@@ -305,7 +305,7 @@ namespace BLToolkit.TypeBuilder
 
 			try
 			{
-				string  originalAssemblyLocation = new Uri(originalAssembly.EscapedCodeBase).AbsolutePath;
+				string  originalAssemblyLocation = new Uri(originalAssembly.EscapedCodeBase).LocalPath;
 				string extensionAssemblyLocation = Path.ChangeExtension(
 					originalAssemblyLocation, "BLToolkitExtension.dll");
 

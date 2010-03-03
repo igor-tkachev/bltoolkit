@@ -204,7 +204,7 @@ namespace BLTgen
 
 		private static string ExecutableName
 		{
-			get { return Path.GetFileName(new Uri(Assembly.GetEntryAssembly().EscapedCodeBase).AbsolutePath); }
+			get { return Path.GetFileName(new Uri(Assembly.GetEntryAssembly().EscapedCodeBase).LocalPath); }
 		}
 
 		private static string GetDescription(MemberMapper mm)
