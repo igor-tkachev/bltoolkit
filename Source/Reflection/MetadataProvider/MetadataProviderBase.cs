@@ -130,7 +130,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 		public virtual bool GetNullable(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			isSet = false;
-			return member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof(Nullable<>);
+			return
+				member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof(Nullable<>) /*||
+#if FW3
+				member.Type == typeof(System.Data.Linq.Binary) ||
+#endif
+				member.Type == typeof(byte[])*/;
 		}
 
 		#endregion

@@ -2512,8 +2512,25 @@ namespace BLToolkit.Data
 					for (int i = 0; i < members.Length; i++)
 					{
 						object value = members[i].GetValue(obj);
+						Type   type  = members[i].MemberAccessor.Type;
 
-						parameters.Add(Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value));
+						IDbDataParameter p;
+
+						if ((value == null || value == DBNull.Value) &&
+							type == typeof(byte[])
+#if FW3
+							|| type == typeof(System.Data.Linq.Binary)
+#endif
+							)
+						{
+							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
+						}
+						else
+						{
+							p = Parameter(baseParameters[i].ParameterName + nRows, value);
+						}
+
+						parameters.Add(p);
 					}
 				}
 				else

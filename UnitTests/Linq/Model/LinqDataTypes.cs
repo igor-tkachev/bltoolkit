@@ -11,7 +11,6 @@ namespace Data.Linq.Model
 		public DateTime DateTimeValue;
 		public bool     BoolValue;
 		public Guid     GuidValue;
-		[NonUpdatable(OnUpdate = false)]
 		public Binary   BinaryValue;
 
 		public override bool Equals(object obj)

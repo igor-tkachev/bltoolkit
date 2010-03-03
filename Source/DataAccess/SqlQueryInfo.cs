@@ -83,6 +83,7 @@ namespace BLToolkit.DataAccess
 					//replace value with DbNull
 					val = DBNull.Value;
 				}
+
 				if (mmi.IsDbTypeSet)
 				{
 					parameters[i] = mmi.IsDbSizeSet 
