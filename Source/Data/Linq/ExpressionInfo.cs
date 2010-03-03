@@ -1013,16 +1013,27 @@ namespace BLToolkit.Data.Linq
 						var e1 = (NewExpression)expr1;
 						var e2 = (NewExpression)expr2;
 
-						if (e1.Arguments.Count != e2.Arguments.Count ||
-							(e1.Members == null && e2.Members == null ||
-							 e1.Members != null && e2.Members != null &&
-							 e1.Members.Count != e2.Members.Count) ||
-							e1.Constructor     != e2.Constructor)
+						if (e1.Arguments.Count != e2.Arguments.Count)
 							return false;
 
-						for (var i = 0; i < e1.Members.Count; i++)
-							if (e1.Members[i] != e2.Members[i])
+						if (e1.Members == null && e2.Members != null)
+							return false;
+
+						if (e1.Members != null && e2.Members == null)
+							return false;
+
+						if (e1.Constructor != e2.Constructor)
+							return false;
+
+						if (e1.Members != null)
+						{
+							if (e1.Members.Count != e2.Members.Count)
 								return false;
+
+							for (var i = 0; i < e1.Members.Count; i++)
+								if (e1.Members[i] != e2.Members[i])
+									return false;
+						}
 
 						for (var i = 0; i < e1.Arguments.Count; i++)
 							if (!Compare(e1.Arguments[i], e2.Arguments[i]))
