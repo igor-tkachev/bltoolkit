@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class OracleSqlProvider : BasicSqlProvider
 	{
@@ -78,6 +78,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				Indent--;
 				AppendIndent(sb).Append(") ").Append(aliases[0]).AppendLine();
+
+				if (NeedTake && NeedSkip)
+				{
+					AppendIndent(sb).AppendLine("WHERE");
+					AppendIndent(sb).Append("\tROWNUM <= ");
+					BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
+					sb.AppendLine();
+				}
+
 				Indent--;
 				AppendIndent(sb).Append(") ").Append(aliases[1]).AppendLine();
 				AppendIndent(sb).Append("WHERE").AppendLine();
@@ -86,10 +95,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (NeedTake && NeedSkip)
 				{
-					AppendIndent(sb).AppendFormat("{0}.{1} BETWEEN ", aliases[1], _rowNumberAlias);
-					BuildExpression(sb, Add(SqlQuery.Select.SkipValue, 1));
-					sb.Append(" AND ");
-					BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
+					AppendIndent(sb).AppendFormat("{0}.{1} > ", aliases[1], _rowNumberAlias);
+					BuildExpression(sb, SqlQuery.Select.SkipValue);
 				}
 				else if (NeedTake)
 				{
