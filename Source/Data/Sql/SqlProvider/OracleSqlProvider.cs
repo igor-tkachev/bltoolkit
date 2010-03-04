@@ -249,6 +249,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
+			CheckAliases(sqlQuery);
+
 			sqlQuery = base.Finalize(sqlQuery);
 
 			switch (sqlQuery.QueryType)

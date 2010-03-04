@@ -1792,6 +1792,48 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return defaultAttr;
 		}
 
+		static string SetAlias(string alias)
+		{
+			if (alias == null)
+				return null;
+
+			alias = alias.TrimStart('_');
+
+			char[] cs      = alias.ToCharArray();
+			bool   replace = false;
+
+			for (int i = 0; i < cs.Length; i++)
+			{
+				char c = cs[i];
+
+				if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')
+					continue;
+
+				cs[i] = ' ';
+				replace = true;
+			}
+
+			if (replace)
+				alias = new string(cs).Replace(" ", "");
+
+			return alias.Length == 0 ? null : alias;
+		}
+
+		protected void CheckAliases(SqlQuery sqlQuery)
+		{
+			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement e)
+			{
+				switch (e.ElementType)
+				{
+					case QueryElementType.SqlField     : ((SqlField)            e).Alias = SetAlias(((SqlField)            e).Alias); break;
+					case QueryElementType.SqlParameter : ((SqlParameter)        e).Name  = SetAlias(((SqlParameter)        e).Name);  break;
+					case QueryElementType.SqlTable     : ((SqlTable)            e).Alias = SetAlias(((SqlTable)            e).Alias); break;
+					case QueryElementType.Join         : ((Join)                e).Alias = SetAlias(((Join)                e).Alias); break;
+					case QueryElementType.Column       : ((SqlQuery.Column)     e).Alias = SetAlias(((SqlQuery.Column)     e).Alias); break;
+					case QueryElementType.TableSource  : ((SqlQuery.TableSource)e).Alias = SetAlias(((SqlQuery.TableSource)e).Alias); break;
+				}
+			});
+		}
 
 		static bool Wrap(int precedence, int parentPrecedence)
 		{

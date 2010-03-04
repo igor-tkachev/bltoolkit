@@ -157,6 +157,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
+			CheckAliases(sqlQuery);
+
 			new QueryVisitor().Visit(sqlQuery.Select, SetNonQueryParameter);
 
 			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement element)

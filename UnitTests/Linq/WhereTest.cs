@@ -749,13 +749,45 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void AliasTest()
+		public void AliasTest1()
 		{
 			int user = 3;
 
 			ForEachProvider(db => AreEqual(
 				from p in    Parent where p.ParentID == user select p,
 				from p in db.Parent where p.ParentID == user select p));
+		}
+
+		[Test]
+		public void AliasTest2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(_ => _.ParentID == 3),
+				db.Parent.Where(_ => _.ParentID == 3)));
+		}
+
+		[Test]
+		public void AliasTest3()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(_p => _p.ParentID == 3),
+				db.Parent.Where(_p => _p.ParentID == 3)));
+		}
+
+		[Test]
+		public void AliasTest4()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(тбл => тбл.ParentID == 3),
+				db.Parent.Where(тбл => тбл.ParentID == 3)));
+		}
+
+		[Test]
+		public void AliasTest5()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p_ => p_.ParentID == 3),
+				db.Parent.Where(p_ => p_.ParentID == 3)));
 		}
 
 		[Test]
