@@ -399,9 +399,14 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue (l1, l2, sequence[0])),
 				pi => pi.IsQueryableMethod("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseValue (l,  ex, sequence[0])),
-				pi => pi.IsQueryableMethod("Take",                  seq => sequence = ParseSequence(seq), ex => ParseTake     (sequence[0], ex)),
-				pi => pi.IsQueryableMethod("Skip",                  seq => sequence = ParseSequence(seq), ex => ParseSkip     (sequence[0], ex)),
-				pi => pi.IsQueryableMethod("ElementAt",             seq => sequence = ParseSequence(seq), ex => ParseElementAt(sequence[0], ex)),
+				pi => pi.IsQueryableMethod("Take",               0, seq => sequence = ParseSequence(seq), l               => ParseTake  (sequence[0], l)),
+				pi => pi.IsQueryableMethod("Take",                  seq => sequence = ParseSequence(seq), ex              => ParseTake  (sequence[0], ex)),
+				pi => pi.IsQueryableMethod("Skip",               0, seq => sequence = ParseSequence(seq), l               => ParseSkip  (sequence[0], l)),
+				pi => pi.IsQueryableMethod("Skip",                  seq => sequence = ParseSequence(seq), ex              => ParseSkip  (sequence[0], ex)),
+				pi => pi.IsQueryableMethod("ElementAt",          0, seq => sequence = ParseSequence(seq), l               => ParseElementAt(sequence[0], l,  false)),
+				pi => pi.IsQueryableMethod("ElementAt",             seq => sequence = ParseSequence(seq), ex              => ParseElementAt(sequence[0], ex, false)),
+				pi => pi.IsQueryableMethod("ElementAtOrDefault", 0, seq => sequence = ParseSequence(seq), l               => ParseElementAt(sequence[0], l,  true)),
+				pi => pi.IsQueryableMethod("ElementAtOrDefault",    seq => sequence = ParseSequence(seq), ex              => ParseElementAt(sequence[0], ex, true)),
 				pi => pi.IsQueryableMethod("Concat",                seq => sequence = ParseSequence(seq), ex => { select = ParseUnion    (sequence[0], ex, true);  return true; }),
 				pi => pi.IsQueryableMethod("Union",                 seq => sequence = ParseSequence(seq), ex => { select = ParseUnion    (sequence[0], ex, false); return true; }),
 				pi => pi.IsQueryableMethod("Except",                seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, true);  return true; }),
@@ -1361,6 +1366,20 @@ namespace BLToolkit.Data.Linq
 			return true;
 		}
 
+		bool ParseTake(QuerySource select, LambdaInfo value)
+		{
+			if (value.Body.Expr.Type != typeof(int))
+				return false;
+
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			ParseTake(ParseExpression(value.Body, select));
+
+			ParsingTracer.DecIndentLevel();
+			return true;
+		}
+
 		void ParseTake(ISqlExpression expr)
 		{
 			CurrentSql.Select.Take(expr);
@@ -1368,8 +1387,36 @@ namespace BLToolkit.Data.Linq
 			_info.SqlProvider.SqlQuery = CurrentSql;
 
 			if (CurrentSql.Select.SkipValue != null && _info.SqlProvider.IsTakeSupported && !_info.SqlProvider.IsSkipSupported)
-				CurrentSql.Select.Take(Convert(
-					new SqlBinaryExpression(typeof(int), CurrentSql.Select.SkipValue, "+", CurrentSql.Select.TakeValue, Precedence.Additive)));
+			{
+				if (CurrentSql.Select.SkipValue is SqlParameter && CurrentSql.Select.TakeValue is SqlValue)
+				{
+					var skip = (SqlParameter)CurrentSql.Select.SkipValue;
+					var parm = (SqlParameter)CurrentSql.Select.SkipValue.Clone(new Dictionary<ICloneableElement,ICloneableElement>(), _ => true);
+					var conv = parm.ValueConverter;
+					var take = (int)((SqlValue)CurrentSql.Select.TakeValue).Value;
+
+					if (conv == null)
+						parm.ValueConverter = v => (int)v + take;
+					else
+						parm.ValueConverter = v => (int)conv(v) + take;
+
+					CurrentSql.Select.Take(parm);
+
+					var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
+
+					ep = new ExpressionInfo<T>.Parameter
+					{
+						Expression   = ep.Expression,
+						Accessor     = ep.Accessor,
+						SqlParameter = parm
+					};
+
+					CurrentSqlParameters.Add(ep);
+				}
+				else
+					CurrentSql.Select.Take(Convert(
+						new SqlBinaryExpression(typeof(int), CurrentSql.Select.SkipValue, "+", CurrentSql.Select.TakeValue, Precedence.Additive)));
+			}
 
 			if (!_info.SqlProvider.TakeAcceptsParameter)
 			{
@@ -1392,9 +1439,29 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
-			var prevSkipValue = CurrentSql.Select.SkipValue;
+			ParseSkip(CurrentSql.Select.SkipValue, ParseExpression(value, select));
 
-			CurrentSql.Select.Skip(ParseExpression(value, select));
+			ParsingTracer.DecIndentLevel();
+			return true;
+		}
+
+		bool ParseSkip(QuerySource select, LambdaInfo value)
+		{
+			if (value.Body.Expr.Type != typeof(int))
+				return false;
+
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			ParseSkip(CurrentSql.Select.SkipValue, ParseExpression(value.Body, select));
+
+			ParsingTracer.DecIndentLevel();
+			return true;
+		}
+
+		void ParseSkip(ISqlExpression prevSkipValue, ISqlExpression expr)
+		{
+			CurrentSql.Select.Skip(expr);
 
 			_info.SqlProvider.SqlQuery = CurrentSql;
 
@@ -1402,11 +1469,11 @@ namespace BLToolkit.Data.Linq
 			{
 				if (_info.SqlProvider.IsSkipSupported || !_info.SqlProvider.IsTakeSupported)
 					CurrentSql.Select.Take(Convert(
-						new SqlBinaryExpression(typeof (int), CurrentSql.Select.TakeValue, "-", CurrentSql.Select.SkipValue, Precedence.Additive)));
+						new SqlBinaryExpression(typeof(int), CurrentSql.Select.TakeValue, "-", CurrentSql.Select.SkipValue, Precedence.Additive)));
 
 				if (prevSkipValue != null)
 					CurrentSql.Select.Skip(Convert(
-						new SqlBinaryExpression(typeof (int), prevSkipValue, "+", CurrentSql.Select.SkipValue, Precedence.Additive)));
+						new SqlBinaryExpression(typeof(int), prevSkipValue, "+", CurrentSql.Select.SkipValue, Precedence.Additive)));
 			}
 
 			if (!_info.SqlProvider.TakeAcceptsParameter)
@@ -1416,16 +1483,13 @@ namespace BLToolkit.Data.Linq
 				if (p != null)
 					p.IsQueryParameter = false;
 			}
-
-			ParsingTracer.DecIndentLevel();
-			return true;
 		}
 
 		#endregion
 
 		#region Parse ElementAt
 
-		bool ParseElementAt(QuerySource select, ParseInfo value)
+		bool ParseElementAt(QuerySource select, ParseInfo value, bool orDefault)
 		{
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
@@ -1433,7 +1497,21 @@ namespace BLToolkit.Data.Linq
 			ParseSkip(select, value);
 			ParseTake(new SqlValue(1));
 
-			_info.MakeElementOperator(ElementMethod.First);
+			_info.MakeElementOperator(orDefault ? ElementMethod.FirstOrDefault : ElementMethod.First);
+
+			ParsingTracer.DecIndentLevel();
+			return true;
+		}
+
+		bool ParseElementAt(QuerySource select, LambdaInfo value, bool orDefault)
+		{
+			ParsingTracer.WriteLine();
+			ParsingTracer.IncIndentLevel();
+
+			ParseSkip(select, value);
+			ParseTake(new SqlValue(1));
+
+			_info.MakeElementOperator(orDefault ? ElementMethod.FirstOrDefault : ElementMethod.First);
 
 			ParsingTracer.DecIndentLevel();
 			return true;

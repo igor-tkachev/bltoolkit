@@ -714,5 +714,57 @@ namespace BLToolkit.Data.Linq
 		#endregion
 
 		#endregion
+
+		#region Take / Skip / ElementAt
+
+		public static IQueryable<TSource> Take<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> count)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (count  == null) throw new ArgumentNullException("count");
+
+			return source.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource) }),
+					new[] { source.Expression, Expression.Quote(count) }));
+		}
+
+		public static IQueryable<TSource> Skip<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> count)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (count  == null) throw new ArgumentNullException("count");
+
+			return source.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource) }),
+					new[] { source.Expression, Expression.Quote(count) }));
+		}
+
+		public static TSource ElementAt<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> index)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (index  == null) throw new ArgumentNullException("index");
+
+			return source.Provider.Execute<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource) }),
+					new[] { source.Expression, Expression.Quote(index) }));
+		}
+
+		public static TSource ElementAtOrDefault<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> index)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (index  == null) throw new ArgumentNullException("index");
+
+			return source.Provider.Execute<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource) }),
+					new[] { source.Expression, Expression.Quote(index) }));
+		}
+
+		#endregion
 	}
 }

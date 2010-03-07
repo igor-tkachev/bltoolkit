@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 // ReSharper disable SuggestUseVarKeywordEverywhere
 // ReSharper disable SuggestUseVarKeywordEvident
 // ReSharper disable UseObjectOrCollectionInitializer
+// ReSharper disable InconsistentNaming
 #endregion
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -1518,7 +1519,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (SqlQuery.OrderBy.IsEmpty)
 			{
 				AppendIndent(sb).Append("SELECT TOP ");
-				BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
+
+				SqlParameter p = SqlQuery.Select.SkipValue as SqlParameter;
+
+				if (p != null && !p.IsQueryParameter && SqlQuery.Select.TakeValue is SqlValue)
+					BuildValue(sb, (int)p.Value + (int)((SqlValue)(SqlQuery.Select.TakeValue)).Value);
+				else
+					BuildExpression(sb, Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue));
+
 				sb.Append(" *").AppendLine();
 				AppendIndent(sb).Append("FROM").AppendLine();
 				AppendIndent(sb).Append("(")   .AppendLine();
@@ -1847,7 +1855,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected string[] GetTempAliases(int n, string defaultAlias)
 		{
-			return SqlQuery.GetTempAliases(n, defaultAlias + (Nesting == 0? "": "n" + Nesting.ToString()));
+			return SqlQuery.GetTempAliases(n, defaultAlias + (Nesting == 0? "": "n" + Nesting));
 		}
 
 		protected static string GetTableAlias(ISqlTableSource table)
@@ -2327,7 +2335,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (expr.Operator == SqlQuery.Predicate.Operator.Equal && expr.Expr1 is SqlValue && expr.Expr2 is SqlValue)
 						{
-							bool value = object.Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
+							bool value = Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
 							return new SqlQuery.Predicate.Expr(new SqlValue(value), Precedence.Comparison);
 						}
 
@@ -2550,10 +2558,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					if (sc != null && v1 != null && v2 != null)
 					{
-						if (object.Equals(value.Value, v1.Value))
+						if (Equals(value.Value, v1.Value))
 							return sc;
 
-						if (object.Equals(value.Value, v2.Value) && !sc.CanBeNull())
+						if (Equals(value.Value, v2.Value) && !sc.CanBeNull())
 							return ConvertPredicate(new SqlQuery.Predicate.NotExpr(sc, true, Precedence.LogicalNegation));
 					}
 				}

@@ -23,7 +23,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine("SELECT @@IDENTITY");
 		}
 
-		public override bool IsSkipSupported          { get { return SqlQuery.Select.TakeValue != null; } }
+		//public override bool IsSkipSupported          { get { return SqlQuery.Select.TakeValue != null; } }
+		public override bool IsSkipSupported          { get { return false; } }
 		public override bool TakeAcceptsParameter     { get { return false; } }
 		public override bool IsCountSubQuerySupported { get { return false; } }
 		public override bool IsNestedJoinSupported    { get { return false; } }
@@ -39,7 +40,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				AlternativeBuildSql2(sb, base.BuildSql);
 				return;
 			}
-			else if (SqlQuery.From.Tables.Count == 0 && SqlQuery.Select.Columns.Count == 1 && SqlQuery.Select.Columns[0].Expression is SqlFunction)
+
+			if (SqlQuery.From.Tables.Count == 0 && SqlQuery.Select.Columns.Count == 1 && SqlQuery.Select.Columns[0].Expression is SqlFunction)
 			{
 				SqlFunction func = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
 

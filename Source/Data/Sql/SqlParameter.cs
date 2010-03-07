@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Sql
 			_value      = value;
 		}
 
-		public SqlParameter(Type systemType, string name, object value, Converter<object, object> valueConverter)
+		public SqlParameter(Type systemType, string name, object value, Converter<object,object> valueConverter)
 			: this(systemType, name, value)
 		{
 			_valueConverter = valueConverter;
@@ -41,8 +41,8 @@ namespace BLToolkit.Data.Sql
 			set { _value = value; }
 		}
 
-		private Converter<object, object> _valueConverter;
-		public  Converter<object, object>  ValueConverter
+		private Converter<object,object> _valueConverter;
+		public  Converter<object,object>  ValueConverter
 		{
 			get { return _valueConverter;  }
 			set { _valueConverter = value; }

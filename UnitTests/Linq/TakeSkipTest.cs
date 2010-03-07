@@ -4,6 +4,7 @@ using System.Linq;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
 
 namespace Data.Linq
 {
@@ -66,10 +67,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Take7()
+		{
+			ForEachProvider(db => Assert.AreEqual(3, db.Child.Take(() => 3).ToList().Count));
+		}
+
+		[Test]
+		public void Take8()
+		{
+			var n = 3;
+			ForEachProvider(db => Assert.AreEqual(3, db.Child.Take(() => n).ToList().Count));
+		}
+
+		[Test]
 		public void Skip1()
 		{
-			var expected = Child.Skip(3);
-			ForEachProvider(db => AreEqual(expected, db.Child.Skip(3)));
+			ForEachProvider(db => AreEqual(Child.Skip(3), db.Child.Skip(3)));
 		}
 
 		[Test]
@@ -103,6 +116,19 @@ namespace Data.Linq
 		{
 			var expected = Child.OrderByDescending(c => c.ChildID).ThenBy(c => c.ParentID + 1).Skip(3);
 			ForEachProvider(db => AreEqual(expected, db.Child.OrderByDescending(c => c.ChildID).ThenBy(c => c.ParentID + 1).Skip(3)));
+		}
+
+		[Test]
+		public void Skip6()
+		{
+			ForEachProvider(db => AreEqual(Child.Skip(3), db.Child.Skip(() => 3)));
+		}
+
+		[Test]
+		public void Skip7()
+		{
+			var n = 3;
+			ForEachProvider(db => AreEqual(Child.Skip(n), db.Child.Skip(() => n)));
 		}
 
 		[Test]
@@ -175,11 +201,50 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ElementAt()
+		public void ElementAt1()
 		{
 			ForEachProvider(db => Assert.AreEqual(
 				(from p in    Parent where p.ParentID > 1 select p).ElementAt(3),
 				(from p in db.Parent where p.ParentID > 1 select p).ElementAt(3)));
+		}
+
+		[Test]
+		public void ElementAt2()
+		{
+			var n = 3;
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in    Parent where p.ParentID > 1 select p).ElementAt(n),
+				(from p in db.Parent where p.ParentID > 1 select p).ElementAt(() => n)));
+		}
+
+		[Test]
+		public void ElementAtDefault1()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in    Parent where p.ParentID > 1 select p).ElementAtOrDefault(3),
+				(from p in db.Parent where p.ParentID > 1 select p).ElementAtOrDefault(3)));
+		}
+
+		[Test]
+		public void ElementAtDefault2()
+		{
+			ForEachProvider(db => Assert.IsNull((from p in db.Parent where p.ParentID > 1 select p).ElementAtOrDefault(300000)));
+		}
+
+		[Test]
+		public void ElementAtDefault3()
+		{
+			var n = 3;
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in    Parent where p.ParentID > 1 select p).ElementAtOrDefault(n),
+				(from p in db.Parent where p.ParentID > 1 select p).ElementAtOrDefault(() => n)));
+		}
+
+		[Test]
+		public void ElementAtDefault4()
+		{
+			var n = 300000;
+			ForEachProvider(db => Assert.IsNull((from p in db.Parent where p.ParentID > 1 select p).ElementAtOrDefault(() => n)));
 		}
 	}
 }

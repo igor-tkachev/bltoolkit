@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public abstract class MsSqlSqlProvider : BasicSqlProvider
 	{
-		public MsSqlSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
+		protected MsSqlSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
 		{
 		}
 
