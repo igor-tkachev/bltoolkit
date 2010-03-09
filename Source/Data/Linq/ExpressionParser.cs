@@ -1396,9 +1396,9 @@ namespace BLToolkit.Data.Linq
 					var take = (int)((SqlValue)CurrentSql.Select.TakeValue).Value;
 
 					if (conv == null)
-						parm.ValueConverter = v => (int)v + take;
+						parm.ValueConverter = v => v == null ? null : (object)((int)v + take);
 					else
-						parm.ValueConverter = v => (int)conv(v) + take;
+						parm.ValueConverter = v => v == null ? null : (object)((int)conv(v) + take);
 
 					CurrentSql.Select.Take(parm);
 

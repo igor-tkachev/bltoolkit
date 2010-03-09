@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Sql
 	using FJoin = SqlQuery.FromClause.Join;
 
 	[DebuggerDisplay("SQL = {SqlText}")]
-	public class SqlQuery : ISqlExpression, ISqlTableSource
+	public class SqlQuery : ISqlTableSource
 	{
 		#region Init
 
@@ -430,13 +430,21 @@ namespace BLToolkit.Data.Sql
 
 #endif
 
+			#region IEquatable<ISqlExpression> Members
+
+			bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
+			{
+				return this == other;
+			}
+
+			#endregion
+
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
 			public ISqlExpression Walk(bool skipColumns, WalkingFunc func)
 			{
-				if (_source is ISqlExpression)
-					_source = (ISqlTableSource)((ISqlExpression)_source).Walk(skipColumns, func);
+				_source = (ISqlTableSource)_source.Walk(skipColumns, func);
 
 				for (int i = 0; i < Joins.Count; i++)
 					((ISqlExpressionWalkable)Joins[i]).Walk(skipColumns, func);
@@ -512,6 +520,18 @@ namespace BLToolkit.Data.Sql
 
 				return sb;
 			}
+
+			#endregion
+
+			#region ISqlExpression Members
+
+			public bool CanBeNull()
+			{
+				return Source.CanBeNull();
+			}
+
+			public int  Precedence { get { return Source.Precedence; } }
+			public Type SystemType { get { return Source.SystemType; } }
 
 			#endregion
 		}
@@ -3651,6 +3671,10 @@ namespace BLToolkit.Data.Sql
 			((ISqlExpressionWalkable)GroupBy).Walk(skipColumns, func);
 			((ISqlExpressionWalkable)Having) .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)OrderBy).Walk(skipColumns, func);
+
+			if (HasUnion)
+				foreach (Union union in Unions)
+					((ISqlExpressionWalkable)union.SqlQuery).Walk(skipColumns, func);
 
 			return func(this);
 		}

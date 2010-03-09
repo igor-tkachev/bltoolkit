@@ -352,7 +352,16 @@ namespace BLToolkit.Data.Linq
 			{
 				var objectMapper = _mappingSchema.GetObjectMapper(ObjectType);
 
+				if (field is SubQueryColumn)
+					field = ((SubQueryColumn)field).Field;
+
 				return objectMapper[((Column)field).Field.Name, true].MemberAccessor.MemberInfo;
+			}
+
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			{
+				return base.GetExpressions(parser);
+				//return new ISqlExpression[] { SqlTable };
 			}
 
 			Table() {}

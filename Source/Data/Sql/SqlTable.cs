@@ -323,5 +323,42 @@ namespace BLToolkit.Data.Sql
 		}
 
 		#endregion
+
+		#region ISqlExpression Members
+
+		bool ISqlExpression.CanBeNull()
+		{
+			return true;
+		}
+
+		int ISqlExpression.Precedence
+		{
+			get { return Precedence.Unknown; }
+		}
+
+		Type ISqlExpression.SystemType
+		{
+			get { return ObjectType; }
+		}
+
+		#endregion
+
+		#region IEquatable<ISqlExpression> Members
+
+		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
+		{
+			return this == other;
+		}
+
+		#endregion
+
+		#region ISqlExpressionWalkable Members
+
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+		{
+			return func(this);
+		}
+
+		#endregion
 	}
 }

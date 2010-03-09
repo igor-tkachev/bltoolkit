@@ -65,6 +65,11 @@ namespace BLToolkit.Data.Sql
 			get { return Sql.Precedence.Primary; }
 		}
 
+		public bool CanBeNull()
+		{
+			return Nullable;
+		}
+
 		#endregion
 
 		#region ISqlExpressionWalkable Members
@@ -81,15 +86,6 @@ namespace BLToolkit.Data.Sql
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
 			return this == other;
-		}
-
-		#endregion
-
-		#region ISqlExpression Members
-
-		public bool CanBeNull()
-		{
-			return Nullable;
 		}
 
 		#endregion

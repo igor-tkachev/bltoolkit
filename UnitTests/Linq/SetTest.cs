@@ -315,5 +315,33 @@ namespace Data.Linq
 				   Child.Select(c => c.ParentID).Contains(11),
 				db.Child.Select(c => c.ParentID).Contains(11)));
 		}
+
+		[Test]
+		public void Contains8()
+		{
+			var arr = new[] { GrandChild[0], GrandChild[1] };
+
+			ForEachProvider(db => Assert.AreEqual(
+				from p in Parent
+				join ch in Child on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(gc)
+				select p,
+				from p in db.Parent
+				join ch in db.Child on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(gc)
+				select p));
+		}
+
+		[Test]
+		public void Union1()
+		{
+			ForEachProvider(db => AreEqual(
+				(from g  in    GrandChild join ch in    Child  on g.ChildID   equals ch.ChildID select ch).Union(
+				(from ch in    Child      join p  in    Parent on ch.ParentID equals p.ParentID select ch)),
+				(from g  in db.GrandChild join ch in db.Child  on g.ChildID   equals ch.ChildID select ch).Union(
+				(from ch in db.Child      join p  in db.Parent on ch.ParentID equals p.ParentID select ch))));
+		}
 	}
 }

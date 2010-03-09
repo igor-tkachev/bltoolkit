@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	public interface ISqlTableSource : IQueryElement, ICloneableElement
+	public interface ISqlTableSource : ISqlExpression
 	{
 		SqlField All      { get; }
 		int      SourceID { get; }
