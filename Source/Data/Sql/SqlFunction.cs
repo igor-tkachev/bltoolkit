@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
-	public class SqlFunction : ISqlExpression, ISqlTableSource
+	public class SqlFunction : ISqlTableSource
 	{
 		[Obsolete]
 		public SqlFunction(string name, params ISqlExpression[] parameters)
@@ -110,12 +110,17 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1, null);
+					_all = new SqlField(null, "*", "*", true, -1, null, null);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
 				return _all;
 			}
+		}
+
+		IList<ISqlExpression> ISqlTableSource.GetKeys(bool allIfEmpty)
+		{
+			return null;
 		}
 
 		#endregion

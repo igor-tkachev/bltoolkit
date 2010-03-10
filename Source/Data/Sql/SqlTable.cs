@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
-using BLToolkit.DataAccess;
 
 namespace BLToolkit.Data.Sql
 {
+	using DataAccess;
 	using Mapping;
 	using Reflection.Extension;
 
@@ -41,15 +42,15 @@ namespace BLToolkit.Data.Sql
 			_name       = _mappingSchema.MetadataProvider.GetTableName   (objectType, _mappingSchema.Extensions, out isSet);
 			_objectType = objectType;
 
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(objectType, _mappingSchema.Extensions);
+			var typeExt = TypeExtension.GetTypeExtension(objectType, _mappingSchema.Extensions);
 
 			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
 				if (mm.MapMemberInfo.SqlIgnore == false)
 				{
-					NonUpdatableAttribute ua =
+					var ua =
 						_mappingSchema.MetadataProvider.GetNonUpdatableAttribute(objectType, typeExt, mm.MemberAccessor, out isSet);
 
-					int order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
+					var order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
 
 					Fields.Add(new SqlField(
 						mm.Type,
@@ -57,7 +58,8 @@ namespace BLToolkit.Data.Sql
 						mm.Name,
 						mm.MapMemberInfo.Nullable,
 						isSet ? order : int.MinValue,
-						ua));
+						ua,
+						mm));
 				}
 		}
 
@@ -80,10 +82,10 @@ namespace BLToolkit.Data.Sql
 			_physicalName = table._physicalName;
 			_objectType   = table._objectType;
 
-			foreach (SqlField field in table.Fields.Values)
+			foreach (var field in table.Fields.Values)
 				Fields.Add(new SqlField(field));
 
-			foreach (Join join in table.Joins)
+			foreach (var join in table.Joins)
 				Joins.Add(join.Clone());
 		}
 
@@ -121,7 +123,7 @@ namespace BLToolkit.Data.Sql
 			if (extensions == null) throw new ArgumentNullException("extensions");
 			if (name       == null) throw new ArgumentNullException("name");
 
-			TypeExtension te = extensions[name];
+			var te = extensions[name];
 
 			if (te == TypeExtension.Null)
 				throw new ArgumentException(string.Format("Table '{0}' not found.", name));
@@ -139,17 +141,18 @@ namespace BLToolkit.Data.Sql
 					(string)me["MapField"].Value ?? (string)me["PhysicalName"].Value,
 					(bool?)me["Nullable"].Value ?? false,
 					-1,
-					(bool?)me["Identity"].Value == true ? new IdentityAttribute() : null));
+					(bool?)me["Identity"].Value == true ? new IdentityAttribute() : null,
+					null));
 
 			foreach (AttributeExtension ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
 
-			string baseExtension = (string)te.Attributes["BaseExtension"].Value;
+			var baseExtension = (string)te.Attributes["BaseExtension"].Value;
 
 			if (!string.IsNullOrEmpty(baseExtension))
 				InitFromBase(new SqlTable(mappingSchema, extensions, baseExtension));
 
-			string baseTypeName = (string)te.Attributes["BaseType"].Value;
+			var baseTypeName = (string)te.Attributes["BaseType"].Value;
 
 			if (!string.IsNullOrEmpty(baseTypeName))
 				InitFromBase(new SqlTable(mappingSchema, Type.GetType(baseTypeName, true, true)));
@@ -162,12 +165,12 @@ namespace BLToolkit.Data.Sql
 			if (_owner        == null) _owner        = baseTable._owner;
 			if (_physicalName == null) _physicalName = baseTable._physicalName;
 
-			foreach (SqlField field in baseTable.Fields.Values)
+			foreach (var field in baseTable.Fields.Values)
 				if (!Fields.ContainsKey(field.Name))
 					Fields.Add(new SqlField(field));
 
-			foreach (Join join in baseTable.Joins)
-				if (Joins.Find(delegate(Join j) { return j.TableName == join.TableName; }) == null)
+			foreach (var join in baseTable.Joins)
+				if (Joins.Find(j => j.TableName == join.TableName) == null)
 					Joins.Add(join);
 		}
 
@@ -229,28 +232,12 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1, null);
+					_all = new SqlField(null, "*", "*", true, -1, null, null);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
 				return _all;
 			}
-		}
-
-		public List<SqlField> GetKeyFields()
-		{
-			List<SqlField> keys = new List<SqlField>();
-
-			foreach (SqlField field in Fields.Values)
-			{
-				if (field.IsPrimaryKey)
-					keys.Add(field);
-			}
-
-			if (keys.Count == 0)
-				keys.AddRange(Fields.Values);
-
-			return keys;
 		}
 
 		#endregion
@@ -270,6 +257,26 @@ namespace BLToolkit.Data.Sql
 		readonly int _sourceID;
 		public   int  SourceID { get { return _sourceID; } }
 
+		List<ISqlExpression> _keyFields;
+
+		public IList<ISqlExpression> GetKeys(bool allIfEmpty)
+		{
+			if (_keyFields == null)
+			{
+				_keyFields = (
+					from f in Fields.Values
+					where   f.IsPrimaryKey
+					orderby f.PrimaryKeyOrder
+					select f as ISqlExpression
+				).ToList();
+
+				if (_keyFields.Count == 0)
+					_keyFields = Fields.Values.Select(f => f as ISqlExpression).ToList();
+			}
+
+			return _keyFields;
+		}
+
 		#endregion
 
 		#region ICloneableElement Members
@@ -283,26 +290,27 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				SqlTable table = new SqlTable(_mappingSchema);
-
-				table._name         = _name;
-				table._alias        = _alias;
-				table._database     = _database;
-				table._owner        = _owner;
-				table._physicalName = _physicalName;
-				table._objectType   = _objectType;
+				var table = new SqlTable(_mappingSchema)
+				{
+					_name         = _name,
+					_alias        = _alias,
+					_database     = _database,
+					_owner        = _owner,
+					_physicalName = _physicalName,
+					_objectType   = _objectType
+				};
 
 				table._fields.Clear();
 
-				foreach (KeyValuePair<string,SqlField> field in _fields)
+				foreach (var field in _fields)
 				{
-					SqlField fc = new SqlField(field.Value);
+					var fc = new SqlField(field.Value);
 
 					objectTree.   Add(field.Value, fc);
 					table._fields.Add(field.Key,   fc);
 				}
 
-				table._joins.AddRange(_joins.ConvertAll<Join>(delegate(Join j) { return j.Clone(); }));
+				table._joins.AddRange(_joins.ConvertAll(j => j.Clone()));
 
 				objectTree.Add(this, clone = table);
 				objectTree.Add(All,  table.All);

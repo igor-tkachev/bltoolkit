@@ -2,19 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
-
-#region ReSharper C# 2.0 disable
-
-// ReSharper disable SuggestUseVarKeywordEvident
-// ReSharper disable SuggestUseVarKeywordEverywhere
-// ReSharper disable ConvertToLambdaExpression
-// ReSharper disable ConvertToAutoProperty
-// ReSharper disable RedundantTypeArgumentsOfMethod
-// ReSharper disable UnusedAnonymousMethodSignature
-
-#endregion
 
 namespace BLToolkit.Data.Sql
 {
@@ -29,8 +19,8 @@ namespace BLToolkit.Data.Sql
 
 		static SqlQuery()
 		{
-			using (Stream       stream = typeof(SqlQuery).Assembly.GetManifestResourceStream(typeof(SqlQuery), "ReservedWords.txt"))
-			using (StreamReader reader = new StreamReader(stream))
+			using (var stream = typeof(SqlQuery).Assembly.GetManifestResourceStream(typeof(SqlQuery), "ReservedWords.txt"))
+			using (var reader = new StreamReader(stream))
 			{
 				/*
 				var words = reader.ReadToEnd().Replace(' ', '\n').Replace('\t', '\n').Split('\n');
@@ -82,7 +72,7 @@ namespace BLToolkit.Data.Sql
 			_parameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
 
-			foreach (Column col in select.Columns)
+			foreach (var col in select.Columns)
 				col.Parent = this;
 
 			_select. SetSqlQuery(this);
@@ -161,13 +151,13 @@ namespace BLToolkit.Data.Sql
 					{
 						if (_expression is SqlField)
 						{
-							SqlField field = (SqlField)_expression;
+							var field = (SqlField)_expression;
 							return field.Alias ?? field.PhysicalName;
 						}
 
 						if (_expression is Column)
 						{
-							Column col = (Column)_expression;
+							var col = (Column)_expression;
 							return col.Alias;
 						}
 					}
@@ -215,7 +205,7 @@ namespace BLToolkit.Data.Sql
 
 				ICloneableElement clone;
 
-				SqlQuery parent = (SqlQuery)_parent.Clone(objectTree, doClone);
+				var parent = (SqlQuery)_parent.Clone(objectTree, doClone);
 
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new Column(
@@ -289,13 +279,13 @@ namespace BLToolkit.Data.Sql
 				{
 					sb
 						.Append("(\n\t\t");
-					int len = sb.Length;
+					var len = sb.Length;
 					Expression.ToString(sb, dic).Replace("\n", "\n\t\t", len, sb.Length - len);
 					sb.Append("\n\t)");
 				}
 				else if (Expression is Column)
 				{
-					Column col = (Column)Expression;
+					var col = (Column)Expression;
 					sb
 						.Append("t")
 						.Append(col.Parent.SourceID)
@@ -319,7 +309,7 @@ namespace BLToolkit.Data.Sql
 
 		#region TableSource
 
-		public class TableSource : ISqlTableSource, ISqlExpressionWalkable
+		public class TableSource : ISqlTableSource
 		{
 			public TableSource(ISqlTableSource source, string alias)
 				: this(source, alias, null)
@@ -383,9 +373,9 @@ namespace BLToolkit.Data.Sql
 			{
 				get
 				{
-					foreach (JoinedTable tj in Joins)
+					foreach (var tj in Joins)
 					{
-						TableSource t = CheckTableSource(tj.Table, table, alias);
+						var t = CheckTableSource(tj.Table, table, alias);
 
 						if (t != null)
 							return t;
@@ -404,7 +394,7 @@ namespace BLToolkit.Data.Sql
 			public void ForEach(Action<TableSource> action)
 			{
 				action(this);
-				foreach (JoinedTable join in Joins)
+				foreach (var join in Joins)
 					join.ForEach(action);
 
 				if (Source is SqlQuery)
@@ -413,9 +403,9 @@ namespace BLToolkit.Data.Sql
 
 			public int GetJoinNumber()
 			{
-				int n = Joins.Count;
+				var n = Joins.Count;
 
-				foreach (JoinedTable join in Joins)
+				foreach (var join in Joins)
 					n += join.Table.GetJoinNumber();
 
 				return n;
@@ -446,7 +436,7 @@ namespace BLToolkit.Data.Sql
 			{
 				_source = (ISqlTableSource)_source.Walk(skipColumns, func);
 
-				for (int i = 0; i < Joins.Count; i++)
+				for (var i = 0; i < Joins.Count; i++)
 					((ISqlExpressionWalkable)Joins[i]).Walk(skipColumns, func);
 
 				return null;
@@ -458,6 +448,11 @@ namespace BLToolkit.Data.Sql
 
 			public int       SourceID { get { return Source.SourceID; } }
 			public SqlField  All      { get { return Source.All;      } }
+
+			IList<ISqlExpression> ISqlTableSource.GetKeys(bool allIfEmpty)
+			{
+				return Source.GetKeys(allIfEmpty);
+			}
 
 			#endregion
 
@@ -472,11 +467,11 @@ namespace BLToolkit.Data.Sql
 
 				if (!objectTree.TryGetValue(this, out clone))
 				{
-					TableSource ts = new TableSource((ISqlTableSource)_source.Clone(objectTree, doClone), _alias);
+					var ts = new TableSource((ISqlTableSource)_source.Clone(objectTree, doClone), _alias);
 
 					objectTree.Add(this, clone = ts);
 
-					ts._joins.AddRange(_joins.ConvertAll<JoinedTable>(delegate(JoinedTable jt) { return (JoinedTable)jt.Clone(objectTree, doClone); }));
+					ts._joins.AddRange(_joins.ConvertAll(jt => (JoinedTable)jt.Clone(objectTree, doClone)));
 				}
 
 				return clone;
@@ -498,7 +493,7 @@ namespace BLToolkit.Data.Sql
 				if (Source is SqlQuery)
 				{
 					sb.Append("(\n\t");
-					int len = sb.Length;
+					var len = sb.Length;
 					Source.ToString(sb, dic).Replace("\n", "\n\t", len, sb.Length - len);
 					sb.Append("\n)");
 				}
@@ -512,7 +507,7 @@ namespace BLToolkit.Data.Sql
 				foreach (IQueryElement join in Joins)
 				{
 					sb.AppendLine().Append('\t');
-					int len = sb.Length;
+					var len = sb.Length;
 					join.ToString(sb, dic).Replace("\n", "\n\t", len, sb.Length - len);
 				}
 
@@ -551,7 +546,7 @@ namespace BLToolkit.Data.Sql
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak, SearchCondition searchCondition)
 			{
-				_joinType  = joinType;
+				JoinType  = joinType;
 				_table     = table;
 				_isWeak    = isWeak;
 				_condition = searchCondition;
@@ -567,12 +562,7 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			private JoinType _joinType;
-			public  JoinType  JoinType
-			{
-				get { return _joinType;  }
-				set { _joinType = value; }
-			}
+			public JoinType JoinType { get; set; }
 
 			private TableSource _table;
 			public  TableSource  Table
@@ -1067,7 +1057,7 @@ namespace BLToolkit.Data.Sql
 				protected override void Walk(bool skipColumns, WalkingFunc action)
 				{
 					base.Walk(skipColumns, action);
-					for (int i = 0; i < _values.Count; i++)
+					for (var i = 0; i < _values.Count; i++)
 						_values[i] = _values[i].Walk(skipColumns, action);
 				}
 
@@ -1083,7 +1073,7 @@ namespace BLToolkit.Data.Sql
 						objectTree.Add(this, clone = new InList(
 							(ISqlExpression)Expr1.Clone(objectTree, doClone),
 							IsNot,
-							_values.ConvertAll<ISqlExpression>(delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); }).ToArray()));
+							_values.ConvertAll(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
 					}
 
 					return clone;
@@ -1101,7 +1091,7 @@ namespace BLToolkit.Data.Sql
 					if (IsNot) sb.Append(" NOT");
 					sb.Append(" IN (");
 
-					foreach (ISqlExpression value in Values)
+					foreach (var value in Values)
 					{
 						value.ToString(sb, dic);
 						sb.Append(',');
@@ -1388,9 +1378,9 @@ namespace BLToolkit.Data.Sql
 					if (_conditions.Count == 0) return Sql.Precedence.Unknown;
 					if (_conditions.Count == 1) return _conditions[0].Precedence;
 
-					int precedence = Sql.Precedence.Primary;
+					var precedence = Sql.Precedence.Primary;
 
-					foreach (Condition condition in _conditions)
+					foreach (var condition in _conditions)
 						precedence = Math.Min(precedence, condition.Precedence);
 
 					return precedence;
@@ -1405,7 +1395,7 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				foreach (Condition condition in Conditions)
+				foreach (var condition in Conditions)
 					condition.Predicate.Walk(skipColumns, func);
 
 				return func(this);
@@ -1426,7 +1416,7 @@ namespace BLToolkit.Data.Sql
 
 			public bool CanBeNull()
 			{
-				foreach (Condition c in Conditions)
+				foreach (var c in Conditions)
 					if (c.CanBeNull())
 						return true;
 
@@ -1446,11 +1436,11 @@ namespace BLToolkit.Data.Sql
 
 				if (!objectTree.TryGetValue(this, out clone))
 				{
-					SearchCondition sc = new SearchCondition();
+					var sc = new SearchCondition();
 
 					objectTree.Add(this, clone = sc);
 
-					sc._conditions.AddRange(_conditions.ConvertAll<Condition>(delegate(Condition c) { return (Condition)c.Clone(objectTree, doClone); }));
+					sc._conditions.AddRange(_conditions.ConvertAll(c => (Condition)c.Clone(objectTree, doClone)));
 				}
 
 				return clone;
@@ -1581,11 +1571,11 @@ namespace BLToolkit.Data.Sql
 
 				Predicate.InList CreateInList(bool isNot, object[] exprs)
 				{
-					Predicate.InList list = new Predicate.InList(_expr, isNot, null);
+					var list = new Predicate.InList(_expr, isNot, null);
 
 					if (exprs != null && exprs.Length > 0)
 					{
-						foreach (object item in exprs)
+						foreach (var item in exprs)
 						{
 							if (item == null || item is SqlValue && ((SqlValue)item).Value == null)
 								continue;
@@ -1794,7 +1784,7 @@ namespace BLToolkit.Data.Sql
 				Predicate<ICloneableElement> doClone)
 				: base(sqlQuery)
 			{
-				_columns.AddRange(clone._columns.ConvertAll<Column>(delegate(Column c) { return (Column)c.Clone(objectTree, doClone); }));
+				_columns.AddRange(clone._columns.ConvertAll(c => (Column)c.Clone(objectTree, doClone)));
 				_isDistinct = clone._isDistinct;
 				_takeValue  = clone._takeValue == null ? null : (ISqlExpression)clone._takeValue.Clone(objectTree, doClone);
 				_skipValue  = clone._skipValue == null ? null : (ISqlExpression)clone._skipValue.Clone(objectTree, doClone);
@@ -1925,7 +1915,7 @@ namespace BLToolkit.Data.Sql
 
 			Column AddOrGetColumn(Column col)
 			{
-				foreach (Column c in Columns)
+				foreach (var c in Columns)
 					if (c.Equals(col))
 						return col;
 
@@ -2019,10 +2009,10 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				for (int i = 0; i < Columns.Count; i++)
+				for (var i = 0; i < Columns.Count; i++)
 				{
-					Column         col  = Columns[i];
-					ISqlExpression expr = col.Walk(skipColumns, func);
+					var col  = Columns[i];
+					var expr = col.Walk(skipColumns, func);
 
 					if (expr is Column)
 						Columns[i] = (Column)expr;
@@ -2072,7 +2062,7 @@ namespace BLToolkit.Data.Sql
 				if (Columns.Count == 0)
 					sb.Append("\t*, \n");
 				else
-					foreach (Column c in Columns)
+					foreach (var c in Columns)
 					{
 						sb.Append("\t");
 						((IQueryElement)c).ToString(sb, dic);
@@ -2211,14 +2201,12 @@ namespace BLToolkit.Data.Sql
 				if (!doClone(this))
 					return this;
 
-				SetClause clone = new SetClause();
-
-				clone._withIdentity = _withIdentity;
+				var clone = new SetClause { _withIdentity = _withIdentity };
 
 				if (_into != null)
 					clone.Into = (SqlTable)_into.Clone(objectTree, doClone);
 
-				foreach (SetExpression item in Items)
+				foreach (var item in Items)
 					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
 
 				objectTree.Add(this, clone);
@@ -2236,7 +2224,7 @@ namespace BLToolkit.Data.Sql
 				if (_into != null)
 					((ISqlExpressionWalkable)_into).Walk(skipColumns, func);
 
-				for (int i = 0; i < Items.Count; i++)
+				for (var i = 0; i < Items.Count; i++)
 					((ISqlExpressionWalkable)Items[i]).Walk(skipColumns, func);
 				return null;
 			}
@@ -2256,7 +2244,7 @@ namespace BLToolkit.Data.Sql
 
 				sb.AppendLine();
 
-				foreach (SetExpression e in Items)
+				foreach (var e in Items)
 				{
 					sb.Append("\t");
 					((IQueryElement)e).ToString(sb, dic);
@@ -2323,7 +2311,7 @@ namespace BLToolkit.Data.Sql
 					_joinedTable = new JoinedTable(joinType, table, alias, isWeak);
 
 					if (joins != null && joins.Count > 0)
-						foreach (Join join in joins)
+						foreach (var join in joins)
 							_joinedTable.Table.Joins.Add(join._joinedTable);
 				}
 
@@ -2347,10 +2335,10 @@ namespace BLToolkit.Data.Sql
 				Predicate<ICloneableElement> doClone)
 				: base(sqlQuery)
 			{
-				_tables.AddRange(clone._tables.ConvertAll<TableSource>(delegate(TableSource ts) { return (TableSource)ts.Clone(objectTree, doClone); }));
+				_tables.AddRange(clone._tables.ConvertAll(ts => (TableSource)ts.Clone(objectTree, doClone)));
 			}
 
-			internal FromClause(List<TableSource> tables)
+			internal FromClause(IEnumerable<TableSource> tables)
 				: base(null)
 			{
 				_tables.AddRange(tables);
@@ -2363,10 +2351,10 @@ namespace BLToolkit.Data.Sql
 
 			public FromClause Table(ISqlTableSource table, string alias, params FJoin[] joins)
 			{
-				TableSource ts = AddOrGetTable(table, alias);
+				var ts = AddOrGetTable(table, alias);
 
 				if (joins != null && joins.Length > 0)
-					foreach (Join join in joins)
+					foreach (var join in joins)
 						ts.Joins.Add(join.JoinedTable);
 
 				return this;
@@ -2374,7 +2362,7 @@ namespace BLToolkit.Data.Sql
 
 			TableSource GetTable(ISqlTableSource table, string alias)
 			{
-				foreach (TableSource ts in Tables)
+				foreach (var ts in Tables)
 					if (ts.Source == table)
 						if (alias == null || ts.Alias == alias)
 							return ts;
@@ -2386,12 +2374,12 @@ namespace BLToolkit.Data.Sql
 
 			TableSource AddOrGetTable(ISqlTableSource table, string alias)
 			{
-				TableSource ts = GetTable(table, alias);
+				var ts = GetTable(table, alias);
 
 				if (ts != null)
 					return ts;
 
-				TableSource t = new TableSource(table, alias);
+				var t = new TableSource(table, alias);
 
 				Tables.Add(t);
 
@@ -2407,9 +2395,9 @@ namespace BLToolkit.Data.Sql
 			{
 				get
 				{
-					foreach (TableSource ts in Tables)
+					foreach (var ts in Tables)
 					{
-						TableSource t = CheckTableSource(ts, table, alias);
+						var t = CheckTableSource(ts, table, alias);
 
 						if (t != null)
 							return t;
@@ -2421,15 +2409,15 @@ namespace BLToolkit.Data.Sql
 
 			public bool IsChild(ISqlTableSource table)
 			{
-				foreach (TableSource ts in Tables)
+				foreach (var ts in Tables)
 					if (ts.Source == table || CheckChild(ts.Joins, table))
 						return true;
 				return false;
 			}
 
-			static bool CheckChild(IList<JoinedTable> joins, ISqlTableSource table)
+			static bool CheckChild(IEnumerable<JoinedTable> joins, ISqlTableSource table)
 			{
-				foreach (JoinedTable j in joins)
+				foreach (var j in joins)
 					if (j.Table == table || CheckChild(j.Table.Joins, table))
 						return true;
 				return false;
@@ -2459,7 +2447,7 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				for (int i = 0; i <	Tables.Count; i++)
+				for (var i = 0; i <	Tables.Count; i++)
 					((ISqlExpressionWalkable)Tables[i]).Walk(skipColumns, func);
 
 				return null;
@@ -2480,7 +2468,7 @@ namespace BLToolkit.Data.Sql
 					foreach (IQueryElement ts in Tables)
 					{
 						sb.Append('\t');
-						int len = sb.Length;
+						var len = sb.Length;
 						ts.ToString(sb, dic).Replace("\n", "\n\t", len, sb.Length - len);
 						sb.Append(", ");
 					}
@@ -2636,7 +2624,7 @@ namespace BLToolkit.Data.Sql
 				Predicate<ICloneableElement> doClone)
 				: base(sqlQuery)
 			{
-				_items.AddRange(clone._items.ConvertAll<ISqlExpression>(delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); }));
+				_items.AddRange(clone._items.ConvertAll(e => (ISqlExpression)e.Clone(objectTree, doClone)));
 			}
 
 			internal GroupByClause(IEnumerable<ISqlExpression> items) : base(null)
@@ -2657,7 +2645,7 @@ namespace BLToolkit.Data.Sql
 
 			void Add(ISqlExpression expr)
 			{
-				foreach (ISqlExpression e in Items)
+				foreach (var e in Items)
 					if (e.Equals(expr))
 						return;
 
@@ -2689,7 +2677,7 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				for (int i = 0; i < Items.Count; i++)
+				for (var i = 0; i < Items.Count; i++)
 					Items[i] = Items[i].Walk(skipColumns, func);
 
 				return null;
@@ -2708,7 +2696,7 @@ namespace BLToolkit.Data.Sql
 
 				sb.Append(" \nGROUP BY \n");
 
-				foreach (ISqlExpression item in Items)
+				foreach (var item in Items)
 				{
 					sb.Append('\t');
 					item.ToString(sb, dic);
@@ -2756,7 +2744,7 @@ namespace BLToolkit.Data.Sql
 				Predicate<ICloneableElement> doClone)
 				: base(sqlQuery)
 			{
-				_items.AddRange(clone._items.ConvertAll<OrderByItem>(delegate(OrderByItem item) { return (OrderByItem)item.Clone(objectTree, doClone); }));
+				_items.AddRange(clone._items.ConvertAll(item => (OrderByItem)item.Clone(objectTree, doClone)));
 			}
 
 			internal OrderByClause(IEnumerable<OrderByItem> items) : base(null)
@@ -2780,7 +2768,7 @@ namespace BLToolkit.Data.Sql
 
 			void Add(ISqlExpression expr, bool isDescending)
 			{
-				foreach (OrderByItem item in Items)
+				foreach (var item in Items)
 					if (item.Expression.Equals(expr))
 						return;
 
@@ -2812,7 +2800,7 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
 			{
-				for (int i = 0; i < Items.Count; i++)
+				for (var i = 0; i < Items.Count; i++)
 					Items[i].Walk(skipColumns, func);
 
 				return null;
@@ -2917,13 +2905,13 @@ namespace BLToolkit.Data.Sql
 		public void FinalizeAndValidate()
 		{
 #if DEBUG
-			string sqlText = SqlText;
+			var sqlText = SqlText;
 
-			Dictionary<SqlQuery,SqlQuery> dic = new Dictionary<SqlQuery,SqlQuery>();
+			var dic = new Dictionary<SqlQuery,SqlQuery>();
 
-			new QueryVisitor().VisitAll(this, delegate(IQueryElement e)
+			new QueryVisitor().VisitAll(this, e =>
 			{
-				SqlQuery sql = e as SqlQuery;
+				var sql = e as SqlQuery;
 
 				if (sql != null)
 				{
@@ -2946,31 +2934,31 @@ namespace BLToolkit.Data.Sql
 
 		void OptimizeUnions()
 		{
-			Dictionary<ISqlExpression,ISqlExpression> exprs = new Dictionary<ISqlExpression,ISqlExpression>();
+			var exprs = new Dictionary<ISqlExpression,ISqlExpression>();
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement e)
 			{
-				SqlQuery sql = e as SqlQuery;
+				var sql = e as SqlQuery;
 
 				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple)
 					return;
 
-				TableSource table = sql.From.Tables[0];
+				var table = sql.From.Tables[0];
 
 				if (table.Joins.Count != 0 || !(table.Source is SqlQuery))
 					return;
 
-				SqlQuery union = (SqlQuery)table.Source;
+				var union = (SqlQuery)table.Source;
 
 				if (!union.HasUnion)
 					return;
 
 				exprs.Add(sql, union);
 
-				for (int i = 0; i < sql.Select.Columns.Count; i++)
+				for (var i = 0; i < sql.Select.Columns.Count; i++)
 				{
-					Column scol = sql.  Select.Columns[i];
-					Column ucol = union.Select.Columns[i];
+					var scol = sql.  Select.Columns[i];
+					var ucol = union.Select.Columns[i];
 
 					scol.Expression = ucol.Expression;
 					scol._alias     = ucol._alias;
@@ -3000,15 +2988,15 @@ namespace BLToolkit.Data.Sql
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
 
-			ForEachTable(delegate(TableSource table)
+			ForEachTable(table =>
 			{
-				foreach (JoinedTable join in table.Joins)
+				foreach (var join in table.Joins)
 					OptimizeSearchCondition(join.Condition);
 			});
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement e)
 			{
-				SqlQuery sql = e as SqlQuery;
+				var sql = e as SqlQuery;
 
 				if (sql != null && sql != this)
 				{
@@ -3026,7 +3014,7 @@ namespace BLToolkit.Data.Sql
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement e)
 			{
-				SqlQuery sql = e as SqlQuery;
+				var sql = e as SqlQuery;
 
 				if (sql != null && sql != this)
 					sql.RemoveOrderBy();
@@ -3054,11 +3042,11 @@ namespace BLToolkit.Data.Sql
 			//
 			if (searchCondition.Conditions.Count == 1)
 			{
-				Condition cond = searchCondition.Conditions[0];
+				var cond = searchCondition.Conditions[0];
 
 				if (cond.Predicate is SearchCondition)
 				{
-					SearchCondition sc = (SearchCondition)cond.Predicate;
+					var sc = (SearchCondition)cond.Predicate;
 
 					if (!cond.IsNot)
 					{
@@ -3071,11 +3059,11 @@ namespace BLToolkit.Data.Sql
 
 					if (sc.Conditions.Count == 1)
 					{
-						Condition c1 = sc.Conditions[0];
+						var c1 = sc.Conditions[0];
 
 						if (!c1.IsNot && c1.Predicate is Predicate.ExprExpr)
 						{
-							Predicate.ExprExpr ee = (Predicate.ExprExpr)c1.Predicate;
+							var ee = (Predicate.ExprExpr)c1.Predicate;
 							Predicate.Operator op;
 
 							switch (ee.Operator)
@@ -3104,11 +3092,11 @@ namespace BLToolkit.Data.Sql
 
 				if (cond.Predicate is Predicate.Expr)
 				{
-					Predicate.Expr expr = (Predicate.Expr)cond.Predicate;
+					var expr = (Predicate.Expr)cond.Predicate;
 
 					if (expr.Expr1 is SqlValue)
 					{
-						SqlValue value = (SqlValue)expr.Expr1;
+						var value = (SqlValue)expr.Expr1;
 
 						if (value.Value is bool)
 							if (cond.IsNot ? !(bool)value.Value : (bool)value.Value)
@@ -3117,17 +3105,17 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			for (int i = 0; i < searchCondition.Conditions.Count; i++)
+			for (var i = 0; i < searchCondition.Conditions.Count; i++)
 			{
-				Condition cond = searchCondition.Conditions[i];
+				var cond = searchCondition.Conditions[i];
 
 				if (cond.Predicate is Predicate.Expr)
 				{
-					Predicate.Expr expr = (Predicate.Expr)cond.Predicate;
+					var expr = (Predicate.Expr)cond.Predicate;
 
 					if (expr.Expr1 is SqlValue)
 					{
-						SqlValue value = (SqlValue)expr.Expr1;
+						var value = (SqlValue)expr.Expr1;
 
 						if (value.Value is bool)
 						{
@@ -3149,7 +3137,7 @@ namespace BLToolkit.Data.Sql
 				}
 				else if (cond.Predicate is SearchCondition)
 				{
-					SearchCondition sc = (SearchCondition)cond.Predicate;
+					var sc = (SearchCondition)cond.Predicate;
 					OptimizeSearchCondition(sc);
 				}
 			}
@@ -3157,7 +3145,7 @@ namespace BLToolkit.Data.Sql
 
 		void ForEachTable(Action<TableSource> action)
 		{
-			From.Tables.ForEach(delegate(TableSource tbl) { tbl.ForEach(action); });
+			From.Tables.ForEach(tbl => tbl.ForEach(action));
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement e)
 			{
@@ -3183,7 +3171,7 @@ namespace BLToolkit.Data.Sql
 				if (tables.Contains(table.Source))
 					return true;
 
-				foreach (JoinedTable join in table.Joins)
+				foreach (var join in table.Joins)
 				{
 					if (findTable(join.Table))
 					{
@@ -3193,7 +3181,7 @@ namespace BLToolkit.Data.Sql
 				}
 
 				if (table.Source is SqlQuery)
-					foreach (TableSource t in ((SqlQuery)table.Source).From.Tables)
+					foreach (var t in ((SqlQuery)table.Source).From.Tables)
 						if (findTable(t))
 							return true;
 
@@ -3202,9 +3190,9 @@ namespace BLToolkit.Data.Sql
 
 			ForEachTable(delegate(TableSource table)
 			{
-				for (int i = 0; i < table.Joins.Count; i++)
+				for (var i = 0; i < table.Joins.Count; i++)
 				{
-					JoinedTable join = table.Joins[i];
+					var join = table.Joins[i];
 
 					if (join.IsWeak)
 					{
@@ -3214,13 +3202,13 @@ namespace BLToolkit.Data.Sql
 
 							Action<IQueryElement> tableCollector = delegate(IQueryElement expr)
 							{
-								SqlField field = expr as SqlField;
+								var field = expr as SqlField;
 
 								if (field != null && !tables.Contains(field.Table))
 									tables.Add(field.Table);
 							};
 
-							QueryVisitor visitor = new QueryVisitor();
+							var visitor = new QueryVisitor();
 
 							visitor.VisitAll(Select,  tableCollector);
 							visitor.VisitAll(Where,   tableCollector);
@@ -3246,17 +3234,17 @@ namespace BLToolkit.Data.Sql
 
 		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere)
 		{
-			for (int i = 0; i < source.Joins.Count; i++)
+			for (var i = 0; i < source.Joins.Count; i++)
 			{
-				JoinedTable jt    = source.Joins[i];
-				TableSource table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
+				var jt    = source.Joins[i];
+				var table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
 
 				if (table != jt.Table)
 				{
-					SqlQuery sql = jt.Table.Source as SqlQuery;
+					var sql = jt.Table.Source as SqlQuery;
 
 					if (sql != null && sql.OrderBy.Items.Count > 0)
-						foreach (OrderByItem item in sql.OrderBy.Items)
+						foreach (var item in sql.OrderBy.Items)
 							OrderBy.Expr(item.Expression, item.IsDescending);
 
 					jt.Table = table;
@@ -3265,7 +3253,7 @@ namespace BLToolkit.Data.Sql
 
 			if (source.Source is SqlQuery)
 			{
-				SqlQuery query = (SqlQuery)source.Source;
+				var query = (SqlQuery)source.Source;
 
 				if (query.From.Tables.Count == 1 &&
 				   //!query.Select.IsDistinct      &&
@@ -3274,14 +3262,14 @@ namespace BLToolkit.Data.Sql
 				   !query.HasUnion               &&
 				    query.GroupBy.IsEmpty        &&
 				   !query.Select.HasModifier     &&
-				   !query.Select.Columns.Exists(delegate(Column c) { return !(c.Expression is SqlField); }))
+				   !query.Select.Columns.Exists(c => !(c.Expression is SqlField)))
 				{
-					Dictionary<ISqlExpression,SqlField> map = new Dictionary<ISqlExpression,SqlField>(query.Select.Columns.Count);
+					var map = new Dictionary<ISqlExpression,SqlField>(query.Select.Columns.Count);
 
-					foreach (Column c in query.Select.Columns)
+					foreach (var c in query.Select.Columns)
 						map.Add(c, (SqlField)c.Expression);
 
-					SqlQuery top = this;
+					var top = this;
 
 					while (top.ParentSql != null)
 						top = top.ParentSql;
@@ -3304,7 +3292,7 @@ namespace BLToolkit.Data.Sql
 					{
 						if (expr is SqlQuery)
 						{
-							SqlQuery sql = (SqlQuery)expr;
+							var sql = (SqlQuery)expr;
 
 							if (sql.ParentSql == query)
 								sql.ParentSql = query.ParentSql ?? this;
@@ -3330,7 +3318,7 @@ namespace BLToolkit.Data.Sql
 			{
 				if (where1.SearchCondition.Precedence < Sql.Precedence.LogicalConjunction)
 				{
-					SearchCondition sc1 = new SearchCondition();
+					var sc1 = new SearchCondition();
 
 					sc1.Conditions.AddRange(where1.SearchCondition.Conditions);
 
@@ -3340,7 +3328,7 @@ namespace BLToolkit.Data.Sql
 
 				if (where2.SearchCondition.Precedence < Sql.Precedence.LogicalConjunction)
 				{
-					SearchCondition sc2 = new SearchCondition();
+					var sc2 = new SearchCondition();
 
 					sc2.Conditions.AddRange(where2.SearchCondition.Conditions);
 
@@ -3353,16 +3341,16 @@ namespace BLToolkit.Data.Sql
 
 		void OptimizeSubQueries()
 		{
-			for (int i = 0; i < From.Tables.Count; i++)
+			for (var i = 0; i < From.Tables.Count; i++)
 			{
-				TableSource table = OptimizeSubQuery(From.Tables[i], true);
+				var table = OptimizeSubQuery(From.Tables[i], true);
 
 				if (table != From.Tables[i])
 				{
-					SqlQuery sql = From.Tables[i].Source as SqlQuery;
+					var sql = From.Tables[i].Source as SqlQuery;
 
 					if (sql != null && sql.OrderBy.Items.Count > 0)
-						foreach (OrderByItem item in sql.OrderBy.Items)
+						foreach (var item in sql.OrderBy.Items)
 							OrderBy.Expr(item.Expression, item.IsDescending);
 
 					From.Tables[i] = table;
@@ -3374,7 +3362,7 @@ namespace BLToolkit.Data.Sql
 		{
 			((ISqlExpressionWalkable)Select).Walk(false, delegate(ISqlExpression expr)
 			{
-				SqlQuery query = expr as SqlQuery;
+				var query = expr as SqlQuery;
 					
 				if (query != null && query.From.Tables.Count == 0 && query.Select.Columns.Count == 1)
 					return query.Select.Columns[0].Expression;
@@ -3400,7 +3388,7 @@ namespace BLToolkit.Data.Sql
 			if (_aliases == null)
 				_aliases = new Dictionary<string,object>();
 
-			string alias = desiredAlias;
+			var alias = desiredAlias;
 
 			if (string.IsNullOrEmpty(desiredAlias))
 			{
@@ -3408,9 +3396,9 @@ namespace BLToolkit.Data.Sql
 				alias        = defaultAlias + "1";
 			}
 
-			for (int i = 1; ; i++)
+			for (var i = 1; ; i++)
 			{
-				string s = alias.ToUpper();
+				var s = alias.ToUpper();
 
 				if (!_aliases.ContainsKey(s) && !_reservedWords.ContainsKey(s))
 				{
@@ -3426,12 +3414,12 @@ namespace BLToolkit.Data.Sql
 
 		public string[] GetTempAliases(int n, string defaultAlias)
 		{
-			string[] aliases = new string[n];
+			var aliases = new string[n];
 
-			for (int i = 0; i < aliases.Length; i++)
+			for (var i = 0; i < aliases.Length; i++)
 				aliases[i] = GetAlias(defaultAlias, defaultAlias);
 
-			for (int i = 0; i < aliases.Length; i++)
+			for (var i = 0; i < aliases.Length; i++)
 				RemoveAlias(aliases[i]);
 
 			return aliases;
@@ -3441,7 +3429,7 @@ namespace BLToolkit.Data.Sql
 		{
 			_aliases = null;
 
-			Dictionary<object,object> objs = new Dictionary<object,object>();
+			var objs = new Dictionary<object,object>();
 
 			Parameters.Clear();
 
@@ -3451,7 +3439,7 @@ namespace BLToolkit.Data.Sql
 				{
 					case QueryElementType.SqlParameter:
 						{
-							SqlParameter p = (SqlParameter)expr;
+							var p = (SqlParameter)expr;
 
 							if (p.IsQueryParameter)
 							{
@@ -3475,7 +3463,7 @@ namespace BLToolkit.Data.Sql
 							{
 								objs.Add(expr, expr);
 
-								Column c = (Column)expr;
+								var c = (Column)expr;
 
 								if (c.Alias != "*")
 									c.Alias = GetAlias(c.Alias, "c");
@@ -3486,7 +3474,7 @@ namespace BLToolkit.Data.Sql
 
 					case QueryElementType.TableSource:
 						{
-							TableSource table = (TableSource)expr;
+							var table = (TableSource)expr;
 
 							if (!objs.ContainsKey(table))
 							{
@@ -3499,17 +3487,17 @@ namespace BLToolkit.Data.Sql
 
 					case QueryElementType.SqlQuery:
 						{
-							SqlQuery sql = (SqlQuery)expr;
+							var sql = (SqlQuery)expr;
 
 							if (sql.HasUnion)
 							{
-								for (int i = 0; i < sql.Select.Columns.Count; i++)
+								for (var i = 0; i < sql.Select.Columns.Count; i++)
 								{
-									Column col = sql.Select.Columns[i];
+									var col = sql.Select.Columns[i];
 
-									for (int j = 0; j < sql.Unions.Count; j++)
+									for (var j = 0; j < sql.Unions.Count; j++)
 									{
-										SelectClause union = sql.Unions[j].SqlQuery.Select;
+										var union = sql.Unions[j].SqlQuery.Select;
 
 										objs.Remove(union.Columns[i].Alias);
 
@@ -3549,12 +3537,12 @@ namespace BLToolkit.Data.Sql
 			_having  = new WhereClause  (this, clone._having,  objectTree, doClone);
 			_orderBy = new OrderByClause(this, clone._orderBy, objectTree, doClone);
 
-			_parameters.AddRange(clone._parameters.ConvertAll<SqlParameter>(delegate(SqlParameter p) { return (SqlParameter)p.Clone(objectTree, doClone); }));
+			_parameters.AddRange(clone._parameters.ConvertAll(p => (SqlParameter)p.Clone(objectTree, doClone)));
 			_parameterDependent = clone.ParameterDependent;
 
 			new QueryVisitor().Visit(this, delegate(IQueryElement expr)
 			{
-				SqlQuery sb = expr as SqlQuery;
+				var sb = expr as SqlQuery;
 
 				if (sb != null && sb.ParentSql == clone)
 					sb.ParentSql = this;
@@ -3563,7 +3551,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlQuery Clone()
 		{
-			return (SqlQuery)Clone(new Dictionary<ICloneableElement,ICloneableElement>(), delegate(ICloneableElement o) { return true; });
+			return (SqlQuery)Clone(new Dictionary<ICloneableElement,ICloneableElement>(), _ => true);
 		}
 
 		public SqlQuery Clone(Predicate<ICloneableElement> doClone)
@@ -3577,7 +3565,7 @@ namespace BLToolkit.Data.Sql
 
 		public TableSource GetTableSource(ISqlTableSource table)
 		{
-			TableSource ts = From[table];
+			var ts = From[table];
 			return ts == null && ParentSql != null? ParentSql.GetTableSource(table) : ts;
 		}
 
@@ -3586,14 +3574,14 @@ namespace BLToolkit.Data.Sql
 			if (ts.Source == table && (alias == null || ts.Alias == alias))
 				return ts;
 
-			TableSource jt = ts[table, alias];
+			var jt = ts[table, alias];
 
 			if (jt != null)
 				return jt;
 
 			if (ts.Source is SqlQuery)
 			{
-				TableSource s = ((SqlQuery)ts.Source).From[table, alias];
+				var s = ((SqlQuery)ts.Source).From[table, alias];
 
 				if (s != null)
 					return s;
@@ -3637,6 +3625,10 @@ namespace BLToolkit.Data.Sql
 			{
 				if (Select.Columns.Count == 1)
 					return Select.Columns[0].SystemType;
+
+				if (From.Tables.Count == 1 && From.Tables[0].Joins.Count == 0)
+					return From.Tables[0].SystemType;
+
 				return null;
 			}
 		}
@@ -3673,7 +3665,7 @@ namespace BLToolkit.Data.Sql
 			((ISqlExpressionWalkable)OrderBy).Walk(skipColumns, func);
 
 			if (HasUnion)
-				foreach (Union union in Unions)
+				foreach (var union in Unions)
 					((ISqlExpressionWalkable)union.SqlQuery).Walk(skipColumns, func);
 
 			return func(this);
@@ -3704,12 +3696,32 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_all == null)
 				{
-					_all = new SqlField(null, "*", "*", true, -1, null);
+					_all = new SqlField(null, "*", "*", true, -1, null, null);
 					((IChild<ISqlTableSource>)_all).Parent = this;
 				}
 
 				return _all;
 			}
+		}
+
+		List<ISqlExpression> _keys;
+
+		public IList<ISqlExpression> GetKeys(bool allIfEmpty)
+		{
+			if (_keys == null && From.Tables.Count == 1 && From.Tables[0].Joins.Count == 0)
+			{
+				_keys = new List<ISqlExpression>();
+
+				var q =
+					from key in ((ISqlTableSource)From.Tables[0]).GetKeys(allIfEmpty)
+					from col in Select.Columns
+					where col.Expression == key
+					select col as ISqlExpression;
+
+				_keys = q.ToList();
+			}
+
+			return null;
 		}
 
 		#endregion

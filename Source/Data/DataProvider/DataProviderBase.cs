@@ -7,7 +7,9 @@ using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
+#if FW3
 	using Sql.SqlProvider;
+#endif
 
 	/// <summary>
 	/// The <b>DataProviderBase</b> is a class that provides specific data provider information
@@ -233,10 +235,14 @@ namespace BLToolkit.Data.DataProvider
 				parameter.Value = value;
 		}
 
+#if FW3
+
 		public virtual ISqlProvider CreateSqlProvider()
 		{
 			return new BasicSqlProvider(this);
 		}
+
+#endif
 
 		public virtual IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{

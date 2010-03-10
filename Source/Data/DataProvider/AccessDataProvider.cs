@@ -6,7 +6,9 @@ using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
+#if FW3
 	using Sql.SqlProvider;
+#endif
 
 	public sealed class AccessDataProvider : OleDbDataProvider
 	{
@@ -228,10 +230,14 @@ namespace BLToolkit.Data.DataProvider
 			get { return 0; }
 		}
 
+#if FW3
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new AccessSqlProvider(this);
 		}
+
+#endif
 
 		#region DataReaderEx
 

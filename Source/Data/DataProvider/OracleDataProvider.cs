@@ -3,7 +3,10 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OracleClient;
 using System.Globalization;
+
+#if FW3
 using BLToolkit.Data.Sql.SqlProvider;
+#endif
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -137,10 +140,14 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 
+#if FW3
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new OracleSqlProvider(this);
 		}
+
+#endif
 	}
 #if FW4
 #pragma warning restore 0618

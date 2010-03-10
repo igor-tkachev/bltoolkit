@@ -1343,7 +1343,7 @@ namespace BLToolkit.Data.Linq
 							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
-						var keys   = sqlTable.GetKeyFields();
+						var keys   = sqlTable.GetKeys(true).Cast<SqlField>();
 						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
 
 						if (fields.Count == 0)
@@ -1405,7 +1405,7 @@ namespace BLToolkit.Data.Linq
 							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
-						var keys = sqlTable.GetKeyFields();
+						var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
 
 						if (keys.Count == 0)
 							throw new LinqException(

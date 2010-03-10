@@ -2,19 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-
-#if FW3
-using System.Linq.Expressions;
-#endif
-
-#region ReSharper C# 2.0 disable
-// ReSharper disable SuggestUseVarKeywordEverywhere
-// ReSharper disable SuggestUseVarKeywordEvident
-// ReSharper disable UseObjectOrCollectionInitializer
-// ReSharper disable InconsistentNaming
-#endregion
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -109,7 +99,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (sqlQuery.HasUnion)
 				{
-					foreach (SqlQuery.Union union in sqlQuery.Unions)
+					foreach (var union in sqlQuery.Unions)
 					{
 						AppendIndent(sb);
 						sb.Append("UNION");
@@ -209,15 +199,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			_indent++;
 
-			bool first = true;
+			var first = true;
 
-			foreach (SqlQuery.Column col in GetSelectedColumns())
+			foreach (var col in GetSelectedColumns())
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
 				first = false;
 
-				bool addAlias = true;
+				var addAlias = true;
 
 				AppendIndent(sb);
 				BuildColumn(sb, col, ref addAlias);
@@ -280,9 +270,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			_indent++;
 
-			bool first = true;
+			var first = true;
 
-			foreach (SqlQuery.SetExpression expr in _sqlQuery.Set.Items)
+			foreach (var expr in _sqlQuery.Set.Items)
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
@@ -313,9 +303,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			_indent++;
 
-			bool first = true;
+			var first = true;
 
-			foreach (SqlQuery.SetExpression expr in _sqlQuery.Set.Items)
+			foreach (var expr in _sqlQuery.Set.Items)
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
@@ -339,7 +329,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				first = true;
 
-				foreach (SqlQuery.SetExpression expr in _sqlQuery.Set.Items)
+				foreach (var expr in _sqlQuery.Set.Items)
 				{
 					if (!first)
 						sb.Append(',').AppendLine();
@@ -377,26 +367,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent++;
 			AppendIndent(sb);
 
-			bool first = true;
+			var first = true;
 
-			foreach (SqlQuery.TableSource ts in _sqlQuery.From.Tables)
+			foreach (var ts in _sqlQuery.From.Tables)
 			{
 				if (!first)
 					sb.Append(", ");
 				first = false;
 
-				int jn = ParenthesizeJoin() ? ts.GetJoinNumber() : 0;
+				var jn = ParenthesizeJoin() ? ts.GetJoinNumber() : 0;
 
 				if (jn > 0)
 				{
 					jn--;
-					for (int i = 0; i < jn; i++)
+					for (var i = 0; i < jn; i++)
 						sb.Append("(");
 				}
 
 				BuildTableName(sb, ts, true, true);
 
-				foreach (SqlQuery.JoinedTable jt in ts.Joins)
+				foreach (var jt in ts.Joins)
 					BuildJoinTable(sb, jt, ref jn);
 			}
 
@@ -433,7 +423,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (buildAlias)
 			{
-				string alias = GetTableAlias(ts);
+				var alias = GetTableAlias(ts);
 
 				if (!string.IsNullOrEmpty(alias))
 				{
@@ -464,7 +454,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (IsNestedJoinSupported && join.Table.Joins.Count != 0)
 			{
-				foreach (SqlQuery.JoinedTable jt in join.Table.Joins)
+				foreach (var jt in join.Table.Joins)
 					BuildJoinTable(sb, jt, ref joinCounter);
 
 				if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
@@ -489,7 +479,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			if (!IsNestedJoinSupported)
-				foreach (SqlQuery.JoinedTable jt in join.Table.Joins)
+				foreach (var jt in join.Table.Joins)
 					BuildJoinTable(sb, jt, ref joinCounter);
 
 			_indent--;
@@ -536,7 +526,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			_indent++;
 
-			for (int i = 0; i < _sqlQuery.GroupBy.Items.Count; i++)
+			for (var i = 0; i < _sqlQuery.GroupBy.Items.Count; i++)
 			{
 				AppendIndent(sb);
 
@@ -587,11 +577,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			_indent++;
 
-			for (int i = 0; i < _sqlQuery.OrderBy.Items.Count; i++)
+			for (var i = 0; i < _sqlQuery.OrderBy.Items.Count; i++)
 			{
 				AppendIndent(sb);
 
-				SqlQuery.OrderByItem item = _sqlQuery.OrderBy.Items[i];
+				var item = _sqlQuery.OrderBy.Items[i];
 
 				BuildExpression(sb, item.Expression);
 
@@ -634,8 +624,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildOffsetLimit(StringBuilder sb)
 		{
-			bool doSkip = NeedSkip && OffsetFormat != null;
-			bool doTake = NeedTake && LimitFormat  != null;
+			var doSkip = NeedSkip && OffsetFormat != null;
+			var doTake = NeedTake && LimitFormat  != null;
 
 			if (doSkip || doTake)
 			{
@@ -669,11 +659,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSearchCondition(StringBuilder sb, SqlQuery.SearchCondition condition)
 		{
-			bool? isOr = null;
-			int   len  = sb.Length;
-			int   prevPrecedence = condition.Conditions.Count > 1 && !condition.Conditions[0].IsOr ? Precedence.LogicalConjunction : Precedence.LogicalDisjunction;
+			var isOr = (bool?)null;
+			var len  = sb.Length;
+			var prevPrecedence = condition.Conditions.Count > 1 && !condition.Conditions[0].IsOr ? Precedence.LogicalConjunction : Precedence.LogicalDisjunction;
 
-			foreach (SqlQuery.Condition cond in condition.Conditions)
+			foreach (var cond in condition.Conditions)
 			{
 				if (isOr != null)
 				{
@@ -704,7 +694,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildSearchCondition(StringBuilder sb, int parentPrecedence, SqlQuery.SearchCondition condition)
 		{
-			bool wrap = Wrap(GetPrecedence(condition as ISqlExpression), parentPrecedence);
+			var wrap = Wrap(GetPrecedence(condition as ISqlExpression), parentPrecedence);
 
 			if (wrap) sb.Append('(');
 			BuildSearchCondition(sb, condition);
@@ -719,26 +709,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (predicate.ElementType)
 			{
-				case QueryElementType.ExprExprPredicate:
+				case QueryElementType.ExprExprPredicate :
 					{
-						SqlQuery.Predicate.ExprExpr expr = (SqlQuery.Predicate.ExprExpr)predicate;
+						var expr = (SqlQuery.Predicate.ExprExpr)predicate;
 
 						switch (expr.Operator)
 						{
-							case SqlQuery.Predicate.Operator.Equal:
-							case SqlQuery.Predicate.Operator.NotEqual:
+							case SqlQuery.Predicate.Operator.Equal :
+							case SqlQuery.Predicate.Operator.NotEqual :
 								{
 									ISqlExpression e = null;
 
-									if (expr.Expr1 is SqlValue && ((SqlValue) expr.Expr1).Value == null)
+									if (expr.Expr1 is SqlValue && ((SqlValue)expr.Expr1).Value == null)
 										e = expr.Expr2;
-									else if (expr.Expr2 is SqlValue && ((SqlValue) expr.Expr2).Value == null)
+									else if (expr.Expr2 is SqlValue && ((SqlValue)expr.Expr2).Value == null)
 										e = expr.Expr1;
 
 									if (e != null)
 									{
 										BuildExpression(sb, GetPrecedence(expr), e);
-										sb.Append(expr.Operator == SqlQuery.Predicate.Operator.Equal? " IS NULL": " IS NOT NULL");
+										sb.Append(expr.Operator == SqlQuery.Predicate.Operator.Equal ? " IS NULL" : " IS NOT NULL");
 										return;
 									}
 
@@ -750,14 +740,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						switch (expr.Operator)
 						{
-							case SqlQuery.Predicate.Operator.Equal         : sb.Append(" = ");  break;
-							case SqlQuery.Predicate.Operator.NotEqual      : sb.Append(" <> "); break;
-							case SqlQuery.Predicate.Operator.Greater       : sb.Append(" > ");  break;
-							case SqlQuery.Predicate.Operator.GreaterOrEqual: sb.Append(" >= "); break;
-							case SqlQuery.Predicate.Operator.NotGreater    : sb.Append(" !> "); break;
-							case SqlQuery.Predicate.Operator.Less          : sb.Append(" < ");  break;
-							case SqlQuery.Predicate.Operator.LessOrEqual   : sb.Append(" <= "); break;
-							case SqlQuery.Predicate.Operator.NotLess       : sb.Append(" !< "); break;
+							case SqlQuery.Predicate.Operator.Equal :
+								sb.Append(" = ");
+								break;
+							case SqlQuery.Predicate.Operator.NotEqual :
+								sb.Append(" <> ");
+								break;
+							case SqlQuery.Predicate.Operator.Greater :
+								sb.Append(" > ");
+								break;
+							case SqlQuery.Predicate.Operator.GreaterOrEqual :
+								sb.Append(" >= ");
+								break;
+							case SqlQuery.Predicate.Operator.NotGreater :
+								sb.Append(" !> ");
+								break;
+							case SqlQuery.Predicate.Operator.Less :
+								sb.Append(" < ");
+								break;
+							case SqlQuery.Predicate.Operator.LessOrEqual :
+								sb.Append(" <= ");
+								break;
+							case SqlQuery.Predicate.Operator.NotLess :
+								sb.Append(" !< ");
+								break;
 						}
 
 						BuildExpression(sb, GetPrecedence(expr), expr.Expr2);
@@ -765,120 +771,61 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					break;
 
-				case QueryElementType.LikePredicate:
+				case QueryElementType.LikePredicate :
 					BuildLikePredicate(sb, (SqlQuery.Predicate.Like)predicate);
 					break;
 
-				case QueryElementType.BetweenPredicate:
-					throw new NotImplementedException();
-
-				case QueryElementType.IsNullPredicate:
+				case QueryElementType.BetweenPredicate :
 					{
-						SqlQuery.Predicate.IsNull p = (SqlQuery.Predicate.IsNull)predicate;
+						var p = (SqlQuery.Predicate.Between)predicate;
 						BuildExpression(sb, GetPrecedence(p), p.Expr1);
-						sb.Append(p.IsNot? " IS NOT NULL": " IS NULL");
+						if (p.IsNot) sb.Append(" NOT");
+						sb.Append(" BETWEEN ");
+						BuildExpression(sb, GetPrecedence(p), p.Expr2);
+						sb.Append(" AND ");
+						BuildExpression(sb, GetPrecedence(p), p.Expr3);
 					}
 
 					break;
 
-				case QueryElementType.InSubqueryPredicate:
+				case QueryElementType.IsNullPredicate :
 					{
-						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)predicate;
+						var p = (SqlQuery.Predicate.IsNull)predicate;
 						BuildExpression(sb, GetPrecedence(p), p.Expr1);
-						sb.Append(p.IsNot? " NOT IN ": " IN ");
+						sb.Append(p.IsNot ? " IS NOT NULL" : " IS NULL");
+					}
+
+					break;
+
+				case QueryElementType.InSubqueryPredicate :
+					{
+						var p = (SqlQuery.Predicate.InSubQuery)predicate;
+						BuildExpression(sb, GetPrecedence(p), p.Expr1);
+						sb.Append(p.IsNot ? " NOT IN " : " IN ");
 						BuildExpression(sb, GetPrecedence(p), p.SubQuery);
 					}
 
 					break;
 
-				case QueryElementType.InListPredicate:
-					{
-						SqlQuery.Predicate.InList p = (SqlQuery.Predicate.InList)predicate;
-
-						if (p.Values == null || p.Values.Count == 0)
-						{
-							BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
-						}
-						else
-						{
-							ICollection values = p.Values;
-
-							if (p.Values.Count == 1 && p.Values[0] is SqlParameter)
-							{
-								SqlParameter pr = (SqlParameter)p.Values[0];
-
-								if (pr.Value == null)
-								{
-									BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
-									return;
-								}
-
-								if (pr.Value is IEnumerable)
-								{
-									IEnumerable items = (IEnumerable)pr.Value;
-
-									bool firstValue = true;
-
-									foreach (object item in items)
-									{
-										if (firstValue)
-										{
-											firstValue = false;
-											BuildExpression(sb, GetPrecedence(p), p.Expr1);
-											sb.Append(p.IsNot ? " NOT IN (" : " IN (");
-										}
-
-										if (item is ISqlExpression)
-											BuildExpression(sb, (ISqlExpression)item);
-										else
-											BuildValue(sb, item);
-
-										sb.Append(", ");
-									}
-
-									if (firstValue)
-										BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
-									else
-										sb.Remove(sb.Length - 2, 2).Append(')');
-
-									return;
-								}
-							}
-
-							BuildExpression(sb, GetPrecedence(p), p.Expr1);
-							sb.Append(p.IsNot ? " NOT IN (" : " IN (");
-
-							foreach (object value in values)
-							{
-								if (value is ISqlExpression)
-									BuildExpression(sb, (ISqlExpression)value);
-								else
-									BuildValue(sb, value);
-
-								sb.Append(", ");
-							}
-
-							sb.Remove(sb.Length - 2, 2).Append(')');
-						}
-					}
-
+				case QueryElementType.InListPredicate :
+					BuildInListPredicate(predicate, sb);
 					break;
 
-				case QueryElementType.FuncLikePredicate:
+				case QueryElementType.FuncLikePredicate :
 					{
-						SqlQuery.Predicate.FuncLike f = (SqlQuery.Predicate.FuncLike)predicate;
+						var f = (SqlQuery.Predicate.FuncLike)predicate;
 						BuildExpression(sb, f.Function.Precedence, f.Function);
 					}
 
 					break;
 
-				case QueryElementType.SearchCondition:
+				case QueryElementType.SearchCondition :
 					BuildSearchCondition(sb, predicate.Precedence, (SqlQuery.SearchCondition)predicate);
 					break;
 
-				case QueryElementType.NotExprPredicate:
+				case QueryElementType.NotExprPredicate :
 					{
-						SqlQuery.Predicate.NotExpr p = (SqlQuery.Predicate.NotExpr)predicate;
+						var p = (SqlQuery.Predicate.NotExpr)predicate;
 
 						if (p.IsNot)
 							sb.Append("NOT ");
@@ -888,13 +835,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					break;
 
-				case QueryElementType.ExprPredicate:
+				case QueryElementType.ExprPredicate :
 					{
-						SqlQuery.Predicate.Expr p = (SqlQuery.Predicate.Expr)predicate;
+						var p = (SqlQuery.Predicate.Expr)predicate;
 
 						if (p.Expr1 is SqlValue)
 						{
-							object value = ((SqlValue)p.Expr1).Value;
+							var value = ((SqlValue)p.Expr1).Value;
 
 							if (value is bool)
 							{
@@ -908,14 +855,154 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					break;
 
-				default:
+				default :
 					throw new InvalidOperationException();
+			}
+		}
+
+		static SqlField GetUnderlayingField(ISqlExpression expr)
+		{
+			switch (expr.ElementType)
+			{
+				case QueryElementType.SqlField: return (SqlField)expr;
+				case QueryElementType.Column  : return GetUnderlayingField(((SqlQuery.Column)expr).Expression);
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		void BuildInListPredicate(ISqlPredicate predicate, StringBuilder sb)
+		{
+			var p = (SqlQuery.Predicate.InList)predicate;
+
+			if (p.Values == null || p.Values.Count == 0)
+			{
+				BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
+			}
+			else
+			{
+				ICollection values = p.Values;
+
+				if (p.Values.Count == 1 && p.Values[0] is SqlParameter)
+				{
+					var pr = (SqlParameter)p.Values[0];
+
+					if (pr.Value == null)
+					{
+						BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
+						return;
+					}
+
+					if (pr.Value is IEnumerable)
+					{
+						var items      = (IEnumerable)pr.Value;
+						var firstValue = true;
+
+						if (p.Expr1 is ISqlTableSource)
+						{
+							var table = (ISqlTableSource)p.Expr1;
+							var keys  = table.GetKeys(true);
+
+							if (keys == null || keys.Count == 0)
+								throw new SqlException("Cant create IN expression.");
+
+							if (keys.Count == 1)
+							{
+								foreach (var item in items)
+								{
+									if (firstValue)
+									{
+										firstValue = false;
+										BuildExpression(sb, GetPrecedence(p), keys[0]);
+										sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+									}
+
+									var field = GetUnderlayingField(keys[0]);
+									var value = field.MemberMapper.GetValue(item);
+
+									if (value is ISqlExpression)
+										BuildExpression(sb, (ISqlExpression)value);
+									else
+										BuildValue(sb, value);
+
+									sb.Append(", ");
+								}
+							}
+							else
+							{
+								foreach (var item in items)
+								{
+									firstValue = false;
+
+									foreach (var key in keys)
+									{
+										var field = GetUnderlayingField(key);
+										var value = field.MemberMapper.GetValue(item);
+
+										//var expr = SqlQuery.Predicate.ExprExpr.ExprExpr
+
+										if (value is ISqlExpression)
+											BuildExpression(sb, (ISqlExpression)value);
+										else
+											BuildValue(sb, value);
+
+									}
+
+										BuildExpression(sb, GetPrecedence(p), keys[0]);
+										sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+
+
+									sb.Append(", ");
+								}
+							}
+						}
+						else
+							foreach (var item in items)
+							{
+								if (firstValue)
+								{
+									firstValue = false;
+									BuildExpression(sb, GetPrecedence(p), p.Expr1);
+									sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+								}
+
+								if (item is ISqlExpression)
+									BuildExpression(sb, (ISqlExpression)item);
+								else
+									BuildValue(sb, item);
+
+								sb.Append(", ");
+							}
+
+						if (firstValue)
+							BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
+						else
+							sb.Remove(sb.Length - 2, 2).Append(')');
+
+						return;
+					}
+				}
+
+				BuildExpression(sb, GetPrecedence(p), p.Expr1);
+				sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+
+				foreach (var value in values)
+				{
+					if (value is ISqlExpression)
+						BuildExpression(sb, (ISqlExpression)value);
+					else
+						BuildValue(sb, value);
+
+					sb.Append(", ");
+				}
+
+				sb.Remove(sb.Length - 2, 2).Append(')');
 			}
 		}
 
 		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, ISqlPredicate predicate)
 		{
-			bool wrap = Wrap(GetPrecedence(predicate), parentPrecedence);
+			var wrap = Wrap(GetPrecedence(predicate), parentPrecedence);
 
 			if (wrap) sb.Append('(');
 			BuildPredicate(sb, predicate);
@@ -924,7 +1011,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildLikePredicate(StringBuilder sb, SqlQuery.Predicate.Like predicate)
 		{
-			int precedence = GetPrecedence(predicate);
+			var precedence = GetPrecedence(predicate);
 
 			BuildExpression(sb, precedence, predicate.Expr1);
 			sb.Append(predicate.IsNot? " NOT LIKE ": " LIKE ");
@@ -955,7 +1042,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case QueryElementType.SqlField:
 					{
-						SqlField field = (SqlField)expr;
+						var field = (SqlField)expr;
 						if (field == field.Table.All)
 						{
 							sb.Append("*");
@@ -964,12 +1051,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							if (buildTableName)
 							{
-								SqlQuery.TableSource ts = _sqlQuery.GetTableSource(field.Table);
+								var ts = _sqlQuery.GetTableSource(field.Table);
 
 								if (ts == null)
 									throw new SqlException(string.Format("Table {0} not found.", field.Table));
 
-								string table = GetTableAlias(ts);
+								var table = GetTableAlias(ts);
 
 								table = table == null ?
 									GetTablePhysicalName(field.Table) :
@@ -993,7 +1080,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.Column:
 					{
-						SqlQuery.Column column = (SqlQuery.Column)expr;
+						var column = (SqlQuery.Column)expr;
 
 #if DEBUG
 						//if (column.ToString() == "t8.ParentID")
@@ -1002,12 +1089,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						//}
 #endif
 
-						ISqlTableSource table  = _sqlQuery.GetTableSource(column.Parent);
+						var table  = _sqlQuery.GetTableSource(column.Parent);
 
 						if (table == null)
 							throw new SqlException(string.Format("Table not found for '{0}'.", column));
 
-						string tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent);
+						var tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent);
 
 						if (string.IsNullOrEmpty(tableAlias))
 							throw new SqlException(string.Format("Table {0} should have an alias.", column.Parent));
@@ -1024,7 +1111,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlQuery:
 					{
-						bool hasParentheses = checkParentheses && sb[sb.Length - 1] == '(';
+						var hasParentheses = checkParentheses && sb[sb.Length - 1] == '(';
 
 						if (!hasParentheses)
 							sb.Append("(");
@@ -1046,18 +1133,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlExpression:
 					{
-						SqlExpression e = (SqlExpression)expr;
-						StringBuilder s = new StringBuilder();
+						var e = (SqlExpression)expr;
+						var s = new StringBuilder();
 
 						if (e.Parameters == null || e.Parameters.Length == 0)
 							sb.Append(e.Expr);
 						else
 						{
-							object[] values = new object[e.Parameters.Length];
+							var values = new object[e.Parameters.Length];
 
-							for (int i = 0; i < values.Length; i++)
+							for (var i = 0; i < values.Length; i++)
 							{
-								ISqlExpression value = e.Parameters[i];
+								var value = e.Parameters[i];
 
 								s.Length = 0;
 								BuildExpression(s, GetPrecedence(e), value);
@@ -1080,7 +1167,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlParameter:
 					{
-						SqlParameter parm = (SqlParameter)expr;
+						var parm = (SqlParameter)expr;
 
 						if (parm.IsQueryParameter)
 							sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
@@ -1107,7 +1194,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
 		{
-			bool wrap = Wrap(GetPrecedence(expr), parentPrecedence);
+			var wrap = Wrap(GetPrecedence(expr), parentPrecedence);
 
 			if (wrap) sb.Append('(');
 			BuildExpression(sb, expr, true, true, alias, ref addAlias);
@@ -1116,19 +1203,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr)
 		{
-			bool dummy = false;
+			var dummy = false;
 			return BuildExpression(sb, expr, true, true, null, ref dummy);
 		}
 
 		protected StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName, bool checkParentheses)
 		{
-			bool dummy = false;
+			var dummy = false;
 			return BuildExpression(sb, expr, buildTableName, checkParentheses, null, ref dummy);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int precedence, ISqlExpression expr)
 		{
-			bool dummy = false;
+			var dummy = false;
 			BuildExpression(sb, precedence, expr, null, ref dummy);
 		}
 
@@ -1161,7 +1248,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is Guid)                   sb.Append('\'').Append(value).Append('\'');
 			else
 			{
-				Type type = value.GetType();
+				var type = value.GetType();
 
 				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
 				{
@@ -1200,7 +1287,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildString(StringBuilder sb, string value)
 		{
-			for (int i = 0; i < value.Length; i++)
+			for (var i = 0; i < value.Length; i++)
 			{
 				if (value[i] > 127)
 				{
@@ -1246,7 +1333,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (expr.Operation == "*" && expr.Expr1 is SqlValue)
 			{
-				SqlValue value = (SqlValue)expr.Expr1;
+				var value = (SqlValue)expr.Expr1;
 
 				if (value.Value is int && (int)value.Value == -1)
 				{
@@ -1273,13 +1360,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				_indent++;
 
-				int i = 0;
+				var i = 0;
 
 				for (; i < func.Parameters.Length - 1; i += 2)
 				{
 					AppendIndent(sb).Append("WHEN ");
 
-					int len = sb.Length;
+					var len = sb.Length;
 
 					BuildExpression(sb, func.Parameters[i]);
 
@@ -1320,9 +1407,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			sb.Append(name).Append('(');
 
-			bool first = true;
+			var first = true;
 
-			foreach (ISqlExpression parameter in exprs)
+			foreach (var parameter in exprs)
 			{
 				if (!first)
 					sb.Append(", ");
@@ -1392,9 +1479,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			_indent++;
 
-			bool first = true;
+			var first = true;
 
-			foreach (SqlQuery.Column col in columns)
+			foreach (var col in columns)
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
@@ -1415,8 +1502,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (NeedSkip)
 			{
-				string[] aliases = GetTempAliases(2, "t");
-				string  rnaliase = GetTempAliases(1, "rn")[0];
+				var aliases  = GetTempAliases(2, "t");
+				var rnaliase = GetTempAliases(1, "rn")[0];
 
 				AppendIndent(sb).Append("SELECT *").AppendLine();
 				AppendIndent(sb).Append("FROM").    AppendLine();
@@ -1471,8 +1558,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (NeedTake)
 				{
-					ISqlExpression expr1 = Add(SqlQuery.Select.SkipValue, 1);
-					ISqlExpression expr2 = Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue);
+					var expr1 = Add(SqlQuery.Select.SkipValue, 1);
+					var expr2 = Add<int>(SqlQuery.Select.SkipValue, SqlQuery.Select.TakeValue);
 
 					if (expr1 is SqlValue && expr2 is SqlValue && Equals(((SqlValue)expr1).Value, ((SqlValue)expr2).Value))
 					{
@@ -1502,7 +1589,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void AlternativeBuildSql2(StringBuilder sb, Action<StringBuilder> buildSql)
 		{
-			string[] aliases = GetTempAliases(3, "t");
+			var aliases = GetTempAliases(3, "t");
 
 			AppendIndent(sb).Append("SELECT *").AppendLine();
 			AppendIndent(sb).Append("FROM")    .AppendLine();
@@ -1520,7 +1607,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				AppendIndent(sb).Append("SELECT TOP ");
 
-				SqlParameter p = SqlQuery.Select.SkipValue as SqlParameter;
+				var p = SqlQuery.Select.SkipValue as SqlParameter;
 
 				if (p != null && !p.IsQueryParameter && SqlQuery.Select.TakeValue is SqlValue)
 					BuildValue(sb, (int)p.Value + (int)((SqlValue)(SqlQuery.Select.TakeValue)).Value);
@@ -1574,11 +1661,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb).Append("ORDER BY").AppendLine();
 
-			string[] obys = GetTempAliases(SqlQuery.OrderBy.Items.Count, "oby");
+			var obys = GetTempAliases(SqlQuery.OrderBy.Items.Count, "oby");
 
 			_indent++;
 
-			for (int i = 0; i < obys.Length; i++)
+			for (var i = 0; i < obys.Length; i++)
 			{
 				AppendIndent(sb).Append(obys[i]);
 
@@ -1599,12 +1686,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected IEnumerable<SqlQuery.Column> AlternativeGetSelectedColumns(ColumnSelector columnSelector)
 		{
-			foreach (SqlQuery.Column col in columnSelector())
+			foreach (var col in columnSelector())
 				yield return col;
 
-			string[] obys = GetTempAliases(SqlQuery.OrderBy.Items.Count, "oby");
+			var obys = GetTempAliases(SqlQuery.OrderBy.Items.Count, "oby");
 
-			for (int i = 0; i < obys.Length; i++)
+			for (var i = 0; i < obys.Length; i++)
 				yield return new SqlQuery.Column(SqlQuery, SqlQuery.OrderBy.Items[i].Expression, obys[i]);
 		}
 
@@ -1632,7 +1719,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected ISqlExpression FloorBeforeConvert(SqlFunction func)
 		{
-			ISqlExpression par1 = func.Parameters[1];
+			var par1 = func.Parameters[1];
 
 			return TypeHelper.IsFloatType(par1.SystemType) && TypeHelper.IsIntegerType(func.SystemType) ?
 				new SqlFunction(func.SystemType, "Floor", par1) : par1;
@@ -1640,11 +1727,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected ISqlExpression AlternativeConvertToBoolean(SqlFunction func, int paramNumber)
 		{
-			ISqlExpression par = func.Parameters[paramNumber];
+			var par = func.Parameters[paramNumber];
 
 			if (TypeHelper.IsFloatType(par.SystemType) || TypeHelper.IsIntegerType(par.SystemType))
 			{
-				SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
+				var sc = new SqlQuery.SearchCondition();
 
 				sc.Conditions.Add(
 					new SqlQuery.Condition(false, new SqlQuery.Predicate.ExprExpr(par, SqlQuery.Predicate.Operator.Equal, new SqlValue(0))));
@@ -1661,24 +1748,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				(sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0) && 
 				sqlQuery.From.Tables[0].Source is SqlTable)
 			{
-				SqlQuery sql = new SqlQuery();
-
-				sql.QueryType = QueryType.Delete;
+				var sql = new SqlQuery { QueryType = QueryType.Delete };
 
 				sqlQuery.ParentSql = sql;
 				sqlQuery.QueryType = QueryType.Select;
 
-				SqlTable table = (SqlTable)sqlQuery.From.Tables[0].Source;
-				SqlTable copy  = new SqlTable(table);
+				var table = (SqlTable)sqlQuery.From.Tables[0].Source;
+				var copy  = new SqlTable(table) { Alias = null };
 
-				copy.Alias = null;
+				var tableKeys = table.GetKeys(true);
+				var copyKeys  = copy. GetKeys(true);
 
-				List<SqlField> tableKeys = table.GetKeyFields();
-				List<SqlField> copyKeys  = copy. GetKeyFields();
-
-				for (int i = 0; i < tableKeys.Count; i++)
+				for (var i = 0; i < tableKeys.Count; i++)
 					sqlQuery.Where
-						.Field(copyKeys[i]).Equal.Field(tableKeys[i]);
+						.Expr(copyKeys[i]).Equal.Expr(tableKeys[i]);
 
 				sql.From.Table(copy).Where.Exists(sqlQuery);
 				sql.Parameters.AddRange(sqlQuery.Parameters);
@@ -1697,35 +1780,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
 				{
-					SqlQuery sql = new SqlQuery();
-
-					sql.QueryType = QueryType.Update;
+					var sql = new SqlQuery { QueryType = QueryType.Update };
 
 					sqlQuery.ParentSql = sql;
 					sqlQuery.QueryType = QueryType.Select;
 
-					SqlTable table = (SqlTable)sqlQuery.From.Tables[0].Source;
-					SqlTable copy  = new SqlTable(table);
+					var table = (SqlTable)sqlQuery.From.Tables[0].Source;
+					var copy  = new SqlTable(table);
 
-					List<SqlField> tableKeys = table.GetKeyFields();
-					List<SqlField> copyKeys  = copy. GetKeyFields();
+					var tableKeys = table.GetKeys(true);
+					var copyKeys  = copy. GetKeys(true);
 
-					for (int i = 0; i < tableKeys.Count; i++)
+					for (var i = 0; i < tableKeys.Count; i++)
 						sqlQuery.Where
-							.Field(copyKeys[i]).Equal.Field(tableKeys[i]);
+							.Expr(copyKeys[i]).Equal.Expr(tableKeys[i]);
 
 					sql.From.Table(copy).Where.Exists(sqlQuery);
 
-					Dictionary<SqlField,SqlField> map = new Dictionary<SqlField, SqlField>(table.Fields.Count);
+					var map = new Dictionary<SqlField, SqlField>(table.Fields.Count);
 
-					foreach (SqlField field in table.Fields.Values)
+					foreach (var field in table.Fields.Values)
 						map.Add(field, copy[field.Name]);
 
-					foreach (SqlQuery.SetExpression item in sqlQuery.Set.Items)
+					foreach (var item in sqlQuery.Set.Items)
 					{
-						((ISqlExpressionWalkable)item).Walk(false, delegate(ISqlExpression expr)
+						((ISqlExpressionWalkable)item).Walk(false, expr =>
 						{
-							SqlField fld = expr as SqlField;
+							var fld = expr as SqlField;
 							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
 						});
 
@@ -1752,22 +1833,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlField GetIdentityField(SqlTable table)
 		{
-			foreach (SqlField field in table.Fields.Values)
+			foreach (var field in table.Fields.Values)
 				if (field.IsIdentity)
 					return field;
 
-			List<SqlField> keys = table.GetKeyFields();
+			var keys = table.GetKeys(true);
 
 			if (keys != null && keys.Count == 1)
-				return keys[0];
+				return (SqlField)keys[0];
 
 			return null;
 		}
 
 		protected SequenceNameAttribute GetSequenceNameAttribute()
 		{
-			SqlTable table         = SqlQuery.Set.Into;
-			SqlField identityField = GetIdentityField(table);
+			var table         = SqlQuery.Set.Into;
+			var identityField = GetIdentityField(table);
 
 			if (identityField == null)
 				throw new SqlException("Identity field must be defined for '{0}'.", table.Name);
@@ -1775,17 +1856,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (table.ObjectType == null)
 				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
 
-			ObjectMapper om = table.MappingSchema.GetObjectMapper(table.ObjectType);
-			MemberMapper mm = om[identityField.Name, true];
+			var om = table.MappingSchema.GetObjectMapper(table.ObjectType);
+			var mm = om[identityField.Name, true];
 
-			SequenceNameAttribute[] attrs = mm.MemberAccessor.GetAttributes<SequenceNameAttribute>();
+			var attrs = mm.MemberAccessor.GetAttributes<SequenceNameAttribute>();
 
 			if (attrs == null)
 				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
 
 			SequenceNameAttribute defaultAttr = null;
 
-			foreach (SequenceNameAttribute attr in attrs)
+			foreach (var attr in attrs)
 			{
 				if (attr.ProviderName == Name)
 					return attr;
@@ -1807,12 +1888,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			alias = alias.TrimStart('_');
 
-			char[] cs      = alias.ToCharArray();
-			bool   replace = false;
+			var cs      = alias.ToCharArray();
+			var replace = false;
 
-			for (int i = 0; i < cs.Length; i++)
+			for (var i = 0; i < cs.Length; i++)
 			{
-				char c = cs[i];
+				var c = cs[i];
 
 				if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')
 					continue;
@@ -1863,8 +1944,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (table.ElementType)
 			{
 				case QueryElementType.TableSource :
-					SqlQuery.TableSource ts = (SqlQuery.TableSource)table;
-					string alias = string.IsNullOrEmpty(ts.Alias) ? GetTableAlias(ts.Source) : ts.Alias;
+					var ts    = (SqlQuery.TableSource)table;
+					var alias = string.IsNullOrEmpty(ts.Alias) ? GetTableAlias(ts.Source) : ts.Alias;
 					return alias != "$" ? alias : null;
 
 				case QueryElementType.SqlTable :
@@ -1881,7 +1962,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case QueryElementType.SqlTable :
 					{
-						SqlTable tbl = (SqlTable)table;
+						var tbl = (SqlTable)table;
 
 						return _dataProvider.BuildTableName(new StringBuilder(), 
 							tbl.Database     == null ? null : _dataProvider.Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString(),
@@ -1986,26 +2067,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual ISqlExpression ConvertConvertion(SqlFunction func)
 		{
-			SqlDataType from = (SqlDataType)func.Parameters[1];
-			SqlDataType to   = (SqlDataType)func.Parameters[0];
+			var from = (SqlDataType)func.Parameters[1];
+			var to   = (SqlDataType)func.Parameters[0];
 
 			if (to.Type == typeof(object))
 				return func.Parameters[2];
 
 			if (to.Precision > 0)
 			{
-				int maxPrecision = GetMaxPrecision(from);
-				int maxScale     = GetMaxScale    (from);
-				int newPrecision = maxPrecision >= 0 ? Math.Min(to.Precision, maxPrecision) : to.Precision;
-				int newScale     = maxScale     >= 0 ? Math.Min(to.Scale,     maxScale)     : to.Scale;
+				var maxPrecision = GetMaxPrecision(from);
+				var maxScale     = GetMaxScale    (from);
+				var newPrecision = maxPrecision >= 0 ? Math.Min(to.Precision, maxPrecision) : to.Precision;
+				var newScale     = maxScale     >= 0 ? Math.Min(to.Scale,     maxScale)     : to.Scale;
 
 				if (to.Precision != newPrecision || to.Scale != newScale)
 					to = new SqlDataType(to.DbType, to.Type, newPrecision, newScale);
 			}
 			else if (to.Length > 0)
 			{
-				int maxLength = to.Type == typeof(string) ? GetMaxDisplaySize(from) : GetMaxLength(from);
-				int newLength = maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length;
+				var maxLength = to.Type == typeof(string) ? GetMaxDisplaySize(from) : GetMaxLength(from);
+				var newLength = maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length;
 
 				if (to.Length != newLength)
 					to = new SqlDataType(to.DbType, to.Type, newLength);
@@ -2027,21 +2108,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					#region SqlBinaryExpression
 
 					{
-						SqlBinaryExpression be = (SqlBinaryExpression)expression;
+						var be = (SqlBinaryExpression)expression;
 
 						switch (be.Operation)
 						{
 							case "+":
 								if (be.Expr1 is SqlValue)
 								{
-									SqlValue v1 = (SqlValue)be.Expr1;
+									var v1 = (SqlValue)be.Expr1;
 									if (v1.Value is int    && (int)   v1.Value == 0 ||
 										v1.Value is string && (string)v1.Value == "") return be.Expr2;
 								}
 
 								if (be.Expr2 is SqlValue)
 								{
-									SqlValue v2 = (SqlValue) be.Expr2;
+									var v2 = (SqlValue) be.Expr2;
 
 									if (v2.Value is int)
 									{
@@ -2049,11 +2130,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 										if (be.Expr1 is SqlBinaryExpression)
 										{
-											SqlBinaryExpression be1 = (SqlBinaryExpression) be.Expr1;
+											var be1 = (SqlBinaryExpression) be.Expr1;
 
 											if (be1.Expr2 is SqlValue)
 											{
-												SqlValue be1v2 = (SqlValue)be1.Expr2;
+												var be1v2 = (SqlValue)be1.Expr2;
 
 												if (be1v2.Value is int)
 												{
@@ -2072,7 +2153,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 										if (be.Expr1 is SqlBinaryExpression)
 										{
-											SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+											var be1 = (SqlBinaryExpression)be.Expr1;
 
 											if (be1.Expr2 is SqlValue)
 											{
@@ -2088,15 +2169,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
 								{
-									SqlValue v1 = (SqlValue)be.Expr1;
-									SqlValue v2 = (SqlValue)be.Expr2;
+									var v1 = (SqlValue)be.Expr1;
+									var v2 = (SqlValue)be.Expr2;
 									if (v1.Value is int    && v2.Value is int)    return new SqlValue((int)v1.Value + (int)v2.Value);
 									if (v1.Value is string || v2.Value is string) return new SqlValue(v1.Value.ToString() + v2.Value);
 								}
 
 								if (be.Expr1.SystemType == typeof(string) && be.Expr2.SystemType != typeof(string))
 								{
-									int len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
+									var len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
 
 									if (len <= 0)
 										len = 100;
@@ -2111,7 +2192,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								if (be.Expr1.SystemType != typeof(string) && be.Expr2.SystemType == typeof(string))
 								{
-									int len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
+									var len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
 
 									if (len <= 0)
 										len = 100;
@@ -2129,7 +2210,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							case "-":
 								if (be.Expr2 is SqlValue)
 								{
-									SqlValue v2 = (SqlValue) be.Expr2;
+									var v2 = (SqlValue) be.Expr2;
 
 									if (v2.Value is int)
 									{
@@ -2137,11 +2218,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 										if (be.Expr1 is SqlBinaryExpression)
 										{
-											SqlBinaryExpression be1 = (SqlBinaryExpression)be.Expr1;
+											var be1 = (SqlBinaryExpression)be.Expr1;
 
 											if (be1.Expr2 is SqlValue)
 											{
-												SqlValue be1v2 = (SqlValue)be1.Expr2;
+												var be1v2 = (SqlValue)be1.Expr2;
 
 												if (be1v2.Value is int)
 												{
@@ -2158,8 +2239,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
 								{
-									SqlValue v1 = (SqlValue)be.Expr1;
-									SqlValue v2 = (SqlValue)be.Expr2;
+									var v1 = (SqlValue)be.Expr1;
+									var v2 = (SqlValue)be.Expr2;
 									if (v1.Value is int && v2.Value is int) return new SqlValue((int)v1.Value - (int)v2.Value);
 								}
 
@@ -2168,10 +2249,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							case "*":
 								if (be.Expr1 is SqlValue)
 								{
-									SqlValue v1 = (SqlValue)be.Expr1;
+									var v1 = (SqlValue)be.Expr1;
+
 									if (v1.Value is int)
 									{
-										int v1v = (int)v1.Value;
+										var v1v = (int)v1.Value;
 
 										switch (v1v)
 										{
@@ -2179,11 +2261,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 											case  1 : return be.Expr2;
 											default :
 												{
-													SqlBinaryExpression be2 = be.Expr2 as SqlBinaryExpression;
+													var be2 = be.Expr2 as SqlBinaryExpression;
 
 													if (be2 != null && be2.Operation == "*" && be2.Expr1 is SqlValue)
 													{
-														SqlValue be2v1 = be2.Expr1 as SqlValue;
+														var be2v1 = be2.Expr1 as SqlValue;
 
 														if (be2v1.Value is int)
 															return ConvertExpression(
@@ -2199,15 +2281,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								if (be.Expr2 is SqlValue)
 								{
-									SqlValue v2 = (SqlValue)be.Expr2;
+									var v2 = (SqlValue)be.Expr2;
 									if (v2.Value is int && (int)v2.Value == 1) return be.Expr1;
 									if (v2.Value is int && (int)v2.Value == 0) return new SqlValue(0);
 								}
 
 								if (be.Expr1 is SqlValue && be.Expr2 is SqlValue)
 								{
-									SqlValue v1 = (SqlValue)be.Expr1;
-									SqlValue v2 = (SqlValue)be.Expr2;
+									var v1 = (SqlValue)be.Expr1;
+									var v2 = (SqlValue)be.Expr2;
 
 									if (v1.Value is int)
 									{
@@ -2234,7 +2316,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					#region SqlFunction
 
 					{
-						SqlFunction func = (SqlFunction)expression;
+						var func = (SqlFunction)expression;
 
 						switch (func.Name)
 						{
@@ -2249,18 +2331,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							case "CASE":
 								{
-									ISqlExpression[] parms = func.Parameters;
-									int              len   = parms.Length;
+									var parms = func.Parameters;
+									var len   = parms.Length;
 
-									for (int i = 0; i < parms.Length - 1; i += 2)
+									for (var i = 0; i < parms.Length - 1; i += 2)
 									{
-										SqlValue value = parms[i] as SqlValue;
+										var value = parms[i] as SqlValue;
 
 										if (value != null)
 										{
 											if ((bool)value.Value == false)
 											{
-												ISqlExpression[] newParms = new ISqlExpression[parms.Length - 2];
+												var newParms = new ISqlExpression[parms.Length - 2];
 
 												if (i != 0)
 													Array.Copy(parms, 0, newParms, 0, i);
@@ -2272,7 +2354,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 											}
 											else
 											{
-												ISqlExpression[] newParms = new ISqlExpression[i + 1];
+												var newParms = new ISqlExpression[i + 1];
 
 												if (i != 0)
 													Array.Copy(parms, 0, newParms, 0, i);
@@ -2296,14 +2378,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							case "Convert":
 								{
-									SqlFunction from = func.Parameters[1] as SqlFunction;
-
-									Type typef = TypeHelper.GetUnderlyingType(func.SystemType);
+									var from  = func.Parameters[1] as SqlFunction;
+									var typef = TypeHelper.GetUnderlyingType(func.SystemType);
 
 									if (from != null && from.Name == "Convert" && TypeHelper.GetUnderlyingType(from.Parameters[1].SystemType) == typef)
 										return from.Parameters[1];
 
-									SqlExpression fe = func.Parameters[1] as SqlExpression;
+									var fe = func.Parameters[1] as SqlExpression;
 
 									if (fe != null && fe.Expr == "Cast({0} as {1})" && TypeHelper.GetUnderlyingType(fe.Parameters[0].SystemType) == typef)
 										return fe.Parameters[0];
@@ -2331,11 +2412,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case QueryElementType.ExprExprPredicate:
 					{
-						SqlQuery.Predicate.ExprExpr expr = (SqlQuery.Predicate.ExprExpr)predicate;
+						var expr = (SqlQuery.Predicate.ExprExpr)predicate;
 
 						if (expr.Operator == SqlQuery.Predicate.Operator.Equal && expr.Expr1 is SqlValue && expr.Expr2 is SqlValue)
 						{
-							bool value = Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
+							var value = Equals(((SqlValue)expr.Expr1).Value, ((SqlValue)expr.Expr2).Value);
 							return new SqlQuery.Predicate.Expr(new SqlValue(value), Precedence.Comparison);
 						}
 
@@ -2356,8 +2437,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							{
 								case SqlQuery.Predicate.Operator.Equal :
 								case SqlQuery.Predicate.Operator.NotEqual :
-									ISqlExpression expr1 = expr.Expr1;
-									ISqlExpression expr2 = expr.Expr2;
+									var expr1 = expr.Expr1;
+									var expr2 = expr.Expr2;
 
 									if (expr1.CanBeNull() && expr2.CanBeNull())
 									{
@@ -2378,22 +2459,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.NotExprPredicate:
 					{
-						SqlQuery.Predicate.NotExpr expr = (SqlQuery.Predicate.NotExpr)predicate;
+						var expr = (SqlQuery.Predicate.NotExpr)predicate;
 
 						if (expr.IsNot && expr.Expr1 is SqlQuery.SearchCondition)
 						{
-							SqlQuery.SearchCondition sc = (SqlQuery.SearchCondition)expr.Expr1;
+							var sc = (SqlQuery.SearchCondition)expr.Expr1;
 
 							if (sc.Conditions.Count == 1)
 							{
-								SqlQuery.Condition cond = sc.Conditions[0];
+								var cond = sc.Conditions[0];
 
 								if (cond.IsNot)
 									return cond.Predicate;
 
 								if (cond.Predicate is SqlQuery.Predicate.ExprExpr)
 								{
-									SqlQuery.Predicate.ExprExpr ee = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
+									var ee = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
 
 									if (ee.Operator == SqlQuery.Predicate.Operator.Equal)
 										return new SqlQuery.Predicate.ExprExpr(ee.Expr1, SqlQuery.Predicate.Operator.NotEqual, ee.Expr2);
@@ -2413,10 +2494,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected ISqlPredicate ConvertEqualPredicate(SqlQuery.Predicate.ExprExpr expr)
 		{
-			ISqlExpression expr1 = expr.Expr1;
-			ISqlExpression expr2 = expr.Expr2;
-
-			SqlQuery.SearchCondition cond = new SqlQuery.SearchCondition();
+			var expr1 = expr.Expr1;
+			var expr2 = expr.Expr2;
+			var cond  = new SqlQuery.SearchCondition();
 
 			if (expr.Operator == SqlQuery.Predicate.Operator.Equal)
 				cond
@@ -2433,9 +2513,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		ISqlPredicate OptimizeCase(SqlQuery.Predicate.ExprExpr expr)
 		{
-			SqlValue    value = expr.Expr1 as SqlValue;
-			SqlFunction func  = expr.Expr2 as SqlFunction;
-			bool        valueFirst = false;
+			var value = expr.Expr1 as SqlValue;
+			var func  = expr.Expr2 as SqlFunction;
+			var valueFirst = false;
 
 			if (value != null && func != null)
 			{
@@ -2451,17 +2531,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				if (value.Value is int && func.Parameters.Length == 5)
 				{
-					SqlQuery.SearchCondition c1 = func.Parameters[0] as SqlQuery.SearchCondition;
-					SqlValue                 v1 = func.Parameters[1] as SqlValue;
-					SqlQuery.SearchCondition c2 = func.Parameters[2] as SqlQuery.SearchCondition;
-					SqlValue                 v2 = func.Parameters[3] as SqlValue;
-					SqlValue                 v3 = func.Parameters[4] as SqlValue;
+					var c1 = func.Parameters[0] as SqlQuery.SearchCondition;
+					var v1 = func.Parameters[1] as SqlValue;
+					var c2 = func.Parameters[2] as SqlQuery.SearchCondition;
+					var v2 = func.Parameters[3] as SqlValue;
+					var v3 = func.Parameters[4] as SqlValue;
 
 					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
 						c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
 					{
-						SqlQuery.Predicate.ExprExpr ee1 = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
-						SqlQuery.Predicate.ExprExpr ee2 = c2.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
+						var ee1 = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
+						var ee2 = c2.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
 
 						if (ee1 != null && ee2 != null && ee1.Expr1.Equals(ee2.Expr1) && ee1.Expr2.Equals(ee2.Expr2))
 						{
@@ -2473,14 +2553,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							if (e + g + l == 2)
 							{
-								int n  = (int)value.Value;
-								int i1 = (int)v1.Value;
-								int i2 = (int)v2.Value;
-								int i3 = (int)v3.Value;
+								var n  = (int)value.Value;
+								var i1 = (int)v1.Value;
+								var i2 = (int)v2.Value;
+								var i3 = (int)v3.Value;
 
-								int n1 = Compare(valueFirst ? n : i1, valueFirst ? i1 : n, expr.Operator) ? 1 : 0;
-								int n2 = Compare(valueFirst ? n : i2, valueFirst ? i2 : n, expr.Operator) ? 1 : 0;
-								int n3 = Compare(valueFirst ? n : i3, valueFirst ? i3 : n, expr.Operator) ? 1 : 0;
+								var n1 = Compare(valueFirst ? n : i1, valueFirst ? i1 : n, expr.Operator) ? 1 : 0;
+								var n2 = Compare(valueFirst ? n : i2, valueFirst ? i2 : n, expr.Operator) ? 1 : 0;
+								var n3 = Compare(valueFirst ? n : i3, valueFirst ? i3 : n, expr.Operator) ? 1 : 0;
 
 								if (n1 + n2 + n3 == 1)
 								{
@@ -2501,15 +2581,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 				else if (value.Value is bool && func.Parameters.Length == 3)
 				{
-					SqlQuery.SearchCondition c1 = func.Parameters[0] as SqlQuery.SearchCondition;
-					SqlValue                 v1 = func.Parameters[1] as SqlValue;
-					SqlValue                 v2 = func.Parameters[2] as SqlValue;
+					var c1 = func.Parameters[0] as SqlQuery.SearchCondition;
+					var v1 = func.Parameters[1] as SqlValue;
+					var v2 = func.Parameters[2] as SqlValue;
 
 					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is bool && v2 != null && v2.Value is bool)
 					{
-						bool bv  = (bool)value.Value;
-						bool bv1 = (bool)v1.Value;
-						bool bv2 = (bool)v2.Value;
+						var bv  = (bool)value.Value;
+						var bv1 = (bool)v1.Value;
+						var bv2 = (bool)v2.Value;
 
 						if (bv == bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal ||
 						    bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual)
@@ -2520,7 +2600,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (bv == bv2 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual ||
 						    bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal)
 						{
-							SqlQuery.Predicate.ExprExpr ee = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
+							var ee = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
 
 							if (ee != null)
 							{
@@ -2542,7 +2622,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								return new SqlQuery.Predicate.ExprExpr(ee.Expr1, op, ee.Expr2);
 							}
 
-							SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
+							var sc = new SqlQuery.SearchCondition();
 
 							sc.Conditions.Add(new SqlQuery.Condition(true, c1));
 
@@ -2552,9 +2632,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				}
 				else if (expr.Operator == SqlQuery.Predicate.Operator.Equal && func.Parameters.Length == 3)
 				{
-					SqlQuery.SearchCondition sc = func.Parameters[0] as SqlQuery.SearchCondition;
-					SqlValue                 v1 = func.Parameters[1] as SqlValue;
-					SqlValue                 v2 = func.Parameters[2] as SqlValue;
+					var sc = func.Parameters[0] as SqlQuery.SearchCondition;
+					var v1 = func.Parameters[1] as SqlValue;
+					var v2 = func.Parameters[2] as SqlValue;
 
 					if (sc != null && v1 != null && v2 != null)
 					{
@@ -2603,7 +2683,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Linq Support
 
-#if FW3
 		public virtual LambdaExpression ConvertMember(MemberInfo mi)
 		{
 			Dictionary<MemberInfo,LambdaExpression> dic;
@@ -2615,7 +2694,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return Linq.Expressions.Members[""].TryGetValue(mi, out expr) ? expr : null;
 		}
-#endif
 
 		#endregion
 	}

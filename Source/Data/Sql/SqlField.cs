@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using BLToolkit.DataAccess;
 
 namespace BLToolkit.Data.Sql
 {
+	using DataAccess;
+	using Mapping;
+
 	public class SqlField : IChild<ISqlTableSource>, ISqlExpression
 	{
 		public SqlField()
@@ -12,38 +14,49 @@ namespace BLToolkit.Data.Sql
 		}
 
 		public SqlField(SqlField field)
-			: this(field.SystemType, field.Name, field.PhysicalName, field.Nullable, field.PrimaryKeyOrder, field._nonUpdatableAttribute)
+			: this(field.SystemType, field.Name, field.PhysicalName, field.Nullable, field.PrimaryKeyOrder, field._nonUpdatableAttribute, field.MemberMapper)
 		{
 		}
 
-		public SqlField(Type systemType, string name, string physicalName, bool nullable, int pkOrder, NonUpdatableAttribute nonUpdatableAttribute)
+		public SqlField(
+			Type                  systemType,
+			string                name,
+			string                physicalName,
+			bool                  nullable,
+			int                   pkOrder,
+			NonUpdatableAttribute nonUpdatableAttribute,
+			MemberMapper          memberMapper)
 		{
-			_systemType            = systemType;
-			_alias                 = name.Replace('.', '_');
-			_name                  = name;
+			SystemType             = systemType;
+			Alias                  = name.Replace('.', '_');
+			Name                   = name;
+			Nullable               = nullable;
+			PrimaryKeyOrder        = pkOrder;
+			MemberMapper           = memberMapper;
 			_physicalName          = physicalName;
-			_nullable              = nullable;
-			_pkOrder               = pkOrder;
 			_nonUpdatableAttribute = nonUpdatableAttribute;
 		}
 
-		private Type   _systemType;     public Type   SystemType      { get { return _systemType;            } set { _systemType     = value; } }
-		private string _alias;          public string Alias           { get { return _alias;                 } set { _alias          = value; } }
-		private string _name;           public string Name            { get { return _name;                  } set { _name           = value; } }
-		private string _physicalName;   public string PhysicalName    { get { return _physicalName ?? _name; } set { _physicalName   = value; } }
-		private bool   _nullable;       public bool   Nullable        { get { return _nullable;              } set { _nullable       = value; } }
-		private int    _pkOrder;        public int    PrimaryKeyOrder { get { return _pkOrder;               } set { _pkOrder        = value; } }
+		public Type            SystemType      { get; set; }
+		public string          Alias           { get; set; }
+		public string          Name            { get; set; }
+		public bool            Nullable        { get; set; }
+		public int             PrimaryKeyOrder { get; set; }
+		public MemberMapper    MemberMapper    { get; set; }
+		public ISqlTableSource Table           { get; private set; }
+
+
+		private string _physicalName;   public string PhysicalName    { get { return _physicalName ?? Name; } set { _physicalName   = value; } }
 
 		public bool IsIdentity   { get { return _nonUpdatableAttribute != null && _nonUpdatableAttribute.IsIdentity; } }
 		public bool IsInsertable { get { return _nonUpdatableAttribute == null || !_nonUpdatableAttribute.OnInsert;  } }
 		public bool IsUpdatable  { get { return _nonUpdatableAttribute == null || !_nonUpdatableAttribute.OnUpdate;  } }
 
-		public bool IsPrimaryKey { get { return _pkOrder != int.MinValue; } }
+		public bool IsPrimaryKey { get { return PrimaryKeyOrder != int.MinValue; } }
 
-		private         NonUpdatableAttribute  _nonUpdatableAttribute;
-		private         ISqlTableSource        _parent;
-		ISqlTableSource IChild<ISqlTableSource>.Parent { get { return _parent; } set { _parent = value; } }
-		public          ISqlTableSource         Table  { get { return _parent; } }
+		readonly NonUpdatableAttribute  _nonUpdatableAttribute;
+
+		ISqlTableSource IChild<ISqlTableSource>.Parent { get { return Table; } set { Table = value; } }
 
 		#region Overrides
 
@@ -97,7 +110,7 @@ namespace BLToolkit.Data.Sql
 			if (!doClone(this))
 				return this;
 
-			_parent.Clone(objectTree, doClone);
+			Table.Clone(objectTree, doClone);
 			return objectTree[this];
 		}
 

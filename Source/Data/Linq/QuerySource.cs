@@ -127,7 +127,7 @@ namespace BLToolkit.Data.Linq
 							{
 								if (!_columns.ContainsKey(mm.MemberName))
 								{
-									var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null);
+									var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null, mm);
 									SqlTable.Fields.Add(field);
 
 									var column = new Column(this, field, null);
@@ -360,8 +360,7 @@ namespace BLToolkit.Data.Linq
 
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
 			{
-				return base.GetExpressions(parser);
-				//return new ISqlExpression[] { SqlTable };
+				return new ISqlExpression[] { SqlTable };
 			}
 
 			Table() {}
@@ -664,6 +663,13 @@ namespace BLToolkit.Data.Linq
 					sub._columns.Add(c.Key, (SubQueryColumn)c.Value.Clone(objectTree, doClone));
 
 				return sub;
+			}
+
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			{
+				var expr = base.GetExpressions(parser);
+
+				return expr.Length == 1 ? expr : new ISqlExpression[] { SubSql };
 			}
 		}
 

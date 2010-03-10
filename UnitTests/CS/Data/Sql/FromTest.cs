@@ -1,5 +1,7 @@
 ﻿using System;
+
 using NUnit.Framework;
+
 using BLToolkit.Data.Sql;
 
 namespace Data.Sql

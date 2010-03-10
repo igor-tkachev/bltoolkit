@@ -225,66 +225,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Data\OperationType.cs" />
-    <Compile Include="Data\Sql\ChildContainer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\IChild.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\ICloneableElement.cs" />
-    <Compile Include="Data\Sql\IQueryElement.cs" />
-    <Compile Include="Data\Sql\ISqlExpression.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />
-    <Compile Include="Data\Sql\ISqlPredicate.cs" />
-    <Compile Include="Data\Sql\ISqlTableSource.cs" />
-    <Compile Include="Data\Sql\IValueContainer.cs" />
-    <Compile Include="Data\Sql\Join.cs" />
-    <Compile Include="Data\Sql\JoinOn.cs" />
-    <Compile Include="Data\Sql\Precedence.cs" />
-    <Compile Include="Data\Sql\QueryElementType.cs" />
-    <Compile Include="Data\Sql\QueryType.cs" />
-    <Compile Include="Data\Sql\QueryVisitor.cs" />
-    <Compile Include="Data\Sql\SqlBinaryExpression.cs" />
-    <Compile Include="Data\Sql\SqlDataType.cs" />
-    <Compile Include="Data\Sql\SqlException.cs" />
-    <Compile Include="Data\Sql\SqlExpression.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlField.cs" />
-    <Compile Include="Data\Sql\SqlFunction.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlParameter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlProvider\AccessSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\BasicSqlProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlProvider\DB2SqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\FirebirdSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\InformixSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\MsSqlSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\SequenceNameAttribute.cs" />
-    <Compile Include="Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\SqlCeSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\SQLiteSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlProvider\SybaseSqlProvider.cs" />
-    <Compile Include="Data\Sql\SqlQuery.cs" />
-    <Compile Include="Data\Sql\SqlTable.cs" />
-    <Compile Include="Data\Sql\SqlTableT.cs" />
-    <Compile Include="Data\Sql\SqlValue.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="EditableObjects\EditableXmlDocument.cs" />
     <Compile Include="EditableObjects\EditableList.cs" />
     <Compile Include="EditableObjects\EditableListChangedEventArgs.cs" />
@@ -521,7 +461,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\ObjectBinder.bmp" />
-    <EmbeddedResource Include="Data\Sql\ReservedWords.txt" />
     <Content Include="Doc\ChangeLog.txt" />
     <Content Include="Doc\License.txt" />
     <Content Include="Doc\OnlineDoc.txt" />

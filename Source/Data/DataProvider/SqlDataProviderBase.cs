@@ -5,7 +5,9 @@ using System.Data.SqlClient;
 
 namespace BLToolkit.Data.DataProvider
 {
+#if FW3
 	using Sql.SqlProvider;
+#endif
 
 	/// <summary>
 	/// Implements access to the Data Provider for SQL Server.
@@ -202,10 +204,14 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 
+#if FW3
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2005SqlProvider(this);
 		}
+
+#endif
 
 		public override int MaxParameters
 		{
