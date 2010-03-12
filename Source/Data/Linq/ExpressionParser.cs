@@ -5222,7 +5222,7 @@ namespace BLToolkit.Data.Linq
 
 			ParameterExpression param = null;
 
-			for (Expression ex = expr; ex != null; )
+			for (var ex = expr; ex != null; )
 			{
 				switch (ex.NodeType)
 				{
@@ -5263,6 +5263,9 @@ namespace BLToolkit.Data.Linq
 
 				if (field != null)
 					return field;
+
+				if (query.Parameter == expr)
+					return query.Parent;
 			}
 
 			return null;

@@ -67,7 +67,7 @@ namespace BLToolkit.Data.Sql
 		#region ISqlExpressionWalkable Members
 
 		[Obsolete]
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc action)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 		{
 			for (int i = 0; i < _parameters.Length; i++)
 				_parameters[i] = _parameters[i].Walk(skipColumns, action);

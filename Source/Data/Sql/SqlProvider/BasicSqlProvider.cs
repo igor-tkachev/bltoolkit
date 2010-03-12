@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -930,30 +931,51 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							}
 							else
 							{
+								var len = sb.Length;
+								var rem = 1;
+
 								foreach (var item in items)
 								{
-									firstValue = false;
+									if (firstValue)
+									{
+										firstValue = false;
+										sb.Append('(');
+									}
 
 									foreach (var key in keys)
 									{
 										var field = GetUnderlayingField(key);
 										var value = field.MemberMapper.GetValue(item);
 
-										//var expr = SqlQuery.Predicate.ExprExpr.ExprExpr
+										BuildExpression(sb, GetPrecedence(p), key);
 
-										if (value is ISqlExpression)
-											BuildExpression(sb, (ISqlExpression)value);
+										if (value == null)
+										{
+											sb.Append(" IS NULL");
+										}
 										else
+										{
+											sb.Append(" = ");
 											BuildValue(sb, value);
+										}
 
+										sb.Append(" AND ");
 									}
 
-										BuildExpression(sb, GetPrecedence(p), keys[0]);
-										sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+									sb.Remove(sb.Length - 4, 4).Append("OR ");
 
-
-									sb.Append(", ");
+									if (sb.Length - len >= 50)
+									{
+										sb.AppendLine();
+										AppendIndent(sb);
+										sb.Append(' ');
+										len = sb.Length;
+										rem = 5 + _indent;
+									}
 								}
+
+								if (!firstValue)
+									sb.Remove(sb.Length - rem, rem);
 							}
 						}
 						else
@@ -1246,6 +1268,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
 			else if (value is DateTime)               sb.AppendFormat("'{0:yyyy-MM-dd HH:mm:ss.fffffff}'", value);
 			else if (value is Guid)                   sb.Append('\'').Append(value).Append('\'');
+			else if (value is decimal)                sb.Append(((decimal)value).ToString(NumberFormatInfo.InvariantInfo));
+			else if (value is double)                 sb.Append(((double) value).ToString(NumberFormatInfo.InvariantInfo));
+			else if (value is float)                  sb.Append(((float)  value).ToString(NumberFormatInfo.InvariantInfo));
 			else
 			{
 				var type = value.GetType();

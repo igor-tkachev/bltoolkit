@@ -10,7 +10,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (parameters == null) throw new ArgumentNullException("parameters");
 
-			foreach (ISqlExpression value in parameters)
+			foreach (var value in parameters)
 				if (value == null) throw new ArgumentNullException("parameters");
 
 			_systemType = systemType;
@@ -55,9 +55,9 @@ namespace BLToolkit.Data.Sql
 		#region ISqlExpressionWalkable Members
 
 		[Obsolete]
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
-			for (int i = 0; i < _parameters.Length; i++)
+			for (var i = 0; i < _parameters.Length; i++)
 				_parameters[i] = _parameters[i].Walk(skipColumns, func);
 
 			return func(this);
@@ -72,12 +72,12 @@ namespace BLToolkit.Data.Sql
 			if (this == other)
 				return true;
 
-			SqlExpression expr = other as SqlExpression;
+			var expr = other as SqlExpression;
 
 			if (expr == null || _systemType != expr._systemType || _expr != expr._expr || _parameters.Length != expr._parameters.Length)
 				return false;
 
-			for (int i = 0; i < _parameters.Length; i++)
+			for (var i = 0; i < _parameters.Length; i++)
 				if (!_parameters[i].Equals(expr._parameters[i]))
 					return false;
 
@@ -90,7 +90,7 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-			foreach (ISqlExpression value in Parameters)
+			foreach (var value in Parameters)
 				if (value.CanBeNull())
 					return true;
 
@@ -114,9 +114,7 @@ namespace BLToolkit.Data.Sql
 					_systemType,
 					_expr,
 					_precedence,
-					Array.ConvertAll<ISqlExpression,ISqlExpression>(
-						_parameters,
-						delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); })));
+					Array.ConvertAll(_parameters, e => (ISqlExpression)e.Clone(objectTree, doClone))));
 			}
 
 			return clone;
@@ -130,11 +128,11 @@ namespace BLToolkit.Data.Sql
 
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
-			int      len = sb.Length;
-			string[] ss  = Array.ConvertAll<ISqlExpression,string>(Parameters, delegate(ISqlExpression p)
+			var len = sb.Length;
+			var ss  = Array.ConvertAll(Parameters, p =>
 			{
 				p.ToString(sb, dic);
-				string s = sb.ToString(len, sb.Length - len);
+				var s = sb.ToString(len, sb.Length - len);
 				sb.Length = len;
 				return s;
 			});

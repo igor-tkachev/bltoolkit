@@ -50,7 +50,7 @@ namespace BLToolkit.Data.Sql
 		#region ISqlExpressionWalkable Members
 
 		[Obsolete]
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
 			_expr1 = _expr1.Walk(skipColumns, func);
 			_expr2 = _expr2.Walk(skipColumns, func);
@@ -67,7 +67,7 @@ namespace BLToolkit.Data.Sql
 			if (this == other)
 				return true;
 
-			SqlBinaryExpression expr = other as SqlBinaryExpression;
+			var expr = other as SqlBinaryExpression;
 
 			return
 				expr        != null &&

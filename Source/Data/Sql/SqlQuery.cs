@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Sql
 {
@@ -233,7 +234,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			public ISqlExpression Walk(bool skipColumns, WalkingFunc func)
+			public ISqlExpression Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				if (!(skipColumns && _expression is Column))
 					_expression = _expression.Walk(skipColumns, func);
@@ -432,14 +433,14 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			public ISqlExpression Walk(bool skipColumns, WalkingFunc func)
+			public ISqlExpression Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				_source = (ISqlTableSource)_source.Walk(skipColumns, func);
 
 				for (var i = 0; i < Joins.Count; i++)
 					((ISqlExpressionWalkable)Joins[i]).Walk(skipColumns, func);
 
-				return null;
+				return this;
 			}
 
 			#endregion
@@ -618,7 +619,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			public ISqlExpression Walk(bool skipColumns, WalkingFunc action)
+			public ISqlExpression Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 			{
 				_condition = (SearchCondition)((ISqlExpressionWalkable)_condition).Walk(skipColumns, action);
 
@@ -673,29 +674,39 @@ namespace BLToolkit.Data.Sql
 
 			public class Expr : Predicate
 			{
-				public Expr(ISqlExpression exp1, int precedence)
+				public Expr([NotNull] ISqlExpression exp1, int precedence)
 					: base(precedence)
 				{
+					if (exp1 == null) throw new ArgumentNullException("exp1");
 					_expr1 = exp1;
 				}
 
-				public Expr(ISqlExpression exp1)
+				public Expr([NotNull] ISqlExpression exp1)
 					: base(exp1.Precedence)
 				{
+					if (exp1 == null) throw new ArgumentNullException("exp1");
 					_expr1 = exp1;
 				}
 
-				ISqlExpression _expr1; public ISqlExpression Expr1 { get { return _expr1; } }
+				private ISqlExpression _expr1;
+				public ISqlExpression Expr1
+				{
+					get { return _expr1; }
+					set { _expr1 = value; }
+				}
 
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc func)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
-					_expr1 = _expr1.Walk(skipColumns, func);
+					_expr1 = Expr1.Walk(skipColumns, func);
+
+					if (_expr1 == null)
+						throw new InvalidOperationException();
 				}
 
 				public override bool CanBeNull()
 				{
-					return _expr1.CanBeNull();
+					return Expr1.CanBeNull();
 				}
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -706,7 +717,7 @@ namespace BLToolkit.Data.Sql
 					ICloneableElement clone;
 
 					if (!objectTree.TryGetValue(this, out clone))
-						objectTree.Add(this, clone = new Expr((ISqlExpression)_expr1.Clone(objectTree, doClone), _precedence));
+						objectTree.Add(this, clone = new Expr((ISqlExpression)Expr1.Clone(objectTree, doClone), _precedence));
 
 					return clone;
 				}
@@ -773,7 +784,7 @@ namespace BLToolkit.Data.Sql
 				private  ISqlExpression _expr2; public ISqlExpression Expr2    { get { return _expr2; } }
 
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc func)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
 					_expr2 = _expr2.Walk(skipColumns, func);
@@ -843,7 +854,7 @@ namespace BLToolkit.Data.Sql
 				ISqlExpression _escape; public ISqlExpression Escape { get { return _escape; } }
 
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc func)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
 					_expr2 = _expr2.Walk(skipColumns, func);
@@ -903,7 +914,7 @@ namespace BLToolkit.Data.Sql
 				ISqlExpression _expr3; public ISqlExpression Expr3 { get { return _expr3; } }
 
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc func)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
 					_expr2 = _expr2.Walk(skipColumns, func);
@@ -995,7 +1006,7 @@ namespace BLToolkit.Data.Sql
 				SqlQuery _subQuery; public SqlQuery SubQuery { get { return _subQuery; } }
 
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc func)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
 					_subQuery = (SqlQuery)((ISqlExpression)_subQuery).Walk(skipColumns, func);
@@ -1054,7 +1065,7 @@ namespace BLToolkit.Data.Sql
 				public   List<ISqlExpression>  Values { get { return _values; } }
 
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc action)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 				{
 					base.Walk(skipColumns, action);
 					for (var i = 0; i < _values.Count; i++)
@@ -1120,7 +1131,7 @@ namespace BLToolkit.Data.Sql
 				SqlFunction _func; public SqlFunction Function { get { return _func; } }
 		
 				[Obsolete]
-				protected override void Walk(bool skipColumns, WalkingFunc func)
+				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					_func = (SqlFunction)((ISqlExpression)_func).Walk(skipColumns, func);
 				}
@@ -1183,10 +1194,10 @@ namespace BLToolkit.Data.Sql
 			public    abstract bool              CanBeNull();
 			protected abstract ICloneableElement Clone    (Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
 			[Obsolete]
-			protected abstract void              Walk     (bool skipColumns, WalkingFunc action);
+			protected abstract void              Walk     (bool skipColumns, Func<ISqlExpression,ISqlExpression> action);
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				Walk(skipColumns, func);
 				return null;
@@ -1393,7 +1404,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				foreach (var condition in Conditions)
 					condition.Predicate.Walk(skipColumns, func);
@@ -1656,7 +1667,7 @@ namespace BLToolkit.Data.Sql
 			readonly bool           _isDescending; public bool           IsDescending { get { return _isDescending; } }
 
 			[Obsolete]
-			internal void Walk(bool skipColumns, WalkingFunc func)
+			internal void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				_expression = _expression.Walk(skipColumns, func);
 			}
@@ -2007,7 +2018,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				for (var i = 0; i < Columns.Count; i++)
 				{
@@ -2137,7 +2148,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				_column     = _column.    Walk(skipColumns, func);
 				_expression = _expression.Walk(skipColumns, func);
@@ -2219,7 +2230,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				if (_into != null)
 					((ISqlExpressionWalkable)_into).Walk(skipColumns, func);
@@ -2445,7 +2456,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				for (var i = 0; i <	Tables.Count; i++)
 					((ISqlExpressionWalkable)Tables[i]).Walk(skipColumns, func);
@@ -2574,7 +2585,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc action)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 			{
 				_searchCondition = (SearchCondition)((ISqlExpressionWalkable)_searchCondition).Walk(skipColumns, action);
 				return null;
@@ -2675,7 +2686,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				for (var i = 0; i < Items.Count; i++)
 					Items[i] = Items[i].Walk(skipColumns, func);
@@ -2798,7 +2809,7 @@ namespace BLToolkit.Data.Sql
 			#region ISqlExpressionWalkable Members
 
 			[Obsolete]
-			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
 				for (var i = 0; i < Items.Count; i++)
 					Items[i].Walk(skipColumns, func);
@@ -2936,7 +2947,7 @@ namespace BLToolkit.Data.Sql
 		{
 			var exprs = new Dictionary<ISqlExpression,ISqlExpression>();
 
-			new QueryVisitor().Visit(this, delegate(IQueryElement e)
+			new QueryVisitor().Visit(this, e =>
 			{
 				var sql = e as SqlQuery;
 
@@ -2976,7 +2987,7 @@ namespace BLToolkit.Data.Sql
 				sql.Unions.InsertRange(0, union.Unions);
 			});
 
-			((ISqlExpressionWalkable)this).Walk(false, delegate(ISqlExpression expr)
+			((ISqlExpressionWalkable)this).Walk(false, expr =>
 			{
 				ISqlExpression e;
 				return exprs.TryGetValue(expr, out e)? e: expr;
@@ -2994,7 +3005,7 @@ namespace BLToolkit.Data.Sql
 					OptimizeSearchCondition(join.Condition);
 			});
 
-			new QueryVisitor().Visit(this, delegate(IQueryElement e)
+			new QueryVisitor().Visit(this, e =>
 			{
 				var sql = e as SqlQuery;
 
@@ -3012,7 +3023,7 @@ namespace BLToolkit.Data.Sql
 			OptimizeColumns();
 			OptimizeSubQueries();
 
-			new QueryVisitor().Visit(this, delegate(IQueryElement e)
+			new QueryVisitor().Visit(this, e =>
 			{
 				var sql = e as SqlQuery;
 
@@ -3147,14 +3158,12 @@ namespace BLToolkit.Data.Sql
 		{
 			From.Tables.ForEach(tbl => tbl.ForEach(action));
 
-			new QueryVisitor().Visit(this, delegate(IQueryElement e)
+			new QueryVisitor().Visit(this, e =>
 			{
 				if (e is SqlQuery && e != this)
 					((SqlQuery)e).ForEachTable(action);
 			});
 		}
-
-		delegate bool FindTableSource(TableSource table);
 
 		void RemoveOrderBy()
 		{
@@ -3166,7 +3175,7 @@ namespace BLToolkit.Data.Sql
 		{
 			List<ISqlTableSource> tables = null;
 
-			FindTableSource findTable = null; findTable = delegate(TableSource table)
+			Func<TableSource,bool> findTable = null; findTable = table =>
 			{
 				if (tables.Contains(table.Source))
 					return true;
@@ -3188,7 +3197,7 @@ namespace BLToolkit.Data.Sql
 				return false;
 			};
 
-			ForEachTable(delegate(TableSource table)
+			ForEachTable(table =>
 			{
 				for (var i = 0; i < table.Joins.Count; i++)
 				{
@@ -3200,7 +3209,7 @@ namespace BLToolkit.Data.Sql
 						{
 							tables = new List<ISqlTableSource>();
 
-							Action<IQueryElement> tableCollector = delegate(IQueryElement expr)
+							Action<IQueryElement> tableCollector = expr =>
 							{
 								var field = expr as SqlField;
 
@@ -3257,7 +3266,7 @@ namespace BLToolkit.Data.Sql
 
 				if (query.From.Tables.Count == 1 &&
 				   //!query.Select.IsDistinct      &&
-				    //query.From.Tables[0].Joins.Count == 0 &&
+				   //query.From.Tables[0].Joins.Count == 0 &&
 				    (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
 				   !query.HasUnion               &&
 				    query.GroupBy.IsEmpty        &&
@@ -3274,10 +3283,21 @@ namespace BLToolkit.Data.Sql
 					while (top.ParentSql != null)
 						top = top.ParentSql;
 
-					((ISqlExpressionWalkable)top).Walk(false, delegate(ISqlExpression expr)
+					((ISqlExpressionWalkable)top).Walk(false, expr =>
 					{
 						SqlField fld;
-						return map.TryGetValue(expr, out fld)? fld: expr;
+						return map.TryGetValue(expr, out fld) ? fld : expr;
+					});
+
+					new QueryVisitor().Visit(top, expr =>
+					{
+						if (expr.ElementType == QueryElementType.InListPredicate)
+						{
+							var p = (Predicate.InList)expr;
+
+							if (p.Expr1 == query)
+								p.Expr1 = query.From.Tables[0];
+						}
 					});
 
 					query.From.Tables[0].Joins.AddRange(source.Joins);
@@ -3288,7 +3308,7 @@ namespace BLToolkit.Data.Sql
 					if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
 					if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
 
-					((ISqlExpressionWalkable)top).Walk(false, delegate(ISqlExpression expr)
+					((ISqlExpressionWalkable)top).Walk(false, expr =>
 					{
 						if (expr is SqlQuery)
 						{
@@ -3360,7 +3380,7 @@ namespace BLToolkit.Data.Sql
 
 		void OptimizeColumns()
 		{
-			((ISqlExpressionWalkable)Select).Walk(false, delegate(ISqlExpression expr)
+			((ISqlExpressionWalkable)Select).Walk(false, expr =>
 			{
 				var query = expr as SqlQuery;
 					
@@ -3433,7 +3453,7 @@ namespace BLToolkit.Data.Sql
 
 			Parameters.Clear();
 
-			new QueryVisitor().VisitAll(this, delegate(IQueryElement expr)
+			new QueryVisitor().VisitAll(this, expr =>
 			{
 				switch (expr.ElementType)
 				{
@@ -3540,7 +3560,7 @@ namespace BLToolkit.Data.Sql
 			_parameters.AddRange(clone._parameters.ConvertAll(p => (SqlParameter)p.Clone(objectTree, doClone)));
 			_parameterDependent = clone.ParameterDependent;
 
-			new QueryVisitor().Visit(this, delegate(IQueryElement expr)
+			new QueryVisitor().Visit(this, expr =>
 			{
 				var sb = expr as SqlQuery;
 
@@ -3655,7 +3675,7 @@ namespace BLToolkit.Data.Sql
 		#region ISqlExpressionWalkable Members
 
 		[Obsolete]
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
 			((ISqlExpressionWalkable)Select) .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)From)   .Walk(skipColumns, func);
@@ -3721,7 +3741,7 @@ namespace BLToolkit.Data.Sql
 				_keys = q.ToList();
 			}
 
-			return null;
+			return _keys;
 		}
 
 		#endregion

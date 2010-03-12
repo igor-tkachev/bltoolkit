@@ -79,7 +79,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpressionWalkable Members
 
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
 			return func(this);
 		}
@@ -93,7 +93,7 @@ namespace BLToolkit.Data.Sql
 			if (this == other)
 				return true;
 
-			SqlParameter p = other as SqlParameter;
+			var p = other as SqlParameter;
 			return (object)p != null && _name != null && p._name != null && _name == p._name && _systemType == p._systemType;
 		}
 
@@ -122,9 +122,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				SqlParameter p = new SqlParameter(_systemType, _name, _value, _valueConverter);
-
-				p._isQueryParameter = _isQueryParameter;
+				var p = new SqlParameter(_systemType, _name, _value, _valueConverter) { _isQueryParameter = _isQueryParameter };
 
 				objectTree.Add(this, clone = p);
 			}

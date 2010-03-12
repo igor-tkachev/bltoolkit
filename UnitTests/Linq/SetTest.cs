@@ -321,7 +321,7 @@ namespace Data.Linq
 		{
 			var arr = new[] { GrandChild[0], GrandChild[1] };
 
-			ForEachProvider(db => Assert.AreEqual(
+			ForEachProvider(db => AreEqual(
 				from p in Parent
 				join ch in Child on p.ParentID equals ch.ParentID
 				join gc in GrandChild on ch.ChildID equals gc.ChildID
@@ -332,6 +332,16 @@ namespace Data.Linq
 				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
 				where arr.Contains(gc)
 				select p));
+		}
+
+		[Test]
+		public void Contains9()
+		{
+			var arr = new[] { Parent1[0], Parent1[1] };
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent1 where arr.Contains(p) select p,
+				from p in db.Parent1 where arr.Contains(p) select p));
 		}
 
 		[Test]

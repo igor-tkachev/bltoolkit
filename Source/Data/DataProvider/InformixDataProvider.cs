@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
+using System.Threading;
 
 using IBM.Data.Informix;
 
@@ -14,9 +16,9 @@ namespace BLToolkit.Data.DataProvider
 		public override DbDataAdapter CreateDataAdapterObject() { return new IfxDataAdapter     ();     }
 		public override ISqlProvider  CreateSqlProvider      () { return new InformixSqlProvider(this); }
 
-		public override Type   ConnectionType         { get { return typeof(IfxConnection);              } }
-		public override string Name                   { get { return DataProvider.ProviderName.Informix; } }
-		public override string EndOfSql               { get { return ";"; } }
+		public override Type   ConnectionType { get { return typeof(IfxConnection);              } }
+		public override string Name           { get { return DataProvider.ProviderName.Informix; } }
+		public override string EndOfSql       { get { return ";"; } }
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
@@ -43,7 +45,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
-						string str = value.ToString();
+						var str = value.ToString();
 						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
 					}
 
@@ -52,7 +54,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is IfxException)
 					{
-						IfxException ex = (IfxException)value;
+						var ex = (IfxException)value;
 
 						foreach (IfxError error in ex.Errors)
 							return error.NativeError;
@@ -75,7 +77,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (p.Value is Guid)
 				{
-					string value = p.Value.ToString();
+					var value = p.Value.ToString();
 					p.DbType = DbType.AnsiStringFixedLength;
 					p.Value  = value;
 					p.Size   = value.Length;
@@ -88,5 +90,68 @@ namespace BLToolkit.Data.DataProvider
 				//}
 			}
 		}
+
+		#region GetDataReader
+
+		public override IDataReader GetDataReader(Mapping.MappingSchema schema, IDataReader dataReader)
+		{
+			return dataReader is IfxDataReader?
+				new InformixDataReaderEx((IfxDataReader)dataReader):
+				base.GetDataReader(schema, dataReader);
+		}
+
+		class InformixDataReaderEx : DataReaderBase<IfxDataReader>, IDataReader
+		{
+			public InformixDataReaderEx(IfxDataReader rd): base(rd)
+			{
+			}
+
+			public new float GetFloat(int i)
+			{
+				var current = Thread.CurrentThread.CurrentCulture;
+
+				if (Thread.CurrentThread.CurrentCulture != CultureInfo.InvariantCulture)
+					Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+				var value = DataReader.GetFloat(i);
+
+				if (current != CultureInfo.InvariantCulture)
+					Thread.CurrentThread.CurrentCulture = current;
+
+				return value;
+			}
+
+			public new double GetDouble(int i)
+			{
+				var current = Thread.CurrentThread.CurrentCulture;
+
+				if (Thread.CurrentThread.CurrentCulture != CultureInfo.InvariantCulture)
+					Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+				var value = DataReader.GetDouble(i);
+
+				if (current != CultureInfo.InvariantCulture)
+					Thread.CurrentThread.CurrentCulture = current;
+
+				return value;
+			}
+
+			public new decimal GetDecimal(int i)
+			{
+				var current = Thread.CurrentThread.CurrentCulture;
+
+				if (Thread.CurrentThread.CurrentCulture != CultureInfo.InvariantCulture)
+					Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+				var value = DataReader.GetDecimal     (i);
+
+				if (current != CultureInfo.InvariantCulture)
+					Thread.CurrentThread.CurrentCulture = current;
+
+				return value;
+			}
+		}
+
+		#endregion
 	}
 }

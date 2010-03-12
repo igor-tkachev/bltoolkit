@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlDataType(SqlDbType dbType)
 		{
-			SqlDataType defaultType = GetDataType(dbType);
+			var defaultType = GetDataType(dbType);
 
 			_dbType    = dbType;
 			_type      = defaultType.Type;
@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			SqlDataType defaultType = GetDataType(type);
+			var defaultType = GetDataType(type);
 
 			_dbType    = defaultType.DbType;
 			_type      = type;
@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			SqlDataType defaultType = GetDataType(dbType);
+			var defaultType = GetDataType(dbType);
 
 			_dbType    = dbType;
 			_type      = type;
@@ -146,15 +146,15 @@ namespace BLToolkit.Data.Sql
 
 		static TypeInfo[] SortTypeInfo(params TypeInfo[] info)
 		{
-			int maxIndex = 0;
+			var maxIndex = 0;
 
-			foreach (TypeInfo typeInfo in info)
+			foreach (var typeInfo in info)
 				if (maxIndex < (int)typeInfo.DbType)
 					maxIndex = (int)typeInfo.DbType;
 
-			TypeInfo[] sortedInfo = new TypeInfo[maxIndex + 1];
+			var sortedInfo = new TypeInfo[maxIndex + 1];
 
-			foreach (TypeInfo typeInfo in info)
+			foreach (var typeInfo in info)
 				sortedInfo[(int)typeInfo.DbType] = typeInfo;
 
 			return sortedInfo;
@@ -215,7 +215,7 @@ namespace BLToolkit.Data.Sql
 
 		public static SqlDataType GetDataType(Type type)
 		{
-			Type underlyingType = type;
+			var underlyingType = type;
 
 			if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(Nullable<>))
 				underlyingType = underlyingType.GetGenericArguments()[0];
@@ -457,7 +457,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpressionWalkable Members
 
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, WalkingFunc func)
+		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
 			return func(this);
 		}
@@ -471,7 +471,7 @@ namespace BLToolkit.Data.Sql
 			if (this == other)
 				return true;
 
-			SqlDataType value = other as SqlDataType;
+			var value = other as SqlDataType;
 			return _type == value._type && _length == value._length && _precision == value._precision && _scale == value._scale;
 		}
 

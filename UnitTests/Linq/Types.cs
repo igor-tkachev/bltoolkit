@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Data.Linq;
+using System.Globalization;
 using System.Linq;
-
+using System.Threading;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 
@@ -209,6 +210,20 @@ namespace Data.Linq
 					db.Person.Delete(p => p.ID > 2);
 				}
 			});
+		}
+
+		[Test]
+		public void TestCultureInfo()
+		{
+			var current = Thread.CurrentThread.CurrentCulture;
+
+			Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-RU");
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where t.MoneyValue > 0.5m select t,
+				from t in db.Types where t.MoneyValue > 0.5m select t));
+
+			Thread.CurrentThread.CurrentCulture = current;
 		}
 	}
 }
