@@ -204,10 +204,14 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 
+#if FW3
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2005SqlProvider(this);
 		}
+
+#endif
 
 		public override int MaxParameters
 		{
@@ -220,6 +224,8 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		#region GetDataReader
+
+#if FW3
 
 		public override IDataReader GetDataReader(Mapping.MappingSchema schema, IDataReader dataReader)
 		{
@@ -239,6 +245,8 @@ namespace BLToolkit.Data.DataProvider
 				return DataReader.GetDateTimeOffset(i);
 			}
 		}
+
+#endif
 
 		#endregion
 	}
