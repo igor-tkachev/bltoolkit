@@ -5,7 +5,7 @@ using BLToolkit.Data.Linq;
 
 namespace Data.Linq.Model
 {
-	class NorthwindDB : DbManager
+	public class NorthwindDB : DbManager
 	{
 		public NorthwindDB() : base("Northwind")
 		{

@@ -307,6 +307,14 @@ namespace BLToolkit.Data.Linq
 
 					goto default;
 
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+					{
+						var pi = info.ConvertTo<UnaryExpression>();
+						var ex = pi.Create(pi.Expr.Operand, pi.Property(Unary.Operand));
+						return ParseSequence(ex);
+					}
+
 				default:
 					throw new ArgumentException(string.Format("Queryable method call expected. Got '{0}'.", info.Expr), "info");
 			}
@@ -337,7 +345,8 @@ namespace BLToolkit.Data.Linq
 						case "Average"            : sequence = ParseSequence(seq); ParseAggregate(pi, null, sequence[0]); break;
 						case "OfType"             : sequence = ParseSequence(seq); select = ParseOfType(pi, sequence);    break;
 						case "Any"                : sequence = ParseAny(SetType.Any, seq, null, pi);                      break;
-						case "Cast"               : sequence = ParseSequence(seq);                                        break;
+						case "Cast"               :
+						case "AsQueryable"        : sequence = ParseSequence(seq);                                        break;
 						case "Delete"             : sequence = ParseSequence(seq); ParseDelete(       null,       sequence[0]); break;
 						case "Update"             : sequence = ParseSequence(seq); ParseUpdate(       null, null, sequence[0]); break;
 						case "Insert"             : sequence = ParseSequence(seq); ParseInsert(false, null, null, sequence[0]); break;
@@ -743,10 +752,7 @@ namespace BLToolkit.Data.Linq
 					 call.Method.DeclaringType == typeof(Queryable)))
 				{
 					var keyField = seq2[0].Fields.FirstOrDefault(f => !f.CanBeNull());
-					var subQuery = seq2[0] as QuerySource.SubQuery;
-
-					if (subQuery == null)
-						subQuery = WrapInSubQuery(seq2[0]);
+					var subQuery = seq2[0] as QuerySource.SubQuery ?? WrapInSubQuery(seq2[0]);
 
 					subQuery.CheckNullField = keyField ?? new QueryField.ExprColumn(subQuery, new SqlValue((int?)1), "test");
 					subQuery.Fields.Add(subQuery.CheckNullField);
@@ -1771,7 +1777,7 @@ namespace BLToolkit.Data.Linq
 				_parseInfo    = pi;
 			}
 
-			ParseInfo _parseInfo;
+			readonly ParseInfo _parseInfo;
 
 			public override ParseInfo<TE> Create<TE>(TE expr, Expression paramAccesor)
 			{
@@ -3157,8 +3163,6 @@ namespace BLToolkit.Data.Linq
 			if (idx.Length != 1)
 				throw new InvalidOperationException();
 
-			MethodInfo mi;
-
 			var type = ma.Expr.Type;
 
 			Expression mapper;
@@ -3176,6 +3180,8 @@ namespace BLToolkit.Data.Linq
 			}
 			else
 			{
+				MethodInfo mi;
+
 				if (!MapSchema.Converters.TryGetValue(type, out mi))
 					throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
 
@@ -3323,8 +3329,11 @@ namespace BLToolkit.Data.Linq
 				{
 					if (!TypeHelper.IsScalar(pi.Expr.Type) || _asParameters.Contains(c))
 					{
-						var e = Expression.Convert(c.ParamAccessor, pi.Expr.Type);
-						pi = pi.Parent.Replace(e, c.ParamAccessor);
+						if (c.ParamAccessor != null)
+						{
+							var e = Expression.Convert(c.ParamAccessor, pi.Expr.Type);
+							pi = pi.Parent.Replace(e, c.ParamAccessor);
+						}
 
 						if (pi.Parent.NodeType == ExpressionType.MemberAccess)
 						{
@@ -4787,7 +4796,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, member.Name, (object)null)
+				SqlParameter = new SqlParameter(expr.Type, member.Name, null)
 			};
 
 			_parameters.Add(expr, p);
@@ -5518,15 +5527,11 @@ namespace BLToolkit.Data.Linq
 				{
 					if (wpi.NodeType == ExpressionType.Parameter)
 					{
-						Expression       expr;
-						Func<Expression> fparam;
+						var pe   = (ParameterExpression)wpi.Expr;
+						var n    = parms[pe.Name];
+						var expr = pi.Expr.Arguments[n];
 
-						var pe = (ParameterExpression)wpi.Expr;
-
-						var n = parms[pe.Name];
-
-						expr   = pi.Expr.Arguments[n];
-						fparam = () => pi.Index(pi.Expr.Arguments, New.Arguments, n);
+						Func<Expression> fparam = () => pi.Index(pi.Expr.Arguments, New.Arguments, n);
 
 						if (expr.NodeType == ExpressionType.MemberAccess)
 							if (!_accessors.ContainsKey(expr))
@@ -5561,14 +5566,15 @@ namespace BLToolkit.Data.Linq
 			{
 				if (wpi.NodeType == ExpressionType.Parameter)
 				{
-					Expression       expr;
-					Func<Expression> fparam;
+					Expression expr;
 
 					var pe = (ParameterExpression)wpi.Expr;
 					int n;
 
 					if (parms.TryGetValue(pe.Name, out n))
 					{
+						Func<Expression> fparam;
+
 						if (n < 0)
 						{
 							expr   = e.Object;

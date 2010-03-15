@@ -40,8 +40,14 @@ namespace BLToolkit.TypeBuilder
 				}
 			}
 
-			if (SecurityManager.IsGranted(new SecurityPermission(SecurityPermissionFlag.ControlAppDomain)))
+			SecurityPermission perm = new SecurityPermission(SecurityPermissionFlag.ControlAppDomain);
+
+#if FW4
+			var set = typeof(TypeFactory).Assembly.PermissionSet;
+#else
+			if (SecurityManager.IsGranted(perm))
 				SubscribeAssemblyResolver();
+#endif
 		}
 
 		static void SubscribeAssemblyResolver()

@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
+using Microsoft.VisualBasic.CompilerServices;
+
 using JetBrains.Annotations;
 
 #region ReSharper C# 2.0 disable
@@ -140,7 +142,9 @@ namespace BLToolkit.Data.Linq
 				{ M(() => "".ToUpper    ()        ), L<S,S>      ( obj           => Sql.Upper(obj)) },
 				{ M(() => "".CompareTo  ("")      ), L<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0).Value ) },
 				{ M(() => "".CompareTo  (1)       ), L<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()).Value ) },
-				{ M(() => string.IsNullOrEmpty("")), L<S,B>      (     p0        => p0 == null || p0.Length == 0 ) },
+
+				{ M(() => string.IsNullOrEmpty("")    ), L<S,B>  ( p0     => p0 == null || p0.Length == 0) },
+				{ M(() => string.CompareOrdinal("","")), L<S,S,I>((s1,s2) => s1.CompareTo(s2)) },
 
 				{ M(() => AltStuff("",0,0,"")), L<S,I?,I?,S,S>((p0, p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
 
@@ -624,6 +628,12 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Math.Truncate(0m)),  L<M,M>( p => Sql.Truncate(p).Value ) },
 				{ M(() => Math.Truncate(0.0)), L<F,F>( p => Sql.Truncate(p).Value ) },
+
+				#endregion
+
+				#region Visual Basic Compiler Services
+
+				{ M(() => Operators.CompareString("","",false)), L<S,S,B,I>((s1,s2,b) => b ? string.CompareOrdinal(s1.ToUpper(), s2.ToUpper()) : string.CompareOrdinal(s1, s2)) },
 
 				#endregion
 			}},

@@ -157,6 +157,7 @@
     <Content Include="Content\Doc\EditableObjects\EditableObject.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Doc\Aspects\OverloadAspect.htm" />
     <Content Include="Content\Doc\Data\LinqDateTimeFunctions.txt" />
     <Content Include="Content\Doc\Data\LinqDateTimeCoreFunctions.txt" />
     <Content Include="Content\Doc\Data\LinqStringCoreFunctions.txt" />
@@ -167,6 +168,11 @@
     <Content Include="Content\Doc\EditableObjects\AcceptRejectChanges.htm" />
     <Content Include="Content\Doc\EditableObjects\IsDirty.htm" />
     <Content Include="Content\Doc\EditableObjects\ManualEditableObject.cs" />
+    <Content Include="Content\Doc\TypeBuilder\InitialValues.htm" />
+    <Content Include="Content\Doc\TypeBuilder\XmlSerialization.htm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Content\Doc\Aspects\OverloadAspect.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

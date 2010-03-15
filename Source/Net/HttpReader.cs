@@ -26,6 +26,7 @@ namespace BLToolkit.Net
 
 		public HttpReader()
 		{
+			BaseUri = string.Empty;
 		}
 
 		public HttpReader(string baseUri)
