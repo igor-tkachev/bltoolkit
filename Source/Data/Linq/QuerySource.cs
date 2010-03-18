@@ -276,7 +276,7 @@ namespace BLToolkit.Data.Linq
 
 					if (ma.Expression != null)
 					{
-						if (ma.Expression.Type == ObjectType)
+						if (ma.Expression.Type == ObjectType || currentMember > 0)
 						{
 							var list = GetMemberList(lambda, expr);
 

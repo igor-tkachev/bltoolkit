@@ -39,10 +39,11 @@ namespace BLToolkit.Data.Linq
 			ArgIndices  = argIndices;
 		}
 
-		public string SqlProvider    { get; set; }
-		public string Name           { get; set; }
-		public bool   ServerSideOnly { get; set; }
-		public int[]  ArgIndices     { get; set; }
+		public string SqlProvider      { get; set; }
+		public string Name             { get; set; }
+		public bool   ServerSideOnly   { get; set; }
+		public bool   PreferServerSide { get; set; }
+		public int[]  ArgIndices       { get; set; }
 
 		protected ISqlExpression[] ConvertArgs(MemberInfo member, ISqlExpression[] args)
 		{

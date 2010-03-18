@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Text;
-
-#if FW3
 using System.Linq.Expressions;
 using System.Reflection;
-#endif
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -28,8 +25,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		bool           IsCountSubQuerySupported    { get; }
 		bool           IsIdentityParameterRequired { get; }
 
-#if FW3
 		LambdaExpression ConvertMember    (MemberInfo mi);
-#endif
 	}
 }

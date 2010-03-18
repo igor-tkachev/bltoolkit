@@ -2466,8 +2466,8 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.MemberAccess:
 						{
-							if (IsSubQuery      (pi, query)) return BuildSubQuery(pi, query, converter);
-							if (IsServerSideOnly(pi))        return BuildField   (lambda, query.BaseQuery, pi);
+							if (IsSubQuery      (        pi,       query)) return BuildSubQuery(pi, query, converter);
+							if (IsServerSideOnly(lambda, pi, true, query)) return BuildField   (lambda, query.BaseQuery, pi);
 
 							var ma = (ParseInfo<MemberExpression>)pi;
 							var ex = pi.Create(ma.Expr.Expression, pi.Property(Member.Expression));
@@ -2618,8 +2618,12 @@ namespace BLToolkit.Data.Linq
 						}
 
 					case ExpressionType.Coalesce:
-					//case ExpressionType.Conditional:
 						if (pi.Expr.Type == typeof(string) && _info.MappingSchema.GetDefaultNullValue<string>() != null)
+							return BuildField(lambda, query.BaseQuery, pi);
+						goto case ExpressionType.Conditional;
+
+					case ExpressionType.Conditional:
+						if (CanBeTranslatedToSql(lambda, pi, query.BaseQuery))
 							return BuildField(lambda, query.BaseQuery, pi);
 						break;
 
@@ -2638,8 +2642,8 @@ namespace BLToolkit.Data.Linq
 								}
 							}
 
-							if (IsSubQuery      (pi, query)) return BuildSubQuery(pi, query, converter);
-							if (IsServerSideOnly(pi))        return BuildField   (lambda, query.BaseQuery, pi);
+							if (IsSubQuery      (        pi,       query)) return BuildSubQuery(pi, query, converter);
+							if (IsServerSideOnly(lambda, pi, true, query)) return BuildField   (lambda, query.BaseQuery, pi);
 						}
 
 						break;
@@ -2654,7 +2658,7 @@ namespace BLToolkit.Data.Linq
 						case ExpressionType.Convert:
 							break;
 						default:
-							if (CanBeCompiled(pi))
+							if (CanBeCompiled(lambda, pi, query.BaseQuery))
 								break;
 							return BuildField(lambda, query.BaseQuery, pi);
 					}
@@ -3379,7 +3383,7 @@ namespace BLToolkit.Data.Linq
 				if (CanBeConstant(parseInfo))
 					return BuildConstant(parseInfo);
 
-				if (CanBeCompiled(parseInfo))
+				if (CanBeCompiled(lambda, parseInfo, queries))
 					return BuildParameter(parseInfo).SqlParameter;
 
 				if (IsSubQuery(parseInfo, queries))
@@ -3632,6 +3636,9 @@ namespace BLToolkit.Data.Linq
 
 							if (ex.NodeType == ExpressionType.Quote)
 								ex = ex.Create(((UnaryExpression)ex.Expr).Operand, ex.Property(Unary.Operand));
+
+							//if (ex.NodeType == ExpressionType.MemberAccess)
+							//	return ParseExpression(lambda, ex, queries);
 
 							if (ex.NodeType == ExpressionType.Lambda)
 							{
@@ -3894,7 +3901,7 @@ namespace BLToolkit.Data.Linq
 						}
 
 						if (IsIEnumerableType(parseInfo.Expr))
-							return !CanBeCompiled(parseInfo);
+							return !CanBeCompiled(null, parseInfo, queries);
 					}
 
 					break;
@@ -3904,10 +3911,10 @@ namespace BLToolkit.Data.Linq
 						var ma = (MemberExpression)parseInfo.Expr;
 
 						if (IsSubQueryMember(parseInfo.Expr) && IsSubQuerySource(ma.Expression, queries))
-							return !CanBeCompiled(parseInfo);
+							return !CanBeCompiled(null, parseInfo, queries);
 
 						if (!ignoreMembers && IsIEnumerableType(parseInfo.Expr))
-							return !CanBeCompiled(parseInfo);
+							return !CanBeCompiled(null, parseInfo, queries);
 
 						if (ma.Expression != null)
 						{
@@ -3986,7 +3993,7 @@ namespace BLToolkit.Data.Linq
 
 		#region IsServerSideOnly
 
-		bool IsServerSideOnly(ParseInfo parseInfo)
+		bool IsServerSideOnly(LambdaInfo lambda, ParseInfo parseInfo, bool preferServer, params QuerySource[] queries)
 		{
 			switch (parseInfo.NodeType)
 			{
@@ -3996,11 +4003,53 @@ namespace BLToolkit.Data.Linq
 						var l  = ConvertMember(pi.Expr.Member);
 
 						if (l != null)
-							return IsServerSideOnly(pi.Parent.Replace(UnwrapLambda(l.Body), null));
+						{
+							var ef   = UnwrapLambda(l.Body);
+							var info = pi.Parent.Replace(ef, null) as ParseInfo;
+
+							return IsServerSideOnly(lambda, info, preferServer, queries);
+
+
+							//if (preferServer && l.Parameters.Count == 1 && pi.Expr.Expression != null)
+							//{
+							//	info = info.Walk(wpi =>
+							//	{
+							//		if (wpi == l.Parameters[0])
+							//			return pi.Create(pi.Expr.Expression, null);
+
+							//		return wpi;
+							//	});
+							//}
+
+							/*
+							var ret  = false;
+
+							info.Walk(lpi =>
+							{
+								if (IsServerSideOnly(lambda, lpi, preferServer, queries))
+									lpi.StopWalking = ret = true;
+								return lpi;
+							});
+
+							return ret;
+							*/
+						}
 
 						var attr = GetFunctionAttribute(pi.Expr.Member);
 
-						return attr != null && attr.ServerSideOnly;
+						if (attr != null)
+						{
+							if (attr.ServerSideOnly)
+								return true;
+
+							//return
+							//	preferServer &&
+							//	attr.PreferServerSide &&
+							//	CanBeTranslatedToSql(lambda, parseInfo, queries) &&
+							//	!CanBeCompiled(lambda, parseInfo, queries);
+						}
+
+						break;
 					}
 
 				case ExpressionType.Call:
@@ -4032,19 +4081,16 @@ namespace BLToolkit.Data.Linq
 						}
 						else
 						{
-							var lambda = ConvertMember(e.Method);
+							var l = ConvertMember(e.Method);
 
-							//if (lambda != null)
-							//	return IsServerSideOnly(pi.Parent.Replace(UnwrapLambda(lambda.Body), null));
-
-							if (lambda != null)
+							if (l != null)
 							{
-								var info = pi.Parent.Replace(UnwrapLambda(lambda.Body), null);
+								var info = pi.Parent.Replace(UnwrapLambda(l.Body), null);
 								var ret  = false;
 
 								info.Walk(lpi =>
 								{
-									if (IsServerSideOnly(lpi))
+									if (IsServerSideOnly(lambda, lpi, preferServer, queries))
 										lpi.StopWalking = ret = true;
 									return lpi;
 								});
@@ -4054,7 +4100,17 @@ namespace BLToolkit.Data.Linq
 
 							var attr = GetFunctionAttribute(e.Method);
 
-							return attr != null && attr.ServerSideOnly;
+							if (attr != null)
+							{
+								if (attr.ServerSideOnly)
+									return true;
+
+								//return
+								//	preferServer &&
+								//	attr.PreferServerSide &&
+								//	CanBeTranslatedToSql(lambda, parseInfo, queries) &&
+								//	!CanBeCompiled(lambda, parseInfo, queries);
+							}
 						}
 
 						break;
@@ -4153,7 +4209,7 @@ namespace BLToolkit.Data.Linq
 
 		#region CanBeCompiled
 
-		bool CanBeCompiled(ParseInfo expr)
+		bool CanBeCompiled(LambdaInfo lambda, ParseInfo expr, params QuerySource[] queries)
 		{
 			var canbe = true;
 
@@ -4161,7 +4217,7 @@ namespace BLToolkit.Data.Linq
 			{
 				if (canbe)
 				{
-					canbe = !IsServerSideOnly(pi);
+					canbe = !IsServerSideOnly(lambda, pi, false, queries);
 
 					if (canbe) switch (pi.NodeType)
 					{
@@ -4178,7 +4234,7 @@ namespace BLToolkit.Data.Linq
 								var ma   = (MemberExpression)pi.Expr;
 								var attr = GetFunctionAttribute(ma.Member);
 
-								canbe = attr == null  || !attr.ServerSideOnly;
+								canbe = attr == null || !attr.ServerSideOnly;
 								break;
 							}
 
@@ -4187,13 +4243,108 @@ namespace BLToolkit.Data.Linq
 								var mc   = (MethodCallExpression)pi.Expr;
 								var attr = GetFunctionAttribute(mc.Method);
 
-								canbe = attr == null  || !attr.ServerSideOnly;
+								canbe = attr == null || !attr.ServerSideOnly;
 								break;
 							}
 					}
 				}
 
 				pi.StopWalking = !canbe;
+
+				return pi;
+			});
+
+			return canbe;
+		}
+
+		#endregion
+
+		#region CanBeTranslatedToSql
+
+		bool CanBeTranslatedToSql(LambdaInfo lambda, ParseInfo expr, params QuerySource[] queries)
+		{
+			var canbe = true;
+
+			expr.Walk(pi =>
+			{
+				if (canbe)
+				{
+					switch (pi.NodeType)
+					{
+						case ExpressionType.MemberAccess:
+							{
+								var ma = (MemberExpression)pi.Expr;
+								var l  = ConvertMember(ma.Member);
+
+								if (l != null)
+								{
+									canbe = CanBeTranslatedToSql(lambda, pi.Parent.Replace(UnwrapLambda(l.Body), null), queries);
+									pi.StopWalking = true;
+								}
+								else
+								{
+									var attr = GetFunctionAttribute(ma.Member);
+
+									if (attr == null && !IsNullableValueMember(ma.Member))
+									{
+										if (IsListCountMember(ma.Member))
+										{
+											var me = pi.ConvertTo<MemberExpression>();
+
+											var src = GetSource(null, me.Create(ma.Expression, me.Property(Member.Expression)), queries);
+											if (src == null)
+												goto case ExpressionType.Parameter;
+										}
+										else
+											goto case ExpressionType.Parameter;
+									}
+								}
+
+								break;
+							}
+
+						case ExpressionType.Parameter:
+							{
+								var field = GetField(lambda, pi.Expr, queries);
+
+								if (field == null)
+									canbe = CanBeCompiled(lambda, pi, queries);
+
+								pi.StopWalking = true;
+
+								break;
+							}
+
+						case ExpressionType.Call:
+							{
+								var mc = pi.ConvertTo<MethodCallExpression>();
+								var e  = pi.Expr as MethodCallExpression;
+
+								if (e.Method.DeclaringType != typeof(Enumerable))
+								{
+									var cm = ConvertMethod(mc);
+
+									if (cm != null)
+									{
+										canbe = CanBeTranslatedToSql(lambda, cm, queries);
+										pi.StopWalking = true;
+									}
+									else
+									{
+										var attr = GetFunctionAttribute(e.Method);
+
+										if (attr == null)
+											canbe = CanBeCompiled(lambda, pi, queries);
+									}
+								}
+
+								break;
+							}
+					}
+				}
+
+				if (!pi.StopWalking)
+					pi.StopWalking = !canbe;
 
 				return pi;
 			});
@@ -4869,7 +5020,7 @@ namespace BLToolkit.Data.Linq
 					}
 
 				default:
-					if (CanBeCompiled(arr))
+					if (CanBeCompiled(null, arr, queries))
 					{
 						var p = BuildParameter(arr).SqlParameter;
 						p.IsQueryParameter = false;

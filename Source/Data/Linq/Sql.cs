@@ -198,13 +198,13 @@ namespace BLToolkit.Data.Linq
 
 		#region String Functions
 
-		[SqlFunction]
-		[SqlFunction("Access",    "Len")]
-		[SqlFunction("Firebird",  "Char_Length")]
-		[SqlFunction("MsSql2005", "Len")]
-		[SqlFunction("MsSql2008", "Len")]
-		[SqlFunction("SqlCe",     "Len")]
-		[SqlFunction("Sybase",    "Len")]
+		[SqlFunction(                            PreferServerSide = true)]
+		[SqlFunction("Access",    "Len",         PreferServerSide = true)]
+		[SqlFunction("Firebird",  "Char_Length", PreferServerSide = true)]
+		[SqlFunction("MsSql2005", "Len",         PreferServerSide = true)]
+		[SqlFunction("MsSql2008", "Len",         PreferServerSide = true)]
+		[SqlFunction("SqlCe",     "Len",         PreferServerSide = true)]
+		[SqlFunction("Sybase",    "Len",         PreferServerSide = true)]
 		public static int? Length(string str)
 		{
 			return str == null ? null : (int?)str.Length;
