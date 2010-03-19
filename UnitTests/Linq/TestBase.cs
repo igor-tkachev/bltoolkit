@@ -508,9 +508,8 @@ namespace Data.Linq
 			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
 
-			Assert.AreEqual(expectedList.Count(), resultList.Count());
-			Assert.AreNotEqual(0, expectedList.Count());
-			Assert.AreNotEqual(0, resultList.  Count());
+			Assert.AreNotEqual(0, expectedList.Count);
+			Assert.AreEqual(expectedList.Count, resultList.Count);
 
 			var exceptExpected = resultList.  Except(expectedList).Count();
 			var exceptResult   = expectedList.Except(resultList).  Count();
@@ -528,9 +527,8 @@ namespace Data.Linq
 			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
 
-			Assert.AreEqual(expectedList.Count(), resultList.Count());
-			Assert.AreNotEqual(0, expectedList.Count());
-			Assert.AreNotEqual(0, resultList.  Count());
+			Assert.AreNotEqual(0, expectedList.Count);
+			Assert.AreEqual(expectedList.Count, resultList.Count);
 
 			var b = expectedList.SequenceEqual(resultList);
 
