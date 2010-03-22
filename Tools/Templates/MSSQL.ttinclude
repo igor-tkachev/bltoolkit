@@ -1,0 +1,15 @@
+﻿<#+
+	private void HelloWorld()
+	{
+		PushIndent("\t");
+		PushIndent("\t");
+		
+		WriteLine("Hello World");
+#>
+		Hello World
+<#+
+
+		PopIndent();
+		PopIndent();
+	}
+#>
