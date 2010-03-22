@@ -44,6 +44,16 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CoalesceNew()
+		{
+			Child ch = null;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select ch ?? new Child { ParentID = p.ParentID },
+				from p in db.Parent select ch ?? new Child { ParentID = p.ParentID }));
+		}
+
+		[Test]
 		public void ScalarCondition()
 		{
 			ForEachProvider(db => AreEqual(

@@ -4370,6 +4370,11 @@ namespace BLToolkit.Data.Linq
 
 								break;
 							}
+
+						case ExpressionType.New:
+							canbe = false;
+							pi.StopWalking = true;
+							break;
 					}
 				}
 
