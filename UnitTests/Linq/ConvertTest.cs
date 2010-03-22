@@ -469,8 +469,8 @@ namespace Data.Linq
 		public void DecimalToString()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0', '.', ','),
-				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.TrimEnd('0', '.', ',')));
+				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.Replace(',', '.').TrimEnd('0', '.'),
+				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.Replace(',', '.').TrimEnd('0', '.')));
 		}
 
 		[Test]
