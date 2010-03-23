@@ -437,7 +437,7 @@ namespace BLToolkit.Data.Sql
 					}
 			}
 
-			return find(element) ? element : null;
+			return null;
 		}
 
 		public T Convert<T>(T element, ConvertFunc action)

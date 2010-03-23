@@ -259,5 +259,17 @@ namespace Data.Linq
 				   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
 				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
 		}
+
+		//[Test]
+		public void LetTest()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				let children = p.Children.Where(c => c.ParentID > 1)
+				select children.Sum(c => c.ChildID),
+				from p in db.Parent
+				let children = p.Children.Where(c => c.ParentID > 1)
+				select children.Sum(c => c.ChildID)));
+		}
 	}
 }
