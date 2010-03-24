@@ -38,7 +38,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW3;TRACE_PARSING1;OVERRIDETOSTRING1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;FW3;TRACE_PARSING1;OVERRIDETOSTRING</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>-Microsoft.Globalization#CA1303;-Microsoft.Design#CA1020;-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1002;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Maintainability#CA1502;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1704;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1707;-Microsoft.Performance#CA1800;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
@@ -142,8 +142,9 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\ExpressionParser.QueryBuilder.cs" />
     <Compile Include="Data\Linq\ExpressionHelper.cs" />
-    <Compile Include="Data\Linq\ExpressionParser.cs" />
+    <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\Expressions.cs" />
@@ -163,10 +164,7 @@
     <Compile Include="Data\Linq\SqlPropertyAttribute.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\ExpressionInfo.cs" />
-    <Compile Include="Data\Linq\ExpressionParserT.cs" />
-    <Compile Include="Data\Linq\ParseInfoExtension.cs" />
-    <Compile Include="Data\Linq\ParseInfoT.cs" />
-    <Compile Include="Data\Linq\ParseInfo.cs" />
+    <Compile Include="Data\Linq\ExpressionParser.Parsing.cs" />
     <Compile Include="Data\Linq\QueryField.cs" />
     <Compile Include="Data\Linq\QuerySource.cs" />
     <Compile Include="Data\Linq\ReflectionHelper.cs" />

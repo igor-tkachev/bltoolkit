@@ -35,7 +35,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
@@ -52,7 +52,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction)expr;
+				var func = (SqlFunction)expr;
 
 				switch (func.Name)
 				{
@@ -71,7 +71,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								break;
 
 							case TypeCode.DateTime :
-								Type type1 = TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType);
+								var type1 = TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType);
 
 								if (IsTimeDataType(func.Parameters[0]))
 								{
@@ -118,16 +118,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (element.ElementType != QueryElementType.SqlQuery)
 					return;
 
-				SqlQuery query = (SqlQuery)element;
+				var query = (SqlQuery)element;
 
-				for (int i = 0; i < query.Select.Columns.Count; i++)
+				for (var i = 0; i < query.Select.Columns.Count; i++)
 				{
-					SqlQuery.Column col = query.Select.Columns[i];
+					var col = query.Select.Columns[i];
 
 					if (col.Expression.ElementType == QueryElementType.SqlQuery)
 					{
-						SqlQuery                           subQuery = (SqlQuery)col.Expression;
-						Dictionary<ISqlTableSource,object> tables   = new Dictionary<ISqlTableSource,object>();
+						var subQuery = (SqlQuery)col.Expression;
+						var tables   = new Dictionary<ISqlTableSource,object>();
 
 						new QueryVisitor().Visit(subQuery, delegate(IQueryElement e)
 						{
@@ -135,7 +135,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								tables.Add((ISqlTableSource)e, null);
 						});
 
-						bool refersParent = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
+						var refersParent = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
 						{
 							switch (e.ElementType)
 							{
@@ -148,13 +148,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (!refersParent)
 							continue;
 
-						SqlQuery.FromClause.Join join = SqlQuery.LeftJoin(subQuery);
+						var join = SqlQuery.LeftJoin(subQuery);
 
 						query.From.Tables[0].Joins.Add(join.JoinedTable);
 
 						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
 
-						bool isAggregated = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
+						var isAggregated = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
 						{
 							if (e.ElementType == QueryElementType.SqlFunction)
 								switch (((SqlFunction)e).Name)
@@ -168,11 +168,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return false;
 						});
 
-						bool allAnd = true;
+						var allAnd = true;
 
-						for (int j = 0; allAnd && j < subQuery.Where.SearchCondition.Conditions.Count - 1; j++)
+						for (var j = 0; allAnd && j < subQuery.Where.SearchCondition.Conditions.Count - 1; j++)
 						{
-							SqlQuery.Condition cond = subQuery.Where.SearchCondition.Conditions[j];
+							var cond = subQuery.Where.SearchCondition.Conditions[j];
 
 							if (cond.IsOr)
 								allAnd = false;
@@ -181,13 +181,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (!allAnd)
 							continue;
 
-						bool modified = false;
+						var modified = false;
 
-						for (int j = 0; j < subQuery.Where.SearchCondition.Conditions.Count; j++)
+						for (var j = 0; j < subQuery.Where.SearchCondition.Conditions.Count; j++)
 						{
-							SqlQuery.Condition cond = subQuery.Where.SearchCondition.Conditions[j];
+							var cond = subQuery.Where.SearchCondition.Conditions[j];
 
-							bool hasParentRef = null != new QueryVisitor().Find(cond, delegate(IQueryElement e)
+							var hasParentRef = null != new QueryVisitor().Find(cond, delegate(IQueryElement e)
 							{
 								switch (e.ElementType)
 								{
@@ -200,11 +200,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							if (!hasParentRef)
 								continue;
 
-							Dictionary<IQueryElement,IQueryElement> replaced = new Dictionary<IQueryElement,IQueryElement>();
+							var replaced = new Dictionary<IQueryElement,IQueryElement>();
 
-							SqlQuery.Condition nc = new QueryVisitor().Convert(cond, delegate(IQueryElement e)
+							var nc = new QueryVisitor().Convert(cond, delegate(IQueryElement e)
 							{
-								IQueryElement ne = e;
+								var ne = e;
 
 								switch (e.ElementType)
 								{
@@ -242,7 +242,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								return ne;
 							});
 
-							if (nc != null && !object.ReferenceEquals(nc, cond))
+							if (nc != null && !ReferenceEquals(nc, cond))
 							{
 								modified = true;
 

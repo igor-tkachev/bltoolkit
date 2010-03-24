@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
@@ -83,7 +83,7 @@ namespace BLToolkit.Data.Linq
 
 		public class ExprColumn : QueryField
 		{
-			public ExprColumn(QuerySource source, ParseInfo expr, string alias)
+			public ExprColumn(QuerySource source, Expression expr, string alias)
 			{
 				QuerySource = source;
 				Expr        = expr;
@@ -102,7 +102,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public readonly QuerySource QuerySource;
-			public readonly ParseInfo   Expr;
+			public readonly Expression  Expr;
 
 			readonly string _alias;
 			FieldIndex[]    _index;
@@ -171,7 +171,7 @@ namespace BLToolkit.Data.Linq
 				if (_sqlExpression != null)
 					return _sqlExpression.CanBeNull();
 
-				return SqlDataType.CanBeNull(Expr.Expr.Type);
+				return SqlDataType.CanBeNull(Expr.Type);
 			}
 
 			public override ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -260,8 +260,7 @@ namespace BLToolkit.Data.Linq
 					{
 						var sub = QuerySource.BaseQuery;
 						var idx = sub.Fields.IndexOf(Field);
-
-						MemberInfo mi = sub.GetMember(Field);
+						var mi  = sub.GetMember(Field);
 
 						foreach (var union in QuerySource.Unions)
 						{

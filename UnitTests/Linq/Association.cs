@@ -214,8 +214,9 @@ namespace Data.Linq
 		[Test]
 		public void Count1()
 		{
-			var expected = from p in Parent where p.Children.Count > 2 select p;
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected, from p in db.Parent where p.Children.Count > 2 select p));
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from p in    Parent where p.Children.Count > 2 select p,
+				from p in db.Parent where p.Children.Count > 2 select p));
 		}
 
 		[Test]

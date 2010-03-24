@@ -21,9 +21,9 @@ namespace BLToolkit.Data.Linq
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, LambdaInfo lambda)
 				: base(sqlQuery, lambda)
 			{
-				var type = TypeHelper.GetGenericType(typeof(IEnumerable<>), lambda.Body.Expr.Type);
+				var type = TypeHelper.GetGenericType(typeof(IEnumerable<>), lambda.Body.Type);
 
-				OriginalType = type == null ? lambda.Body.Expr.Type : type.GetGenericArguments()[0];
+				OriginalType = type == null ? lambda.Body.Type : type.GetGenericArguments()[0];
 				_objectType  = GetObjectType(OriginalType, mappingSchema);
 				SqlTable     = new SqlTable(mappingSchema, _objectType);
 
@@ -389,10 +389,9 @@ namespace BLToolkit.Data.Linq
 			public Expr(SqlQuery sqlBilder, LambdaInfo lambda, params QuerySource[] baseQueries)
 				: base(sqlBilder, lambda, baseQueries)
 			{
-				if (lambda.Body.Expr is NewExpression)
+				if (lambda.Body is NewExpression)
 				{
-					var body = lambda.Body.ConvertTo<NewExpression>();
-					var ex   = body.Expr;
+					var ex = (NewExpression)lambda.Body;
 
 					if (ex.Members == null)
 						return;
@@ -406,16 +405,15 @@ namespace BLToolkit.Data.Linq
 
 						var field = 
 							GetBaseField(lambda, ex.Arguments[i]) ??
-							new ExprColumn(this, body.Create(ex.Arguments[i], body.Index(ex.Arguments, New.Arguments, i)), member.Name);
+							new ExprColumn(this, ex.Arguments[i], member.Name);
 
 						Fields.Add(field);
 						Members.Add(member, field);
 					}
 				}
-				else if (lambda.Body.Expr is MemberInitExpression)
+				else if (lambda.Body is MemberInitExpression)
 				{
-					var body = lambda.Body.ConvertTo<MemberInitExpression>();
-					var ex   = body.Expr;
+					var ex = (MemberInitExpression)lambda.Body;
 
 					for (var i = 0; i < ex.Bindings.Count; i++)
 					{
@@ -427,13 +425,8 @@ namespace BLToolkit.Data.Linq
 
 						if (binding is MemberAssignment)
 						{
-							var ma = binding as MemberAssignment;
-
-							var piBinding    = body.     Create(ma.Expression, body.Index(ex.Bindings, MemberInit.Bindings, i));
-							var piAssign     = piBinding.Create(ma.Expression, piBinding.ConvertExpressionTo<MemberAssignment>());
-							var piExpression = piAssign. Create(ma.Expression, piAssign.Property(MemberAssignmentBind.Expression));
-
-							var field = GetBaseField(lambda, piExpression) ?? new ExprColumn(this, piExpression, member.Name);
+							var ma    = binding as MemberAssignment;
+							var field = GetBaseField(lambda, ma.Expression) ?? new ExprColumn(this, ma.Expression, member.Name);
 
 							Fields.Add(field);
 							Members.Add(member, field);
@@ -747,7 +740,7 @@ namespace BLToolkit.Data.Linq
 			{
 				if (Lambda.Body.NodeType == ExpressionType.MemberAccess)
 				{
-					var ex = (MemberExpression)Lambda.Body.Expr;
+					var ex = (MemberExpression)Lambda.Body;
 
 					if (ex.Member == mi)
 						return Fields[0];
@@ -768,8 +761,8 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(LambdaInfo lambda, Expression expr, int currentMember)
 			{
-				if (Lambda.Body.Expr is MemberExpression && expr is MemberExpression)
-					if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body.Expr).Member)
+				if (Lambda.Body is MemberExpression && expr is MemberExpression)
+					if (((MemberExpression)expr).Member == ((MemberExpression)Lambda.Body).Member)
 						return _field;
 
 				return GetBaseField(lambda, expr);
@@ -887,7 +880,7 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(LambdaInfo lambda, Expression expr, int currentMember)
 			{
-				if (expr == Lambda.Body.Expr)
+				if (expr == Lambda.Body)
 					return null;
 
 				var field = SourceColumn.GetField(lambda, expr, currentMember);
@@ -1087,7 +1080,7 @@ namespace BLToolkit.Data.Linq
 
 		private        List<QueryField> _fields = new List<QueryField>();
 		public virtual List<QueryField>  Fields     { get { return _fields; } }
-		public virtual Type              ObjectType { get { return Lambda.Body.Expr.Type; }}
+		public virtual Type              ObjectType { get { return Lambda.Body.Type; }}
 
 		public abstract QueryField       GetField    (LambdaInfo lambda, Expression expr, int currentMember);
 		public abstract QueryField       GetField    (MemberInfo mi);
@@ -1143,7 +1136,7 @@ namespace BLToolkit.Data.Linq
 						throw new InvalidOperationException();
 
 					for (var i = 0; i < Lambda.Parameters.Length; i++)
-						if (Lambda.Parameters[i].Expr == expr)
+						if (Lambda.Parameters[i] == expr)
 							return Sources[i];
 				}
 
@@ -1189,8 +1182,8 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.Parameter :
 						if (lambda != null)
 						{
-							foreach (ParseInfo<ParameterExpression> p in lambda.Parameters)
-								if (expr == p.Expr)
+							foreach (var p in lambda.Parameters)
+								if (expr == p)
 									return list;
 
 							return null;

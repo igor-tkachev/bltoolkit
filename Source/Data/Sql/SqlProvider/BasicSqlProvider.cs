@@ -2165,8 +2165,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 												{
 													switch (be1.Operation)
 													{
-														case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
-														case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
+														case "+":
+															{
+																var value = (int)be1v2.Value + (int)v2.Value;
+																var oper  = be1.Operation;
+
+																if (value < 0)
+																{
+																	value = - value;
+																	oper  = "-";
+																}
+
+																return new SqlBinaryExpression(be.SystemType, be1.Expr1, oper, new SqlValue(value), be.Precedence);
+															}
+
+														case "-":
+															{
+																var value = (int)be1v2.Value - (int)v2.Value;
+																var oper  = be1.Operation;
+
+																if (value < 0)
+																{
+																	value = - value;
+																	oper  = "+";
+																}
+
+																return new SqlBinaryExpression(be.SystemType, be1.Expr1, oper, new SqlValue(value), be.Precedence);
+															}
 													}
 												}
 											}
@@ -2182,11 +2207,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 											if (be1.Expr2 is SqlValue)
 											{
-												return new SqlBinaryExpression(
-													be1.SystemType,
-													be1.Expr1,
-													be1.Operation,
-													new SqlValue(string.Concat(((SqlValue)be1.Expr2).Value, v2.Value)));
+												var value = ((SqlValue)be1.Expr2).Value;
+
+												if (value is string)
+													return new SqlBinaryExpression(
+														be1.SystemType,
+														be1.Expr1,
+														be1.Operation,
+														new SqlValue(string.Concat(value, v2.Value)));
 											}
 										}
 									}
@@ -2253,8 +2281,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 												{
 													switch (be1.Operation)
 													{
-														case "+": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value - (int)v2.Value), be.Precedence);
-														case "-": return new SqlBinaryExpression(be.SystemType, be1.Expr1, be1.Operation, new SqlValue((int)be1v2.Value + (int)v2.Value), be.Precedence);
+														case "+":
+															{
+																var value = (int)be1v2.Value - (int)v2.Value;
+																var oper  = be1.Operation;
+
+																if (value < 0)
+																{
+																	value = -value;
+																	oper  = "-";
+																}
+
+																return new SqlBinaryExpression(be.SystemType, be1.Expr1, oper, new SqlValue(value), be.Precedence);
+															}
+
+														case "-":
+															{
+																var value = (int)be1v2.Value + (int)v2.Value;
+																var oper  = be1.Operation;
+
+																if (value < 0)
+																{
+																	value = -value;
+																	oper  = "+";
+																}
+
+																return new SqlBinaryExpression(be.SystemType, be1.Expr1, oper, new SqlValue(value), be.Precedence);
+															}
 													}
 												}
 											}

@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+using BLToolkit.Common;
+
 namespace BLToolkit.Data.Linq
 {
+	using FExpr = Func<Expression>;
+	using FParm = Func<ParameterExpression,bool>;
+	using FTest = Func<Expression, bool>;
+
 	static class ExpressionHelper
 	{
 		#region IsConstant
@@ -43,6 +50,343 @@ namespace BLToolkit.Data.Linq
 				return true;
 			}
 
+			return false;
+		}
+
+		public static bool IsConstant<T>(this Expression expr, Func<T,ConstantExpression,bool> func)
+		{
+			if (expr.NodeType == ExpressionType.Constant)
+			{
+				var c = expr as ConstantExpression;
+				return c.Value is T? func((T)c.Value, c): false;
+			}
+
+			return false;
+		}
+
+		public static bool IsConstant<T>(this Expression expr)
+		{
+			return IsConstant<T>(expr, (_,__) => true);
+		}
+
+		#endregion
+
+		#region IsMethod
+
+		//[DebuggerStepThrough]
+		public static bool IsMethod(
+			this MethodCallExpression       expr,
+			Type                            declaringType,
+			string                          methodName,
+			FTest[]                         args,
+			Func<MethodCallExpression,bool> func)
+		{
+			var dtype  = expr.Method.DeclaringType;
+
+			if ((declaringType == null && (dtype == typeof(Queryable) || dtype == typeof(Enumerable) || dtype == typeof(Extensions)) || declaringType == dtype) &&
+				(methodName == null || expr.Method.Name == methodName) &&
+				expr.Arguments.Count == args.Length)
+			{
+				for (var i = 0; i < args.Length; i++)
+					if (!args[i](expr.Arguments[i]))
+						return false;
+
+				return func(expr);
+			}
+
+			return false;
+		}
+
+		public static bool IsMethod(this Expression expr, Type declaringType, string methodName, FTest[] args, Func<MethodCallExpression,bool> func)
+		{
+			return
+				expr.NodeType == ExpressionType.Call?
+					IsMethod((MethodCallExpression)expr, declaringType, methodName, args, func):
+					false;
+		}
+
+		public static bool IsMethod(this Expression expr, Type declaringType, string methodName, params FTest[] args)
+		{
+			return IsMethod(expr, declaringType, methodName, args, p => true);
+		}
+
+		public static bool IsMethod(this Expression expr, Func<MethodCallExpression,bool> func)
+		{
+			return expr.NodeType == ExpressionType.Call? func((MethodCallExpression)expr): false;
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression        pi,
+			Func<Expression,LambdaInfo,bool> lambda)
+		{
+			Expression seq = null;
+			return IsMethod(pi, null, null, new FTest[]
+			{
+				p => { seq = p; return true; },
+				l => l.CheckIfLambda(1, p => lambda(seq, p))
+			}, p => true);
+		}
+
+		//[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression pi,
+			string                    methodName,
+			int                       nparams1,
+			Action<Expression>        seq,
+			Action<LambdaInfo>        parms)
+		{
+			Expression seqInfo = null;
+			LambdaInfo lambda  = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+				{
+					p => { seqInfo = p; return true; },
+					l => l.IsLambda(nparams1, lm => lambda = lm),
+				}, p => true))
+			{
+				seq(seqInfo);
+				lambda.MethodInfo = pi.Method;
+				parms(lambda);
+				return true;
+			}
+
+			return false;
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression     pi,
+			string                        methodName,
+			int                           nparams1,
+			int                           nparams2,
+			Action<Expression>            seq,
+			Action<LambdaInfo,LambdaInfo> parms)
+		{
+			Expression seqInfo = null;
+			LambdaInfo lambda1 = null;
+			LambdaInfo lambda2 = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+				{
+					p => { seqInfo = p; return true; },
+					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
+					l => l.IsLambda(nparams2, l2 => lambda2 = l2),
+				}, p => true))
+			{
+				seq(seqInfo);
+				parms(lambda1, lambda2);
+				return true;
+			}
+
+			return false;
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression                pi,
+			string                                   methodName,
+			int                                      nparams1,
+			int                                      nparams2,
+			int                                      nparams3,
+			Action<Expression>                       seq,
+			Action<LambdaInfo,LambdaInfo,LambdaInfo> parms)
+		{
+			Expression seqInfo = null;
+			LambdaInfo lambda1 = null;
+			LambdaInfo lambda2 = null;
+			LambdaInfo lambda3 = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+				{
+					p => { seqInfo = p; return true; },
+					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
+					l => l.IsLambda(nparams2, l2 => lambda2 = l2),
+					l => l.IsLambda(nparams3, l3 => lambda3 = l3),
+				}, p => true))
+			{
+				seq(seqInfo);
+				parms(lambda1, lambda2, lambda3);
+				return true;
+			}
+
+			return false;
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression                           pi,
+			string                                              methodName,
+			Action<Expression>                                  seq,
+			Action<Expression,LambdaInfo,LambdaInfo,LambdaInfo> parms)
+		{
+			Expression seqInfo = null;
+			Expression inner   = null;
+			LambdaInfo lambda1 = null;
+			LambdaInfo lambda2 = null;
+			LambdaInfo lambda3 = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+				{
+					p => { seqInfo = p;return true; },
+					p => { inner   = p; return true; },
+					l => l.IsLambda(1, l1 => lambda1 = l1),
+					l => l.IsLambda(1, l2 => lambda2 = l2),
+					l => l.IsLambda(2, l3 => lambda3 = l3),
+				}, p => true))
+			{
+				seq(seqInfo);
+				parms(inner, lambda1, lambda2, lambda3);
+				return true;
+			}
+
+			return false;
+		}
+
+		//[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression pi,
+			string                    methodName,
+			Func<Expression,bool>     action)
+		{
+			return IsMethod(pi, null, methodName, new [] { action }, p => true);
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression pi,
+			string                    methodName,
+			Action<Expression>        seq,
+			Func<Expression,bool>     action)
+		{
+			return IsMethod(pi, null, methodName, new [] { p => { seq(p); return true; }, action }, _ => true);
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod2(
+			this MethodCallExpression pi,
+			string                    methodName,
+			Action<Expression>        seq,
+			Func<Expression,bool>     action)
+		{
+			return IsMethod(pi, typeof(Queryable), methodName, new [] { p => { seq(p); return true; }, action }, _ => true);
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression     pi,
+			string                        methodName,
+			Action<Expression>            seq,
+			Action<LambdaInfo,Expression> action)
+		{
+			Expression seqInfo = null;
+			LambdaInfo lambda  = null;
+			Expression expr    = null;
+
+			if (IsMethod(pi, null, methodName, new FTest[]
+			{
+				p  => { seqInfo = p; return true; },
+				l  => l.IsLambda(1, l1 => lambda = l1),
+				ex => { expr = ex; return true;  }
+			}, _ => true))
+			{
+				seq(seqInfo);
+				action(lambda, expr);
+				return true;
+			}
+
+			return false;
+		}
+
+		[DebuggerStepThrough]
+		public static bool IsQueryableMethod(
+			this MethodCallExpression pi,
+			Func<Expression,bool>     func)
+		{
+			return IsMethod(pi, null, null, new [] { func }, _ => true);
+		}
+
+		#endregion
+
+		#region IsLambda
+
+		public static bool IsLambda(this Expression expr, FParm[] parameters, FTest body, Func<LambdaExpression,bool> func)
+		{
+			if (expr.NodeType == ExpressionType.Quote)
+				expr = ((UnaryExpression)expr).Operand;
+
+			if (expr.NodeType == ExpressionType.Lambda)
+			{
+				var lambda = (LambdaExpression)expr;
+
+				if (lambda.Parameters.Count != parameters.Length)
+					return false;
+
+				for (var i = 0; i < parameters.Length; i++)
+					if (!parameters[i](lambda.Parameters[i]))
+						return false;
+
+				return body(lambda.Body) && func(lambda);;
+			}
+			
+			return false;
+		}
+
+		public static bool IsLambda<T>(this Expression expr, FTest body, Func<LambdaExpression,bool> func)
+		{
+			return IsLambda(expr, new FParm[] { e => e.Type == typeof(T) }, body, func);
+		}
+
+		static readonly FParm[] _singleParam = new FParm[] { p => true };
+
+		public static bool IsLambda(this Expression expr, int parameters, Func<Expression,bool> func)
+		{
+			var parms = parameters == 0? Array<FParm>.Empty : parameters == 1? _singleParam : new FParm[parameters];
+
+			if (parameters > 1)
+				for (var i = 0; i < parms.Length; i++)
+					parms[i] = _singleParam[0];
+
+			return IsLambda(expr, parms, func, p => true);
+		}
+
+		static FParm GetFParm(ParameterExpression[] parms, int n)
+		{
+			return p => { parms[n] = p; return true; };
+		}
+
+		public static bool IsLambda(this Expression expr, int nparms, Action<LambdaInfo> lambda)
+		{
+			var parameters = new ParameterExpression[nparms];
+
+			return IsLambda(
+				expr,
+				parameters.Select((_,i) => GetFParm(parameters, i)).ToArray(),
+				body => { lambda(new LambdaInfo(body, parameters)); return true; },
+				_    => true);
+		}
+
+		public static bool CheckIfLambda(this Expression expr, int nparms, Func<LambdaInfo,bool> lambda)
+		{
+			var parameters = new ParameterExpression[nparms];
+
+			return IsLambda(
+				expr,
+				parameters.Select((_,i) => GetFParm(parameters, i)).ToArray(),
+				body => lambda(new LambdaInfo(body, parameters)),
+				_    => true);
+		}
+
+		#endregion
+
+		#region Match
+
+		public static bool Match<T>(this T expr, params Func<T,bool>[] matches)
+			where T : Expression
+		{
+			foreach (var match in matches)
+				if (match(expr))
+					return true;
 			return false;
 		}
 
@@ -773,12 +1117,16 @@ namespace BLToolkit.Data.Linq
 			return null;
 		}
 
-		static T Find<T>(IEnumerable<T> source, Func<Expression,bool> func)
+		static Expression Find<T>(IEnumerable<T> source, Func<Expression,bool> func)
 			where T : Expression
 		{
 			foreach (var item in source)
-				if (func(item))
-					return item;
+			{
+				var f = Find(item, func);
+				if (f != null)
+					return f;
+			}
+
 			return null;
 		}
 
@@ -830,7 +1178,8 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Not:
 				case ExpressionType.Quote:
 				case ExpressionType.TypeAs:
-				case ExpressionType.UnaryPlus: return Find(((UnaryExpression)expr).Operand, func);
+				case ExpressionType.UnaryPlus:
+					return Find(((UnaryExpression)expr).Operand, func);
 
 				case ExpressionType.Call:
 					{
@@ -878,7 +1227,8 @@ namespace BLToolkit.Data.Linq
 							Find(e.Initializers,  ex => Find(ex.Arguments, func));
 					}
 
-				case ExpressionType.MemberAccess: Find(((MemberExpression)expr).Expression, func); break;
+				case ExpressionType.MemberAccess:
+					return Find(((MemberExpression)expr).Expression, func);
 
 				case ExpressionType.MemberInit:
 					{
@@ -886,9 +1236,9 @@ namespace BLToolkit.Data.Linq
 						{
 							switch (b.BindingType)
 							{
-								case MemberBindingType.Assignment    : Find(((MemberAssignment)b).   Expression,   func);                         break;
-								case MemberBindingType.ListBinding   : Find(((MemberListBinding)b).  Initializers, p => Find(p.Arguments, func)); break;
-								case MemberBindingType.MemberBinding : Find(((MemberMemberBinding)b).Bindings,     modify);                       break;
+								case MemberBindingType.Assignment    : return Find(((MemberAssignment)b).   Expression,   func);
+								case MemberBindingType.ListBinding   : return Find(((MemberListBinding)b).  Initializers, p => Find(p.Arguments, func));
+								case MemberBindingType.MemberBinding : return Find(((MemberMemberBinding)b).Bindings,     modify);
 							}
 
 							return null;
@@ -914,6 +1264,19 @@ namespace BLToolkit.Data.Linq
 
 		#region Convert
 
+		/*
+		public class ConvertionContext
+		{
+			public bool StopWalking;
+
+			public Expression ClearStopWalkingFlag(Expression expr)
+			{
+				StopWalking = false;
+				return expr;
+			}
+		}
+		*/
+
 		static IEnumerable<T> Convert<T>(IEnumerable<T> source, Func<T,T> func)
 			where T : class
 		{
@@ -938,7 +1301,7 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var item in source)
 			{
-				var e = func(item);
+				var e = Convert(item, func);
 				list.Add((T)e);
 				modified = modified || e != item;
 			}
@@ -978,15 +1341,18 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.Subtract:
 				case ExpressionType.SubtractChecked:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as BinaryExpression;
 						var c = Convert(e.Conversion, func);
 						var l = Convert(e.Left,       func);
 						var r = Convert(e.Right,      func);
 
-						if (c != e.Conversion || l != e.Left || r != e.Right)
-							expr = Expression.MakeBinary(expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c);
-
-						return func(expr);
+						return c != e.Conversion || l != e.Left || r != e.Right ?
+							Expression.MakeBinary(expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c):
+							expr;
 					}
 
 				case ExpressionType.ArrayLength:
@@ -999,66 +1365,81 @@ namespace BLToolkit.Data.Linq
 				case ExpressionType.TypeAs:
 				case ExpressionType.UnaryPlus:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as UnaryExpression;
 						var o = Convert(e.Operand, func);
 
-						if (o != e.Operand)
-							expr = Expression.MakeUnary(expr.NodeType, o, e.Type, e.Method);
-
-						return func(expr);
+						return o != e.Operand ?
+							Expression.MakeUnary(expr.NodeType, o, e.Type, e.Method) :
+							expr;
 					}
 
 				case ExpressionType.Call:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as MethodCallExpression;
 						var o = Convert(e.Object,    func);
 						var a = Convert(e.Arguments, func);
 
-						if (o != e.Object || a != e.Arguments)
-							expr = Expression.Call(o, e.Method, a);
-
-						return func(expr);
+						return o != e.Object || a != e.Arguments ? 
+							Expression.Call(o, e.Method, a) : 
+							expr;
 					}
 
 				case ExpressionType.Conditional:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as ConditionalExpression;
 						var s = Convert(e.Test,    func);
 						var t = Convert(e.IfTrue,  func);
 						var f = Convert(e.IfFalse, func);
 
-						if (s != e.Test || t != e.IfTrue || f != e.IfFalse)
-							expr = Expression.Condition(s, t, f);
-
-						return func(expr);
+						return s != e.Test || t != e.IfTrue || f != e.IfFalse ?
+							Expression.Condition(s, t, f) :
+							expr;
 					}
 
 				case ExpressionType.Invoke:
 					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
 						var e  = expr as InvocationExpression;
 						var ex = Convert(e.Expression, func);
 						var a  = Convert(e.Arguments,  func);
 
-						if (ex != e.Expression || a != e.Arguments)
-							expr = Expression.Invoke(ex, a);
-
-						return func(expr);
+						return ex != e.Expression || a != e.Arguments ? Expression.Invoke(ex, a) : expr;
 					}
 
 				case ExpressionType.Lambda:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as LambdaExpression;
 						var b = Convert(e.Body,       func);
 						var p = Convert(e.Parameters, func);
 
-						if (b != e.Body || p != e.Parameters)
-							expr = Expression.Lambda(b, p.ToArray());
-
-						return func(expr);
+						return b != e.Body || p != e.Parameters ? Expression.Lambda(b, p.ToArray()) : expr;
 					}
 
 				case ExpressionType.ListInit:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as ListInitExpression;
 						var n = Convert(e.NewExpression, func);
 						var i = Convert(e.Initializers,  p =>
@@ -1067,25 +1448,29 @@ namespace BLToolkit.Data.Linq
 							return args != p.Arguments? Expression.ElementInit(p.AddMethod, args): p;
 						});
 
-						if (n != e.NewExpression || i != e.Initializers)
-							expr = Expression.ListInit((NewExpression)n, i);
-
-						return func(expr);
+						return n != e.NewExpression || i != e.Initializers ?
+							Expression.ListInit((NewExpression)n, i) :
+							expr;
 					}
 
 				case ExpressionType.MemberAccess:
 					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
 						var e  = expr as MemberExpression;
 						var ex = Convert(e.Expression, func);
 
-						if (ex != e.Expression)
-							expr = Expression.MakeMemberAccess(ex, e.Member);
-
-						return func(expr);
+						return ex != e.Expression ? Expression.MakeMemberAccess(ex, e.Member) : expr;
 					}
 
 				case ExpressionType.MemberInit:
 					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
 						Func<MemberBinding,MemberBinding> modify = null; modify = b =>
 						{
 							switch (b.BindingType)
@@ -1135,56 +1520,63 @@ namespace BLToolkit.Data.Linq
 						var ne = Convert(e.NewExpression, func);
 						var bb = Convert(e.Bindings,      modify);
 
-						if (ne != e.NewExpression || bb != e.Bindings)
-							expr = Expression.MemberInit((NewExpression)ne, bb);
-
-						return func(expr);
+						return ne != e.NewExpression || bb != e.Bindings ?
+							Expression.MemberInit((NewExpression)ne, bb) :
+							expr;
 					}
 
 				case ExpressionType.New:
 					{
+						var ex = func(expr);
+						if (ex != expr)
+							return ex;
+
 						var e = expr as NewExpression;
 						var a = Convert(e.Arguments, func);
 
-						if (a != e.Arguments)
-							expr = e.Members == null?
-								Expression.New(e.Constructor, a):
-								Expression.New(e.Constructor, a, e.Members);
-
-						return func(expr);
+						return a != e.Arguments ?
+							e.Members == null ?
+								Expression.New(e.Constructor, a) :
+								Expression.New(e.Constructor, a, e.Members) :
+							expr;
 					}
 
 				case ExpressionType.NewArrayBounds:
 					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
 						var e  = expr as NewArrayExpression;
 						var ex = Convert(e.Expressions, func);
 
-						if (ex != e.Expressions)
-							expr = Expression.NewArrayBounds(e.Type, ex);
-
-						return func(expr);
+						return ex != e.Expressions ? Expression.NewArrayBounds(e.Type, ex) : expr;
 					}
 
 				case ExpressionType.NewArrayInit:
 					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
 						var e  = expr as NewArrayExpression;
 						var ex = Convert(e.Expressions, func);
 
-						if (ex != e.Expressions)
-							expr = Expression.NewArrayInit(e.Type.GetElementType(), ex);
-
-						return func(expr);
+						return ex != e.Expressions ?
+							Expression.NewArrayInit(e.Type.GetElementType(), ex) :
+							expr;
 					}
 
 				case ExpressionType.TypeIs:
 					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
 						var e  = expr as TypeBinaryExpression;
 						var ex = Convert(e.Expression, func);
 
-						if (ex != e.Expression)
-							expr = Expression.TypeIs(ex, e.Type);
-
-						return func(expr);
+						return ex != e.Expression ? Expression.TypeIs(ex, e.Type) : expr;
 					}
 
 				case ExpressionType.Constant : return func(expr);
@@ -1223,6 +1615,7 @@ namespace BLToolkit.Data.Linq
 				{
 					case ExpressionType.Call         :
 					case ExpressionType.MemberAccess :
+					case ExpressionType.New          :
 						if (!accessors.ContainsKey(e))
 							accessors.Add(e, p);
 						break;

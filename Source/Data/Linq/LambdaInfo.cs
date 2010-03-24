@@ -6,20 +6,21 @@ namespace BLToolkit.Data.Linq
 {
 	class LambdaInfo
 	{
-		public LambdaInfo(ParseInfo b, params ParseInfo<ParameterExpression>[] parms)
+		public LambdaInfo(Expression b, params ParameterExpression[] parms)
 		{
 			Body       = b;
 			Parameters = parms;
 		}
 
-		public ParseInfo                        Body;
-		public ParseInfo<ParameterExpression>[] Parameters;
-		public MethodInfo                       MethodInfo;
+		public Expression            Body;
+		public ParameterExpression[] Parameters;
+		public MethodInfo            MethodInfo;
 
+		[Obsolete]
 		public LambdaInfo ConvertTo<T>()
 			where T : Expression
 		{
-			return new LambdaInfo(Body.ConvertTo<T>(), Parameters);
+			return new LambdaInfo((T)Body, Parameters);
 		}
 	}
 }

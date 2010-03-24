@@ -303,7 +303,7 @@ namespace Data.Linq
 		public void DateAddHour()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select              Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue). Value.Hour,
+				from t in    Types select           Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue). Value.Hour,
 				from t in db.Types select Sql.AsSql(Sql.DateAdd(Sql.DateParts.Hour, 1, t.DateTimeValue)).Value.Hour));
 		}
 
@@ -433,6 +433,14 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in    Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44),
 				from p in db.Types select new DateTime(p.DateTimeValue.Year, 10, 1, 20, 35, 44)));
+		}
+
+		[Test]
+		public void NewDateTime5()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in from p in    Types select new DateTime(p.DateTimeValue.Year + 1, 10, 1) where t.Month == 10 select t,
+				from t in from p in db.Types select new DateTime(p.DateTimeValue.Year + 1, 10, 1) where t.Month == 10 select t));
 		}
 	}
 }

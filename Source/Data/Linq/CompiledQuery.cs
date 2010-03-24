@@ -54,26 +54,21 @@ namespace BLToolkit.Data.Linq
 		{
 			var ps = Expression.Parameter(typeof(object[]), "ps");
 
-			var info = ParseInfo.CreateRoot(query.Body, null).Walk(pi =>
+			var info = query.Body.Convert(pi =>
 			{
 				switch (pi.NodeType)
 				{
 					case ExpressionType.Parameter:
-						return new ParseInfo<Expression>
-						{
-							Expr =
-								Expression.Convert(
-									Expression.ArrayIndex(
-										ps,
-										Expression.Constant(query.Parameters.IndexOf((ParameterExpression)pi.Expr))),
-									pi.Expr.Type),
-							IsReplaced  = true,
-							StopWalking = true
-						};
+						return 
+							Expression.Convert(
+								Expression.ArrayIndex(
+									ps,
+									Expression.Constant(query.Parameters.IndexOf((ParameterExpression)pi))),
+								pi.Type);
 
 					case ExpressionType.Call:
 						{
-							var expr = (MethodCallExpression)pi.Expr;
+							var expr = (MethodCallExpression)pi;
 
 							if (expr.Method.DeclaringType == typeof(Queryable))
 							{
@@ -81,12 +76,7 @@ namespace BLToolkit.Data.Linq
 								var helper = (ITableHelper)Activator.CreateInstance(
 									typeof (TableHelper<>).MakeGenericType(qtype == null ? expr.Type : qtype.GetGenericArguments()[0]));
 
-								return new ParseInfo<Expression>
-								{
-									Expr        = helper.CallTable(query, expr, ps, qtype != null),
-									IsReplaced  = true,
-									StopWalking = true
-								};
+								return helper.CallTable(query, expr, ps, qtype != null);
 							}
 						}
 
@@ -96,7 +86,7 @@ namespace BLToolkit.Data.Linq
 				return pi;
 			});
 
-			return Expression.Lambda<Func<object[],object>>(Expression.Convert(info.Expr, typeof(object)), ps).Compile();
+			return Expression.Lambda<Func<object[],object>>(Expression.Convert(info, typeof(object)), ps).Compile();
 		}
 
 		#region Invoke
