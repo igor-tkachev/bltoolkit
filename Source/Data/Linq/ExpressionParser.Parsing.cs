@@ -166,7 +166,7 @@ namespace BLToolkit.Data.Linq
 													var q =
 														from a in args
 														where
-															a.a.NodeType != ExpressionType.Parameter &&
+															a.a.NodeType == ExpressionType.Call &&
 															a.a.Type != typeof(string) &&
 															!a.a.Type.IsArray &&
 															TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
