@@ -260,8 +260,8 @@ namespace Data.Linq
 				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
 		}
 
-		//[Test]
-		public void LetTest()
+		[Test]
+		public void LetTest1()
 		{
 			ForEachProvider(db => AreEqual(
 				from p in Parent
@@ -270,6 +270,20 @@ namespace Data.Linq
 				from p in db.Parent
 				let children = p.Children.Where(c => c.ParentID > 1)
 				select children.Sum(c => c.ChildID)));
+		}
+
+		[Test]
+		public void LetTest2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				let children1 = p.Children.Where(c => c.ParentID > 1)
+				let children2 = children1.Where(c => c.ParentID < 10)
+				select children2.Sum(c => c.ChildID),
+				from p in db.Parent
+				let children1 = p.Children.Where(c => c.ParentID > 1)
+				let children2 = children1.Where(c => c.ParentID < 10)
+				select children2.Sum(c => c.ChildID)));
 		}
 	}
 }

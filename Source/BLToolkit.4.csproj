@@ -146,6 +146,10 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\ExpressionHelper.cs" />
+    <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
+    <Compile Include="Data\Linq\ExpressionParser.Parsing.cs" />
+    <Compile Include="Data\Linq\ExpressionParser.QueryBuilder.cs" />
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\Expressions.cs" />
@@ -165,10 +169,6 @@
     <Compile Include="Data\Linq\SqlPropertyAttribute.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\ExpressionInfo.cs" />
-    <Compile Include="Data\Linq\ExpressionParser.cs" />
-    <Compile Include="Data\Linq\ParseInfoExtension.cs" />
-    <Compile Include="Data\Linq\ParseInfoT.cs" />
-    <Compile Include="Data\Linq\ParseInfo.cs" />
     <Compile Include="Data\Linq\QueryField.cs" />
     <Compile Include="Data\Linq\QuerySource.cs" />
     <Compile Include="Data\Linq\ReflectionHelper.cs" />
@@ -218,6 +218,7 @@
     <Compile Include="Data\Sql\SqlTable.cs" />
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlValue.cs" />
+    <Compile Include="Linq\Extensions.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />
     <Compile Include="Mapping\Association.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />

@@ -19,6 +19,8 @@ namespace BLToolkit.Data.Linq
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
+		#region Properties & Fields
+
 		public ExpressionInfo<T>     Next;
 		public Expression            Expression;
 		public ParameterExpression[] Parameters;
@@ -34,6 +36,8 @@ namespace BLToolkit.Data.Linq
 		{
 			get { return _sqlProvider ?? (_sqlProvider = DataProvider.CreateSqlProvider()); }
 		}
+
+		#endregion
 
 		#region GetInfo
 
@@ -1111,7 +1115,6 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
-
 
 		#endregion
 	}

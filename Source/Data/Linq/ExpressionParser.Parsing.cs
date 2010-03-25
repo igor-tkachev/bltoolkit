@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 	using DataProvider;
 	using Mapping;
@@ -58,8 +59,6 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Parsing
-
 		#region Parse
 
 		public ExpressionInfo<T> Parse(
@@ -71,15 +70,14 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine(expression);
 			ParsingTracer.IncIndentLevel();
 
-			if (parameters != null)
-				expression = ConvertParameters(expression, parameters);
+			ExpressionAccessors = expression.GetExpressionAccessors(ExpressionParam);
+
+			expression = ConvertExpression(expression, parameters);
 
 			_info.DataProvider  = dataProvider;
 			_info.MappingSchema = mappingSchema;
 			_info.Expression    = expression;
 			_info.Parameters    = parameters;
-
-			ExpressionAccessors = expression.GetExpressionAccessors(ExpressionParam);
 
 			expression.Match(
 				//
@@ -126,25 +124,111 @@ namespace BLToolkit.Data.Linq
 			return _info;
 		}
 
-		static Expression ConvertParameters(Expression expression, ParameterExpression[] parameters)
+		static Expression ConvertExpression(Expression expression, ParameterExpression[] parameters)
 		{
-			return expression.Convert(pi =>
+			var result = expression;
+
+			do
 			{
-				if (pi.NodeType == ExpressionType.Parameter)
+				expression = result;
+
+				// Find let subqueries.
+				//
+				var dic = new Dictionary<MemberInfo,Expression>();
+
+				expression.Visit(ex =>
 				{
-					var idx = Array.IndexOf(parameters, (ParameterExpression)pi);
+					switch (ex.NodeType)
+					{
+						case ExpressionType.Call:
+							{
+								var me = (MethodCallExpression)ex;
 
-					if (idx > 0)
-						return
-							Expression.Convert(
-								Expression.ArrayIndex(
-									ParametersParam,
-									Expression.Constant(Array.IndexOf(parameters, (ParameterExpression)pi))),
-								pi.Type);
-				}
+								LambdaInfo lambda = null;
 
-				return pi;
-			});
+								if (me.Method.Name == "Select" &&
+								    (me.IsQueryableMethod((_, l) => { lambda = l; return true; }) ||
+								     me.IsQueryableMethod(null, 2, _ => { }, l => lambda = l)))
+								{
+									lambda.Body.Visit(e =>
+									{
+										switch (e.NodeType)
+										{
+											case ExpressionType.New:
+												{
+													var ne = (NewExpression)e;
+
+													if (ne.Members == null || ne.Arguments.Count != ne.Members.Count)
+														break;
+
+													var args = ne.Arguments.Zip(ne.Members, (a,m) => new { a, m }).ToList();
+
+													var q =
+														from a in args
+														where
+															a.a.NodeType != ExpressionType.Parameter &&
+															a.a.Type != typeof(string) &&
+															!a.a.Type.IsArray &&
+															TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
+														select a;
+
+													foreach (var item in q)
+														dic.Add(item.m, item.a);
+												}
+
+												break;
+										}
+									});
+								}
+							}
+
+							break;
+					}
+				});
+
+				result = expression.Convert(ex =>
+				{
+					switch (ex.NodeType)
+					{
+						case ExpressionType.Parameter:
+							if (parameters != null)
+							{
+								var idx = Array.IndexOf(parameters, (ParameterExpression)ex);
+
+								if (idx > 0)
+									return
+										Expression.Convert(
+											Expression.ArrayIndex(
+												ParametersParam,
+												Expression.Constant(Array.IndexOf(parameters, (ParameterExpression)ex))),
+											ex.Type);
+							}
+
+							break;
+
+
+						case ExpressionType.MemberAccess:
+							{
+								var me     = (MemberExpression)ex;
+								var member = me.Member;
+
+								if (member is PropertyInfo)
+									member = ((PropertyInfo)member).GetGetMethod();
+
+								Expression arg;
+
+								if (dic.Count > 0 && dic.TryGetValue(member, out arg))
+									return arg;
+							}
+
+							break;
+					}
+
+					return ex;
+				});
+			} while (result != expression);
+
+			return result;
 		}
 
 		int _sequenceNumber;
@@ -2037,8 +2121,6 @@ namespace BLToolkit.Data.Linq
 
 			ParseSet(extract, update, select);
 		}
-
-		#endregion
 
 		#endregion
 	}

@@ -326,7 +326,7 @@ namespace BLToolkit.Data.Linq
 					if (!parameters[i](lambda.Parameters[i]))
 						return false;
 
-				return body(lambda.Body) && func(lambda);;
+				return body(lambda.Body) && func(lambda);
 			}
 			
 			return false;
@@ -1264,19 +1264,6 @@ namespace BLToolkit.Data.Linq
 
 		#region Convert
 
-		/*
-		public class ConvertionContext
-		{
-			public bool StopWalking;
-
-			public Expression ClearStopWalkingFlag(Expression expr)
-			{
-				StopWalking = false;
-				return expr;
-			}
-		}
-		*/
-
 		static IEnumerable<T> Convert<T>(IEnumerable<T> source, Func<T,T> func)
 			where T : class
 		{
@@ -1351,7 +1338,7 @@ namespace BLToolkit.Data.Linq
 						var r = Convert(e.Right,      func);
 
 						return c != e.Conversion || l != e.Left || r != e.Right ?
-							Expression.MakeBinary(expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression) c):
+							Expression.MakeBinary(expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression)c):
 							expr;
 					}
 
@@ -1604,7 +1591,6 @@ namespace BLToolkit.Data.Linq
 			return ex;
 		}
 
-
 		static public Dictionary<Expression,Expression> GetExpressionAccessors(this Expression expression, Expression path)
 		{
 			var accessors = new Dictionary<Expression, Expression>();
@@ -1627,6 +1613,40 @@ namespace BLToolkit.Data.Linq
 			});
 
 			return accessors;
+		}
+
+		static public Expression GetRootObject(this Expression expr)
+		{
+			if (expr == null)
+				return null;
+
+			switch (expr.NodeType)
+			{
+				case ExpressionType.Call:
+					{
+						var e = (MethodCallExpression)expr;
+
+						if (e.Object != null)
+							return GetRootObject(e.Object);
+
+						if (e.Arguments != null && e.Arguments.Count > 0)
+							return GetRootObject(e.Arguments[0]);
+
+						break;
+					}
+
+				case ExpressionType.MemberAccess:
+					{
+						var e = ((MemberExpression)expr);
+
+						if (e.Expression != null)
+							return GetRootObject(e.Expression);
+
+						break;
+					}
+			}
+
+			return expr;
 		}
 
 		#endregion

@@ -51,13 +51,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case QueryElementType.SqlBinaryExpression:
 					{
-						SqlBinaryExpression be = (SqlBinaryExpression)expr;
+						var be = (SqlBinaryExpression)expr;
 
 						switch (be.Operation)
 						{
 							case "%":
 								{
-									Type type1 = TypeHelper.GetUnderlyingType(be.Expr1.SystemType);
+									var type1 = TypeHelper.GetUnderlyingType(be.Expr1.SystemType);
 
 									if (type1 == typeof(double) || type1 == typeof(float))
 									{
@@ -77,7 +77,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				case QueryElementType.SqlFunction:
 					{
-						SqlFunction func = (SqlFunction)expr;
+						var func = (SqlFunction)expr;
 
 						switch (func.Name)
 						{
