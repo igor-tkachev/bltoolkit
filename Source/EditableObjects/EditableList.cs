@@ -77,6 +77,25 @@ namespace BLToolkit.EditableObjects
 			return (T)base.AddNew();
 		}
 
+		public int RemoveAll(Predicate<T> match)
+		{
+			int n = 0;
+
+			for (int i = 0; i < Count; i++)
+			{
+				T item = this[i];
+
+				if (match(item))
+				{
+					Remove((object)item);
+					i--;
+					n++;
+				}
+			}
+
+			return n;
+		}
+
 		#endregion
 
 		#region Like List<T> Methods
