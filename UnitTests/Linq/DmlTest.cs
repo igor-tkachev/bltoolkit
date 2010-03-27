@@ -92,6 +92,27 @@ namespace Update
 		}
 
 		[Test]
+		public void Delete5()
+		{
+			ForEachProvider(db =>
+			{
+				var values = new[] { 1001, 1002 };
+
+				db.Parent.Delete(_ => _.ParentID > 1000);
+
+				db.Insert(new[]
+				{
+					new Parent { ParentID = values[0], Value1 = 1 },
+					new Parent { ParentID = values[1], Value1 = 1  }
+				});
+
+				Assert.AreEqual(2, db.Parent.Count(_ => _.ParentID > 1000));
+				Assert.AreEqual(2, db.Parent.Delete(_ => values.Contains(_.ParentID)));
+				Assert.AreEqual(0, db.Parent.Count(_ => _.ParentID > 1000));
+			});
+		}
+
+		[Test]
 		public void Update1()
 		{
 			ForEachProvider(db =>
