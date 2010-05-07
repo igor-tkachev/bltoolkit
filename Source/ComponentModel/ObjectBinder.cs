@@ -92,6 +92,8 @@ namespace BLToolkit.ComponentModel
 			{
 				_objectViewType = value;
 
+				List = null;
+
 				OnListChanged(ListChangedType.PropertyDescriptorChanged, -1);
 			}
 		}
