@@ -1231,7 +1231,7 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Call:
 						{
-							var e = pi as MethodCallExpression;
+							var e = (MethodCallExpression)pi;
 
 							if (e.Method.DeclaringType == typeof (Enumerable) && e.Method.Name != "Contains")
 								return isHaving = true;

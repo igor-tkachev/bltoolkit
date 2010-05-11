@@ -54,6 +54,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[CLSCompliant(false)]
+		[SqlFunction("Convert", 0, 1, 2, ServerSideOnly = true)]
+		public static TTo Convert<TTo, TFrom>(TTo to, TFrom from, int format)
+		{
+			var dt = Common.ConvertTo<TTo>.From(from);
+			return dt;
+		}
+
+		[CLSCompliant(false)]
 		[SqlFunction("Convert", 0, 1)]
 		public static TTo Convert2<TTo,TFrom>(TTo to, TFrom from)
 		{

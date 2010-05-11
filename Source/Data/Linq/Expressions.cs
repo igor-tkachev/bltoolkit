@@ -177,7 +177,7 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Sql.MakeDateTime(0, 0, 0)          ), L<I?,I?,I?,D?>         ((y,m,d)        => Sql.Convert(Sql.Date, y.ToString() + "-" + m.ToString() + "-" + d.ToString())) },
 				{ M(() => new DateTime    (0, 0, 0, 0, 0, 0) ), L<I,I,I,I,I,I,D>       ((y,m,d,h,mm,s) => Sql.MakeDateTime(y, m, d, h, mm, s).Value ) },
-				{ M(() =>Sql. MakeDateTime(0, 0, 0, 0, 0, 0) ), L<I?,I?,I?,I?,I?,I?,D?>((y,m,d,h,mm,s) => Sql.Convert(Sql.DateTime2,
+				{ M(() => Sql.MakeDateTime(0, 0, 0, 0, 0, 0) ), L<I?,I?,I?,I?,I?,I?,D?>((y,m,d,h,mm,s) => Sql.Convert(Sql.DateTime2,
 					y.ToString() + "-" + m.ToString() + "-" + d.ToString() + " " +
 					h.ToString() + ":" + mm.ToString() + ":" + s.ToString())) },
 
@@ -662,12 +662,16 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Sql.PadLeft ("",0,' ')),  L<S,I?,C,S>   ((p0,p1,p2) => p0.Length > p1 ? p0 : Replicate(p2, p1 - p0.Length) + p0) },
 				{ M(() => Sql.Trim    ("")      ),  L<S,S>        ( p0        => Sql.TrimLeft(Sql.TrimRight(p0))) },
 				{ M(() => Sql.MakeDateTime(0,0,0)), L<I?,I?,I?,D?>((y,m,d)    => DateAdd(Sql.DateParts.Month, (y.Value - 1900) * 12 + m.Value - 1, d.Value - 1)) },
-
+				{ M(() => Sql.MakeDateTime(0, 0, 0, 0, 0, 0) ), L<I?,I?,I?,I?,I?,I?,D?>((y,m,d,h,mm,s) => Sql.Convert(Sql.DateTime2,
+					y.ToString() + "-" + m.ToString() + "-" + d.ToString() + " " +
+					h.ToString() + ":" + mm.ToString() + ":" + s.ToString(), 120)) },
 				{ M(() => Sql.Cosh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) + Sql.Exp(-v)) / 2) },
 				{ M(() => Sql.Log(0m, 0)), L<M?,M?,M?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
 				{ M(() => Sql.Log(0.0,0)), L<F?,F?,F?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
 				{ M(() => Sql.Sinh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / 2) },
 				{ M(() => Sql.Tanh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / (Sql.Exp(v) + Sql.Exp(-v))) },
+
+				{ M(() => DateTime.Parse("")), L<String,DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
 			}},
 
 			#endregion

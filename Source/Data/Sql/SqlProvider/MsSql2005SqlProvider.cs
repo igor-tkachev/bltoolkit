@@ -47,6 +47,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									return new SqlExpression(
 										func.SystemType, "Cast(Floor(Cast({0} as Float)) as DateTime)", Precedence.Primary, func.Parameters[1]);
 							}
+
+							if (func.Parameters.Length == 2 && func.Parameters[0] is SqlDataType && func.Parameters[0] == SqlDataType.DateTime)
+								return new SqlFunction(func.SystemType, func.Name, func.Precedence, func.Parameters[0], func.Parameters[1], new SqlValue(120));
 						}
 
 						break;
