@@ -2,6 +2,7 @@
 using System.Data.Linq;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 
 using BLToolkit.Data.DataProvider;
@@ -108,6 +109,40 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in    Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue,
 				from p in db.Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue));
+		}
+
+
+		[Test]
+		public void Guid2()
+		{
+			var guid3 = new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436");
+			var guid4 = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b");
+
+			var parm = Expression.Parameter(typeof(LinqDataTypes), "p");
+
+			ForEachProvider(db =>
+				Assert.AreNotEqual(
+					db.Types
+						.Where(
+							Expression.Lambda<Func<LinqDataTypes,bool>>(
+								Expression.Equal(
+									Expression.PropertyOrField(parm, "GuidValue"),
+									Expression.Constant(guid3),
+									false,
+									typeof(Guid).GetMethod("op_Equality")),
+								new[] { parm }))
+						.Single().GuidValue,
+					db.Types
+						.Where(
+							Expression.Lambda<Func<LinqDataTypes,bool>>(
+								Expression.Equal(
+									Expression.PropertyOrField(parm, "GuidValue"),
+									Expression.Constant(guid4),
+									false,
+									typeof(Guid).GetMethod("op_Equality")),
+								new[] { parm }))
+						.Single().GuidValue)
+			);
 		}
 
 		[Test]

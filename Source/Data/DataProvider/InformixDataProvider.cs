@@ -63,7 +63,6 @@ namespace BLToolkit.Data.DataProvider
 					}
 
 					break;
-				 
 			}
 
 			return value;

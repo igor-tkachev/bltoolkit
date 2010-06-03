@@ -9,8 +9,8 @@ md bl-toolkit
 
 cd bl-toolkit
 
-"%ProgramFiles%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit_dev *.*
-"%ProgramFiles%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit Source\*.*
+"%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit_dev *.*
+"%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit Source\*.*
 
 cd Source
 %windir%\Microsoft.NET\Framework\v2.0.50727\MSBuild.exe BLToolkit.2.csproj /property:Configuration=Release 
@@ -22,6 +22,6 @@ cd ..\Tools\BLTgen
 copy bin\Release\*.exe ..\..\Source
 cd ..\..\Source
 
-"%ProgramFiles%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* -x*\bin\* -x*\obj\* c:\temp\BLToolkitSnapshot\bltoolkit_bin *.exe *.dll Data\DataProvider\
+"%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* -x*\bin\* -x*\obj\* c:\temp\BLToolkitSnapshot\bltoolkit_bin *.exe *.dll Data\DataProvider\
 
 ftp -s:e:\documents\copybltsnapshot.txt ftp.bltoolkit.net

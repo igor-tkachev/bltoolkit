@@ -566,7 +566,7 @@ namespace Data.Linq
 				where ch == null && ch == null
 				select p;
 
-			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Access }, db => AreEqual(expected,
+			ForEachProvider(new[] { ProviderName.Firebird, ProviderName.Sybase, ProviderName.Access }, db => AreEqual(expected,
 				from p in db.Parent
 					join ch in 
 						from c in db.GrandChild

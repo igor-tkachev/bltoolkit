@@ -1176,7 +1176,8 @@ namespace BLToolkit.Data.Linq
 			{
 				pi.IsConstant(c =>
 				{
-					if (!TypeHelper.IsScalar(pi.Type) || _asParameters.Contains(c))
+					//if (!TypeHelper.IsScalar(pi.Type) || _asParameters.Contains(c))
+					if (!ExpressionHelper.IsConstant(pi.Type) || _asParameters.Contains(c))
 					{
 						var val = expressionAccessors[pi];
 

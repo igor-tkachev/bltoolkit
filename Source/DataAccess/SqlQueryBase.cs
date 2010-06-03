@@ -255,6 +255,7 @@ namespace BLToolkit.DataAccess
 
 				if (nParameter < 0)
 					sb.AppendFormat("\t{0},\n", p.ParameterName);
+					//sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(p.ParameterName, ConvertType.NameToQueryParameter));
 				else
 					sb.AppendFormat("\t{{{0}}},\n", nParameter++);
 			}

@@ -1,4 +1,4 @@
-v 3.2 (working)
+v 3.2
 
 Demo (see the dev version of the project)
 

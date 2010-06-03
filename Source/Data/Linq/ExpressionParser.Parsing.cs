@@ -1609,7 +1609,7 @@ namespace BLToolkit.Data.Linq
 
 			var query = select;
 
-			if (query.SqlQuery.Select.IsDistinct)
+			if (query.SqlQuery.Select.IsDistinct || query.SqlQuery.Select.TakeValue != null || query.SqlQuery.Select.SkipValue != null)
 			{
 				query.Select(this);
 				query = WrapInSubQuery(query);

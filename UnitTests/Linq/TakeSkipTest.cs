@@ -80,6 +80,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void TakeCount()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+				   Child.Take(5).Count(),
+				db.Child.Take(5).Count()));
+		}
+
+		[Test]
 		public void Skip1()
 		{
 			ForEachProvider(db => AreEqual(Child.Skip(3), db.Child.Skip(3)));
@@ -129,6 +137,14 @@ namespace Data.Linq
 		{
 			var n = 3;
 			ForEachProvider(db => AreEqual(Child.Skip(n), db.Child.Skip(() => n)));
+		}
+
+		[Test]
+		public void SkipCount()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
+				   Child.Skip(2).Count(),
+				db.Child.Skip(2).Count()));
 		}
 
 		[Test]
@@ -183,6 +199,14 @@ namespace Data.Linq
 				var list = db.Child.Skip(2).Take(5).ToList();
 				Assert.AreEqual( 5, list.Count);
 			});
+		}
+
+		[Test]
+		public void SkipTakeCount()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
+				   Child.Skip(2).Take(5).Count(),
+				db.Child.Skip(2).Take(5).Count()));
 		}
 
 		[Test]
