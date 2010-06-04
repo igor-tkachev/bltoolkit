@@ -1,0 +1,25 @@
+﻿<p class="j">
+The <b>ObjectBinder</b> component has been designed to simplify binding controls on a form to objects for FW 1.x.
+Since Microsoft has released FW 2.0 we can use the <b>BindingSource</b> component to bind controls to objects.
+However the <b>ObjectBinder</b> still can be useful as it supports a few features which are not available for the <b>BindingSource</b>.
+Those features are:
+</p>
+
+<ul>
+<li><p class="j">Support for field binding along with property binding.</p></li>
+<li><p class="j">Support for inner class field and property binding such as <i>Order.Address.Line1</i>.</p></li>
+<li><p class="j">Support for the <i>ObjectView</i> feature which is available by assigning an object view type to the 
+<b>ObjectBinder.ObjectViewType</b> property. An object view is an object that implements the <b>IObjectView</b> interface.
+This interface includes only one property - <i>object <b>Object</b> { get; set; }</i>.
+An object view can implement additional properties based on the assosiated object.
+The <b>ObjectBinder</b> will combine all of these properties with main object properties and create a single <b>PropertyDescriptor</b> collection.
+This feature can be used to separate UI presentation logic from business model objects and to keep them clean.
+ObjectView should be a stateless, lightweight object as its single instance can be assigned to many assosiated objects.</p></li>
+<li><p class="j">The <b>ObjectBinder</b> is optimized for high performance applications such real-time multithreaded message processing and
+distribution banking systems. So it does not use reflection to access objects.
+The standard way (which is used by the <b>BindingSource</b>) is to call the <b>TypeDescriptor.GetProperties</b> method
+to get a <b>PropertyDescriptor</b> collection. This method creates property descriptors that access object properties by reflection.
+The <b>ObjectBinder</b> has its own mechanism to avoid unnessasy reflection and boxing/unboxing operations.</p></li>
+</ul>
+
+<p class="j">The dev version of BLToolkit contains a demo project (Demo\WinForms) showing the use of the <b>ObjectBinder</b>.</p>

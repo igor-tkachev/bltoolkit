@@ -1,0 +1,27 @@
+<% group # Basic CRUDL operations and SQL text generation %>
+<% order # 152 %>
+
+InsertSql.cs
+<% ..\..\..\HowTo\DataAccess\InsertSql.cs %>
+<i>DataAccessor.InsertSql</i> method generates and executes the following SQL statement:
+<% sql #
+INSERT INTO [Person] (
+	[MiddleName],
+	[Gender],
+	[LastName],
+	[FirstName]
+) VALUES (
+	@MiddleName,
+	@Gender,
+	@LastName,
+	@FirstName
+)
+%>
+<a name='Person'></a>
+Person.cs
+<% ..\..\..\HowTo\DataAccess\Person.cs %>
+Gender.cs
+<% ..\..\..\HowTo\DataAccess\Gender.cs %>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

@@ -1,0 +1,12 @@
+﻿<% title # Async aspect %>
+<p class="j">
+This aspect simplifies asynchronous operations.
+Note the AsyncAspect is not compatible with other type builders that generate a method body.
+If you apply them along with the AsyncAspect to an abstract method, they will be igored.
+</p>
+
+AsyncAspect.cs
+<% ..\..\..\HowTo\Aspects\AsyncAspect.cs %>
+
+BLToolkit type builder will generate the following for the class above:
+<% Doc\Aspects\AsyncAspect.cs %>

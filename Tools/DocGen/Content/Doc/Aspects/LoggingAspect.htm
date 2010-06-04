@@ -1,0 +1,18 @@
+﻿<% title # Logging aspect %>
+<p class="j">This aspect allows logging some diagnostic information with minimum efforts. 
+All you need to do is to decorate your class with the Log attribute. 
+If you have a class hierarchy you can decorate only your base class. 
+Diagnostic information will be logged for all virtual and abstract members 
+of your abstract class.</p>
+
+LoggingAspect.cs
+<% ..\..\..\HowTo\Aspects\LoggingAspect.cs %>
+
+<p class="j">Here is the logging output.</p>
+
+<% txt #
+4/20/2008 11:19:44 PM: HowTo.Aspects.LoggingAspectTest.BLToolkitExtension.TestClass.Test1(1) - 105 ms.
+
+4/20/2008 11:19:46 PM: HowTo.Aspects.LoggingAspectTest.BLToolkitExtension.TestClass.Test3("3") - 1507 ms
+                       with exception 'System.ApplicationException' - "Test exception.".
+%>

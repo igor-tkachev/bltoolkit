@@ -1,0 +1,26 @@
+<% group # SQL text generation control attributes %>
+<p class='j'>
+The <b>TableName</b> attribute specifies a name of the table represented by the decorated object.
+</p>
+
+TableName.cs
+<% ..\..\..\HowTo\DataAccess\TableName.cs %>
+<i>DataAccessor.SelectByKeySql</i> and <i>DataAccessor.SelectByKey</i> methods generate and execute the following SQL statement:
+<% sql #
+-- SelectByKeySql
+SELECT
+	[MiddleName],
+	[PersonID],
+	[LastName],
+	[FirstName]
+FROM
+	[Person]
+WHERE
+	[PersonID] = @PersonID
+
+-- SelectByKey
+exec Person_SelectByKey @id=1
+%>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

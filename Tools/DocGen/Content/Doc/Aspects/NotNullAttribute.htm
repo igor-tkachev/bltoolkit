@@ -1,0 +1,10 @@
+﻿<% title # NotNull attribute %>
+<p class="j">This attribute allows checking a virtual or abstract method parameter if it is null at runtime. 
+BLToolkit type builder will override methods with NotNull parameters and 
+emit code for checking null value at the beginning of the method.</p>
+
+NotNull.cs
+<% ..\..\..\HowTo\Aspects\NotNull.cs %>
+
+BLToolkit type builder will generate the following for the class above:
+<% Doc\Aspects\NotNull.cs %>

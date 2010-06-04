@@ -1,0 +1,15 @@
+<% group # Basic CRUDL operations and stored procedures %>
+<% order # 204 %>
+
+Delete.cs
+<% ..\..\..\HowTo\DataAccess\Delete.cs %>
+Both <i>DataAccessor.DeleteByKey</i> and <i>DataAccessor.Delete</i> methods generate and execute the following SQL statement:
+<% sql # exec Person_Delete @PersonID=2 %>
+<a name='Person'></a>
+Person.cs
+<% ..\..\..\HowTo\DataAccess\Person.cs %>
+Gender.cs
+<% ..\..\..\HowTo\DataAccess\Gender.cs %>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

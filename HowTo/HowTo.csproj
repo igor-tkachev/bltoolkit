@@ -1,0 +1,227 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8DA66999-005A-49AB-86A9-2C1F62905B50}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HowTo</RootNamespace>
+    <AssemblyName>HowTo</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Source\Data\DataProvider\SybaseAdoDataProvider.cs">
+      <Link>Data\DataProvider\SybaseAdoDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="Aspects\AsyncAspect.cs" />
+    <Compile Include="Aspects\CacheAspect.cs" />
+    <Compile Include="Aspects\ClearCacheAspect.cs" />
+    <Compile Include="Aspects\CounterAspect.cs" />
+    <Compile Include="Aspects\LoggingAspect.cs" />
+    <Compile Include="Aspects\MixinAspect.cs" />
+    <Compile Include="Aspects\NoCache.cs" />
+    <Compile Include="Aspects\NotNull.cs" />
+    <Compile Include="Aspects\OverloadAspect.cs" />
+    <Compile Include="DataAccess\AbstractAccessor.cs" />
+    <Compile Include="DataAccess\ActionName.cs" />
+    <Compile Include="DataAccess\ActionSprocName.cs" />
+    <Compile Include="DataAccess\ActualType.cs" />
+    <Compile Include="DataAccess\CommandBehavior.cs" />
+    <Compile Include="DataAccess\CustomSqlQuery2.cs" />
+    <Compile Include="DataAccess\CustomSqlQuery1.cs" />
+    <Compile Include="DataAccess\Transaction.cs" />
+    <Compile Include="DataAccess\OpenConfigQuery.cs" />
+    <Compile Include="DataAccess\SqlQuery.cs" />
+    <Compile Include="DataAccess\SprocName.cs" />
+    <Compile Include="DataAccess\ScalarSource.cs" />
+    <Compile Include="DataAccess\ScalarFieldName.cs" />
+    <Compile Include="DataAccess\ParamNullValue.cs" />
+    <Compile Include="DataAccess\ParamName.cs" />
+    <Compile Include="DataAccess\Param.cs" />
+    <Compile Include="DataAccess\Format.cs" />
+    <Compile Include="DataAccess\DiscoverParameters.cs" />
+    <Compile Include="DataAccess\Direction.cs" />
+    <Compile Include="DataAccess\Destination.cs" />
+    <Compile Include="DataAccess\DataSetTable.cs" />
+    <Compile Include="DataAccess\ExecuteScalar.cs" />
+    <Compile Include="DataAccess\ExecuteObject.cs" />
+    <Compile Include="DataAccess\ExecuteList.cs" />
+    <Compile Include="DataAccess\ExecuteDictionary.cs" />
+    <Compile Include="DataAccess\TableName.cs" />
+    <Compile Include="DataAccess\NonUpdatable.cs" />
+    <Compile Include="DataAccess\MultiplePrimaryKey.cs" />
+    <Compile Include="DataAccess\PrimaryKey.cs" />
+    <Compile Include="DataAccess\Gender.cs" />
+    <Compile Include="DataAccess\Person.cs" />
+    <Compile Include="DataAccess\XmlExtension.cs" />
+    <Compile Include="DataAccess\Delete.cs" />
+    <Compile Include="DataAccess\Update.cs" />
+    <Compile Include="DataAccess\Insert.cs" />
+    <Compile Include="DataAccess\SelectAll.cs" />
+    <Compile Include="DataAccess\SelectByKey.cs" />
+    <Compile Include="DataAccess\DeleteSql.cs" />
+    <Compile Include="DataAccess\UpdateSql.cs" />
+    <Compile Include="DataAccess\InsertSql.cs" />
+    <Compile Include="DataAccess\SelectAllSql.cs" />
+    <Compile Include="DataAccess\OpenConfig.cs" />
+    <Compile Include="DataAccess\SelectByKeySql.cs" />
+    <Compile Include="DataAccess\PersonAccessor.cs" />
+    <Compile Include="Data\Close.cs" />
+    <Compile Include="Data\AdoDemo.cs" />
+    <Compile Include="Data\ComplexMapping.cs" />
+    <Compile Include="Data\ExecuteScalarDictionary.cs" />
+    <Compile Include="Data\ExecuteScalar.cs" />
+    <Compile Include="Data\ExecuteReader.cs" />
+    <Compile Include="Data\ExecuteDictionary.cs" />
+    <Compile Include="Data\ExecuteDataTable.cs" />
+    <Compile Include="Data\ExecuteDataSet.cs" />
+    <Compile Include="Data\ExecuteNonQuery.cs" />
+    <Compile Include="Data\ExecuteForEach.cs" />
+    <Compile Include="Data\ExecuteScalarList.cs" />
+    <Compile Include="Data\Prepare.cs" />
+    <Compile Include="Data\DataProvider\AddDataProvider.cs" />
+    <Compile Include="Data\OpenConfig1.cs" />
+    <Compile Include="Data\DbManagerDemo.cs" />
+    <Compile Include="Data\OpenConfig1FW2.cs" />
+    <Compile Include="Data\OpenConfig2.cs" />
+    <Compile Include="Data\ExecuteObject.cs" />
+    <Compile Include="Data\ExecuteList.cs" />
+    <Compile Include="Data\OpenConfig3.cs" />
+    <Compile Include="Data\Parameter.cs" />
+    <Compile Include="Data\SetCommand.cs" />
+    <Compile Include="Data\SetSpCommand.cs" />
+    <Compile Include="Data\Transaction.cs" />
+    <Compile Include="Data\UpdateObject.cs" />
+    <Compile Include="EditableObjects\AcceptRejectChanges.cs" />
+    <Compile Include="EditableObjects\IsDirty.cs" />
+    <Compile Include="EditableObjects\EditableObjectTest.cs" />
+    <Compile Include="Mapping\MapToJson.cs" />
+    <Compile Include="Mapping\MapFieldAttribute.cs" />
+    <Compile Include="Mapping\ObjectToObject.cs" />
+    <Compile Include="Mapping\MapValueAttribute2.cs" />
+    <Compile Include="Mapping\MapValueAttribute1.cs" />
+    <Compile Include="Mapping\ValueToEnum.cs" />
+    <Compile Include="Mapping\EnumToValue.cs" />
+    <Compile Include="Patterns\DuckTyping.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reflection\ObjectFactory.cs" />
+    <Compile Include="TypeBuilder\InitialValues.cs" />
+    <Compile Include="TypeBuilder\XmlSerialization.cs" />
+    <Compile Include="TypeBuilder\InternalTypes.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Source\BLToolkit.3.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.3</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\XmlExtension.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Sql.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Access.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Oracle.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\Fdp.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\Sql\SQLite.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\RelationExtension.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

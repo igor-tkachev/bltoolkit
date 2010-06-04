@@ -1,0 +1,25 @@
+<% group # SQL text generation control attributes %>
+
+<p class="j">
+The <b>NonUpdatable</b> attribute indicates the field that should not be updated by <i>UPDATE</i> or <i>INSERT</i> SQL statements.
+</p>
+
+NonUpdatable.cs
+<% ..\..\..\HowTo\DataAccess\NonUpdatable.cs %>
+<i>DataAccessor.Insert</i> method generates and executes the following SQL statement:
+<% sql #
+INSERT INTO [Person] (
+	[MiddleName],
+	[Gender],
+	[LastName],
+	[FirstName]
+) VALUES (
+	@MiddleName,
+	@Gender,
+	@LastName,
+	@FirstName
+)
+%>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

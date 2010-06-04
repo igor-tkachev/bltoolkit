@@ -1,0 +1,26 @@
+<% title # EditableObject class %>
+<% order # 1 %>
+<p class="j">
+<b>EditableObject</b> is an object that provides functionality to commit and rollback changes to itself.
+After verifying the accuracy of changes made to the object, you can accept the changes
+using the <b>AcceptChanges</b> method of the object, which will set the <b>Current</b> field values
+to be the <b>Original</b> values. The <b>RejectChanges</b> method rejects all changes made to the object
+since <b>AcceptChanges</b> was last called. The <b>IsDirty</b> property gets a value that indicates
+whether the object has changed.
+</p>
+<p class="j">
+If we wrote an editable object manually, we could get the following code just for two editable properties:
+</p>
+<% Doc\EditableObjects\ManualEditableObject.cs %>
+
+<p class='j'>
+BLToolkit allows implementing the same functionality by inheriting your object
+from the BLToolkit <b>EditableObject</b> base class and replacing editable members with abstract properties.
+</p>
+EditableObjectTest.cs
+<% ..\..\..\HowTo\EditableObjects\EditableObjectTest.cs %>
+
+<p class='j'>
+BLToolkit type builder will generate the following for the class above:
+</p>
+<% Doc\EditableObjects\EditableObject.cs %>

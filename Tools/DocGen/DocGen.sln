@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebGen", "WebGen.csproj", "{06353283-C802-4706-BB18-5BBC49B03D59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChmGen", "ChmGen.csproj", "{23AD6408-9310-4D0F-B461-C590EAF82868}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_Content", "_Content.csproj", "{DE11BCB2-94A1-4691-9192-5FC8E0323E2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06353283-C802-4706-BB18-5BBC49B03D59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06353283-C802-4706-BB18-5BBC49B03D59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06353283-C802-4706-BB18-5BBC49B03D59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06353283-C802-4706-BB18-5BBC49B03D59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23AD6408-9310-4D0F-B461-C590EAF82868}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23AD6408-9310-4D0F-B461-C590EAF82868}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23AD6408-9310-4D0F-B461-C590EAF82868}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23AD6408-9310-4D0F-B461-C590EAF82868}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE11BCB2-94A1-4691-9192-5FC8E0323E2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE11BCB2-94A1-4691-9192-5FC8E0323E2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

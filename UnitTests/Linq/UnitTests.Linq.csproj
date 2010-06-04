@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{07997A18-86D3-47AC-A514-AB1B03E6AEC8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Data.Linq</RootNamespace>
+    <AssemblyName>UnitTests.Linq</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\Firebird\FirebirdSql.Data.FirebirdClient.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.Data.DB2, Version=9.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\IBM\IBM.Data.DB2.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.Data.Informix, Version=3.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\IBM\IBM.Data.Informix.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=5.2.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\MySql\MySql.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Npgsql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\PostgreSql\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.DataAccess, Version=2.102.4.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\Oracle\Oracle.DataAccess.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sybase.AdoNet2.AseClient, Version=1.15.192.0, Culture=neutral, PublicKeyToken=95d94fac46c88e1e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\Sybase\Sybase.AdoNet2.AseClient.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.60.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\SQLite\System.Data.SQLite.DLL</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\SqlCe\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Source\Data\DataProvider\DB2DataProvider.cs">
+      <Link>Providers\DB2DataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\FdpDataProvider.cs">
+      <Link>Providers\FdpDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\InformixDataProvider.cs">
+      <Link>Providers\InformixDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\MySqlDataProvider.cs">
+      <Link>Providers\MySqlDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\OdpDataProvider.cs">
+      <Link>Providers\OdpDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\PostgreSQLDataProvider.cs">
+      <Link>Providers\PostgreSQLDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\SqlCeDataProvider.cs">
+      <Link>Providers\SqlCeDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\SQLiteDataProvider.cs">
+      <Link>Providers\SQLiteDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Source\Data\DataProvider\SybaseDataProvider.cs">
+      <Link>Providers\SybaseDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="Common.cs" />
+    <Compile Include="ConvertTest.cs" />
+    <Compile Include="CompileTest.cs" />
+    <Compile Include="ComplexTest.cs" />
+    <Compile Include="Association.cs" />
+    <Compile Include="L2SAttributes.cs" />
+    <Compile Include="VisualBasicTest.cs" />
+    <Compile Include="DmlTest.cs" />
+    <Compile Include="ExpressionsTest.cs" />
+    <Compile Include="MathFunctions.cs" />
+    <Compile Include="Exceptions\Inheritance.cs" />
+    <Compile Include="Inheritance.cs" />
+    <Compile Include="ProviderSpecific\Access.cs" />
+    <Compile Include="ProviderSpecific\MsSql2008s.cs" />
+    <Compile Include="ProviderSpecific\SqlCe.cs" />
+    <Compile Include="SetTest.cs" />
+    <Compile Include="SubQuery.cs" />
+    <Compile Include="Types.cs" />
+    <Compile Include="Exceptions\Mapping.cs" />
+    <Compile Include="Functions.cs" />
+    <Compile Include="Distinct.cs" />
+    <Compile Include="ElementOperationTest.cs" />
+    <Compile Include="Exceptions\ElementOperationTest.cs" />
+    <Compile Include="Mapping.cs" />
+    <Compile Include="TakeSkipTest.cs" />
+    <Compile Include="OrderByTest.cs" />
+    <Compile Include="CreateData.cs" />
+    <Compile Include="GroupByTest.cs" />
+    <Compile Include="Exceptions\JoinTest.cs" />
+    <Compile Include="JoinTest.cs" />
+    <Compile Include="DateTimeFunctions.cs" />
+    <Compile Include="ProviderSpecific\MySql.cs" />
+    <Compile Include="SelectManyTest.cs" />
+    <Compile Include="StringFunctions.cs" />
+    <Compile Include="SelectTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectScalar.cs" />
+    <Compile Include="TestBase.cs" />
+    <Compile Include="WhereTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="UnitTests.Linq.Interface.csproj">
+      <Project>{D527524F-EC92-465E-9CAE-86278121675A}</Project>
+      <Name>UnitTests.Linq.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="UnitTests.Linq.VisualBasic.vbproj">
+      <Project>{D11617AB-9F88-4C74-8ABD-F8580DB4B01B}</Project>
+      <Name>UnitTests.Linq.VisualBasic</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

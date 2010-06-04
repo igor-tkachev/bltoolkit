@@ -1,0 +1,25 @@
+<% group # Abstract accessor attributes %>
+
+<p class='j'>
+The <b>Direction</b> attributes allow controlling mapping from/to a business object.
+The following table contains brief description of the direction attributes:
+
+<table class='data'>
+<tr><th>Attribute</th><th>Description</th></tr>
+<tr><td>Output</td>     <td>Provided members are output parameters of the query.</td></tr>
+<tr><td>InputOutput</td><td>Provided members are input/output parameters of the query.</td></tr>
+<tr><td>Ignore</td>     <td>Provided members are excluded from mapping.</td></tr>
+<tr><td>ReturnValue</td><td>Provided member is mapped to return value.</td></tr>
+</table>
+</p>
+
+Direction.cs
+<% ..\..\..\HowTo\DataAccess\Direction.cs %>
+<a name='Person'></a>
+Person.cs
+<% ..\..\..\HowTo\DataAccess\Person.cs %>
+Gender.cs
+<% ..\..\..\HowTo\DataAccess\Gender.cs %>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

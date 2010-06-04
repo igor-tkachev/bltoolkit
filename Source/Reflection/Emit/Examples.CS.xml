@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<examples>
+
+<emit name="Emit">
+<example>
+<code lang="C#">
+using System;
+
+using NUnit.Framework;
+
+using BLToolkit.Reflection;
+using BLToolkit.Reflection.Emit;
+
+namespace Examples.Reflection.Emit
+{
+	[TestFixture]
+	public class HelloWorld
+	{
+		public interface IHello
+		{
+			void SayHello(string toWhom);
+		}
+
+		[Test]
+		public void Test()
+		{
+			EmitHelper emit = new AssemblyBuilderHelper("HelloWorld.dll")
+				.DefineType  ("Hello", typeof(object), typeof(IHello))
+				.DefineMethod(typeof(IHello).GetMethod("SayHello"))
+				.Emitter;
+
+			/*[a]*/emit/*[/a]*/
+				// string.Format("Hello, {0}!", toWhom)
+				//
+				./*[a]*/ldstr/*[/a]*/   ("Hello, {0}!")
+				./*[a]*/ldarg_1/*[/a]*/
+				./*[a]*/call/*[/a]*/    (typeof(string), "Format", typeof(string), typeof(object))
+
+				// Console.WriteLine("Hello, World!");
+				//
+				./*[a]*/call/*[/a]*/    (typeof(Console), "WriteLine", typeof(string))
+				./*[a]*/ret/*[/a]*/()
+				;
+
+			Type type = emit.Method.Type.Create();
+
+			IHello hello = (IHello)TypeAccessor.CreateInstance(type);
+
+			hello.SayHello("World");
+		}
+	}
+}
+</code>
+</example>
+</emit>
+
+
+</examples>

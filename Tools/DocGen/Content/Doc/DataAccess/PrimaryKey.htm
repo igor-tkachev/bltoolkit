@@ -1,0 +1,37 @@
+<% group # SQL text generation control attributes %>
+<p class='j'>
+The <b>PrimaryKey</b> attribute indicates the field that is a part of a primary key.
+</p>
+
+PrimaryKey.cs
+<% ..\..\..\HowTo\DataAccess\PrimaryKey.cs %>
+<i>DataAccessor.SelectByKeySql</i> method generates and executes the following SQL statement:
+<% sql #
+SELECT
+	[MiddleName],
+	[PersonID],
+	[LastName],
+	[FirstName]
+FROM
+	[Person]
+WHERE
+	[PersonID] = @PersonID
+%>
+MultiplePrimaryKey.cs
+<% ..\..\..\HowTo\DataAccess\MultiplePrimaryKey.cs %>
+In this case <i>DataAccessor.SelectByKeySql</i> method generates and executes the following SQL statement:
+<% sql #
+SELECT
+	[MiddleName],
+	[PersonID],
+	[LastName],
+	[FirstName]
+FROM
+	[Person]
+WHERE
+	[FirstName] = @FirstName AND
+	[LastName] = @LastName
+%>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

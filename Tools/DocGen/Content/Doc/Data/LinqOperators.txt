@@ -1,0 +1,117 @@
+﻿* DB2
+| Modulo        | a % b             | Mod(a, b)
+| Bitwise AND   | a & b             | BitAnd(a, b)
+| Bitwise OR    | a || b            | BitOr(a, b)
+| Bitwise XOR   | a ^ b             | BitXor(a, b)
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a || b || c
+
+* Informix
+| Modulo        | a % b             | Mod(a, b)
+| Bitwise AND   | a & b             | BitAnd(a, b)
+| Bitwise OR    | a || b            | BitOr(a, b)
+| Bitwise XOR   | a ^ b             | BitXor(a, b)
+| Coalesce      | a ?? b            | Nvl(a, b)
+| Coalesce      | a ?? b ?? c       | Nvl(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a || b || c
+
+* Oracle
+| Modulo        | a % b             | Mod(a, b)
+| Bitwise AND   | a & b             | BitAnd(a, b)
+| Bitwise OR    | a || b            | (a + b) - BitAnd(a, b)
+| Bitwise XOR   | a ^ b             | (a + b) - BitAnd(a, b) * 2
+| Coalesce      | a ?? b            | Nvl(a, b)
+| Coalesce      | a ?? b ?? c       | Nvl(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a || b || c
+
+* Firebird
+| Modulo        | a % b             | Mod(a, b)
+| Bitwise AND   | a & b             | Bin_And(a, b)
+| Bitwise OR    | a || b            | Bin_Or(a, b)
+| Bitwise XOR   | a ^ b             | Bin_Xor(a, b)
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a || b || c
+
+* PostgreSQL
+| Modulo        | a % b             | a % b
+| Bitwise AND   | a & b             | a & b
+| Bitwise OR    | a || b            | a || b
+| Bitwise XOR   | a ^ b             | a # b
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a || b || c
+
+* MySql
+| Modulo        | a % b             | a % b
+| Bitwise AND   | a & b             | a & b
+| Bitwise OR    | a || b            | a || b
+| Bitwise XOR   | a ^ b             | a ^ b
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | Concat(a, b, c)
+
+* MS SQL
+| Modulo        | a % b             | a % b
+| Bitwise AND   | a & b             | a & b
+| Bitwise OR    | a || b            | a || b
+| Bitwise XOR   | a ^ b             | a ^ b
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a + b + c
+
+* SqlCe
+| Modulo        | a % b             | a % b
+| Bitwise AND   | a & b             | a & b
+| Bitwise OR    | a || b            | a || b
+| Bitwise XOR   | a ^ b             | a ^ b
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a + b + c
+
+* Sybase
+| Modulo        | a % b             | a % b
+| Bitwise AND   | a & b             | a & b
+| Bitwise OR    | a || b            | a || b
+| Bitwise XOR   | a ^ b             | a ^ b
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a + b + c
+
+* SQLite
+| Modulo        | a % b             | a % b
+| Bitwise AND   | a & b             | a & b
+| Bitwise OR    | a || b            | a || b
+| Bitwise XOR   | a ^ b             | (a + b) - (a & b) * 2
+| Coalesce      | a ?? b            | Coalesce(a, b)
+| Coalesce      | a ?? b ?? c       | Coalesce(a, b, c)
+| Conditional   | a ? b : c         | CASE WHEN a THEN b ELSE c END
+| Conditional   | a ? b : c ? d : e | CASE WHEN a THEN b WHEN c THEN d ELSE e END
+| Concatenation | a + b + c         | a || b || c
+
+* Access
+| Modulo        | a % b             | a MOD b
+| Coalesce      | a ?? b            | Iif(a IS NULL, b, a)
+| Coalesce      | a ?? b ?? c       | Iif(a IS NULL, Iif(b IS NULL, c, b), a)
+| Conditional   | a ? b : c         | Iif(a, b, c)
+| Conditional   | a ? b : c ? d : e | Iif(a, b, Iif(c, d, e))
+| Concatenation | a + b + c         | a + b + c

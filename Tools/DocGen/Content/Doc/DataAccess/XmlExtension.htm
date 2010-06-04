@@ -1,0 +1,26 @@
+<% group # SQL text generation control attributes %>
+<p class='j'>
+BLToolkit supports different ways to provide metadata information for business objects.
+One of the ways is using attributes. Another one is XmlExtension.
+XmlExtension is a simple xml file where you can specify a type and its attributes.
+</p>
+
+XmlExtension.cs
+<% ..\..\..\HowTo\DataAccess\XmlExtension.cs %>
+XmlExtension.xml
+<% ..\..\..\HowTo\DataAccess\XmlExtension.xml %>
+<i>DataAccessor.SelectByKetSql</i> method generates and executes the following SQL statement:
+<% sql #
+SELECT
+	[MiddleName],
+	[PersonID],
+	[LastName],
+	[FirstName]
+FROM
+	[Person]
+WHERE
+	[PersonID] = @PersonID
+%>
+App.config
+<% Doc\Data\App.config %>
+<a href="../Data/CreateSql.htm">Create.sql script</a>

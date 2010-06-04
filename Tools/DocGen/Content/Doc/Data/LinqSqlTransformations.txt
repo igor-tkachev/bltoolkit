@@ -1,0 +1,42 @@
+﻿* DB2
+| SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYSIBM.SYSDUMMY1 \nFETCH FIRST 1 ROW ONLY
+| TAKE x   | query.Take(x)      | #sql ... FETCH FIRST x ROWS ONLY
+
+* Informix
+| SELECT x | db.Select(() => x) | #sql SELECT FIRST 1 x\nFROM SYSTABLES
+| TAKE x   | query.Take(x)      | #sql SELECT FIRST x
+
+* Oracle
+| SELECT x | db.Select(() => x) | #sql SELECT x \nFROM SYS.DUAL
+| TAKE x   | query.Take(x)      | #sql ... WHERE rownum <= x
+
+* Firebird
+| SELECT x | db.Select(() => x) | #sql SELECT x \nFROM rdb$database
+| TAKE x   | query.Take(x)      | #sql SELECT FIRST x
+
+* PostgreSQL
+| SELECT x | db.Select(() => x) | #sql SELECT x
+| TAKE x   | query.Take(x)      | #sql ... LIMIT x
+
+* MySql
+| SELECT x | db.Select(() => x) | #sql SELECT x
+| TAKE x   | query.Take(x)      | #sql ... LIMIT x
+
+* MS SQL
+| SELECT x | db.Select(() => x) | #sql SELECT x
+| TAKE x   | query.Take(x)      | #sql SELECT TOP x
+
+* SqlCe
+| SELECT x | db.Select(() => x) | #sql SELECT x
+
+* Sybase
+| SELECT x | db.Select(() => x) | #sql SELECT x
+| TAKE x   | query.Take(x)      | #sql SELECT TOP x
+
+* SQLite
+| SELECT x | db.Select(() => x) | #sql SELECT x
+| TAKE x   | query.Take(x)      | #sql ... LIMIT x
+
+* Access
+| SELECT x | db.Select(() => x) | #sql SELECT x
+| TAKE x   | query.Take(x)      | #sql SELECT TOP x

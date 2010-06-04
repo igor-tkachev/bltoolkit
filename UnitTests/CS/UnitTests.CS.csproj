@@ -1,0 +1,269 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>UnitTests.CS</RootNamespace>
+    <AssemblyName>UnitTests.CS</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MSSQL;FW3</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;MSSQL;FW3</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Aspects\AsyncAndDataAccessorTest.cs" />
+    <Compile Include="Aspects\CacheAspectTest.cs" />
+    <Compile Include="Aspects\AsyncAspectTest.cs" />
+    <Compile Include="Aspects\ClearCacheAspect.cs" />
+    <Compile Include="Aspects\CounterAspectTest.cs" />
+    <Compile Include="Aspects\InterceptorAspectTest.cs" />
+    <Compile Include="Aspects\LoggingAspectTest.cs" />
+    <Compile Include="Aspects\MixinAspectTest.cs" />
+    <Compile Include="Aspects\NotNullAspectTest.cs" />
+    <Compile Include="Aspects\OverloadAspectTest.cs" />
+    <Compile Include="Common\ConvertTest.cs" />
+    <Compile Include="Common\OperatorTest.cs" />
+    <Compile Include="Common\NameOrIndexParameterTest.cs" />
+    <Compile Include="ComponenetModel\ObjectBinderTest.cs" />
+    <Compile Include="DataAccess\ActualTypeAttributeTest.cs" />
+    <Compile Include="DataAccess\ArrayTest.cs" />
+    <Compile Include="DataAccess\DynamicSqlQueryTest.cs" />
+    <Compile Include="DataAccess\TestQueryAttribute.cs" />
+    <Compile Include="DataAccess\XmlTypeTest.cs" />
+    <Compile Include="DataAccess\DataAccessorBuilderTest.cs" />
+    <Compile Include="DataAccess\PrimaryKeyAttributeTest.cs" />
+    <Compile Include="DataAccess\ScalarListTest.cs" />
+    <Compile Include="DataAccess\CreateEntityTest.cs" />
+    <Compile Include="DataAccess\DataAccessorTest.cs" />
+    <Compile Include="DataAccess\DictionaryTest.cs" />
+    <Compile Include="DataAccess\EnumTest.cs" />
+    <Compile Include="DataAccess\ScalarTest.cs" />
+    <Compile Include="DataAccess\OutRefTest.cs" />
+    <Compile Include="DataAccess\PersonDataSet2.cs">
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataAccess\PersonDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DataAccess\SqlQueryTest.cs" />
+    <Compile Include="DataAccess\SqlQueryTest2.cs" />
+    <Compile Include="DataAccess\SqlTest.cs" />
+    <Compile Include="DataAccess\XmlExtension.cs" />
+    <Compile Include="Data\BinaryTest.cs" />
+    <Compile Include="Data\ComplexMappingTest.cs" />
+    <Compile Include="Data\CompositeKeyTest.cs" />
+    <Compile Include="Data\EventsTest.cs" />
+    <Compile Include="Data\ExecuteForEach.cs" />
+    <Compile Include="Data\ExecuteObjectTest.cs" />
+    <Compile Include="Data\InnerTypesTest.cs" />
+    <Compile Include="Data\ExecuteDictionaryTest.cs" />
+    <Compile Include="Data\ExecuteScalarDictionaryTest.cs" />
+    <Compile Include="Data\ExecuteScalarListTest.cs" />
+    <Compile Include="Data\DbManagerTest.cs" />
+    <Compile Include="Data\ExecuteListT.cs" />
+    <Compile Include="Data\ExecuteScalarTest.cs" />
+    <Compile Include="Data\NullableParameter.cs" />
+    <Compile Include="Data\OutputParameter.cs" />
+    <Compile Include="Data\Sql\DefinitionTest.cs" />
+    <Compile Include="Data\Sql\FromTest.cs" />
+    <Compile Include="Data\Sql\SelectTest.cs" />
+    <Compile Include="EditableObjects\EditableObjectT.cs" />
+    <Compile Include="EditableObjects\EditableArrayListTest.cs" />
+    <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />
+    <Compile Include="EditableObjects\EditableObjectTest.cs" />
+    <Compile Include="EditableObjects\InnerObjectTest.cs" />
+    <Compile Include="EditableObjects\NestedObjectTest.cs" />
+    <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
+    <Compile Include="Mapping\ExpressionMapperTest.cs" />
+    <Compile Include="Mapping\NullableEnum.cs" />
+    <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
+    <Compile Include="Mapping\EnumExtension.cs" />
+    <Compile Include="Mapping\ISupportMappingTest.cs" />
+    <Compile Include="Mapping\MapFieldAttributeTest.cs" />
+    <Compile Include="Mapping\MapperMemberAttributeTest.cs" />
+    <Compile Include="Mapping\MapTest.cs" />
+    <Compile Include="Mapping\MapValueAttributeTest.cs" />
+    <Compile Include="Mapping\MemberMapperTest.cs" />
+    <Compile Include="Mapping\MetadataProvider\MetadataProviderTest.cs" />
+    <Compile Include="Mapping\NullableAttributeTest.cs" />
+    <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
+    <Compile Include="Mapping\ObjectMapperTest.cs" />
+    <Compile Include="Mapping\ResultSetTest.cs" />
+    <Compile Include="Mapping\TrimmableAttributeTest.cs" />
+    <Compile Include="Mapping\XmlMap.cs" />
+    <Compile Include="Patterns\MustImplementAttributeTest.cs" />
+    <Compile Include="Patterns\DuckTypingTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Reflection\TypeAccessorTest3.cs" />
+    <Compile Include="Reflection\Emit\MethodBuilderHelperTest.cs" />
+    <Compile Include="Reflection\Extension\DefaultValueTest.cs" />
+    <Compile Include="Mapping\Person.mapping.cs" />
+    <Compile Include="TypeBuilder\Builders\AutoImplementInterfaceTest.cs" />
+    <Compile Include="Reflection\ObjectFactoryAttributeTest.cs" />
+    <Compile Include="Reflection\ExtendedPropertyDescriptorTest.cs" />
+    <Compile Include="Reflection\TypeAccessorTest.cs" />
+    <Compile Include="Reflection\TypeAccessorTest2.cs" />
+    <Compile Include="Reflection\TypeHelperTest.cs" />
+    <Compile Include="TestFixtureBase.cs" />
+    <Compile Include="TestObject.cs" />
+    <Compile Include="TypeBuilder\Builders\ArrayBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\IAbstractTypeBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\DefaultTypeBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\ImplemetInterfaceBuilderTest.cs" />
+    <Compile Include="TypeBuilder\Builders\TypeAccessorBuilderTest.cs" />
+    <Compile Include="TypeBuilder\GenerateAtributeTest.cs" />
+    <Compile Include="TypeBuilder\GenericMethodTest.cs" />
+    <Compile Include="TypeBuilder\InternalTypesTest.cs" />
+    <Compile Include="TypeBuilder\GetSetValueAttributeTest.cs" />
+    <Compile Include="TypeBuilder\InstanceTypeAttributeTest.cs" />
+    <Compile Include="TypeBuilder\LazyInstanceAttributeTest.cs" />
+    <Compile Include="TypeBuilder\NoInstanceAttributeTest.cs" />
+    <Compile Include="TypeBuilder\NoInstanceAttributeTest2.cs" />
+    <Compile Include="TypeBuilder\ParameterAttributeTest.cs" />
+    <Compile Include="TypeBuilder\Builders\PropertyChangeBuilderTest.cs" />
+    <Compile Include="TypeBuilder\TypeFactoryTest.cs" />
+    <Compile Include="Reflection\Extension\ExtensionTest.cs" />
+    <Compile Include="Validation\MinValue.cs" />
+    <Compile Include="Validation\NullValue.cs" />
+    <Compile Include="Validation\RegExValidationTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.3</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="DataAccess\PersonDataSet2.xsc">
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="DataAccess\PersonDataSet2.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>PersonDataSet2.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>DataAccessTest</CustomToolNamespace>
+    </None>
+    <None Include="DataAccess\PersonDataSet2.xss">
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="DataAccess\PersonDataSet2.xsx">
+      <DependentUpon>PersonDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="TypeBuilder\InternalTypesTest.snk">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\Map.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataAccess\XmlExtension.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\Person.mapping.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mapping\XmlMap.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

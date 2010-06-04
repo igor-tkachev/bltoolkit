@@ -1,0 +1,16 @@
+﻿<% title # Cache aspect %>
+<% group # Cache aspect %>
+<p class="j">This aspect helps to cache method calls. 
+The aspect uses input method parameters to create a cache key and 
+caches return value and all output (both <i>ref</i> and <i>out</i>) parameters. 
+By default only value types and string type of the method parameters are used 
+to create a cache key. Any other types are ignored. 
+This behavior can be changed by assigning the <b>CacheAspect.IsCacheableParameterType</b> property
+to a delegate providing custom logic.
+</p>
+
+CacheAspect.cs
+<% ..\..\..\HowTo\Aspects\CacheAspect.cs %>
+
+If we decompile the actual emitted TestClass class, we may see something like the following:
+<% Doc\Aspects\CacheAspect.cs %>

@@ -1,0 +1,9 @@
+﻿<#@ template language="C#v3.5" debug="True" #>
+<#@ output extension=".generated.cs"   #>
+<#@ include file="BLToolkit.ttinclude" #>
+<#@ include file="Sybase.ttinclude"    #>
+<#
+	
+
+	GenerateModel();
+#>

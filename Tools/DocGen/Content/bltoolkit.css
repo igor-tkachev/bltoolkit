@@ -1,0 +1,190 @@
+body 
+{
+	background  : White;
+	font-family : Verdana;
+	font-size   : .80em;
+}
+
+a:link    { text-decoration: none;      color : #338899; }
+a:visited { text-decoration: none;      color : #55AABB; }
+a:hover   { text-decoration: underline; color : #338899; }
+
+a.m:link    { text-decoration: underline; color : Black; }
+a.m:visited { text-decoration: underline; color : Black; }
+a.m:hover   { text-decoration: underline; color : Black; }
+
+.title
+{
+	font-size   : 1.75em;
+	color       : #116677;
+	font-family : Arial;
+}
+
+.homeurl
+{
+	color     : #338899;
+}
+
+.hr
+{
+	height           : 1px;
+	background-color : #338899;
+}
+
+.sp
+{
+	height : 7px;
+}
+
+th
+{
+	font-size        : .80em;
+	vertical-align   : top;
+	background-color : #EEEEEE;
+	text-align       : center;
+}
+
+td
+{
+	font-size      : .80em;
+	vertical-align : top;
+}
+
+td.p
+{
+	font-size      : .80em;
+	vertical-align : top;
+	padding-top    : 7px;
+}
+
+td.pj
+{
+	font-size      : .80em;
+	vertical-align : top;
+	padding-top    : 7px;
+	text-align     : justify;
+}
+
+.j
+{
+	text-align : justify;
+}
+
+.kw
+{
+	color : blue;
+}
+
+.com
+{
+	color : green;
+}
+
+.str
+{
+	color : DarkCyan;
+}
+
+.a
+{
+	color           : DarkRed;
+	font-weight     : bold;
+	text-decoration : underline;
+}
+
+table.code
+{
+	border-color     : #116677;
+	border-style     : solid;
+	border-width     : 1px;
+	margin-top       : .6em;
+	margin-bottom    : .6em;
+	background-color : #F7F7F7;
+}
+
+pre.code
+{
+	font    : 120% Consolas, Monospace, Courier New, Courier;
+	margin  : 0;
+	padding : 5px;
+}
+
+.j pre.code, .pj pre.code
+{
+	font      : 80% Consolas, Monospace, Courier New, Courier;
+	margin    : 0;
+	padding   : 3px;
+}
+
+.j table.code, .pj table.code
+{
+	margin-top       : .4em;
+	margin-bottom    : .0em;
+}
+
+a.rss
+{
+	color            : White;
+	background-color : DarkOrange;
+	font-weight      : bold;
+	font-size        : .80em;
+	font-family      : Arial;
+}
+
+table.data
+{
+	margin: 10px 7px 10px 7px;
+}
+
+.data td, .data th
+{
+	padding: 2px 5px 2px 5px;
+}
+
+.bordered td, .bordered th
+{
+	border-color: #AAAAAA;
+	border-style: solid;
+	border-width: 1px;
+}
+
+.nowrappable td, .nowrappable th
+{
+	white-space: nowrap;
+}
+
+a.rss:link    { text-decoration: none; color : White; }
+a.rss:visited { text-decoration: none; color : White; }
+a.rss:hover   { text-decoration: nonr; color : White; }
+
+h4, h5
+{
+	font-family : Verdana;
+	color       : #338899;
+}
+
+.data table.code
+{
+	border-style : none;
+	margin       : 0;
+	padding      : 0;
+	background   : #FFFFFF;
+}
+
+.data pre.code
+{
+	padding : 0;
+	padding : 0;
+}
+
+.code td, .code th
+{
+	border-style: none;
+}
+
+td.nosup
+{
+	font-weight: bold;
+	color      : Red;
+	text-align : center;
+}

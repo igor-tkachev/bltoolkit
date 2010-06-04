@@ -1,0 +1,7 @@
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\bin\Release\BLTgen.exe
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\bin\Release\BLTgen.pdb
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\bin\Release\BLToolkit.3.dll
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\bin\Release\BLToolkit.3.pdb
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\obj\Release\ResolveAssemblyReference.cache
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\obj\Release\BLTgen.exe
+C:\Temp\BLToolkitSnapshot\bl-toolkit\Tools\BLTgen\obj\Release\BLTgen.pdb

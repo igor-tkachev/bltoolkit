@@ -1,0 +1,17 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Release" />
+  <Config name="Debug" configfile="All\App.config" binpathtype="Auto">
+    <assembly path="All\bin\Debug\HowTo.2005.dll" />
+    <assembly path="All\bin\Debug\UnitTests.CS.2005.dll" />
+    <assembly path="All\bin\Debug\Examples.CS.2005.dll" />
+    <assembly path="All\bin\Debug\Examples.VB.2005.dll" />
+    <assembly path="All\bin\Debug\Examples.Cpp.2005.dll" />
+  </Config>
+  <Config name="Release" configfile="All\App.config" binpathtype="Auto">
+    <assembly path="All\bin\Release\HowTo.2005.dll" />
+    <assembly path="All\bin\Release\UnitTests.CS.2005.dll" />
+    <assembly path="All\bin\Release\Examples.CS.2005.dll" />
+    <assembly path="All\bin\Release\Examples.VB.2005.dll" />
+    <assembly path="All\bin\Release\Examples.Cpp.2005.dll" />
+  </Config>
+</NUnitProject>

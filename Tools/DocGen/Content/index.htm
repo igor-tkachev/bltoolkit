@@ -1,0 +1,113 @@
+<div class="j">
+Business Logic Toolkit is a set of components to simplify .NET application development.
+BLToolkit is provided as <a href="Source/index.htm">source code</a> that you can use "as is" or customize for your applications.
+It is written in C# and compatible with .NET Framework 2.0, 3.0, and 3.5.<br/><br/>
+</div>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td>
+<% rss # rss.xml %>
+<br>
+<a class="rss" href="rss.xml">&nbsp;&nbsp;RSS&nbsp;&nbsp;</a>
+</td>
+<td nowrap>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td>
+<ct_table>
+<ct_item link="Doc/Aspects/index.htm"         label="Aspects"        >
+CacheAspect, CounterAspect, LoggingAspect, MixinAttribute. All of these are available now in C# (well, with one little limitation).
+<% cs #
+[/*[a]*/Counter/*[/a]*/, /*[a]*/Log/*[/a]*/]
+public /*[a]*/abstract/*[/a]*/ class MyClass
+{
+	[/*[a]*/Cache/*[/a]*/]
+	public /*[a]*/virtual/*[/a]*/ int MyMethod(int p1, int p2)
+	{
+%>
+</ct_item>
+<mt_item link="Doc/ComponentModel/index.htm"  label="ComponentModel" >Object Binder. Add Business Objects' native purity and flexibility to your ASP.NET and WinForms applications.</mt_item>
+<mt_item link="Doc/Data/index.htm"            label="Data"           >
+High-level, data provider independent wrapper for ADO.NET.
+<% cs #
+using (DbManager db = new DbManager())
+{
+	return db
+		.SetCommand("SELECT * FROM Person")
+		.ExecuteList<Person>();
+%>
+</mt_item>
+<mt_item link="Doc/DataAccess/index.htm"      label="DataAccess"     >
+Data Access Layer. Got bored of writing the same data access code over and over again? Now you are saved from being just a coding machine!
+<% cs #
+public /*[a]*/abstract/*[/a]*/ class PersonAccessor : /*[a]*/DataAccessor/*[/a]*/
+{
+	[/*[a]*/SqlText/*[/a]*/(@"SELECT * FROM Person WHERE FirstName = @firstName")]
+	public /*[a]*/abstract/*[/a]*/ List<Person> GetPersonListByFirstName(string @firstName);
+
+	[/*[a]*/SprocName/*[/a]*/("sp_GetPersonListByLastName")]
+	public /*[a]*/abstract/*[/a]*/ List<Person> GetPersonListByLastName(string @lastName);
+%>
+</mt_item>
+<mt_item link="Doc/EditableObjects/index.htm" label="EditableObjects">
+Set of base classes to build custom object hierarchies. The <i>EditableObject</i> and <i>EditableList</i> classes support such methods as <i>AcceptChanges</i>, <i>RejectChanges</i>, flag <i>IsDirty</i>, and event <i>PropertyChanged</i>.
+<% cs #
+public /*[a]*/abstract/*[/a]*/ class TestObject : /*[a]*/EditableObject/*[/a]*/<TestObject>
+{
+	public /*[a]*/abstract/*[/a]*/ string FirstName { get; set; }
+	public /*[a]*/abstract/*[/a]*/ string LastName  { get; set; }
+}
+
+...
+
+TestObject obj = TestObject./*[a]*/CreateInstance/*[/a]*/();
+obj.FirstName = "Tester";
+obj.AcceptChanges();
+%>
+</mt_item>
+<mt_item link="Doc/Mapping/index.htm"         label="Mapping"        >High performance object mapper will help you build your own ORM.</mt_item>
+<mt_item link="Doc/Reflection/index.htm"      label="Reflection"     >The <i>TypeAccessor</i> class allows to avoid slowness of Reflection and gain incredible performance of applications working with types dynamically.</mt_item>
+<mt_item link="Doc/Reflection/Emit/index.htm" label="Reflection.Emit">
+The <i>EmitHelper</i> class - emit with a human face.
+<% cs #
+emit
+	// string.Format("Hello, {0}!", toWhom)
+	//
+	./*[a]*/ldstr/*[/a]*/   ("Hello, {0}!")
+	./*[a]*/ldarg_1/*[/a]*/
+	./*[a]*/call/*[/a]*/    (typeof(string), "Format", typeof(string), typeof(object))
+
+	// Console.WriteLine("Hello, World!");
+	//
+	./*[a]*/call/*[/a]*/    (typeof(Console), "WriteLine", typeof(string))
+	./*[a]*/ret/*[/a]*/()
+	;
+%>
+</mt_item>
+<mt_item link="Doc/TypeBuilder/index.htm"     label="TypeBuilder"    >Extensible run-time class generator.</mt_item>
+<mt_item link="Doc/Validation/index.htm"      label="Validation"     >Simple way to do a complex thing.</mt_item>
+
+<tr><td colspan="3" nowrap>
+<br>
+<br>
+<!-- Search Google -->
+<FORM method=GET action=http://www.google.com/custom>
+<TABLE bgcolor=#FFFFFF cellspacing=0 border=0>
+<tr valign=top><td>
+<A HREF=http://www.google.com/search>
+<IMG SRC=http://www.google.com/logos/Logo_40wht.gif border=0 ALT=Google align=middle></A>
+</td>
+<td>
+<INPUT TYPE=text name=q size=31 maxlength=255 value="">
+<INPUT type=submit name=sa VALUE="Google Search">
+<INPUT type=hidden name=cof VALUE="S:http://www.bltoolkit.com;VLC:#55AABB;AH:center;LC:#338899;ALC:#338899;AWFID:f21e212400fdbd32;">
+<input type=hidden name=domains value="bltoolkit.net"><br><input type=radio name=sitesearch value=""> Search WWW <input type=radio name=sitesearch value="bltoolkit.net" checked> Search bltoolkit.net 
+</td></tr></TABLE>
+</FORM>
+<!-- Search Google -->
+</td></tr>
+
+</ct_table>
+
+</td>
+</tr>
+</table>
+
