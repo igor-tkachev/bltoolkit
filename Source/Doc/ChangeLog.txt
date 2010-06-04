@@ -1,3 +1,14 @@
+v 4.0
+
+Bug fixes
+
+- 
+
+Enhancement
+
+- No more C# 2.0 support.
+
+
 v 3.2
 
 Demo (see the dev version of the project)

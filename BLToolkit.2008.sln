@@ -109,9 +109,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.Linq", "UnitTests
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Partial.Trust", "Partial.Trust", "{D0ACC326-305C-420D-805C-D63E53A99E94}"
-	ProjectSection(SolutionItems) = preProject
-		ReadMe.txt = ReadMe.txt
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Partial.Trust.Asp.Net", "Demo\Partial.Trust\Asp.Net\Partial.Trust.Asp.Net.csproj", "{16272F10-9E3D-4C24-8761-8A43E9FB525F}"
 EndProject

@@ -13,8 +13,9 @@ cd bl-toolkit
 "%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit Source\*.*
 
 cd Source
-%windir%\Microsoft.NET\Framework\v2.0.50727\MSBuild.exe BLToolkit.2.csproj /property:Configuration=Release 
+%windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLToolkit.2.csproj /property:Configuration=Release 
 %windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLToolkit.3.csproj /property:Configuration=Release 
+%windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.4.csproj /property:Configuration=Release
 copy bin\Release\*.dll .
 
 cd ..\Tools\BLTgen
