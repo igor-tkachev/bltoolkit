@@ -1884,7 +1884,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			var om = table.MappingSchema.GetObjectMapper(table.ObjectType);
 			var mm = om[identityField.Name, true];
 
-			var attrs = mm.MemberAccessor.GetAttributes<SequenceNameAttribute>();
+			var attrs = mm.MapMemberInfo.MemberAccessor.GetAttributes<SequenceNameAttribute>();
 
 			if (attrs == null)
 				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
@@ -2116,6 +2116,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (to.Length != newLength)
 					to = new SqlDataType(to.DbType, to.Type, newLength);
 			}
+			else if (from.Type == typeof(short) && to.Type == typeof(int))
+				return func.Parameters[2];
 
 			return ConvertExpression(new SqlFunction(func.SystemType, "Convert", to, func.Parameters[2]));
 		}

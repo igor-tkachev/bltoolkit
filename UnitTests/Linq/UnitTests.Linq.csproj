@@ -128,6 +128,7 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
+    <Compile Include="L2SAttributes.cs" />
     <Compile Include="VisualBasicTest.cs" />
     <Compile Include="DmlTest.cs" />
     <Compile Include="ExpressionsTest.cs" />

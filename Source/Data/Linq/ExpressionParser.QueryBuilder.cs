@@ -727,10 +727,10 @@ namespace BLToolkit.Data.Linq
 				else
 				{
 					var exceptionMethod = Expressor<ExpressionParser<T>>.MethodExpressor(_ => DefaultInheritanceMappingException(null, null));
-					var dindex         = table.Columns[table.InheritanceDiscriminators[0]].Select(this)[0].Index;
+					var dindex          = table.Columns[table.InheritanceDiscriminators[0]].Select(this)[0].Index;
 
 					expr = Expression.Convert(
-						Expression.Call(_infoParam, exceptionMethod,
+						Expression.Call(null, exceptionMethod,
 							Expression.Call(_dataReaderParam, DataReader.GetValue, Expression.Constant(dindex)),
 							Expression.Constant(table.ObjectType)),
 						table.ObjectType);

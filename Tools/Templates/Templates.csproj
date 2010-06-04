@@ -53,6 +53,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BLToolkit.ttinclude" />
+    <None Include="Sybase.ttinclude" />
     <None Include="DataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>DataModel.generated.cs</LastGenOutput>

@@ -575,8 +575,6 @@
       <SubType>
       </SubType>
     </EmbeddedResource>
-    <None Include="Migrated rules for BLToolkit.4 %282%29.ruleset" />
-    <None Include="Migrated rules for BLToolkit.4.ruleset" />
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>
     </None>

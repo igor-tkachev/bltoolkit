@@ -43,7 +43,17 @@ namespace BLToolkit.TypeBuilder
 			SecurityPermission perm = new SecurityPermission(SecurityPermissionFlag.ControlAppDomain);
 
 #if FW4
-			var set = typeof(TypeFactory).Assembly.PermissionSet;
+			try
+			{
+				//var permissionSet = new PermissionSet(PermissionState.None);
+				//permissionSet.AddPermission(perm);
+
+				//if (permissionSet.IsSubsetOf(AppDomain.CurrentDomain.PermissionSet))
+					SubscribeAssemblyResolver();
+			}
+			catch
+			{
+			}
 #else
 			if (SecurityManager.IsGranted(perm))
 				SubscribeAssemblyResolver();

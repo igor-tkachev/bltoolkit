@@ -67,6 +67,7 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue timestamp,
 	BoolValue     boolean,
 	GuidValue     uuid,
-	BinaryValue   bytea
+	BinaryValue   bytea,
+	SmallIntValue smallint
 )
 GO

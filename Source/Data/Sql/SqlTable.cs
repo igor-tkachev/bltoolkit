@@ -48,9 +48,9 @@ namespace BLToolkit.Data.Sql
 				if (mm.MapMemberInfo.SqlIgnore == false)
 				{
 					var ua =
-						_mappingSchema.MetadataProvider.GetNonUpdatableAttribute(objectType, typeExt, mm.MemberAccessor, out isSet);
+						_mappingSchema.MetadataProvider.GetNonUpdatableAttribute(objectType, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
-					var order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MemberAccessor, out isSet);
+					var order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
 					Fields.Add(new SqlField(
 						mm.Type,

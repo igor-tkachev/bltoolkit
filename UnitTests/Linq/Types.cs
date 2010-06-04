@@ -111,7 +111,6 @@ namespace Data.Linq
 				from p in db.Types where p.GuidValue == new Guid("D2F970C0-35AC-4987-9CD5-5BADB1757436") select p.GuidValue));
 		}
 
-
 		[Test]
 		public void Guid2()
 		{
@@ -260,6 +259,19 @@ namespace Data.Linq
 				from t in db.Types where t.MoneyValue > 0.5m select t));
 
 			Thread.CurrentThread.CurrentCulture = current;
+		}
+
+		[Test]
+		public void SmallInt()
+		{
+			ForEachProvider(db => AreEqual(
+				from t1 in Types
+				join t2 in Types on t1.SmallIntValue equals t2.ID
+				select t1,
+				from t1 in db.Types
+				join t2 in db.Types on t1.SmallIntValue equals t2.ID
+				select t1)
+			);
 		}
 	}
 }

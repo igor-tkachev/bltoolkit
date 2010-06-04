@@ -44,6 +44,7 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue datetime year to fraction(3),
 	BoolValue     boolean,
 	GuidValue     char(36),
-	BinaryValue   byte
+	BinaryValue   byte,
+	SmallIntValue smallint
 )
 GO

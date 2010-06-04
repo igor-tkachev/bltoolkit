@@ -58,7 +58,7 @@ namespace BLToolkit.DataAccess
 				if (mm.MapMemberInfo.SqlIgnore)
 					continue;
 
-				MemberAccessor ma = mm.MemberAccessor;
+				MemberAccessor ma = mm.MapMemberInfo.MemberAccessor;
 
 				bool isSet;
 				MappingSchema.MetadataProvider.GetPrimaryKeyOrder(om.TypeAccessor.OriginalType, typeExt, ma, out isSet);
@@ -100,7 +100,7 @@ namespace BLToolkit.DataAccess
 					if (mm.MapMemberInfo.SqlIgnore)
 						continue;
 
-					MemberAccessor ma = mm.MemberAccessor;
+					MemberAccessor ma = mm.MapMemberInfo.MemberAccessor;
 
 					if (TypeHelper.IsScalar(ma.Type))
 					{
@@ -235,7 +235,7 @@ namespace BLToolkit.DataAccess
 
 				bool isSet;
 
-				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MemberAccessor, out isSet) == null || !isSet)
+				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet) == null || !isSet)
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
@@ -288,10 +288,10 @@ namespace BLToolkit.DataAccess
 			{
 				bool isSet;
 
-				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MemberAccessor, out isSet) != null && isSet)
+				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet) != null && isSet)
 					continue;
 
-				mp.GetPrimaryKeyOrder(type, typeExt, mm.MemberAccessor, out isSet);
+				mp.GetPrimaryKeyOrder(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
 				if (isSet)
 					continue;
