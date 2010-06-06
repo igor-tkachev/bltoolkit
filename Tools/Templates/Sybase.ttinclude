@@ -1,5 +1,110 @@
-﻿<#+
-private void Test()
+﻿<#
+	ConnectionType = "Sybase.Data.AseClient.AseConnection, Sybase.AdoNet2.AseClient";
+#><#+
+private void LoadMetadata()
 {
+	if (IsMetadataLoaded)
+		return;
+
+	IsMetadataLoaded = true;
+
+	var tables  = CreateList(new { ID = 0, Table = new Table() });
+	var columns = CreateList(new { ID = 0, ColID = (short)0, Column = new Column() });
+
+	using (var conn = GetConnection())
+	using (var cmd  = conn.CreateCommand())
+	{
+		// Load tables & vies.
+		//
+		cmd.CommandText = @"
+			SELECT
+				id,
+				USER_NAME(uid),
+				name,
+				type
+			FROM
+				sysobjects
+			WHERE
+				type IN ('U','V') AND sysstat2 > 0";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var t = new
+				{
+					ID    = Convert.ToInt32(rd[0]),
+					Table = new Table
+					{
+						Owner     = rd[1].ToString(),
+						TableName = rd[2].ToString(),
+						ClassName = rd[2].ToString(),
+						isView    = rd[3].ToString() == "V"
+					}
+				};
+
+				tables.Add(t);
+			}
+		}
+
+		// Load columns.
+		//
+		cmd.CommandText = @"
+			SELECT
+				o.id,
+				c.colid,
+				c.name,
+				c.status,
+				c.usertype,
+				t.type,
+				c.length,
+				c.prec,
+				c.scale,
+				t.name as typename,
+				Convert(bit, c.status & 0x08) isNullable,
+				Convert(bit, c.status & 0x80) isIdentity
+			FROM
+				syscolumns c
+					JOIN sysobjects o ON c.id       = o.id
+					JOIN systypes   t ON c.usertype = t.usertype
+			WHERE
+				o.type IN ('U','V') AND o.sysstat2 > 0
+			ORDER BY
+				o.id, c.colid";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var col = new
+				{
+					ID     = Convert.ToInt32(rd["id"]),
+					ColID  = Convert.ToInt16(rd["colid"]),
+					Column = new Column
+					{
+						ColumnName = Convert.ToString (rd["name"]),
+						MemberName = Convert.ToString (rd["name"]),
+						IsNullable = Convert.ToBoolean(rd["isNullable"]),
+						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
+					}
+				};
+
+				columns.Add(col);
+			}
+		}
+	}
+
+	var qc =
+		from c in columns
+		group c by c.ID into gr
+		join t in tables on gr.Key equals Convert.ToInt32(t.ID)
+		select new { t.Table, gr };
+
+	foreach (var c in qc)
+	{
+		c.Table.Columns.AddRange(from col in c.gr orderby col.ColID select col.Column);
+		
+		Tables.Add(c.Table.TableName, c.Table);
+	}
 }
 #>

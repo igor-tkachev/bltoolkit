@@ -1,0 +1,15 @@
+﻿<#@ include file="T4Toolbox.tt" #>
+<#
+
+	var customToolNamespace = TransformationContext.FindProjectItem(Host.TemplateFile).Properties.Item("CustomToolNamespace").Value;
+
+	if (customToolNamespace != null)
+		Namespace = customToolNamespace.ToString();
+
+	if (string.IsNullOrEmpty(Namespace))
+		Namespace = TransformationContext.DefaultNamespace;
+
+	if (string.IsNullOrEmpty(DataContextName))
+		DataContextName = System.IO.Path.GetFileNameWithoutExtension(Host.TemplateFile);
+
+#>

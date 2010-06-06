@@ -1,9 +1,14 @@
-﻿<#@ template language="C#v3.5" debug="True" #>
-<#@ output extension=".generated.cs"   #>
-<#@ include file="BLToolkit.ttinclude" #>
-<#@ include file="Sybase.ttinclude"    #>
+﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
+<#@ output extension=".generated.cs"     #>
+<#@ include file="BLT4Toolkit.ttinclude" #>
+<#@ include file="BLToolkit.ttinclude"   #>
+<#@ include file="Sybase.ttinclude"      #>
 <#
+	ConnectionString     = "Data Source=DBHost;Port=5000;Database=BLToolkitData;Uid=sa";
+	DataProviderAssembly = @"E:\Projects\SVN\BLToolkit\trunk\Redist\Sybase\Sybase.AdoNet2.AseClient.dll";
 	
+	//Namespace    = "Templates";
+	//DatabaseName = "Test";
 
 	GenerateModel();
 #>

@@ -128,7 +128,7 @@ namespace BLToolkit.Reflection
 
 				var mi = expr.Member;
 
-				HasSetterValue = !(mi is PropertyInfo) || ((PropertyInfo)mi).GetSetMethod() != null;
+				HasSetterValue = !(mi is PropertyInfo) || ((PropertyInfo)mi).GetSetMethod(true) != null;
 
 				if (HasSetterValue)
 				{
@@ -146,7 +146,7 @@ namespace BLToolkit.Reflection
 						.end();
 
 					if (mi is FieldInfo) emit.stfld   ((FieldInfo)mi);
-					else                 emit.callvirt(((PropertyInfo)mi).GetSetMethod());
+					else                 emit.callvirt(((PropertyInfo)mi).GetSetMethod(true));
 
 					emit.ret();
 

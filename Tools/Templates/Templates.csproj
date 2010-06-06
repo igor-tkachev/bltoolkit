@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="BLToolkit.ttinclude" />
+    <None Include="BLT4Toolkit.ttinclude" />
     <None Include="Sybase.ttinclude" />
     <None Include="DataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -63,6 +64,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
+      <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
+      <Name>BLToolkit.3</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
