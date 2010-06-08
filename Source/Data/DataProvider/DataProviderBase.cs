@@ -261,6 +261,13 @@ namespace BLToolkit.Data.DataProvider
 			return sb.Append(table);
 		}
 
+		public virtual bool ParameterNamesEqual(string paramName1, string paramName2)
+		{
+			// default implementation is case-insensitive, because if we make it 
+			// case-sensitive and don't overload it in all existing providers - client code may break
+			return string.Equals(paramName1, paramName2, StringComparison.InvariantCultureIgnoreCase);
+		}
+
 		public virtual string ProviderName           { get { return ConnectionType.Namespace; } }
 		public virtual int    MaxParameters          { get { return 100;   } }
 		public virtual int    MaxBatchSize           { get { return 65536; } }

@@ -608,7 +608,7 @@ namespace BLToolkit.Data
 			// Pull the parameters for this stored procedure from 
 			// the parameter cache (or discover them & populate the cache)
 			//
-			IDbDataParameter[] commandParameters = GetSpParameters(spName, true, openNewConnectionToDiscoverParameters);
+			IDbDataParameter[] spParameters = GetSpParameters(spName, true, openNewConnectionToDiscoverParameters);
 
 			// DbParameters are bound by name, plain parameters by order
 			//
@@ -622,26 +622,26 @@ namespace BLToolkit.Data
 				parameterValues = PrepareParameters(parameterValues);
 
 				if (parameterValues == null || parameterValues.Length == 0)
-					return commandParameters;
+					return spParameters;
 
 				dbParameters = true;
 			}
 
-			if (commandParameters == null/* || commandParameters.Length == 0*/)
+			if (spParameters == null/* || commandParameters.Length == 0*/)
 			{
-				commandParameters = new IDbDataParameter[parameterValues.Length];
+				spParameters = new IDbDataParameter[parameterValues.Length];
 
 				if (dbParameters)
 				{
-					parameterValues.CopyTo(commandParameters, 0);
+					parameterValues.CopyTo(spParameters, 0);
 				}
 				else
 				{
 					for (int i = 0; i < parameterValues.Length; i++)
-						commandParameters[i] = Parameter("?", parameterValues[i]);
+						spParameters[i] = Parameter("?", parameterValues[i]);
 				}
 
-				return commandParameters;
+				return spParameters;
 			}
 
 			if (dbParameters)
@@ -649,47 +649,51 @@ namespace BLToolkit.Data
 				// If we receive an array of IDbDataParameter, 
 				// we need to copy parameters to the IDbDataParameter[].
 				//
-				for (int i = 0; i < commandParameters.Length; i++)
+				foreach (IDbDataParameter spParam in spParameters)
 				{
-					IDbDataParameter param = commandParameters[i];
-					string           name  = param.ParameterName;
+					string           spParamName  = spParam.ParameterName;
 					bool             found = false;
 
-					foreach (IDbDataParameter p in parameterValues)
+					foreach (IDbDataParameter paramWithValue in parameterValues)
 					{
-						if (string.Compare(name, p.ParameterName, true) == 0 || 
-							string.Compare(name, _dataProvider.Convert(p.ParameterName, ConvertType.NameToSprocParameter).ToString()) == 0)
+						bool parameterNamesEqual = _dataProvider.ParameterNamesEqual(spParamName, paramWithValue.ParameterName);
+						if (!parameterNamesEqual)
 						{
-							if (param.Direction != p.Direction)
-							{
-								Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
-									"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
-										spName, name, param.Direction, p.Direction),
-									TraceSwitch.DisplayName);
+							string convertedParameterName =
+								_dataProvider.Convert(paramWithValue.ParameterName, ConvertType.NameToSprocParameter).ToString();
 
-								param.Direction = p.Direction;
-							}
-
-							if (param.Direction != ParameterDirection.Output)
-								param.Value = p.Value;
-
-							p.ParameterName = name;
-
-							found = true;
-
-							break;
+							parameterNamesEqual = _dataProvider.ParameterNamesEqual(spParamName, convertedParameterName);
 						}
+
+						if (!parameterNamesEqual) continue;
+
+						if (spParam.Direction != paramWithValue.Direction)
+						{
+							Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
+								"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
+								spName, spParamName, spParam.Direction, paramWithValue.Direction),
+							                  TraceSwitch.DisplayName);
+
+							spParam.Direction = paramWithValue.Direction;
+						}
+
+						if (spParam.Direction != ParameterDirection.Output)
+							spParam.Value = paramWithValue.Value;
+
+						paramWithValue.ParameterName = spParamName;
+						found = true;
+						break;
 					}
 
 					if (found == false && (
-						param.Direction == ParameterDirection.Input || 
-						param.Direction == ParameterDirection.InputOutput))
+					                      	spParam.Direction == ParameterDirection.Input || 
+					                      	spParam.Direction == ParameterDirection.InputOutput))
 					{
 						Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
-							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, name),
-							TraceSwitch.DisplayName);
+							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, spParamName),
+						                  TraceSwitch.DisplayName);
 
-						param.SourceColumn = _dataProvider.Convert(name, ConvertType.SprocParameterToName).ToString();
+						spParam.SourceColumn = _dataProvider.Convert(spParamName, ConvertType.SprocParameterToName).ToString();
 					}
 				}
 			}
@@ -697,10 +701,10 @@ namespace BLToolkit.Data
 			{
 				// Assign the provided values to the parameters based on parameter order.
 				//
-				AssignParameterValues(commandParameters, parameterValues);
+				AssignParameterValues(spParameters, parameterValues);
 			}
 
-			return commandParameters;
+			return spParameters;
 		}
 
 		///<summary>
@@ -725,9 +729,9 @@ namespace BLToolkit.Data
 			//
 			object refParam = null;
 
-			for (int i = 0; i < parameters.Length; i++)
+			foreach (object p in parameters)
 			{
-				if (parameters[i] != null)
+				if (p != null)
 				{
 					if (refParam != null)
 					{
@@ -735,7 +739,7 @@ namespace BLToolkit.Data
 						break;
 					}
 
-					refParam = parameters[i];
+					refParam = p;
 				}
 			}
 
@@ -796,8 +800,8 @@ namespace BLToolkit.Data
 		{
 			command.Parameters.Clear();
 
-			for (int i = 0; i < commandParameters.Length; i++)
-				_dataProvider.AttachParameter(command, commandParameters[i]);
+			foreach (IDbDataParameter p in commandParameters)
+				_dataProvider.AttachParameter(command, p);
 		}
 
 		private static readonly Dictionary<string, IDbDataParameter[]> _paramCache =
@@ -889,7 +893,6 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <param name="spName">The name of the stored procedure.</param>
 		/// <param name="includeReturnValueParameter">A boolean value indicating
-		/// <param name="openNewConnectionToDiscoverParameters"></param>
 		/// whether the return value parameter should be included in the results.</param>
 		/// <returns>An array of the <see cref="IDbDataParameter"/>.</returns>
 		public IDbDataParameter[] GetSpParameters(string spName, bool includeReturnValueParameter, bool openNewConnectionToDiscoverParameters)
@@ -936,10 +939,8 @@ namespace BLToolkit.Data
 			// Iterate through the parameters, assigning the values from 
 			// the corresponding position in the value array.
 			//
-			for (int i = 0; i < commandParameters.Length; i++)
+			foreach (IDbDataParameter parameter in commandParameters)
 			{
-				IDbDataParameter parameter = commandParameters[i];
-
 				if (_dataProvider.IsValueParameter(parameter))
 				{
 					if (nValues >= parameterValues.Length)
@@ -1253,7 +1254,6 @@ namespace BLToolkit.Data
 		/// Maps all parameters returned from the server to an object.
 		/// </summary>
 		/// <param name="obj">An <see cref="System.Object"/> to map from command parameters.</param>
-		/// from command parameters.</param>
 		public void MapOutputParameters(object obj)
 		{
 			MapOutputParameters(null, obj);
@@ -1432,7 +1432,6 @@ namespace BLToolkit.Data
 		/// </remarks>
 		/// <param name="parameterName">The name of the parameter.</param>
 		/// <param name="dbType">One of the <see cref="DbType"/> values.</param>
-		/// that is the value of the parameter.</param>
 		/// <returns>The <see cref="IDbDataParameter"/> object.</returns>
 		public IDbDataParameter OutputParameter(string parameterName, DbType dbType)
 		{
