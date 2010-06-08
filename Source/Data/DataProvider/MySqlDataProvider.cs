@@ -116,7 +116,10 @@ namespace BLToolkit.Data.DataProvider
 					return ParameterSymbol + CommandParameterPrefix + value.ToString();
 
 				case ConvertType.NameToSprocParameter:
-					return ParameterSymbol + SprocParameterPrefix + value.ToString();
+					string valueStr = value.ToString();
+					if (valueStr[0] == ParameterSymbol)
+						valueStr = valueStr.Substring(1);
+					return ParameterSymbol + SprocParameterPrefix + valueStr;
 
 				case ConvertType.SprocParameterToName:
 					if (value != null)
