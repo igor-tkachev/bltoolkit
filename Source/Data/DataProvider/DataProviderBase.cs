@@ -265,7 +265,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			// default implementation is case-insensitive, because if we make it 
 			// case-sensitive and don't overload it in all existing providers - client code may break
-			return string.Equals(paramName1, paramName2, StringComparison.InvariantCultureIgnoreCase);
+			return string.Equals(paramName1, paramName2, StringComparison.OrdinalIgnoreCase);
 		}
 
 		public virtual string ProviderName           { get { return ConnectionType.Namespace; } }
