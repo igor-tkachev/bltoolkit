@@ -1,15 +1,107 @@
-﻿<#+
-	private void HelloWorld()
-	{
-		PushIndent("\t");
-		PushIndent("\t");
-		
-		WriteLine("Hello World");
-#>
-		Hello World
-<#+
+﻿<#
+	ConnectionType = typeof(System.Data.SqlClient.SqlConnection).AssemblyQualifiedName;
+#><#+
+private void LoadMetadata()
+{
+	if (IsMetadataLoaded)
+		return;
 
-		PopIndent();
-		PopIndent();
+	IsMetadataLoaded = true;
+
+	var tables  = CreateList(new { ID = "", Table  = new Table() });
+	var columns = CreateList(new { ID = "", Column = new Column() });
+
+	using (var conn = GetConnection())
+	using (var cmd  = conn.CreateCommand())
+	{
+		// Load tables & vies.
+		//
+		cmd.CommandText = @"
+			SELECT
+				TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME,
+				TABLE_SCHEMA,
+				TABLE_NAME,
+				TABLE_TYPE
+			FROM
+				INFORMATION_SCHEMA.TABLES";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var t = new
+				{
+					ID    = Convert.ToString(rd[0]),
+					Table = new Table
+					{
+						Owner     = rd[1].ToString(),
+						TableName = rd[2].ToString(),
+						ClassName = rd[2].ToString(),
+						isView    = rd[3].ToString() == "VIEW"
+					}
+				};
+
+				tables.Add(t);
+			}
+		}
+
+		// Load columns.
+		//
+		cmd.CommandText = @"
+			SELECT
+				(TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME) as id,
+				CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END         as isNullable,
+				ORDINAL_POSITION         as colid,
+				COLUMN_NAME              as name,
+				c.DATA_TYPE              as dataType,
+				CHARACTER_MAXIMUM_LENGTH as length, 
+				ISNULL(NUMERIC_PRECISION, DATETIME_PRECISION) AS prec,
+				NUMERIC_SCALE            as scale,
+				COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') as isIdentity
+			FROM
+				INFORMATION_SCHEMA.COLUMNS c";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var col = new
+				{
+					ID     = Convert.ToString(rd["id"]),
+					Column = new Column
+					{
+						ID         = Convert.ToInt16  (rd["colid"]),
+						ColumnName = Convert.ToString (rd["name"]),
+						MemberName = Convert.ToString (rd["name"]),
+						IsNullable = Convert.ToBoolean(rd["isNullable"]),
+						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
+					}
+				};
+
+				columns.Add(col);
+			}
+		}
 	}
+
+foreach (var c in from c in columns orderby c.ID, c.Column.ID select c)
+	WriteLine(c.ID + ", " + c.Column.ID + ", " + c.Column.ColumnName);
+
+
+	var qc =
+		from c in columns
+		group c by c.ID into gr
+		join t in tables on gr.Key equals t.ID
+		select new { t.Table, gr };
+
+	foreach (var c in qc)
+	{
+		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
+		{
+			WriteLine(col.ID + ", " + col.ColumnName);
+			//c.Table.Columns.Add(col.ColumnName, col);
+		}
+
+		Tables.Add(c.Table.TableName, c.Table);
+	}
+}
 #>

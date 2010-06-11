@@ -97,7 +97,7 @@ private void LoadMetadata()
 	var qc =
 		from c in columns
 		group c by c.ID into gr
-		join t in tables on gr.Key equals Convert.ToInt32(t.ID)
+		join t in tables on gr.Key equals t.ID
 		select new { t.Table, gr };
 
 	foreach (var c in qc)

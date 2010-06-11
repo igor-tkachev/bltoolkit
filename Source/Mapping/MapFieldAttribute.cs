@@ -15,53 +15,19 @@ namespace BLToolkit.Mapping
 
 		public MapFieldAttribute(string mapName)
 		{
-			_mapName = mapName;
+			MapName = mapName;
 		}
 
 		public MapFieldAttribute(string mapName, string origName)
 		{
-			_mapName  = mapName;
-			_origName = origName;
+			MapName  = mapName;
+			OrigName = origName;
 		}
 
-		private string _mapName;
-		public  string  MapName
-		{
-			[DebuggerStepThrough]
-			get { return _mapName;  }
-			set { _mapName = value; }
-		}
-
-		private string _origName;
-		public  string  OrigName
-		{
-			[DebuggerStepThrough]
-			get { return _origName;  }
-			set { _origName = value; }
-		}
-
-		private string _format;
-		public  string  Format
-		{
-			[DebuggerStepThrough]
-			get { return _format;  }
-			set { _format = value; }
-		}
-
-		private string _storage;
-		public  string  Storage
-		{
-			[DebuggerStepThrough]
-			get { return _storage;  }
-			set { _storage = value; }
-		}
-
-		private bool _isInheritanceDiscriminator;
-		public  bool  IsInheritanceDiscriminator
-		{
-			[DebuggerStepThrough]
-			get { return _isInheritanceDiscriminator;  }
-			set { _isInheritanceDiscriminator = value; }
-		}
+		public string MapName                    { get; set; }
+		public string OrigName                   { get; set; }
+		public string Format                     { get; set; }
+		public string Storage                    { get; set; }
+		public bool   IsInheritanceDiscriminator { get; set; }
 	}
 }

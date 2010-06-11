@@ -3,7 +3,13 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#
-	AppDomain.CurrentDomain.AssemblyResolve += (_,args) => System.Reflection.Assembly.LoadFile(DataProviderAssembly);
+	AppDomain.CurrentDomain.AssemblyResolve += (_,args) =>
+	{
+		if (DataProviderAssembly != null)
+			return System.Reflection.Assembly.LoadFile(DataProviderAssembly);
+		else
+			return null;
+	};
 #><#+
 string ConnectionString;
 string ConnectionType;
@@ -23,7 +29,7 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 	tt.WriteLine("{");
 	tt.PushIndent("\t");
 
-	foreach (var c in t.Columns)
+	foreach (var c in from c in t.Columns.Values orderby c.ID select c)
 	{
 		tt.WriteLine("public int {0};", c.ColumnName);
 	}
@@ -132,11 +138,12 @@ class Table
 	public string ClassName;
 	public bool   isView;
 
-	public List<Column> Columns = new List<Column>();
+	public Dictionary<string,Column> Columns = new Dictionary<string,Column>();
 }
 
 class Column
 {
+	public int    ID;
 	public string ColumnName;
 	public string MemberName;
 	public bool   IsNullable;
