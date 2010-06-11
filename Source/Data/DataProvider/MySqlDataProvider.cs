@@ -11,6 +11,7 @@ using MySql.Data.MySqlClient;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
+	using BLToolkit.Common;
 
 	public class MySqlDataProvider :  DataProviderBase
 	{
@@ -105,8 +106,29 @@ namespace BLToolkit.Data.DataProvider
 			return false;
 		}
 
+		public override IDbDataParameter GetParameter(
+			IDbCommand command,
+			NameOrIndexParameter nameOrIndex)
+		{
+			if (nameOrIndex.ByName)
+			{
+				// if we have a stored procedure, then maybe command paramaters were formatted
+				// (SprocParameterPrefix added). In this case we need to format given parameter name first
+				// and only then try to take parameter by formatted parameter name
+				string parameterName = command.CommandType == CommandType.StoredProcedure
+					? Convert(nameOrIndex.Name, ConvertType.NameToSprocParameter).ToString()
+					: nameOrIndex.Name;
+
+				return (IDbDataParameter)(command.Parameters[parameterName]);
+			}
+			return (IDbDataParameter)(command.Parameters[nameOrIndex.Index]);
+		}
+
 		public override object Convert(object value, ConvertType convertType)
 		{
+			if (value == null)
+				throw new ArgumentNullException("value");
+
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
@@ -116,10 +138,17 @@ namespace BLToolkit.Data.DataProvider
 					return ParameterSymbol + CommandParameterPrefix + value.ToString();
 
 				case ConvertType.NameToSprocParameter:
-					string valueStr = value.ToString();
-					if (valueStr[0] == ParameterSymbol)
-						valueStr = valueStr.Substring(1);
-					return ParameterSymbol + SprocParameterPrefix + valueStr;
+					{
+						string valueStr = value.ToString();
+						if(string.IsNullOrEmpty(valueStr))
+							throw new ArgumentException("Argument 'value' must represent parameter name.");
+
+						if (valueStr[0] == ParameterSymbol)
+							valueStr = valueStr.Substring(1);
+						if (valueStr.StartsWith(SprocParameterPrefix, StringComparison.Ordinal))
+							valueStr = valueStr.Substring(SprocParameterPrefix.Length);
+						return ParameterSymbol + SprocParameterPrefix + valueStr;
+					}
 
 				case ConvertType.SprocParameterToName:
 					if (value != null)
