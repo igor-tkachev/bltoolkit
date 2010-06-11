@@ -1,12 +1,12 @@
-﻿using BLToolkit.Data.DataProvider;
+﻿using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
-namespace Data.Linq.ProviderSpecific
+namespace UnitTests.CS.ProviderSpecific.MySql
 {
-	using Model;
-
 	[TestFixture]
-	public class MySqlTest : TestBase
+	[Category("MySql")]
+	public class MySqlSprocParameterPrefixTests
 	{
 		[Test]
 		public void ParameterPrefixTest()
@@ -16,7 +16,7 @@ namespace Data.Linq.ProviderSpecific
 
 			try
 			{
-				using (var db = new TestDbManager(ProviderName.MySql))
+				using (var db = new DbManager(ProviderName.MySql))
 				{
 					var person = db.SetSpCommand("GetPersonById", db.Parameter("?ID", 1)).ExecuteObject<Person>();
 					Assert.IsNotNull(person);
@@ -41,15 +41,15 @@ namespace Data.Linq.ProviderSpecific
 
 			try
 			{
-				using (var db = new TestDbManager(ProviderName.MySql))
+				using (var db = new DbManager(ProviderName.MySql))
 				{
 					var person = db.SetCommand(
-							"SELECT * FROM Person WHERE PersonID = ?ID",
-							db.Parameter("?ID", 1))
+							"SELECT * FROM Person WHERE PersonID = ?PersonID",
+							db.Parameter("?PersonID", 1))
 						.ExecuteObject<Person>();
 
 					Assert.IsNotNull(person);
-					Assert.AreEqual(1, person.ID);
+					Assert.AreEqual(1, person.PersonID);
 
 					var person2 = db.SetCommand(
 							"SELECT * FROM Person WHERE FirstName = ?firstName AND LastName = ?lastName",
@@ -69,7 +69,7 @@ namespace Data.Linq.ProviderSpecific
 		[Test]
 		public void SprocParameterPrefixShouldBeSpecifiedManuallyWhenItIsNotSet()
 		{
-			using (var db = new TestDbManager(ProviderName.MySql))
+			using (var db = new DbManager(ProviderName.MySql))
 			{
 				var person = db.SetSpCommand("GetPersonById", db.Parameter("?_ID", 1)).ExecuteObject<Person>();
 				Assert.IsNotNull(person);
@@ -90,7 +90,7 @@ namespace Data.Linq.ProviderSpecific
 			// Maybe we need to be more strict on syntax and on the library users
 			// and do not allow different syntax (omiting parameter symbol)?
 
-			using (var db = new TestDbManager(ProviderName.MySql))
+			using (var db = new DbManager(ProviderName.MySql))
 			{
 				var person = db.SetSpCommand("GetPersonById", db.Parameter("_ID", 1)).ExecuteObject<Person>();
 				Assert.IsNotNull(person);
@@ -115,7 +115,62 @@ namespace Data.Linq.ProviderSpecific
 				{
 					MySqlDataProvider.SprocParameterPrefix = oldPrefix;
 				}
+			}
+		}
 
+		[Test]
+		public void SpecifyingParameterPrefixManuallyIsAlsoOk()
+		{
+			var oldPrefix = MySqlDataProvider.SprocParameterPrefix;
+			MySqlDataProvider.SprocParameterPrefix = "_";
+
+			try
+			{
+				using (var db = new DbManager(ProviderName.MySql))
+				{
+					// we specify parameter name with a prefix, though SprocParameterPrefix is specified
+					// in this case additional parameter prefix will not be added, so everything will be ok
+					var person = db.SetSpCommand("GetPersonById", db.Parameter("?_ID", 1)).ExecuteObject<Person>();
+					Assert.IsNotNull(person);
+				}
+			}
+			finally
+			{
+				MySqlDataProvider.SprocParameterPrefix = oldPrefix;
+			}
+		}
+
+		[Test]
+		public void PrefixIsAddedWhenRetrievingParameterFromDbManager()
+		{
+			var oldPrefix = MySqlDataProvider.SprocParameterPrefix;
+			MySqlDataProvider.SprocParameterPrefix = "_";
+
+			try
+			{
+				using (var db = new DbManager(ProviderName.MySql))
+				{
+					db.SetSpCommand("GetPersonById", db.Parameter("?ID", 1)).Prepare();
+					foreach (int personID in new[] { 1, 2 })
+					{
+						// prefix is not specified but it will be added internally before retrieving parameter from
+						// command parameters
+						db.Parameter("?ID").Value = personID;
+						var person = db.ExecuteObject<Person>();
+						Assert.IsNotNull(person);
+						Assert.AreEqual(personID, person.PersonID);
+
+						// specifying prefix is also ok
+						db.Parameter("?_ID").Value = personID;
+						person = db.ExecuteObject<Person>();
+						Assert.IsNotNull(person);
+						Assert.AreEqual(personID, person.PersonID);
+					}
+				}
+			}
+			finally
+			{
+				MySqlDataProvider.SprocParameterPrefix = oldPrefix;
 			}
 		}
 

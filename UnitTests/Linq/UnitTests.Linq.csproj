@@ -154,7 +154,6 @@
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="DateTimeFunctions.cs" />
-    <Compile Include="ProviderSpecific\MySql.cs" />
     <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />
     <Compile Include="SelectTest.cs" />
