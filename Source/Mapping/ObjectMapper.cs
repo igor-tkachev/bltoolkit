@@ -24,11 +24,11 @@ namespace BLToolkit.Mapping
 
 			MemberMapper mm = null;
 
-			MemberMapperAttribute attr = mapMemberInfo.MemberAccessor.GetAttribute<MemberMapperAttribute>();
+			var attr = mapMemberInfo.MemberAccessor.GetAttribute<MemberMapperAttribute>();
 
 			if (attr == null)
 			{
-				object[] attrs = TypeHelper.GetAttributes(mapMemberInfo.Type, typeof(MemberMapperAttribute));
+				var attrs = TypeHelper.GetAttributes(mapMemberInfo.Type, typeof(MemberMapperAttribute));
 
 				foreach (MemberMapperAttribute a in attrs)
 				{
@@ -44,7 +44,7 @@ namespace BLToolkit.Mapping
 
 			if (mm == null)
 			{
-				object[] attrs = TypeHelper.GetAttributes(
+				var attrs = TypeHelper.GetAttributes(
 					mapMemberInfo.MemberAccessor.MemberInfo.DeclaringType, typeof(MemberMapperAttribute));
 
 				foreach (MemberMapperAttribute a in attrs)
@@ -114,12 +114,7 @@ namespace BLToolkit.Mapping
 		private MetadataProviderBase _metadataProvider;
 		public  MetadataProviderBase  MetadataProvider
 		{
-			get
-			{
-				if (_metadataProvider == null)
-					_metadataProvider = CreateMetadataProvider();
-				return _metadataProvider;
-			}
+			get { return _metadataProvider ?? (_metadataProvider = CreateMetadataProvider()); }
 			set { _metadataProvider = value; }
 		}
 
@@ -132,7 +127,7 @@ namespace BLToolkit.Mapping
 				{
 					_fieldNames = new string[_members.Count];
 
-					for (int i = 0; i < _fieldNames.Length; i++)
+					for (var i = 0; i < _fieldNames.Length; i++)
 					{
 						_fieldNames[i] = _members[i].Name;
 					}
@@ -150,7 +145,7 @@ namespace BLToolkit.Mapping
 			{
 				if (name == null) throw new ArgumentNullException("name");
 
-				MemberMapper mm = (MemberMapper)_nameToMember[name];
+				var mm = (MemberMapper)_nameToMember[name];
 
 				if (mm == null)
 				{
@@ -208,7 +203,7 @@ namespace BLToolkit.Mapping
 		{
 			if (byPropertyName)
 			{
-				for (int i = 0; i < _members.Count; ++i)
+				for (var i = 0; i < _members.Count; ++i)
 					if (_members[i].MemberName == name)
 						return i;
 
@@ -246,7 +241,7 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberAccessor ma in _typeAccessor)
 			{
-				Association a = GetAssociation(ma);
+				var a = GetAssociation(ma);
 
 				if (a != null)
 				{
@@ -257,21 +252,22 @@ namespace BLToolkit.Mapping
 				if (GetMapIgnore(ma))
 					continue;
 
-				MapFieldAttribute mapFieldAttr = ma.GetAttribute<MapFieldAttribute>();
+				var mapFieldAttr = ma.GetAttribute<MapFieldAttribute>();
 
 				if (mapFieldAttr == null || (mapFieldAttr.OrigName == null && mapFieldAttr.Format == null))
 				{
-					MapMemberInfo mi = new MapMemberInfo();
+					var mi = new MapMemberInfo();
 
-					DbTypeAttribute dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
+					var dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
 
 					if (dbTypeAttribute != null)
 					{
-						mi.DbType = dbTypeAttribute.DbType;
+						mi.DbType      = dbTypeAttribute.DbType;
 						mi.IsDbTypeSet = true;
+
 						if (dbTypeAttribute.Size != null)
 						{
-							mi.DbSize = dbTypeAttribute.Size.Value;
+							mi.DbSize      = dbTypeAttribute.Size.Value;
 							mi.IsDbSizeSet = true;
 						}
 					}
@@ -297,7 +293,7 @@ namespace BLToolkit.Mapping
 				{
 					EnsureMapper(mapFieldAttr.MapName, ma.Name + "." + mapFieldAttr.OrigName);
 				}
-				else if (mapFieldAttr.Format != null)
+				else //if (mapFieldAttr.Format != null)
 				{
 					foreach (MemberMapper inner in _mappingSchema.GetObjectMapper(ma.Type))
 						EnsureMapper(string.Format(mapFieldAttr.Format, inner.Name), ma.Name + "." + inner.MemberName);
@@ -306,8 +302,8 @@ namespace BLToolkit.Mapping
 
 			foreach (AttributeExtension ae in _extension.Attributes["MapField"])
 			{
-				string mapName  = (string)ae["MapName"];
-				string origName = (string)ae["OrigName"];
+				var mapName  = (string)ae["MapName"];
+				var origName = (string)ae["OrigName"];
 
 				if (mapName == null || origName == null)
 					throw new MappingException(string.Format(
@@ -322,13 +318,13 @@ namespace BLToolkit.Mapping
 
 		private MemberMapper EnsureMapper(string mapName, string origName)
 		{
-			MemberMapper mm = this[mapName];
+			var mm = this[mapName];
 
 			if (mm == null)
 			{
-				string name = mapName.ToLower();
+				var name = mapName.ToLower();
 
-				foreach (MemberMapper m in _members)
+				foreach (var m in _members)
 				{
 					if (m.MemberAccessor.Name.ToLower() == name)
 					{
@@ -355,11 +351,9 @@ namespace BLToolkit.Mapping
 		{
 			if (origName == null) throw new ArgumentNullException("origName");
 
-			string       name = origName.ToLower();
-			int          idx  = origName.IndexOf('.');
-			MemberMapper mm;
-
-			mm = (MemberMapper)_nameToComplexMapper[name];
+			var name = origName.ToLower();
+			var idx  = origName.IndexOf('.');
+			var mm   = (MemberMapper)_nameToComplexMapper[name];
 			
 			if (mm != null)
 				return mm;
@@ -375,7 +369,7 @@ namespace BLToolkit.Mapping
 				{
 					if (ma.Name.Length == name.Length && ma.Name.ToLower() == name)
 					{
-						ObjectMapper om = MappingSchema.GetObjectMapper(ma.Type);
+						var om = MappingSchema.GetObjectMapper(ma.Type);
 
 						if (om != null)
 						{
@@ -383,16 +377,17 @@ namespace BLToolkit.Mapping
 
 							if (mm != null)
 							{
-								MapMemberInfo mi = new MapMemberInfo();
+								var mi = new MapMemberInfo
+								{
+									MemberAccessor        = ma,
+									ComplexMemberAccessor = mm.ComplexMemberAccessor,
+									Type                  = mm.Type,
+									MappingSchema         = MappingSchema,
+									Name                  = mapName,
+									MemberName            = origName
+								};
 
-								mi.MemberAccessor        = ma;
-								mi.ComplexMemberAccessor = mm.ComplexMemberAccessor;
-								mi.Type                  = mm.Type;
-								mi.MappingSchema         = MappingSchema;
-								mi.Name                  = mapName;
-								mi.MemberName            = origName;
-
-								MemberMapper mapper = new MemberMapper.ComplexMapper(mm);
+								var mapper = new MemberMapper.ComplexMapper(mm);
 
 								mapper.Init(mi);
 
@@ -408,7 +403,7 @@ namespace BLToolkit.Mapping
 			}
 			else
 			{
-				foreach (MemberMapper m in _members)
+				foreach (var m in _members)
 					if (m.MemberAccessor.Name.Length == name.Length && m.MemberAccessor.Name.ToLower() == name)
 					{
 						_nameToComplexMapper[name] = m;
@@ -429,7 +424,7 @@ namespace BLToolkit.Mapping
 		{
 			bool isSet;
 
-			MapValue[] values = MetadataProvider.GetMapValues(Extension, member, out isSet);
+			var values = MetadataProvider.GetMapValues(Extension, member, out isSet);
 
 			return isSet? values: _mappingSchema.GetMapValues(member.Type);
 		}
@@ -438,7 +433,7 @@ namespace BLToolkit.Mapping
 		{
 			bool isSet;
 
-			object value = MetadataProvider.GetDefaultValue(MappingSchema, Extension, memberAccessor, out isSet);
+			var value = MetadataProvider.GetDefaultValue(MappingSchema, Extension, memberAccessor, out isSet);
 
 			return isSet? value: _mappingSchema.GetDefaultValue(memberAccessor.Type);
 		}
@@ -546,10 +541,7 @@ namespace BLToolkit.Mapping
 
 		public override object GetValue(object o, string name)
 		{
-			MemberMapper mm = (MemberMapper)_nameToMember[name];
-
-			if (mm == null)
-				mm = this[name];
+			var mm = (MemberMapper)_nameToMember[name] ?? this[name];
 
 			return mm == null? null: mm.GetValue(o);
 		}
@@ -631,10 +623,7 @@ namespace BLToolkit.Mapping
 
 		public override int GetOrdinal(string name)
 		{
-			MemberMapper mm = (MemberMapper)_nameToMember[name];
-
-			if (mm == null)
-				mm = this[name];
+			var mm = (MemberMapper)_nameToMember[name] ?? this[name];
 
 			return mm == null? -1: mm.Ordinal;
 		}

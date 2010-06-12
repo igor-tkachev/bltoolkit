@@ -379,16 +379,15 @@ namespace Data
 				dt.Xml_      = new SqlXml(new XmlTextReader(new StringReader("<xml/>")));
 #endif
 
-				IDbDataParameter[] parameters = db.CreateParameters(dt);
+				var parameters = db.CreateParameters(dt);
 
 				Assert.IsNotNull(parameters);
 				Assert.AreEqual(ObjectMapper<DataTypeSqlTest>.Instance.Count, parameters.Length);
 
 				foreach (MemberMapper mm in ObjectMapper<DataTypeSqlTest>.Instance)
 				{
-					string paramName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
-					IDbDataParameter p = Array.Find(parameters,
-						delegate(IDbDataParameter obj) { return obj.ParameterName == paramName; });
+					var pName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
+					var p     = Array.Find(parameters, obj => obj.ParameterName == pName);
 
 					Assert.IsNotNull(p);
 					Assert.AreEqual(mm.GetValue(dt), p.Value);
@@ -404,12 +403,11 @@ namespace Data
 		[Test]
 		public void CreateParametersStructTest()
 		{
-			DBInfo dbInfo = new DBInfo();
-			dbInfo.TimeValue = DateTime.Now;
-			
-			using (DbManager db = new DbManager())
+			var dbInfo = new DBInfo { TimeValue = DateTime.Now };
+
+			using (var db = new DbManager())
 			{
-				IDbDataParameter[] parameters = db.CreateParameters(dbInfo);
+				var parameters = db.CreateParameters(dbInfo);
 				
 				Assert.IsNotNull(parameters);
 				Assert.AreEqual(1, parameters.Length);

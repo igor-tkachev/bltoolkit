@@ -11,21 +11,17 @@ namespace Mapping
 	{
 		public abstract class Object1
 		{
-			public abstract string Str1 { get; set; }
-			[Nullable]
-			public abstract string Str2 { get; set; }
-			[NullValue("(null)")]
-			public abstract string Str3 { get; set; }
-			[NullValue(typeof(DBNull))]
-			public abstract string Str4 { get; set; }
+			[NotNull]                   public abstract string Str1 { get; set; }
+			[Nullable]                  public abstract string Str2 { get; set; }
+			[NullValue("(null)")]       public abstract string Str3 { get; set; }
+			[NullValue(typeof(DBNull))] public abstract string Str4 { get; set; }
 		}
 
 		[Test]
 		public void TestString1()
 		{
-			ObjectMapper om = Map.GetObjectMapper(typeof(Object1));
-
-			Object1 o = (Object1)om.CreateInstance();
+			var om = Map.GetObjectMapper(typeof(Object1));
+			var o  = (Object1)om.CreateInstance();
 
 			om.SetValue(o, "Str1", null);
 			om.SetValue(o, "Str2", null);

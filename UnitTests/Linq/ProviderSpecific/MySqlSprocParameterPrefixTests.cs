@@ -1,9 +1,14 @@
-﻿using BLToolkit.Data;
+﻿using System;
+
+using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
+
 using NUnit.Framework;
 
-namespace UnitTests.CS.ProviderSpecific.MySql
+namespace Data.Linq.ProviderSpecific
 {
+	using Model;
+
 	[TestFixture]
 	[Category("MySql")]
 	public class MySqlSprocParameterPrefixTests
@@ -49,7 +54,7 @@ namespace UnitTests.CS.ProviderSpecific.MySql
 						.ExecuteObject<Person>();
 
 					Assert.IsNotNull(person);
-					Assert.AreEqual(1, person.PersonID);
+					Assert.AreEqual(1, person.ID);
 
 					var person2 = db.SetCommand(
 							"SELECT * FROM Person WHERE FirstName = ?firstName AND LastName = ?lastName",
@@ -151,20 +156,21 @@ namespace UnitTests.CS.ProviderSpecific.MySql
 				using (var db = new DbManager(ProviderName.MySql))
 				{
 					db.SetSpCommand("GetPersonById", db.Parameter("?ID", 1)).Prepare();
-					foreach (int personID in new[] { 1, 2 })
+
+					foreach (var personID in new[] { 1, 2 })
 					{
 						// prefix is not specified but it will be added internally before retrieving parameter from
 						// command parameters
 						db.Parameter("?ID").Value = personID;
 						var person = db.ExecuteObject<Person>();
 						Assert.IsNotNull(person);
-						Assert.AreEqual(personID, person.PersonID);
+						Assert.AreEqual(personID, person.ID);
 
 						// specifying prefix is also ok
 						db.Parameter("?_ID").Value = personID;
 						person = db.ExecuteObject<Person>();
 						Assert.IsNotNull(person);
-						Assert.AreEqual(personID, person.PersonID);
+						Assert.AreEqual(personID, person.ID);
 					}
 				}
 			}
@@ -173,6 +179,5 @@ namespace UnitTests.CS.ProviderSpecific.MySql
 				MySqlDataProvider.SprocParameterPrefix = oldPrefix;
 			}
 		}
-
 	}
 }

@@ -9,37 +9,27 @@ namespace BLToolkit.Mapping
 	{
 		public NullableAttribute()
 		{
-			_isNullable = true;
+			IsNullable = true;
 		}
 
 		public NullableAttribute(bool isNullable)
 		{
-			_isNullable = isNullable;
+			IsNullable = isNullable;
 		}
 
 		public NullableAttribute(Type type)
 		{
-			_type       = type;
-			_isNullable = true;
+			Type       = type;
+			IsNullable = true;
 		}
 
 		public NullableAttribute(Type type, bool isNullable)
 		{
-			_type       = type;
-			_isNullable = isNullable;
+			Type       = type;
+			IsNullable = isNullable;
 		}
 
-		private bool _isNullable;
-		public  bool  IsNullable
-		{
-			get { return _isNullable;  }
-			set { _isNullable = value; }
-		}
-
-		private readonly Type _type;
-		public           Type  Type
-		{
-			get { return _type; }
-		}
+		public bool IsNullable { get; set; }
+		public Type Type       { get; private set; }
 	}
 }

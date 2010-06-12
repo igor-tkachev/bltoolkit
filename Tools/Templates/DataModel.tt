@@ -1,6 +1,7 @@
-﻿<#@ template language="C#" debug="True" hostspecific="True" #>
+﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs"     #>
 <#@ include file="BLToolkit.ttinclude"   #>
+<#@ include file="BLT4Toolkit.ttinclude" #>
 <#@ include file="MSSQL.ttinclude"      #>
 <#
 	//ConnectionString     = "Data Source=DBHost;Port=5000;Database=BLToolkitData;Uid=sa";
@@ -8,8 +9,35 @@
 
 	ConnectionString     = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
 
-	Namespace       = "Templates";
-	DataContextName = "Test";
+	//Namespace       = "Templates";
+	//DataContextName = "Test";
+
+	BaseEntityClass = "EntityBase";
+
+	LoadMetadata();
+
+	Tables["BinaryData"].Columns["BinaryDataID"].MemberName = "ID";
+
+	foreach (var t in Tables.Values)
+		foreach (var c in t.Columns.Values)
+			if (c.PKIndex >= 0 && t.TableName + "ID" == c.ColumnName)
+				c.MemberName = "ID";
+
+	foreach (var t in Tables.Values)
+		t.BaseClassName = "EntityBase<" + t.ClassName + ">";
+
+	Usings.Add("BLToolkit.Common");
+	
+	/*
+	Usings.Add("System.Runtime.Serialization");
+
+	foreach (var t in Tables.Values)
+		t.Attributes = "Serializable, DataContract";
+
+	foreach (var t in Tables.Values)
+		foreach (var c in t.Columns.Values)
+			c.Attributes = "DataMember";
+	*/
 
 	GenerateModel();
 #>

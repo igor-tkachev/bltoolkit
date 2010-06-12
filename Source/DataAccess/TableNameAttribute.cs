@@ -27,8 +27,8 @@ namespace BLToolkit.DataAccess
 			_name     = name;
 		}
 
-		private string _database; public string Database { get { return _database; } set { _database = value; } }
-		private string _owner;    public string Owner    { get { return _owner;    } set { _owner = value;    } }
-		private string _name;     public string Name     { get { return _name;     } set { _name = value;     } }
+		private string _database; public virtual string Database { get { return _database; } set { _database = value; } }
+		private string _owner;    public virtual string Owner    { get { return _owner;    } set { _owner = value;    } }
+		private string _name;     public virtual string Name     { get { return _name;     } set { _name = value;     } }
 	}
 }

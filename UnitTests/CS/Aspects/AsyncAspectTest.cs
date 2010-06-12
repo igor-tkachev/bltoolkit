@@ -17,7 +17,7 @@ namespace Aspects
 		{
 			public int Test(int intVal, string strVal)
 			{
-				System.Threading.Thread.Sleep(ExecutionTime + 10);
+				System.Threading.Thread.Sleep(ExecutionTime + 30);
 				return intVal;
 			}
 
@@ -36,7 +36,7 @@ namespace Aspects
 		{
 			public T Test(T intVal)
 			{
-				System.Threading.Thread.Sleep(ExecutionTime + 10);
+				System.Threading.Thread.Sleep(ExecutionTime + 30);
 				return intVal;
 			}
 
@@ -47,17 +47,17 @@ namespace Aspects
 		[Test]
 		public void AsyncTest()
 		{
-			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
-			Stopwatch sw = Stopwatch.StartNew();
+			var o = TypeAccessor<TestObject>.CreateInstanceEx();
+			var sw = Stopwatch.StartNew();
 
 			Assert.AreEqual(1, o.Test(1, null));
-			long mss = sw.ElapsedMilliseconds;
+			var mss = sw.ElapsedMilliseconds;
 			Assert.IsTrue(mss >= ExecutionTime);
 
 			sw.Reset();
 			sw.Start();
 
-			IAsyncResult ar = o.BeginTest(2, "12");
+			var ar = o.BeginTest(2, "12");
 			mss = sw.ElapsedMilliseconds;
 			Assert.IsTrue(mss <= ExecutionTime);
 
@@ -69,16 +69,16 @@ namespace Aspects
 		[Test]
 		public void GenericTest()
 		{
-			TestObject<DateTime> o = TypeAccessor<TestObject<DateTime>>.CreateInstanceEx();
-			DateTime           now = DateTime.Now;
-			IAsyncResult        ar = o.BeginTest(now);
+			var o   = TypeAccessor<TestObject<DateTime>>.CreateInstanceEx();
+			var now = DateTime.Now;
+			var ar  = o.BeginTest(now);
 
 			Assert.AreEqual(now, o.EndTest(ar));
 		}
 
 		private static void CallBack(IAsyncResult ar)
 		{
-			TestObject o = (TestObject) ar.AsyncState;
+			var o = (TestObject) ar.AsyncState;
 			Console.WriteLine("Callback");
 			o.EndTest(ar);
 		}
@@ -86,39 +86,39 @@ namespace Aspects
 		[Test]
 		public void CallbackTest()
 		{
-			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
+			var o = TypeAccessor<TestObject>.CreateInstanceEx();
 
-			o.BeginTest(2, null, new AsyncCallback(CallBack), o);
+			o.BeginTest(2, null, CallBack, o);
 		}
 
 		[Test]
 		public void NoStateTest()
 		{
-			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
+			var o = TypeAccessor<TestObject>.CreateInstanceEx();
 
 			Assert.AreEqual(1, o.Test(1, null));
 
-			IAsyncResult ar = o.BeginTest(2, null, null);
+			var ar = o.BeginTest(2, null, null);
 			Assert.AreEqual(2, o.EndTest(ar));
 		}
 
 		[Test]
 		public void NoCallbackTest()
 		{
-			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
+			var o = TypeAccessor<TestObject>.CreateInstanceEx();
 
 			Assert.AreEqual(1, o.Test(1, null));
 
-			IAsyncResult ar = o.BeginTest(2, "1234");
+			var ar = o.BeginTest(2, "1234");
 			Assert.AreEqual(2, o.EndTest(ar));
 		}
 
 		[Test]
 		public void AnyNameTest()
 		{
-			TestObject o = TypeAccessor<TestObject>.CreateInstanceEx();
+			var o = TypeAccessor<TestObject>.CreateInstanceEx();
 
-			IAsyncResult ar = o.AnyName(2, null, null, null);
+			var ar = o.AnyName(2, null, null, null);
 			Assert.AreEqual(2, o.AnyName(ar));
 		}
 	}

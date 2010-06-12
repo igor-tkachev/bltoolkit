@@ -34,10 +34,11 @@ private void LoadMetadata()
 					ID    = Convert.ToString(rd[0]),
 					Table = new Table
 					{
-						Owner     = rd[1].ToString(),
-						TableName = rd[2].ToString(),
-						ClassName = rd[2].ToString(),
-						isView    = rd[3].ToString() == "VIEW"
+						Owner         = rd[1].ToString(),
+						TableName     = rd[2].ToString(),
+						ClassName     = rd[2].ToString(),
+						isView        = rd[3].ToString() == "VIEW",
+						BaseClassName = BaseEntityClass,
 					}
 				};
 
@@ -78,14 +79,70 @@ private void LoadMetadata()
 					}
 				};
 
+//hierarchyid
+//geometry
+//geography
+//xml
+
+				var c = col.Column;
+
+				switch (Convert.ToString(rd["dataType"]))
+				{
+					case "image"            : c.Type = "byte[]";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Image;            break;
+					case "text"             : c.Type = "string";         c.DbType = DbType.String;         c.SqlDbType = SqlDbType.Text;             break;
+					case "binary"           : c.Type = "byte[]";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Binary;           break;
+					case "tinyint"          : c.Type = "byte";           c.DbType = DbType.Byte;           c.SqlDbType = SqlDbType.TinyInt;          break;
+					case "date"             : c.Type = "DateTime";       c.DbType = DbType.Date;           c.SqlDbType = SqlDbType.Date;             break;
+					case "time"             : c.Type = "DateTime";       c.DbType = DbType.Time;           c.SqlDbType = SqlDbType.Time;             break;
+					case "bit"              : c.Type = "bool";           c.DbType = DbType.Boolean;        c.SqlDbType = SqlDbType.Bit;              break;
+					case "smallint"         : c.Type = "short";          c.DbType = DbType.Int16;          c.SqlDbType = SqlDbType.SmallInt;         break;
+					case "decimal"          : c.Type = "decimal";        c.DbType = DbType.Decimal;        c.SqlDbType = SqlDbType.Decimal;          break;
+					case "int"              : c.Type = "int";            c.DbType = DbType.Int32;          c.SqlDbType = SqlDbType.Int;              break;
+					case "smalldatetime"    : c.Type = "DateTime";       c.DbType = DbType.DateTime;       c.SqlDbType = SqlDbType.SmallDateTime;    break;
+					case "real"             : c.Type = "float";          c.DbType = DbType.Single;         c.SqlDbType = SqlDbType.Real;             break;
+					case "money"            : c.Type = "decimal";        c.DbType = DbType.Currency;       c.SqlDbType = SqlDbType.Money;            break;
+					case "datetime"         : c.Type = "DateTime";       c.DbType = DbType.DateTime;       c.SqlDbType = SqlDbType.DateTime;         break;
+					case "float"            : c.Type = "double";         c.DbType = DbType.Double;         c.SqlDbType = SqlDbType.Float;            break;
+					case "numeric"          : c.Type = "decimal";        c.DbType = DbType.Decimal;        c.SqlDbType = SqlDbType.Decimal;          break;
+					case "smallmoney"       : c.Type = "decimal";        c.DbType = DbType.Currency;       c.SqlDbType = SqlDbType.SmallMoney;       break;
+					case "datetime2"        : c.Type = "DateTime";       c.DbType = DbType.DateTime2;      c.SqlDbType = SqlDbType.DateTime2;        break;
+					case "bigint"           : c.Type = "long";           c.DbType = DbType.Int64;          c.SqlDbType = SqlDbType.BigInt;           break;
+					case "varbinary"        : c.Type = "byte[]";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.VarBinary;        break;
+					case "timestamp"        : c.Type = "byte[]";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Timestamp;        break;
+					case "sysname"          : c.Type = "string";         c.DbType = DbType.String;         c.SqlDbType = SqlDbType.NVarChar;         break;
+					case "nvarchar"         : c.Type = "string";         c.DbType = DbType.String;         c.SqlDbType = SqlDbType.NVarChar;         break;
+					case "varchar"          : c.Type = "string";         c.DbType = DbType.AnsiString;     c.SqlDbType = SqlDbType.VarChar;          break;
+					case "ntext"            : c.Type = "string";         c.DbType = DbType.String;         c.SqlDbType = SqlDbType.NText;            break;
+					case "uniqueidentifier" : c.Type = "Guid";           c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.UniqueIdentifier; break;
+					case "datetimeoffset"   : c.Type = "DateTimeOffset"; c.DbType = DbType.DateTimeOffset; c.SqlDbType = SqlDbType.DateTimeOffset;   break;
+					case "sql_variant"      : c.Type = "object";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Variant;          break;
+
+					case "char"          :
+						c.Type      = Convert.ToInt32 (rd["length"]) == 1 ? "char" : "string";
+						c.DbType    = DbType.AnsiStringFixedLength;
+						c.SqlDbType = SqlDbType.Char;
+						break;
+
+					case "nchar"         :
+						c.Type      = Convert.ToInt32 (rd["length"]) == 1 ? "char" : "string";
+						c.DbType    = DbType.StringFixedLength;
+						c.SqlDbType = SqlDbType.NChar;
+						break;
+				}
+
+				switch (c.Type)
+				{
+					case "string" :
+					case "byte[]" : c.IsClass = true; break;
+				}
+
+				if (c.IsNullable && !c.IsClass)
+					c.Type += "?";
+
 				columns.Add(col);
 			}
 		}
 	}
-
-foreach (var c in from c in columns orderby c.ID, c.Column.ID select c)
-	WriteLine(c.ID + ", " + c.Column.ID + ", " + c.Column.ColumnName);
-
 
 	var qc =
 		from c in columns
@@ -96,10 +153,7 @@ foreach (var c in from c in columns orderby c.ID, c.Column.ID select c)
 	foreach (var c in qc)
 	{
 		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
-		{
-			WriteLine(col.ID + ", " + col.ColumnName);
-			//c.Table.Columns.Add(col.ColumnName, col);
-		}
+			c.Table.Columns.Add(col.ColumnName, col);
 
 		Tables.Add(c.Table.TableName, c.Table);
 	}

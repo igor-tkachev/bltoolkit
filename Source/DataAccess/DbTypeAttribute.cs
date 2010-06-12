@@ -6,8 +6,8 @@ namespace BLToolkit.DataAccess
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false), CLSCompliant(false)]
 	public sealed class DbTypeAttribute : Attribute
 	{
-		DbType _dbType; public DbType DbType { get { return _dbType; } set { _dbType = value; } }
-		int?   _size;   public int?   Size   { get { return _size;   } set { _size   = value; } }
+		public DbType DbType { get; set; }
+		public int?   Size   { get; set; }
 
 		public DbTypeAttribute(DbType sqlDbType)
 		{
@@ -17,7 +17,7 @@ namespace BLToolkit.DataAccess
 		public DbTypeAttribute(DbType sqlDbType, int size)
 		{
 			DbType = sqlDbType;
-			Size = size;
+			Size   = size;
 		}
 	}
 }

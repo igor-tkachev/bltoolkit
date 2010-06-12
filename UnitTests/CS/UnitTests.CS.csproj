@@ -49,10 +49,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MySql.Data, Version=6.2.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\MySql\MySql.Data.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
@@ -170,9 +166,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="ProviderSpecific\MySql\MySqlSprocParameterPrefixTests.cs" />
-    <Compile Include="ProviderSpecific\MySql\MySqlDataProvider.cs" />
-    <Compile Include="ProviderSpecific\MySql\Person.cs" />
     <Compile Include="Reflection\TypeAccessorTest3.cs" />
     <Compile Include="Reflection\Emit\MethodBuilderHelperTest.cs" />
     <Compile Include="Reflection\Extension\DefaultValueTest.cs" />

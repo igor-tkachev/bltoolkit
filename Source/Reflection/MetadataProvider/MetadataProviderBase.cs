@@ -131,7 +131,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			isSet = false;
 			return
-				member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof(Nullable<>) /*||
+				//member.Type.IsClass ||
+				member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof (Nullable<>);
+				/*||
 #if FW3
 				member.Type == typeof(System.Data.Linq.Binary) ||
 #endif
@@ -237,8 +239,8 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		protected static List<string> GetPrimaryKeyFields(MappingSchema schema, TypeAccessor ta, TypeExtension tex)
 		{
-			MetadataProviderBase mdp = schema.MetadataProvider;
-			List<string> keys = new List<string>();
+			var mdp  = schema.MetadataProvider;
+			var keys = new List<string>();
 
 			foreach (MemberAccessor sma in ta)
 			{
@@ -289,7 +291,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private static MetadataProviderBase CreateInternal()
 		{
-			MetadataProviderList list = new MetadataProviderList();
+			var list = new MetadataProviderList();
 
 			if (OnCreateProvider != null)
 				OnCreateProvider(list);
