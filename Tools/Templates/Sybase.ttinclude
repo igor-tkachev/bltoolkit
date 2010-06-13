@@ -1,7 +1,7 @@
 ﻿<#
 	ConnectionType = "Sybase.Data.AseClient.AseConnection, Sybase.AdoNet2.AseClient";
 #><#+
-private void LoadMetadata()
+private void LoadServerMetadata()
 {
 	if (IsMetadataLoaded)
 		return;
@@ -39,7 +39,7 @@ private void LoadMetadata()
 						Owner         = rd[1].ToString(),
 						TableName     = rd[2].ToString(),
 						ClassName     = rd[2].ToString(),
-						isView        = rd[3].ToString() == "V",
+						IsView        = rd[3].ToString() == "V",
 						BaseClassName = BaseEntityClass,
 					}
 				};
@@ -232,7 +232,10 @@ private void LoadMetadata()
 	{
 		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
 			c.Table.Columns.Add(col.ColumnName, col);
-		
+
+		if (c.Table.Owner == "dbo")
+			c.Table.Owner = null;
+
 		Tables.Add(c.Table.TableName, c.Table);
 	}
 }

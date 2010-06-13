@@ -59,6 +59,7 @@
   <ItemGroup>
     <None Include="BLToolkit.ttinclude" />
     <None Include="BLT4Toolkit.ttinclude" />
+    <None Include="WCFAttributes.ttinclude" />
     <None Include="Sybase.ttinclude" />
     <None Include="DataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

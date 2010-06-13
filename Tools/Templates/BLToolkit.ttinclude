@@ -68,10 +68,10 @@ static Action<GeneratedTextTransformation,Column,int[],string[]> RenderColumn = 
 
 	tt.Write("public {0}{1} {2}", c.Type, tt.LenDiff(tt.MaxColumnTypeLen, c.Type), c.MemberName);
 
-	if (!tt.RenderField)
-		tt.WriteLine("{0} {{ get; set; }}", tt.LenDiff(tt.MaxColumnMemberLen, c.MemberName));
-	else
+	if (tt.RenderField)
 		tt.WriteLine(";");
+	else
+		tt.WriteLine("{0} {{ get; set; }}", tt.LenDiff(tt.MaxColumnMemberLen, c.MemberName));
 };
 
 static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
@@ -88,8 +88,8 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 	tt.WriteLine("{");
 	tt.PushIndent("\t");
 
-	tt.MaxColumnTypeLen        = t.Columns.Values.Max(_ => _.Type.Length);
-	tt.MaxColumnMemberLen      = t.Columns.Values.Max(_ => _.MemberName.Length);
+	tt.MaxColumnTypeLen   = t.Columns.Values.Max(_ => _.Type.Length);
+	tt.MaxColumnMemberLen = t.Columns.Values.Max(_ => _.MemberName.Length);
 
 	var maxLens = new int[]
 	{
@@ -97,18 +97,18 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 		t.Columns.Values.Max(_ => _.IsNullable                 ? "Nullable".Length : _.IsIdentity ? "Identity".Length : 0),
 		t.Columns.Values.Max(_ => _.IsIdentity && _.IsNullable ? "Identity".Length : 0),
 		t.Columns.Values.Max(_ => _.PKIndex >= 0               ? string.Format("PrimaryKey({0})", _.PKIndex).Length : 0),
-		t.Columns.Values.Max(_ => string.IsNullOrEmpty(_.Attributes) ? 0 : _.Attributes.Length),
+		t.Columns.Values.Max(_ => _.Attributes.Count == 0      ? 0 : string.Join(", ", _.Attributes.Distinct().ToArray()).Length),
 	};
 
 	foreach (var c in from c in t.Columns.Values orderby c.ID select c)
 	{
 		var attrs = new string[]
 		{
-			c.MemberName == c.ColumnName       ? null : string.Format("MapField(\"{0}\")", c.ColumnName),
-			c.IsNullable                       ? "Nullable" : c.IsIdentity ? "Identity" : null,
-			c.IsIdentity && c.IsNullable       ? "Identity" : null,
-			c.PKIndex    <  0                  ? null : string.Format("PrimaryKey({0})", c.PKIndex),
-			string.IsNullOrEmpty(c.Attributes) ? null : c.Attributes,
+			c.MemberName == c.ColumnName ? null : string.Format("MapField(\"{0}\")", c.ColumnName),
+			c.IsNullable                 ? "Nullable" : c.IsIdentity ? "Identity" : null,
+			c.IsIdentity && c.IsNullable ? "Identity" : null,
+			c.PKIndex    <  0            ? null : string.Format("PrimaryKey({0})", c.PKIndex),
+			c.Attributes.Count == 0      ? null : string.Join(", ", c.Attributes.Distinct().ToArray()),
 		};
 
 		RenderColumn(tt, c, maxLens, attrs);
@@ -120,8 +120,8 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 
 static Action<GeneratedTextTransformation,Table> RenderTableAttributes = (tt,t) =>
 {
-	if (!string.IsNullOrEmpty(t.Attributes))
-		tt.WriteLine("[{0}]", t.Attributes);
+	if (t.Attributes.Count > 0)
+		tt.WriteLine("[{0}]", string.Join(", ", t.Attributes.Distinct().ToArray()));
 
 	tt.Write("[TableName(");
 	
@@ -143,7 +143,7 @@ List<string> Usings = new List<string>()
 static Action<GeneratedTextTransformation> RenderUsing = tt =>
 {
 	var q =
-		from ns in tt.Usings
+		from ns in tt.Usings.Distinct()
 		group ns by ns.Split('.')[0];
 
 	var groups =
@@ -159,8 +159,13 @@ static Action<GeneratedTextTransformation> RenderUsing = tt =>
 	}
 };
 
+Action<GeneratedTextTransformation> BeforeGenerateModel = _ => {};
+Action<GeneratedTextTransformation> AfterGenerateModel  = _ => {};
+
 void GenerateModel()
 {
+	BeforeGenerateModel(this);
+
 	if (ConnectionString != null) ConnectionString = ConnectionString.Trim();
 	if (DataContextName  != null) DataContextName  = DataContextName. Trim();
 
@@ -206,6 +211,8 @@ namespace <#= Namespace #>
 #>
 }
 <#+
+
+	AfterGenerateModel(this);
 }
 
 string LenDiff(int max, string str)
@@ -244,28 +251,48 @@ Dictionary<string,Table> Tables = new Dictionary<string,Table>();
 
 class Table
 {
-	public string Owner;
-	public string TableName;
-	public string ClassName;
-	public string BaseClassName;
-	public bool   isView;
-	public string Attributes = null;
+	public string       Owner;
+	public string       TableName;
+	public string       ClassName;
+	public string       BaseClassName;
+	public bool         IsView;
+	public List<string> Attributes = new List<string>();
 
 	public Dictionary<string,Column> Columns = new Dictionary<string,Column>();
 }
 
+Action<GeneratedTextTransformation> BeforeLoadMetadata = _ => {};
+Action<GeneratedTextTransformation> AfterLoadMetadata  = _ => {};
+
+private void LoadMetadata()
+{
+	BeforeLoadMetadata(this);
+	LoadServerMetadata();
+
+	foreach (var t in Tables.Values)
+	{
+		if (t.ClassName.Contains(" "))
+		{
+			var ss = t.ClassName.Split(' ').Where(_ => _.Trim().Length > 0).Select(_ => char.ToUpper(_[0]) + _.Substring(1));
+			t.ClassName = string.Join("", ss.ToArray());
+		}
+	}
+
+	AfterLoadMetadata(this);
+}
+
 class Column
 {
-	public int       ID;
-	public string    ColumnName;
-	public string    MemberName;
-	public bool      IsNullable;
-	public bool      IsIdentity;
-	public string    Type;
-	public bool      IsClass;
-	public DbType    DbType;
-	public SqlDbType SqlDbType;
-	public string    Attributes = null;
-	public int       PKIndex = -1;
+	public int          ID;
+	public string       ColumnName;
+	public string       MemberName;
+	public bool         IsNullable;
+	public bool         IsIdentity;
+	public string       Type;
+	public bool         IsClass;
+	public DbType       DbType;
+	public SqlDbType    SqlDbType;
+	public int          PKIndex = -1;
+	public List<string> Attributes = new List<string>();
 }
 #>

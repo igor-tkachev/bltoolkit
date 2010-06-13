@@ -1,13 +1,15 @@
 ﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
-<#@ output extension=".generated.cs"     #>
-<#@ include file="BLToolkit.ttinclude"   #>
-<#@ include file="BLT4Toolkit.ttinclude" #>
-<#@ include file="MSSQL.ttinclude"      #>
+<#@ output extension=".generated.cs"       #>
+<#@ include file="BLToolkit.ttinclude"     #>
+<#@ include file="BLT4Toolkit.ttinclude"   #>
+<#@ include file="MSSQL.ttinclude"         #>
+<#@ include file="WCFAttributes.ttinclude" #>
 <#
 	//ConnectionString     = "Data Source=DBHost;Port=5000;Database=BLToolkitData;Uid=sa";
 	//DataProviderAssembly = @"E:\Projects\SVN\BLToolkit\trunk\Redist\Sybase\Sybase.AdoNet2.AseClient.dll";
 
-	ConnectionString     = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+	//ConnectionString     = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+	ConnectionString     = "Server=.;Database=Northwind;Integrated Security=SSPI";
 
 	//Namespace       = "Templates";
 	//DataContextName = "Test";
@@ -16,7 +18,7 @@
 
 	LoadMetadata();
 
-	Tables["BinaryData"].Columns["BinaryDataID"].MemberName = "ID";
+	//Tables["BinaryData"].Columns["BinaryDataID"].MemberName = "ID";
 
 	foreach (var t in Tables.Values)
 		foreach (var c in t.Columns.Values)
@@ -27,17 +29,6 @@
 		t.BaseClassName = "EntityBase<" + t.ClassName + ">";
 
 	Usings.Add("BLToolkit.Common");
-	
-	/*
-	Usings.Add("System.Runtime.Serialization");
-
-	foreach (var t in Tables.Values)
-		t.Attributes = "Serializable, DataContract";
-
-	foreach (var t in Tables.Values)
-		foreach (var c in t.Columns.Values)
-			c.Attributes = "DataMember";
-	*/
 
 	GenerateModel();
 #>

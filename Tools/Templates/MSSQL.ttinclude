@@ -1,7 +1,7 @@
 ﻿<#
 	ConnectionType = typeof(System.Data.SqlClient.SqlConnection).AssemblyQualifiedName;
 #><#+
-private void LoadMetadata()
+private void LoadServerMetadata()
 {
 	if (IsMetadataLoaded)
 		return;
@@ -23,7 +23,9 @@ private void LoadMetadata()
 				TABLE_NAME,
 				TABLE_TYPE
 			FROM
-				INFORMATION_SCHEMA.TABLES";
+				INFORMATION_SCHEMA.TABLES
+			--WHERE
+			--	TABLE_NAME <> 'sysdiagrams'";
 
 		using (var rd = cmd.ExecuteReader())
 		{
@@ -37,7 +39,7 @@ private void LoadMetadata()
 						Owner         = rd[1].ToString(),
 						TableName     = rd[2].ToString(),
 						ClassName     = rd[2].ToString(),
-						isView        = rd[3].ToString() == "VIEW",
+						IsView        = rd[3].ToString() == "VIEW",
 						BaseClassName = BaseEntityClass,
 					}
 				};
@@ -79,11 +81,6 @@ private void LoadMetadata()
 					}
 				};
 
-//hierarchyid
-//geometry
-//geography
-//xml
-
 				var c = col.Column;
 
 				switch (Convert.ToString(rd["dataType"]))
@@ -116,6 +113,11 @@ private void LoadMetadata()
 					case "uniqueidentifier" : c.Type = "Guid";           c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.UniqueIdentifier; break;
 					case "datetimeoffset"   : c.Type = "DateTimeOffset"; c.DbType = DbType.DateTimeOffset; c.SqlDbType = SqlDbType.DateTimeOffset;   break;
 					case "sql_variant"      : c.Type = "object";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Variant;          break;
+					case "xml"              : c.Type = "string";         c.DbType = DbType.Xml;            c.SqlDbType = SqlDbType.Xml;              break;
+
+//hierarchyid
+//geometry
+//geography
 
 					case "char"          :
 						c.Type      = Convert.ToInt32 (rd["length"]) == 1 ? "char" : "string";
@@ -142,6 +144,32 @@ private void LoadMetadata()
 				columns.Add(col);
 			}
 		}
+
+		// Load PKs.
+		//
+		cmd.CommandText = @"
+			SELECT
+				(k.TABLE_CATALOG + '.' + k.TABLE_SCHEMA + '.' + k.TABLE_NAME) as id,
+				k.CONSTRAINT_NAME                                             as name,
+				k.COLUMN_NAME                                                 as colname,
+				k.ORDINAL_POSITION                                            as colid
+			FROM
+				INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
+					JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS c ON k.CONSTRAINT_NAME = c.CONSTRAINT_NAME
+			WHERE
+				c.CONSTRAINT_TYPE='PRIMARY KEY'";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var id      = Convert.ToString(rd["id"]);
+				var colid   = Convert.ToInt32 (rd["colid"]);
+				var colname = Convert.ToString(rd["colname"]);
+
+				columns.Single(_ => _.ID == id && _.Column.ColumnName == colname).Column.PKIndex = colid;
+			}
+		}
 	}
 
 	var qc =
@@ -154,6 +182,9 @@ private void LoadMetadata()
 	{
 		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
 			c.Table.Columns.Add(col.ColumnName, col);
+
+		if (c.Table.Owner == "dbo")
+			c.Table.Owner = null;
 
 		Tables.Add(c.Table.TableName, c.Table);
 	}
