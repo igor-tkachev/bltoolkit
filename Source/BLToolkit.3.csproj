@@ -575,6 +575,12 @@
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>
     </None>
+    <None Include="Templates\BLT4Toolkit.ttinclude" />
+    <None Include="Templates\BLToolkit.ttinclude" />
+    <None Include="Templates\MSSQL.ttinclude" />
+    <None Include="Templates\Sybase.ttinclude" />
+    <None Include="Templates\VB.ttinclude" />
+    <None Include="Templates\WCFAttributes.ttinclude" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\ObjectBinder.bmp" />

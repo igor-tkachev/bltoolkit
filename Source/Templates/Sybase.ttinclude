@@ -3,11 +3,6 @@
 #><#+
 private void LoadServerMetadata()
 {
-	if (IsMetadataLoaded)
-		return;
-
-	IsMetadataLoaded = true;
-
 	var tables  = CreateList(new { ID = 0, Table  = new Table()  });
 	var columns = CreateList(new { ID = 0, Column = new Column() });
 
@@ -218,6 +213,88 @@ private void LoadServerMetadata()
 				var colid = Convert.ToInt32(rd["colid"]);
 
 				columns.Single(_ => _.ID == id && _.Column.ID == colid).Column.PKIndex = colid;
+			}
+		}
+
+		// Load FKs.
+		//
+		cmd.CommandText = @"
+			SELECT
+				o.name     as Name,
+				c.tableid  as ThisTable,
+				r.reftabid as OtherTable,
+				COL_NAME(c.tableid, r.fokey1) as ThisColumn1,
+				COL_NAME(c.tableid, r.fokey2) as ThisColumn2,
+				COL_NAME(c.tableid, r.fokey3) as ThisColumn3,
+				COL_NAME(c.tableid, r.fokey4) as ThisColumn4,
+				COL_NAME(c.tableid, r.fokey5) as ThisColumn5,
+				COL_NAME(c.tableid, r.fokey6) as ThisColumn6,
+				COL_NAME(c.tableid, r.fokey7) as ThisColumn7,
+				COL_NAME(c.tableid, r.fokey8) as ThisColumn8,
+				COL_NAME(c.tableid, r.fokey9) as ThisColumn9,
+				COL_NAME(c.tableid, r.fokey10) as ThisColumn10,
+				COL_NAME(c.tableid, r.fokey11) as ThisColumn11,
+				COL_NAME(c.tableid, r.fokey12) as ThisColumn12,
+				COL_NAME(c.tableid, r.fokey13) as ThisColumn13,
+				COL_NAME(c.tableid, r.fokey14) as ThisColumn14,
+				COL_NAME(c.tableid, r.fokey15) as ThisColumn15,
+				COL_NAME(c.tableid, r.fokey16) as ThisColumn16,
+				COL_NAME(r.reftabid, r.refkey1) as OtherColumn1,
+				COL_NAME(r.reftabid, r.refkey2) as OtherColumn2,
+				COL_NAME(r.reftabid, r.refkey3) as OtherColumn3,
+				COL_NAME(r.reftabid, r.refkey4) as OtherColumn4,
+				COL_NAME(r.reftabid, r.refkey5) as OtherColumn5,
+				COL_NAME(r.reftabid, r.refkey6) as OtherColumn6,
+				COL_NAME(r.reftabid, r.refkey7) as OtherColumn7,
+				COL_NAME(r.reftabid, r.refkey8) as OtherColumn8,
+				COL_NAME(r.reftabid, r.refkey9) as OtherColumn9,
+				COL_NAME(r.reftabid, r.refkey10) as OtherColumn10,
+				COL_NAME(r.reftabid, r.refkey11) as OtherColumn11,
+				COL_NAME(r.reftabid, r.refkey12) as OtherColumn12,
+				COL_NAME(r.reftabid, r.refkey13) as OtherColumn13,
+				COL_NAME(r.reftabid, r.refkey14) as OtherColumn14,
+				COL_NAME(r.reftabid, r.refkey15) as OtherColumn15,
+				COL_NAME(r.reftabid, r.refkey16) as OtherColumn16
+			FROM
+				sysreferences r
+					JOIN sysconstraints c ON r.constrid = c.constrid
+						JOIN sysobjects o  ON c.constrid = o.id
+						JOIN sysobjects o3 ON c.tableid  = o3.id
+					LEFT JOIN sysobjects o2 ON r.reftabid = o2.id
+					JOIN sysreferences r2 ON r.constrid = r2.constrid
+						LEFT JOIN sysindexes i ON r2.indexid = i.indid AND r2.reftabid = i.id
+			WHERE
+				c.status = 64";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var name            = Convert.ToString(rd["Name"]);
+				var thisTableID     = Convert.ToInt32 (rd["ThisTable"]);
+				var otherTableID    = Convert.ToInt32 (rd["OtherTable"]);
+
+				var thisTable   = (from t in tables  where t.ID == thisTableID  select t.Table).Single();
+				var otherTable  = (from t in tables  where t.ID == otherTableID select t.Table).Single();
+
+				thisTable.ForeignKeys.Add(name, new ForeignKey { KeyName = name, MemberName = name, OtherTable = otherTable });
+
+				for (int i = 1; i <= 16; i++)
+				{
+					if (rd.IsDBNull(rd.GetOrdinal("ThisColumn"  + i)))
+						break;
+
+					var thisColumnName  = Convert.ToString(rd["ThisColumn"  + i]);
+					var otherColumnName = Convert.ToString(rd["OtherColumn" + i]);
+
+					var thisColumn  = (from c in columns where c.ID == thisTableID  && c.Column.ColumnName == thisColumnName  select c.Column).Single();
+					var otherColumn = (from c in columns where c.ID == otherTableID && c.Column.ColumnName == otherColumnName select c.Column).Single();
+
+					var key = thisTable.ForeignKeys[name];
+
+					key.ThisColumns. Add(thisColumn);
+					key.OtherColumns.Add(otherColumn);
+				}
 			}
 		}
 	}

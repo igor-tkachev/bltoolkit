@@ -1,0 +1,113 @@
+﻿<#
+
+OneToManyAssociationType = OneToManyAssociationType.Replace("<", "(Of ").Replace(">", ")");
+
+WriteComment        = (tt,s) => WriteLine("'{0}", s);
+WriteUsing          = (tt,s) => WriteLine("Imports {0}", s);
+WriteBeginNamespace = (tt,s) => { WriteLine("Namespace {0}", s); WriteLine(""); };
+WriteEndNamespace   =  tt    => { WriteLine(""); WriteLine("End Namespace");    };
+WriteBeginClass     = (tt,cl,bc) =>
+{
+	WriteLine("Public Partial Class {0}", cl);
+	if (!string.IsNullOrEmpty(bc))
+		WriteLine("\tInherits {0}", bc);
+};
+WriteEndClass       =  tt    => WriteLine("End Class");
+MakeGenericType     = (c,t)  => string.Format("{0}(Of {1})", c, t);
+WriteTableProperty  = (tt,name,maxlen) =>
+{
+	WriteLine("");
+	WriteLine("Public ReadOnly Property {0}(){1} As Table(Of {0})", name, LenDiff(maxlen, name));
+	WriteLine("\tGet");
+	WriteLine("\t\tReturn GetTable(Of {0})()", name);
+	WriteLine("\tEnd Get");
+	WriteLine("End Property");
+};
+WriteAttribute      = (tt,a) => WriteLine("<{0}> _", a.Replace("=", ":="));
+WriteAttributeLine  =  tt    => {};
+
+RenderColumn = (tt,c,maxLens,attrs) =>
+{
+	WriteLine("");
+
+	var type = MakeType(c.Type);
+
+	if (!tt.RenderField)
+		WriteLine("Private _{0} As {1}", c.MemberName, type);
+
+	attrs = attrs.Where(_ => _ != null).ToArray();
+
+	if (attrs.Length > 0)
+		WriteLine("<{0}> _", string.Join(", ", attrs).Replace("=", ":="));
+
+	if (tt.RenderField)
+		WriteLine("Public {0} As {1}", c.MemberName, type);
+	else
+	{
+		WriteLine("Public Property {0} As {1}", c.MemberName, type);
+		WriteLine("\tGet");
+		WriteLine("\t\tReturn Me._{0}", c.MemberName);
+		WriteLine("\tEnd Get");
+		WriteLine("\tSet");
+		WriteLine("\t\tMe._{0} = value", c.MemberName);
+		WriteLine("\tEnd Set");
+		WriteLine("End Property");
+	}
+};
+
+RenderForeignKey = (tt,key) =>
+{
+	WriteComment(tt, " " + key.KeyName);
+
+	var type = string.Format(OneToManyAssociationType, key.OtherTable.ClassName);
+
+	if (!RenderField)
+		WriteLine("Private _{0} As {1}", key.MemberName, type);
+
+	WriteLine("<Association(ThisKey:=\"{0}\", OtherKey:=\"{1}\")> _",
+		string.Join(", ", (from c in key.ThisColumns  select c.MemberName).ToArray()),
+		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()));
+
+	if (RenderField)
+		WriteLine("Public {0} As {1}", key.MemberName, type);
+	else
+	{
+		WriteLine("Public Property {0} As {1}", key.MemberName, type);
+		WriteLine("\tGet");
+		WriteLine("\t\tReturn Me._{0}", key.MemberName);
+		WriteLine("\tEnd Get");
+		WriteLine("\tSet");
+		WriteLine("\t\tMe._{0} = value", key.MemberName);
+		WriteLine("\tEnd Set");
+		WriteLine("End Property");
+	}
+};
+
+MakeType = t =>
+{
+	switch (t)
+	{
+		case "byte[]"   : return "Byte()";
+		case "string"   : return "String";
+		case "byte"     : return "Byte";
+		case "byte?"    : return "Byte?";
+		case "bool"     : return "Boolean";
+		case "bool?"    : return "Boolean?";
+		case "object"   : return "Object";
+		case "short"    : return "Short";
+		case "short?"   : return "Short?";
+		case "decimal"  : return "Decimal";
+		case "decimal?" : return "Decimal?";
+		case "int"      : return "Integer";
+		case "int?"     : return "Integer?";
+		case "float"    : return "Single";
+		case "float?"   : return "Single?";
+		case "double"   : return "Double";
+		case "double?"  : return "Double?";
+		case "long"     : return "Long";
+		case "long?"    : return "Long?";
+	}
+	
+	return t;
+};
+#>

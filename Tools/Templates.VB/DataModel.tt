@@ -1,27 +1,29 @@
 ﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
-<#@ output extension=".generated.cs" #>
+<#@ output extension=".generated.vb" #>
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLToolkit.ttinclude"     #>
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLT4Toolkit.ttinclude"   #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\Sybase.ttinclude"         #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\MSSQL.ttinclude"         #>
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\WCFAttributes.ttinclude" #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\VB.ttinclude"            #>
 <#
-	ConnectionString     = "Data Source=DBHost;Port=5000;Database=BLToolkitData;Uid=sa";
-	DataProviderAssembly = @"E:\Projects\SVN\BLToolkit\trunk\Redist\Sybase\Sybase.AdoNet2.AseClient.dll";
+	//ConnectionString     = "Data Source=DBHost;Port=5000;Database=BLToolkitData;Uid=sa";
+	//DataProviderAssembly = @"E:\Projects\SVN\BLToolkit\trunk\Redist\Sybase\Sybase.AdoNet2.AseClient.dll";
 
 	//ConnectionString     = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
-	//ConnectionString     = "Server=.;Database=Northwind;Integrated Security=SSPI";
-	//ConnectionString     = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
+	ConnectionString     = "Server=.;Database=Northwind;Integrated Security=SSPI";
 
 	//Namespace       = "Templates";
 	//DataContextName = "Test";
 
 	BaseEntityClass = "EntityBase";
 
+	RenderField = true;
+
 	LoadMetadata();
 
 	//Tables["BinaryData"].Columns["BinaryDataID"].MemberName = "ID";
 
-	//Tables["Employees"].ForeignKeys["FK_Employees_Employees"].MemberName = "ReportsToEmployee";
+	Tables["Employees"].ForeignKeys["FK_Employees_Employees"].MemberName = "ReportsToEmployee";
 
 	foreach (var t in Tables.Values)
 		foreach (var c in t.Columns.Values)
@@ -29,7 +31,7 @@
 				c.MemberName = "ID";
 
 	foreach (var t in Tables.Values)
-		t.BaseClassName = "EntityBase<" + t.ClassName + ">";
+		t.BaseClassName = "EntityBase(Of " + t.ClassName + ")";
 
 	Usings.Add("BLToolkit.Common");
 
