@@ -7,6 +7,7 @@ Bug fixes
 Enhancement
 
 - No more C# 2.0 support.
+- T4 Templates for Sybase and MS SQL Server.
 
 
 v 3.2
