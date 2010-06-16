@@ -14,17 +14,17 @@ namespace BLToolkit.Data.Linq
 	{
 		#region GetTable
 
-		static public Table<T> GetTable<T>(this DbManager dbManager)
+		static public Table<T> GetTable<T>(this IDataContext dataContext)
 			where T : class
 		{
-			return new Table<T>(dbManager);
+			return new Table<T>(dataContext);
 		}
 
 		#endregion
 
 		#region Scalar Select
 
-		static public T Select<T>([NotNull] this DbManager dataContext, [NotNull] Expression<Func<T>> selector)
+		static public T Select<T>([NotNull] this IDataContext dataContext, [NotNull] Expression<Func<T>> selector)
 		{
 			if (dataContext == null) throw new ArgumentNullException("dataContext");
 			if (selector    == null) throw new ArgumentNullException("selector");
@@ -262,7 +262,7 @@ namespace BLToolkit.Data.Linq
 			public IQueryable<T> Query;
 		}
 
-		public static IValueInsertable<T> Into<T>(this DbManager dataContext, [NotNull] Table<T> target)
+		public static IValueInsertable<T> Into<T>(this IDataContext dataContext, [NotNull] Table<T> target)
 		{
 			if (target == null) throw new ArgumentNullException("target");
 
@@ -272,7 +272,7 @@ namespace BLToolkit.Data.Linq
 				Expression.Call(
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
-					new[] { Expression.Constant(null, typeof(DbManager)), query.Expression }));
+					new[] { Expression.Constant(null, typeof(IDataContext)), query.Expression }));
 
 			return new ValueInsertable<T> { Query = q };
 		}
@@ -530,20 +530,20 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
-		/// <param name="dbManager"></param>
+		/// <param name="dataContext"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDb,TResult> Compile<TDb,TResult>(
-			[NotNull] this DbManager dbManager,
-			[NotNull] Expression<Func<TDb,TResult>> query)
-			where TDb : DbManager
+		static public Func<TDC,TResult> Compile<TDC,TResult>(
+			[NotNull] this IDataContext dataContext,
+			[NotNull] Expression<Func<TDC,TResult>> query)
+			where TDC : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -554,11 +554,11 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
-		/// <param name="dbManager"></param>
+		/// <param name="dataContext"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -567,10 +567,10 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDb,TArg1,TResult> Compile<TDb,TArg1, TResult>(
-			[NotNull] this DbManager dbManager,
-			[NotNull] Expression<Func<TDb,TArg1,TResult>> query)
-			where TDb : DbManager
+		static public Func<TDC,TArg1,TResult> Compile<TDC,TArg1, TResult>(
+			[NotNull] this IDataContext dataContext,
+			[NotNull] Expression<Func<TDC,TArg1,TResult>> query)
+			where TDC : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -581,11 +581,11 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
-		/// <param name="dbManager"></param>
+		/// <param name="dataContext"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -597,10 +597,10 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDb,TArg1,TArg2,TResult> Compile<TDb,TArg1,TArg2,TResult>(
-			[NotNull] this DbManager dbManager,
-			[NotNull] Expression<Func<TDb,TArg1,TArg2,TResult>> query)
-			where TDb : DbManager
+		static public Func<TDC,TArg1,TArg2,TResult> Compile<TDC,TArg1,TArg2,TResult>(
+			[NotNull] this IDataContext dataContext,
+			[NotNull] Expression<Func<TDC,TArg1,TArg2,TResult>> query)
+			where TDC : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -611,11 +611,11 @@ namespace BLToolkit.Data.Linq
 		/// <returns>
 		/// A generic delegate that represents the compiled query.
 		/// </returns>
-		/// <param name="dbManager"></param>
+		/// <param name="dataContext"></param>
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -630,10 +630,10 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDb,TArg1,TArg2,TArg3,TResult> Compile<TDb,TArg1,TArg2,TArg3,TResult>(
-			[NotNull] this DbManager dbManager,
-			[NotNull] Expression<Func<TDb,TArg1,TArg2,TArg3,TResult>> query)
-			where TDb : DbManager
+		static public Func<TDC,TArg1,TArg2,TArg3,TResult> Compile<TDC,TArg1,TArg2,TArg3,TResult>(
+			[NotNull] this IDataContext dataContext,
+			[NotNull] Expression<Func<TDC,TArg1,TArg2,TArg3,TResult>> query)
+			where TDC : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -644,7 +644,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Insert
 
-		public static int Insert<T>(this DbManager dataContext, T obj)
+		public static int Insert<T>(this IDataContext dataContext, T obj)
 		{
 			return ExpressionInfo<T>.Insert(dataContext, obj);
 		}
@@ -668,7 +668,7 @@ namespace BLToolkit.Data.Linq
 
 		#region InsertWithIdentity
 
-		public static object InsertWithIdentity<T>(this DbManager dataContext, T obj)
+		public static object InsertWithIdentity<T>(this IDataContext dataContext, T obj)
 		{
 			return ExpressionInfo<T>.InsertWithIdentity(dataContext, obj);
 		}
@@ -677,7 +677,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Update
 
-		public static int Update<T>(this DbManager dataContext, T obj)
+		public static int Update<T>(this IDataContext dataContext, T obj)
 		{
 			return ExpressionInfo<T>.Update(dataContext, obj);
 		}
@@ -696,7 +696,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Delete
 
-		public static int Delete<T>(this DbManager dataContext, T obj)
+		public static int Delete<T>(this IDataContext dataContext, T obj)
 		{
 			return ExpressionInfo<T>.Delete(dataContext, obj);
 		}

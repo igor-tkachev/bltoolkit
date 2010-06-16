@@ -91,34 +91,34 @@ namespace BLToolkit.Data.Linq
 
 		#region Invoke
 
-		public TResult Invoke<TDb,TResult>(TDb dbManager)
+		public TResult Invoke<TDC,TResult>(TDC dataContext)
 		{
-			return ExecuteQuery<TResult>(dbManager);
+			return ExecuteQuery<TResult>(dataContext);
 		}
 
-		public TResult Invoke<TDb,T1,TResult>(TDb dbManager, T1 arg1)
+		public TResult Invoke<TDC,T1,TResult>(TDC dataContext, T1 arg1)
 		{
-			return ExecuteQuery<TResult>(dbManager, arg1);
+			return ExecuteQuery<TResult>(dataContext, arg1);
 		}
 
-		public TResult Invoke<TDb,T1,T2,TResult>(TDb dbManager, T1 arg1, T2 arg2)
+		public TResult Invoke<TDC,T1,T2,TResult>(TDC dataContext, T1 arg1, T2 arg2)
 		{
-			return ExecuteQuery<TResult>(dbManager, arg1, arg2);
+			return ExecuteQuery<TResult>(dataContext, arg1, arg2);
 		}
 
-		public TResult Invoke<TDb,T1,T2,T3,TResult>(TDb dbManager, T1 arg1, T2 arg2, T3 arg3)
+		public TResult Invoke<TDC,T1,T2,T3,TResult>(TDC dataContext, T1 arg1, T2 arg2, T3 arg3)
 		{
-			return ExecuteQuery<TResult>(dbManager, arg1, arg2, arg3);
+			return ExecuteQuery<TResult>(dataContext, arg1, arg2, arg3);
 		}
 
-		public TResult Invoke<TDb,T1,T2,T3,T4,TResult>(TDb dbManager, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+		public TResult Invoke<TDC,T1,T2,T3,T4,TResult>(TDC dataContext, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
 		{
-			return ExecuteQuery<TResult>(dbManager, arg1, arg2, arg3, arg4);
+			return ExecuteQuery<TResult>(dataContext, arg1, arg2, arg3, arg4);
 		}
 
-		public TResult Invoke<TDb,T1,T2,T3,T4,T5,TResult>(TDb dbManager, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+		public TResult Invoke<TDC,T1,T2,T3,T4,T5,TResult>(TDC dataContext, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
 		{
-			return ExecuteQuery<TResult>(dbManager, arg1, arg2, arg3, arg4, arg5);
+			return ExecuteQuery<TResult>(dataContext, arg1, arg2, arg3, arg4, arg5);
 		}
 
 		#endregion
@@ -134,18 +134,18 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC ">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		public static Func<TDb,TResult> Compile<TDb,TResult>(
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TResult>> query)
-			  where TDb : DbManager
+		public static Func<TDC,TResult> Compile<TDC,TResult>(
+			[JetBrains.Annotations.NotNull] Expression<Func<TDC,TResult>> query)
+			  where TDC : IDataContext
 		{
 			if (query == null) throw new ArgumentNullException("query");
-			return new CompiledQuery(query).Invoke<TDb,TResult>;
+			return new CompiledQuery(query).Invoke<TDC,TResult>;
 		}
 
 		/// <summary>
@@ -157,7 +157,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -166,12 +166,12 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		public static Func<TDb,TArg1,TResult> Compile<TDb,TArg1,TResult>(
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TResult>> query)
-			where TDb : DbManager
+		public static Func<TDC,TArg1,TResult> Compile<TDC,TArg1,TResult>(
+			[JetBrains.Annotations.NotNull] Expression<Func<TDC,TArg1,TResult>> query)
+			where TDC : IDataContext
 		{
 			if (query == null) throw new ArgumentNullException("query");
-			return new CompiledQuery(query).Invoke<TDb,TArg1,TResult>;
+			return new CompiledQuery(query).Invoke<TDC,TArg1,TResult>;
 		}
 
 		/// <summary>
@@ -183,7 +183,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC ">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -195,12 +195,12 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		public static Func<TDb,TArg1,TArg2,TResult> Compile<TDb,TArg1,TArg2,TResult>(
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TArg2,TResult>> query)
-			where TDb : DbManager
+		public static Func<TDC,TArg1,TArg2,TResult> Compile<TDC,TArg1,TArg2,TResult>(
+			[JetBrains.Annotations.NotNull] Expression<Func<TDC,TArg1,TArg2,TResult>> query)
+			where TDC : IDataContext
 		{
 			if (query == null) throw new ArgumentNullException("query");
-			return new CompiledQuery(query).Invoke<TDb,TArg1,TArg2,TResult>;
+			return new CompiledQuery(query).Invoke<TDC,TArg1,TArg2,TResult>;
 		}
 
 		/// <summary>
@@ -212,7 +212,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC ">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -227,12 +227,12 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		public static Func<TDb,TArg1,TArg2,TArg3,TResult> Compile<TDb,TArg1,TArg2,TArg3,TResult>(
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TArg2,TArg3,TResult>> query)
-			where TDb : DbManager
+		public static Func<TDC,TArg1,TArg2,TArg3,TResult> Compile<TDC,TArg1,TArg2,TArg3,TResult>(
+			[JetBrains.Annotations.NotNull] Expression<Func<TDC,TArg1,TArg2,TArg3,TResult>> query)
+			where TDC : IDataContext
 		{
 			if (query == null) throw new ArgumentNullException("query");
-			return new CompiledQuery(query).Invoke<TDb,TArg1,TArg2,TArg3,TResult>;
+			return new CompiledQuery(query).Invoke<TDC,TArg1,TArg2,TArg3,TResult>;
 		}
 
 		/// <summary>
@@ -244,7 +244,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC ">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -262,12 +262,12 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		public static Func<TDb,TArg1,TArg2,TArg3,TArg4,TResult> Compile<TDb,TArg1,TArg2,TArg3,TArg4,TResult>(
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TArg2,TArg3,TArg4,TResult>> query)
-			where TDb : DbManager
+		public static Func<TDC,TArg1,TArg2,TArg3,TArg4,TResult> Compile<TDC,TArg1,TArg2,TArg3,TArg4,TResult>(
+			[JetBrains.Annotations.NotNull] Expression<Func<TDC,TArg1,TArg2,TArg3,TArg4,TResult>> query)
+			where TDC : IDataContext
 		{
 			if (query == null) throw new ArgumentNullException("query");
-			return new CompiledQuery(query).Invoke<TDb,TArg1,TArg2,TArg3,TArg4,TResult>;
+			return new CompiledQuery(query).Invoke<TDC,TArg1,TArg2,TArg3,TArg4,TResult>;
 		}
 
 		/// <summary>
@@ -279,7 +279,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDb">
+		/// <typeparam name="TDC ">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -300,12 +300,12 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		public static Func<TDb,TArg1,TArg2,TArg3,TArg4,TArg5,TResult> Compile<TDb,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>(
-			[JetBrains.Annotations.NotNull] Expression<Func<TDb,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>> query)
-			where TDb : DbManager
+		public static Func<TDC,TArg1,TArg2,TArg3,TArg4,TArg5,TResult> Compile<TDC,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>(
+			[JetBrains.Annotations.NotNull] Expression<Func<TDC,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>> query)
+			where TDC : IDataContext
 		{
 			if (query == null) throw new ArgumentNullException("query");
-			return new CompiledQuery(query).Invoke<TDb,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>;
+			return new CompiledQuery(query).Invoke<TDC,TArg1,TArg2,TArg3,TArg4,TArg5,TResult>;
 		}
 
 		#endregion

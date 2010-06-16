@@ -19,8 +19,8 @@ namespace BLToolkit.Data.Linq
 		{
 		}
 
-		public Query(DbManager dbManager, Expression expression)
-			: base(dbManager, expression)
+		public Query(IDataContext dataContext, Expression expression)
+			: base(dataContext, expression)
 		{
 		}
 

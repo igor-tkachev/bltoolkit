@@ -5,23 +5,23 @@ namespace BLToolkit.Data.Linq
 {
 	class QueryContext
 	{
-		public class DbManagerContext
+		public class DataContextContext
 		{
-			public DbManager DbManager;
-			public bool      InUse;
+			public IDataContext DataContext;
+			public bool         InUse;
 		}
 
-		public DbManager RootDbManager;
-		public int       Counter;
+		public IDataContext RootDataContext;
+		public int          Counter;
 
-		List<DbManagerContext> _contexts;
+		List<DataContextContext> _contexts;
 
-		public DbManagerContext GetDbManager()
+		public DataContextContext GetDataContext()
 		{
 			if (_contexts == null)
 			{
-				RootDbManager.OnClosing += OnRootClosing;
-				_contexts = new List<DbManagerContext>(1);
+				RootDataContext.OnClosing += OnRootClosing;
+				_contexts = new List<DataContextContext>(1);
 			}
 
 			foreach (var context in _contexts)
@@ -33,14 +33,14 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			var ctx = new DbManagerContext { DbManager = RootDbManager.Clone(), InUse = true };
+			var ctx = new DataContextContext { DataContext = RootDataContext.Clone(), InUse = true };
 
 			_contexts.Add(ctx);
 
 			return ctx;
 		}
 
-		public void ReleaseDbManager(DbManagerContext context)
+		public void ReleaseDataContext(DataContextContext context)
 		{
 			context.InUse = false;
 		}
@@ -48,9 +48,10 @@ namespace BLToolkit.Data.Linq
 		void OnRootClosing(object sender, EventArgs e)
 		{
 			foreach (var context in _contexts)
-				context.DbManager.Dispose();
+				if (context.DataContext is IDisposable)
+				((IDisposable)context.DataContext).Dispose();
 
-			RootDbManager.OnClosing -= OnRootClosing;
+			RootDataContext.OnClosing -= OnRootClosing;
 
 			_contexts = null;
 		}

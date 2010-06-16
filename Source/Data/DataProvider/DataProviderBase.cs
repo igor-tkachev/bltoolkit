@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Text;
+
 using BLToolkit.Common;
 using BLToolkit.Mapping;
 
@@ -19,7 +20,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-	public abstract class DataProviderBase
+	public abstract partial class DataProviderBase
 	{
 		#region Abstract Properties
 

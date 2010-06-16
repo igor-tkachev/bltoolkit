@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
-	using DataProvider;
 	using Mapping;
 
 	class CompiledTable<T>
@@ -20,15 +19,15 @@ namespace BLToolkit.Data.Linq
 		readonly Expression       _expression;
 		readonly object           _sync = new object();
 
-		DataProviderBase  _lastDataProvider;
+		ILinqDataProvider _lastDataProvider;
 		MappingSchema     _lastMappingSchema;
 		ExpressionInfo<T> _lastInfo;
 
 		readonly Dictionary<object,ExpressionInfo<T>> _infos = new Dictionary<object, ExpressionInfo<T>>();
 
-		ExpressionInfo<T> GetInfo(DbManager db)
+		ExpressionInfo<T> GetInfo(IDataContext dataContext)
 		{
-			DataProviderBase  lastDataProvider;
+			ILinqDataProvider lastDataProvider;
 			MappingSchema     lastMappingSchema;
 			ExpressionInfo<T> info;
 
@@ -39,8 +38,8 @@ namespace BLToolkit.Data.Linq
 				info              = _lastInfo;
 			}
 
-			var dataProvider  = db != null ? db.DataProvider  : DbManager.GetDataProvider(DbManager.DefaultConfiguration);
-			var mappingSchema = db != null ? db.MappingSchema : Map.DefaultSchema;
+			var dataProvider  = dataContext != null ? dataContext.DataProvider  : Settings.GetDefaultDataProvider();
+			var mappingSchema = dataContext != null ? dataContext.MappingSchema : Map.DefaultSchema;
 
 			if (lastDataProvider != dataProvider || lastMappingSchema != mappingSchema)
 				info = null;
@@ -77,13 +76,13 @@ namespace BLToolkit.Data.Linq
 
 		public IQueryable<T> Create(object[] parameters)
 		{
-			var db = (DbManager)parameters[0];
+			var db = (IDataContext)parameters[0];
 			return new Table<T>(db, _expression) { Info = GetInfo(db), Parameters = parameters };
 		}
 
 		public T Execute(object[] parameters)
 		{
-			var db = (DbManager)parameters[0];
+			var db = (IDataContext)parameters[0];
 			return (T)GetInfo(db).GetElement(null, db, _expression, parameters);
 		}
 	}

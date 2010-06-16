@@ -136,6 +136,7 @@
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
+    <Compile Include="Data\DataProvider\DataProviderBase.Linq.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
@@ -146,9 +147,12 @@
     <Compile Include="Data\Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
+    <Compile Include="Data\Linq\ILinqDataProvider.cs" />
+    <Compile Include="Data\Linq\IQueryContext.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\Expressions.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
+    <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\Extensions.cs" />
     <Compile Include="Data\Linq\IUpdateable.cs" />

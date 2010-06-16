@@ -9,7 +9,6 @@ namespace BLToolkit.Data.Linq
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
-	using DataProvider;
 	using Mapping;
 	using Reflection;
 
@@ -62,7 +61,7 @@ namespace BLToolkit.Data.Linq
 		#region Parse
 
 		public ExpressionInfo<T> Parse(
-			DataProviderBase      dataProvider,
+			ILinqDataProvider     dataProvider,
 			MappingSchema         mappingSchema,
 			Expression            expression,
 			ParameterExpression[] parameters)

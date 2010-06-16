@@ -22,10 +22,10 @@ namespace BLToolkit.Data.Linq
 			Expression = Expression.Constant(this);
 		}
 
-		public Table(DbManager dbManager)
+		public Table(IDataContext dataContext)
 		{
-			DbManager  = dbManager;
-			Expression = Expression.Constant(this);
+			DataContext = dataContext;
+			Expression  = Expression.Constant(this);
 		}
 
 		public Table(Expression expression)
@@ -33,14 +33,14 @@ namespace BLToolkit.Data.Linq
 			Expression = expression;
 		}
 
-		public Table(DbManager dbManager, Expression expression)
+		public Table(IDataContext dataContext, Expression expression)
 		{
-			DbManager  = dbManager;
-			Expression = expression;
+			DataContext = dataContext;
+			Expression  = expression;
 		}
 
 		protected Expression        Expression;
-		public    DbManager         DbManager { get; set; }
+		public    IDataContext      DataContext { get; set; }
 		internal  ExpressionInfo<T> Info;
 		internal  object[]          Parameters;
 
@@ -63,7 +63,7 @@ namespace BLToolkit.Data.Linq
 				if (_sqlTextHolder == null)
 				{
 					var info = GetExpressionInfo(Expression, true);
-					_sqlTextHolder = info.GetSqlText(DbManager ?? new DbManager(), Expression, Parameters, 0);
+					_sqlTextHolder = info.GetSqlText(DataContext ?? new DbManager(), Expression, Parameters, 0);
 				}
 
 				return _sqlTextHolder;
@@ -74,9 +74,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Execute
 
-		IEnumerable<T> Execute(DbManager db, Expression expression)
+		IEnumerable<T> Execute(IDataContext dataContext, Expression expression)
 		{
-			return GetExpressionInfo(expression, true).GetIEnumerable(null, db, expression, Parameters);
+			return GetExpressionInfo(expression, true).GetIEnumerable(null, dataContext, expression, Parameters);
 		}
 
 		private ExpressionInfo<T> GetExpressionInfo(Expression expression, bool cache)
@@ -84,8 +84,8 @@ namespace BLToolkit.Data.Linq
 			if (cache && Info != null)
 				return Info;
 
-			var dataProvider  = DbManager != null ? DbManager.DataProvider  : DbManager.GetDataProvider(DbManager.DefaultConfiguration);
-			var mappingSchema = DbManager != null ? DbManager.MappingSchema : Map.DefaultSchema;
+			var dataProvider  = DataContext != null ? DataContext.DataProvider  : Settings.GetDefaultDataProvider();
+			var mappingSchema = DataContext != null ? DataContext.MappingSchema : Map.DefaultSchema;
 
 			var info = ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
 
@@ -138,7 +138,7 @@ namespace BLToolkit.Data.Linq
 			if (expression == null)
 				throw new ArgumentNullException("expression");
 
-			return new Query<TElement>(DbManager, expression);
+			return new Query<TElement>(DataContext, expression);
 		}
 
 		IQueryable IQueryProvider.CreateQuery(Expression expression)
@@ -150,7 +150,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { DbManager, expression });
+				return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { DataContext, expression });
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -160,12 +160,12 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			return (TResult)GetExpressionInfo(expression, false).GetElement(null, DbManager, expression, Parameters);
+			return (TResult)GetExpressionInfo(expression, false).GetElement(null, DataContext, expression, Parameters);
 		}
 
 		object IQueryProvider.Execute(Expression expression)
 		{
-			return Execute(DbManager, expression);
+			return Execute(DataContext, expression);
 		}
 
 		#endregion
@@ -174,12 +174,12 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			return Execute(DbManager, Expression).GetEnumerator();
+			return Execute(DataContext, Expression).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Execute(DbManager, Expression).GetEnumerator();
+			return Execute(DataContext, Expression).GetEnumerator();
 		}
 
 		#endregion
