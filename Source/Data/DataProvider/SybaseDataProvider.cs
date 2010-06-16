@@ -1,10 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
+
 using BLToolkit.Mapping;
+
 using Sybase.Data.AseClient;
 
 namespace BLToolkit.Data.DataProvider
@@ -42,7 +43,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTableAlias:
 					{
-						string name = value.ToString();
+						var name = value.ToString();
 
 						if (name.Length > 0 && name[0] == '[')
 							return value;
@@ -54,7 +55,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToOwner:
 				case ConvertType.NameToQueryTable:
 					{
-						string name = value.ToString();
+						var name = value.ToString();
 
 						if (name.Length > 0 && name[0] == '[')
 							return value;
@@ -68,7 +69,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
-						string str = value.ToString();
+						var str = value.ToString();
 						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
 					}
 
@@ -77,7 +78,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is AseException)
 					{
-						AseException ex = (AseException)value;
+						var ex = (AseException)value;
 
 						foreach (AseError error in ex.Errors)
 							if (error.IsError)
@@ -97,8 +98,8 @@ namespace BLToolkit.Data.DataProvider
 					{
 						try
 						{
-							AseException  ex = (AseException)value;
-							StringBuilder sb = new StringBuilder();
+							var ex = (AseException)value;
+							var sb = new StringBuilder();
 
 							foreach (AseError error in ex.Errors)
 								if (error.IsError)
@@ -129,7 +130,7 @@ namespace BLToolkit.Data.DataProvider
 
 			base.AttachParameter(command, parameter);
 			
-			AseParameter p = (AseParameter)parameter;
+			var p = (AseParameter)parameter;
 
 			if (p.AseDbType == AseDbType.Unsupported && p.Value is DBNull)
 				parameter.DbType = DbType.AnsiString;
@@ -156,9 +157,9 @@ namespace BLToolkit.Data.DataProvider
 
 			List<IDbDataParameter> list = null;
 
-			if (commandParameters != null) for (int i = 0; i < commandParameters.Length; i++)
+			if (commandParameters != null) for (var i = 0; i < commandParameters.Length; i++)
 			{
-				IDbDataParameter p = commandParameters[i];
+				var p = commandParameters[i];
 
 				if (p.Value is Guid)
 				{
@@ -175,7 +176,7 @@ namespace BLToolkit.Data.DataProvider
 						{
 							list = new List<IDbDataParameter>(commandParameters.Length);
 
-							for (int j = 0; j < i; j++)
+							for (var j = 0; j < i; j++)
 								list.Add(commandParameters[j]);
 						}
 					}
@@ -208,11 +209,11 @@ namespace BLToolkit.Data.DataProvider
 
 			public new object GetValue(int i)
 			{
-				object value = DataReader.GetValue(i);
+				var value = DataReader.GetValue(i);
 
 				if (value is DateTime)
 				{
-					DateTime dt = (DateTime)value;
+					var dt = (DateTime)value;
 
 					if (dt.Year == 1900 && dt.Month == 1 && dt.Day == 1)
 						return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);

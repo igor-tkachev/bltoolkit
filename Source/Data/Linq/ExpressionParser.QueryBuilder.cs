@@ -488,7 +488,7 @@ namespace BLToolkit.Data.Linq
 							if (query is QuerySource.SubQuerySourceColumn)
 								return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)query, converter);
 
-							break;
+							return Expression.Convert(ExpressionAccessors[pi], pi.Type);
 						}
 
 					case ExpressionType.Coalesce:

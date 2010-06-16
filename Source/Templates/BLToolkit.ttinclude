@@ -39,7 +39,8 @@ string ConnectionString;
 string ConnectionType;
 string DataProviderAssembly = null;
 
-string DataContextName;
+string DatabaseName             = null;
+string DataContextName          = "DataContext";
 string Namespace                = "DataModel";
 string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
@@ -176,7 +177,10 @@ static Action<GeneratedTextTransformation,Table> RenderTableAttributes = (tt,t) 
 	}
 
 	string tbl = "TableName(";
-	
+
+	if (!string.IsNullOrEmpty(tt.DatabaseName))
+		tbl += string.Format("Database=\"{0}\", ", tt.DatabaseName);
+
 	if (!string.IsNullOrEmpty(t.Owner))
 		tbl += string.Format("Owner=\"{0}\", ", t.Owner);
 
@@ -290,8 +294,24 @@ List<T> CreateList<T>(T item)
 
 System.Data.IDbConnection GetConnection()
 {
-	var connType = Type.GetType(ConnectionType);
-	var conn     = (System.Data.IDbConnection)Activator.CreateInstance(connType);
+	Type connType = null;
+
+	if (DataProviderAssembly != null)
+	{
+		try
+		{
+			var assembly = System.Reflection.Assembly.LoadFile(DataProviderAssembly);
+			connType = assembly.GetType(ConnectionType);
+		}
+		catch
+		{
+		}
+	}
+
+	if (connType == null)
+		connType = Type.GetType(ConnectionType);
+
+	var conn = (System.Data.IDbConnection)Activator.CreateInstance(connType);
 
 	conn.ConnectionString = ConnectionString;
 	conn.Open();
@@ -347,7 +367,13 @@ void LoadMetadata()
 				else
 					key.AssociationType = AssociationType.ManyToOne;
 			}
+		}
+	}
 
+	foreach (var t in Tables.Values)
+	{
+		foreach (var key in t.ForeignKeys.Values)
+		{
 			var name = key.MemberName;
 
 			if (key.BackReference != null && key.ThisColumns.Count == 1 && key.ThisColumns[0].MemberName.ToLower().EndsWith("id"))
@@ -371,7 +397,10 @@ void LoadMetadata()
 				if (name.EndsWith("_BackReference"))
 					name = name.Substring(0, name.Length - "_BackReference".Length);
 
-				name = name.Replace(t.TableName, "").Trim('_');
+				name = string.Join("", name.Split('_').Where(_ => _.Length > 0 && _ != t.TableName).ToArray());
+
+				if (key.AssociationType == AssociationType.OneToMany)
+					name += "s";
 			}
 
 			if (name.Length != 0 &&
@@ -390,6 +419,9 @@ void LoadMetadata()
 	AfterLoadMetadata(this);
 }
 
+Action<GeneratedTextTransformation> BeforeLoadMetadata = _ => {};
+Action<GeneratedTextTransformation> AfterLoadMetadata  = _ => {};
+
 Dictionary<string,Table> Tables = new Dictionary<string,Table>();
 
 partial class Table
@@ -404,9 +436,6 @@ partial class Table
 	public Dictionary<string,Column>     Columns     = new Dictionary<string,Column>();
 	public Dictionary<string,ForeignKey> ForeignKeys = new Dictionary<string,ForeignKey>();
 }
-
-Action<GeneratedTextTransformation> BeforeLoadMetadata = _ => {};
-Action<GeneratedTextTransformation> AfterLoadMetadata  = _ => {};
 
 partial class Column
 {

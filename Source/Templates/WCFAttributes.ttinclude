@@ -9,7 +9,7 @@
 			Usings.Add("System.Runtime.Serialization");
 
 			foreach (var t in Tables.Values)
-				t.Attributes.AddRange(new[] { "Serializable", "Serializable", "DataContract" });
+				t.Attributes.AddRange(new[] { "Serializable", "DataContract" });
 
 			foreach (var t in Tables.Values)
 				foreach (var c in t.Columns.Values)

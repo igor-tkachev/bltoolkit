@@ -5,13 +5,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using BLToolkit.Common;
-
 namespace BLToolkit.Data.Linq
 {
+	using Common;
+
 	using FExpr = Func<Expression>;
 	using FParm = Func<ParameterExpression,bool>;
-	using FTest = Func<Expression, bool>;
+	using FTest = Func<Expression,bool>;
 
 	static class ExpressionHelper
 	{
@@ -494,7 +494,7 @@ namespace BLToolkit.Data.Linq
 						var e1 = (ConstantExpression)expr1;
 						var e2 = (ConstantExpression)expr2;
 
-						return e1.Value == null && e2.Value == null || IsConstant(e1.Type)? Equals(e1.Value, e2.Value): true;
+						return e1.Value == null && e2.Value == null || IsConstant(e1.Type) ? Equals(e1.Value, e2.Value) : true;
 					}
 
 				case ExpressionType.Invoke:

@@ -118,5 +118,26 @@ namespace Data.Linq
 				from p in    Person select p.FirstName.Length + "".Length,
 				from p in db.Person select p.FirstName.Length + "".Length));
 		}
+
+		class Test
+		{
+			class Entity
+			{
+				public Test TestField = null;
+			}
+
+			public Test TestClosure(TestDbManager db)
+			{
+				return db.Person.Select(_ => new Entity { TestField = this }).First().TestField;
+			}
+		}
+
+		[Test]
+		public void ClosureTest()
+		{
+			ForEachProvider(db => Assert.AreNotEqual(
+				new Test().TestClosure(db),
+				new Test().TestClosure(db)));
+		}
 	}
 }
