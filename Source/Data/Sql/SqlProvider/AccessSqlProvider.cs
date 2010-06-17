@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class AccessSqlProvider : BasicSqlProvider
 	{
@@ -43,15 +43,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (SqlQuery.From.Tables.Count == 0 && SqlQuery.Select.Columns.Count == 1 && SqlQuery.Select.Columns[0].Expression is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
+				var func = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
 
 				if (func.Name == "Iif" && func.Parameters.Length == 3 && func.Parameters[0] is SqlQuery.SearchCondition)
 				{
-					SqlQuery.SearchCondition sc = (SqlQuery.SearchCondition)func.Parameters[0];
+					var sc = (SqlQuery.SearchCondition)func.Parameters[0];
 
 					if (sc.Conditions.Count == 1 && sc.Conditions[0].Predicate is SqlQuery.Predicate.FuncLike)
 					{
-						SqlQuery.Predicate.FuncLike p = (SqlQuery.Predicate.FuncLike)sc.Conditions[0].Predicate;
+						var p = (SqlQuery.Predicate.FuncLike)sc.Conditions[0].Predicate;
 
 						if (p.Function.Name == "EXISTS")
 						{
@@ -69,10 +69,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		void BuildAnyAsCount(StringBuilder sb)
 		{
-			SqlFunction                 func  = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
-			SqlQuery.SearchCondition    cond  = (SqlQuery.SearchCondition)func.Parameters[0];
-			SqlFunction                 exist = ((SqlQuery.Predicate.FuncLike)cond.Conditions[0].Predicate).Function;
-			SqlQuery                    query = (SqlQuery)exist.Parameters[0];
+			var func  = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
+			var cond  = (SqlQuery.SearchCondition)func.Parameters[0];
+			var exist = ((SqlQuery.Predicate.FuncLike)cond.Conditions[0].Predicate).Function;
+			var query = (SqlQuery)exist.Parameters[0];
 
 			_selectColumn = new SqlQuery.Column(SqlQuery, new SqlExpression(cond.Conditions[0].IsNot ? "Count(*) = 0" : "Count(*) > 0"), SqlQuery.Select.Columns[0].Alias);
 
@@ -84,7 +84,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
 			if (_selectColumn != null)
-				return new SqlQuery.Column[] { _selectColumn };
+				return new[] { _selectColumn };
 
 			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
@@ -121,27 +121,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (predicate is SqlQuery.Predicate.Like)
 			{
-				SqlQuery.Predicate.Like l = (SqlQuery.Predicate.Like)predicate;
+				var l = (SqlQuery.Predicate.Like)predicate;
 
 				if (l.Escape != null)
 				{
 					if (l.Expr2 is SqlValue && l.Escape is SqlValue)
 					{
-						string   text = ((SqlValue) l.Expr2).Value.ToString();
-						SqlValue val  = new SqlValue(ReescapeLikeText(text, (char)((SqlValue)l.Escape).Value));
+						var text = ((SqlValue) l.Expr2).Value.ToString();
+						var val  = new SqlValue(ReescapeLikeText(text, (char)((SqlValue)l.Escape).Value));
 
 						return new SqlQuery.Predicate.Like(l.Expr1, l.IsNot, val, null);
 					}
 
 					if (l.Expr2 is SqlParameter)
 					{
-						SqlParameter p = (SqlParameter)l.Expr2;
-						string       v = "";
+						var p = (SqlParameter)l.Expr2;
+						var v = "";
 						
 						if (p.ValueConverter != null)
 							v = p.ValueConverter(" ") as string;
 
-						p.ValueConverter = GetLikeEscaper(v.StartsWith("%") ? "%" : "", v.EndsWith("%") ? "%" : "");
+						p.SetLikeConverter(v.StartsWith("%") ? "%" : "", v.EndsWith("%") ? "%" : "");
 
 						return new SqlQuery.Predicate.Like(l.Expr1, l.IsNot, p, null);
 					}
@@ -153,11 +153,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		static string ReescapeLikeText(string text, char esc)
 		{
-			StringBuilder sb = new StringBuilder(text.Length);
+			var sb = new StringBuilder(text.Length);
 
-			for (int i = 0; i < text.Length; i++)
+			for (var i = 0; i < text.Length; i++)
 			{
-				char c = text[i];
+				var c = text[i];
 
 				if (c == esc)
 				{
@@ -174,49 +174,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sb.ToString();
 		}
 
-		static Converter<object,object> GetLikeEscaper(string start, string end)
-		{
-			return delegate(object value)
-			{
-				if (value == null)
-#if DEBUG
-					value = "";
-#else
-					throw new SqlException("NULL cannot be used as a LIKE predicate parameter.");
-#endif
-
-				string text = value.ToString();
-
-				if (text.IndexOfAny(new char[] { '%', '_', '[' }) < 0)
-					return start + text + end;
-
-				StringBuilder sb = new StringBuilder(start, text.Length + start.Length + end.Length);
-
-				for (int i = 0; i < text.Length; i++)
-				{
-					char c = text[i];
-
-					if (c == '%' || c == '_' || c == '[')
-					{
-						sb.Append('[');
-						sb.Append(c);
-						sb.Append(']');
-					}
-					else
-						sb.Append(c);
-				}
-
-				return sb.ToString();
-			};
-		}
-
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation[0])
 				{
@@ -228,7 +192,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				var func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
@@ -236,13 +200,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (func.Parameters.Length > 2)
 						{
-							ISqlExpression[] parms = new ISqlExpression[func.Parameters.Length - 1];
+							var parms = new ISqlExpression[func.Parameters.Length - 1];
 
 							Array.Copy(func.Parameters, 1, parms, 0, parms.Length);
 							return new SqlFunction(func.SystemType, func.Name, func.Parameters[0], new SqlFunction(func.SystemType, func.Name, parms));
 						}
 
-						SqlQuery.SearchCondition sc = new SqlQuery.SearchCondition();
+						var sc = new SqlQuery.SearchCondition();
 
 						sc.Conditions.Add(new SqlQuery.Condition(false, new SqlQuery.Predicate.IsNull(func.Parameters[0], false)));
 
@@ -328,7 +292,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		SqlFunction ConvertCase(Type systemType, ISqlExpression[] parameters, int start)
 		{
-			int len = parameters.Length - start;
+			var len = parameters.Length - start;
 
 			if (len < 3)
 				throw new SqlException("CASE statement is not supported by the {0}.", GetType().Name);

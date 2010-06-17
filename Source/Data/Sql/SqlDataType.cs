@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql
 {
+	using Reflection;
+
+	[Serializable]
 	public class SqlDataType : ISqlExpression
 	{
 		#region Init

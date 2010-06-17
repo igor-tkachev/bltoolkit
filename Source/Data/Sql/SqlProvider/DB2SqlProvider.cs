@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity)
 			{
-				_identityField = GetIdentityField(sqlQuery.Set.Into);
+				_identityField = sqlQuery.Set.Into.GetIdentityField();
 
 				if (_identityField == null)
 					return 2;

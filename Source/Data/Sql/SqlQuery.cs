@@ -11,7 +11,7 @@ namespace BLToolkit.Data.Sql
 {
 	using FJoin = SqlQuery.FromClause.Join;
 
-	[DebuggerDisplay("SQL = {SqlText}")]
+	[Serializable, DebuggerDisplay("SQL = {SqlText}")]
 	public class SqlQuery : ISqlTableSource
 	{
 		#region Init
@@ -120,6 +120,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Column
 
+		[Serializable]
 		public class Column : IEquatable<Column>, ISqlExpression, IChild<SqlQuery>
 		{
 			public Column(SqlQuery parent, ISqlExpression expression, string alias)
@@ -310,6 +311,7 @@ namespace BLToolkit.Data.Sql
 
 		#region TableSource
 
+		[Serializable]
 		public class TableSource : ISqlTableSource
 		{
 			public TableSource(ISqlTableSource source, string alias)
@@ -543,6 +545,7 @@ namespace BLToolkit.Data.Sql
 			Left
 		}
 
+		[Serializable]
 		public class JoinedTable : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak, SearchCondition searchCondition)
@@ -658,6 +661,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Predicate
 
+		[Serializable]
 		public abstract class Predicate : ISqlPredicate
 		{
 			public enum Operator
@@ -672,6 +676,7 @@ namespace BLToolkit.Data.Sql
 				NotLess         // !<    Is the operator used to test the condition of one expression not being less than the other expression.
 			}
 
+			[Serializable]
 			public class Expr : Predicate
 			{
 				public Expr([NotNull] ISqlExpression exp1, int precedence)
@@ -733,6 +738,7 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
+			[Serializable]
 			public class NotExpr : Expr
 			{
 				public NotExpr(ISqlExpression exp1, bool isNot, int precedence)
@@ -771,6 +777,7 @@ namespace BLToolkit.Data.Sql
 
 			// { expression { = | <> | != | > | >= | ! > | < | <= | !< } expression
 			//
+			[Serializable]
 			public class ExprExpr : Expr
 			{
 				public ExprExpr(ISqlExpression exp1, Operator op, ISqlExpression exp2)
@@ -841,6 +848,7 @@ namespace BLToolkit.Data.Sql
 
 			// string_expression [ NOT ] LIKE string_expression [ ESCAPE 'escape_character' ]
 			//
+			[Serializable]
 			public class Like : NotExpr
 			{
 				public Like(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression escape)
@@ -901,6 +909,7 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] BETWEEN expression AND expression
 			//
+			[Serializable]
 			public class Between : NotExpr
 			{
 				public Between(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression exp3)
@@ -958,6 +967,7 @@ namespace BLToolkit.Data.Sql
 
 			// expression IS [ NOT ] NULL
 			//
+			[Serializable]
 			public class IsNull : NotExpr
 			{
 				public IsNull(ISqlExpression exp1, bool isNot)
@@ -995,6 +1005,7 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] IN ( subquery | expression [ ,...n ] )
 			//
+			[Serializable]
 			public class InSubQuery : NotExpr
 			{
 				public InSubQuery(ISqlExpression exp1, bool isNot, SqlQuery subQuery)
@@ -1045,6 +1056,7 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
+			[Serializable]
 			public class InList : NotExpr
 			{
 				public InList(ISqlExpression exp1, bool isNot, params ISqlExpression[] values)
@@ -1120,6 +1132,7 @@ namespace BLToolkit.Data.Sql
 			// expression { = | <> | != | > | >= | !> | < | <= | !< } { ALL | SOME | ANY } ( subquery )
 			// EXISTS ( subquery )
 
+			[Serializable]
 			public class FuncLike : Predicate
 			{
 				public FuncLike(SqlFunction func)
@@ -1238,6 +1251,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Condition
 
+		[Serializable]
 		public class Condition : IQueryElement, ICloneableElement
 		{
 			public Condition(bool isNot, ISqlPredicate predicate)
@@ -1325,6 +1339,7 @@ namespace BLToolkit.Data.Sql
 
 		#region SearchCondition
 
+		[Serializable]
 		public class SearchCondition : ConditionBase<SearchCondition, SearchCondition.Next>, ISqlPredicate, ISqlExpression
 		{
 			public SearchCondition()
@@ -1496,6 +1511,7 @@ namespace BLToolkit.Data.Sql
 			T Value   (object         value);
 		}
 
+		[Serializable]
 		public abstract class ConditionBase<T1,T2> : IConditionExpr<ConditionBase<T1,T2>.Expr_>
 			where T1 : ConditionBase<T1,T2>
 		{
@@ -1655,6 +1671,7 @@ namespace BLToolkit.Data.Sql
 
 		#region OrderByItem
 
+		[Serializable]
 		public class OrderByItem : IQueryElement, ICloneableElement
 		{
 			public OrderByItem(ISqlExpression expression, bool isDescending)
@@ -1722,6 +1739,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ClauseBase
 
+		[Serializable]
 		public abstract class ClauseBase
 		{
 			protected ClauseBase(SqlQuery sqlQuery)
@@ -1749,6 +1767,7 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
+		[Serializable]
 		public abstract class ClauseBase<T1, T2> : ConditionBase<T1, T2>
 			where T1 : ClauseBase<T1, T2>
 		{
@@ -1780,6 +1799,7 @@ namespace BLToolkit.Data.Sql
 
 		#region SelectClause
 
+		[Serializable]
 		public class SelectClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			#region Init
@@ -2103,6 +2123,7 @@ namespace BLToolkit.Data.Sql
 
 		#region SetClause
 
+		[Serializable]
 		public class SetExpression : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
 			public SetExpression(ISqlExpression column, ISqlExpression expression)
@@ -2173,6 +2194,7 @@ namespace BLToolkit.Data.Sql
 			#endregion
 		}
 
+		[Serializable]
 		public class SetClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
 			readonly List<SetExpression> _items = new List<SetExpression>();
@@ -2283,6 +2305,7 @@ namespace BLToolkit.Data.Sql
 
 		#region FromClause
 
+		[Serializable]
 		public class FromClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			#region Join
@@ -2517,6 +2540,7 @@ namespace BLToolkit.Data.Sql
 
 		#region WhereClause
 
+		[Serializable]
 		public class WhereClause : ClauseBase<WhereClause,WhereClause.Next>, IQueryElement, ISqlExpressionWalkable
 		{
 			public class Next : ClauseBase
@@ -2622,6 +2646,7 @@ namespace BLToolkit.Data.Sql
 
 		#region GroupByClause
 
+		[Serializable]
 		public class GroupByClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			internal GroupByClause(SqlQuery sqlQuery) : base(sqlQuery)
@@ -2742,6 +2767,7 @@ namespace BLToolkit.Data.Sql
 
 		#region OrderByClause
 
+		[Serializable]
 		public class OrderByClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			internal OrderByClause(SqlQuery sqlQuery) : base(sqlQuery)
@@ -2855,6 +2881,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Union
 
+		[Serializable]
 		public class Union : IQueryElement
 		{
 			public Union()
@@ -3391,6 +3418,7 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
+		[NonSerialized]
 		IDictionary<string,object> _aliases;
 
 		public void RemoveAlias(string alias)

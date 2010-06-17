@@ -1109,7 +1109,7 @@ namespace BLToolkit.Mapping
 
 		class GuidMapper : MemberMapper
 		{
-			public Guid _nullValue;
+			private Guid _nullValue;
 
 			public override bool IsNull (object o) { return false; }
 			public override void SetNull(object o) { _memberAccessor.SetGuid(o, _nullValue); }
@@ -1392,7 +1392,7 @@ namespace BLToolkit.Mapping
 				{
 					if (value != null)
 					{
-						Type valueType = value.GetType();
+						var valueType = value.GetType();
 						
 						if (valueType != MemberType)
 						{
@@ -1425,7 +1425,7 @@ namespace BLToolkit.Mapping
 				{
 					if (value != null)
 					{
-						Type valueType = value.GetType();
+						var valueType = value.GetType();
 						
 						if (valueType != MemberType)
 						{
@@ -1458,7 +1458,7 @@ namespace BLToolkit.Mapping
 				{
 					if (value != null)
 					{
-						Type valueType = value.GetType();
+						var valueType = value.GetType();
 						
 						if (valueType != MemberType)
 						{
@@ -1491,7 +1491,7 @@ namespace BLToolkit.Mapping
 				{
 					if (value != null)
 					{
-						Type valueType = value.GetType();
+						var valueType = value.GetType();
 						
 						if (valueType != MemberType)
 						{
@@ -1524,7 +1524,7 @@ namespace BLToolkit.Mapping
 				{
 					if (value != null)
 					{
-						Type valueType = value.GetType();
+						var valueType = value.GetType();
 						
 						if (valueType != MemberType)
 						{
@@ -1557,7 +1557,7 @@ namespace BLToolkit.Mapping
 				{
 					if (value != null)
 					{
-						Type valueType = value.GetType();
+						var valueType = value.GetType();
 						
 						if (valueType != MemberType)
 						{
@@ -1663,12 +1663,12 @@ namespace BLToolkit.Mapping
 
 		private static MemberMapper GetSqlTypeMemberMapper(MapMemberInfo mi)
 		{
-			Type type = mi.Type;
+			var type = mi.Type;
 
 			if (TypeHelper.IsSameOrParent(typeof(INullable), type) == false)
 				return null;
 
-			bool d = mi.MapValues != null;
+			var d = mi.MapValues != null;
 
 			if (type == typeof(SqlByte))     return d? new SqlByteMapper.    Default(): new SqlByteMapper();
 			if (type == typeof(SqlInt16))    return d? new SqlInt16Mapper.   Default(): new SqlInt16Mapper();
@@ -1693,7 +1693,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlByte value = _memberAccessor.GetSqlByte(o);
+				var value = _memberAccessor.GetSqlByte(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1726,7 +1726,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlInt16 value = _memberAccessor.GetSqlInt16(o);
+				var value = _memberAccessor.GetSqlInt16(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1759,7 +1759,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlInt32 value = _memberAccessor.GetSqlInt32(o);
+				var value = _memberAccessor.GetSqlInt32(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1792,7 +1792,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlInt64 value = _memberAccessor.GetSqlInt64(o);
+				var value = _memberAccessor.GetSqlInt64(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1825,7 +1825,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlSingle value = _memberAccessor.GetSqlSingle(o);
+				var value = _memberAccessor.GetSqlSingle(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1858,7 +1858,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlBoolean value = _memberAccessor.GetSqlBoolean(o);
+				var value = _memberAccessor.GetSqlBoolean(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1891,7 +1891,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlDouble value = _memberAccessor.GetSqlDouble(o);
+				var value = _memberAccessor.GetSqlDouble(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1924,7 +1924,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlDateTime value = _memberAccessor.GetSqlDateTime(o);
+				var value = _memberAccessor.GetSqlDateTime(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1957,7 +1957,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlDecimal value = _memberAccessor.GetSqlDecimal(o);
+				var value = _memberAccessor.GetSqlDecimal(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -1990,7 +1990,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlMoney value = _memberAccessor.GetSqlMoney(o);
+				var value = _memberAccessor.GetSqlMoney(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -2023,7 +2023,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlGuid value = _memberAccessor.GetSqlGuid(o);
+				var value = _memberAccessor.GetSqlGuid(o);
 				return value.IsNull? null: (object)value.Value;
 			}
 
@@ -2056,7 +2056,7 @@ namespace BLToolkit.Mapping
 
 			public override object GetValue(object o)
 			{
-				SqlString value = _memberAccessor.GetSqlString(o);
+				var value = _memberAccessor.GetSqlString(o);
 				return value.IsNull? null: value.Value;
 			}
 
@@ -2107,10 +2107,10 @@ namespace BLToolkit.Mapping
 
 			if (mapInfo.MapValues != null)
 			{
-				IComparable comp = (IComparable)value;
+				var comp = (IComparable)value;
 
-				foreach (MapValue mv in mapInfo.MapValues)
-				foreach (object mapValue in mv.MapValues)
+				foreach (var mv       in mapInfo.MapValues)
+				foreach (var mapValue in mv.MapValues)
 				{
 					try
 					{
@@ -2128,14 +2128,14 @@ namespace BLToolkit.Mapping
 					return mapInfo.DefaultValue;
 			}
 
-			Type valueType  = value.GetType();
-			Type memberType = mapInfo.Type;
+			var valueType  = value.GetType();
+			var memberType = mapInfo.Type;
 
 			if (!TypeHelper.IsSameOrParent(memberType, valueType))
 			{
 				if (memberType.IsGenericType)
 				{
-					Type underlyingType = Nullable.GetUnderlyingType(memberType);
+					var underlyingType = Nullable.GetUnderlyingType(memberType);
 
 					if (valueType == underlyingType)
 						return value;
@@ -2145,7 +2145,7 @@ namespace BLToolkit.Mapping
 
 				if (memberType.IsEnum)
 				{
-					Type underlyingType = mapInfo.MemberAccessor.UnderlyingType;
+					var underlyingType = mapInfo.MemberAccessor.UnderlyingType;
 
 					if (valueType != underlyingType)
 						//value = _mappingSchema.ConvertChangeType(value, underlyingType);

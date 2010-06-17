@@ -30,7 +30,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildGetIdentity(StringBuilder sb)
 		{
-			SqlField identityField = GetIdentityField(SqlQuery.Set.Into);
+			var identityField = SqlQuery.Set.Into.GetIdentityField();
 
 			if (identityField == null)
 				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
@@ -50,9 +50,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSql(StringBuilder sb)
 		{
-			bool buildRowNum = NeedSkip || NeedTake && (!SqlQuery.OrderBy.IsEmpty || !SqlQuery.Having.IsEmpty);
-
-			string[] aliases = null;
+			var buildRowNum = NeedSkip || NeedTake && (!SqlQuery.OrderBy.IsEmpty || !SqlQuery.Having.IsEmpty);
+			var aliases     = null as string[];
 
 			if (buildRowNum)
 			{
@@ -142,7 +141,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
@@ -164,18 +163,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				var func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
 					case "Coalesce"       : return new SqlFunction(func.SystemType, "Nvl", func.Parameters);
 					case "Convert"        :
 						{
-							Type ftype = TypeHelper.GetUnderlyingType(func.SystemType);
+							var ftype = TypeHelper.GetUnderlyingType(func.SystemType);
 
 							if (ftype == typeof(bool))
 							{
-								ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+								var ex = AlternativeConvertToBoolean(func, 1);
 								if (ex != null)
 									return ex;
 							}
@@ -221,7 +220,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlExpression)
 			{
-				SqlExpression e = (SqlExpression)expr;
+				var e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("To_Number(To_Char(") && e.Expr.EndsWith(", 'FF'))"))
 					return Div(new SqlExpression(e.SystemType, e.Expr.Replace("To_Number(To_Char(", "to_Number(To_Char("), e.Parameters), 1000);
@@ -271,7 +270,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (value is Guid)
 			{
-				string s = ((Guid)value).ToString("N");
+				var s = ((Guid)value).ToString("N");
 
 				sb
 					.Append("Cast('")

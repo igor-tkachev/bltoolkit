@@ -4,6 +4,7 @@ using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql
 {
+	[Serializable]
 	public class SqlTable<T> : SqlTable
 	{
 		public SqlTable()

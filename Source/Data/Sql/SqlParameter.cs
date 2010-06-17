@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql
 {
+	[Serializable]
 	public class SqlParameter : ISqlExpression, IValueContainer
 	{
 		public SqlParameter(Type systemType, string name, object value)
 		{
-			_name       = name;
-			_systemType = systemType;
+			IsQueryParameter = true;
+			Name       = name;
+			SystemType = systemType;
 			_value      = value;
 		}
 
@@ -31,29 +34,137 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
-		private string _name;       public string Name       { get { return _name;       } set { _name = value;       } }
-		private Type   _systemType; public Type   SystemType { get { return _systemType; } set { _systemType = value; } }
+		public string Name             { get; set; }
+		public Type   SystemType       { get; set; }
+		public bool   IsQueryParameter { get; set; }
 
 		private object _value;
 		public  object  Value
 		{
-			get { return _valueConverter == null? _value: _valueConverter(_value); }
+			get
+			{
+				var valueConverter = ValueConverter;
+				return valueConverter == null? _value: valueConverter(_value);
+			}
+
 			set { _value = value; }
 		}
 
+		#region Value Converter
+
+		List<Type> _enumTypes;
+		List<int>  _takeValues;
+		string     _likeStart, _likeEnd;
+
+		[NonSerialized]
 		private Converter<object,object> _valueConverter;
 		public  Converter<object,object>  ValueConverter
 		{
-			get { return _valueConverter;  }
+			get
+			{
+				if (_valueConverter == null)
+				{
+					if (_enumTypes != null)
+						foreach (var type in _enumTypes)
+							SetEnumConverter(type, Map.DefaultSchema);
+					else if (_takeValues != null)
+						foreach (var take in _takeValues)
+							SetTakeConverter(take);
+					else if (_likeStart != null)
+						SetLikeConverter(_likeStart, _likeEnd);
+				}
+
+				return _valueConverter;
+			}
+
 			set { _valueConverter = value; }
 		}
 
-		private bool _isQueryParameter = true;
-		public  bool  IsQueryParameter
+		internal void SetEnumConverter(Type type, MappingSchema ms)
 		{
-			get { return _isQueryParameter;  }
-			set { _isQueryParameter = value; }
+			if (_enumTypes == null)
+				_enumTypes = new List<Type>();
+
+			_enumTypes.Add(type);
+
+			SetEnumConverterInternal(type, ms);
 		}
+
+		void SetEnumConverterInternal(Type type, MappingSchema ms)
+		{
+			if (_valueConverter == null)
+			{
+				_valueConverter = o => ms.MapEnumToValue(o, type);
+			}
+			else
+			{
+				var converter = _valueConverter;
+				_valueConverter = o => ms.MapEnumToValue(converter(o), type);
+			}
+		}
+
+		internal void SetTakeConverter(int take)
+		{
+			if (_takeValues == null)
+				_takeValues = new List<int>();
+
+			_takeValues.Add(take);
+
+			SetTakeConverterInternal(take);
+		}
+
+		void SetTakeConverterInternal(int take)
+		{
+			var conv = _valueConverter;
+
+			if (conv == null)
+				_valueConverter = v => v == null ? null : (object) ((int) v + take);
+			else
+				_valueConverter = v => v == null ? null : (object) ((int) conv(v) + take);
+		}
+
+		internal void SetLikeConverter(string start, string end)
+		{
+			_likeStart = start;
+			_likeEnd   = end;
+			_valueConverter = GetLikeEscaper(start, end);
+		}
+
+		static Converter<object,object> GetLikeEscaper(string start, string end)
+		{
+			return value =>
+			{
+				if (value == null)
+#if DEBUG
+					value = "";
+#else
+					throw new SqlException("NULL cannot be used as a LIKE predicate parameter.");
+#endif
+
+				var text = value.ToString();
+
+				if (text.IndexOfAny(new[] { '%', '_', '[' }) < 0)
+					return start + text + end;
+
+				var sb = new StringBuilder(start, text.Length + start.Length + end.Length);
+
+				foreach (var c in text)
+				{
+					if (c == '%' || c == '_' || c == '[')
+					{
+						sb.Append('[');
+						sb.Append(c);
+						sb.Append(']');
+					}
+					else
+						sb.Append(c);
+				}
+
+				return sb.ToString();
+			};
+		}
+
+		#endregion
 
 		#region Overrides
 
@@ -94,7 +205,7 @@ namespace BLToolkit.Data.Sql
 				return true;
 
 			var p = other as SqlParameter;
-			return (object)p != null && _name != null && p._name != null && _name == p._name && _systemType == p._systemType;
+			return (object)p != null && Name != null && p.Name != null && Name == p.Name && SystemType == p.SystemType;
 		}
 
 		#endregion
@@ -103,10 +214,10 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-			if (_systemType == null && _value == null)
+			if (SystemType == null && _value == null)
 				return true;
 
-			return SqlDataType.CanBeNull(_systemType ?? _value.GetType());
+			return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
 		}
 
 		#endregion
@@ -122,7 +233,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var p = new SqlParameter(_systemType, _name, _value, _valueConverter) { _isQueryParameter = _isQueryParameter };
+				var p = new SqlParameter(SystemType, Name, _value, _valueConverter) { IsQueryParameter = IsQueryParameter };
 
 				objectTree.Add(this, clone = p);
 			}

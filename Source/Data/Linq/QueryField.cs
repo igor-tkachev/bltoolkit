@@ -22,9 +22,10 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.WriteLine(this);
 			}
 
-			public readonly SqlField          Field;
-			public readonly QuerySource.Table Table;
-			public readonly MemberMapper      Mapper;
+			public   readonly SqlField          Field;
+			public   readonly QuerySource.Table Table;
+			[NonSerialized]
+			internal readonly MemberMapper      Mapper;
 
 			public override QuerySource[] Sources { get { return new[] { Table }; } }
 

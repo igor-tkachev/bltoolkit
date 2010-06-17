@@ -1856,24 +1856,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Helpers
 
-		protected SqlField GetIdentityField(SqlTable table)
-		{
-			foreach (var field in table.Fields.Values)
-				if (field.IsIdentity)
-					return field;
-
-			var keys = table.GetKeys(true);
-
-			if (keys != null && keys.Count == 1)
-				return (SqlField)keys[0];
-
-			return null;
-		}
-
 		protected SequenceNameAttribute GetSequenceNameAttribute()
 		{
 			var table         = SqlQuery.Set.Into;
-			var identityField = GetIdentityField(table);
+			var identityField = table.GetIdentityField();
 
 			if (identityField == null)
 				throw new SqlException("Identity field must be defined for '{0}'.", table.Name);
@@ -1881,10 +1867,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (table.ObjectType == null)
 				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
 
-			var om = table.MappingSchema.GetObjectMapper(table.ObjectType);
-			var mm = om[identityField.Name, true];
-
-			var attrs = mm.MapMemberInfo.MemberAccessor.GetAttributes<SequenceNameAttribute>();
+			var attrs = table.SequenceAttributes;
 
 			if (attrs == null)
 				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);

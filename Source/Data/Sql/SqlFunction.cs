@@ -5,6 +5,7 @@ using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
+	[Serializable]
 	public class SqlFunction : ISqlTableSource
 	{
 		[Obsolete]

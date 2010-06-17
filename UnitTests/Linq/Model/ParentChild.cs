@@ -90,6 +90,11 @@ namespace Data.Linq.Model
 
 	public class GrandChild : IEquatable<GrandChild>
 	{
+		public GrandChild()
+		{
+			
+		}
+
 		public int? ParentID;
 		public int? ChildID;
 		public int? GrandChildID;

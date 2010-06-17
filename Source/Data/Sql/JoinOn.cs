@@ -6,6 +6,7 @@ namespace BLToolkit.Data.Sql
 {
 	using Reflection.Extension;
 
+	[Serializable]
 	public class JoinOn : IQueryElement, ICloneableElement
 	{
 		public JoinOn()

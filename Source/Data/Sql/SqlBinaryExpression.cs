@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
-	[DebuggerDisplay("SQL = {SqlText}")]
+	[Serializable, DebuggerDisplay("SQL = {SqlText}")]
 	public class SqlBinaryExpression : ISqlExpression
 	{
 		public SqlBinaryExpression(Type systemType, ISqlExpression expr1, string operation, ISqlExpression expr2, int precedence)

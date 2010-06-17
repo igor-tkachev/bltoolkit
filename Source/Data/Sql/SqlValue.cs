@@ -4,6 +4,7 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
+	[Serializable]
 	public class SqlValue : ISqlExpression, IValueContainer
 	{
 		public SqlValue(Type systemType, object value)

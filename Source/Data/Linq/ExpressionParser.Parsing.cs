@@ -1427,13 +1427,8 @@ namespace BLToolkit.Data.Linq
 				{
 					var skip = (SqlParameter)CurrentSql.Select.SkipValue;
 					var parm = (SqlParameter)CurrentSql.Select.SkipValue.Clone(new Dictionary<ICloneableElement,ICloneableElement>(), _ => true);
-					var conv = parm.ValueConverter;
-					var take = (int)((SqlValue)CurrentSql.Select.TakeValue).Value;
 
-					if (conv == null)
-						parm.ValueConverter = v => v == null ? null : (object)((int)v + take);
-					else
-						parm.ValueConverter = v => v == null ? null : (object)((int)conv(v) + take);
+					parm.SetTakeConverter((int)((SqlValue)CurrentSql.Select.TakeValue).Value);
 
 					CurrentSql.Select.Take(parm);
 
@@ -1958,7 +1953,7 @@ namespace BLToolkit.Data.Linq
 					var expr   = ParseExpression(setter, ma.Expression, select);
 
 					if (expr is SqlParameter && ma.Expression.Type.IsEnum)
-						SetParameterEnumConverter((SqlParameter)expr, ma.Expression.Type, _info.MappingSchema);
+						((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, _info.MappingSchema);
 
 					CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
 				}
@@ -1987,7 +1982,7 @@ namespace BLToolkit.Data.Linq
 			var expr   = ParseExpression(update, update.Body, select);
 
 			if (expr is SqlParameter && update.Body.Type.IsEnum)
-				SetParameterEnumConverter((SqlParameter)expr, update.Body.Type, _info.MappingSchema);
+				((SqlParameter)expr).SetEnumConverter(update.Body.Type, _info.MappingSchema);
 
 			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column, expr));
 		}
@@ -2019,7 +2014,7 @@ namespace BLToolkit.Data.Linq
 			var expr = ParseExpression(null, update, select);
 
 			if (expr is SqlParameter && update.Type.IsEnum)
-				SetParameterEnumConverter((SqlParameter)expr, update.Type, _info.MappingSchema);
+				((SqlParameter)expr).SetEnumConverter(update.Type, _info.MappingSchema);
 
 			CurrentSql.Set.Items.Add(new SqlQuery.SetExpression(column.GetExpressions(this)[0], expr));
 		}

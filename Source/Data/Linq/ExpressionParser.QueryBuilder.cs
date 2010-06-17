@@ -2395,27 +2395,14 @@ namespace BLToolkit.Data.Linq
 						var l = ParseExpression(operand, queries);
 						var r = ParseExpression(value,   queries);
 
-						if (l is SqlParameter) SetParameterEnumConverter((SqlParameter)l, type, _info.MappingSchema);
-						if (r is SqlParameter) SetParameterEnumConverter((SqlParameter)r, type, _info.MappingSchema);
+						if (l is SqlParameter) ((SqlParameter)l).SetEnumConverter(type, _info.MappingSchema);
+						if (r is SqlParameter) ((SqlParameter)r).SetEnumConverter(type, _info.MappingSchema);
 
 						return Convert(new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
 			}
 
 			return null;
-		}
-
-		static void SetParameterEnumConverter(SqlParameter p, Type type, MappingSchema ms)
-		{
-			if (p.ValueConverter == null)
-			{
-				p.ValueConverter = o => ms.MapEnumToValue(o, type);
-			}
-			else
-			{
-				var converter = p.ValueConverter;
-				p.ValueConverter = o => ms.MapEnumToValue(converter(o), type);
-			}
 		}
 
 		#endregion

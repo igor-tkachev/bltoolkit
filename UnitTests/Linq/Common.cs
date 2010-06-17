@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BLToolkit.Common;
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
 
 using NUnit.Framework;
 
@@ -141,74 +138,6 @@ namespace Data.Linq
 			ForEachProvider(db => Assert.AreNotEqual(
 				new Test().TestClosure(db),
 				new Test().TestClosure(db)));
-		}
-
-		class MyDbManager : TestDbManager
-		{
-			public MyDbManager() : base("Sql2008") {}
-
-			protected override SqlQuery ProcessQuery(SqlQuery sqlQuery)
-			{
-				if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.Into.Name == "Parent")
-				{
-					var expr =
-						new QueryVisitor().Find(sqlQuery.Set, e =>
-						{
-							if (e.ElementType == QueryElementType.SetExpression)
-							{
-								var se = (SqlQuery.SetExpression)e;
-								return ((SqlField)se.Column).Name == "ParentID";
-							}
-
-							return false;
-						}) as SqlQuery.SetExpression;
-
-					if (expr != null)
-					{
-						var value = ConvertTo<int>.From(((IValueContainer)expr.Expression).Value);
-
-						if (value == 555)
-						{
-							var tableName = "Parent1";
-							var dic       = new Dictionary<IQueryElement,IQueryElement>();
-
-							sqlQuery = new QueryVisitor().Convert(sqlQuery, e =>
-							{
-								if (e.ElementType == QueryElementType.SqlTable)
-								{
-									var oldTable = (SqlTable)e;
-									var newTable = new SqlTable(oldTable) { Name = tableName };
-
-									foreach (var field in oldTable.Fields.Values)
-										dic.Add(field, newTable.Fields[field.Name]);
-
-									return newTable;
-								}
-
-								IQueryElement ex;
-								return dic.TryGetValue(e, out ex) ? ex : null;
-							});
-						}
-					}
-				}
-
-				return sqlQuery;
-			}
-		}
-
-		[Test]
-		public void QueryTest()
-		{
-			using (var db = new MyDbManager())
-			{
-				var n = 555;
-
-				db.Parent.Insert(() => new Parent
-				{
-					ParentID = n,
-					Value1   = n
-				});
-			}
 		}
 	}
 }

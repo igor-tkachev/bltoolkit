@@ -82,6 +82,10 @@ namespace BLToolkit.Data
 				sql.ParameterDependent = true;
 			}
 
+//System.Runtime.Serialization.Formatters.Binary.BinaryFormatter serializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+//System.IO.MemoryStream memStream = new System.IO.MemoryStream();
+//serializer.Serialize(memStream, sql);
+
 			var sqlProvider = DataProvider.CreateSqlProvider();
 
 			var cc = sqlProvider.CommandCount(sql);

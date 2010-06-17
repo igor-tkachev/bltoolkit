@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
+	[Serializable]
 	public class ChildContainer<P,C> : Dictionary<string,C>, IDictionary<string,C>
 		where C : IChild<P>
 		where P : class

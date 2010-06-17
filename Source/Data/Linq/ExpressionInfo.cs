@@ -717,11 +717,7 @@ namespace BLToolkit.Data.Linq
 			};
 
 			if (field.SystemType.IsEnum)
-			{
-				var ms = dataContext.MappingSchema;
-				var tp = field.SystemType;
-				param.SqlParameter.ValueConverter = o => ms.MapEnumToValue(o, tp);
-			}
+				param.SqlParameter.SetEnumConverter(field.SystemType, dataContext.MappingSchema);
 
 			return param;
 		}

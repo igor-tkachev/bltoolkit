@@ -4,6 +4,7 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
+	[Serializable]
 	public class SqlExpression : ISqlExpression
 	{
 		public SqlExpression(Type systemType, string expr, int precedence, params ISqlExpression[] parameters)

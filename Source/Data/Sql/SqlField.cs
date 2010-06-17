@@ -7,6 +7,7 @@ namespace BLToolkit.Data.Sql
 	using DataAccess;
 	using Mapping;
 
+	[Serializable]
 	public class SqlField : IChild<ISqlTableSource>, ISqlExpression
 	{
 		public SqlField()
@@ -32,7 +33,7 @@ namespace BLToolkit.Data.Sql
 			Name                   = name;
 			Nullable               = nullable;
 			PrimaryKeyOrder        = pkOrder;
-			MemberMapper           = memberMapper;
+			_memberMapper          = memberMapper;
 			_physicalName          = physicalName;
 			_nonUpdatableAttribute = nonUpdatableAttribute;
 		}
@@ -42,9 +43,14 @@ namespace BLToolkit.Data.Sql
 		public string          Name            { get; set; }
 		public bool            Nullable        { get; set; }
 		public int             PrimaryKeyOrder { get; set; }
-		public MemberMapper    MemberMapper    { get; set; }
 		public ISqlTableSource Table           { get; private set; }
 
+		[NonSerialized]
+		private MemberMapper _memberMapper;
+		public  MemberMapper  MemberMapper
+		{
+			get { return _memberMapper; }
+		}
 
 		private string _physicalName;   public string PhysicalName    { get { return _physicalName ?? Name; } set { _physicalName   = value; } }
 

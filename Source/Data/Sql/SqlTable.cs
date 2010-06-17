@@ -9,48 +9,42 @@ namespace BLToolkit.Data.Sql
 	using DataAccess;
 	using Mapping;
 	using Reflection.Extension;
+	using SqlProvider;
 
+	[Serializable]
 	public class SqlTable : ISqlTableSource
 	{
 		#region Init
 
-		public SqlTable() : this(Map.DefaultSchema)
-		{
-		}
-
-		public SqlTable(MappingSchema mappingSchema)
+		public SqlTable()
 		{
 			_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
-
-			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
-
-			_mappingSchema = mappingSchema;
-
-			_fields = new ChildContainer<ISqlTableSource,SqlField>(this);
+			_fields   = new ChildContainer<ISqlTableSource,SqlField>(this);
 		}
 
 		#endregion
 
 		#region Init from type
 
-		public SqlTable(MappingSchema mappingSchema, Type objectType)
-			: this(mappingSchema)
+		public SqlTable([JetBrains.Annotations.NotNull] MappingSchema mappingSchema, Type objectType) : this()
 		{
+			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
+
 			bool isSet;
-			_database   = _mappingSchema.MetadataProvider.GetDatabaseName(objectType, _mappingSchema.Extensions, out isSet);
-			_owner      = _mappingSchema.MetadataProvider.GetOwnerName   (objectType, _mappingSchema.Extensions, out isSet);
-			_name       = _mappingSchema.MetadataProvider.GetTableName   (objectType, _mappingSchema.Extensions, out isSet);
+			_database   = mappingSchema.MetadataProvider.GetDatabaseName(objectType, mappingSchema.Extensions, out isSet);
+			_owner      = mappingSchema.MetadataProvider.GetOwnerName   (objectType, mappingSchema.Extensions, out isSet);
+			_name       = mappingSchema.MetadataProvider.GetTableName   (objectType, mappingSchema.Extensions, out isSet);
 			_objectType = objectType;
 
-			var typeExt = TypeExtension.GetTypeExtension(objectType, _mappingSchema.Extensions);
+			var typeExt = TypeExtension.GetTypeExtension(objectType, mappingSchema.Extensions);
 
-			foreach (MemberMapper mm in MappingSchema.GetObjectMapper(objectType))
+			foreach (MemberMapper mm in mappingSchema.GetObjectMapper(objectType))
 				if (mm.MapMemberInfo.SqlIgnore == false)
 				{
 					var ua =
-						_mappingSchema.MetadataProvider.GetNonUpdatableAttribute(objectType, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
+						mappingSchema.MetadataProvider.GetNonUpdatableAttribute(objectType, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
-					var order = _mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
+					var order = mappingSchema.MetadataProvider.GetPrimaryKeyOrder(objectType, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
 					Fields.Add(new SqlField(
 						mm.Type,
@@ -61,6 +55,16 @@ namespace BLToolkit.Data.Sql
 						ua,
 						mm));
 				}
+
+			var identityField = GetIdentityField();
+
+			if (identityField != null)
+			{
+				var om = mappingSchema.GetObjectMapper(_objectType);
+				var mm = om[identityField.Name, true];
+
+				_sequenceAttributes = mm.MapMemberInfo.MemberAccessor.GetAttributes<SequenceNameAttribute>();
+			}
 		}
 
 		public SqlTable(Type objectType)
@@ -72,15 +76,15 @@ namespace BLToolkit.Data.Sql
 
 		#region Init from Table
 
-		public SqlTable(MappingSchema mappingSchema, SqlTable table)
-			: this(mappingSchema)
+		public SqlTable(SqlTable table) : this()
 		{
-			_alias        = table._alias;
-			_database     = table._database;
-			_owner        = table._owner;
-			_name         = table._name;
-			_physicalName = table._physicalName;
-			_objectType   = table._objectType;
+			_alias              = table._alias;
+			_database           = table._database;
+			_owner              = table._owner;
+			_name               = table._name;
+			_physicalName       = table._physicalName;
+			_objectType         = table._objectType;
+			_sequenceAttributes = table._sequenceAttributes;
 
 			foreach (var field in table.Fields.Values)
 				Fields.Add(new SqlField(field));
@@ -89,20 +93,15 @@ namespace BLToolkit.Data.Sql
 				Joins.Add(join.Clone());
 		}
 
-		public SqlTable(SqlTable table)
-			: this(table.MappingSchema, table)
+		public SqlTable(SqlTable table, IEnumerable<SqlField> fields, IEnumerable<Join> joins) : this()
 		{
-		}
-
-		public SqlTable(SqlTable table, IEnumerable<SqlField> fields, IEnumerable<Join> joins)
-			: this(table.MappingSchema)
-		{
-			_alias        = table._alias;
-			_database     = table._database;
-			_owner        = table._owner;
-			_name         = table._name;
-			_physicalName = table._physicalName;
-			_objectType   = table._objectType;
+			_alias              = table._alias;
+			_database           = table._database;
+			_owner              = table._owner;
+			_name               = table._name;
+			_physicalName       = table._physicalName;
+			_objectType         = table._objectType;
+			_sequenceAttributes = table._sequenceAttributes;
 
 			Fields.AddRange(fields);
 			Joins. AddRange(joins);
@@ -117,11 +116,11 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
-		public SqlTable(MappingSchema mappingSchema, ExtensionList extensions, string name)
-			: this(mappingSchema)
+		public SqlTable([JetBrains.Annotations.NotNull] MappingSchema mappingSchema, ExtensionList extensions, string name) : this()
 		{
-			if (extensions == null) throw new ArgumentNullException("extensions");
-			if (name       == null) throw new ArgumentNullException("name");
+			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
+			if (extensions    == null) throw new ArgumentNullException("extensions");
+			if (name          == null) throw new ArgumentNullException("name");
 
 			var te = extensions[name];
 
@@ -225,6 +224,13 @@ namespace BLToolkit.Data.Sql
 		readonly List<Join> _joins = new List<Join>();
 		public   List<Join>  Joins { get { return _joins; } }
 
+		private SequenceNameAttribute[] _sequenceAttributes;
+		public  SequenceNameAttribute[]  SequenceAttributes
+		{
+			get { return _sequenceAttributes; }
+		}
+
+		[NonSerialized]
 		private  SqlField _all;
 		public   SqlField  All
 		{
@@ -240,14 +246,18 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		#endregion
-
-		#region Protected Members
-
-		readonly MappingSchema _mappingSchema;
-		public   MappingSchema  MappingSchema
+		public SqlField GetIdentityField()
 		{
-			get { return _mappingSchema; }
+			foreach (var field in Fields.Values)
+				if (field.IsIdentity)
+					return field;
+
+			var keys = GetKeys(true);
+
+			if (keys != null && keys.Count == 1)
+				return (SqlField)keys[0];
+
+			return null;
 		}
 
 		#endregion
@@ -290,14 +300,15 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var table = new SqlTable(_mappingSchema)
+				var table = new SqlTable()
 				{
-					_name         = _name,
-					_alias        = _alias,
-					_database     = _database,
-					_owner        = _owner,
-					_physicalName = _physicalName,
-					_objectType   = _objectType
+					_name               = _name,
+					_alias              = _alias,
+					_database           = _database,
+					_owner              = _owner,
+					_physicalName       = _physicalName,
+					_objectType         = _objectType,
+					_sequenceAttributes = _sequenceAttributes,
 				};
 
 				table._fields.Clear();
