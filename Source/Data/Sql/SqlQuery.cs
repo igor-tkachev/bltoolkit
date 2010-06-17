@@ -2186,7 +2186,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			private bool _withIdentity;
-			public  bool WithIdentity
+			public  bool  WithIdentity
 			{
 				get { return _withIdentity;  }
 				set { _withIdentity = value; }

@@ -2,7 +2,7 @@
 
 namespace BLToolkit.Data.Sql
 {
-	interface IValueContainer
+	public interface IValueContainer
 	{
 		object Value { get; }
 	}

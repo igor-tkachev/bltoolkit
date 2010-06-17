@@ -734,7 +734,9 @@ namespace BLToolkit.Data.Sql
 						{
 							SqlQuery.SetClause sc = new SqlQuery.SetClause();
 							sc.Into = t ?? sc.Into;
-							sc.Items.AddRange(i);
+							sc.Items.AddRange(i ?? s.Items);
+							sc.WithIdentity = s.WithIdentity;
+
 							newElement = sc;
 						}
 
@@ -879,7 +881,7 @@ namespace BLToolkit.Data.Sql
 						if (!doConvert)
 							break;
 
-						SqlQuery nq = new SqlQuery();
+						SqlQuery nq = new SqlQuery { QueryType = q.QueryType };
 
 						_visitedElements.Add(q, nq);
 

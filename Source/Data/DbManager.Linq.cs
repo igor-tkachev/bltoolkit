@@ -29,11 +29,17 @@ namespace BLToolkit.Data
 			public ISqlProvider       SqlProvider;
 		}
 
+		#region SetQuery
+
 		object IDataContext.SetQuery(IQueryContext queryContext)
 		{
 			var query = GetCommand(queryContext);
 
 			GetParameters(queryContext, query);
+
+#if DEBUG
+			Debug.WriteLineIf(TraceSwitch.TraceInfo, ((IDataContext)this).GetSqlText(query), TraceSwitch.DisplayName);
+#endif
 
 			return query;
 		}
@@ -68,6 +74,14 @@ namespace BLToolkit.Data
 				});
 			}
 
+			var newSql = ProcessQuery(sql);
+
+			if (sql != newSql)
+			{
+				sql = newSql;
+				sql.ParameterDependent = true;
+			}
+
 			var sqlProvider = DataProvider.CreateSqlProvider();
 
 			var cc = sqlProvider.CommandCount(sql);
@@ -93,6 +107,11 @@ namespace BLToolkit.Data
 				SqlQuery      = sql,
 				SqlProvider   = sqlProvider
 			};
+		}
+
+		protected virtual SqlQuery ProcessQuery(SqlQuery sqlQuery)
+		{
+			return sqlQuery;
 		}
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
@@ -122,10 +141,8 @@ namespace BLToolkit.Data
 			}
 			else
 			{
-				for (var i = 0; i < parameters.Length; i++)
+				foreach (var parm in parameters)
 				{
-					var parm = parameters[i];
-
 					if (parm.IsQueryParameter && pq.SqlParameters.Contains(parm))
 					{
 						var name = DataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter).ToString();
@@ -137,15 +154,15 @@ namespace BLToolkit.Data
 			pq.Parameters = parms.ToArray();
 		}
 
+		#endregion
+
+		#region ExecuteXXX
+
 		int IDataContext.ExecuteNonQuery(object query)
 		{
 			var pq = (PreparedQuery)query;
 
 			SetCommand(pq.Commands[0], pq.Parameters);
-
-#if DEBUG
-			Debug.WriteLineIf(TraceSwitch.TraceInfo, ((IDataContext)this).GetSqlText(pq), TraceSwitch.DisplayName);
-#endif
 
 			return ExecuteNonQuery();
 		}
@@ -155,10 +172,6 @@ namespace BLToolkit.Data
 			var pq = (PreparedQuery)query;
 
 			SetCommand(pq.Commands[0], pq.Parameters);
-
-#if DEBUG
-			Debug.WriteLineIf(TraceSwitch.TraceInfo, ((IDataContext)this).GetSqlText(pq), TraceSwitch.DisplayName);
-#endif
 
 			IDbDataParameter idparam = null;
 
@@ -191,12 +204,12 @@ namespace BLToolkit.Data
 
 			SetCommand(pq.Commands[0], pq.Parameters);
 
-#if DEBUG
-			Debug.WriteLineIf(TraceSwitch.TraceInfo, ((IDataContext)this).GetSqlText(pq), TraceSwitch.DisplayName);
-#endif
-
 			return ExecuteReader();
 		}
+
+		#endregion
+
+		#region GetSqlText
 
 		string IDataContext.GetSqlText(object query)
 		{
@@ -251,6 +264,8 @@ namespace BLToolkit.Data
 
 			return sb.ToString();
 		}
+
+		#endregion
 
 		IDataContext IDataContext.Clone()
 		{
