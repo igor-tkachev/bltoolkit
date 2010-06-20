@@ -3,14 +3,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Resources;
+using BLToolkit;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle      ("Business Logic Toolkit")]
-[assembly: AssemblyDescription("Business Logic Toolkit for .NET")]
-[assembly: AssemblyProduct    ("Business Logic Toolkit")]
-[assembly: AssemblyCopyright  ("\xA9 2002-2010 www.bltoolkit.net")]
+[assembly: AssemblyTitle      (BLToolkitConstants.ProductName)]
+[assembly: AssemblyDescription(BLToolkitConstants.ProductDescription)]
+[assembly: AssemblyProduct    (BLToolkitConstants.ProductName)]
+[assembly: AssemblyCopyright  (BLToolkitConstants.Copyright)]
 [assembly: AssemblyCulture    ("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -30,8 +31,8 @@ using System.Resources;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion    ("4.0.0.0")]
-[assembly: AssemblyFileVersion("4.0.0.0")]
+[assembly: AssemblyVersion    (BLToolkitConstants.FullVersionString)]
+[assembly: AssemblyFileVersion(BLToolkitConstants.FullVersionString)]
 
 // The AllowPartiallyTrustedCallersAttribute requires the assembly to be signed with a strong name key.
 // This attribute is necessary since the control is called by either an intranet or Internet

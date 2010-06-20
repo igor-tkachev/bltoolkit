@@ -55,6 +55,8 @@
     <CodeAnalysisRules>-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1033;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1303;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1707;-Microsoft.Naming#CA1706;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
     <NoWarn>
     </NoWarn>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
@@ -121,6 +123,7 @@
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Properties\BLToolkitConstants.cs" />
     <Compile Include="Common\ArrayT.cs" />
     <Compile Include="Common\Compatibility4.cs" />
     <Compile Include="Common\Tuple.cs" />
@@ -226,6 +229,7 @@
     <Compile Include="Mapping\MapRelationBase.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
+    <Compile Include="Properties\BLToolkitConstants.Revision.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -582,6 +586,7 @@
     <None Include="Templates\BLT4Toolkit.ttinclude" />
     <None Include="Templates\BLToolkit.ttinclude" />
     <None Include="Templates\MSSQL.ttinclude" />
+    <None Include="Templates\BLToolkitConstants.Revision.cs.template" />
     <None Include="Templates\Sybase.ttinclude" />
     <None Include="Templates\VB.ttinclude" />
     <None Include="Templates\WCFAttributes.ttinclude" />
@@ -617,4 +622,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"$(SolutionDir)Tools\SvnRevision\SvnRevision.exe" "$(SolutionDir)/" "$(ProjectDir)Templates\BLToolkitConstants.Revision.cs.template" "$(ProjectDir)Properties\BLToolkitConstants.Revision.cs"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -246,6 +246,8 @@
     <Compile Include="Mapping\MapRelationBase.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
+    <Compile Include="Properties\BLToolkitConstants.cs" />
+    <Compile Include="Properties\BLToolkitConstants.Revision.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -552,6 +554,13 @@
     <Compile Include="Net\HttpReader.cs" />
     <Compile Include="Web\UI\Design\WebObjectBinderDesigner.cs" />
     <Compile Include="Web\UI\WebObjectBinder.cs" />
+    <None Include="Templates\BLT4Toolkit.ttinclude" />
+    <None Include="Templates\BLToolkit.ttinclude" />
+    <None Include="Templates\BLToolkitConstants.Revision.cs.template" />
+    <None Include="Templates\MSSQL.ttinclude" />
+    <None Include="Templates\Sybase.ttinclude" />
+    <None Include="Templates\VB.ttinclude" />
+    <None Include="Templates\WCFAttributes.ttinclude" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\Design\GetTypeDialog.resx">
@@ -640,4 +649,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"$(SolutionDir)Tools\SvnRevision\SvnRevision.exe" "$(SolutionDir)/" "$(ProjectDir)Templates\BLToolkitConstants.Revision.cs.template" "$(ProjectDir)Properties\BLToolkitConstants.Revision.cs"</PreBuildEvent>
+  </PropertyGroup>
 </Project>
