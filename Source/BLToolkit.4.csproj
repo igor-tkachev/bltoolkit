@@ -650,6 +650,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"$(SolutionDir)Tools\SvnRevision\SvnRevision.exe" "$(SolutionDir)/" "$(ProjectDir)Templates\BLToolkitConstants.Revision.cs.template" "$(ProjectDir)Properties\BLToolkitConstants.Revision.cs"</PreBuildEvent>
+    <PreBuildEvent>"$(ProjectDir)..\Tools\SvnRevision\SvnRevision.exe" $(ProjectDir)..\ $(ProjectDir)Templates\BLToolkitConstants.Revision.cs.template $(ProjectDir)Properties\BLToolkitConstants.Revision.cs</PreBuildEvent>
   </PropertyGroup>
 </Project>
