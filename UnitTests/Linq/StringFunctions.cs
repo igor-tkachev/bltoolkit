@@ -507,6 +507,16 @@ namespace Data.Linq
 			});
 		}
 
+		[Test]
+		public void IsNullOrEmpty2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.ID == 1 select string.IsNullOrEmpty(p.FirstName);
+				Assert.AreEqual(false, q.ToList().First());
+			});
+		}
+
 		//[Test]
 		public void Test()
 		{

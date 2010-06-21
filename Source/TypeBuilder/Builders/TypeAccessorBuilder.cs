@@ -60,11 +60,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Usually, there is no such attribute in the source assembly.
 			// Therefore we do not cache the result.
 			//
-			object[] attributes = _originalType.Type.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
+			var attributes = _originalType.Type.Assembly.GetCustomAttributes(typeof(InternalsVisibleToAttribute), true);
 
 			foreach (InternalsVisibleToAttribute visibleToAttribute in attributes)
 			{
-				AssemblyName an = new AssemblyName(visibleToAttribute.AssemblyName);
+				var an = new AssemblyName(visibleToAttribute.AssemblyName);
 
 				if (AssemblyName.ReferenceMatchesDefinition(assemblyBuilder.AssemblyName, an))
 				{
@@ -80,7 +80,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				throw new TypeBuilderException(string.Format("Can not build type accessor for non-public type '{0}'.", _originalType.FullName));
 #endif
 
-			string typeName = GetTypeName();
+			var typeName = GetTypeName();
 
 			_typeBuilder = assemblyBuilder.DefineType(typeName, _accessorType);
 
@@ -98,7 +98,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				.ret()
 				;
 
-			Type result = _typeBuilder.Create();
+			var result = _typeBuilder.Create();
 
 			foreach (TypeBuilderHelper tb in _nestedTypes)
 				tb.Create();
@@ -108,17 +108,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		void BuildCreateInstanceMethods()
 		{
-			bool            isValueType  = _type.IsValueType;
-			ConstructorInfo baseDefCtor  = isValueType? null: _type.GetPublicDefaultConstructor();
-			ConstructorInfo baseInitCtor = _type.GetPublicConstructor(typeof(InitContext));
+			var isValueType  = _type.IsValueType;
+			var baseDefCtor  = isValueType? null: _type.GetPublicDefaultConstructor();
+			var baseInitCtor = _type.GetPublicConstructor(typeof(InitContext));
 
 			if (baseDefCtor == null && baseInitCtor == null && !isValueType)
 				return;
 
 			// CreateInstance.
 			//
-			MethodBuilderHelper method = _typeBuilder.DefineMethod(
-				_accessorType.GetMethod(false, "CreateInstance", Type.EmptyTypes));
+			var method = _typeBuilder.DefineMethod(_accessorType.GetMethod(false, "CreateInstance", Type.EmptyTypes));
 
 			if (baseDefCtor != null)
 			{
@@ -129,7 +128,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else if (isValueType)
 			{
-				LocalBuilder    locObj = method.Emitter.DeclareLocal(_type);
+				var locObj = method.Emitter.DeclareLocal(_type);
 				
 				method.Emitter
 					.ldloca  (locObj)
@@ -163,7 +162,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else if (isValueType)
 			{
-				LocalBuilder    locObj = method.Emitter.DeclareLocal(_type);
+				var locObj = method.Emitter.DeclareLocal(_type);
 				
 				method.Emitter
 					.ldloca  (locObj)
@@ -186,8 +185,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			// Type.
 			//
-			MethodBuilderHelper method =
-				_typeBuilder.DefineMethod(_accessorType.GetProperty("Type").GetGetMethod());
+			var method = _typeBuilder.DefineMethod(_accessorType.GetProperty("Type").GetGetMethod());
 
 			method.Emitter
 				.LoadType(_type)
@@ -207,28 +205,28 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildMembers()
 		{
-			ListDictionary members = new ListDictionary();
+			var members = new ListDictionary();
 
-			foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+			foreach (var fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
 				AddMemberToDictionary(members, fi);
 
 			if (_friendlyAssembly)
 			{
-				foreach (FieldInfo fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
+				foreach (var fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
 					if (fi.IsAssembly || fi.IsFamilyOrAssembly)
 						AddMemberToDictionary(members, fi);
 			}
 
-			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+			foreach (var pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				if (pi.GetIndexParameters().Length == 0)
 					AddMemberToDictionary(members, pi);
 
-			foreach (PropertyInfo pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
+			foreach (var pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
 			{
 				if (pi.GetIndexParameters().Length == 0)
 				{
-					MethodInfo getter = pi.GetGetMethod(true);
-					MethodInfo setter = pi.GetSetMethod(true);
+					var getter = pi.GetGetMethod(true);
+					var setter = pi.GetSetMethod(true);
 
 					if (getter != null && getter.IsAbstract || setter != null && setter.IsAbstract)
 						AddMemberToDictionary(members, pi);
@@ -241,7 +239,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static void AddMemberToDictionary(IDictionary members, MemberInfo mi)
 		{
-			string name = mi.Name;
+			var name = mi.Name;
 
 			if (!members.Contains(name))
 			{
@@ -249,7 +247,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				return;
 			}
 
-			MemberInfo existing = (MemberInfo) members[name];
+			var existing = (MemberInfo)members[name];
 			if (mi.DeclaringType.IsSubclassOf(existing.DeclaringType))
 			{
 				// mi is a member of the most descendant type.
@@ -260,29 +258,27 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildMember(MemberInfo mi)
 		{
-			bool              isValueType = _originalType.IsValueType;
-			TypeBuilderHelper nestedType  = _typeBuilder.DefineNestedType(
-				"Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
-
-			ConstructorBuilderHelper ctorBuilder = BuildNestedTypeConstructor(nestedType);
+			var isValueType = _originalType.IsValueType;
+			var nestedType  = _typeBuilder.DefineNestedType("Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
+			var ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
 			BuildGetter    (mi, nestedType);
 			if (!isValueType)
 				BuildSetter(mi, nestedType);
 			BuildInitMember(mi, ctorBuilder);
 
-			Type type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
+			var type = mi is FieldInfo ? ((FieldInfo)mi).FieldType : ((PropertyInfo)mi).PropertyType;
 
 			BuildIsNull    (mi, nestedType, type);
 
 			if (type.IsEnum)
 				type = Enum.GetUnderlyingType(type);
 
-			string typedPropertyName = type.Name;
+			var typedPropertyName = type.Name;
 
 			if (type.IsGenericType)
 			{
-				Type underlyingType = Nullable.GetUnderlyingType(type);
+				var underlyingType = Nullable.GetUnderlyingType(type);
 
 				if (underlyingType != null)
 				{
@@ -350,8 +346,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildGetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo getMethod  = null;
+			var methodType = mi.DeclaringType;
+			var getMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -370,10 +366,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			MethodBuilderHelper method = nestedType.DefineMethod(
-				_memberAccessor.GetMethod("GetValue", typeof(object)));
-			
-			EmitHelper emit = method.Emitter;
+			var method = nestedType.DefineMethod(_memberAccessor.GetMethod("GetValue", typeof(object)));
+			var emit   = method.Emitter;
 
 			emit
 				.ldarg_1
@@ -382,7 +376,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (mi is FieldInfo)
 			{
-				FieldInfo fi = (FieldInfo)mi;
+				var fi = (FieldInfo)mi;
 
 				emit
 					.ldfld          (fi)
@@ -391,7 +385,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-				PropertyInfo pi = (PropertyInfo)mi;
+				var pi = (PropertyInfo)mi;
 
 				emit
 					.callvirt       (getMethod)
@@ -411,8 +405,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildSetter(MemberInfo mi, TypeBuilderHelper nestedType)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo setMethod  = null;
+			var methodType = mi.DeclaringType;
+			var setMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -433,10 +427,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			//else if (((FieldInfo)mi).IsLiteral)
 			//	return;
 
-			MethodBuilderHelper method = nestedType.DefineMethod(
-				_memberAccessor.GetMethod("SetValue", typeof(object), typeof(object)));
-			
-			EmitHelper emit = method.Emitter;
+			var method = nestedType.DefineMethod(_memberAccessor.GetMethod("SetValue", typeof(object), typeof(object)));
+			var emit   = method.Emitter;
 
 			emit
 				.ldarg_1
@@ -446,7 +438,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (mi is FieldInfo)
 			{
-				FieldInfo fi = (FieldInfo)mi;
+				var fi = (FieldInfo)mi;
 
 				emit
 					.CastFromObject (fi.FieldType)
@@ -455,7 +447,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-				PropertyInfo pi = (PropertyInfo)mi;
+				var pi = (PropertyInfo)mi;
 
 				emit
 					.CastFromObject (pi.PropertyType)
@@ -478,10 +470,10 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeBuilderHelper nestedType,
 			Type              memberType)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo getMethod  = null;
-			Boolean    isNullable = TypeHelper.IsNullable(memberType);
-			Boolean    isValueType = (!isNullable && memberType.IsValueType);
+			var methodType = mi.DeclaringType;
+			var getMethod  = null as MethodInfo;
+			var isNullable = TypeHelper.IsNullable(memberType);
+			var isValueType = (!isNullable && memberType.IsValueType);
 
 			if (!isValueType && mi is PropertyInfo)
 			{
@@ -500,13 +492,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			MethodInfo methodInfo = _memberAccessor.GetMethod("IsNull");
+			var methodInfo = _memberAccessor.GetMethod("IsNull");
 
 			if (methodInfo == null)
 				return;
 
-			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			EmitHelper          emit   = method.Emitter;
+			var method = nestedType.DefineMethod(methodInfo);
+			var emit   = method.Emitter;
 
 			if (isValueType)
 			{
@@ -559,8 +551,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeBuilderHelper nestedType,
 			string            typedPropertyName)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo getMethod  = null;
+			var methodType = mi.DeclaringType;
+			var getMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -579,14 +571,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			MethodInfo methodInfo = _memberAccessor.GetMethod("Get" + typedPropertyName, typeof(object));
+			var methodInfo = _memberAccessor.GetMethod("Get" + typedPropertyName, typeof(object));
 
 			if (methodInfo == null)
 				return;
 
-			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			
-			EmitHelper emit = method.Emitter;
+			var method = nestedType.DefineMethod(methodInfo);
+			var emit   = method.Emitter;
 
 			emit
 				.ldarg_1
@@ -607,8 +598,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			Type              memberType,
 			string            typedPropertyName)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo setMethod  = null;
+			var methodType = mi.DeclaringType;
+			var setMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -627,15 +618,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			MethodInfo methodInfo =
-				_memberAccessor.GetMethod("Set" + typedPropertyName, typeof(object), memberType);
+			var methodInfo = _memberAccessor.GetMethod("Set" + typedPropertyName, typeof(object), memberType);
 
 			if (methodInfo == null)
 				return;
 
-			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			
-			EmitHelper emit = method.Emitter;
+			var method = nestedType.DefineMethod(methodInfo);
+			var emit   = method.Emitter;
 
 			emit
 				.ldarg_1
@@ -657,9 +646,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			Type              memberType
 			)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo getMethod  = null;
-			MethodInfo setMethod  = null;
+			var methodType = mi.DeclaringType;
+			var getMethod  = null as MethodInfo;
+			var setMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -692,10 +681,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			MethodBuilderHelper method = nestedType.DefineMethod(
-				_memberAccessor.GetMethod("CloneValue", typeof(object), typeof(object)));
-
-			EmitHelper emit = method.Emitter;
+			var method = nestedType.DefineMethod(_memberAccessor.GetMethod("CloneValue", typeof(object), typeof(object)));
+			var emit   = method.Emitter;
 
 			emit
 				.ldarg_2
@@ -719,7 +706,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						;
 				else
 				{
-					Label valueIsNull = emit.DefineLabel();
+					var valueIsNull = emit.DefineLabel();
 
 					emit
 						.dup
@@ -746,8 +733,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeBuilderHelper nestedType,
 			Type              memberType)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo getMethod  = null;
+			var methodType = mi.DeclaringType;
+			var getMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -766,16 +753,15 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			Type setterType = (memberType.IsEnum ? Enum.GetUnderlyingType(memberType) : memberType);
-			MethodInfo methodInfo = _memberAccessor.GetMethod("Get" + setterType.Name, typeof(object));
+			var setterType = (memberType.IsEnum ? Enum.GetUnderlyingType(memberType) : memberType);
+			var methodInfo = _memberAccessor.GetMethod("Get" + setterType.Name, typeof(object));
 
 			if (methodInfo == null)
 				return;
 
-			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			Type          nullableType = typeof(Nullable<>).MakeGenericType(memberType);
-			
-			EmitHelper emit = method.Emitter;
+			var method       = nestedType.DefineMethod(methodInfo);
+			var nullableType = typeof(Nullable<>).MakeGenericType(memberType);
+			var emit         = method.Emitter;
 
 			emit
 				.ldarg_1
@@ -788,7 +774,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-				LocalBuilder locNullable = emit.DeclareLocal(nullableType);
+				var locNullable = emit.DeclareLocal(nullableType);
 
 				emit
 					.callvirt (getMethod)
@@ -808,8 +794,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			TypeBuilderHelper nestedType,
 			Type              memberType)
 		{
-			Type       methodType = mi.DeclaringType;
-			MethodInfo setMethod  = null;
+			var methodType = mi.DeclaringType;
+			var setMethod  = null as MethodInfo;
 
 			if (mi is PropertyInfo)
 			{
@@ -828,16 +814,14 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			Type setterType = (memberType.IsEnum ? Enum.GetUnderlyingType(memberType) : memberType);
-			MethodInfo methodInfo =
-				_memberAccessor.GetMethod("Set" + setterType.Name, typeof(object), setterType);
+			var setterType = (memberType.IsEnum ? Enum.GetUnderlyingType(memberType) : memberType);
+			var methodInfo = _memberAccessor.GetMethod("Set" + setterType.Name, typeof(object), setterType);
 
 			if (methodInfo == null)
 				return;
 
-			MethodBuilderHelper method = nestedType.DefineMethod(methodInfo);
-			
-			EmitHelper emit = method.Emitter;
+			var method = nestedType.DefineMethod(methodInfo);
+			var emit   = method.Emitter;
 
 			emit
 				.ldarg_1
@@ -858,7 +842,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			Type[] parameters = { typeof(TypeAccessor), typeof(MemberInfo) };
 
-			ConstructorBuilderHelper ctorBuilder = nestedType.DefinePublicConstructor(parameters);
+			var ctorBuilder = nestedType.DefinePublicConstructor(parameters);
 
 			ctorBuilder.Emitter
 				.ldarg_0
@@ -873,7 +857,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildObjectFactory()
 		{
-			Attribute attr = TypeHelper.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
+			var attr = TypeHelper.GetFirstAttribute(_type, typeof(ObjectFactoryAttribute));
 
 			if (attr != null)
 			{

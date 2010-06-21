@@ -105,9 +105,9 @@ namespace BLToolkit.Reflection
 
 		internal static object CopyInternal(object source, object dest, TypeAccessor ta)
 		{
-			bool                       isDirty = false;
-			IMemberwiseEditable sourceEditable = source as IMemberwiseEditable;
-			IMemberwiseEditable   destEditable = dest   as IMemberwiseEditable;
+			var isDirty        = false;
+			var sourceEditable = source as IMemberwiseEditable;
+			var destEditable   = dest   as IMemberwiseEditable;
 
 			if (sourceEditable != null && destEditable != null)
 			{
@@ -133,8 +133,9 @@ namespace BLToolkit.Reflection
 			if (dest   == null) throw new ArgumentNullException("dest");
 
 			TypeAccessor ta;
-			Type         sType = source.GetType();
-			Type         dType = dest.  GetType();
+
+			var sType = source.GetType();
+			var dType = dest.  GetType();
 
 			if      (TypeHelper.IsSameOrParent(sType, dType)) ta = GetAccessor(sType);
 			else if (TypeHelper.IsSameOrParent(dType, sType)) ta = GetAccessor(dType);
@@ -148,7 +149,7 @@ namespace BLToolkit.Reflection
 		{
 			if (source == null) throw new ArgumentNullException("source");
 
-			TypeAccessor ta = GetAccessor(source.GetType());
+			var ta = GetAccessor(source.GetType());
 
 			return CopyInternal(source, ta.CreateInstanceEx(), ta);
 		}
@@ -162,8 +163,9 @@ namespace BLToolkit.Reflection
 				return false;
 
 			TypeAccessor ta;
-			Type         sType = obj1.GetType();
-			Type         dType = obj2.GetType();
+
+			var sType = obj1.GetType();
+			var dType = obj2.GetType();
 
 			if      (TypeHelper.IsSameOrParent(sType, dType)) ta = GetAccessor(sType);
 			else if (TypeHelper.IsSameOrParent(dType, sType)) ta = GetAccessor(dType);
@@ -182,7 +184,7 @@ namespace BLToolkit.Reflection
 			if (obj == null)
 				throw new ArgumentNullException("obj");
 
-			int    hash = 0;
+			var    hash = 0;
 			object value;
 
 			foreach (MemberAccessor ma in GetAccessor(obj.GetType()))
@@ -244,7 +246,7 @@ namespace BLToolkit.Reflection
 		{
 			if (originalType == null) throw new ArgumentNullException("originalType");
 
-			TypeAccessor accessor = (TypeAccessor)_accessors[originalType];
+			var accessor = (TypeAccessor)_accessors[originalType];
 
 			if (accessor == null)
 			{
@@ -257,12 +259,9 @@ namespace BLToolkit.Reflection
 						if (IsAssociatedType(originalType))
 							return (TypeAccessor)_accessors[originalType];
 
-						Type instanceType = IsClassBulderNeeded(originalType)? null: originalType;
+						var instanceType = (IsClassBulderNeeded(originalType)? null: originalType) ?? TypeFactory.GetType(originalType);
 
-						if (instanceType == null)
-							instanceType = TypeFactory.GetType(originalType);
-
-						Type accessorType = TypeFactory.GetType(originalType,
+						var accessorType = TypeFactory.GetType(originalType,
 							originalType, new TypeAccessorBuilder(instanceType, originalType));
 
 						accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
@@ -303,7 +302,7 @@ namespace BLToolkit.Reflection
 				}
 				else
 				{
-					object[] attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
+					var attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
 
 					if (attrs != null && attrs.Length > 0)
 						return true;
@@ -327,7 +326,7 @@ namespace BLToolkit.Reflection
 					return true;
 			}
 
-			object[] attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
+			var attrs = TypeHelper.GetAttributes(type, typeof(AutoImplementInterfaceAttribute));
 
 			return attrs != null && attrs.Length > 0;
 		}
@@ -336,7 +335,7 @@ namespace BLToolkit.Reflection
 		{
 			if (AssociatedTypeHandler != null)
 			{
-				Type child = AssociatedTypeHandler(type);
+				var child = AssociatedTypeHandler(type);
 
 				if (child != null)
 				{
@@ -395,7 +394,7 @@ namespace BLToolkit.Reflection
 					string.Format("'{0}' must be a base type of '{1}'", parent, child),
 					"child");
 
-			TypeAccessor accessor = GetAccessor(child);
+			var accessor = GetAccessor(child);
 
 			accessor = (TypeAccessor)Activator.CreateInstance(accessor.GetType());
 
@@ -484,18 +483,18 @@ namespace BLToolkit.Reflection
 
 		private static object GetEnumNullValue(Type type)
 		{
-			object nullValue = _nullValues[type];
+			var nullValue = _nullValues[type];
 
 			if (nullValue != null || _nullValues.Contains(type))
 				return nullValue;
 
-			FieldInfo[] fields = type.GetFields();
+			var fields = type.GetFields();
 
-			foreach (FieldInfo fi in fields)
+			foreach (var fi in fields)
 			{
 				if ((fi.Attributes & EnumField) == EnumField)
 				{
-					Attribute[] attrs = Attribute.GetCustomAttributes(fi, typeof(NullValueAttribute));
+					var attrs = Attribute.GetCustomAttributes(fi, typeof(NullValueAttribute));
 
 					if (attrs.Length > 0)
 					{
@@ -522,7 +521,7 @@ namespace BLToolkit.Reflection
 			if (value == null)
 				return true;
 
-			object nullValue = GetNullValue(value.GetType());
+			var nullValue = GetNullValue(value.GetType());
 
 			return nullValue != null && value.Equals(nullValue);
 		}
@@ -594,16 +593,15 @@ namespace BLToolkit.Reflection
 				if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
 					return string.Format("{0}?", MapTypeName(Nullable.GetUnderlyingType(type)));
 
-				string name = type.Name;
-
-				int idx = name.IndexOf('`');
+				var name = type.Name;
+				var idx  = name.IndexOf('`');
 
 				if (idx >= 0)
 					name = name.Substring(0, idx);
 
 				name += "<";
 
-				foreach (Type t in type.GetGenericArguments())
+				foreach (var t in type.GetGenericArguments())
 					name += MapTypeName(t) + ',';
 
 				if (name[name.Length - 1] == ',')
@@ -645,10 +643,11 @@ namespace BLToolkit.Reflection
 				return;
 			}
 
-			TypeAccessor   ta      = GetAccessor(o.GetType());
 			MemberAccessor ma;
-			int            nameLen = 0;
-			int            typeLen = 0;
+
+			var ta      = GetAccessor(o.GetType());
+			var nameLen = 0;
+			var typeLen = 0;
 
 			foreach (DictionaryEntry de in ta._memberNames)
 			{
@@ -661,17 +660,17 @@ namespace BLToolkit.Reflection
 					typeLen = MapTypeName(ma.Type).Length;
 			}
 
-			string text = "*** " + o.GetType().FullName + ": ***";
+			var text = "*** " + o.GetType().FullName + ": ***";
 
 			writeLine(text);
 
-			string format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
+			var format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
 
 			foreach (DictionaryEntry de in ta._memberNames)
 			{
 				ma = (MemberAccessor)de.Value;
 
-				object value = ma.GetValue(o);
+				var value = ma.GetValue(o);
 
 				if (value == null)
 					value = "(null)";
@@ -694,7 +693,7 @@ namespace BLToolkit.Reflection
 
 		public static ICustomTypeDescriptor GetCustomTypeDescriptor(Type type)
 		{
-			ICustomTypeDescriptor descriptor = (ICustomTypeDescriptor)_descriptors[type];
+			var descriptor = (ICustomTypeDescriptor)_descriptors[type];
 
 			if (descriptor == null)
 			{
@@ -716,13 +715,7 @@ namespace BLToolkit.Reflection
 		private ICustomTypeDescriptor _customTypeDescriptor;
 		public  ICustomTypeDescriptor  CustomTypeDescriptor
 		{
-			get
-			{
-				if (_customTypeDescriptor == null)
-					_customTypeDescriptor = GetCustomTypeDescriptor(OriginalType);
-
-				return _customTypeDescriptor;
-			}
+			get { return _customTypeDescriptor ?? (_customTypeDescriptor = GetCustomTypeDescriptor(OriginalType)); }
 		}
 
 		#endregion
@@ -738,7 +731,7 @@ namespace BLToolkit.Reflection
 				{
 					if (TypeHelper.IsSameOrParent(typeof(ICustomTypeDescriptor), OriginalType))
 					{
-						ICustomTypeDescriptor descriptor = CreateInstance() as ICustomTypeDescriptor;
+						var descriptor = CreateInstance() as ICustomTypeDescriptor;
 
 						if (descriptor != null)
 							_propertyDescriptors = descriptor.GetProperties();
@@ -754,12 +747,12 @@ namespace BLToolkit.Reflection
 
 		public PropertyDescriptorCollection CreatePropertyDescriptors()
 		{
-			Debug.WriteLineIf(BLToolkit.Data.DbManager.TraceSwitch.TraceInfo,
+			Debug.WriteLineIf(Data.DbManager.TraceSwitch.TraceInfo,
 				OriginalType.FullName, "CreatePropertyDescriptors");
 
-			PropertyDescriptor[] pd = new PropertyDescriptor[Count];
+			var pd = new PropertyDescriptor[Count];
 
-			int i = 0;
+			var i = 0;
 			foreach (MemberAccessor ma in _members)
 				pd[i++] = ma.PropertyDescriptor;
 
@@ -775,17 +768,15 @@ namespace BLToolkit.Reflection
 			//if (isNull == null)
 			//	isNull = _isNull;
 
-			PropertyDescriptorCollection pdc;
-
-			pdc = CreatePropertyDescriptors();
+			var pdc = CreatePropertyDescriptors();
 
 			if (objectViewType != null)
 			{
-				TypeAccessor             viewAccessor = GetAccessor(objectViewType);
-				IObjectView              objectView   = (IObjectView)viewAccessor.CreateInstanceEx();
-				List<PropertyDescriptor> list         = new List<PropertyDescriptor>();
+				var viewAccessor = GetAccessor(objectViewType);
+				var objectView   = (IObjectView)viewAccessor.CreateInstanceEx();
+				var list         = new List<PropertyDescriptor>();
 
-				PropertyDescriptorCollection viewpdc = viewAccessor.PropertyDescriptors;
+				var viewpdc = viewAccessor.PropertyDescriptors;
 
 				foreach (PropertyDescriptor pd in viewpdc)
 					list.Add(new ObjectViewPropertyDescriptor(pd, objectView));
@@ -812,22 +803,22 @@ namespace BLToolkit.Reflection
 			PropertyDescriptor[]         parentAccessors,
 			IsNullHandler                isNull)
 		{
-			ArrayList list      = new ArrayList(pdc.Count);
-			ArrayList objects   = new ArrayList();
-			bool      isDataRow = itemType.IsSubclassOf(typeof(DataRow));
+			var list      = new ArrayList(pdc.Count);
+			var objects   = new ArrayList();
+			var isDataRow = itemType.IsSubclassOf(typeof(DataRow));
 
 			foreach (PropertyDescriptor p in pdc)
 			{
-				Type propertyType = p.PropertyType;
+				var propertyType = p.PropertyType;
 
 				if (p.Attributes.Matches(BindableAttribute.No) ||
 					//propertyType == typeof(Type)               ||
 					isDataRow && p.Name == "ItemArray")
 					continue;
 
-				bool isList           = false;
-				bool explicitlyBound  = p.Attributes.Contains(BindableAttribute.Yes);
-				PropertyDescriptor pd = p;
+				var isList           = false;
+				var explicitlyBound  = p.Attributes.Contains(BindableAttribute.Yes);
+				var pd               = p;
 
 				if (propertyType.GetInterface("IList") != null)
 				{
@@ -848,17 +839,17 @@ namespace BLToolkit.Reflection
 					 propertyType != typeof(object) &&
 					Array.IndexOf(parentTypes, propertyType) == -1)
 				{
-					Type[] childParentTypes = new Type[parentTypes.Length + 1];
+					var childParentTypes = new Type[parentTypes.Length + 1];
 
 					parentTypes.CopyTo(childParentTypes, 0);
 					childParentTypes[parentTypes.Length] = itemType;
 
-					PropertyDescriptor[] childParentAccessors = new PropertyDescriptor[parentAccessors.Length + 1];
+					var childParentAccessors = new PropertyDescriptor[parentAccessors.Length + 1];
 
 					parentAccessors.CopyTo(childParentAccessors, 0);
 					childParentAccessors[parentAccessors.Length] = pd;
 
-					PropertyDescriptorCollection pdch = GetAccessor(propertyType).PropertyDescriptors;
+					var pdch = GetAccessor(propertyType).PropertyDescriptors;
 
 					pdch = pdch.Sort(new PropertyDescriptorComparer());
 					pdch = GetExtendedProperties(
@@ -909,7 +900,7 @@ namespace BLToolkit.Reflection
 
 			public override object GetValue(object component)
 			{
-				object value = base.GetValue(component);
+				var value = base.GetValue(component);
 
 				if (value == null)
 					return value;
@@ -927,7 +918,7 @@ namespace BLToolkit.Reflection
 
 		class StandardPropertyDescriptor : PropertyDescriptorWrapper
 		{
-			protected readonly PropertyDescriptor   _descriptor = null;
+			protected readonly PropertyDescriptor   _descriptor;
 			protected readonly IsNullHandler        _isNull;
 
 			protected readonly string               _prefixedName;
@@ -948,7 +939,7 @@ namespace BLToolkit.Reflection
 
 			protected object GetNestedComponent(object component)
 			{
-				for (int i = 0;
+				for (var i = 0;
 					i < _chainAccessors.Length && component != null && !(component is DBNull);
 					i++)
 				{
@@ -1052,7 +1043,7 @@ namespace BLToolkit.Reflection
 
 		PropertyDescriptor ITypeDescriptionProvider.GetProperty(string name)
 		{
-			MemberAccessor ma = this[name];
+			var ma = this[name];
 			return ma != null ? ma.PropertyDescriptor : null;
 		}
 
@@ -1063,10 +1054,10 @@ namespace BLToolkit.Reflection
 
 		EventDescriptorCollection ITypeDescriptionProvider.GetEvents()
 		{
-			EventInfo[]       ei = OriginalType.GetEvents();
-			EventDescriptor[] ed = new EventDescriptor[ei.Length];
+			var ei = OriginalType.GetEvents();
+			var ed = new EventDescriptor[ei.Length];
 
-			for (int i = 0; i < ei.Length; i++)
+			for (var i = 0; i < ei.Length; i++)
 				ed[i] = new CustomEventDescriptor(ei[i]);
 
 			return new EventDescriptorCollection(ed);

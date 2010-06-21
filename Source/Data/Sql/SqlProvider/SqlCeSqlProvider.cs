@@ -295,5 +295,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
 		}
+
+		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		{
+			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
+				sb.Append("CASE WHEN ");
+
+			base.BuildColumn(sb, col, ref addAlias);
+
+			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
+				sb.Append(" THEN 1 ELSE 0 END");
+		}
 	}
 }

@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Windows;
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
+using Expression = System.Linq.Expressions.Expression;
 
 namespace Reflection
 {
@@ -220,5 +221,46 @@ namespace Reflection
 
 			Assert.AreEqual(obj.IntField, accessor(obj));
 		}
+
+		[Test]
+		public void PointTest()
+		{
+			var p = new Point();
+
+			foreach (MemberAccessor memberAccessor in TypeAccessor.GetAccessor(typeof(Point)))
+			{
+				memberAccessor.GetValue(p);
+			}
+		}
+
+		public object GetValue(object o)
+		{
+			return ((Point)o).X;
+		}
+
+		/*
+.method public hidebysig virtual instance object GetValue(object o) cil managed
+{
+    .maxstack 1
+    L_0000: ldarg.1 
+    L_0001: unbox.any [WindowsBase]System.Windows.Point
+    L_0006: callvirt instance float64 [WindowsBase]System.Windows.Point::get_X()
+    L_000b: box float64
+    L_0010: ret 
+}
+
+.method public hidebysig instance object GetValue(object o) cil managed
+{
+    .maxstack 1
+    .locals init ([0] valuetype [WindowsBase]System.Windows.Point CS$0$0000)
+    L_0000: ldarg.1 
+    L_0001: unbox.any [WindowsBase]System.Windows.Point
+    L_0006: stloc.0 
+    L_0007: ldloca.s CS$0$0000
+    L_0009: call instance float64 [WindowsBase]System.Windows.Point::get_X()
+    L_000e: box float64
+    L_0013: ret 
+}
+*/
 	}
 }
