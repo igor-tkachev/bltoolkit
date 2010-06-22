@@ -9,6 +9,8 @@ md bl-toolkit
 
 cd bl-toolkit
 
+Tools\SvnRevision\SvnRevision.exe . Source\Templates\BLToolkitConstants.Revision.cs.template Source\Properties\BLToolkitConstants.Revision.cs
+
 "%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit_dev *.*
 "%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit Source\*.*
 
