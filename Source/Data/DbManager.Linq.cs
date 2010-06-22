@@ -9,6 +9,7 @@ namespace BLToolkit.Data
 {
 	using DataProvider;
 	using Linq;
+	using Reflection;
 	using Sql;
 	using Sql.SqlProvider;
 
@@ -271,6 +272,8 @@ namespace BLToolkit.Data
 
 		#endregion
 
+		#region IDataContext Members
+
 		IDataContext IDataContext.Clone()
 		{
 			return Clone();
@@ -280,5 +283,12 @@ namespace BLToolkit.Data
 		{
 			get { return DataProvider; }
 		}
+
+		object IDataContext.CreateInstance(InitContext context)
+		{
+			return null;
+		}
+
+		#endregion
 	}
 }

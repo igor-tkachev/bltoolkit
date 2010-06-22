@@ -385,6 +385,15 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
+				if (!methodType.IsClass)
+				{
+					var loc = emit.DeclareLocal(methodType);
+
+					emit
+						.stloc      ((byte)loc.LocalIndex)
+						.ldloca_s   ((byte)loc.LocalIndex);
+				}
+
 				var pi = (PropertyInfo)mi;
 
 				emit

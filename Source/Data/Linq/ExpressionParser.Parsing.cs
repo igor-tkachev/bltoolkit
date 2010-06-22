@@ -21,11 +21,12 @@ namespace BLToolkit.Data.Linq
 			_info.Queries.Add(new ExpressionInfo<T>.QueryInfo());
 		}
 
-		readonly ExpressionInfo<T>   _info            = new ExpressionInfo<T>();
-		readonly ParameterExpression _contextParam    = Expression.Parameter(typeof(QueryContext),      "context");
-		readonly ParameterExpression _dataReaderParam = Expression.Parameter(typeof(IDataReader),       "rd");
-		readonly ParameterExpression _mapSchemaParam  = Expression.Parameter(typeof(MappingSchema),     "ms");
-		readonly ParameterExpression _infoParam       = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
+		readonly ExpressionInfo<T>   _info             = new ExpressionInfo<T>();
+		readonly ParameterExpression _contextParam     = Expression.Parameter(typeof(QueryContext),      "context");
+		readonly ParameterExpression _dataContextParam = Expression.Parameter(typeof(IDataContext),      "dctx");
+		readonly ParameterExpression _dataReaderParam  = Expression.Parameter(typeof(IDataReader),       "rd");
+		readonly ParameterExpression _mapSchemaParam   = Expression.Parameter(typeof(MappingSchema),     "ms");
+		readonly ParameterExpression _infoParam        = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
 
 		bool   _isSubQueryParsing;
 		int    _currentSql = 0;
@@ -1584,6 +1585,7 @@ namespace BLToolkit.Data.Linq
 					{
 						parser._infoParam,
 						parser._contextParam,
+						parser._dataContextParam,
 						parser._dataReaderParam,
 						parser._mapSchemaParam,
 						parser.ExpressionParam,
@@ -1774,6 +1776,7 @@ namespace BLToolkit.Data.Linq
 						{
 							_infoParam,
 							_contextParam,
+							_dataContextParam,
 							_dataReaderParam,
 							_mapSchemaParam,
 							ExpressionParam,

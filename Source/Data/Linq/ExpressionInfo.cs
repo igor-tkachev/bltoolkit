@@ -209,7 +209,7 @@ namespace BLToolkit.Data.Linq
 				var query = SetCommand(dataContext, expr, parameters, 0);
 				using (var dr = dataContext.ExecuteReader(query))
 					while (dr.Read())
-						return mapper(this, ctx, dr, MappingSchema, expr, parameters);
+						return mapper(this, ctx, dataContext, dr, MappingSchema, expr, parameters);
 
 				return Array<TE>.Empty.First();
 			}
@@ -288,7 +288,7 @@ namespace BLToolkit.Data.Linq
 
 				var slot = GetMapperSlot(index);
 
-				GetIEnumerable = (_, db, expr, ps) => Map(query(db, expr, ps, 0), slot);
+				GetIEnumerable = (_, db, expr, ps) => Map(db, query(db, expr, ps, 0), slot);
 			}
 		}
 
@@ -326,10 +326,10 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		IEnumerable<T> Map(IEnumerable<IDataReader> data, int slot)
+		IEnumerable<T> Map(IDataContext dataContext, IEnumerable<IDataReader> data, int slot)
 		{
 			foreach (var dr in data)
-				yield return (T)MapDataReaderToObject(typeof(T), dr, slot);
+				yield return (T)MapDataReaderToObject(typeof(T), dataContext, dr, slot);
 		}
 
 		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, IDataContext dataContext, Expression expr, object[] ps, Mapper<T> mapper)
@@ -340,7 +340,7 @@ namespace BLToolkit.Data.Linq
 			foreach (var dr in data)
 			{
 				context.AfterQuery();
-				yield return mapper(this, context, dr, MappingSchema, expr, ps);
+				yield return mapper(this, context, dataContext, dr, MappingSchema, expr, ps);
 			}
 		}
 
@@ -391,7 +391,7 @@ namespace BLToolkit.Data.Linq
 			return _mapperSlots.Length - 1;
 		}
 
-		protected object MapDataReaderToObject(Type destObjectType, IDataReader dataReader, int slotNumber)
+		protected object MapDataReaderToObject(Type destObjectType, IDataContext dataContext, IDataReader dataReader, int slotNumber)
 		{
 			var slot   = _mapperSlots[slotNumber];
 			var source = MappingSchema.CreateDataReaderMapper(dataReader);
@@ -405,7 +405,7 @@ namespace BLToolkit.Data.Linq
 				ObjectMapper  = dest
 			};
 
-			var destObject = dest.CreateInstance(initContext);
+			var destObject = dataContext.CreateInstance(initContext) ?? dest.CreateInstance(initContext);
 
 			if (initContext.StopMapping)
 				return destObject;
@@ -501,7 +501,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetMapperMethodInfo()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, 0));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, null, 0));
 		}
 
 		#endregion
@@ -516,6 +516,7 @@ namespace BLToolkit.Data.Linq
 
 		public IEnumerable<TElement> GetGroupJoinEnumerator<TElement>(
 			QueryContext     qc,
+			IDataContext     dataContext,
 			IDataReader      dataReader,
 			Expression       expr,
 			object[]         ps,
@@ -523,12 +524,12 @@ namespace BLToolkit.Data.Linq
 			Mapper<TElement> itemReader)
 		{
 			var count = MappingSchema.ConvertToInt32(dataReader[counterIndex]);
-			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, qc, dataReader, MappingSchema, expr, ps));
+			return GetGroupJoinEnumerator(count, count == 0? default(TElement): itemReader(this, qc, dataContext, dataReader, MappingSchema, expr, ps));
 		}
 
 		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, 0, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, null, 0, null));
 		}
 
 		#endregion
@@ -559,18 +560,19 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public IGrouping<TKey,TElement> GetGrouping<TKey,TElement>(
-			QueryContext                        context,
-			IDataReader                         dataReader,
-			Expression                          expr,
-			object[]                            ps,
-			Mapper<TKey>                        keyReader,
-			ExpressionInfo<TElement>            valueReader)
+			QueryContext             context,
+			IDataContext             dataContext,
+			IDataReader              dataReader,
+			Expression               expr,
+			object[]                 ps,
+			Mapper<TKey>             keyReader,
+			ExpressionInfo<TElement> valueReader)
 		{
 			var db = context.GetDataContext();
 
 			try
 			{
-				var key = keyReader(this, context, dataReader, MappingSchema, expr, ps);
+				var key = keyReader(this, context, dataContext, dataReader, MappingSchema, expr, ps);
 
 				ps = ps == null ? new object[1] : ps.ToArray();
 				ps[0] = key;
@@ -587,7 +589,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null));
+			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
 		}
 
 		#endregion
@@ -644,7 +646,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Inner Types
 
-		public delegate TE Mapper<TE>(ExpressionInfo<T> info, QueryContext qc, IDataReader rd, MappingSchema ms, Expression expr, object[] ps);
+		public delegate TE Mapper<TE>(ExpressionInfo<T> info, QueryContext qc, IDataContext dc, IDataReader rd, MappingSchema ms, Expression expr, object[] ps);
 
 		public class Parameter
 		{

@@ -50,7 +50,7 @@ namespace BLToolkit.Data.Linq
 			else
 			{
 				var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-					expr, new[] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });
+					expr, new[] { _infoParam, _contextParam, _dataContextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });
 
 				_info.SetQuery(mapper.Compile());
 			}
@@ -263,6 +263,7 @@ namespace BLToolkit.Data.Linq
 					{
 						parser._infoParam,
 						parser._contextParam,
+						parser._dataContextParam,
 						parser._dataReaderParam,
 						parser._mapSchemaParam,
 						parser.ExpressionParam,
@@ -272,6 +273,7 @@ namespace BLToolkit.Data.Linq
 				return
 					Expression.Call(parser._infoParam, parser._info.GetGroupingMethodInfo<TKey,TElement>(),
 						parser._contextParam,
+						parser._dataContextParam,
 						parser._dataReaderParam,
 						parser.ExpressionParam,
 						ParametersParam,
@@ -308,6 +310,7 @@ namespace BLToolkit.Data.Linq
 					Expression.Convert(
 						Expression.Call(_infoParam, _info.GetMapperMethodInfo(),
 							Expression.Constant(expr.Type),
+							_dataContextParam,
 							_dataReaderParam,
 							Expression.Constant(_info.GetMapperSlot(index))),
 						expr.Type);
@@ -635,6 +638,7 @@ namespace BLToolkit.Data.Linq
 				Expression.Convert(
 					Expression.Call(_infoParam, mapperMethod,
 						Expression.Constant(ty),
+						_dataContextParam,
 						_dataReaderParam,
 						Expression.Constant(_info.GetMapperSlot(idx))),
 					objectType);
@@ -905,6 +909,7 @@ namespace BLToolkit.Data.Linq
 					{
 						parser._infoParam,
 						parser._contextParam,
+						parser._dataContextParam,
 						parser._dataReaderParam,
 						parser._mapSchemaParam,
 						parser.ExpressionParam,
@@ -914,6 +919,7 @@ namespace BLToolkit.Data.Linq
 				return
 					Expression.Call(parser._infoParam, parser._info.GetGroupJoinEnumeratorMethodInfo<TE>(),
 						parser._contextParam,
+						parser._dataContextParam,
 						parser._dataReaderParam,
 						parser.ExpressionParam,
 						ParametersParam,
@@ -1100,7 +1106,7 @@ namespace BLToolkit.Data.Linq
 			var pi = BuildField(ex, new[] { 0 });
 
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
-				pi, new [] { _infoParam, _contextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });
+				pi, new [] { _infoParam, _contextParam, _dataContextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });
 
 			_info.SetQuery(mapper.Compile());
 		}

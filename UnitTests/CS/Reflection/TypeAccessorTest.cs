@@ -42,7 +42,7 @@ namespace Reflection
 		[Test]
 		public void HasGetter()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject1));
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject1));
 
 			Assert.IsTrue (ta["IntField"].   HasGetter);
 			Assert.IsTrue (ta["IntProperty"].HasGetter);
@@ -57,7 +57,7 @@ namespace Reflection
 		[Test]
 		public void HasSetter()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject1));
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject1));
 
 			Assert.IsTrue (ta["IntField"].   HasSetter);
 			Assert.IsTrue (ta["IntProperty"].HasSetter);
@@ -72,8 +72,8 @@ namespace Reflection
 		[Test]
 		public void GetValue()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject1));
-			TestObject1  o  = (TestObject1)ta.CreateInstance();
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject1));
+			var o  = (TestObject1)ta.CreateInstance();
 
 			Assert.AreEqual(10,    ta["IntField"].   GetValue(o));
 			Assert.AreEqual(20,    ta["IntProperty"].GetValue(o));
@@ -98,7 +98,7 @@ namespace Reflection
 		[Test]
 		public void HasAbstractGetter()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject2));
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject2));
 
 			Assert.IsTrue(ta["IntField"].     HasGetter);
 			Assert.IsTrue(ta["IntProperty"].  HasGetter);
@@ -110,8 +110,8 @@ namespace Reflection
 		[Test]
 		public void GetAbstractValue()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject2));
-			TestObject2  o  = (TestObject2)ta.CreateInstance();
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject2));
+			var o  = (TestObject2)ta.CreateInstance();
 
 			o.IntProperty = 20;
 			o.StrProperty = "10";
@@ -125,7 +125,7 @@ namespace Reflection
 		[Test]
 		public void HasAbstractSetter()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject2));
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject2));
 
 			Assert.IsTrue(ta["IntField"].     HasSetter);
 			Assert.IsTrue(ta["IntProperty"].  HasSetter);
@@ -137,8 +137,8 @@ namespace Reflection
 		[Test]
 		public void SetAbstractValue()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject2));
-			TestObject2  o  = (TestObject2)ta.CreateInstance();
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject2));
+			var o  = (TestObject2)ta.CreateInstance();
 
 			ta["IntField"].     SetValue(o, 10);
 			ta["IntProperty"].  SetValue(o, 20);
@@ -156,7 +156,7 @@ namespace Reflection
 		[Test]
 		public void ProtectedMembers()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(TestObject2));
+			var ta = TypeAccessor.GetAccessor(typeof(TestObject2));
 
 			Assert.IsNull   (ta["ProtField"]);
 			Assert.IsNull   (ta["ProtProperty1"]);
@@ -174,7 +174,7 @@ namespace Reflection
 		[Test]
 		public void Write()
 		{
-			TestObject3 o = new TestObject3();
+			var o = new TestObject3();
 
 			TypeAccessor.WriteConsole(o);
 			TypeAccessor.WriteDebug  (o);
@@ -237,30 +237,5 @@ namespace Reflection
 		{
 			return ((Point)o).X;
 		}
-
-		/*
-.method public hidebysig virtual instance object GetValue(object o) cil managed
-{
-    .maxstack 1
-    L_0000: ldarg.1 
-    L_0001: unbox.any [WindowsBase]System.Windows.Point
-    L_0006: callvirt instance float64 [WindowsBase]System.Windows.Point::get_X()
-    L_000b: box float64
-    L_0010: ret 
-}
-
-.method public hidebysig instance object GetValue(object o) cil managed
-{
-    .maxstack 1
-    .locals init ([0] valuetype [WindowsBase]System.Windows.Point CS$0$0000)
-    L_0000: ldarg.1 
-    L_0001: unbox.any [WindowsBase]System.Windows.Point
-    L_0006: stloc.0 
-    L_0007: ldloca.s CS$0$0000
-    L_0009: call instance float64 [WindowsBase]System.Windows.Point::get_X()
-    L_000e: box float64
-    L_0013: ret 
-}
-*/
 	}
 }
