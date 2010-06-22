@@ -15,7 +15,7 @@ namespace BLToolkit.Mapping
 			_dataReaderEx  = dataReader as IDataReaderEx;
 		}
 
-		IDataReaderEx _dataReaderEx;
+		readonly IDataReaderEx _dataReaderEx;
 
 		readonly IDataReader _dataReader;
 		public   IDataReader  DataReader
@@ -53,13 +53,13 @@ namespace BLToolkit.Mapping
 
 		public virtual object GetValue(object o, int index)
 		{
-			object value = _dataReader.GetValue(index);
+			var value = _dataReader.GetValue(index);
 			return value is DBNull? null: value;
 		}
 
 		public virtual object GetValue(object o, string name)
 		{
-			object value = _dataReader[name];
+			var value = _dataReader[name];
 			return value is DBNull? null: value;
 		}
 
