@@ -1,0 +1,40 @@
+﻿<#@ template language="C#v3.5" debug="True" #>
+<#@ output extension=".generated.cs"   #>
+<#@ include file="BLToolkit.ttinclude" #>
+<#@ include file="MSSQL.ttinclude"     #>
+<#
+	ConnectionString = "Data Source=.;Database=Northwind;Integrated Security=SSPI";
+
+	Namespace       = "Linq.Demo.DataModel";
+	DataContextName = "NorthwindDB";
+
+	OneToManyAssociationType = "List<{0}>";
+
+	LoadMetadata();
+
+	foreach (var t in Tables.Values)
+	{
+		if (t.ClassName.EndsWith("ies"))
+			t.ClassName = t.ClassName.Substring(0, t.ClassName.Length - 3) + "y";
+		else if (t.ClassName.EndsWith("s"))
+			t.ClassName = t.ClassName.Substring(0, t.ClassName.Length - 1);
+	}
+
+	foreach (var t in Tables.Values)
+		foreach (var a in t.ForeignKeys.Values)
+	{
+		if (a.MemberName.EndsWith("ies"))
+			a.MemberName = a.MemberName.Substring(0, a.MemberName.Length - 3) + "y";
+		else if (a.MemberName.EndsWith("s"))
+			a.MemberName = a.MemberName.Substring(0, a.MemberName.Length - 1);
+	}
+
+	Tables["Employees"].    ForeignKeys["FK_Employees_Employees"].              MemberName = "ReportsToEmployee";
+	Tables["Employees"].    ForeignKeys["FK_Employees_Employees_BackReference"].MemberName = "Reporters";
+	Tables["Order Details"].ForeignKeys["FK_Order_Details_Orders"].             MemberName = "Order";
+	Tables["Order Details"].ForeignKeys["FK_Order_Details_Products"].           MemberName = "Product";
+
+	Tables["Products"].Columns["Discontinued"].Attributes.Add("MapField(IsInheritanceDiscriminator=true)");
+
+	GenerateModel();
+#>

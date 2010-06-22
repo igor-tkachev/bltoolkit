@@ -1,0 +1,495 @@
+﻿<#@ assembly name="System.Core"      #>
+<#@ assembly name="System.Data"      #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Data"   #>
+<#@ import namespace="System.Linq"   #>
+<#
+	AppDomain.CurrentDomain.AssemblyResolve += (_,args) =>
+	{
+		if (DataProviderAssembly != null)
+			return System.Reflection.Assembly.LoadFile(DataProviderAssembly);
+		else
+			return null;
+	};
+#><#+
+
+static Action<GeneratedTextTransformation,string> WriteComment        = (tt,s) => tt.WriteLine("//{0}", s);
+static Action<GeneratedTextTransformation,string> WriteUsing          = (tt,s) => tt.WriteLine("using {0};", s);
+static Action<GeneratedTextTransformation,string> WriteBeginNamespace = (tt,s) => { tt.WriteLine("namespace {0}", s); tt.WriteLine("{"); };
+static Action<GeneratedTextTransformation>        WriteEndNamespace   =  tt    => tt.WriteLine("}");
+static Action<GeneratedTextTransformation,string,string> WriteBeginClass = (tt,cl,bc) =>
+{
+	tt.Write("public partial class {0}", cl);
+	if (!string.IsNullOrEmpty(bc))
+		tt.Write(" : {0}", bc);
+	tt.WriteLine("");
+	tt.WriteLine("{");
+};
+static Action<GeneratedTextTransformation>        WriteEndClass       =  tt   => tt.WriteLine("}");
+static Func<string,string,string>                 MakeGenericType     = (c,t) => string.Format("{0}<{1}>", c, t);
+static Func<string,string>                        MakeType            = t     => t;
+static Action<GeneratedTextTransformation,string,int> WriteTableProperty = (tt,name,maxlen) =>
+{
+	tt.WriteLine("public Table<{0}>{1} {0}{1} {{ get {{ return GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name));
+};
+static Action<GeneratedTextTransformation,string> WriteAttribute      = (tt,a) => tt.Write("[{0}]", a);
+static Action<GeneratedTextTransformation>        WriteAttributeLine  =  tt    => tt.WriteLine("");
+
+string ConnectionString;
+string ConnectionType;
+string DataProviderAssembly = null;
+
+string DatabaseName             = null;
+string DataContextName          = "DataContext";
+string Namespace                = "DataModel";
+string BaseDataContextClass     = "DbManager";
+string BaseEntityClass          = null;
+string OneToManyAssociationType = "IEnumerable<{0}>";
+
+bool   RenderField = false;
+
+bool   IsMetadataLoaded;
+
+int MaxColumnTypeLen;
+int MaxColumnMemberLen;
+
+static Action<GeneratedTextTransformation,Column,int[],string[]> RenderColumn = (tt,c,maxLens,attrs) =>
+{
+	if (maxLens.Sum() > 0)
+	{
+		if (attrs.Any(_ => _ != null))
+		{
+			tt.Write("[");
+
+			for (var i = 0; i < attrs.Length; i++)
+			{
+				if (attrs[i] != null)
+				{
+					tt.Write(attrs[i]);
+					tt.WriteSpace(maxLens[i] - attrs[i].Length);
+
+					if (attrs.Skip(i + 1).Any(_ => _ != null))
+						tt.Write(", ");
+					else if (maxLens.Skip(i + 1).Any(_ => _ > 0))
+						tt.WriteSpace(2);
+				}
+				else if (maxLens[i] > 0)
+				{
+					tt.WriteSpace(maxLens[i]);
+					
+					if (maxLens.Skip(i + 1).Any(_ => _ > 0))
+						tt.WriteSpace(2);
+				}
+			}
+
+			tt.Write("] ");
+		}
+		else
+		{
+			tt.WriteSpace(maxLens.Sum() + (maxLens.Where(_ => _ > 0).Count() - 1) * 2 + 3);
+		}
+	}
+
+	tt.Write("public {0}{1} {2}", c.Type, tt.LenDiff(tt.MaxColumnTypeLen, c.Type), c.MemberName);
+
+	if (tt.RenderField)
+		tt.WriteLine(";");
+	else
+		tt.WriteLine("{0} {{ get; set; }}", tt.LenDiff(tt.MaxColumnMemberLen, c.MemberName));
+};
+
+static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key) =>
+{
+	WriteComment(tt, " " + key.KeyName);
+	tt.WriteLine("[Association(ThisKey=\"{0}\", OtherKey=\"{1}\")]",
+		string.Join(", ", (from c in key.ThisColumns  select c.MemberName).ToArray()),
+		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()));
+
+	tt.Write("public ");
+
+	if (key.AssociationType == AssociationType.OneToMany)
+		tt.Write(tt.OneToManyAssociationType, key.OtherTable.ClassName);
+	else
+		tt.Write(key.OtherTable.ClassName);
+
+	tt.Write(" ");
+	tt.Write(key.MemberName);
+
+	if (tt.RenderField)
+		tt.WriteLine(";");
+	else
+		tt.WriteLine(" { get; set; }");
+};
+
+static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
+{
+	RenderTableAttributes(tt, t);
+
+	WriteBeginClass(tt, t.ClassName, t.BaseClassName);
+	
+	tt.PushIndent("\t");
+
+	tt.MaxColumnTypeLen   = t.Columns.Values.Max(_ => _.Type.Length);
+	tt.MaxColumnMemberLen = t.Columns.Values.Max(_ => _.MemberName.Length);
+
+	var maxLens = new int[]
+	{
+		t.Columns.Values.Max(_ => _.MemberName == _.ColumnName ? 0 : "MapField('')".Length + _.ColumnName.Length),
+		t.Columns.Values.Max(_ => _.IsNullable                 ? "Nullable".Length : _.IsIdentity ? "Identity".Length : 0),
+		t.Columns.Values.Max(_ => _.IsIdentity && _.IsNullable ? "Identity".Length : 0),
+		t.Columns.Values.Max(_ => _.IsPrimaryKey               ? string.Format("PrimaryKey({0})", _.PKIndex).Length : 0),
+		t.Columns.Values.Max(_ => _.Attributes.Count == 0      ? 0 : string.Join(", ", _.Attributes.Distinct().ToArray()).Length),
+	};
+
+	foreach (var c in from c in t.Columns.Values orderby c.ID select c)
+	{
+		var attrs = new string[]
+		{
+			c.MemberName == c.ColumnName ? null : string.Format("MapField(\"{0}\")", c.ColumnName),
+			c.IsNullable                 ? "Nullable" : c.IsIdentity ? "Identity" : null,
+			c.IsIdentity && c.IsNullable ? "Identity" : null,
+			c.IsPrimaryKey               ? string.Format("PrimaryKey({0})", c.PKIndex) : null,
+			c.Attributes.Count == 0      ? null : string.Join(", ", c.Attributes.Distinct().ToArray()),
+		};
+
+		RenderColumn(tt, c, maxLens, attrs);
+	}
+
+	if (t.ForeignKeys.Count > 0)
+	{
+		foreach (var key in t.ForeignKeys.Values)
+		{
+			tt.WriteLine("");
+			RenderForeignKey(tt, key);
+		}
+	}
+
+	tt.PopIndent();
+	WriteEndClass(tt);
+};
+
+static Action<GeneratedTextTransformation,Table> RenderTableAttributes = (tt,t) =>
+{
+	if (t.Attributes.Count > 0)
+	{
+		WriteAttribute(tt, string.Join(", ", t.Attributes.Distinct().ToArray()));
+		WriteAttributeLine(tt);
+	}
+
+	string tbl = "TableName(";
+
+	if (!string.IsNullOrEmpty(tt.DatabaseName))
+		tbl += string.Format("Database=\"{0}\", ", tt.DatabaseName);
+
+	if (!string.IsNullOrEmpty(t.Owner))
+		tbl += string.Format("Owner=\"{0}\", ", t.Owner);
+
+	tbl += string.Format("Name=\"{0}\")", t.TableName);
+
+	WriteAttribute(tt, tbl);
+	WriteAttributeLine(tt);
+};
+
+List<string> Usings = new List<string>()
+{
+	"System",
+	"BLToolkit.Data",
+	"BLToolkit.Data.Linq",
+	"BLToolkit.DataAccess",
+	"BLToolkit.Mapping",
+};
+
+static Action<GeneratedTextTransformation> RenderUsing = tt =>
+{
+	var q =
+		from ns in tt.Usings.Distinct()
+		group ns by ns.Split('.')[0];
+
+	var groups =
+		(from ns in q where ns.Key == "System"                select ns).Concat
+		(from ns in q where ns.Key != "System" orderby ns.Key select ns);
+
+	foreach (var gr in groups)
+	{
+		foreach (var ns in from s in gr orderby s select s)
+			WriteUsing(tt, ns);
+
+		tt.WriteLine("");
+	}
+};
+
+Action<GeneratedTextTransformation> BeforeGenerateModel = _ => {};
+Action<GeneratedTextTransformation> AfterGenerateModel  = _ => {};
+
+void GenerateModel()
+{
+	BeforeGenerateModel(this);
+
+	if (ConnectionString != null) ConnectionString = ConnectionString.Trim();
+	if (DataContextName  != null) DataContextName  = DataContextName. Trim();
+
+	if (string.IsNullOrEmpty(ConnectionString)) { Error("ConnectionString cannot be empty."); return; }
+	if (string.IsNullOrEmpty(DataContextName))  { Error("DataContextName cannot be empty.");  return; }
+
+	LoadMetadata();
+
+	WriteComment(this, "---------------------------------------------------------------------------------------------------");
+	WriteComment(this, " <auto-generated>");
+	WriteComment(this, "    This code was generated by BLToolkit template for T4.");
+	WriteComment(this, "    Changes to this file may cause incorrect behavior and will be lost if the code is regenerated.");
+	WriteComment(this, " </auto-generated>");
+	WriteComment(this, "---------------------------------------------------------------------------------------------------");
+
+	RenderUsing(this);
+
+	WriteBeginNamespace(this, Namespace);
+	PushIndent("\t");
+
+	WriteBeginClass(this, DataContextName, BaseDataContextClass);
+
+	var tlist  = (from t in Tables.Values orderby t.TableName select t).ToList();
+	var maxlen = tlist.Max(_ => _.ClassName.Length);
+
+	PushIndent("\t");
+
+	foreach (var t in tlist)
+		WriteTableProperty(this, t.ClassName, maxlen);
+
+	PopIndent();
+
+	WriteEndClass(this);
+
+	foreach (var t in tlist)
+	{
+		WriteLine("");
+		RenderTable(this, t);
+	}
+
+	PopIndent();
+	WriteEndNamespace(this);
+
+	AfterGenerateModel(this);
+}
+
+string LenDiff(int max, string str)
+{
+	var s = "";
+
+	while (max-- > str.Length)
+		s += " ";
+
+	return s;
+}
+
+void WriteSpace(int len)
+{
+	while (len-- > 0)
+		Write(" ");
+}
+
+List<T> CreateList<T>(T item)
+{
+	return new List<T>();
+}
+
+System.Data.IDbConnection GetConnection()
+{
+	Type connType = null;
+
+	if (DataProviderAssembly != null)
+	{
+		try
+		{
+			var assembly = System.Reflection.Assembly.LoadFile(DataProviderAssembly);
+			connType = assembly.GetType(ConnectionType);
+		}
+		catch
+		{
+		}
+	}
+
+	if (connType == null)
+		connType = Type.GetType(ConnectionType);
+
+	var conn = (System.Data.IDbConnection)Activator.CreateInstance(connType);
+
+	conn.ConnectionString = ConnectionString;
+	conn.Open();
+
+	return conn;
+}
+
+void LoadMetadata()
+{
+	if (IsMetadataLoaded)
+		return;
+
+	IsMetadataLoaded = true;
+
+	BeforeLoadMetadata(this);
+	LoadServerMetadata();
+
+	foreach (var t in Tables.Values)
+	{
+		if (t.ClassName.Contains(" "))
+		{
+			var ss = t.ClassName.Split(' ').Where(_ => _.Trim().Length > 0).Select(_ => char.ToUpper(_[0]) + _.Substring(1));
+			t.ClassName = string.Join("", ss.ToArray());
+		}
+	}
+
+	foreach (var t in Tables.Values)
+		foreach (var key in t.ForeignKeys.Values.ToList())
+			if (!key.KeyName.EndsWith("_BackReference"))
+				key.OtherTable.ForeignKeys.Add(key.KeyName + "_BackReference", key.BackReference = new ForeignKey
+				{
+					KeyName         = key.KeyName    + "_BackReference",
+					MemberName      = key.MemberName + "_BackReference",
+					AssociationType = AssociationType.Auto,
+					OtherTable      = t,
+					ThisColumns     = key.OtherColumns,
+					OtherColumns    = key.ThisColumns
+				});
+
+	foreach (var t in Tables.Values)
+	{
+		foreach (var key in t.ForeignKeys.Values)
+		{
+			if (key.BackReference != null && key.AssociationType == AssociationType.Auto)
+			{
+				if (key.ThisColumns.All(_ => _.IsPrimaryKey))
+				{
+					if (t.Columns.Values.Count(_ => _.IsPrimaryKey) == key.ThisColumns.Count)
+						key.AssociationType = AssociationType.OneToOne;
+					else
+						key.AssociationType = AssociationType.ManyToOne;
+				}
+				else
+					key.AssociationType = AssociationType.ManyToOne;
+			}
+		}
+	}
+
+	foreach (var t in Tables.Values)
+	{
+		foreach (var key in t.ForeignKeys.Values)
+		{
+			var name = key.MemberName;
+
+			if (key.BackReference != null && key.ThisColumns.Count == 1 && key.ThisColumns[0].MemberName.ToLower().EndsWith("id"))
+			{
+				name = key.ThisColumns[0].MemberName;
+				name = name.Substring(0, name.Length - "id".Length);
+
+				if (!t.ForeignKeys.Values.Select(_ => _.MemberName).Concat(
+					 t.Columns.    Values.Select(_ => _.MemberName)).Concat(
+					 new[] { t.ClassName }).Any(_ => _ == name))
+				{
+					name = key.MemberName;;
+				}
+			}
+			
+			if (name == key.MemberName)
+			{
+				if (name.StartsWith("FK_"))
+					name = name.Substring(3);
+
+				if (name.EndsWith("_BackReference"))
+					name = name.Substring(0, name.Length - "_BackReference".Length);
+
+				name = string.Join("", name.Split('_').Where(_ => _.Length > 0 && _ != t.TableName).ToArray());
+
+				if (key.AssociationType == AssociationType.OneToMany)
+					name += "s";
+			}
+
+			if (name.Length != 0 &&
+				!t.ForeignKeys.Values.Select(_ => _.MemberName).Concat(
+				 t.Columns.    Values.Select(_ => _.MemberName)).Concat(
+				 new[] { t.ClassName }).Any(_ => _ == name))
+			{
+				key.MemberName = name;
+			}
+		}
+	}
+
+	if (Tables.Values.SelectMany(_ => _.ForeignKeys.Values).Any(_ => _.AssociationType == AssociationType.OneToMany))
+		Usings.Add("System.Collections.Generic");
+
+	AfterLoadMetadata(this);
+}
+
+Action<GeneratedTextTransformation> BeforeLoadMetadata = _ => {};
+Action<GeneratedTextTransformation> AfterLoadMetadata  = _ => {};
+
+Dictionary<string,Table> Tables = new Dictionary<string,Table>();
+
+partial class Table
+{
+	public string       Owner;
+	public string       TableName;
+	public string       ClassName;
+	public string       BaseClassName;
+	public bool         IsView;
+	public List<string> Attributes = new List<string>();
+
+	public Dictionary<string,Column>     Columns     = new Dictionary<string,Column>();
+	public Dictionary<string,ForeignKey> ForeignKeys = new Dictionary<string,ForeignKey>();
+}
+
+partial class Column
+{
+	public int          ID;
+	public string       ColumnName;
+	public string       MemberName;
+	public bool         IsNullable;
+	public bool         IsIdentity;
+	public string       Type;
+	public bool         IsClass;
+	public DbType       DbType;
+	public SqlDbType    SqlDbType;
+	public int          PKIndex = -1;
+	public List<string> Attributes = new List<string>();
+
+	public bool IsPrimaryKey { get { return PKIndex >= 0; } }
+}
+
+enum AssociationType
+{
+	Auto,
+	OneToOne,
+	OneToMany,
+	ManyToOne,
+}
+
+partial class ForeignKey
+{
+	public string          KeyName;
+	public string          MemberName;
+	public Table           OtherTable;
+	public List<Column>    ThisColumns  = new List<Column>();
+	public List<Column>    OtherColumns = new List<Column>();
+	public ForeignKey      BackReference;
+
+	private AssociationType _associationType = AssociationType.Auto;
+	public  AssociationType  AssociationType
+	{
+		get { return _associationType; }
+		set
+		{
+			_associationType = value;
+
+			if (BackReference != null)
+			{
+				switch (value)
+				{
+					case AssociationType.Auto      : BackReference.AssociationType = AssociationType.Auto;      break;
+					case AssociationType.OneToOne  : BackReference.AssociationType = AssociationType.OneToOne;  break;
+					case AssociationType.OneToMany : BackReference.AssociationType = AssociationType.ManyToOne; break;
+					case AssociationType.ManyToOne : BackReference.AssociationType = AssociationType.OneToMany; break;
+				}
+			}
+		}
+	}
+}
+#>
