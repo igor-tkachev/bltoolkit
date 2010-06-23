@@ -1626,6 +1626,10 @@ namespace BLToolkit.Data.Linq
 						{}
 					}
 				}
+				else if (query.ByExpressions.Length == 1 && !(query.ByExpressions[0] is QuerySource))
+				{
+					args = new[] { query.ByExpressions[0] };
+				}
 			}
 
 			return new SqlFunction(expr.Type, expr.Method.Name, args);
