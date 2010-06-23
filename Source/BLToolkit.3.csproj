@@ -75,6 +75,9 @@
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -400,6 +403,10 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
+    <Compile Include="ServiceModel\ILinqService.cs" />
+    <Compile Include="ServiceModel\LinqService.cs" />
+    <Compile Include="ServiceModel\LinqServiceClient.cs" />
+    <Compile Include="ServiceModel\ServiceModelDataContext.cs" />
     <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />
@@ -618,9 +625,6 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ServiceModel\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
