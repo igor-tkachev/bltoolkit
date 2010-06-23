@@ -279,9 +279,19 @@ namespace BLToolkit.Data
 			return Clone();
 		}
 
-		ILinqDataProvider IDataContext.DataProvider
+		string IDataContext.ContextID
 		{
-			get { return DataProvider; }
+			get { return DataProvider.Name; }
+		}
+
+		static Func<ISqlProvider> GetCreateSqlProvider(DataProviderBase dp)
+		{
+			return dp.CreateSqlProvider;
+		}
+
+		Func<ISqlProvider> IDataContext.CreateSqlProvider
+		{
+			get { return GetCreateSqlProvider(DataProvider); }
 		}
 
 		object IDataContext.CreateInstance(InitContext context)

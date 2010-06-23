@@ -21,9 +21,10 @@ namespace BLToolkit.Data.Linq
 		public ExpressionInfo<T>     Next;
 		public Expression            Expression;
 		public ParameterExpression[] Parameters;
-		public ILinqDataProvider     DataProvider;
+		public string                ContextID;
 		public MappingSchema         MappingSchema;
 		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
+		public Func<ISqlProvider>    CreateSqlProvider;
 
 		public Func<QueryContext,IDataContext,Expression,object[],IEnumerable<T>> GetIEnumerable;
 		public Func<QueryContext,IDataContext,Expression,object[],object>         GetElement;
@@ -31,7 +32,7 @@ namespace BLToolkit.Data.Linq
 		private ISqlProvider _sqlProvider; 
 		public  ISqlProvider  SqlProvider
 		{
-			get { return _sqlProvider ?? (_sqlProvider = DataProvider.CreateSqlProvider()); }
+			get { return _sqlProvider ?? (_sqlProvider = CreateSqlProvider()); }
 		}
 
 		#endregion
@@ -42,19 +43,19 @@ namespace BLToolkit.Data.Linq
 		static readonly object            _sync      = new object();
 		const           int               _cacheSize = 100;
 
-		public static ExpressionInfo<T> GetExpressionInfo(ILinqDataProvider dataProvider, MappingSchema mappingSchema, Expression expr)
+		public static ExpressionInfo<T> GetExpressionInfo(string contextID, MappingSchema mappingSchema, Func<ISqlProvider> sqlProvider, Expression expr)
 		{
-			var info = FindInfo(dataProvider, mappingSchema, expr);
+			var info = FindInfo(contextID, mappingSchema, expr);
 
 			if (info == null)
 			{
 				lock (_sync)
 				{
-					info = FindInfo(dataProvider, mappingSchema, expr);
+					info = FindInfo(contextID, mappingSchema, expr);
 
 					if (info == null)
 					{
-						info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, expr, null);
+						info = new ExpressionParser<T>().Parse(contextID, mappingSchema, sqlProvider, expr, null);
 						info.Next = _first;
 						_first = info;
 					}
@@ -64,14 +65,14 @@ namespace BLToolkit.Data.Linq
 			return info;
 		}
 
-		static ExpressionInfo<T> FindInfo(ILinqDataProvider dataProvider, MappingSchema mappingSchema, Expression expr)
+		static ExpressionInfo<T> FindInfo(string contextID, MappingSchema mappingSchema, Expression expr)
 		{
 			ExpressionInfo<T> prev = null;
 			var n = 0;
 
 			for (var info = _first; info != null; info = info.Next)
 			{
-				if (info.Compare(dataProvider, mappingSchema, expr))
+				if (info.Compare(contextID, mappingSchema, expr))
 				{
 					if (prev != null)
 					{
@@ -132,7 +133,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = DataProvider.CreateDataContext();
+				dataContext = Settings.CreateDefaultDataContext();
 
 			try
 			{
@@ -167,7 +168,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = DataProvider.CreateDataContext();
+				dataContext = Settings.CreateDefaultDataContext();
 
 			try
 			{
@@ -202,7 +203,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = DataProvider.CreateDataContext();
+				dataContext = Settings.CreateDefaultDataContext();
 
 			try
 			{
@@ -310,7 +311,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = DataProvider.CreateDataContext();
+				dataContext = Settings.CreateDefaultDataContext();
 
 			try
 			{
@@ -611,9 +612,13 @@ namespace BLToolkit.Data.Linq
 
 		#region Compare
 
-		public bool Compare(ILinqDataProvider dataProvider, MappingSchema mappingSchema, Expression expr)
+		public bool Compare(string contextID, MappingSchema mappingSchema, Expression expr)
 		{
-			return DataProvider == dataProvider && MappingSchema == mappingSchema && ExpressionHelper.Compare(Expression, expr, _queryableAccessorDic);
+			return
+				ContextID.Length == contextID.Length &&
+				ContextID        == contextID        &&
+				MappingSchema    == mappingSchema    &&
+				ExpressionHelper.Compare(Expression, expr, _queryableAccessorDic);
 		}
 
 		readonly Dictionary<Expression,Func<Expression,IQueryable>> _queryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
@@ -733,7 +738,7 @@ namespace BLToolkit.Data.Linq
 
 			ExpressionInfo<int> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+			var key = new { dataContext.MappingSchema, dataContext.ContextID };
 
 			if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
 				lock (_sync)
@@ -746,9 +751,10 @@ namespace BLToolkit.Data.Linq
 
 						ei = new ExpressionInfo<int>
 						{
-							MappingSchema = dataContext.MappingSchema,
-							DataProvider  = dataContext.DataProvider,
-							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+							MappingSchema     = dataContext.MappingSchema,
+							ContextID         = dataContext.ContextID,
+							CreateSqlProvider = dataContext.CreateSqlProvider,
+							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						foreach (var field in sqlTable.Fields)
@@ -782,7 +788,7 @@ namespace BLToolkit.Data.Linq
 
 			ExpressionInfo<object> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+			var key = new { dataContext.MappingSchema, dataContext.ContextID };
 
 			if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
 				lock (_sync)
@@ -796,9 +802,10 @@ namespace BLToolkit.Data.Linq
 
 						ei = new ExpressionInfo<object>
 						{
-							MappingSchema = dataContext.MappingSchema,
-							DataProvider  = dataContext.DataProvider,
-							Queries       = { new ExpressionInfo<object>.QueryInfo { SqlQuery = sqlQuery, } }
+							MappingSchema     = dataContext.MappingSchema,
+							ContextID         = dataContext.ContextID,
+							CreateSqlProvider = dataContext.CreateSqlProvider,
+							Queries           = { new ExpressionInfo<object>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						foreach (var field in sqlTable.Fields)
@@ -832,7 +839,7 @@ namespace BLToolkit.Data.Linq
 
 			ExpressionInfo<int> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+			var key = new { dataContext.MappingSchema, dataContext.ContextID };
 
 			if (!ObjectOperation<T>.Update.TryGetValue(key, out ei))
 				lock (_sync)
@@ -845,9 +852,10 @@ namespace BLToolkit.Data.Linq
 
 						ei = new ExpressionInfo<int>
 						{
-							MappingSchema = dataContext.MappingSchema,
-							DataProvider  = dataContext.DataProvider,
-							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+							MappingSchema     = dataContext.MappingSchema,
+							ContextID         = dataContext.ContextID,
+							CreateSqlProvider = dataContext.CreateSqlProvider,
+							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						var keys   = sqlTable.GetKeys(true).Cast<SqlField>();
@@ -894,7 +902,7 @@ namespace BLToolkit.Data.Linq
 
 			ExpressionInfo<int> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.DataProvider };
+			var key = new { dataContext.MappingSchema, dataContext.ContextID };
 
 			if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
 				lock (_sync)
@@ -907,9 +915,10 @@ namespace BLToolkit.Data.Linq
 
 						ei = new ExpressionInfo<int>
 						{
-							MappingSchema = dataContext.MappingSchema,
-							DataProvider  = dataContext.DataProvider,
-							Queries       = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+							MappingSchema     = dataContext.MappingSchema,
+							ContextID         = dataContext.ContextID,
+							CreateSqlProvider = dataContext.CreateSqlProvider,
+							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();

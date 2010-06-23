@@ -19,7 +19,7 @@ namespace BLToolkit.Data.Linq
 		readonly Expression       _expression;
 		readonly object           _sync = new object();
 
-		ILinqDataProvider _lastDataProvider;
+		string            _lastContextID;
 		MappingSchema     _lastMappingSchema;
 		ExpressionInfo<T> _lastInfo;
 
@@ -27,26 +27,26 @@ namespace BLToolkit.Data.Linq
 
 		ExpressionInfo<T> GetInfo(IDataContext dataContext)
 		{
-			ILinqDataProvider lastDataProvider;
+			string            lastContextID;
 			MappingSchema     lastMappingSchema;
 			ExpressionInfo<T> info;
 
 			lock (_sync)
 			{
-				lastDataProvider  = _lastDataProvider;
+				lastContextID     = _lastContextID;
 				lastMappingSchema = _lastMappingSchema;
 				info              = _lastInfo;
 			}
 
-			var dataProvider  = dataContext != null ? dataContext.DataProvider  : Settings.GetDefaultDataProvider();
+			var contextID     = dataContext != null ? dataContext.ContextID     : Settings.GetDefaultContextID;
 			var mappingSchema = dataContext != null ? dataContext.MappingSchema : Map.DefaultSchema;
 
-			if (lastDataProvider != dataProvider || lastMappingSchema != mappingSchema)
+			if (lastContextID != contextID || lastMappingSchema != mappingSchema)
 				info = null;
 
 			if (info == null)
 			{
-				var key = new { dataProvider, mappingSchema };
+				var key = new { contextID, mappingSchema };
 
 				lock (_sync)
 					_infos.TryGetValue(key, out info);
@@ -59,11 +59,16 @@ namespace BLToolkit.Data.Linq
 
 						if (info == null)
 						{
-							info = new ExpressionParser<T>().Parse(dataProvider, mappingSchema, _expression, _lambda.Parameters.ToArray());
+							info = new ExpressionParser<T>().Parse(
+								contextID,
+								mappingSchema,
+								dataContext != null ? dataContext.CreateSqlProvider : Settings.GetDefaultCreateSqlProvider,
+								_expression,
+								_lambda.Parameters.ToArray());
 
 							_infos.Add(key, info);
 
-							_lastDataProvider  = dataProvider;
+							_lastContextID  = contextID;
 							_lastMappingSchema = mappingSchema;
 							_lastInfo = info;
 						}

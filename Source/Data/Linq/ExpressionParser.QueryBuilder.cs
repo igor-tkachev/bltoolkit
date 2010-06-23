@@ -278,7 +278,13 @@ namespace BLToolkit.Data.Linq
 						parser.ExpressionParam,
 						ParametersParam,
 						Expression.Constant(keyReader.Compile()),
-						Expression.Constant(valueParser.Parse(parser._info.DataProvider, parser._info.MappingSchema, valueExpr, parser._info.Parameters)));
+						Expression.Constant(
+							valueParser.Parse(
+								parser._info.ContextID,
+								parser._info.MappingSchema,
+								parser._info.CreateSqlProvider,
+								valueExpr,
+								parser._info.Parameters)));
 			}
 		}
 

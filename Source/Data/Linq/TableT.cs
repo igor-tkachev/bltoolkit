@@ -84,10 +84,11 @@ namespace BLToolkit.Data.Linq
 			if (cache && Info != null)
 				return Info;
 
-			var dataProvider  = DataContext != null ? DataContext.DataProvider  : Settings.GetDefaultDataProvider();
-			var mappingSchema = DataContext != null ? DataContext.MappingSchema : Map.DefaultSchema;
+			var contextID     = DataContext != null ? DataContext.ContextID         : Settings.GetDefaultContextID;
+			var mappingSchema = DataContext != null ? DataContext.MappingSchema     : Map.DefaultSchema;
+			var sqlProvider   = DataContext != null ? DataContext.CreateSqlProvider : Settings.GetDefaultCreateSqlProvider;
 
-			var info = ExpressionInfo<T>.GetExpressionInfo(dataProvider, mappingSchema, expression);
+			var info = ExpressionInfo<T>.GetExpressionInfo(contextID, mappingSchema, sqlProvider, expression);
 
 			if (cache)
 				Info = info;
