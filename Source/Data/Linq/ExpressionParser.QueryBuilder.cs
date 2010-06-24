@@ -1632,9 +1632,10 @@ namespace BLToolkit.Data.Linq
 						{}
 					}
 				}
-				else if (query.ByExpressions.Length == 1 && !(query.ByExpressions[0] is QuerySource))
+				else if (query.ElementSource is QuerySource.Scalar)
 				{
-					args = new[] { query.ByExpressions[0] };
+					var scalar = (QuerySource.Scalar)query.ElementSource;
+					args = new[] { scalar.GetExpressions(this)[0] };
 				}
 			}
 

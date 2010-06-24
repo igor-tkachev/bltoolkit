@@ -312,8 +312,8 @@ namespace Data.Linq
 		public void GroupByMax()
 		{
 			ForEachProvider(db => AreEqual(
-				from ch in    Child group ch.ParentID by ch.ParentID into g select new { Max = g.Max() },
-				from ch in db.Child group ch.ParentID by ch.ParentID into g select new { Max = g.Max() }));
+				from ch in    Child group ch.ParentID by ch.ChildID into g select new { Max = g.Max() },
+				from ch in db.Child group ch.ParentID by ch.ChildID into g select new { Max = g.Max() }));
 		}
 
 		[Test]
