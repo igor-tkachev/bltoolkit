@@ -88,7 +88,7 @@ namespace BLToolkit.Data
 
 		static string GetMessage(DbManager dbManager, Exception innerException)
 		{
-			object obj = dbManager.DataProvider.Convert(
+			var obj = dbManager.DataProvider.Convert(
 				innerException, ConvertType.ExceptionToErrorMessage);
 
 			return obj is Exception ? ((Exception)obj).Message : obj.ToString();

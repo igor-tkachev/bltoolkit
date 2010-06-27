@@ -85,7 +85,7 @@ namespace System.Collections.Specialized
 			NotifyCollectionChangedAction action,
 			object                        changedItem,
 			int                           index)
-			: this(action, changedItem == null? null: new object[]{ changedItem }, index)
+			: this(action, changedItem == null? null: new[]{ changedItem }, index)
 		{
 		}
 
@@ -136,7 +136,7 @@ namespace System.Collections.Specialized
 			NotifyCollectionChangedAction action,
 			object                        newItem,
 			object                        oldItem)
-			: this(action, new object[] { newItem }, new object[] { oldItem }, -1)
+			: this(action, new[] { newItem }, new[] { oldItem }, -1)
 		{
 		}
 
@@ -152,7 +152,7 @@ namespace System.Collections.Specialized
 			object                        newItem,
 			object                        oldItem,
 			int                           index)
-			: this(action, new object[] { newItem }, new object[] { oldItem }, index)
+			: this(action, new[] { newItem }, new[] { oldItem }, index)
 		{
 		}
 
@@ -203,7 +203,7 @@ namespace System.Collections.Specialized
 			object                        changedItem,
 			int                           index,
 			int                           oldIndex)
-			: this(action, new object[]{changedItem}, index, oldIndex)
+			: this(action, new[]{changedItem}, index, oldIndex)
 		{
 		}
 
@@ -284,6 +284,11 @@ namespace System.Collections.Specialized
 	/// The delegate to use for handlers that receive the CollectionChanged event.
 	/// </summary>
 	public delegate void NotifyCollectionChangedEventHandler(object sender, NotifyCollectionChangedEventArgs e);
+}
+
+namespace System.Runtime.CompilerServices
+{
+	internal class ExtensionAttribute : Attribute {}
 }
 
 #endif
