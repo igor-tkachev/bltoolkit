@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Linq;
 using System.Globalization;
 using System.Linq;
@@ -7,7 +8,8 @@ using System.Threading;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
-
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -272,6 +274,79 @@ namespace Data.Linq
 				join t2 in db.Types on t1.SmallIntValue equals t2.ID
 				select t1)
 			);
+		}
+
+		[TableName("Person")]
+		public class PersonCharTest
+		{
+			public int    PersonID;
+			public string FirstName;
+			public string LastName;
+			public string MiddleName;
+			public char   Gender;
+		}
+
+		[Test]
+		public void CharTest1()
+		{
+			List<PersonCharTest> list;
+
+			using (var db = new TestDbManager("Sql2008"))
+				list = db.GetTable<PersonCharTest>().ToList();
+
+			ForEachProvider(db => AreEqual(
+				from p in list                          where p.Gender == 'M' select p.PersonID,
+				from p in db.GetTable<PersonCharTest>() where p.Gender == 'M' select p.PersonID));
+		}
+
+		[Test]
+		public void CharTest2()
+		{
+			List<PersonCharTest> list;
+
+			using (var db = new TestDbManager("Sql2008"))
+				list = db.GetTable<PersonCharTest>().ToList();
+
+			ForEachProvider(db => AreEqual(
+				from p in list                          where 'M' == p.Gender select p.PersonID,
+				from p in db.GetTable<PersonCharTest>() where 'M' == p.Gender select p.PersonID));
+		}
+
+		[TableName("Person")]
+		public class PersonBoolTest
+		{
+			public int    PersonID;
+			public string FirstName;
+			public string LastName;
+			public string MiddleName;
+			[MapField("Gender"), MapValue(true, "M"), MapValue(false, "F")]
+			public bool   IsMale;
+		}
+
+		//[Test]
+		public void BoolTest1()
+		{
+			List<PersonBoolTest> list;
+
+			using (var db = new TestDbManager("Sql2008"))
+				list = db.GetTable<PersonBoolTest>().ToList();
+
+			ForEachProvider(db => AreEqual(
+				from p in list                          where p.IsMale select p.PersonID,
+				from p in db.GetTable<PersonBoolTest>() where p.IsMale select p.PersonID));
+		}
+
+		//[Test]
+		public void BoolTest2()
+		{
+			List<PersonBoolTest> list;
+
+			using (var db = new TestDbManager("Sql2008"))
+				list = db.GetTable<PersonBoolTest>().ToList();
+
+			ForEachProvider(db => AreEqual(
+				from p in list                          where p.IsMale == true select p.PersonID,
+				from p in db.GetTable<PersonBoolTest>() where p.IsMale == true select p.PersonID));
 		}
 	}
 }

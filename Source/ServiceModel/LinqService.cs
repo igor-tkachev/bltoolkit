@@ -5,7 +5,9 @@ using BLToolkit.Data.Linq;
 
 namespace BLToolkit.ServiceModel
 {
-	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
+	[ServiceBehavior(
+		InstanceContextMode = InstanceContextMode.Single,
+		ConcurrencyMode     = ConcurrencyMode.Multiple)]
 	public class LinqService : ILinqService
 	{
 		public virtual IDataContext CreateDataContext()
@@ -15,17 +17,17 @@ namespace BLToolkit.ServiceModel
 
 		#region ILinqService Members
 
-		Type _sqlProviderType;
+		public Type SqlProviderType { get; set; }
 
-		public Type GetSqlProviderType()
+		public virtual Type GetSqlProviderType()
 		{
-			if (_sqlProviderType == null)
+			if (SqlProviderType == null)
 			{
 				var ctx = CreateDataContext();
 
 				try
 				{
-					_sqlProviderType = ctx.CreateSqlProvider().GetType();
+					SqlProviderType = ctx.CreateSqlProvider().GetType();
 				}
 				finally
 				{
@@ -34,7 +36,7 @@ namespace BLToolkit.ServiceModel
 				}
 			}
 
-			return _sqlProviderType;
+			return SqlProviderType;
 		}
 
 		#endregion

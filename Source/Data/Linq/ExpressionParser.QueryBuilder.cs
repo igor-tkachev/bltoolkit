@@ -2258,6 +2258,28 @@ namespace BLToolkit.Data.Linq
 
 		ISqlPredicate ParseCompare(LambdaInfo lambda, ExpressionType nodeType, Expression left, Expression right, QuerySource[] queries)
 		{
+			if (left.NodeType == ExpressionType.Convert && left.Type == typeof(int) && right.NodeType == ExpressionType.Constant)
+			{
+				var conv = (UnaryExpression)left;
+
+				if (conv.Operand.Type == typeof(char))
+				{
+					left  = conv.Operand;
+					right = Expression.Constant(ConvertTo<char>.From(((ConstantExpression)right).Value));
+				}
+			}
+
+			if (right.NodeType == ExpressionType.Convert && right.Type == typeof(int) && left.NodeType == ExpressionType.Constant)
+			{
+				var conv = (UnaryExpression)right;
+
+				if (conv.Operand.Type == typeof(char))
+				{
+					right = conv.Operand;
+					left  = Expression.Constant(ConvertTo<char>.From(((ConstantExpression)left).Value));
+				}
+			}
+
 			switch (nodeType)
 			{
 				case ExpressionType.Equal    :

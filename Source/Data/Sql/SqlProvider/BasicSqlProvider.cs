@@ -741,30 +741,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						switch (expr.Operator)
 						{
-							case SqlQuery.Predicate.Operator.Equal :
-								sb.Append(" = ");
-								break;
-							case SqlQuery.Predicate.Operator.NotEqual :
-								sb.Append(" <> ");
-								break;
-							case SqlQuery.Predicate.Operator.Greater :
-								sb.Append(" > ");
-								break;
-							case SqlQuery.Predicate.Operator.GreaterOrEqual :
-								sb.Append(" >= ");
-								break;
-							case SqlQuery.Predicate.Operator.NotGreater :
-								sb.Append(" !> ");
-								break;
-							case SqlQuery.Predicate.Operator.Less :
-								sb.Append(" < ");
-								break;
-							case SqlQuery.Predicate.Operator.LessOrEqual :
-								sb.Append(" <= ");
-								break;
-							case SqlQuery.Predicate.Operator.NotLess :
-								sb.Append(" !< ");
-								break;
+							case SqlQuery.Predicate.Operator.Equal          : sb.Append(" = ");  break;
+							case SqlQuery.Predicate.Operator.NotEqual       : sb.Append(" <> "); break;
+							case SqlQuery.Predicate.Operator.Greater        : sb.Append(" > ");  break;
+							case SqlQuery.Predicate.Operator.GreaterOrEqual : sb.Append(" >= "); break;
+							case SqlQuery.Predicate.Operator.NotGreater     : sb.Append(" !> "); break;
+							case SqlQuery.Predicate.Operator.Less           : sb.Append(" < ");  break;
+							case SqlQuery.Predicate.Operator.LessOrEqual    : sb.Append(" <= "); break;
+							case SqlQuery.Predicate.Operator.NotLess        : sb.Append(" !< "); break;
 						}
 
 						BuildExpression(sb, GetPrecedence(expr), expr.Expr2);

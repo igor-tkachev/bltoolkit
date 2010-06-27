@@ -49,7 +49,7 @@ namespace BLToolkit.Data.Linq
 		{
 			foreach (var context in _contexts)
 				if (context.DataContext is IDisposable)
-				((IDisposable)context.DataContext).Dispose();
+					((IDisposable)context.DataContext).Dispose();
 
 			RootDataContext.OnClosing -= OnRootClosing;
 
