@@ -6,8 +6,8 @@ namespace BLToolkit.Data.Linq
 
 	public static class Settings
 	{
-		public static string             GetDefaultContextID         = DbManager.GetDataProvider(DbManager.DefaultConfiguration).Name;
-		public static Func<ISqlProvider> GetDefaultCreateSqlProvider = DbManager.GetDataProvider(DbManager.DefaultConfiguration).CreateSqlProvider;
-		public static Func<IDataContext> CreateDefaultDataContext    = () => new DbManager();
+		public static string                    GetDefaultContextID         = DbManager.GetDataProvider(DbManager.DefaultConfiguration).Name;
+		public static Func<ISqlProvider>        GetDefaultCreateSqlProvider = DbManager.GetDataProvider(DbManager.DefaultConfiguration).CreateSqlProvider;
+		public static Func<string,IDataContext> CreateDefaultDataContext    = config => new DbManager(config ?? DbManager.DefaultConfiguration);
 	}
 }

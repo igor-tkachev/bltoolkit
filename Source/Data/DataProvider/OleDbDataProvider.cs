@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
+using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -70,7 +71,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTableAlias:
 					{
-						string name = value.ToString();
+						var name = value.ToString();
 
 						if (name.Length > 0 && name[0] == '[')
 							return value;
@@ -82,7 +83,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToOwner:
 				case ConvertType.NameToQueryTable:
 					{
-						string name = value.ToString();
+						var name = value.ToString();
 
 						if (name.Length > 0 && name[0] == '[')
 							return value;
@@ -96,7 +97,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.SprocParameterToName:
 					if (value != null)
 					{
-						string str = value.ToString();
+						var str = value.ToString();
 						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
 					}
 
@@ -105,7 +106,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is OleDbException)
 					{
-						OleDbException ex = (OleDbException)value;
+						var ex = (OleDbException)value;
 						if (ex.Errors.Count > 0)
 							return ex.Errors[0].NativeError;
 					}
@@ -114,6 +115,11 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return value;
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			throw new NotSupportedException();
 		}
 
 		/// <summary>

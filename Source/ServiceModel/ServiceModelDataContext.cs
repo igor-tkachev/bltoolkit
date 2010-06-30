@@ -26,6 +26,7 @@ namespace BLToolkit.ServiceModel
 		}
 
 		public ServiceModelDataContext([NotNull] string endpointConfigurationName)
+			: this()
 		{
 			if (endpointConfigurationName == null) throw new ArgumentNullException("endpointConfigurationName");
 
@@ -33,6 +34,7 @@ namespace BLToolkit.ServiceModel
 		}
 
 		public ServiceModelDataContext([NotNull] string endpointConfigurationName, [NotNull] string remoteAddress)
+			: this()
 		{
 			if (endpointConfigurationName == null) throw new ArgumentNullException("endpointConfigurationName");
 			if (remoteAddress             == null) throw new ArgumentNullException("remoteAddress");
@@ -42,6 +44,7 @@ namespace BLToolkit.ServiceModel
 		}
 
 		public ServiceModelDataContext([NotNull] string endpointConfigurationName, [NotNull] EndpointAddress endpointAddress)
+			: this()
 		{
 			if (endpointConfigurationName == null) throw new ArgumentNullException("endpointConfigurationName");
 			if (endpointAddress           == null) throw new ArgumentNullException("endpointAddress");
@@ -51,6 +54,7 @@ namespace BLToolkit.ServiceModel
 		}
 
 		public ServiceModelDataContext([NotNull] Binding binding, [NotNull] EndpointAddress endpointAddress)
+			: this()
 		{
 			if (binding         == null) throw new ArgumentNullException("binding");
 			if (endpointAddress == null) throw new ArgumentNullException("endpointAddress");
@@ -94,7 +98,7 @@ namespace BLToolkit.ServiceModel
 			{
 				if (_sqlProviderType == null)
 					using (var client = GetClient())
-						_sqlProviderType = client.GetSqlProviderType();
+						_sqlProviderType = Type.GetType(client.GetSqlProviderType());
 
 				return _sqlProviderType;
 			}
@@ -133,7 +137,8 @@ namespace BLToolkit.ServiceModel
 		{
 			var ctx = (IQueryContext)query;
 
-			throw new NotImplementedException();
+			using (var client = GetClient())
+				return client.ExecuteNonQuery(ctx.SqlQuery, ctx.GetParameters());
 		}
 
 		object IDataContext.ExecuteScalar(object query)
@@ -217,11 +222,12 @@ namespace BLToolkit.ServiceModel
 			foreach (var command in commands)
 				sb.AppendLine(command);
 
-			return sb.ToString();
-
 			if (OnClosing != null)
-				throw new NotImplementedException();
-			throw new NotImplementedException();
+			{
+				
+			}
+
+			return sb.ToString();
 		}
 
 		IDataContext IDataContext.Clone()

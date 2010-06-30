@@ -8,10 +8,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class SQLiteSqlProvider : BasicSqlProvider
 	{
-		public SQLiteSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
 			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
@@ -20,6 +16,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
 			sb.AppendLine("SELECT last_insert_rowid()");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new SQLiteSqlProvider();
 		}
 
 		protected override string LimitFormat  { get { return "LIMIT {0}";  } }
@@ -34,7 +35,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
@@ -47,18 +48,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				var func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
 					case "Space"   : return new SqlFunction(func.SystemType, "PadR", new SqlValue(" "), func.Parameters[0]);
 					case "Convert" :
 						{
-							Type ftype = TypeHelper.GetUnderlyingType(func.SystemType);
+							var ftype = TypeHelper.GetUnderlyingType(func.SystemType);
 
 							if (ftype == typeof(bool))
 							{
-								ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+								var ex = AlternativeConvertToBoolean(func, 1);
 								if (ex != null)
 									return ex;
 							}
@@ -76,7 +77,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlExpression)
 			{
-				SqlExpression e = (SqlExpression)expr;
+				var e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Cast(StrFTime(Quarter"))
 					return Inc(Div(Dec(new SqlExpression(e.SystemType, e.Expr.Replace("Cast(StrFTime(Quarter", "Cast(StrFTime('%m'"), e.Parameters)), 3));
@@ -129,7 +130,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (value is Guid)
 			{
-				string s = ((Guid)value).ToString("N");
+				var s = ((Guid)value).ToString("N");
 
 				sb
 					.Append("Cast(x'")
@@ -146,6 +147,51 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else
 				base.BuildValue(sb, value);
+		}
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return "@" + value;
+
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
+				case ConvertType.NameToQueryTable:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.SprocParameterToName:
+					{
+						var name = (string)value;
+						return name.Length > 0 && name[0] == '@'? name.Substring(1): name;
+					}
+			}
+
+			return value;
 		}
 	}
 }

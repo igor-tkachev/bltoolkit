@@ -535,6 +535,38 @@ namespace Update
 		}
 
 		[Test]
+		public void Insert9()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child. Delete(c => c.ParentID > 1000);
+					db.Parent.Delete(p => p.ParentID > 1000);
+
+					db.Insert(new Parent { ParentID = id, Value1 = id });
+		
+					Assert.AreEqual(1,
+						db.Parent
+							.Where(p => p.ParentID == id)
+							.Insert(db.Child, p => new Child
+							{
+								ParentID = p.ParentID,
+								ChildID  = p.ParentID,
+							}));
+					Assert.AreEqual(1, db.Child.Count(c => c.ParentID == id));
+				}
+				finally
+				{
+					db.Child. Delete(c => c.ParentID > 1000);
+					db.Parent.Delete(p => p.ParentID > 1000);
+				}
+			});
+		}
+
+		[Test]
 		public void InsertNull()
 		{
 			ForEachProvider(db =>

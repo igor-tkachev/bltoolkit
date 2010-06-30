@@ -892,7 +892,7 @@ namespace BLToolkit.Data
 			{
 				lock (_paramCacheLock)
 				{
-					// There is a possible race condition since the operation may took a time.
+					// There is a possible race condition since the operation may take a time.
 					//
 					if (!_paramCache.TryGetValue(key, out cachedParameters))
 					{

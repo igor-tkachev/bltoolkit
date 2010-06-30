@@ -5,23 +5,25 @@
 // </auto-generated>
 //---------------------------------------------------------------------------------------------------
 using System;
+using System.ServiceModel;
 
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+using BLToolkit.ServiceModel;
 
-namespace Templates
+namespace Linq.OverWCF
 {
-	public partial class DataContext : DbManager
+	public partial class DataModel : ServiceModelDataContext
 	{
 		public Table<BinaryData>    BinaryData    { get { return this.GetTable<BinaryData>();    } }
 		public Table<Child>         Child         { get { return this.GetTable<Child>();         } }
+		public Table<DataTypes>     DataTypes     { get { return this.GetTable<DataTypes>();     } }
 		public Table<DataTypeTest>  DataTypeTest  { get { return this.GetTable<DataTypeTest>();  } }
 		public Table<Doctor>        Doctor        { get { return this.GetTable<Doctor>();        } }
 		public Table<GrandChild>    GrandChild    { get { return this.GetTable<GrandChild>();    } }
 		public Table<LinqDataTypes> LinqDataTypes { get { return this.GetTable<LinqDataTypes>(); } }
-		public Table<MyTable>       MyTable       { get { return this.GetTable<MyTable>();       } }
 		public Table<Parent>        Parent        { get { return this.GetTable<Parent>();        } }
 		public Table<Patient>       Patient       { get { return this.GetTable<Patient>();       } }
 		public Table<Person>        Person        { get { return this.GetTable<Person>();        } }
@@ -38,8 +40,15 @@ namespace Templates
 	[TableName(Name="Child")]
 	public partial class Child
 	{
-		public int ParentID { get; set; }
-		public int ChildID  { get; set; }
+		[Nullable] public int? ParentID { get; set; }
+		[Nullable] public int? ChildID  { get; set; }
+	}
+
+	[TableName(Name="DataTypes")]
+	public partial class DataTypes
+	{
+		[Nullable] public int?     ID         { get; set; }
+		[Nullable] public decimal? MoneyValue { get; set; }
 	}
 
 	[TableName(Name="DataTypeTest")]
@@ -47,14 +56,14 @@ namespace Templates
 	{
 		[Identity, PrimaryKey(1)] public int       DataTypeID { get; set; }
 		[Nullable               ] public byte[]    Binary_    { get; set; }
-		                          public bool      Boolean_   { get; set; }
+		[Nullable               ] public bool?     Boolean_   { get; set; }
 		[Nullable               ] public byte?     Byte_      { get; set; }
 		[Nullable               ] public byte[]    Bytes_     { get; set; }
 		[Nullable               ] public char?     Char_      { get; set; }
 		[Nullable               ] public DateTime? DateTime_  { get; set; }
 		[Nullable               ] public decimal?  Decimal_   { get; set; }
 		[Nullable               ] public double?   Double_    { get; set; }
-		[Nullable               ] public byte[]    Guid_      { get; set; }
+		[Nullable               ] public Guid?     Guid_      { get; set; }
 		[Nullable               ] public short?    Int16_     { get; set; }
 		[Nullable               ] public int?      Int32_     { get; set; }
 		[Nullable               ] public long?     Int64_     { get; set; }
@@ -83,33 +92,27 @@ namespace Templates
 	[TableName(Name="GrandChild")]
 	public partial class GrandChild
 	{
-		public int ParentID     { get; set; }
-		public int ChildID      { get; set; }
-		public int GrandChildID { get; set; }
+		[Nullable] public int? ParentID     { get; set; }
+		[Nullable] public int? ChildID      { get; set; }
+		[Nullable] public int? GrandChildID { get; set; }
 	}
 
 	[TableName(Name="LinqDataTypes")]
 	public partial class LinqDataTypes
 	{
-		           public int      ID            { get; set; }
-		           public decimal  MoneyValue    { get; set; }
-		           public DateTime DateTimeValue { get; set; }
-		           public bool     BoolValue     { get; set; }
-		           public string   GuidValue     { get; set; }
-		[Nullable] public byte[]   BinaryValue   { get; set; }
-		           public short    SmallIntValue { get; set; }
-	}
-
-	[TableName(Name="MyTable")]
-	public partial class MyTable
-	{
-		[Nullable] public int? MyID { get; set; }
+		[Nullable] public int?      ID            { get; set; }
+		[Nullable] public decimal?  MoneyValue    { get; set; }
+		[Nullable] public DateTime? DateTimeValue { get; set; }
+		[Nullable] public bool?     BoolValue     { get; set; }
+		[Nullable] public Guid?     GuidValue     { get; set; }
+		[Nullable] public byte[]    BinaryValue   { get; set; }
+		[Nullable] public short?    SmallIntValue { get; set; }
 	}
 
 	[TableName(Name="Parent")]
 	public partial class Parent
 	{
-		           public int  ParentID { get; set; }
+		[Nullable] public int? ParentID { get; set; }
 		[Nullable] public int? Value1   { get; set; }
 	}
 
@@ -140,5 +143,26 @@ namespace Templates
 		// FK_Patient_Person_BackReference
 		[Association(ThisKey="PersonID", OtherKey="PersonID")]
 		public Patient Patient { get; set; }
+	}
+}
+
+namespace Linq.OverWCF
+{
+	public partial class DataModel
+	{
+		public DataModel() : base(
+			new NetTcpBinding(SecurityMode.None)
+			{
+				MaxReceivedMessageSize = 10000000,
+				MaxBufferPoolSize      = 10000000,
+				MaxBufferSize          = 10000000,
+				CloseTimeout           = new TimeSpan(00, 01, 00),
+				OpenTimeout            = new TimeSpan(00, 01, 00),
+				ReceiveTimeout         = new TimeSpan(00, 10, 00),
+				SendTimeout            = new TimeSpan(00, 10, 00),
+			},
+			new EndpointAddress("net.tcp://localhost:1234/LinqOverWCF"))
+		{
+		}
 	}
 }

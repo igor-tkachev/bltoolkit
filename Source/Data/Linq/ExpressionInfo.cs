@@ -133,7 +133,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext();
+				dataContext = Settings.CreateDefaultDataContext(null);
 
 			try
 			{
@@ -168,7 +168,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext();
+				dataContext = Settings.CreateDefaultDataContext(null);
 
 			try
 			{
@@ -203,7 +203,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext();
+				dataContext = Settings.CreateDefaultDataContext(null);
 
 			try
 			{
@@ -311,7 +311,7 @@ namespace BLToolkit.Data.Linq
 			var dispose = dataContext == null;
 
 			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext();
+				dataContext = Settings.CreateDefaultDataContext(null);
 
 			try
 			{
@@ -667,8 +667,8 @@ namespace BLToolkit.Data.Linq
 				SqlQuery = new SqlQuery();
 			}
 
-			public SqlQuery        SqlQuery { get; set; }
-			public object          Context  { get; set; }
+			public SqlQuery SqlQuery { get; set; }
+			public object   Context  { get; set; }
 
 			public SqlParameter[] GetParameters()
 			{

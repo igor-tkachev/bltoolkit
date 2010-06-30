@@ -9,7 +9,6 @@ using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
-using BLToolkit.Reflection.MetadataProvider;
 
 namespace BLToolkit.DataAccess
 {
@@ -38,7 +37,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected virtual MemberMapper[] GetFieldList(ObjectMapper om)
 		{
-			List<MemberMapper> list = new List<MemberMapper>(om.Count);
+			var list = new List<MemberMapper>(om.Count);
 
 			foreach (MemberMapper mm in om)
 				if (mm.MapMemberInfo.SqlIgnore == false)
@@ -50,15 +49,15 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected virtual MemberMapper[] GetNonKeyFieldList(ObjectMapper om)
 		{
-			TypeExtension      typeExt = TypeExtension.GetTypeExtension(om.TypeAccessor.OriginalType, Extensions);
-			List<MemberMapper> list    = new List<MemberMapper>();
+			var typeExt = TypeExtension.GetTypeExtension(om.TypeAccessor.OriginalType, Extensions);
+			var list    = new List<MemberMapper>();
 
 			foreach (MemberMapper mm in om)
 			{
 				if (mm.MapMemberInfo.SqlIgnore)
 					continue;
 
-				MemberAccessor ma = mm.MapMemberInfo.MemberAccessor;
+				var ma = mm.MapMemberInfo.MemberAccessor;
 
 				bool isSet;
 				MappingSchema.MetadataProvider.GetPrimaryKeyOrder(om.TypeAccessor.OriginalType, typeExt, ma, out isSet);
@@ -178,11 +177,11 @@ namespace BLToolkit.DataAccess
 
 		protected void AppendTableName(StringBuilder sb, DbManager db, Type type)
 		{
-			string database = GetDatabaseName(type);
-			string owner    = GetOwnerName   (type);
-			string name     = GetTableName   (type);
+			var database = GetDatabaseName(type);
+			var owner    = GetOwnerName   (type);
+			var name     = GetTableName   (type);
 
-			db.DataProvider.BuildTableName(sb,
+			db.DataProvider.CreateSqlProvider().BuildTableName(sb,
 				database == null ? null : db.DataProvider.Convert(database, ConvertType.NameToDatabase).  ToString(),
 				owner    == null ? null : db.DataProvider.Convert(owner,    ConvertType.NameToOwner).     ToString(),
 				name     == null ? null : db.DataProvider.Convert(name,     ConvertType.NameToQueryTable).ToString());
@@ -192,13 +191,13 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateSelectAllSqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb    = new StringBuilder();
-			SqlQueryInfo  query = new SqlQueryInfo(om);
+			var om    = db.MappingSchema.GetObjectMapper(type);
+			var sb    = new StringBuilder();
+			var query = new SqlQueryInfo(om);
 
 			sb.Append("SELECT\n");
 
-			foreach (MemberMapper mm in GetFieldList(om))
+			foreach (var mm in GetFieldList(om))
 				sb.AppendFormat("\t{0},\n",
 					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
 
@@ -214,18 +213,18 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter)
 		{
-			TypeExtension        typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			ObjectMapper         om      = db.MappingSchema.GetObjectMapper(type);
-			List<MemberMapper>   list    = new List<MemberMapper>();
-			StringBuilder        sb      = new StringBuilder();
-			SqlQueryInfo         query   = new SqlQueryInfo(om);
-			MetadataProviderBase mp      = MappingSchema.MetadataProvider;
+			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+			var om      = db.MappingSchema.GetObjectMapper(type);
+			var list    = new List<MemberMapper>();
+			var sb      = new StringBuilder();
+			var query   = new SqlQueryInfo(om);
+			var mp      = MappingSchema.MetadataProvider;
 
 			sb.Append("INSERT INTO ");
 			AppendTableName(sb, db, type);
 			sb.Append(" (\n");
 
-			foreach (MemberMapper mm in GetFieldList(om))
+			foreach (var mm in GetFieldList(om))
 			{
 				// IT: This works incorrectly for complex mappers.
 				//
@@ -247,9 +246,9 @@ namespace BLToolkit.DataAccess
 
 			sb.Append(") VALUES (\n");
 
-			foreach (MemberMapper mm in list)
+			foreach (var mm in list)
 			{
-				SqlQueryParameterInfo p = query.AddParameter(
+				var p = query.AddParameter(
 					db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
@@ -271,20 +270,20 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type, int nParameter)
 		{
-			TypeExtension   typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			ObjectMapper    om      = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder   sb      = new StringBuilder();
-			SqlQueryInfo    query   = new SqlQueryInfo(om);
-			MetadataProviderBase mp = MappingSchema.MetadataProvider;
+			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+			var om      = db.MappingSchema.GetObjectMapper(type);
+			var sb      = new StringBuilder();
+			var query   = new SqlQueryInfo(om);
+			var mp      = MappingSchema.MetadataProvider;
 
 			sb.Append("UPDATE\n\t");
 			AppendTableName(sb, db, type);
 			sb.Append("\nSET\n");
 
-			MemberMapper[] fields    = GetFieldList(om);
-			bool           hasFields = false;
+			var fields    = GetFieldList(om);
+			var hasFields = false;
 
-			foreach (MemberMapper mm in fields)
+			foreach (var mm in fields)
 			{
 				bool isSet;
 
@@ -298,7 +297,7 @@ namespace BLToolkit.DataAccess
 
 				hasFields = true;
 
-				SqlQueryParameterInfo p = query.AddParameter(
+				var p = query.AddParameter(
 					db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 

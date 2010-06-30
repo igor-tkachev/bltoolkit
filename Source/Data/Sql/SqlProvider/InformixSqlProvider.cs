@@ -9,10 +9,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class InformixSqlProvider : BasicSqlProvider
 	{
-		public InformixSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
 			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
@@ -21,6 +17,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
 			sb.AppendLine("SELECT DBINFO('sqlca.sqlerrd1') FROM systables where tabid = 1");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new InformixSqlProvider();
 		}
 
 		protected override void BuildSelectClause(StringBuilder sb)
@@ -208,6 +209,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+					return "?";
+
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return ":" + value;
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						var str = value.ToString();
+						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 	}
 }

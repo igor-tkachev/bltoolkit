@@ -19,7 +19,7 @@ WriteTableProperty  = (tt,name,maxlen) =>
 	WriteLine("");
 	WriteLine("Public ReadOnly Property {0}(){1} As Table(Of {0})", name, LenDiff(maxlen, name));
 	WriteLine("\tGet");
-	WriteLine("\t\tReturn GetTable(Of {0})()", name);
+	WriteLine("\t\tReturn Me.GetTable(Of {0})()", name);
 	WriteLine("\tEnd Get");
 	WriteLine("End Property");
 };

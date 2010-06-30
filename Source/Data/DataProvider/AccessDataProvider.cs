@@ -24,14 +24,14 @@ namespace BLToolkit.Data.DataProvider
 			if (command.CommandType != CommandType.StoredProcedure)
 				throw new InvalidOperationException("command.CommandType must be CommandType.StoredProcedure");
 
-			OleDbConnection conn = command.Connection as OleDbConnection;
+			var conn = command.Connection as OleDbConnection;
 
 			if (conn == null || conn.State != ConnectionState.Open)
 				throw new InvalidOperationException("Invalid connection state.");
 
 			command.Parameters.Clear();
 
-			DataTable dt = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Procedures, new object[]{null, null, command.CommandText});
+			var dt = conn.GetOleDbSchemaTable(OleDbSchemaGuid.Procedures, new object[]{null, null, command.CommandText});
 
 			if (dt.Rows.Count == 0)
 			{
@@ -47,7 +47,8 @@ namespace BLToolkit.Data.DataProvider
 			}
 			else
 			{
-				DataColumn col = dt.Columns["PROCEDURE_DEFINITION"];
+				var col = dt.Columns["PROCEDURE_DEFINITION"];
+
 				if (col == null)
 				{
 					// Not really possible
@@ -58,9 +59,9 @@ namespace BLToolkit.Data.DataProvider
 				if (_paramsExp == null)
 					_paramsExp = new Regex(@"PARAMETERS ((\[(?<name>[^\]]+)\]|(?<name>[^\s]+))\s(?<type>[^,;\s]+(\s\([^\)]+\))?)[,;]\s)*", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
-				Match             match = _paramsExp.Match((string)dt.Rows[0][col.Ordinal]);
-				CaptureCollection names = match.Groups["name"].Captures;
-				CaptureCollection types = match.Groups["type"].Captures;
+				var match = _paramsExp.Match((string)dt.Rows[0][col.Ordinal]);
+				var names = match.Groups["name"].Captures;
+				var types = match.Groups["type"].Captures;
 
 				if (names.Count != types.Count)
 				{
@@ -69,13 +70,13 @@ namespace BLToolkit.Data.DataProvider
 					return false;
 				}
 
-				char[] separators = new char[]{' ', '(', ',', ')'};
+				var separators = new[] {' ', '(', ',', ')'};
 
-				for (int i = 0; i < names.Count; ++i)
+				for (var i = 0; i < names.Count; ++i)
 				{
-					string paramName = names[i].Value;
-					string[] rawType = types[i].Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-					OleDbParameter p = new OleDbParameter(paramName, GetOleDbType(rawType[0]));
+					var paramName = names[i].Value;
+					var rawType   = types[i].Value.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+					var p         = new OleDbParameter(paramName, GetOleDbType(rawType[0]));
 
 					if (rawType.Length > 2)
 					{
@@ -234,10 +235,28 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new AccessSqlProvider(this);
+			return new AccessSqlProvider();
 		}
 
 #endif
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.ExceptionToErrorNumber:
+					if (value is OleDbException)
+					{
+						var ex = (OleDbException)value;
+						if (ex.Errors.Count > 0)
+							return ex.Errors[0].NativeError;
+					}
+
+					break;
+			}
+
+			return SqlProvider.Convert(value, convertType);
+		}
 
 		#region DataReaderEx
 
@@ -256,11 +275,11 @@ namespace BLToolkit.Data.DataProvider
 
 			public new object GetValue(int i)
 			{
-				object value = DataReader.GetValue(i);
+				var value = DataReader.GetValue(i);
 
 				if (value is DateTime)
 				{
-					DateTime dt = (DateTime)value;
+					var dt = (DateTime)value;
 
 					if (dt.Year == 1899 && dt.Month == 12 && dt.Day == 30)
 						return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
@@ -271,7 +290,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public new DateTime GetDateTime(int i)
 			{
-				DateTime dt = DataReader.GetDateTime(i);
+				var dt = DataReader.GetDateTime(i);
 
 				if (dt.Year == 1899 && dt.Month == 12 && dt.Day == 30)
 					return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);

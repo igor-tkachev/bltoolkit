@@ -10,10 +10,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class MySqlSqlProvider : BasicSqlProvider
 	{
-		public MySqlSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
 			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
@@ -22,6 +18,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
 			sb.AppendLine("SELECT LAST_INSERT_ID()");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new MySqlSqlProvider();
 		}
 
 		protected override string LimitFormat { get { return "LIMIT {0}"; } }
@@ -147,7 +148,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 
@@ -162,6 +163,75 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
+		}
+
+		public static char ParameterSymbol           { get; set; }
+		public static bool TryConvertParameterSymbol { get; set; }
+
+		private static string _commandParameterPrefix = "";
+		public  static string  CommandParameterPrefix
+		{
+			get { return _commandParameterPrefix; }
+			set { _commandParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
+		}
+
+		private static string _sprocParameterPrefix = "";
+		public  static string  SprocParameterPrefix
+		{
+			get { return _sprocParameterPrefix; }
+			set { _sprocParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
+		}
+
+		private static List<char> _convertParameterSymbols;
+		public  static List<char>  ConvertParameterSymbols
+		{
+			get { return _convertParameterSymbols; }
+			set { _convertParameterSymbols = value ?? new List<char>(); }
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			if (value == null)
+				throw new ArgumentNullException("value");
+
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+					return ParameterSymbol + value.ToString();
+
+				case ConvertType.NameToCommandParameter:
+					return ParameterSymbol + CommandParameterPrefix + value.ToString();
+
+				case ConvertType.NameToSprocParameter:
+					{
+						string valueStr = value.ToString();
+						if(string.IsNullOrEmpty(valueStr))
+							throw new ArgumentException("Argument 'value' must represent parameter name.");
+
+						if (valueStr[0] == ParameterSymbol)
+							valueStr = valueStr.Substring(1);
+						if (valueStr.StartsWith(SprocParameterPrefix, StringComparison.Ordinal))
+							valueStr = valueStr.Substring(SprocParameterPrefix.Length);
+						return ParameterSymbol + SprocParameterPrefix + valueStr;
+					}
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						string str = value.ToString();
+						str = (str.Length > 0 && (str[0] == ParameterSymbol || (TryConvertParameterSymbol && ConvertParameterSymbols.Contains(str[0])))) ? str.Substring(1) : str;
+
+						if ((!string.IsNullOrEmpty(SprocParameterPrefix))
+							&& str.StartsWith(SprocParameterPrefix))
+							str = str.Substring(SprocParameterPrefix.Length);
+
+						return str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 	}
 }

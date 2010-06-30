@@ -17,7 +17,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new MsSql2008SqlProvider(this);
+			return new MsSql2008SqlProvider();
 		}
 
 #endif

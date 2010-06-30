@@ -30,7 +30,7 @@ static Func<string,string,string>                 MakeGenericType     = (c,t) =>
 static Func<string,string>                        MakeType            = t     => t;
 static Action<GeneratedTextTransformation,string,int> WriteTableProperty = (tt,name,maxlen) =>
 {
-	tt.WriteLine("public Table<{0}>{1} {0}{1} {{ get {{ return GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name));
+	tt.WriteLine("public Table<{0}>{1} {0}{1} {{ get {{ return this.GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name));
 };
 static Action<GeneratedTextTransformation,string> WriteAttribute      = (tt,a) => tt.Write("[{0}]", a);
 static Action<GeneratedTextTransformation>        WriteAttributeLine  =  tt    => tt.WriteLine("");
@@ -40,7 +40,7 @@ string ConnectionType;
 string DataProviderAssembly = null;
 
 string DatabaseName             = null;
-string DataContextName          = "DataContext";
+string DataContextName          = null;
 string Namespace                = "DataModel";
 string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
@@ -229,7 +229,9 @@ void GenerateModel()
 	if (DataContextName  != null) DataContextName  = DataContextName. Trim();
 
 	if (string.IsNullOrEmpty(ConnectionString)) { Error("ConnectionString cannot be empty."); return; }
-	if (string.IsNullOrEmpty(DataContextName))  { Error("DataContextName cannot be empty.");  return; }
+
+	if (string.IsNullOrEmpty(DataContextName))
+		DataContextName = "DataContext";
 
 	LoadMetadata();
 

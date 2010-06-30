@@ -6,7 +6,7 @@ Bug fixes
 
 Enhancement
 
-- No more C# 2.0 support.
+- No more .NET Framework 2.0 support.
 - T4 Templates for Sybase and MS SQL Server.
 
 

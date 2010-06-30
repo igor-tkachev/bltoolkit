@@ -230,7 +230,6 @@
     <Compile Include="Mapping\MapRelationBase.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
-    <Compile Include="Properties\BLToolkitConstants.Revision.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -394,6 +393,7 @@
     <Compile Include="Patterns\DuckType.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\JetBrains.Annotations.cs" />
+    <Compile Include="Properties\Revision.generated.cs" />
     <Compile Include="Reflection\ExprMemberAccessor.cs" />
     <Compile Include="Reflection\ExprTypeAccessor.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
@@ -588,6 +588,8 @@
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>
     </None>
+    <None Include="Properties\Revision.tt">
+    </None>
     <None Include="Templates\BLT4Toolkit.ttinclude" />
     <None Include="Templates\BLToolkit.ttinclude" />
     <None Include="Templates\MSSQL.ttinclude" />
@@ -625,6 +627,9 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

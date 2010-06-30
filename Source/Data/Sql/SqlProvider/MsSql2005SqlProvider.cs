@@ -1,24 +1,19 @@
 ﻿using System;
 using System.Data;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
-	using DataProvider;
+	using Reflection;
 
 	public class MsSql2005SqlProvider : MsSqlSqlProvider
 	{
-		public MsSql2005SqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
 
 			if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction)expr;
+				var func = (SqlFunction)expr;
 
 				switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(func.SystemType)))
 				{
@@ -26,7 +21,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (func.Name == "Convert")
 						{
-							Type type1 = TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType);
+							var type1 = TypeHelper.GetUnderlyingType(func.Parameters[1].SystemType);
 
 							if (IsTimeDataType(func.Parameters[0]))
 							{
@@ -57,6 +52,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new MsSql2005SqlProvider();
 		}
 
 		protected override void BuildDataType(System.Text.StringBuilder sb, SqlDataType type)

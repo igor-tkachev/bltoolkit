@@ -10,9 +10,9 @@ namespace BLToolkit.Data.DataProvider
 
 	class DB2DataProvider :  DataProviderBase
 	{
-		public override IDbConnection CreateConnectionObject () { return new DB2Connection ();     }
-		public override DbDataAdapter CreateDataAdapterObject() { return new DB2DataAdapter();     }
-		public override ISqlProvider  CreateSqlProvider      () { return new DB2SqlProvider(this); }
+		public override IDbConnection CreateConnectionObject () { return new DB2Connection (); }
+		public override DbDataAdapter CreateDataAdapterObject() { return new DB2DataAdapter(); }
+		public override ISqlProvider  CreateSqlProvider      () { return new DB2SqlProvider(); }
 
 		public override Type   ConnectionType { get { return typeof(DB2Connection);         } }
 		public override string Name           { get { return DataProvider.ProviderName.DB2; } }
@@ -33,32 +33,10 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-					return "@" + value;
-
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return ":" + value;
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						string str = value.ToString();
-						return str.Length > 0 && str[0] == ':'? str.Substring(1): str;
-					}
-
-					break;
-
-				case ConvertType.NameToQueryField:
-				case ConvertType.NameToQueryFieldAlias:
-				case ConvertType.NameToQueryTable:
-				case ConvertType.NameToQueryTableAlias:
-					return "\"" + value + "\"";
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is DB2Exception)
 					{
-						DB2Exception ex = (DB2Exception)value;
+						var ex = (DB2Exception)value;
 
 						foreach (DB2Error error in ex.Errors)
 							return error.RowNumber;
@@ -70,7 +48,7 @@ namespace BLToolkit.Data.DataProvider
 				 
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)

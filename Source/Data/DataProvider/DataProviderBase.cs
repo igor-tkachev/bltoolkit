@@ -175,12 +175,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual object Convert(object value, ConvertType convertType)
 		{
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public virtual void InitDbManager(DbManager dbManager)
 		{
-			MappingSchema schema = MappingSchema;
+			var schema = MappingSchema;
 
 			if (schema != null)
 				dbManager.MappingSchema = schema;
@@ -194,12 +194,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 		}
 
-		private        MappingSchema _mappingSchema;
-		public virtual MappingSchema  MappingSchema
-		{
-			get { return _mappingSchema;  }
-			set { _mappingSchema = value; }
-		}
+		public virtual MappingSchema MappingSchema { get; set; }
 
 		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
@@ -238,9 +233,12 @@ namespace BLToolkit.Data.DataProvider
 
 #if FW3
 
-		public virtual ISqlProvider CreateSqlProvider()
+		public abstract ISqlProvider CreateSqlProvider();
+
+		private   ISqlProvider _sqlProvider;
+		protected ISqlProvider  SqlProvider
 		{
-			return new BasicSqlProvider(this);
+			get { return _sqlProvider ?? (_sqlProvider = CreateSqlProvider()); }
 		}
 
 #endif
@@ -250,18 +248,6 @@ namespace BLToolkit.Data.DataProvider
 			return dataReader;
 		}
 
-		public virtual StringBuilder BuildTableName(StringBuilder sb, string database, string owner, string table)
-		{
-			if (database != null)
-			{
-				if (owner == null)  sb.Append(database).Append("..");
-				else                sb.Append(database).Append(".").Append(owner).Append(".");
-			}
-			else if (owner != null) sb.Append(owner).Append(".");
-
-			return sb.Append(table);
-		}
-
 		public virtual bool ParameterNamesEqual(string paramName1, string paramName2)
 		{
 			// default implementation is case-insensitive, because if we make it 
@@ -269,10 +255,10 @@ namespace BLToolkit.Data.DataProvider
 			return string.Equals(paramName1, paramName2, StringComparison.OrdinalIgnoreCase);
 		}
 
-		public virtual string ProviderName           { get { return ConnectionType.Namespace; } }
-		public virtual int    MaxParameters          { get { return 100;   } }
-		public virtual int    MaxBatchSize           { get { return 65536; } }
-		public virtual string EndOfSql               { get { return ";";   } }
+		public virtual string ProviderName  { get { return ConnectionType.Namespace; } }
+		public virtual int    MaxParameters { get { return 100;   } }
+		public virtual int    MaxBatchSize  { get { return 65536; } }
+		public virtual string EndOfSql      { get { return ";";   } }
 
 		#endregion
 

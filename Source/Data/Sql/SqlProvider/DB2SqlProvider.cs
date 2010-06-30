@@ -9,10 +9,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class DB2SqlProvider : BasicSqlProvider
 	{
-		public DB2SqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override bool TakeAcceptsParameter { get { return SqlQuery.Select.SkipValue != null; } }
 
 		SqlField _identityField;
@@ -56,6 +52,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
 			sb.AppendLine("SELECT identity_val_local() FROM SYSIBM.SYSDUMMY1");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new DB2SqlProvider();
 		}
 
 		protected override void BuildSql(StringBuilder sb)
@@ -223,6 +224,36 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
 				sb.Append(" THEN 1 ELSE 0 END");
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+					return "@" + value;
+
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return ":" + value;
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						var str = value.ToString();
+						return str.Length > 0 && str[0] == ':'? str.Substring(1): str;
+					}
+
+					break;
+
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTable:
+				case ConvertType.NameToQueryTableAlias:
+					return "\"" + value + "\"";
+			}
+
+			return value;
 		}
 	}
 }

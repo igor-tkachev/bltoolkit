@@ -245,7 +245,6 @@
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
     <Compile Include="Properties\BLToolkitConstants.cs" />
-    <Compile Include="Properties\BLToolkitConstants.Revision.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -408,6 +407,7 @@
     <Compile Include="Patterns\DuckType.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\JetBrains.Annotations.cs" />
+    <Compile Include="Properties\Revision.generated.cs" />
     <Compile Include="Reflection\ExprMemberAccessor.cs" />
     <Compile Include="Reflection\ExprTypeAccessor.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
@@ -552,6 +552,9 @@
     <Compile Include="Net\HttpReader.cs" />
     <Compile Include="Web\UI\Design\WebObjectBinderDesigner.cs" />
     <Compile Include="Web\UI\WebObjectBinder.cs" />
+    <None Include="Properties\Revision.tt">
+      <LastGenOutput>Revision1.generated.cs</LastGenOutput>
+    </None>
     <None Include="Templates\BLT4Toolkit.ttinclude" />
     <None Include="Templates\BLToolkit.ttinclude" />
     <None Include="Templates\BLToolkitConstants.Revision.cs.template" />
@@ -648,6 +651,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ServiceModel\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

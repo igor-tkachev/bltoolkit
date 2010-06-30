@@ -10,10 +10,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class SqlCeSqlProvider : BasicSqlProvider
 	{
-		public SqlCeSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override bool IsSkipSupported           { get { return false; } }
 		public override bool IsTakeSupported           { get { return false; } }
 		public override bool IsSubQueryTakeSupported   { get { return false; } }
@@ -27,6 +23,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
 			sb.AppendLine("SELECT @@IDENTITY");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new SqlCeSqlProvider();
 		}
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
@@ -305,6 +306,54 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
 				sb.Append(" THEN 1 ELSE 0 END");
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return "@" + value;
+
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
+				case ConvertType.NameToQueryTable:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						var str = value.ToString();
+						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
+					}
+					break;
+			}
+
+			return value;
 		}
 	}
 }

@@ -1,0 +1,36 @@
+﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
+<#@ output extension=".generated.cs" #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLToolkit.ttinclude"   #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLT4Toolkit.ttinclude" #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\MSSQL.ttinclude"       #>
+<#
+	ConnectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+
+	BaseDataContextClass = "ServiceModelDataContext";
+	
+	Usings.Add("BLToolkit.ServiceModel");
+	Usings.Add("System.ServiceModel");
+
+	GenerateModel();
+#>
+
+namespace Linq.OverWCF
+{
+	public partial class DataModel
+	{
+		public DataModel() : base(
+			new NetTcpBinding(SecurityMode.None)
+			{
+				MaxReceivedMessageSize = 10000000,
+				MaxBufferPoolSize      = 10000000,
+				MaxBufferSize          = 10000000,
+				CloseTimeout           = new TimeSpan(00, 01, 00),
+				OpenTimeout            = new TimeSpan(00, 01, 00),
+				ReceiveTimeout         = new TimeSpan(00, 10, 00),
+				SendTimeout            = new TimeSpan(00, 10, 00),
+			},
+			new EndpointAddress("net.tcp://localhost:1234/LinqOverWCF"))
+		{
+		}
+	}
+}

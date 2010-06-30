@@ -17,35 +17,41 @@ namespace BLToolkit.Data.DataProvider
 	{
 		#region Static configuration
 
-		public static char ParameterSymbol           { get; set; }
-		public static bool TryConvertParameterSymbol { get; set; }
+		public static char ParameterSymbol
+		{
+			get { return MySqlSqlProvider.ParameterSymbol;  }
+			set { MySqlSqlProvider.ParameterSymbol = value; }
+		}
 
-		private static List<char> _convertParameterSymbols;
+		public static bool TryConvertParameterSymbol
+		{
+			get { return MySqlSqlProvider.TryConvertParameterSymbol;  }
+			set { MySqlSqlProvider.TryConvertParameterSymbol = value; }
+		}
+
+		public  static string  CommandParameterPrefix
+		{
+			get { return MySqlSqlProvider.CommandParameterPrefix;  }
+			set { MySqlSqlProvider.CommandParameterPrefix = value; }
+		}
+
+		public  static string  SprocParameterPrefix
+		{
+			get { return MySqlSqlProvider.SprocParameterPrefix;  }
+			set { MySqlSqlProvider.SprocParameterPrefix = value; }
+		}
+
 		public  static List<char>  ConvertParameterSymbols
 		{
-			get { return _convertParameterSymbols; }
-			set { _convertParameterSymbols = value ?? new List<char>(); }
+			get { return MySqlSqlProvider.ConvertParameterSymbols;  }
+			set { MySqlSqlProvider.ConvertParameterSymbols = value; }
 		}
 
 		[Obsolete("Use CommandParameterPrefix or SprocParameterPrefix instead.")]
 		public  static string  ParameterPrefix
 		{
-			get { return _sprocParameterPrefix; }
-			set { _sprocParameterPrefix = _commandParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
-		}
-
-		private static string _commandParameterPrefix = "";
-		public  static string  CommandParameterPrefix
-		{
-			get { return _commandParameterPrefix; }
-			set { _commandParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
-		}
-
-		private static string _sprocParameterPrefix = "";
-		public  static string  SprocParameterPrefix
-		{
-			get { return _sprocParameterPrefix; }
-			set { _sprocParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
+			get { return MySqlSqlProvider.SprocParameterPrefix; }
+			set { SprocParameterPrefix = CommandParameterPrefix = string.IsNullOrEmpty(value) ? string.Empty : value; }
 		}
 
 		public static void ConfigureOldStyle()
@@ -131,39 +137,6 @@ namespace BLToolkit.Data.DataProvider
 
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-					return ParameterSymbol + value.ToString();
-
-				case ConvertType.NameToCommandParameter:
-					return ParameterSymbol + CommandParameterPrefix + value.ToString();
-
-				case ConvertType.NameToSprocParameter:
-					{
-						string valueStr = value.ToString();
-						if(string.IsNullOrEmpty(valueStr))
-							throw new ArgumentException("Argument 'value' must represent parameter name.");
-
-						if (valueStr[0] == ParameterSymbol)
-							valueStr = valueStr.Substring(1);
-						if (valueStr.StartsWith(SprocParameterPrefix, StringComparison.Ordinal))
-							valueStr = valueStr.Substring(SprocParameterPrefix.Length);
-						return ParameterSymbol + SprocParameterPrefix + valueStr;
-					}
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						string str = value.ToString();
-						str = (str.Length > 0 && (str[0] == ParameterSymbol || (TryConvertParameterSymbol && ConvertParameterSymbols.Contains(str[0])))) ? str.Substring(1) : str;
-
-						if ((!string.IsNullOrEmpty(SprocParameterPrefix))
-							&& str.StartsWith(SprocParameterPrefix))
-							str = str.Substring(SprocParameterPrefix.Length);
-
-						return str;
-					}
-					break;
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is MySqlException)
 						return ((MySqlException)value).Number;
@@ -175,7 +148,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public override Type ConnectionType
@@ -190,7 +163,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new MySqlSqlProvider(this);
+			return new MySqlSqlProvider();
 		}
 
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)

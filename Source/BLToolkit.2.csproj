@@ -269,13 +269,13 @@
     <Compile Include="Patterns\DuckTyping.cs" />
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\BLToolkitConstants.cs" />
-    <Compile Include="Properties\BLToolkitConstants.Revision.cs" />
     <Compile Include="Properties\JetBrains.Annotations.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Revision.generated.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />
     <Compile Include="Reflection\MetadataProvider\AttributeMetadataProvider.cs" />
     <Compile Include="Reflection\MetadataProvider\ExtensionMetadataProvider.cs" />
@@ -457,6 +457,8 @@
     <EmbeddedResource Include="Reflection\Extension\TypeExtension.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="Properties\Revision.tt">
+    </None>
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>
     </None>
@@ -477,4 +479,8 @@
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

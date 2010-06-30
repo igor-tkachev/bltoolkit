@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-using BLToolkit.Mapping;
+
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
@@ -10,10 +10,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{
-		public PostgreSQLSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
 			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
@@ -21,12 +17,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			SequenceNameAttribute attr = GetSequenceNameAttribute();
+			var attr = GetSequenceNameAttribute();
 
 			AppendIndent(sb)
 				.Append("SELECT currval('")
 				.Append(attr.SequenceName)
 				.AppendLine("')");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new PostgreSQLSqlProvider();
 		}
 
 		protected override string LimitFormat  { get { return "LIMIT {0}"; } }
@@ -38,7 +39,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
@@ -48,14 +49,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				var func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
 					case "Convert"   :
 						if (TypeHelper.GetUnderlyingType(func.SystemType) == typeof(bool))
 						{
-							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+							var ex = AlternativeConvertToBoolean(func, 1);
 							if (ex != null)
 								return ex;
 						}
@@ -76,7 +77,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlExpression)
 			{
-				SqlExpression e = (SqlExpression)expr;
+				var e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(DOW"))
 					return Inc(new SqlExpression(expr.SystemType, e.Expr.Replace("Extract(DOW", "Extract(Dow"), e.Parameters));
@@ -134,6 +135,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return ":" + value;
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						var str = value.ToString();
+						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 	}
 }

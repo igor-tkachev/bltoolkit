@@ -12,9 +12,9 @@ namespace BLToolkit.Data.DataProvider
 
 	class InformixDataProvider :  DataProviderBase
 	{
-		public override IDbConnection CreateConnectionObject () { return new IfxConnection      ();     }
-		public override DbDataAdapter CreateDataAdapterObject() { return new IfxDataAdapter     ();     }
-		public override ISqlProvider  CreateSqlProvider      () { return new InformixSqlProvider(this); }
+		public override IDbConnection CreateConnectionObject () { return new IfxConnection      (); }
+		public override DbDataAdapter CreateDataAdapterObject() { return new IfxDataAdapter     (); }
+		public override ISqlProvider  CreateSqlProvider      () { return new InformixSqlProvider(); }
 
 		public override Type   ConnectionType { get { return typeof(IfxConnection);              } }
 		public override string Name           { get { return DataProvider.ProviderName.Informix; } }
@@ -35,22 +35,6 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-					return "?";
-
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return ":" + value;
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						var str = value.ToString();
-						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
-					}
-
-					break;
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is IfxException)
 					{
@@ -65,7 +49,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)

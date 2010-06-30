@@ -9,10 +9,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class AccessSqlProvider : BasicSqlProvider
 	{
-		public AccessSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
 			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
@@ -111,6 +107,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		#endregion
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new AccessSqlProvider();
+		}
 
 		protected override bool ParenthesizeJoin()
 		{
@@ -335,6 +336,55 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return "@" + value;
+
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
+				case ConvertType.NameToQueryTable:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						var str = value.ToString();
+						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 	}
 }

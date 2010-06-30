@@ -30,24 +30,10 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return ":" + value;
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						string str = value.ToString();
-						return (str.Length > 0 && str[0] == ':')? str.Substring(1): str;
-					}
-
-					break;
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is NpgsqlException)
 					{
-						NpgsqlException ex = (NpgsqlException)value;
+						var ex = (NpgsqlException)value;
 
 						foreach (NpgsqlError error in ex.Errors)
 							return error.Code;
@@ -58,7 +44,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public override Type ConnectionType
@@ -78,7 +64,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new PostgreSQLSqlProvider(this);
+			return new PostgreSQLSqlProvider();
 		}
 	}
 }

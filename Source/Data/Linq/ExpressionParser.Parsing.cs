@@ -1929,14 +1929,14 @@ namespace BLToolkit.Data.Linq
 				select = ParseWhere(predicate, select);
 
 			if (setter != null)
-				ParseSetter(setter, select);
+				ParseSetter(setter, select, select);
 
 			CurrentSql.QueryType = QueryType.Update;
 
 			_buildSelect = () => { _info.SetNonQueryQuery(); };
 		}
 
-		private void ParseSetter(LambdaInfo setter, QuerySource select)
+		void ParseSetter(LambdaInfo setter, QuerySource into, QuerySource select)
 		{
 			if (setter.Body.NodeType != ExpressionType.MemberInit)
 				throw new LinqException("Object initializer expected for update statement.");
@@ -1955,7 +1955,7 @@ namespace BLToolkit.Data.Linq
 				if (binding is MemberAssignment)
 				{
 					var ma     = binding as MemberAssignment;
-					var column = select.GetField(member);
+					var column = into.GetField(member);
 					var expr   = ParseExpression(setter, ma.Expression, select);
 
 					if (expr is SqlParameter && ma.Expression.Type.IsEnum)
@@ -2033,23 +2033,23 @@ namespace BLToolkit.Data.Linq
 		{
 			if (into != null)
 			{
-				ParseSetter(setter, select);
+				var sql = CurrentSql;
+				CurrentSql = new SqlQuery();
+				var source = ParseTable(into);
+				CurrentSql = sql;
+
+				ParseSetter(setter, source, select);
+
+				CurrentSql.Select.Columns.RemoveAll(_ => true);
 
 				foreach (var item in CurrentSql.Set.Items)
-					CurrentSql.Select.Expr(item.Expression);
+					CurrentSql.Select.Columns.Add(new SqlQuery.Column(CurrentSql, item.Expression));
 
-				var sql = CurrentSql;
-
-				CurrentSql = new SqlQuery();
-
-				var source = ParseTable(into);
-
-				CurrentSql = sql;
-				CurrentSql.Set.Into  = ((QuerySource.Table)source).SqlTable;
+				CurrentSql.Set.Into = ((QuerySource.Table)source).SqlTable;
 			}
 			else if (setter != null)
 			{
-				ParseSetter(setter, select);
+				ParseSetter(setter, select, select);
 
 				CurrentSql.Set.Into  = ((QuerySource.Table)select).SqlTable;
 				CurrentSql.From.Tables.Clear();

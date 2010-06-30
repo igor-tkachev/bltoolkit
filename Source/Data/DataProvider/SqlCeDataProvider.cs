@@ -67,53 +67,13 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return "@" + value;
-
-				case ConvertType.NameToQueryField:
-				case ConvertType.NameToQueryFieldAlias:
-				case ConvertType.NameToQueryTableAlias:
-					{
-						string name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '[')
-							return value;
-					}
-
-					return "[" + value + "]";
-
-				case ConvertType.NameToDatabase:
-				case ConvertType.NameToOwner:
-				case ConvertType.NameToQueryTable:
-					{
-						string name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '[')
-							return value;
-
-						if (name.IndexOf('.') > 0)
-							value = string.Join("].[", name.Split('.'));
-					}
-
-					return "[" + value + "]";
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						string str = value.ToString();
-						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
-					}
-					break;
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is SqlCeException)
 						return ((SqlCeException)value).NativeError;
 					break;
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		/// <summary>
@@ -149,13 +109,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new SqlCeSqlProvider(this);
-		}
-
-		public override void SetParameterValue(IDbDataParameter parameter, object value)
-		{
-
-			base.SetParameterValue(parameter, value);
+			return new SqlCeSqlProvider();
 		}
 	}
 }

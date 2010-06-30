@@ -19,7 +19,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class FirebirdSqlProvider : BasicSqlProvider
 	{
-		public FirebirdSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
+		public FirebirdSqlProvider()
 		{
 		}
 
@@ -36,6 +36,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.Append("SELECT gen_id(")
 				.Append(attr.SequenceName)
 				.AppendLine(", 0) FROM rdb$database");
+		}
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new FirebirdSqlProvider();
 		}
 
 		protected override void BuildSelectClause(StringBuilder sb)
@@ -192,6 +197,44 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
 				sb.Append(" THEN 1 ELSE 0 END");
+		}
+
+		public static bool QuoteIdentifiers = false;
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryTable:
+					if (QuoteIdentifiers)
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '"')
+							return value;
+
+						return '"' + name + '"';
+					}
+
+					break;
+
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return "@" + value;
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						string str = value.ToString();
+						return str.Length > 0 && str[0] == '@' ? str.Substring(1) : str;
+					}
+
+					break;
+			}
+
+			return value;
 		}
 	}
 }

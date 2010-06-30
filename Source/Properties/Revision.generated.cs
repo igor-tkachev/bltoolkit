@@ -7,6 +7,7 @@ namespace BLToolkit
 		// <summary>
 		// Revision component of version.
 		// <summary>
-		public const string Revision = "973";
+		public const string Revision = "992";
 	}
 }
+

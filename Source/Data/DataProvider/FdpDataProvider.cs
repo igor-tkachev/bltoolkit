@@ -51,7 +51,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public static bool IsReturnValueEmulation    = true;
 		public static bool IsInOutParameterEmulation = true;
-		public static bool QuoteIdentifiers          = false;
+
+		public static bool QuoteIdentifiers
+		{
+			get { return FirebirdSqlProvider.QuoteIdentifiers;  }
+			set { FirebirdSqlProvider.QuoteIdentifiers = value; }
+		}
 
 		#endregion
 
@@ -88,38 +93,10 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryField:
-				case ConvertType.NameToQueryTable:
-					if (QuoteIdentifiers)
-					{
-						string name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '"')
-							return value;
-
-						return '"' + name + '"';
-					}
-
-					break;
-
-				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return "@" + value;
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						string str = value.ToString();
-						return str.Length > 0 && str[0] == '@' ? str.Substring(1) : str;
-					}
-
-					break;
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is FbException)
 					{
-						FbException ex = (FbException)value;
+						var ex = (FbException)value;
 						if (ex.Errors.Count > 0)
 							return ex.Errors[0].Number;
 					}
@@ -127,7 +104,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public override Type ConnectionType
@@ -147,7 +124,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new FirebirdSqlProvider(this);
+			return new FirebirdSqlProvider();
 		}
 
 		public override bool IsValueParameter(IDbDataParameter parameter)

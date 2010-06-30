@@ -79,15 +79,12 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-					return ":" + value;
-
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
 				case ConvertType.SprocParameterToName:
-					string name = (string)value;
+					var name = (string)value;
 
 					if (name.Length > 0)
 					{
@@ -109,7 +106,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 			}
 
-			return base.Convert(value, convertType);
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		/// <summary>
@@ -144,7 +141,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new OracleSqlProvider(this);
+			return new OracleSqlProvider();
 		}
 
 #endif

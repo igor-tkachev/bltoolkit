@@ -16,180 +16,180 @@ Imports BLToolkit.Mapping
 
 Namespace Templates.VB
 
-	Public Partial Class DataModel
+	Public Partial Class DataContext
 		Inherits DbManager
 
 		Public ReadOnly Property AlphabeticalListOfProducts() As Table(Of AlphabeticalListOfProducts)
 			Get
-				Return GetTable(Of AlphabeticalListOfProducts)()
+				Return Me.GetTable(Of AlphabeticalListOfProducts)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Categories()                 As Table(Of Categories)
 			Get
-				Return GetTable(Of Categories)()
+				Return Me.GetTable(Of Categories)()
 			End Get
 		End Property
 
 		Public ReadOnly Property CategorySalesFor1997()       As Table(Of CategorySalesFor1997)
 			Get
-				Return GetTable(Of CategorySalesFor1997)()
+				Return Me.GetTable(Of CategorySalesFor1997)()
 			End Get
 		End Property
 
 		Public ReadOnly Property CurrentProductList()         As Table(Of CurrentProductList)
 			Get
-				Return GetTable(Of CurrentProductList)()
+				Return Me.GetTable(Of CurrentProductList)()
 			End Get
 		End Property
 
 		Public ReadOnly Property CustomerAndSuppliersByCity() As Table(Of CustomerAndSuppliersByCity)
 			Get
-				Return GetTable(Of CustomerAndSuppliersByCity)()
+				Return Me.GetTable(Of CustomerAndSuppliersByCity)()
 			End Get
 		End Property
 
 		Public ReadOnly Property CustomerCustomerDemo()       As Table(Of CustomerCustomerDemo)
 			Get
-				Return GetTable(Of CustomerCustomerDemo)()
+				Return Me.GetTable(Of CustomerCustomerDemo)()
 			End Get
 		End Property
 
 		Public ReadOnly Property CustomerDemographics()       As Table(Of CustomerDemographics)
 			Get
-				Return GetTable(Of CustomerDemographics)()
+				Return Me.GetTable(Of CustomerDemographics)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Customers()                  As Table(Of Customers)
 			Get
-				Return GetTable(Of Customers)()
+				Return Me.GetTable(Of Customers)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Employees()                  As Table(Of Employees)
 			Get
-				Return GetTable(Of Employees)()
+				Return Me.GetTable(Of Employees)()
 			End Get
 		End Property
 
 		Public ReadOnly Property EmployeeTerritories()        As Table(Of EmployeeTerritories)
 			Get
-				Return GetTable(Of EmployeeTerritories)()
+				Return Me.GetTable(Of EmployeeTerritories)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Invoices()                   As Table(Of Invoices)
 			Get
-				Return GetTable(Of Invoices)()
+				Return Me.GetTable(Of Invoices)()
 			End Get
 		End Property
 
 		Public ReadOnly Property OrderDetails()               As Table(Of OrderDetails)
 			Get
-				Return GetTable(Of OrderDetails)()
+				Return Me.GetTable(Of OrderDetails)()
 			End Get
 		End Property
 
 		Public ReadOnly Property OrderDetailsExtended()       As Table(Of OrderDetailsExtended)
 			Get
-				Return GetTable(Of OrderDetailsExtended)()
+				Return Me.GetTable(Of OrderDetailsExtended)()
 			End Get
 		End Property
 
 		Public ReadOnly Property OrderSubtotals()             As Table(Of OrderSubtotals)
 			Get
-				Return GetTable(Of OrderSubtotals)()
+				Return Me.GetTable(Of OrderSubtotals)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Orders()                     As Table(Of Orders)
 			Get
-				Return GetTable(Of Orders)()
+				Return Me.GetTable(Of Orders)()
 			End Get
 		End Property
 
 		Public ReadOnly Property OrdersQry()                  As Table(Of OrdersQry)
 			Get
-				Return GetTable(Of OrdersQry)()
+				Return Me.GetTable(Of OrdersQry)()
 			End Get
 		End Property
 
 		Public ReadOnly Property ProductSalesFor1997()        As Table(Of ProductSalesFor1997)
 			Get
-				Return GetTable(Of ProductSalesFor1997)()
+				Return Me.GetTable(Of ProductSalesFor1997)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Products()                   As Table(Of Products)
 			Get
-				Return GetTable(Of Products)()
+				Return Me.GetTable(Of Products)()
 			End Get
 		End Property
 
 		Public ReadOnly Property ProductsAboveAveragePrice()  As Table(Of ProductsAboveAveragePrice)
 			Get
-				Return GetTable(Of ProductsAboveAveragePrice)()
+				Return Me.GetTable(Of ProductsAboveAveragePrice)()
 			End Get
 		End Property
 
 		Public ReadOnly Property ProductsByCategory()         As Table(Of ProductsByCategory)
 			Get
-				Return GetTable(Of ProductsByCategory)()
+				Return Me.GetTable(Of ProductsByCategory)()
 			End Get
 		End Property
 
 		Public ReadOnly Property QuarterlyOrders()            As Table(Of QuarterlyOrders)
 			Get
-				Return GetTable(Of QuarterlyOrders)()
+				Return Me.GetTable(Of QuarterlyOrders)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Region()                     As Table(Of Region)
 			Get
-				Return GetTable(Of Region)()
+				Return Me.GetTable(Of Region)()
 			End Get
 		End Property
 
 		Public ReadOnly Property SalesByCategory()            As Table(Of SalesByCategory)
 			Get
-				Return GetTable(Of SalesByCategory)()
+				Return Me.GetTable(Of SalesByCategory)()
 			End Get
 		End Property
 
 		Public ReadOnly Property SalesTotalsByAmount()        As Table(Of SalesTotalsByAmount)
 			Get
-				Return GetTable(Of SalesTotalsByAmount)()
+				Return Me.GetTable(Of SalesTotalsByAmount)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Shippers()                   As Table(Of Shippers)
 			Get
-				Return GetTable(Of Shippers)()
+				Return Me.GetTable(Of Shippers)()
 			End Get
 		End Property
 
 		Public ReadOnly Property SummaryOfSalesByQuarter()    As Table(Of SummaryOfSalesByQuarter)
 			Get
-				Return GetTable(Of SummaryOfSalesByQuarter)()
+				Return Me.GetTable(Of SummaryOfSalesByQuarter)()
 			End Get
 		End Property
 
 		Public ReadOnly Property SummaryOfSalesByYear()       As Table(Of SummaryOfSalesByYear)
 			Get
-				Return GetTable(Of SummaryOfSalesByYear)()
+				Return Me.GetTable(Of SummaryOfSalesByYear)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Suppliers()                  As Table(Of Suppliers)
 			Get
-				Return GetTable(Of Suppliers)()
+				Return Me.GetTable(Of Suppliers)()
 			End Get
 		End Property
 
 		Public ReadOnly Property Territories()                As Table(Of Territories)
 			Get
-				Return GetTable(Of Territories)()
+				Return Me.GetTable(Of Territories)()
 			End Get
 		End Property
 	End Class
@@ -252,7 +252,7 @@ Namespace Templates.VB
 
 		' FK_Products_Categories_BackReference
 		<Association(ThisKey:="CategoryID", OtherKey:="CategoryID")> _
-		Public Products As IEnumerable(Of Products)
+		Public Productss As IEnumerable(Of Products)
 	End Class
 
 	<Serializable, DataContract> _
@@ -314,7 +314,7 @@ Namespace Templates.VB
 
 		' FK_CustomerCustomerDemo_Customers
 		<Association(ThisKey:="CustomerID", OtherKey:="CustomerID")> _
-		Public FK_CustomerCustomerDemo_Customers As IEnumerable(Of Customers)
+		Public Customers As IEnumerable(Of Customers)
 	End Class
 
 	<Serializable, DataContract> _
@@ -330,7 +330,7 @@ Namespace Templates.VB
 
 		' FK_CustomerCustomerDemo_BackReference
 		<Association(ThisKey:="CustomerTypeID", OtherKey:="CustomerTypeID")> _
-		Public FK_CustomerCustomerDemo_BackReference As IEnumerable(Of CustomerCustomerDemo)
+		Public CustomerCustomerDemos As IEnumerable(Of CustomerCustomerDemo)
 	End Class
 
 	<Serializable, DataContract> _
@@ -373,11 +373,11 @@ Namespace Templates.VB
 
 		' FK_Orders_Customers_BackReference
 		<Association(ThisKey:="CustomerID", OtherKey:="CustomerID")> _
-		Public Orders As IEnumerable(Of Orders)
+		Public Orderss As IEnumerable(Of Orders)
 
 		' FK_CustomerCustomerDemo_Customers_BackReference
 		<Association(ThisKey:="CustomerID", OtherKey:="CustomerID")> _
-		Public CustomerCustomerDemo As IEnumerable(Of CustomerCustomerDemo)
+		Public CustomerCustomerDemos As IEnumerable(Of CustomerCustomerDemo)
 	End Class
 
 	<Serializable, DataContract> _
@@ -445,15 +445,15 @@ Namespace Templates.VB
 
 		' FK_Orders_Employees_BackReference
 		<Association(ThisKey:="EmployeeID", OtherKey:="EmployeeID")> _
-		Public FK_Orders_Employees_BackReference As IEnumerable(Of Orders)
+		Public Orderss As IEnumerable(Of Orders)
 
 		' FK_EmployeeTerritories_Employees_BackReference
 		<Association(ThisKey:="EmployeeID", OtherKey:="EmployeeID")> _
-		Public EmployeeTerritories As IEnumerable(Of EmployeeTerritories)
+		Public EmployeeTerritoriess As IEnumerable(Of EmployeeTerritories)
 
 		' FK_Employees_Employees_BackReference
 		<Association(ThisKey:="EmployeeID", OtherKey:="ReportsTo")> _
-		Public FK_Employees_Employees_BackReference As IEnumerable(Of Employees)
+		Public s As IEnumerable(Of Employees)
 	End Class
 
 	<Serializable, DataContract> _
@@ -469,11 +469,11 @@ Namespace Templates.VB
 
 		' FK_EmployeeTerritories_Employees
 		<Association(ThisKey:="EmployeeID", OtherKey:="EmployeeID")> _
-		Public FK_EmployeeTerritories_Employees As IEnumerable(Of Employees)
+		Public Employees As IEnumerable(Of Employees)
 
 		' FK_EmployeeTerritories_Territories
 		<Association(ThisKey:="TerritoryID", OtherKey:="TerritoryID")> _
-		Public FK_EmployeeTerritories_Territories As IEnumerable(Of Territories)
+		Public Territories As IEnumerable(Of Territories)
 	End Class
 
 	<Serializable, DataContract> _
@@ -582,11 +582,11 @@ Namespace Templates.VB
 
 		' FK_Order_Details_Orders
 		<Association(ThisKey:="OrderID", OtherKey:="OrderID")> _
-		Public Order_Details_Orders As IEnumerable(Of Orders)
+		Public OrderDetailsOrders As IEnumerable(Of Orders)
 
 		' FK_Order_Details_Products
 		<Association(ThisKey:="ProductID", OtherKey:="ProductID")> _
-		Public Order_Details_Products As IEnumerable(Of Products)
+		Public OrderDetailsProducts As IEnumerable(Of Products)
 	End Class
 
 	<Serializable, DataContract> _
@@ -689,7 +689,7 @@ Namespace Templates.VB
 
 		' FK_Order_Details_Orders_BackReference
 		<Association(ThisKey:="OrderID", OtherKey:="OrderID")> _
-		Public Order_Details As IEnumerable(Of OrderDetails)
+		Public OrderDetailss As IEnumerable(Of OrderDetails)
 	End Class
 
 	<Serializable, DataContract> _
@@ -818,7 +818,7 @@ Namespace Templates.VB
 
 		' FK_Order_Details_Products_BackReference
 		<Association(ThisKey:="ProductID", OtherKey:="ProductID")> _
-		Public FK_Order_Details_Products_BackReference As IEnumerable(Of OrderDetails)
+		Public OrderDetailss As IEnumerable(Of OrderDetails)
 	End Class
 
 	<Serializable, DataContract> _
@@ -885,7 +885,7 @@ Namespace Templates.VB
 
 		' FK_Territories_Region_BackReference
 		<Association(ThisKey:="ID", OtherKey:="RegionID")> _
-		Public Territories As IEnumerable(Of Territories)
+		Public Territoriess As IEnumerable(Of Territories)
 	End Class
 
 	<Serializable, DataContract> _
@@ -940,7 +940,7 @@ Namespace Templates.VB
 
 		' FK_Orders_Shippers_BackReference
 		<Association(ThisKey:="ShipperID", OtherKey:="ShipVia")> _
-		Public FK_Orders_Shippers_BackReference As IEnumerable(Of Orders)
+		Public Orderss As IEnumerable(Of Orders)
 	End Class
 
 	<Serializable, DataContract> _
@@ -1016,7 +1016,7 @@ Namespace Templates.VB
 
 		' FK_Products_Suppliers_BackReference
 		<Association(ThisKey:="SupplierID", OtherKey:="SupplierID")> _
-		Public FK_Products_Suppliers_BackReference As IEnumerable(Of Products)
+		Public Productss As IEnumerable(Of Products)
 	End Class
 
 	<Serializable, DataContract> _
@@ -1035,11 +1035,11 @@ Namespace Templates.VB
 
 		' FK_Territories_Region
 		<Association(ThisKey:="RegionID", OtherKey:="ID")> _
-		Public FK_Territories_Region As IEnumerable(Of Region)
+		Public Region As IEnumerable(Of Region)
 
 		' FK_EmployeeTerritories_Territories_BackReference
 		<Association(ThisKey:="TerritoryID", OtherKey:="TerritoryID")> _
-		Public Employee As IEnumerable(Of EmployeeTerritories)
+		Public EmployeeTerritoriess As IEnumerable(Of EmployeeTerritories)
 	End Class
 
 End Namespace

@@ -9,10 +9,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public abstract class MsSqlSqlProvider : BasicSqlProvider
 	{
-		protected MsSqlSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		protected override string FirstFormat
 		{
 			get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" : null; }
@@ -107,13 +103,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			sb.Append(DataProvider.Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
+			sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
 		}
 
 		protected override void BuildUnicodeString(StringBuilder sb, string value)
@@ -133,6 +129,54 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
 				sb.Append(" THEN 1 ELSE 0 END");
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+				case ConvertType.NameToCommandParameter:
+				case ConvertType.NameToSprocParameter:
+					return "@" + value;
+
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
+				case ConvertType.NameToQueryTable:
+					{
+						var name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '[')
+							return value;
+
+						if (name.IndexOf('.') > 0)
+							value = string.Join("].[", name.Split('.'));
+					}
+
+					return "[" + value + "]";
+
+				case ConvertType.SprocParameterToName:
+					if (value != null)
+					{
+						var str = value.ToString();
+						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
+					}
+					break;
+			}
+
+			return value;
 		}
 	}
 }

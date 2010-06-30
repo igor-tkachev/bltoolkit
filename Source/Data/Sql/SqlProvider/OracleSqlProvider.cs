@@ -9,10 +9,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class OracleSqlProvider : BasicSqlProvider
 	{
-		public OracleSqlProvider(DataProviderBase dataProvider) : base(dataProvider)
-		{
-		}
-
 		public override bool IsCountSubQuerySupported    { get { return false; } }
 		public override bool IsIdentityParameterRequired { get { return true;  } }
 
@@ -47,6 +43,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		}
 
 		string _rowNumberAlias;
+
+		protected override ISqlProvider CreateSqlProvider()
+		{
+			return new OracleSqlProvider();
+		}
 
 		protected override void BuildSql(StringBuilder sb)
 		{
@@ -298,6 +299,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
 				sb.Append(" THEN 1 ELSE 0 END");
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.NameToQueryParameter:
+					return ":" + value;
+			}
+
+			return value;
 		}
 	}
 }

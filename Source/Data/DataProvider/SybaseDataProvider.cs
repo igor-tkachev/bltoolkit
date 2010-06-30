@@ -34,47 +34,6 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return "@" + value;
-
-				case ConvertType.NameToQueryField:
-				case ConvertType.NameToQueryFieldAlias:
-				case ConvertType.NameToQueryTableAlias:
-					{
-						var name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '[')
-							return value;
-					}
-
-					return "[" + value + "]";
-
-				case ConvertType.NameToDatabase:
-				case ConvertType.NameToOwner:
-				case ConvertType.NameToQueryTable:
-					{
-						var name = value.ToString();
-
-						if (name.Length > 0 && name[0] == '[')
-							return value;
-
-						if (name.IndexOf('.') > 0)
-							value = string.Join("].[", name.Split('.'));
-					}
-
-					return "[" + value + "]";
-
-				case ConvertType.SprocParameterToName:
-					if (value != null)
-					{
-						var str = value.ToString();
-						return str.Length > 0 && str[0] == '@'? str.Substring(1): str;
-					}
-
-					break;
-
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is AseException)
 					{
@@ -120,7 +79,7 @@ namespace BLToolkit.Data.DataProvider
 					break;
 			}
 
-			return value;
+			return SqlProvider.Convert(value, convertType);
 		}
 
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
@@ -148,7 +107,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override ISqlProvider CreateSqlProvider()
 		{
-			return new SybaseSqlProvider(this);
+			return new SybaseSqlProvider();
 		}
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)

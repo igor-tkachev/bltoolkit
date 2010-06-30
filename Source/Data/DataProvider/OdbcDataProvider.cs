@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.Odbc;
+using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -12,7 +13,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-	public class OdbcDataProvider: DataProviderBase
+	public class OdbcDataProvider : DataProviderBase
 	{
 		/// <summary>
 		/// Creates the database connection object.
@@ -64,7 +65,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is OdbcException)
 					{
-						OdbcException ex = (OdbcException)value;
+						var ex = (OdbcException)value;
 						if (ex.Errors.Count > 0)
 							return ex.Errors[0].NativeError;
 					}
@@ -72,6 +73,11 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return base.Convert(value, convertType);
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			throw new NotSupportedException();
 		}
 
 		/// <summary>

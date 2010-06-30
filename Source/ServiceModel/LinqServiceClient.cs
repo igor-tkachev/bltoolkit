@@ -2,6 +2,8 @@
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 
+using BLToolkit.Data.Sql;
+
 namespace BLToolkit.ServiceModel
 {
 	class LinqServiceClient : ClientBase<ILinqService>, ILinqService, IDisposable
@@ -23,9 +25,14 @@ namespace BLToolkit.ServiceModel
 
 		#region ILinqService Members
 
-		public Type GetSqlProviderType()
+		public string GetSqlProviderType()
 		{
 			return Channel.GetSqlProviderType();
+		}
+
+		public int ExecuteNonQuery(SqlQuery query, SqlParameter[] parameters)
+		{
+			return Channel.ExecuteNonQuery(query, parameters);
 		}
 
 		#endregion

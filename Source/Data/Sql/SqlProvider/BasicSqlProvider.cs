@@ -13,20 +13,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	using Mapping;
 	using Reflection;
 
-	public class BasicSqlProvider : ISqlProvider
+	public abstract class BasicSqlProvider : ISqlProvider
 	{
 		#region Init
-
-		public BasicSqlProvider(DataProviderBase dataProvider)
-		{
-			_dataProvider = dataProvider;
-		}
-
-		readonly DataProviderBase _dataProvider;
-		public   DataProviderBase  DataProvider
-		{
-			get { return _dataProvider; }
-		}
 
 		private SqlQuery _sqlQuery;
 		public  SqlQuery  SqlQuery
@@ -130,18 +119,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual int BuildSqlBuilder(SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
 		{
 			if (!IsSkipSupported && sqlQuery.Select.SkipValue != null)
-				throw new SqlException("Skip for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
+				throw new SqlException("Skip for subqueries is not supported by the '{0}' provider.", Name);
 
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
-				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", _dataProvider.Name);
+				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
 			return CreateSqlProvider().BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
-		protected virtual ISqlProvider CreateSqlProvider()
-		{
-			return DataProvider.CreateSqlProvider();
-		}
+		protected abstract ISqlProvider CreateSqlProvider();
 
 		protected virtual bool ParenthesizeJoin()
 		{
@@ -171,6 +157,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			
 			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.Set.WithIdentity)
 				BuildGetIdentity(sb);
+		}
+
+		public virtual StringBuilder BuildTableName(StringBuilder sb, string database, string owner, string table)
+		{
+			if (database != null)
+			{
+				if (owner == null)  sb.Append(database).Append("..");
+				else                sb.Append(database).Append(".").Append(owner).Append(".");
+			}
+			else if (owner != null) sb.Append(owner).Append(".");
+
+			return sb.Append(table);
+		}
+
+		public virtual object Convert(object value, ConvertType convertType)
+		{
+			return value;
 		}
 
 		#endregion
@@ -214,7 +217,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				BuildColumn(sb, col, ref addAlias);
 
 				if (!_skipAlias && addAlias && col.Alias != null)
-					sb.Append(" as ").Append(DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
+					sb.Append(" as ").Append(Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
 			}
 
 			if (first)
@@ -430,7 +433,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				{
 					if (buildName)
 						sb.Append(" ");
-					sb.Append(DataProvider.Convert(alias, ConvertType.NameToQueryTableAlias));
+					sb.Append(Convert(alias, ConvertType.NameToQueryTableAlias));
 				}
 			}
 		}
@@ -1066,7 +1069,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								table = table == null ?
 									GetTablePhysicalName(field.Table) :
-									DataProvider.Convert(table, ConvertType.NameToQueryTableAlias).ToString();
+									Convert(table, ConvertType.NameToQueryTableAlias).ToString();
 
 								if (string.IsNullOrEmpty(table))
 									throw new SqlException(string.Format("Table {0} should have an alias.", field.Table));
@@ -1078,7 +1081,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 									.Append('.');
 							}
 
-							sb.Append(_dataProvider.Convert(field.PhysicalName, ConvertType.NameToQueryField));
+							sb.Append(Convert(field.PhysicalName, ConvertType.NameToQueryField));
 						}
 					}
 
@@ -1108,9 +1111,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						addAlias = alias != column.Alias;
 
 						sb
-							.Append(DataProvider.Convert(tableAlias, ConvertType.NameToQueryTableAlias))
+							.Append(Convert(tableAlias, ConvertType.NameToQueryTableAlias))
 							.Append('.')
-							.Append(_dataProvider.Convert(column.Alias, ConvertType.NameToQueryField));
+							.Append(Convert(column.Alias, ConvertType.NameToQueryField));
 					}
 
 					break;
@@ -1176,7 +1179,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						var parm = (SqlParameter)expr;
 
 						if (parm.IsQueryParameter)
-							sb.Append(_dataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter));
+							sb.Append(Convert(parm.Name, ConvertType.NameToQueryParameter));
 						else
 							BuildValue(sb, parm.Value);
 					}
@@ -1496,7 +1499,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sb.Append(',').AppendLine();
 				first = false;
 
-				AppendIndent(sb).AppendFormat("{0}.{1}", table, DataProvider.Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
+				AppendIndent(sb).AppendFormat("{0}.{1}", table, Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
 
 				if (postfix != null)
 					sb.Append(postfix);
@@ -1956,10 +1959,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var tbl = (SqlTable)table;
 
-						return _dataProvider.BuildTableName(new StringBuilder(), 
-							tbl.Database     == null ? null : _dataProvider.Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString(),
-							tbl.Owner        == null ? null : _dataProvider.Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString(),
-							tbl.PhysicalName == null ? null : _dataProvider.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString()).ToString();
+						return BuildTableName(new StringBuilder(), 
+							tbl.Database     == null ? null : Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString(),
+							tbl.Owner        == null ? null : Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString(),
+							tbl.PhysicalName == null ? null : Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString()).ToString();
 					}
 
 				case QueryElementType.TableSource :

@@ -5,6 +5,8 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
+	using DataProvider;
+
 	public interface ISqlProvider
 	{
 		int            CommandCount      (SqlQuery sqlQuery);
@@ -12,6 +14,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		ISqlExpression ConvertExpression (ISqlExpression expression);
 		ISqlPredicate  ConvertPredicate  (ISqlPredicate  predicate);
 		SqlQuery       Finalize          (SqlQuery sqlQuery);
+
+		StringBuilder  BuildTableName    (StringBuilder sb, string database, string owner, string table);
+		object         Convert           (object value, ConvertType convertType);
 
 		string         Name                        { get; }
 		SqlQuery       SqlQuery                    { get; set; }
