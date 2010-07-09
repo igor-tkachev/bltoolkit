@@ -122,7 +122,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual void Insert(T obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{

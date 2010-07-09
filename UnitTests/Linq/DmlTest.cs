@@ -567,6 +567,92 @@ namespace Update
 		}
 
 		[Test]
+		public void InsertEnum1()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Parent4.Delete(_ => _.ParentID > 1000);
+
+					var p = new Parent4
+					{
+						ParentID = id,
+						Value1   = TypeValue.Value2
+					};
+
+					Assert.AreEqual(1,
+						db.Parent4
+						.Insert(() => new Parent4
+						{
+							ParentID = 1001,
+							Value1   = p.Value1
+						}));
+
+					Assert.AreEqual(1, db.Parent4.Count(_ => _.ParentID == id && _.Value1 == p.Value1));
+				}
+				finally
+				{
+					db.Parent4.Delete(_ => _.ParentID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertEnum2()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Parent4.Delete(_ => _.ParentID > 1000);
+
+					Assert.AreEqual(1,
+						db.Parent4
+							.Value(_ => _.ParentID, id)
+							.Value(_ => _.Value1,   TypeValue.Value1)
+						.Insert());
+
+					Assert.AreEqual(1, db.Parent4.Count(_ => _.ParentID == id));
+				}
+				finally
+				{
+					db.Parent4.Delete(_ => _.ParentID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertEnum3()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Parent4.Delete(_ => _.ParentID > 1000);
+
+					Assert.AreEqual(1,
+						db.Parent4
+							.Value(_ => _.ParentID, id)
+							.Value(_ => _.Value1,   () => TypeValue.Value1)
+						.Insert());
+
+					Assert.AreEqual(1, db.Parent4.Count(_ => _.ParentID == id));
+				}
+				finally
+				{
+					db.Parent4.Delete(_ => _.ParentID > 1000);
+				}
+			});
+		}
+
+		[Test]
 		public void InsertNull()
 		{
 			ForEachProvider(db =>

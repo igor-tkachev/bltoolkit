@@ -94,12 +94,12 @@ namespace BLToolkit.Data.Sql
 		{
 			if (_valueConverter == null)
 			{
-				_valueConverter = o => ms.MapEnumToValue(o, type);
+				_valueConverter = o => ms.MapEnumToValue(o, type, true);
 			}
 			else
 			{
 				var converter = _valueConverter;
-				_valueConverter = o => ms.MapEnumToValue(converter(o), type);
+				_valueConverter = o => ms.MapEnumToValue(converter(o), type, true);
 			}
 		}
 
