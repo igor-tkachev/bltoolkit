@@ -129,6 +129,7 @@
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
     <Compile Include="Exceptions\Common.cs" />
+    <Compile Include="ExtensionTests.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="VisualBasicTest.cs" />

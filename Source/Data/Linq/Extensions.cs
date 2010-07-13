@@ -12,12 +12,51 @@ namespace BLToolkit.Data.Linq
 
 	public static class Extensions
 	{
-		#region GetTable
+		#region Table Helpers
 
 		static public Table<T> GetTable<T>(this IDataContext dataContext)
 			where T : class
 		{
 			return new Table<T>(dataContext);
+		}
+
+		static public Table<T> TableName<T>([NotNull] this Table<T> table, [NotNull] string name)
+		{
+			if (table == null) throw new ArgumentNullException("table");
+			if (name  == null) throw new ArgumentNullException("name");
+
+			table.Expression = Expression.Call(
+				null,
+				((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+				new[] { table.Expression, Expression.Constant(name) });
+
+			return table;
+		}
+
+		static public Table<T> DatabaseName<T>([NotNull] this Table<T> table, [NotNull] string name)
+		{
+			if (table == null) throw new ArgumentNullException("table");
+			if (name  == null) throw new ArgumentNullException("name");
+
+			table.Expression = Expression.Call(
+				null,
+				((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+				new[] { table.Expression, Expression.Constant(name) });
+
+			return table;
+		}
+
+		static public Table<T> OwnerName<T>([NotNull] this Table<T> table, [NotNull] string name)
+		{
+			if (table == null) throw new ArgumentNullException("table");
+			if (name  == null) throw new ArgumentNullException("name");
+
+			table.Expression = Expression.Call(
+				null,
+				((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+				new[] { table.Expression, Expression.Constant(name) });
+
+			return table;
 		}
 
 		#endregion
@@ -43,7 +82,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int Delete<T>([NotNull] this IQueryable<T> source)
 		{
-			if (source   == null) throw new ArgumentNullException("source");
+			if (source == null) throw new ArgumentNullException("source");
 
 			return source.Provider.Execute<int>(
 				Expression.Call(

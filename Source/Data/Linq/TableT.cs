@@ -39,8 +39,9 @@ namespace BLToolkit.Data.Linq
 			Expression  = expression;
 		}
 
-		protected Expression        Expression;
+		public    Expression        Expression  { get; set; }
 		public    IDataContext      DataContext { get; set; }
+
 		internal  ExpressionInfo<T> Info;
 		internal  object[]          Parameters;
 

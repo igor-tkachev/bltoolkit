@@ -70,7 +70,7 @@ namespace BLToolkit.Data.DataProvider
 				//
 				if (p.SqlDbType == SqlDbType.Structured)
 				{
-					int lastDot = p.TypeName.LastIndexOf('.');
+					var lastDot = p.TypeName.LastIndexOf('.');
 					if (lastDot >= 0)
 						p.TypeName = p.TypeName.Substring(lastDot + 1);
 				}
@@ -87,14 +87,14 @@ namespace BLToolkit.Data.DataProvider
 			if (commandParameters == null)
 				return;
 
-			foreach (IDbDataParameter p in commandParameters)
+			foreach (var p in commandParameters)
 			{
-				object val = p.Value;
+				var val = p.Value;
 
 				if (val == null || !val.GetType().IsArray || val is byte[] || val is char[])
 					continue;
 
-				DataTable dt = new DataTable();
+				var dt = new DataTable();
 
 				dt.Columns.Add("column_value", val.GetType().GetElementType());
 
@@ -102,7 +102,7 @@ namespace BLToolkit.Data.DataProvider
 
 				foreach (object o in (Array)val)
 				{
-					DataRow row = dt.NewRow();
+					var row = dt.NewRow();
 					row[0] = o;
 					dt.Rows.Add(row);
 				}

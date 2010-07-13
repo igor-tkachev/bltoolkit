@@ -451,17 +451,17 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod("GroupBy",         1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Type.GetGenericArguments()[0])),
 				pi => pi.IsQueryableMethod("GroupBy",         1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, null, l2,   sequence[0], null)),
 				pi => pi.IsQueryableMethod("GroupBy",      1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select   = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
-				pi => pi.IsQueryableMethod("Update",          1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate(l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Set",             1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Set",             1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet   (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Set",                   seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet   (l,  ex, sequence[0])),
-				pi => pi.IsQueryableMethod("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseValue (l,  ex, sequence[0])),
-				pi => pi.IsQueryableMethod("Take",               0, seq => sequence = ParseSequence(seq), l               => ParseTake  (sequence[0], l)),
-				pi => pi.IsQueryableMethod("Take",                  seq => sequence = ParseSequence(seq), ex              => ParseTake  (sequence[0], ex)),
-				pi => pi.IsQueryableMethod("Skip",               0, seq => sequence = ParseSequence(seq), l               => ParseSkip  (sequence[0], l)),
-				pi => pi.IsQueryableMethod("Skip",                  seq => sequence = ParseSequence(seq), ex              => ParseSkip  (sequence[0], ex)),
+				pi => pi.IsQueryableMethod("Update",          1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate   (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Set",             1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet      (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Set",             1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet      (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Set",                   seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet      (l,  ex, sequence[0])),
+				pi => pi.IsQueryableMethod("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue    (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue    (l1, l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseValue    (l,  ex, sequence[0])),
+				pi => pi.IsQueryableMethod("Take",               0, seq => sequence = ParseSequence(seq), l               => ParseTake     (sequence[0], l)),
+				pi => pi.IsQueryableMethod("Take",                  seq => sequence = ParseSequence(seq), ex              => ParseTake     (sequence[0], ex)),
+				pi => pi.IsQueryableMethod("Skip",               0, seq => sequence = ParseSequence(seq), l               => ParseSkip     (sequence[0], l)),
+				pi => pi.IsQueryableMethod("Skip",                  seq => sequence = ParseSequence(seq), ex              => ParseSkip     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod("ElementAt",          0, seq => sequence = ParseSequence(seq), l               => ParseElementAt(sequence[0], l,  false)),
 				pi => pi.IsQueryableMethod("ElementAt",             seq => sequence = ParseSequence(seq), ex              => ParseElementAt(sequence[0], ex, false)),
 				pi => pi.IsQueryableMethod("ElementAtOrDefault", 0, seq => sequence = ParseSequence(seq), l               => ParseElementAt(sequence[0], l,  true)),
@@ -471,8 +471,11 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod("Except",                seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, true);  return true; }),
 				pi => pi.IsQueryableMethod("Intersect",             seq => sequence = ParseSequence(seq), ex => { select = ParseIntersect(sequence,    ex, false); return true; }),
 				pi => pi.IsQueryableMethod("DefaultIfEmpty",        seq => { sequence = ParseDefaultIfEmpty(seq); return sequence != null; }),
-				pi => pi.IsQueryableMethod("Insert",             0, seq => sequence = ParseSequence(seq), l               => ParseInsert(false, null, l, sequence[0])),
-				pi => pi.IsQueryableMethod("InsertWithIdentity", 0, seq => sequence = ParseSequence(seq), l               => ParseInsert(true,  null, l, sequence[0])),
+				pi => pi.IsQueryableMethod("Insert",             0, seq => sequence = ParseSequence(seq), l               => ParseInsert   (false, null, l, sequence[0])),
+				pi => pi.IsQueryableMethod("InsertWithIdentity", 0, seq => sequence = ParseSequence(seq), l               => ParseInsert   (true,  null, l, sequence[0])),
+				pi => pi.IsQueryableMethod("TableName",             seq => sequence = ParseSequence(seq), ex              => ParseTableName(sequence[0], ex)),
+				pi => pi.IsQueryableMethod("DatabaseName",          seq => sequence = ParseSequence(seq), ex              => ParseDBName   (sequence[0], ex)),
+				pi => pi.IsQueryableMethod("OwnerName",             seq => sequence = ParseSequence(seq), ex              => ParseOwnerName(sequence[0], ex)),
 				pi =>
 				{
 					Expression into = null;
@@ -2120,6 +2123,45 @@ namespace BLToolkit.Data.Linq
 			}
 
 			ParseSet(extract, update, select);
+		}
+
+		#endregion
+
+		#region Parse TableName
+
+		static bool ParseTableName(QuerySource query, Expression name)
+		{
+			var table = (QuerySource.Table)query;
+
+			table.SqlTable.PhysicalName = (string)((ConstantExpression)name).Value;
+
+			return true;
+		}
+
+		#endregion
+
+		#region Parse DatabaseName
+
+		static bool ParseDBName(QuerySource query, Expression name)
+		{
+			var table = (QuerySource.Table)query;
+
+			table.SqlTable.Database = (string)((ConstantExpression)name).Value;
+
+			return true;
+		}
+
+		#endregion
+
+		#region Parse OwnerName
+
+		static bool ParseOwnerName(QuerySource query, Expression name)
+		{
+			var table = (QuerySource.Table)query;
+
+			table.SqlTable.Owner = (string)((ConstantExpression)name).Value;
+
+			return true;
 		}
 
 		#endregion
