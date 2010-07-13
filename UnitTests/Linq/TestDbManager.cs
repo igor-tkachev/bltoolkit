@@ -28,6 +28,7 @@ namespace Data.Linq
 		public Table<Parent5>                Parent5            { get { return GetTable<Parent5>();                } }
 		public Table<ParentInheritanceBase>  ParentInheritance  { get { return GetTable<ParentInheritanceBase>();  } }
 		public Table<ParentInheritanceBase2> ParentInheritance2 { get { return GetTable<ParentInheritanceBase2>(); } }
+		public Table<ParentInheritanceBase3> ParentInheritance3 { get { return GetTable<ParentInheritanceBase3>(); } }
 		public Table<Child>                  Child              { get { return GetTable<Child>();                  } }
 		public Table<GrandChild>             GrandChild         { get { return GetTable<GrandChild>();             } }
 		public Table<GrandChild1>            GrandChild1        { get { return GetTable<GrandChild1>();            } }

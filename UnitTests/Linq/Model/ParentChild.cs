@@ -419,4 +419,27 @@ namespace Data.Linq.Model
 	}
 
 	#endregion
+
+	#region Inheritance3
+
+	[TableName("Parent")]
+	[InheritanceMapping(Code = null, Type = typeof(ParentInheritanceBase3))]
+	[InheritanceMapping(Code = 1,    Type = typeof(ParentInheritance13))]
+	[InheritanceMapping(Code = 2,    Type = typeof(ParentInheritance13))]
+	public abstract class ParentInheritanceBase3
+	{
+		[PrimaryKey]
+		public int ParentID;
+
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID")]
+		public List<Child> Children;
+	}
+
+	public class ParentInheritance13 : ParentInheritanceBase3
+	{
+		[MapField("Value1", IsInheritanceDiscriminator = true)]
+		public int Value;
+	}
+
+	#endregion
 }

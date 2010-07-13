@@ -91,6 +91,16 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Test11()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.ParentInheritance3 where p is ParentInheritance13 select p;
+				q.ToList();
+			});
+		}
+
+		[Test]
 		public void TypeCastAsTest()
 		{
 			var expected =

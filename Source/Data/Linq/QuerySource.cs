@@ -137,7 +137,7 @@ namespace BLToolkit.Data.Linq
 								}
 
 								if (mm.MapMemberInfo.IsInheritanceDiscriminator)
-									discriminator = mm.MapMemberInfo.Name;
+									discriminator = mm.MapMemberInfo.MemberName;
 							}
 						}
 
