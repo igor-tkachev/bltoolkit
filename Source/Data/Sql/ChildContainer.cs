@@ -8,6 +8,10 @@ namespace BLToolkit.Data.Sql
 		where C : IChild<P>
 		where P : class
 	{
+		internal ChildContainer()
+		{
+		}
+
 		internal ChildContainer(P parent)
 		{
 			_parent = parent;

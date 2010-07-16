@@ -406,6 +406,8 @@
     <Compile Include="ServiceModel\ILinqService.cs" />
     <Compile Include="ServiceModel\LinqService.cs" />
     <Compile Include="ServiceModel\LinqServiceClient.cs" />
+    <Compile Include="ServiceModel\LinqServiceQuery.cs" />
+    <Compile Include="ServiceModel\LinqServiceSerializer.cs" />
     <Compile Include="ServiceModel\ServiceModelDataContext.cs" />
     <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />

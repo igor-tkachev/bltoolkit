@@ -53,8 +53,8 @@ namespace BLToolkit.ServiceModel
 
 		class QueryContext : IQueryContext
 		{
-			public SqlQuery       SqlQuery { get; set; }
-			public object         Context  { get; set; }
+			public SqlQuery       SqlQuery   { get; set; }
+			public object         Context    { get; set; }
 			public SqlParameter[] Parameters { get; set; }
 
 			public SqlParameter[] GetParameters()
@@ -63,15 +63,15 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		public virtual int ExecuteNonQuery(SqlQuery query, SqlParameter[] parameters)
+		public virtual int ExecuteNonQuery(LinqServiceQuery query)
 		{
-			ValidateQuery(query, parameters);
+			ValidateQuery(query.Query, query.Parameters);
 
 			var db = CreateDataContext();
 
 			try
 			{
-				var obj = db.SetQuery(new QueryContext { SqlQuery = query, Parameters = parameters });
+				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
 				return db.ExecuteNonQuery(obj);
 			}
 			finally

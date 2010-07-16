@@ -203,12 +203,10 @@ namespace BLToolkit.Common
 			if (p is Type)            return ToString((Type)p);
 			if (p is XmlDocument)     return ToString((XmlDocument)p);
 			if (p is Byte[])          return ToString((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToString(((Binary)p).ToArray());
-#endif
 
-			if (p is IConvertible) return ((IConvertible)p).ToString(null);
-			if (p is IFormattable) return ((IFormattable)p).ToString(null, null);
+			if (p is IConvertible)    return ((IConvertible)p).ToString(null);
+			if (p is IFormattable)    return ((IFormattable)p).ToString(null, null);
 
 			return p.ToString();
 		}
@@ -2676,8 +2674,6 @@ namespace BLToolkit.Common
 
 		#endregion
 
-		#if FW3
-
 		#region DateTimeOffset
 
 		// Scalar Types.
@@ -2760,8 +2756,6 @@ namespace BLToolkit.Common
 		}
 
 		#endregion
-
-		#endif
 
 		#region TimeSpan
 
@@ -8576,7 +8570,7 @@ namespace BLToolkit.Common
 
 		#endregion
 
-		private static Exception CreateInvalidCastException(Type originalType, Type conversionType)
+		static Exception CreateInvalidCastException(Type originalType, Type conversionType)
 		{
 			return new InvalidCastException(string.Format(
 				Resources.Convert_InvalidCast, originalType.FullName, conversionType.FullName));

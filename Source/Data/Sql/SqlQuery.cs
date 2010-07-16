@@ -48,6 +48,11 @@ namespace BLToolkit.Data.Sql
 			_orderBy = new OrderByClause(this);
 		}
 
+		internal SqlQuery(int id)
+		{
+			_sourceID = id;
+		}
+
 		internal void Init(
 			SetClause          set,
 			SelectClause       select,
@@ -2123,7 +2128,6 @@ namespace BLToolkit.Data.Sql
 
 		#region SetClause
 
-		[Serializable]
 		public class SetExpression : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
 			public SetExpression(ISqlExpression column, ISqlExpression expression)
@@ -2194,7 +2198,6 @@ namespace BLToolkit.Data.Sql
 			#endregion
 		}
 
-		[Serializable]
 		public class SetClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
 			readonly List<SetExpression> _items = new List<SetExpression>();
@@ -2293,12 +2296,7 @@ namespace BLToolkit.Data.Sql
 		private SetClause _set;
 		public  SetClause  Set
 		{
-			get
-			{
-				if (_set == null)
-					_set = new SetClause();
-				return _set;
-			}
+			get { return _set ?? (_set = new SetClause()); }
 		}
 
 		#endregion

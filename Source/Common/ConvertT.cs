@@ -27,7 +27,7 @@ namespace BLToolkit.Common
 		{
 			// Note that type parameters are in reverse order.
 			//
-			return Array.ConvertAll<P,T>(src, (Converter<P,T>)((object)From));
+			return Array.ConvertAll(src, (Converter<P,T>)((object)From));
 		}
 
 		///<summary>
@@ -41,8 +41,8 @@ namespace BLToolkit.Common
 		///<returns>Converter instance.</returns>
 		public static ConvertMethod GetConverter()
 		{
-			Type from = typeof(P);
-			Type to   = typeof(T);
+			var from = typeof(P);
+			var to   = typeof(T);
 
 			// Convert to the same type.
 			//
@@ -67,17 +67,18 @@ namespace BLToolkit.Common
 			else
 				methodName = "To" + to.Name;
 
-			MethodInfo mi = typeof(Convert).GetMethod(methodName,
+			var mi = typeof(Convert).GetMethod(methodName,
 				BindingFlags.Public | BindingFlags.Static | BindingFlags.ExactBinding,
-				null, new Type[] {from}, null) ?? FindTypeCastOperator(to) ?? FindTypeCastOperator(from);
+				null, new[] { from }, null) ?? FindTypeCastOperator(to) ?? FindTypeCastOperator(from);
 
 			if (mi == null && TypeHelper.IsNullable(to))
 			{
 				// To-nullable conversion.
 				// We have to use reflection to enforce some constraints.
 				//
-				Type toType   = to.GetGenericArguments()[0];
-				Type fromType = TypeHelper.IsNullable(from)? from.GetGenericArguments()[0]: from;
+				var toType   = to.GetGenericArguments()[0];
+				var fromType = TypeHelper.IsNullable(from)? from.GetGenericArguments()[0]: from;
+
 				methodName = TypeHelper.IsNullable(from) ? "FromNullable" : "From";
 
 				mi = typeof(NullableConvert<,>)
@@ -93,11 +94,11 @@ namespace BLToolkit.Common
 
 		private static MethodInfo FindTypeCastOperator(Type t)
 		{
-			foreach (MethodInfo mi in t.GetMethods(BindingFlags.Public | BindingFlags.Static))
+			foreach (var mi in t.GetMethods(BindingFlags.Public | BindingFlags.Static))
 			{
 				if (mi.IsSpecialName && mi.ReturnType == typeof(T) && (mi.Name == "op_Implicit" || mi.Name == "op_Explicit"))
 				{
-					ParameterInfo[] parameters = mi.GetParameters();
+					var parameters = mi.GetParameters();
 
 					if (1 == parameters.Length && parameters[0].ParameterType == typeof(P))
 						return mi;

@@ -138,7 +138,7 @@ namespace BLToolkit.ServiceModel
 			var ctx = (IQueryContext)query;
 
 			using (var client = GetClient())
-				return client.ExecuteNonQuery(ctx.SqlQuery, ctx.GetParameters());
+				return client.ExecuteNonQuery(new LinqServiceQuery { Query = ctx.SqlQuery, Parameters = ctx.GetParameters() });
 		}
 
 		object IDataContext.ExecuteScalar(object query)

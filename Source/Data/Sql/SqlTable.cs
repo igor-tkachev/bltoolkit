@@ -11,7 +11,6 @@ namespace BLToolkit.Data.Sql
 	using Reflection.Extension;
 	using SqlProvider;
 
-	[Serializable]
 	public class SqlTable : ISqlTableSource
 	{
 		#region Init
@@ -20,6 +19,24 @@ namespace BLToolkit.Data.Sql
 		{
 			_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
 			_fields   = new ChildContainer<ISqlTableSource,SqlField>(this);
+		}
+
+		internal SqlTable(
+			int id, string name, string alias, string database, string owner, string physicalName, Type objectType,
+			SequenceNameAttribute[] sequenceAttributes,
+			SqlField[] fields)
+		{
+			_sourceID           = id;
+			_name               = name;
+			_alias              = alias;
+			_database           = database;
+			_owner              = owner;
+			_physicalName       = physicalName;
+			_objectType         = objectType;
+			_sequenceAttributes = sequenceAttributes;
+
+			_fields  = new ChildContainer<ISqlTableSource,SqlField>(this);
+			_fields.AddRange(fields);
 		}
 
 		#endregion
@@ -230,9 +247,8 @@ namespace BLToolkit.Data.Sql
 			get { return _sequenceAttributes; }
 		}
 
-		[NonSerialized]
-		private  SqlField _all;
-		public   SqlField  All
+		private SqlField _all;
+		public  SqlField  All
 		{
 			get
 			{
@@ -300,7 +316,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var table = new SqlTable()
+				var table = new SqlTable
 				{
 					_name               = _name,
 					_alias              = _alias,

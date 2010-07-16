@@ -83,14 +83,14 @@ namespace BLToolkit.Reflection
 		[Obsolete("Use generic version instead")]
 		public Attribute GetAttribute(Type attributeType)
 		{
-			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+			var attrs = _memberInfo.GetCustomAttributes(attributeType, true);
 
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
 		public T GetAttribute<T>() where T : Attribute
 		{
-			object[] attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
+			var attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
 
 			return attrs.Length > 0? (T)attrs[0]: null;
 		}
@@ -98,7 +98,7 @@ namespace BLToolkit.Reflection
 		[Obsolete("Use generic version instead")]
 		public object[] GetAttributes(Type attributeType)
 		{
-			object[] attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+			var attrs = _memberInfo.GetCustomAttributes(attributeType, true);
 
 			return attrs.Length > 0? attrs: null;
 		}
@@ -112,7 +112,7 @@ namespace BLToolkit.Reflection
 
 		public object[] GetAttributes()
 		{
-			object[] attrs = _memberInfo.GetCustomAttributes(true);
+			var attrs = _memberInfo.GetCustomAttributes(true);
 
 			return attrs.Length > 0? attrs: null;
 		}
@@ -142,7 +142,7 @@ namespace BLToolkit.Reflection
 
 		public virtual void CloneValue(object source, object dest)
 		{
-			object value = GetValue(source);
+			var value = GetValue(source);
 			SetValue(dest, value is ICloneable? ((ICloneable)value).Clone(): value);
 		}
 

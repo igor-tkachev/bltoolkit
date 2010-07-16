@@ -34,12 +34,14 @@ namespace Linq.OverWCF
 
 				var client = new DataModel();
 
-				client.Person.Insert(() => new Person
+				var identity = client.Person.Insert(() => new Person
 				{
 					FirstName = "1",
 					LastName  = "2",
 					Gender    = 'F',
 				});
+
+				Console.WriteLine(identity);
 
 				Console.ReadLine();
 

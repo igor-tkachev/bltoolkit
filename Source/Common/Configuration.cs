@@ -69,7 +69,7 @@ namespace BLToolkit.Common
 		/// use only when side effects are noticed with attribute being present on derived and base classes. 
 		/// For builder attributes use provided attribute compatibility mechanism.
 		/// </summary>
-		public  static bool  FilterOutBaseEqualAttributes
+		public static bool FilterOutBaseEqualAttributes
 		{
 			get { return _filterOutBaseEqualAttributes; }
 			set { _filterOutBaseEqualAttributes = value; }
