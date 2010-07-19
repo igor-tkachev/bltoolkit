@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
-using BLToolkit.Common;
-
 namespace BLToolkit.Aspects
 {
+	using Common;
+
 	public delegate bool IsCacheableParameterType(Type parameterType);
 
 	/// <summary>
@@ -17,6 +17,14 @@ namespace BLToolkit.Aspects
 	public class CacheAspect : Interceptor
 	{
 		#region Init
+
+		static CacheAspect()
+		{
+			MaxCacheTime = int.MaxValue;
+			IsEnabled    = true;
+
+			CleanupThread.Init();
+		}
 
 		public CacheAspect()
 		{
@@ -35,11 +43,11 @@ namespace BLToolkit.Aspects
 
 			_methodInfo = info.MethodInfo;
 
-			string[] ps = configString.Split(';');
+			var ps = configString.Split(';');
 
-			foreach (string p in ps)
+			foreach (var p in ps)
 			{
-				string[] vs = p.Split('=');
+				var vs = p.Split('=');
 
 				if (vs.Length == 2)
 				{
@@ -77,12 +85,12 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			IDictionary cache = Cache;
+			var cache = Cache;
 
 			lock (cache.SyncRoot)
 			{
-				CompoundValue   key  = GetKey(info);
-				CacheAspectItem item = GetItem(cache, key);
+				var key  = GetKey(info);
+				var item = GetItem(cache, key);
 
 				if (item != null && !item.IsExpired)
 				{
@@ -91,10 +99,10 @@ namespace BLToolkit.Aspects
 
 					if (item.RefValues != null)
 					{
-						ParameterInfo[] pis = info.CallMethodInfo.Parameters;
-						int             n   = 0;
+						var pis = info.CallMethodInfo.Parameters;
+						var n   = 0;
 
-						for (int i = 0; i < pis.Length; i++)
+						for (var i = 0; i < pis.Length; i++)
 							if (pis[i].ParameterType.IsByRef)
 								info.ParameterValues[i] = item.RefValues[n++];
 					}
@@ -113,30 +121,30 @@ namespace BLToolkit.Aspects
 			if (!IsEnabled)
 				return;
 
-			IDictionary cache = Cache;
+			var cache = Cache;
 
 			lock (cache.SyncRoot)
 			{
-				CompoundValue key = (CompoundValue)info.Items["CacheKey"];
+				var key = (CompoundValue)info.Items["CacheKey"];
 
 				if (key == null)
 					return;
 
-				int  maxCacheTime = _instanceMaxCacheTime ?? MaxCacheTime;
-				bool isWeak       = _instanceIsWeak       ?? IsWeak;
+				var maxCacheTime = _instanceMaxCacheTime ?? MaxCacheTime;
+				var isWeak       = _instanceIsWeak       ?? IsWeak;
 
-				CacheAspectItem item = new CacheAspectItem();
+				var item = new CacheAspectItem
+				{
+					ReturnValue = info.ReturnValue,
+					MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0 ?
+						DateTime.MaxValue :
+						DateTime.Now.AddMilliseconds(maxCacheTime),
+				};
 
-				item.ReturnValue  = info.ReturnValue;
-				item.MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0?
-					DateTime.MaxValue:
-					DateTime.Now.AddMilliseconds(maxCacheTime);
+				var pis = info.CallMethodInfo.Parameters;
+				var n   = 0;
 
-				ParameterInfo[] pis = info.CallMethodInfo.Parameters;
-
-				int n = 0;
-
-				foreach (ParameterInfo pi in pis)
+				foreach (var pi in pis)
 					if (pi.ParameterType.IsByRef)
 						n++;
 
@@ -146,7 +154,7 @@ namespace BLToolkit.Aspects
 
 					n = 0;
 
-					for (int i = 0; i < pis.Length; i++)
+					for (var i = 0; i < pis.Length; i++)
 						if (pis[i].ParameterType.IsByRef)
 							item.RefValues[n++] = info.ParameterValues[i];
 				}
@@ -159,26 +167,9 @@ namespace BLToolkit.Aspects
 
 		#region Global Parameters
 
-		private static bool _isEnabled = true;
-		public  static bool  IsEnabled
-		{
-			get { return _isEnabled;  }
-			set { _isEnabled = value; }
-		}
-
-		private static int _maxCacheTime = int.MaxValue;
-		public  static int  MaxCacheTime
-		{
-			get { return _maxCacheTime;  }
-			set { _maxCacheTime = value; }
-		}
-
-		private static bool _isWeak;
-		public  static bool  IsWeak
-		{
-			get { return _isWeak;  }
-			set { _isWeak = value; }
-		}
+		public static bool IsEnabled    { get; set; }
+		public static int  MaxCacheTime { get; set; }
+		public static bool IsWeak       { get; set; }
 
 		#endregion
 
@@ -220,20 +211,20 @@ namespace BLToolkit.Aspects
 
 		protected static CompoundValue GetKey(InterceptCallInfo info)
 		{
-			ParameterInfo[] parInfo     = info.CallMethodInfo.Parameters;
-			object[]        parValues   = info.ParameterValues;
-			object[]        keyValues   = new object[parValues.Length];
-			bool[]          cacheParams = info.CallMethodInfo.CacheableParameters;
+			var parInfo     = info.CallMethodInfo.Parameters;
+			var parValues   = info.ParameterValues;
+			var keyValues   = new object[parValues.Length];
+			var cacheParams = info.CallMethodInfo.CacheableParameters;
 
 			if (cacheParams == null)
 			{
 				info.CallMethodInfo.CacheableParameters = cacheParams = new bool[parInfo.Length];
 
-				for (int i = 0; i < parInfo.Length; i++)
+				for (var i = 0; i < parInfo.Length; i++)
 					cacheParams[i] = IsCacheableParameterType(parInfo[i].ParameterType);
 			}
 
-			for (int i = 0; i < parValues.Length; i++)
+			for (var i = 0; i < parValues.Length; i++)
 				keyValues[i] = cacheParams[i] ? parValues[i] : null;
 
 			return new CompoundValue(keyValues);
@@ -241,12 +232,12 @@ namespace BLToolkit.Aspects
 
 		protected static CacheAspectItem GetItem(IDictionary cache, CompoundValue key)
 		{
-			object obj = cache[key];
+			var obj = cache[key];
 
 			if (obj == null)
 				return null;
 
-			WeakReference wr = obj as WeakReference;
+			var wr = obj as WeakReference;
 
 			if (wr == null)
 				return (CacheAspectItem)obj;
@@ -270,7 +261,7 @@ namespace BLToolkit.Aspects
 			if (methodInfo == null)
 				throw new ArgumentNullException("methodInfo");
 
-			CacheAspect aspect = GetAspect(methodInfo);
+			var aspect = GetAspect(methodInfo);
 
 			if (aspect != null)
 				CleanupThread.ClearCache(aspect.Cache);
@@ -315,7 +306,7 @@ namespace BLToolkit.Aspects
 			if (parameterTypes == null)
 				parameterTypes = Type.EmptyTypes;
 
-			MethodInfo methodInfo = declaringType.GetMethod(
+			var methodInfo = declaringType.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
@@ -371,7 +362,7 @@ namespace BLToolkit.Aspects
 					lock (_syncTimer)
 						if (_timer == null)
 						{
-							TimeSpan interval = TimeSpan.FromSeconds(10);
+							var interval = TimeSpan.FromSeconds(10);
 							_timer = new Timer(Cleanup, null, interval, interval);
 						}
 			}
@@ -396,30 +387,30 @@ namespace BLToolkit.Aspects
 					return;
 				}
 
-				DateTime start          = DateTime.Now;
-				int      objectsInCache = 0;
+				var start          = DateTime.Now;
+				var objectsInCache = 0;
 
 				try
 				{
 					_workTimes++;
 
-					List<DictionaryEntry> list = new List<DictionaryEntry>();
+					var list = new List<DictionaryEntry>();
 
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
-						IDictionary cache = aspect.Cache;
+						var cache = aspect.Cache;
 
 						lock (cache.SyncRoot)
 						{
 							foreach (DictionaryEntry de in cache)
 							{
-								WeakReference wr = de.Value as WeakReference;
+								var wr = de.Value as WeakReference;
 
 								bool isExpired;
 
 								if (wr != null)
 								{
-									CacheAspectItem ca = wr.Target as CacheAspectItem;
+									var ca = wr.Target as CacheAspectItem;
 
 									isExpired = ca == null || ca.IsExpired;
 								}
@@ -432,7 +423,7 @@ namespace BLToolkit.Aspects
 									list.Add(de);
 							}
 
-							foreach (DictionaryEntry de in list)
+							foreach (var de in list)
 							{
 								cache.Remove(de.Key);
 								_objectsExpired++;
@@ -504,11 +495,6 @@ namespace BLToolkit.Aspects
 					}
 				}
 			}
-		}
-
-		static CacheAspect()
-		{
-			CleanupThread.Init();
 		}
 
 		#endregion

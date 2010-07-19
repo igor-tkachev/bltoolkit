@@ -5,13 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Sql
 {
 	using FJoin = SqlQuery.FromClause.Join;
 
-	[Serializable, DebuggerDisplay("SQL = {SqlText}")]
+	[DebuggerDisplay("SQL = {SqlText}")]
 	public class SqlQuery : ISqlTableSource
 	{
 		#region Init
@@ -38,7 +39,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlQuery()
 		{
-			_sourceID = Interlocked.Increment(ref SourceIDCounter);
+			SourceID = Interlocked.Increment(ref SourceIDCounter);
 
 			_select  = new SelectClause (this);
 			_from    = new FromClause   (this);
@@ -50,7 +51,7 @@ namespace BLToolkit.Data.Sql
 
 		internal SqlQuery(int id)
 		{
-			_sourceID = id;
+			SourceID = id;
 		}
 
 		internal void Init(
@@ -74,8 +75,8 @@ namespace BLToolkit.Data.Sql
 			_having             = having;
 			_orderBy            = orderBy;
 			_unions             = unions;
-			_parentSql          = parentSql;
-			_parameterDependent = parameterDependent;
+			ParentSql          = parentSql;
+			ParameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
 
 			foreach (var col in select.Columns)
@@ -95,19 +96,8 @@ namespace BLToolkit.Data.Sql
 			get { return _parameters; }
 		}
 
-		private bool _parameterDependent;
-		public  bool  ParameterDependent
-		{
-			get { return _parameterDependent;  }
-			set { _parameterDependent = value; }
-		}
-
-		private SqlQuery _parentSql;
-		public  SqlQuery  ParentSql
-		{
-			get { return _parentSql;  }
-			set { _parentSql = value; }
-		}
+		public bool     ParameterDependent { get; set; }
+		public SqlQuery ParentSql          { get; set; }
 
 		public bool IsSimple
 		{
@@ -125,15 +115,14 @@ namespace BLToolkit.Data.Sql
 
 		#region Column
 
-		[Serializable]
 		public class Column : IEquatable<Column>, ISqlExpression, IChild<SqlQuery>
 		{
 			public Column(SqlQuery parent, ISqlExpression expression, string alias)
 			{
 				if (expression == null) throw new ArgumentNullException("expression");
 
-				_parent     = parent;
-				_expression = expression;
+				Parent     = parent;
+				Expression = expression;
 				_alias      = alias;
 			}
 
@@ -142,12 +131,7 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			private ISqlExpression _expression;
-			public  ISqlExpression  Expression
-			{
-				get { return _expression;  }
-				set { _expression = value; }
-			}
+			public ISqlExpression Expression { get; set; }
 
 			internal string _alias;
 			public   string  Alias
@@ -156,15 +140,15 @@ namespace BLToolkit.Data.Sql
 				{
 					if (_alias == null)
 					{
-						if (_expression is SqlField)
+						if (Expression is SqlField)
 						{
-							var field = (SqlField)_expression;
+							var field = (SqlField)Expression;
 							return field.Alias ?? field.PhysicalName;
 						}
 
-						if (_expression is Column)
+						if (Expression is Column)
 						{
-							var col = (Column)_expression;
+							var col = (Column)Expression;
 							return col.Alias;
 						}
 					}
@@ -176,7 +160,7 @@ namespace BLToolkit.Data.Sql
 
 			public bool Equals(Column other)
 			{
-				return _alias == other._alias && _expression.Equals(other._expression);
+				return _alias == other._alias && Expression.Equals(other.Expression);
 			}
 
 #if OVERRIDETOSTRING
@@ -212,12 +196,12 @@ namespace BLToolkit.Data.Sql
 
 				ICloneableElement clone;
 
-				var parent = (SqlQuery)_parent.Clone(objectTree, doClone);
+				var parent = (SqlQuery)Parent.Clone(objectTree, doClone);
 
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new Column(
 						parent,
-						(ISqlExpression)_expression.Clone(objectTree, doClone),
+						(ISqlExpression)Expression.Clone(objectTree, doClone),
 						_alias));
 
 				return clone;
@@ -242,8 +226,8 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			public ISqlExpression Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				if (!(skipColumns && _expression is Column))
-					_expression = _expression.Walk(skipColumns, func);
+				if (!(skipColumns && Expression is Column))
+					Expression = Expression.Walk(skipColumns, func);
 
 				return func(this);
 			}
@@ -257,12 +241,7 @@ namespace BLToolkit.Data.Sql
 				get { return Alias; }
 			}
 
-			private SqlQuery _parent;
-			public  SqlQuery  Parent
-			{
-				get { return _parent;  }
-				set { _parent = value; }
-			}
+			public SqlQuery Parent { get; set; }
 
 			#endregion
 	
@@ -316,7 +295,6 @@ namespace BLToolkit.Data.Sql
 
 		#region TableSource
 
-		[Serializable]
 		public class TableSource : ISqlTableSource
 		{
 			public TableSource(ISqlTableSource source, string alias)
@@ -328,8 +306,8 @@ namespace BLToolkit.Data.Sql
 			{
 				if (source == null) throw new ArgumentNullException("source");
 
-				_source = source;
-				_alias  = alias;
+				Source = source;
+				_alias = alias;
 
 				if (joins != null)
 					_joins.AddRange(joins);
@@ -339,19 +317,14 @@ namespace BLToolkit.Data.Sql
 			{
 				if (source == null) throw new ArgumentNullException("source");
 
-				_source = source;
-				_alias  = alias;
+				Source = source;
+				_alias = alias;
 
 				if (joins != null)
 					_joins.AddRange(joins);
 			}
 
-			private ISqlTableSource _source;
-			public  ISqlTableSource  Source
-			{
-				get { return _source;  }
-				set { _source = value; }
-			}
+			public ISqlTableSource Source { get; set; }
 
 			internal string _alias;
 			public   string  Alias
@@ -360,11 +333,11 @@ namespace BLToolkit.Data.Sql
 				{
 					if (string.IsNullOrEmpty(_alias))
 					{
-						if (_source is TableSource)
-							return (_source as TableSource).Alias;
+						if (Source is TableSource)
+							return (Source as TableSource).Alias;
 
-						if (_source is SqlTable)
-							return ((SqlTable)_source).Alias;
+						if (Source is SqlTable)
+							return ((SqlTable)Source).Alias;
 					}
 
 					return _alias;
@@ -442,7 +415,7 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			public ISqlExpression Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				_source = (ISqlTableSource)_source.Walk(skipColumns, func);
+				Source = (ISqlTableSource)Source.Walk(skipColumns, func);
 
 				for (var i = 0; i < Joins.Count; i++)
 					((ISqlExpressionWalkable)Joins[i]).Walk(skipColumns, func);
@@ -475,7 +448,7 @@ namespace BLToolkit.Data.Sql
 
 				if (!objectTree.TryGetValue(this, out clone))
 				{
-					var ts = new TableSource((ISqlTableSource)_source.Clone(objectTree, doClone), _alias);
+					var ts = new TableSource((ISqlTableSource)Source.Clone(objectTree, doClone), _alias);
 
 					objectTree.Add(this, clone = ts);
 
@@ -550,15 +523,14 @@ namespace BLToolkit.Data.Sql
 			Left
 		}
 
-		[Serializable]
 		public class JoinedTable : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak, SearchCondition searchCondition)
 			{
-				JoinType  = joinType;
-				_table     = table;
-				_isWeak    = isWeak;
-				_condition = searchCondition;
+				JoinType   = joinType;
+				Table     = table;
+				IsWeak    = isWeak;
+				Condition = searchCondition;
 			}
 
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak)
@@ -571,27 +543,10 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			public JoinType JoinType { get; set; }
-
-			private TableSource _table;
-			public  TableSource  Table
-			{
-				get { return _table;  }
-				set { _table = value; }
-			}
-
-			private SearchCondition _condition;
-			public  SearchCondition  Condition
-			{
-				get { return _condition;  }
-			}
-
-			private bool _isWeak;
-			public  bool  IsWeak
-			{
-				get { return _isWeak;  }
-				set { _isWeak = value; }
-			}
+			public JoinType        JoinType  { get; set; }
+			public TableSource     Table     { get; set; }
+			public SearchCondition Condition { get; private set; }
+			public bool            IsWeak    { get; set; }
 
 			public ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
@@ -603,9 +558,9 @@ namespace BLToolkit.Data.Sql
 				if (!objectTree.TryGetValue(this, out clone))
 					objectTree.Add(this, clone = new JoinedTable(
 						JoinType,
-						(TableSource)_table.Clone(objectTree, doClone), 
-						_isWeak,
-						(SearchCondition)_condition.Clone(objectTree, doClone)));
+						(TableSource)Table.Clone(objectTree, doClone), 
+						IsWeak,
+						(SearchCondition)Condition.Clone(objectTree, doClone)));
 
 				return clone;
 			}
@@ -629,9 +584,9 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			public ISqlExpression Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 			{
-				_condition = (SearchCondition)((ISqlExpressionWalkable)_condition).Walk(skipColumns, action);
+				Condition = (SearchCondition)((ISqlExpressionWalkable)Condition).Walk(skipColumns, action);
 
-				_table.Walk(skipColumns, action);
+				Table.Walk(skipColumns, action);
 
 				return null;
 			}
@@ -666,7 +621,6 @@ namespace BLToolkit.Data.Sql
 
 		#region Predicate
 
-		[Serializable]
 		public abstract class Predicate : ISqlPredicate
 		{
 			public enum Operator
@@ -681,36 +635,32 @@ namespace BLToolkit.Data.Sql
 				NotLess         // !<    Is the operator used to test the condition of one expression not being less than the other expression.
 			}
 
-			[Serializable]
 			public class Expr : Predicate
 			{
 				public Expr([NotNull] ISqlExpression exp1, int precedence)
 					: base(precedence)
 				{
 					if (exp1 == null) throw new ArgumentNullException("exp1");
-					_expr1 = exp1;
+
+					Expr1 = exp1;
 				}
 
 				public Expr([NotNull] ISqlExpression exp1)
 					: base(exp1.Precedence)
 				{
 					if (exp1 == null) throw new ArgumentNullException("exp1");
-					_expr1 = exp1;
+
+					Expr1 = exp1;
 				}
 
-				private ISqlExpression _expr1;
-				public ISqlExpression Expr1
-				{
-					get { return _expr1; }
-					set { _expr1 = value; }
-				}
+				public ISqlExpression Expr1 { get; set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
-					_expr1 = Expr1.Walk(skipColumns, func);
+					Expr1 = Expr1.Walk(skipColumns, func);
 
-					if (_expr1 == null)
+					if (Expr1 == null)
 						throw new InvalidOperationException();
 				}
 
@@ -727,7 +677,7 @@ namespace BLToolkit.Data.Sql
 					ICloneableElement clone;
 
 					if (!objectTree.TryGetValue(this, out clone))
-						objectTree.Add(this, clone = new Expr((ISqlExpression)Expr1.Clone(objectTree, doClone), _precedence));
+						objectTree.Add(this, clone = new Expr((ISqlExpression)Expr1.Clone(objectTree, doClone), Precedence));
 
 					return clone;
 				}
@@ -743,16 +693,15 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			[Serializable]
 			public class NotExpr : Expr
 			{
 				public NotExpr(ISqlExpression exp1, bool isNot, int precedence)
 					: base(exp1, precedence)
 				{
-					_isNot = isNot;
+					IsNot = isNot;
 				}
 
-				bool _isNot; public bool IsNot { get { return _isNot; } set { _isNot = value; } }
+				public bool IsNot { get; set; }
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 				{
@@ -762,7 +711,7 @@ namespace BLToolkit.Data.Sql
 					ICloneableElement clone;
 
 					if (!objectTree.TryGetValue(this, out clone))
-						objectTree.Add(this, clone = new NotExpr((ISqlExpression)Expr1.Clone(objectTree, doClone), _isNot, _precedence));
+						objectTree.Add(this, clone = new NotExpr((ISqlExpression)Expr1.Clone(objectTree, doClone), IsNot, Precedence));
 
 					return clone;
 				}
@@ -782,29 +731,28 @@ namespace BLToolkit.Data.Sql
 
 			// { expression { = | <> | != | > | >= | ! > | < | <= | !< } expression
 			//
-			[Serializable]
 			public class ExprExpr : Expr
 			{
 				public ExprExpr(ISqlExpression exp1, Operator op, ISqlExpression exp2)
 					: base(exp1, Sql.Precedence.Comparison)
 				{
-					_op    = op;
-					_expr2 = exp2;
+					this.Operator = op;
+					Expr2 = exp2;
 				}
 
-				readonly Operator       _op;    public new Operator   Operator { get { return _op;    } }
-				private  ISqlExpression _expr2; public ISqlExpression Expr2    { get { return _expr2; } }
+				public new Operator   Operator { get; private set; }
+				public ISqlExpression Expr2    { get; private set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
-					_expr2 = _expr2.Walk(skipColumns, func);
+					Expr2 = Expr2.Walk(skipColumns, func);
 				}
 
 				public override bool CanBeNull()
 				{
-					return base.CanBeNull() || _expr2.CanBeNull();
+					return base.CanBeNull() || Expr2.CanBeNull();
 				}
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -816,7 +764,7 @@ namespace BLToolkit.Data.Sql
 
 					if (!objectTree.TryGetValue(this, out clone))
 						objectTree.Add(this, clone = new ExprExpr(
-							(ISqlExpression)Expr1.Clone(objectTree, doClone), _op, (ISqlExpression)_expr2.Clone(objectTree, doClone)));
+							(ISqlExpression)Expr1.Clone(objectTree, doClone), this.Operator, (ISqlExpression)Expr2.Clone(objectTree, doClone)));
 
 					return clone;
 				}
@@ -832,7 +780,7 @@ namespace BLToolkit.Data.Sql
 
 					string op;
 
-					switch (_op)
+					switch (this.Operator)
 					{
 						case Operator.Equal         : op = "=";  break;
 						case Operator.NotEqual      : op = "<>"; break;
@@ -853,27 +801,26 @@ namespace BLToolkit.Data.Sql
 
 			// string_expression [ NOT ] LIKE string_expression [ ESCAPE 'escape_character' ]
 			//
-			[Serializable]
 			public class Like : NotExpr
 			{
 				public Like(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression escape)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
-					_expr2  = exp2;
-					_escape = escape;
+					Expr2  = exp2;
+					Escape = escape;
 				}
 
-				ISqlExpression _expr2;  public ISqlExpression Expr2  { get { return _expr2;  } }
-				ISqlExpression _escape; public ISqlExpression Escape { get { return _escape; } }
+				public ISqlExpression Expr2  { get; private set; }
+				public ISqlExpression Escape { get; private set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
-					_expr2 = _expr2.Walk(skipColumns, func);
+					Expr2 = Expr2.Walk(skipColumns, func);
 
-					if (_escape != null)
-						_escape = _escape.Walk(skipColumns, func);
+					if (Escape != null)
+						Escape = Escape.Walk(skipColumns, func);
 				}
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -885,7 +832,7 @@ namespace BLToolkit.Data.Sql
 
 					if (!objectTree.TryGetValue(this, out clone))
 						objectTree.Add(this, clone = new Like(
-							(ISqlExpression)Expr1.Clone(objectTree, doClone), IsNot, (ISqlExpression)_expr2.Clone(objectTree, doClone), _escape));
+							(ISqlExpression)Expr1.Clone(objectTree, doClone), IsNot, (ISqlExpression)Expr2.Clone(objectTree, doClone), Escape));
 
 					return clone;
 				}
@@ -914,25 +861,24 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] BETWEEN expression AND expression
 			//
-			[Serializable]
 			public class Between : NotExpr
 			{
 				public Between(ISqlExpression exp1, bool isNot, ISqlExpression exp2, ISqlExpression exp3)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
-					_expr2 = exp2;
-					_expr3 = exp3;
+					Expr2 = exp2;
+					Expr3 = exp3;
 				}
 
-				ISqlExpression _expr2; public ISqlExpression Expr2 { get { return _expr2; } }
-				ISqlExpression _expr3; public ISqlExpression Expr3 { get { return _expr3; } }
+				public ISqlExpression Expr2 { get; private set; }
+				public ISqlExpression Expr3 { get; private set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
-					_expr2 = _expr2.Walk(skipColumns, func);
-					_expr3 = _expr3.Walk(skipColumns, func);
+					Expr2 = Expr2.Walk(skipColumns, func);
+					Expr3 = Expr3.Walk(skipColumns, func);
 				}
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -946,8 +892,8 @@ namespace BLToolkit.Data.Sql
 						objectTree.Add(this, clone = new Between(
 							(ISqlExpression)Expr1.Clone(objectTree, doClone),
 							IsNot,
-							(ISqlExpression)_expr2.Clone(objectTree, doClone),
-							(ISqlExpression)_expr3.Clone(objectTree, doClone)));
+							(ISqlExpression)Expr2.Clone(objectTree, doClone),
+							(ISqlExpression)Expr3.Clone(objectTree, doClone)));
 
 					return clone;
 				}
@@ -972,7 +918,6 @@ namespace BLToolkit.Data.Sql
 
 			// expression IS [ NOT ] NULL
 			//
-			[Serializable]
 			public class IsNull : NotExpr
 			{
 				public IsNull(ISqlExpression exp1, bool isNot)
@@ -1010,22 +955,21 @@ namespace BLToolkit.Data.Sql
 
 			// expression [ NOT ] IN ( subquery | expression [ ,...n ] )
 			//
-			[Serializable]
 			public class InSubQuery : NotExpr
 			{
 				public InSubQuery(ISqlExpression exp1, bool isNot, SqlQuery subQuery)
 					: base(exp1, isNot, Sql.Precedence.Comparison)
 				{
-					_subQuery = subQuery;
+					SubQuery = subQuery;
 				}
 
-				SqlQuery _subQuery; public SqlQuery SubQuery { get { return _subQuery; } }
+				public SqlQuery SubQuery { get; private set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
 					base.Walk(skipColumns, func);
-					_subQuery = (SqlQuery)((ISqlExpression)_subQuery).Walk(skipColumns, func);
+					SubQuery = (SqlQuery)((ISqlExpression)SubQuery).Walk(skipColumns, func);
 				}
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -1039,14 +983,14 @@ namespace BLToolkit.Data.Sql
 						objectTree.Add(this, clone = new InSubQuery(
 							(ISqlExpression)Expr1.Clone(objectTree, doClone),
 							IsNot,
-							(SqlQuery)_subQuery.Clone(objectTree, doClone)));
+							(SqlQuery)SubQuery.Clone(objectTree, doClone)));
 
 					return clone;
 				}
 
 				public override QueryElementType ElementType
 				{
-					get { return QueryElementType.InSubqueryPredicate; }
+					get { return QueryElementType.InSubQueryPredicate; }
 				}
 
 				protected override void ToString(StringBuilder sb, Dictionary<IQueryElement, IQueryElement> dic)
@@ -1061,7 +1005,6 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			[Serializable]
 			public class InList : NotExpr
 			{
 				public InList(ISqlExpression exp1, bool isNot, params ISqlExpression[] values)
@@ -1137,26 +1080,25 @@ namespace BLToolkit.Data.Sql
 			// expression { = | <> | != | > | >= | !> | < | <= | !< } { ALL | SOME | ANY } ( subquery )
 			// EXISTS ( subquery )
 
-			[Serializable]
 			public class FuncLike : Predicate
 			{
 				public FuncLike(SqlFunction func)
 					: base(func.Precedence)
 				{
-					_func = func;
+					Function = func;
 				}
 
-				SqlFunction _func; public SqlFunction Function { get { return _func; } }
-		
+				public SqlFunction Function { get; private set; }
+
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
-					_func = (SqlFunction)((ISqlExpression)_func).Walk(skipColumns, func);
+					Function = (SqlFunction)((ISqlExpression)Function).Walk(skipColumns, func);
 				}
 
 				public override bool CanBeNull()
 				{
-					return _func.CanBeNull();
+					return Function.CanBeNull();
 				}
 
 				protected override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -1167,7 +1109,7 @@ namespace BLToolkit.Data.Sql
 					ICloneableElement clone;
 
 					if (!objectTree.TryGetValue(this, out clone))
-						objectTree.Add(this, clone = new FuncLike((SqlFunction)_func.Clone(objectTree, doClone)));
+						objectTree.Add(this, clone = new FuncLike((SqlFunction)Function.Clone(objectTree, doClone)));
 
 					return clone;
 				}
@@ -1198,16 +1140,12 @@ namespace BLToolkit.Data.Sql
 
 			protected Predicate(int precedence)
 			{
-				_precedence = precedence;
+				Precedence = precedence;
 			}
 
 			#region IPredicate Members
 
-			readonly int _precedence;
-			public   int  Precedence
-			{
-				get { return _precedence;  }
-			}
+			public int Precedence { get; private set; }
 
 			public    abstract bool              CanBeNull();
 			protected abstract ICloneableElement Clone    (Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
@@ -1256,34 +1194,33 @@ namespace BLToolkit.Data.Sql
 
 		#region Condition
 
-		[Serializable]
 		public class Condition : IQueryElement, ICloneableElement
 		{
 			public Condition(bool isNot, ISqlPredicate predicate)
 			{
-				_isNot     = isNot;
-				_predicate = predicate;
+				IsNot     = isNot;
+				Predicate = predicate;
 			}
 
 			public Condition(bool isNot, ISqlPredicate predicate, bool isOr)
 			{
-				_isNot     = isNot;
-				_predicate = predicate;
-				_isOr      = isOr;
+				IsNot     = isNot;
+				Predicate = predicate;
+				IsOr      = isOr;
 			}
 
-			private bool          _isNot;     public bool          IsNot     { get { return _isNot;     } set { _isNot     = value; } }
-			private ISqlPredicate _predicate; public ISqlPredicate Predicate { get { return _predicate; } set { _predicate = value; } }
-			private bool          _isOr;      public bool          IsOr      { get { return _isOr;      } set { _isOr      = value; } }
+			public bool          IsNot     { get; set; }
+			public ISqlPredicate Predicate { get; set; }
+			public bool          IsOr      { get; set; }
 
 			public int Precedence
 			{
 				get
 				{
 					return
-						_isNot ? Sql.Precedence.LogicalNegation :
-						_isOr  ? Sql.Precedence.LogicalDisjunction :
-						         Sql.Precedence.LogicalConjunction;
+						IsNot ? Sql.Precedence.LogicalNegation :
+						IsOr  ? Sql.Precedence.LogicalDisjunction :
+						        Sql.Precedence.LogicalConjunction;
 				}
 			}
 
@@ -1295,7 +1232,7 @@ namespace BLToolkit.Data.Sql
 				ICloneableElement clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
-					objectTree.Add(this, clone = new Condition(_isNot, (ISqlPredicate)_predicate.Clone(objectTree, doClone), _isOr));
+					objectTree.Add(this, clone = new Condition(IsNot, (ISqlPredicate)Predicate.Clone(objectTree, doClone), IsOr));
 
 				return clone;
 			}
@@ -1344,7 +1281,6 @@ namespace BLToolkit.Data.Sql
 
 		#region SearchCondition
 
-		[Serializable]
 		public class SearchCondition : ConditionBase<SearchCondition, SearchCondition.Next>, ISqlPredicate, ISqlExpression
 		{
 			public SearchCondition()
@@ -1511,12 +1447,11 @@ namespace BLToolkit.Data.Sql
 		interface IConditionExpr<T>
 		{
 			T Expr    (ISqlExpression expr);
-			T Field   (SqlField          field);
-			T SubQuery(SqlQuery     sqlQuery);
+			T Field   (SqlField       field);
+			T SubQuery(SqlQuery       sqlQuery);
 			T Value   (object         value);
 		}
 
-		[Serializable]
 		public abstract class ConditionBase<T1,T2> : IConditionExpr<ConditionBase<T1,T2>.Expr_>
 			where T1 : ConditionBase<T1,T2>
 		{
@@ -1639,7 +1574,7 @@ namespace BLToolkit.Data.Sql
 
 				public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(_condition, true, expr); }
 				public Expr_ Field   (SqlField       field)    { return Expr(field);               }
-				public Expr_ SubQuery(SqlQuery     subQuery) { return Expr(subQuery);            }
+				public Expr_ SubQuery(SqlQuery       subQuery) { return Expr(subQuery);            }
 				public Expr_ Value   (object         value)    { return Expr(new SqlValue(value)); }
 
 				public T2 Exists(SqlQuery subQuery)
@@ -1660,10 +1595,10 @@ namespace BLToolkit.Data.Sql
 
 			public Not_  Not { get { return new Not_(this); } }
 
-			public Expr_ Expr    (ISqlExpression expr)   { return new Expr_(this, false, expr); }
-			public Expr_ Field   (SqlField       field)  { return Expr(field);                  }
-			public Expr_ SubQuery(SqlQuery     subQuery) { return Expr(subQuery);               }
-			public Expr_ Value   (object         value)  { return Expr(new SqlValue(value));    }
+			public Expr_ Expr    (ISqlExpression expr)     { return new Expr_(this, false, expr); }
+			public Expr_ Field   (SqlField       field)    { return Expr(field);                  }
+			public Expr_ SubQuery(SqlQuery       subQuery) { return Expr(subQuery);               }
+			public Expr_ Value   (object         value)    { return Expr(new SqlValue(value));    }
 
 			public T2 Exists(SqlQuery subQuery)
 			{
@@ -1676,22 +1611,21 @@ namespace BLToolkit.Data.Sql
 
 		#region OrderByItem
 
-		[Serializable]
 		public class OrderByItem : IQueryElement, ICloneableElement
 		{
 			public OrderByItem(ISqlExpression expression, bool isDescending)
 			{
-				_expression   = expression;
-				_isDescending = isDescending;
+				Expression   = expression;
+				IsDescending = isDescending;
 			}
 
-			private  ISqlExpression _expression;   public ISqlExpression Expression   { get { return _expression;   } }
-			readonly bool           _isDescending; public bool           IsDescending { get { return _isDescending; } }
+			public ISqlExpression Expression   { get; private set; }
+			public bool           IsDescending { get; private set; }
 
 			[Obsolete]
 			internal void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				_expression = _expression.Walk(skipColumns, func);
+				Expression = Expression.Walk(skipColumns, func);
 			}
 
 			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -1702,7 +1636,7 @@ namespace BLToolkit.Data.Sql
 				ICloneableElement clone;
 
 				if (!objectTree.TryGetValue(this, out clone))
-					objectTree.Add(this, clone = new OrderByItem((ISqlExpression)_expression.Clone(objectTree, doClone), _isDescending));
+					objectTree.Add(this, clone = new OrderByItem((ISqlExpression)Expression.Clone(objectTree, doClone), IsDescending));
 
 				return clone;
 			}
@@ -1744,12 +1678,11 @@ namespace BLToolkit.Data.Sql
 
 		#region ClauseBase
 
-		[Serializable]
 		public abstract class ClauseBase
 		{
 			protected ClauseBase(SqlQuery sqlQuery)
 			{
-				_sqlQuery = sqlQuery;
+				SqlQuery = sqlQuery;
 			}
 
 			public SelectClause  Select  { get { return SqlQuery.Select;  } }
@@ -1760,25 +1693,20 @@ namespace BLToolkit.Data.Sql
 			public OrderByClause OrderBy { get { return SqlQuery.OrderBy; } }
 			public SqlQuery      End()   { return SqlQuery; }
 
-			private            SqlQuery _sqlQuery;
-			protected internal SqlQuery  SqlQuery
-			{
-				get { return _sqlQuery;  }
-			}
+			protected internal SqlQuery SqlQuery { get; private set; }
 
 			internal void SetSqlQuery(SqlQuery sqlQuery)
 			{
-				_sqlQuery = sqlQuery;
+				SqlQuery = sqlQuery;
 			}
 		}
 
-		[Serializable]
 		public abstract class ClauseBase<T1, T2> : ConditionBase<T1, T2>
 			where T1 : ClauseBase<T1, T2>
 		{
 			protected ClauseBase(SqlQuery sqlQuery)
 			{
-				_sqlQuery = sqlQuery;
+				SqlQuery = sqlQuery;
 			}
 
 			public SelectClause  Select  { get { return SqlQuery.Select;  } }
@@ -1788,15 +1716,11 @@ namespace BLToolkit.Data.Sql
 			public OrderByClause OrderBy { get { return SqlQuery.OrderBy; } }
 			public SqlQuery      End()   { return SqlQuery; }
 
-			private            SqlQuery _sqlQuery;
-			protected internal SqlQuery  SqlQuery
-			{
-				get { return _sqlQuery; }
-			}
+			protected internal SqlQuery SqlQuery { get; private set; }
 
 			internal void SetSqlQuery(SqlQuery sqlQuery)
 			{
-				_sqlQuery = sqlQuery;
+				SqlQuery = sqlQuery;
 			}
 		}
 
@@ -1804,7 +1728,6 @@ namespace BLToolkit.Data.Sql
 
 		#region SelectClause
 
-		[Serializable]
 		public class SelectClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			#region Init
@@ -1821,17 +1744,17 @@ namespace BLToolkit.Data.Sql
 				: base(sqlQuery)
 			{
 				_columns.AddRange(clone._columns.ConvertAll(c => (Column)c.Clone(objectTree, doClone)));
-				_isDistinct = clone._isDistinct;
-				_takeValue  = clone._takeValue == null ? null : (ISqlExpression)clone._takeValue.Clone(objectTree, doClone);
-				_skipValue  = clone._skipValue == null ? null : (ISqlExpression)clone._skipValue.Clone(objectTree, doClone);
+				IsDistinct = clone.IsDistinct;
+				TakeValue  = clone.TakeValue == null ? null : (ISqlExpression)clone.TakeValue.Clone(objectTree, doClone);
+				SkipValue  = clone.SkipValue == null ? null : (ISqlExpression)clone.SkipValue.Clone(objectTree, doClone);
 			}
 
 			internal SelectClause(bool isDistinct, ISqlExpression takeValue, ISqlExpression skipValue, IEnumerable<Column> columns)
 				: base(null)
 			{
-				_isDistinct = isDistinct;
-				_takeValue  = takeValue;
-				_skipValue  = skipValue;
+				IsDistinct = isDistinct;
+				TakeValue  = takeValue;
+				SkipValue  = skipValue;
 				_columns.AddRange(columns);
 			}
 
@@ -1981,11 +1904,10 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause Distinct
 			{
-				get { _isDistinct = true; return this; }
+				get { IsDistinct = true; return this; }
 			}
 
-			private bool _isDistinct;
-			public  bool  IsDistinct { get { return _isDistinct; } set { _isDistinct = value; } }
+			public bool IsDistinct { get; set; }
 
 			#endregion
 
@@ -1993,18 +1915,17 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause Take(int value)
 			{
-				_takeValue = new SqlValue(value);
+				TakeValue = new SqlValue(value);
 				return this;
 			}
 
 			public SelectClause Take(ISqlExpression value)
 			{
-				_takeValue = value;
+				TakeValue = value;
 				return this;
 			}
 
-			private ISqlExpression _takeValue;
-			public  ISqlExpression  TakeValue { get { return _takeValue; } set { _takeValue = value; } }
+			public ISqlExpression TakeValue { get; set; }
 
 			#endregion
 
@@ -2012,18 +1933,17 @@ namespace BLToolkit.Data.Sql
 
 			public SelectClause Skip(int value)
 			{
-				_skipValue = new SqlValue(value);
+				SkipValue = new SqlValue(value);
 				return this;
 			}
 
 			public SelectClause Skip(ISqlExpression value)
 			{
-				_skipValue = value;
+				SkipValue = value;
 				return this;
 			}
 
-			private ISqlExpression _skipValue;
-			public  ISqlExpression  SkipValue { get { return _skipValue; } set { _skipValue = value; } }
+			public ISqlExpression SkipValue { get; set; }
 
 			#endregion
 
@@ -2132,12 +2052,12 @@ namespace BLToolkit.Data.Sql
 		{
 			public SetExpression(ISqlExpression column, ISqlExpression expression)
 			{
-				_column     = column;
-				_expression = expression;
+				Column     = column;
+				Expression = expression;
 			}
 
-			private ISqlExpression _column;     public ISqlExpression Column     { get { return _column;     } set { _column     = value; } }
-			private ISqlExpression _expression; public ISqlExpression Expression { get { return _expression; } set { _expression = value; } }
+			public ISqlExpression Column     { get; set; }
+			public ISqlExpression Expression { get; set; }
 
 			#region Overrides
 
@@ -2162,8 +2082,8 @@ namespace BLToolkit.Data.Sql
 				ICloneableElement clone;
 
 				objectTree.Add(this, clone = new SetExpression(
-						(ISqlExpression)_column.    Clone(objectTree, doClone),
-						(ISqlExpression)_expression.Clone(objectTree, doClone)));
+						(ISqlExpression)Column.    Clone(objectTree, doClone),
+						(ISqlExpression)Expression.Clone(objectTree, doClone)));
 
 				return clone;
 			}
@@ -2175,8 +2095,8 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				_column     = _column.    Walk(skipColumns, func);
-				_expression = _expression.Walk(skipColumns, func);
+				Column     = Column.    Walk(skipColumns, func);
+				Expression = Expression.Walk(skipColumns, func);
 				return null;
 			}
 
@@ -2188,9 +2108,9 @@ namespace BLToolkit.Data.Sql
 
 			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				_column.ToString(sb, dic);
+				Column.ToString(sb, dic);
 				sb.Append(" = ");
-				_expression.ToString(sb, dic);
+				Expression.ToString(sb, dic);
 
 				return sb;
 			}
@@ -2203,19 +2123,8 @@ namespace BLToolkit.Data.Sql
 			readonly List<SetExpression> _items = new List<SetExpression>();
 			public   List<SetExpression>  Items { get { return _items; } }
 
-			private SqlTable _into;
-			public  SqlTable  Into
-			{
-				get { return _into;  }
-				set { _into = value; }
-			}
-
-			private bool _withIdentity;
-			public  bool  WithIdentity
-			{
-				get { return _withIdentity;  }
-				set { _withIdentity = value; }
-			}
+			public SqlTable Into         { get; set; }
+			public bool     WithIdentity { get; set; }
 
 			#region Overrides
 
@@ -2237,10 +2146,10 @@ namespace BLToolkit.Data.Sql
 				if (!doClone(this))
 					return this;
 
-				var clone = new SetClause { _withIdentity = _withIdentity };
+				var clone = new SetClause { WithIdentity = WithIdentity };
 
-				if (_into != null)
-					clone.Into = (SqlTable)_into.Clone(objectTree, doClone);
+				if (Into != null)
+					clone.Into = (SqlTable)Into.Clone(objectTree, doClone);
 
 				foreach (var item in Items)
 					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
@@ -2257,8 +2166,8 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				if (_into != null)
-					((ISqlExpressionWalkable)_into).Walk(skipColumns, func);
+				if (Into != null)
+					((ISqlExpressionWalkable)Into).Walk(skipColumns, func);
 
 				for (var i = 0; i < Items.Count; i++)
 					((ISqlExpressionWalkable)Items[i]).Walk(skipColumns, func);
@@ -2275,8 +2184,8 @@ namespace BLToolkit.Data.Sql
 			{
 				sb.Append("SET ");
 
-				if (_into != null)
-					((IQueryElement)_into).ToString(sb, dic);
+				if (Into != null)
+					((IQueryElement)Into).ToString(sb, dic);
 
 				sb.AppendLine();
 
@@ -2303,7 +2212,6 @@ namespace BLToolkit.Data.Sql
 
 		#region FromClause
 
-		[Serializable]
 		public class FromClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			#region Join
@@ -2330,7 +2238,7 @@ namespace BLToolkit.Data.Sql
 
 				protected override SearchCondition Search
 				{
-					get { return _joinedTable.Condition; }
+					get { return JoinedTable.Condition; }
 				}
 
 				protected override Next GetNext()
@@ -2340,18 +2248,14 @@ namespace BLToolkit.Data.Sql
 
 				internal Join(JoinType joinType, ISqlTableSource table, string alias, bool isWeak, ICollection<Join> joins)
 				{
-					_joinedTable = new JoinedTable(joinType, table, alias, isWeak);
+					JoinedTable = new JoinedTable(joinType, table, alias, isWeak);
 
 					if (joins != null && joins.Count > 0)
 						foreach (var join in joins)
-							_joinedTable.Table.Joins.Add(join._joinedTable);
+							JoinedTable.Table.Joins.Add(join.JoinedTable);
 				}
 
-				readonly JoinedTable _joinedTable;
-				internal JoinedTable  JoinedTable
-				{
-					get { return _joinedTable; }
-				}
+				internal JoinedTable JoinedTable { get; private set; }
 			}
 
 			#endregion
@@ -2538,7 +2442,6 @@ namespace BLToolkit.Data.Sql
 
 		#region WhereClause
 
-		[Serializable]
 		public class WhereClause : ClauseBase<WhereClause,WhereClause.Next>, IQueryElement, ISqlExpressionWalkable
 		{
 			public class Next : ClauseBase
@@ -2556,7 +2459,7 @@ namespace BLToolkit.Data.Sql
 
 			internal WhereClause(SqlQuery sqlQuery) : base(sqlQuery)
 			{
-				_searchCondition = new SearchCondition();
+				SearchCondition = new SearchCondition();
 			}
 
 			internal WhereClause(
@@ -2566,19 +2469,15 @@ namespace BLToolkit.Data.Sql
 				Predicate<ICloneableElement> doClone)
 				: base(sqlQuery)
 			{
-				_searchCondition = (SearchCondition)clone._searchCondition.Clone(objectTree, doClone);
+				SearchCondition = (SearchCondition)clone.SearchCondition.Clone(objectTree, doClone);
 			}
 
 			internal WhereClause(SearchCondition searchCondition) : base(null)
 			{
-				_searchCondition = searchCondition;
+				SearchCondition = searchCondition;
 			}
 
-			private SearchCondition _searchCondition;
-			public  SearchCondition  SearchCondition
-			{
-				get { return _searchCondition;  }
-			}
+			public SearchCondition SearchCondition { get; private set; }
 
 			public bool IsEmpty
 			{
@@ -2587,7 +2486,7 @@ namespace BLToolkit.Data.Sql
 
 			protected override SearchCondition Search
 			{
-				get { return _searchCondition; }
+				get { return SearchCondition; }
 			}
 
 			protected override Next GetNext()
@@ -2609,7 +2508,7 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 			{
-				_searchCondition = (SearchCondition)((ISqlExpressionWalkable)_searchCondition).Walk(skipColumns, action);
+				SearchCondition = (SearchCondition)((ISqlExpressionWalkable)SearchCondition).Walk(skipColumns, action);
 				return null;
 			}
 
@@ -2644,7 +2543,6 @@ namespace BLToolkit.Data.Sql
 
 		#region GroupByClause
 
-		[Serializable]
 		public class GroupByClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			internal GroupByClause(SqlQuery sqlQuery) : base(sqlQuery)
@@ -2765,7 +2663,6 @@ namespace BLToolkit.Data.Sql
 
 		#region OrderByClause
 
-		[Serializable]
 		public class OrderByClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
 		{
 			internal OrderByClause(SqlQuery sqlQuery) : base(sqlQuery)
@@ -2879,7 +2776,6 @@ namespace BLToolkit.Data.Sql
 
 		#region Union
 
-		[Serializable]
 		public class Union : IQueryElement
 		{
 			public Union()
@@ -2888,12 +2784,12 @@ namespace BLToolkit.Data.Sql
 
 			public Union(SqlQuery sqlQuery, bool isAll)
 			{
-				_sqlQuery = sqlQuery;
-				_isAll    = isAll;
+				SqlQuery = sqlQuery;
+				IsAll    = isAll;
 			}
 
-			private readonly SqlQuery _sqlQuery; public SqlQuery SqlQuery { get { return _sqlQuery; } }
-			private readonly bool     _isAll;    public bool     IsAll    { get { return _isAll;    } }
+			public SqlQuery SqlQuery { get; private set; }
+			public bool IsAll { get; private set; }
 
 			public QueryElementType ElementType
 			{
@@ -3416,7 +3312,6 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		[NonSerialized]
 		IDictionary<string,object> _aliases;
 
 		public void RemoveAlias(string alias)
@@ -3569,7 +3464,7 @@ namespace BLToolkit.Data.Sql
 		{
 			objectTree.Add(clone, this);
 
-			_sourceID = Interlocked.Increment(ref SourceIDCounter);
+			SourceID = Interlocked.Increment(ref SourceIDCounter);
 
 			_queryType = clone._queryType;
 
@@ -3584,7 +3479,7 @@ namespace BLToolkit.Data.Sql
 			_orderBy = new OrderByClause(this, clone._orderBy, objectTree, doClone);
 
 			_parameters.AddRange(clone._parameters.ConvertAll(p => (SqlParameter)p.Clone(objectTree, doClone)));
-			_parameterDependent = clone.ParameterDependent;
+			ParameterDependent = clone.ParameterDependent;
 
 			new QueryVisitor().Visit(this, expr =>
 			{
@@ -3732,8 +3627,7 @@ namespace BLToolkit.Data.Sql
 
 		public static int SourceIDCounter;
 
-		readonly int _sourceID;
-		public   int  SourceID { get { return _sourceID; } }
+		public int SourceID { get; private set; }
 
 		private SqlField _all;
 		public  SqlField  All

@@ -90,14 +90,12 @@ namespace BLToolkit.Mapping
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
 		public virtual DateTime GetDateTime(object o, int index) { return _dataReader.GetDateTime(index); }
 
-#if FW3
 		public virtual DateTimeOffset GetDateTimeOffset(object o, int index)
 		{
 			return _dataReaderEx != null?
 				_dataReaderEx.GetDateTimeOffset(index):
 				_mappingSchema.ConvertToDateTimeOffset(_dataReader.GetValue(index));
 		}
-#endif
 
 		// Nullable type getters.
 		//
@@ -122,14 +120,12 @@ namespace BLToolkit.Mapping
 		public virtual Decimal?  GetNullableDecimal (object o, int index) { return _dataReader.IsDBNull(index)? null: (Decimal?) _dataReader.GetDecimal (index); }
 		public virtual Guid?     GetNullableGuid    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Guid?)    _dataReader.GetGuid    (index); }
 		public virtual DateTime? GetNullableDateTime(object o, int index) { return _dataReader.IsDBNull(index)? null: (DateTime?)_dataReader.GetDateTime(index); }
-#if FW3
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o, int index)
 		{
 			return _dataReader.IsDBNull(index)? null:
 				_dataReaderEx != null? _dataReaderEx.GetDateTimeOffset(index):
 				_mappingSchema.ConvertToNullableDateTimeOffset(_dataReader.GetValue(index));
 		}
-#endif
 
 		// SQL type getters.
 		//

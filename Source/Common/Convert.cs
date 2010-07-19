@@ -1,17 +1,14 @@
 using System;
+using System.Data.Linq;
 using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
 using System.Xml;
 
-#if FW3
-using System.Data.Linq;
-#endif
-
-using BLToolkit.Properties;
-
 namespace BLToolkit.Common
 {
+	using BLToolkit.Properties;
+
 	/// <summary>Converts a base data type to another base data type.</summary>
 	public class Convert
 	{
@@ -58,10 +55,8 @@ namespace BLToolkit.Common
 		public static String ToString(TimeSpan p)        { return p.ToString(); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(DateTime p)        { return p.ToString(); }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(DateTimeOffset p)  { return p.ToString(); }
-		#endif
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(Guid p)            { return p.ToString(); }
 
@@ -104,10 +99,8 @@ namespace BLToolkit.Common
 		public static String ToString(TimeSpan? p)       { return p.ToString(); }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(DateTime? p)       { return p.ToString(); }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(DateTimeOffset? p) { return p.ToString(); }
-		#endif
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(Guid? p)           { return p.ToString(); }
 
@@ -151,9 +144,7 @@ namespace BLToolkit.Common
 		public static String ToString(XmlDocument p)     { return p == null? null: p.InnerXml; }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(Byte[] p)          { return p == null? null: System.Text.Encoding.UTF8.GetString(p); }
-#if FW3
 		public static String ToString(Binary p)          { return p == null? null: System.Text.Encoding.UTF8.GetString(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>String</c> value.</summary>
 		public static String ToString(object p)
@@ -348,10 +339,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SByte</c> value.</summary>
 		[CLSCompliant(false)]
 		public static SByte ToSByte(Byte[] p)          { return p == null || p.Length == 0? (SByte)0: checked((SByte)p[0]); }
-#if FW3
 		[CLSCompliant(false)]
 		public static SByte ToSByte(Binary p)          { return p == null || p.Length == 0? (SByte)0: checked((SByte)p.ToArray()[0]); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SByte</c> value.</summary>
 		[CLSCompliant(false)]
@@ -399,9 +388,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSByte((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSByte(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToSByte(null);
 			
@@ -516,9 +503,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Int16</c> value.</summary>
 		public static Int16 ToInt16(Byte[] p)          { return p == null || p.Length == 0? (Int16)0: BitConverter.ToInt16(p, 0); }
-#if FW3
 		public static Int16 ToInt16(Binary p)          { return p == null || p.Length == 0? (Int16)0: BitConverter.ToInt16(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int16</c> value.</summary>
 		public static Int16 ToInt16(object p)         
@@ -565,9 +550,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToInt16((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToInt16(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToInt16(null);
 			
@@ -682,9 +665,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Int32</c> value.</summary>
 		public static Int32 ToInt32(Byte[] p)          { return p == null || p.Length == 0? 0: BitConverter.ToInt32(p, 0); }
-#if FW3
 		public static Int32 ToInt32(Binary p)          { return p == null || p.Length == 0? 0: BitConverter.ToInt32(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int32</c> value.</summary>
 		public static Int32 ToInt32(object p)
@@ -731,9 +712,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToInt32((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToInt32(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible)    return ((IConvertible)p).ToInt32(null);
 			
@@ -782,10 +761,8 @@ namespace BLToolkit.Common
 		public static Int64 ToInt64(Boolean p)         { return p? 1: 0; }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(DateTime p)        { return (p - DateTime.MinValue).Ticks; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(DateTimeOffset p)  { return (p - DateTime.MinValue).Ticks; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(TimeSpan p)        { return p.Ticks; }
 
@@ -827,10 +804,8 @@ namespace BLToolkit.Common
 		public static Int64 ToInt64(Boolean? p)        { return (p.HasValue && p.Value)? 1: 0; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(DateTime? p)       { return p.HasValue? (p.Value - DateTime.MinValue).Ticks: 0; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(DateTimeOffset? p) { return p.HasValue? (p.Value - DateTime.MinValue).Ticks: 0; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(TimeSpan? p)       { return p.HasValue? p.Value.Ticks: 0; }
 
@@ -866,9 +841,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(Byte[] p)          { return p == null || p.Length == 0? 0: BitConverter.ToInt64(p, 0); }
-#if FW3
 		public static Int64 ToInt64(Binary p)          { return p == null || p.Length == 0? 0: BitConverter.ToInt64(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(object p)         
@@ -896,9 +869,7 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToInt64((Decimal)p);
 			if (p is Boolean)         return ToInt64((Boolean)p);
 			if (p is DateTime)        return ToInt64((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToInt64((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToInt64((TimeSpan)p);
 
 			// SqlTypes
@@ -920,9 +891,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToInt64((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToInt64(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
 			
@@ -1037,9 +1006,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Byte</c> value.</summary>
 		public static Byte ToByte(Byte[] p)          { return p == null || p.Length == 0? (Byte)0: p[0]; }
-#if FW3
 		public static Byte ToByte(Binary p)          { return p == null || p.Length == 0? (Byte)0: p.ToArray()[0]; }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Byte</c> value.</summary>
 		public static Byte ToByte(object p)         
@@ -1086,9 +1053,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToByte((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToByte(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
 			
@@ -1232,10 +1197,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt16</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt16 ToUInt16(Byte[] p)          { return p == null || p.Length == 0? (UInt16)0: BitConverter.ToUInt16(p, 0); }
-#if FW3
 		[CLSCompliant(false)]
 		public static UInt16 ToUInt16(Binary p)          { return p == null || p.Length == 0? (UInt16)0: BitConverter.ToUInt16(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>UInt16</c> value.</summary>
 		[CLSCompliant(false)]
@@ -1283,9 +1246,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToUInt16((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToUInt16(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
 			
@@ -1429,10 +1390,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt32</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(Byte[] p)          { return p == null || p.Length == 0? 0: BitConverter.ToUInt32(p, 0); }
-#if FW3
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(Binary p)          { return p == null || p.Length == 0? 0: BitConverter.ToUInt32(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>UInt32</c> value.</summary>
 		[CLSCompliant(false)]
@@ -1480,9 +1439,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToUInt32((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToUInt32(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			
@@ -1626,10 +1583,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt64</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(Byte[] p)          { return p == null || p.Length == 0? 0: BitConverter.ToUInt64(p, 0); }
-#if FW3
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(Binary p)          { return p == null || p.Length == 0? 0: BitConverter.ToUInt64(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>UInt64</c> value.</summary>
 		[CLSCompliant(false)]
@@ -1677,9 +1632,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToUInt64((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToUInt64(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
 			
@@ -1794,9 +1747,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Char</c> value.</summary>
 		public static Char ToChar(Byte[] p)          { return p == null || p.Length == 0? (Char)0: BitConverter.ToChar(p, 0); }
-#if FW3
 		public static Char ToChar(Binary p)          { return p == null || p.Length == 0? (Char)0: BitConverter.ToChar(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Char</c> value.</summary>
 		public static Char ToChar(object p)         
@@ -1844,9 +1795,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToChar((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToChar(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
 			
@@ -1961,9 +1910,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Single</c> value.</summary>
 		public static Single ToSingle(Byte[] p)          { return p == null || p.Length == 0? 0.0f: BitConverter.ToSingle(p, 0); }
-#if FW3
 		public static Single ToSingle(Binary p)          { return p == null || p.Length == 0? 0.0f: BitConverter.ToSingle(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Single</c> value.</summary>
 		public static Single ToSingle(object p)         
@@ -2010,9 +1957,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSingle((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSingle(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToSingle(null);
 			
@@ -2061,10 +2006,8 @@ namespace BLToolkit.Common
 		public static Double ToDouble(Char p)            { return      checked((Double)p); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(DateTime p)        { return (p - DateTime.MinValue).TotalDays; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(DateTimeOffset p)  { return (p - DateTime.MinValue).TotalDays; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(TimeSpan p)        { return p.TotalDays; }
 
@@ -2106,10 +2049,8 @@ namespace BLToolkit.Common
 		public static Double ToDouble(Boolean? p)        { return (p.HasValue && p.Value)?         1.0: 0.0; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(DateTime? p)       { return p.HasValue? (p.Value - DateTime.MinValue).TotalDays: 0.0; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(DateTimeOffset? p) { return p.HasValue? (p.Value - DateTime.MinValue).TotalDays: 0.0; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(TimeSpan? p)       { return p.HasValue? p.Value.TotalDays: 0.0; }
 
@@ -2145,9 +2086,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(Byte[] p)          { return p == null || p.Length == 0? 0.0: BitConverter.ToDouble(p, 0); }
-#if FW3
 		public static Double ToDouble(Binary p)          { return p == null || p.Length == 0? 0.0: BitConverter.ToDouble(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(object p)         
@@ -2175,9 +2114,7 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToDouble((Decimal)p);
 			if (p is Boolean)         return ToDouble((Boolean)p);
 			if (p is DateTime)        return ToDouble((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToDouble((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToDouble((TimeSpan)p);
 
 			// SqlTypes
@@ -2199,9 +2136,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToDouble((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToDouble(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToDouble(null);
 			
@@ -2338,9 +2273,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Boolean</c> value.</summary>
 		public static Boolean ToBoolean(Byte[] p)          { return p == null || p.Length == 0? false: BitConverter.ToBoolean(p, 0); }
-#if FW3
 		public static Boolean ToBoolean(Binary p)          { return p == null || p.Length == 0? false: BitConverter.ToBoolean(p.ToArray(), 0); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Boolean</c> value.</summary>
 		public static Boolean ToBoolean(object p)         
@@ -2389,9 +2322,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToBoolean((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToBoolean(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToBoolean(null);
 			
@@ -2515,8 +2446,6 @@ namespace BLToolkit.Common
 					return new Decimal(bits);
 		}
 
-#if FW3
-
 		public static Decimal ToDecimal(Binary p)
 		{
 					if (p == null || p.Length == 0) return 0.0m;
@@ -2526,8 +2455,6 @@ namespace BLToolkit.Common
 					Buffer.BlockCopy(p.ToArray(), 0, bits, 0, p.Length);
 					return new Decimal(bits);
 		}
-
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Decimal</c> value.</summary>
 		public static Decimal ToDecimal(object p)         
@@ -2574,9 +2501,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToDecimal((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToDecimal(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToDecimal(null);
 			
@@ -2597,19 +2522,15 @@ namespace BLToolkit.Common
 		public static DateTime ToDateTime(Int64 p)           { return DateTime.MinValue + TimeSpan.FromTicks(p); }
 		/// <summary>Converts the value from <c>Double</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(Double p)          { return DateTime.MinValue + TimeSpan.FromDays(p); }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(DateTimeOffset p)  { return p.LocalDateTime; }
-		#endif
 
 		// Nullable Types.
 		// 
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(DateTime? p)       { return p.HasValue?                                               p.Value:  DateTime.MinValue; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(DateTimeOffset? p) { return p.HasValue?                                   p.Value.LocalDateTime:  DateTime.MinValue; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(TimeSpan? p)       { return p.HasValue? DateTime.MinValue +                           p.Value:  DateTime.MinValue; }
 		/// <summary>Converts the value from <c>Int64?</c> to an equivalent <c>DateTime</c> value.</summary>
@@ -2632,9 +2553,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(Byte[] p)          { return p == null || p.Length == 0? DateTime.MinValue: DateTime.FromBinary(ToInt64(p)); }
-#if FW3
 		public static DateTime ToDateTime(Binary p)          { return p == null || p.Length == 0? DateTime.MinValue: DateTime.FromBinary(ToInt64(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(object p)         
@@ -2649,9 +2568,7 @@ namespace BLToolkit.Common
 			if (p is TimeSpan)        return ToDateTime((TimeSpan)p);
 			if (p is Int64)           return ToDateTime((Int64)p);
 			if (p is Double)          return ToDateTime((Double)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToDateTime((DateTimeOffset)p);
-			#endif
 
 			// SqlTypes
 			//
@@ -2663,9 +2580,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToDateTime((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToDateTime(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
 			
@@ -2717,9 +2632,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>DateTimeOffset</c> value.</summary>
 		public static DateTimeOffset ToDateTimeOffset(Byte[] p)          { return p == null || p.Length == 0? DateTimeOffset.MinValue: new DateTimeOffset(ToDateTime(p)); }
-#if FW3
 		public static DateTimeOffset ToDateTimeOffset(Binary p)          { return p == null || p.Length == 0? DateTimeOffset.MinValue: new DateTimeOffset(ToDateTime(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>DateTimeOffset</c> value.</summary>
 		public static DateTimeOffset ToDateTimeOffset(object p)         
@@ -2746,9 +2659,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToDateTimeOffset((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToDateTimeOffset(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
 			
@@ -2765,10 +2676,8 @@ namespace BLToolkit.Common
 		public static TimeSpan ToTimeSpan(String p)          { return p == null? TimeSpan.MinValue: TimeSpan.Parse(p); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(DateTime p)        { return p - DateTime.MinValue; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(DateTimeOffset p)  { return p - DateTimeOffset.MinValue; }
-		#endif
 		/// <summary>Converts the value from <c>Int64</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(Int64 p)           { return TimeSpan.FromTicks(p); }
 		/// <summary>Converts the value from <c>Double</c> to an equivalent <c>TimeSpan</c> value.</summary>
@@ -2780,10 +2689,8 @@ namespace BLToolkit.Common
 		public static TimeSpan ToTimeSpan(TimeSpan? p)       { return p.HasValue? p.Value:                            TimeSpan.MinValue; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(DateTime? p)       { return p.HasValue? p.Value - DateTime.MinValue:        TimeSpan.MinValue; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(DateTimeOffset? p) { return p.HasValue? p.Value - DateTimeOffset.MinValue:        TimeSpan.MinValue; }
-		#endif
 		/// <summary>Converts the value from <c>Int64?</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(Int64? p)          { return p.HasValue? TimeSpan.FromTicks(p.Value):        TimeSpan.MinValue; }
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>TimeSpan</c> value.</summary>
@@ -2804,9 +2711,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(Byte[] p)          { return p == null || p.Length == 0? TimeSpan.MinValue: TimeSpan.FromTicks(ToInt64(p)); }
-#if FW3
 		public static TimeSpan ToTimeSpan(Binary p)          { return p == null || p.Length == 0? TimeSpan.MinValue: TimeSpan.FromTicks(ToInt64(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(object p)         
@@ -2819,9 +2724,7 @@ namespace BLToolkit.Common
 			//
 			if (p is String)          return ToTimeSpan((String)p);
 			if (p is DateTime)        return ToTimeSpan((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToTimeSpan((DateTimeOffset)p);
-			#endif
 			if (p is Int64)           return ToTimeSpan((Int64)p);
 			if (p is Double)          return ToTimeSpan((Double)p);
 
@@ -2835,9 +2738,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToTimeSpan((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToTimeSpan(((Binary)p).ToArray());
-#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(TimeSpan));
 		}
@@ -2869,9 +2770,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Guid</c> value.</summary>
 		public static Guid ToGuid(Byte[] p)          { return p == null? Guid.Empty: new Guid(p); }
-#if FW3
 		public static Guid ToGuid(Binary p)          { return p == null? Guid.Empty: new Guid(p.ToArray()); }
-#endif
 		/// <summary>Converts the value from <c>Type</c> to an equivalent <c>Guid</c> value.</summary>
 		public static Guid ToGuid(Type p)            { return p == null? Guid.Empty: p.GUID; }
 
@@ -2895,9 +2794,7 @@ namespace BLToolkit.Common
 			// Other Types.
 			//
 			if (p is Byte[])          return ToGuid((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToGuid(((Binary)p).ToArray());
-#endif
 			if (p is Type)            return ToGuid((Type)p);
 
 			throw CreateInvalidCastException(p.GetType(), typeof(Guid));
@@ -3043,10 +2940,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SByte?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static SByte? ToNullableSByte(Byte[] p)          { return p == null || p.Length == 0? null: (SByte?)ToSByte(p); }
-#if FW3
 		[CLSCompliant(false)]
 		public static SByte? ToNullableSByte(Binary p)          { return p == null || p.Length == 0? null: (SByte?)ToSByte(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SByte?</c> value.</summary>
 		[CLSCompliant(false)]
@@ -3095,9 +2990,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableSByte((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableSByte(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToSByte(null);
 			
@@ -3211,9 +3104,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Int16?</c> value.</summary>
 		public static Int16? ToNullableInt16(Byte[] p)          { return p == null || p.Length == 0? null: (Int16?)ToInt16(p); }
-#if FW3
 		public static Int16? ToNullableInt16(Binary p)          { return p == null || p.Length == 0? null: (Int16?)ToInt16(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int16?</c> value.</summary>
 		public static Int16? ToNullableInt16(object p)         
@@ -3261,9 +3152,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableInt16((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableInt16(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToInt16(null);
 			
@@ -3377,9 +3266,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Int32?</c> value.</summary>
 		public static Int32? ToNullableInt32(Byte[] p)          { return p == null || p.Length == 0? null: (Int32?)ToInt32(p); }
-#if FW3
 		public static Int32? ToNullableInt32(Binary p)          { return p == null || p.Length == 0? null: (Int32?)ToInt32(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int32?</c> value.</summary>
 		public static Int32? ToNullableInt32(object p)         
@@ -3427,9 +3314,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableInt32((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableInt32(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToInt32(null);
 			
@@ -3480,10 +3365,8 @@ namespace BLToolkit.Common
 		public static Int64? ToNullableInt64(Boolean p)         { return p? 1: 0; }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(DateTime p)        { return (p - DateTime.MinValue).Ticks; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(DateTimeOffset p)  { return (p - DateTimeOffset.MinValue).Ticks; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(TimeSpan p)        { return p.Ticks; }
 
@@ -3522,10 +3405,8 @@ namespace BLToolkit.Common
 		public static Int64? ToNullableInt64(Boolean? p)        { return p.HasValue? (Int64?)(p.Value? 1: 0):  null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(DateTime? p)       { return p.HasValue? (Int64?)(p.Value - DateTime.MinValue).Ticks: null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(DateTimeOffset? p) { return p.HasValue? (Int64?)(p.Value - DateTimeOffset.MinValue).Ticks: null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(TimeSpan? p)       { return p.HasValue? (Int64?)p.Value.Ticks: null; }
 
@@ -3561,9 +3442,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(Byte[] p)          { return p == null || p.Length == 0? null: (Int64?)ToInt64(p); }
-#if FW3
 		public static Int64? ToNullableInt64(Binary p)          { return p == null || p.Length == 0? null: (Int64?)ToInt64(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(object p)         
@@ -3592,9 +3471,7 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableInt64((Decimal)p);
 			if (p is Boolean)         return ToNullableInt64((Boolean)p);
 			if (p is DateTime)        return ToNullableInt64((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToNullableInt64((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToNullableInt64((TimeSpan)p);
 
 			// SqlTypes
@@ -3616,9 +3493,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableInt64((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableInt64(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToInt64(null);
 			
@@ -3732,9 +3607,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Byte?</c> value.</summary>
 		public static Byte? ToNullableByte(Byte[] p)          { return p == null || p.Length == 0? null: (Byte?)ToByte(p); }
-#if FW3
 		public static Byte? ToNullableByte(Binary p)          { return p == null || p.Length == 0? null: (Byte?)ToByte(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Byte?</c> value.</summary>
 		public static Byte? ToNullableByte(object p)         
@@ -3782,9 +3655,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableByte((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableByte(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToByte(null);
 			
@@ -3927,10 +3798,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt16?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt16? ToNullableUInt16(Byte[] p)          { return p == null || p.Length == 0? null: (UInt16?)ToUInt16(p); }
-#if FW3
 		[CLSCompliant(false)]
 		public static UInt16? ToNullableUInt16(Binary p)          { return p == null || p.Length == 0? null: (UInt16?)ToUInt16(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>UInt16?</c> value.</summary>
 		[CLSCompliant(false)]
@@ -3979,9 +3848,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableUInt16((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableUInt16(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt16(null);
 			
@@ -4124,10 +3991,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt32?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt32? ToNullableUInt32(Byte[] p)          { return p == null || p.Length == 0? null: (UInt32?)ToUInt32(p); }
-#if FW3
 		[CLSCompliant(false)]
 		public static UInt32? ToNullableUInt32(Binary p)          { return p == null || p.Length == 0? null: (UInt32?)ToUInt32(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>UInt32?</c> value.</summary>
 		[CLSCompliant(false)]
@@ -4176,9 +4041,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableUInt32((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableUInt32(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt32(null);
 			
@@ -4321,10 +4184,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt64?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt64? ToNullableUInt64(Byte[] p)          { return p == null || p.Length == 0? null: (UInt64?)ToUInt64(p); }
-#if FW3
 		[CLSCompliant(false)]
 		public static UInt64? ToNullableUInt64(Binary p)          { return p == null || p.Length == 0? null: (UInt64?)ToUInt64(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>UInt64?</c> value.</summary>
 		[CLSCompliant(false)]
@@ -4373,9 +4234,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableUInt64((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableUInt64(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToUInt64(null);
 			
@@ -4489,9 +4348,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Char?</c> value.</summary>
 		public static Char? ToNullableChar(Byte[] p)          { return p == null || p.Length == 0? null: (Char?)ToChar(p); }
-#if FW3
 		public static Char? ToNullableChar(Binary p)          { return p == null || p.Length == 0? null: (Char?)ToChar(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Char?</c> value.</summary>
 		public static Char? ToNullableChar(object p)         
@@ -4540,9 +4397,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableChar((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableChar(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToChar(null);
 			
@@ -4656,9 +4511,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Single?</c> value.</summary>
 		public static Single? ToNullableSingle(Byte[] p)          { return p == null || p.Length == 0? null: (Single?)ToSingle(p); }
-#if FW3
 		public static Single? ToNullableSingle(Binary p)          { return p == null || p.Length == 0? null: (Single?)ToSingle(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Single?</c> value.</summary>
 		public static Single? ToNullableSingle(object p)         
@@ -4706,9 +4559,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableSingle((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableSingle(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToSingle(null);
 			
@@ -4759,10 +4610,8 @@ namespace BLToolkit.Common
 		public static Double? ToNullableDouble(Boolean p)         { return p? 1.0: 0.0; }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(DateTime p)        { return (p - DateTime.MinValue).TotalDays; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(DateTimeOffset p)  { return (p - DateTimeOffset.MinValue).TotalDays; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(TimeSpan p)        { return p.TotalDays; }
 
@@ -4801,10 +4650,8 @@ namespace BLToolkit.Common
 		public static Double? ToNullableDouble(Boolean? p)        { return p.HasValue? (Double?)(p.Value? 1.0: 0.0):  null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(DateTime? p)       { return p.HasValue? (Double?)(p.Value - DateTime.MinValue).TotalDays: null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(DateTimeOffset? p) { return p.HasValue? (Double?)(p.Value - DateTimeOffset.MinValue).TotalDays: null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(TimeSpan? p)       { return p.HasValue? (Double?)p.Value.TotalDays: null; }
 
@@ -4840,9 +4687,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(Byte[] p)          { return p == null || p.Length == 0? null: (Double?)ToDouble(p); }
-#if FW3
 		public static Double? ToNullableDouble(Binary p)          { return p == null || p.Length == 0? null: (Double?)ToDouble(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(object p)         
@@ -4871,9 +4716,7 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableDouble((Decimal)p);
 			if (p is Boolean)         return ToNullableDouble((Boolean)p);
 			if (p is DateTime)        return ToNullableDouble((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToNullableDouble((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToNullableDouble((TimeSpan)p);
 
 			// SqlTypes
@@ -4896,9 +4739,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableDouble((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableDouble(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToDouble(null);
 			
@@ -5012,9 +4853,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Boolean?</c> value.</summary>
 		public static Boolean? ToNullableBoolean(Byte[] p)          { return p == null || p.Length == 0? null: (Boolean?)ToBoolean(p); }
-#if FW3
 		public static Boolean? ToNullableBoolean(Binary p)          { return p == null || p.Length == 0? null: (Boolean?)ToBoolean(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Boolean?</c> value.</summary>
 		public static Boolean? ToNullableBoolean(object p)         
@@ -5062,9 +4901,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableBoolean((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableBoolean(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToBoolean(null);
 			
@@ -5178,9 +5015,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Decimal?</c> value.</summary>
 		public static Decimal? ToNullableDecimal(Byte[] p)          { return p == null || p.Length == 0? null: (Decimal?)ToDecimal(p); }
-#if FW3
 		public static Decimal? ToNullableDecimal(Binary p)          { return p == null || p.Length == 0? null: (Decimal?)ToDecimal(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Decimal?</c> value.</summary>
 		public static Decimal? ToNullableDecimal(object p)         
@@ -5228,9 +5063,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableDecimal((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableDecimal(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToDecimal(null);
 			
@@ -5245,10 +5078,8 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(DateTime p)        { return p; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(DateTimeOffset p)  { return p.LocalDateTime; }
-		#endif
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(String p)          { return p == null? null: (DateTime?)DateTime.Parse(p); }
 
@@ -5267,10 +5098,8 @@ namespace BLToolkit.Common
 		public static DateTime? ToNullableDateTime(Int64? p)          { return p.HasValue? DateTime.MinValue +        TimeSpan.FromTicks(p.Value): (DateTime?)null; }
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(Double? p)         { return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): (DateTime?)null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(DateTimeOffset? p) { return p.HasValue? p.Value.LocalDateTime: (DateTime?)null; }
-		#endif
 
 		// SqlTypes
 		// 
@@ -5287,9 +5116,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(Byte[] p)          { return p == null || p.Length == 0? null: (DateTime?)ToDateTime(p); }
-#if FW3
 		public static DateTime? ToNullableDateTime(Binary p)          { return p == null || p.Length == 0? null: (DateTime?)ToDateTime(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(object p)         
@@ -5301,9 +5128,7 @@ namespace BLToolkit.Common
 			// Scalar Types.
 			//
 			if (p is DateTime)        return ToNullableDateTime((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToNullableDateTime((DateTimeOffset)p);
-			#endif
 			if (p is String)          return ToNullableDateTime((String)p);
 
 			if (p is TimeSpan)        return ToNullableDateTime((TimeSpan)p);
@@ -5320,9 +5145,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableDateTime((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableDateTime(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ((IConvertible)p).ToDateTime(null);
 			
@@ -5330,8 +5153,6 @@ namespace BLToolkit.Common
 		}
 
 		#endregion
-
-		#if FW3
 
 		#region DateTimeOffset?
 
@@ -5377,9 +5198,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>DateTimeOffset?</c> value.</summary>
 		public static DateTimeOffset? ToNullableDateTimeOffset(Byte[] p)          { return p == null || p.Length == 0? null: (DateTimeOffset?)ToDateTimeOffset(p); }
-#if FW3
 		public static DateTimeOffset? ToNullableDateTimeOffset(Binary p)          { return p == null || p.Length == 0? null: (DateTimeOffset?)ToDateTimeOffset(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>DateTimeOffset?</c> value.</summary>
 		public static DateTimeOffset? ToNullableDateTimeOffset(object p)         
@@ -5408,9 +5227,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableDateTimeOffset((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableDateTimeOffset(((Binary)p).ToArray());
-#endif
 
 			if (p is IConvertible) return ToDateTimeOffset(((IConvertible)p).ToDateTime(null));
 			
@@ -5418,8 +5235,6 @@ namespace BLToolkit.Common
 		}
 
 		#endregion
-
-		#endif
 
 		#region TimeSpan?
 
@@ -5431,10 +5246,8 @@ namespace BLToolkit.Common
 		public static TimeSpan? ToNullableTimeSpan(String p)          { return p == null? null: (TimeSpan?)TimeSpan.Parse(p); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(DateTime p)        { return p - DateTime.MinValue; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(DateTimeOffset p)  { return p - DateTimeOffset.MinValue; }
-		#endif
 		/// <summary>Converts the value from <c>Int64</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(Int64 p)           { return TimeSpan.FromTicks(p); }
 		/// <summary>Converts the value from <c>Double</c> to an equivalent <c>TimeSpan?</c> value.</summary>
@@ -5444,10 +5257,8 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(DateTime? p)       { return p.HasValue? p.Value - DateTime.MinValue: (TimeSpan?)null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(DateTimeOffset? p) { return p.HasValue? p.Value - DateTimeOffset.MinValue: (TimeSpan?)null; }
-		#endif
 		/// <summary>Converts the value from <c>Int64?</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(Int64? p)          { return p.HasValue? TimeSpan.FromTicks(p.Value): (TimeSpan?)null; }
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>TimeSpan?</c> value.</summary>
@@ -5468,9 +5279,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(Byte[] p)          { return p == null || p.Length == 0? null: (TimeSpan?)ToTimeSpan(p); }
-#if FW3
 		public static TimeSpan? ToNullableTimeSpan(Binary p)          { return p == null || p.Length == 0? null: (TimeSpan?)ToTimeSpan(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(object p)         
@@ -5484,9 +5293,7 @@ namespace BLToolkit.Common
 			if (p is TimeSpan)        return ToNullableTimeSpan((TimeSpan)p);
 			if (p is String)          return ToNullableTimeSpan((String)p);
 			if (p is DateTime)        return ToNullableTimeSpan((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToNullableTimeSpan((DateTimeOffset)p);
-			#endif
 			if (p is Int64)           return ToNullableTimeSpan((Int64)p);
 			if (p is Double)          return ToNullableTimeSpan((Double)p);
 
@@ -5500,9 +5307,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToNullableTimeSpan((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableTimeSpan(((Binary)p).ToArray());
-#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(TimeSpan?));
 		}
@@ -5533,9 +5338,7 @@ namespace BLToolkit.Common
 		public static Guid? ToNullableGuid(Type p)            { return p == null? null: (Guid?)p.GUID; }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Guid?</c> value.</summary>
 		public static Guid? ToNullableGuid(Byte[] p)          { return p == null? null: (Guid?)new Guid(p); }
-#if FW3
 		public static Guid? ToNullableGuid(Binary p)          { return p == null? null: (Guid?)new Guid(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Guid?</c> value.</summary>
 		public static Guid? ToNullableGuid(object p)         
@@ -5559,9 +5362,7 @@ namespace BLToolkit.Common
 			//
 			if (p is Type)            return ToNullableGuid((Type)p);
 			if (p is Byte[])          return ToNullableGuid((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToNullableGuid(((Binary)p).ToArray());
-#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(Guid?));
 		}
@@ -5616,10 +5417,8 @@ namespace BLToolkit.Common
 		public static SqlString ToSqlString(TimeSpan p)        { return p.ToString(); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(DateTime p)        { return p.ToString(); }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(DateTimeOffset p)  { return p.ToString(); }
-		#endif
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(Guid p)            { return p.ToString(); }
 		/// <summary>Converts the value from <c>Char[]</c> to an equivalent <c>SqlString</c> value.</summary>
@@ -5664,10 +5463,8 @@ namespace BLToolkit.Common
 		public static SqlString ToSqlString(TimeSpan? p)       { return p.HasValue? p.ToString(): SqlString.Null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(DateTime? p)       { return p.HasValue? p.ToString(): SqlString.Null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(DateTimeOffset? p) { return p.HasValue? p.ToString(): SqlString.Null; }
-		#endif
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(Guid? p)           { return p.HasValue? p.ToString(): SqlString.Null; }
 
@@ -5711,9 +5508,7 @@ namespace BLToolkit.Common
 		public static SqlString ToSqlString(XmlDocument p)     { return p == null? SqlString.Null: p.InnerXml; }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(Byte[] p)          { return p == null || p.Length == 0? SqlString.Null: new SqlString(ToString(p)); }
-#if FW3
 		public static SqlString ToSqlString(Binary p)          { return p == null || p.Length == 0? SqlString.Null: new SqlString(ToString(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(object p)         
@@ -5764,9 +5559,7 @@ namespace BLToolkit.Common
 			if (p is Type)            return ToSqlString((Type)p);
 			if (p is XmlDocument)     return ToSqlString((XmlDocument)p);
 			if (p is Byte[])          return ToSqlString((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlString(((Binary)p).ToArray());
-#endif
 
 			return ToString(p);
 		}
@@ -5880,9 +5673,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlByte</c> value.</summary>
 		public static SqlByte ToSqlByte(Byte[] p)          { return p == null || p.Length == 0? SqlByte.Null: new SqlByte(ToByte(p)); }
-#if FW3
 		public static SqlByte ToSqlByte(Binary p)          { return p == null || p.Length == 0? SqlByte.Null: new SqlByte(ToByte(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlByte</c> value.</summary>
 		public static SqlByte ToSqlByte(object p)         
@@ -5930,9 +5721,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlByte((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlByte(((Binary)p).ToArray());
-#endif
 
 			return ToByte(p);
 		}
@@ -6046,9 +5835,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlInt16</c> value.</summary>
 		public static SqlInt16 ToSqlInt16(Byte[] p)          { return p == null || p.Length == 0? SqlInt16.Null: new SqlInt16(ToInt16(p)); }
-#if FW3
 		public static SqlInt16 ToSqlInt16(Binary p)          { return p == null || p.Length == 0? SqlInt16.Null: new SqlInt16(ToInt16(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlInt16</c> value.</summary>
 		public static SqlInt16 ToSqlInt16(object p)         
@@ -6096,9 +5883,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlInt16((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlInt16(((Binary)p).ToArray());
-#endif
 
 			return ToInt16(p);
 		}
@@ -6212,9 +5997,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlInt32</c> value.</summary>
 		public static SqlInt32 ToSqlInt32(Byte[] p)          { return p == null || p.Length == 0? SqlInt32.Null: new SqlInt32(ToInt32(p)); }
-#if FW3
 		public static SqlInt32 ToSqlInt32(Binary p)          { return p == null || p.Length == 0? SqlInt32.Null: new SqlInt32(ToInt32(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlInt32</c> value.</summary>
 		public static SqlInt32 ToSqlInt32(object p)         
@@ -6262,9 +6045,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlInt32((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlInt32(((Binary)p).ToArray());
-#endif
 
 			return ToInt32(p);
 		}
@@ -6313,10 +6094,8 @@ namespace BLToolkit.Common
 		public static SqlInt64 ToSqlInt64(Boolean p)         { return p? 1: 0; }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(DateTime p)        { return (p - DateTime.MinValue).Ticks; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(DateTimeOffset p)  { return (p - DateTimeOffset.MinValue).Ticks; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(TimeSpan p)        { return p.Ticks; }
 
@@ -6357,10 +6136,8 @@ namespace BLToolkit.Common
 		public static SqlInt64 ToSqlInt64(Char? p)           { return p.HasValue? ToInt64(p.Value): SqlInt64.Null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(DateTime? p)       { return p.HasValue? ToInt64(p.Value): SqlInt64.Null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(DateTimeOffset? p) { return p.HasValue? ToInt64(p.Value): SqlInt64.Null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(TimeSpan? p)       { return p.HasValue? ToInt64(p.Value): SqlInt64.Null; }
 
@@ -6394,9 +6171,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(Byte[] p)          { return p == null || p.Length == 0? SqlInt64.Null: new SqlInt64(ToInt64(p)); }
-#if FW3
 		public static SqlInt64 ToSqlInt64(Binary p)          { return p == null || p.Length == 0? SqlInt64.Null: new SqlInt64(ToInt64(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlInt64</c> value.</summary>
 		public static SqlInt64 ToSqlInt64(object p)         
@@ -6425,9 +6200,7 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToSqlInt64((Decimal)p);
 			if (p is Boolean)         return ToSqlInt64((Boolean)p);
 			if (p is DateTime)        return ToSqlInt64((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToSqlInt64((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToSqlInt64((TimeSpan)p);
 
 			// SqlTypes
@@ -6449,9 +6222,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlInt64((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlInt64(((Binary)p).ToArray());
-#endif
 
 			return ToInt64(p);
 		}
@@ -6561,9 +6332,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlSingle</c> value.</summary>
 		public static SqlSingle ToSqlSingle(Byte[] p)          { return p == null || p.Length == 0? SqlSingle.Null: new SqlSingle(ToSingle(p)); }
-#if FW3
 		public static SqlSingle ToSqlSingle(Binary p)          { return p == null || p.Length == 0? SqlSingle.Null: new SqlSingle(ToSingle(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlSingle</c> value.</summary>
 		public static SqlSingle ToSqlSingle(object p)         
@@ -6610,9 +6379,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlSingle((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlSingle(((Binary)p).ToArray());
-#endif
 
 			return ToSingle(p);
 		}
@@ -6661,10 +6428,8 @@ namespace BLToolkit.Common
 		public static SqlDouble ToSqlDouble(Boolean p)         { return p? 1.0: 0.0; }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(DateTime p)        { return (p - DateTime.MinValue).TotalDays; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(DateTimeOffset p)  { return (p - DateTimeOffset.MinValue).TotalDays; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(TimeSpan p)        { return p.TotalDays; }
 
@@ -6703,10 +6468,8 @@ namespace BLToolkit.Common
 		public static SqlDouble ToSqlDouble(Decimal? p)        { return p.HasValue? ToDouble(p.Value): SqlDouble.Null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(DateTime? p)       { return p.HasValue? ToDouble(p.Value): SqlDouble.Null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(DateTimeOffset? p) { return p.HasValue? ToDouble(p.Value): SqlDouble.Null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(TimeSpan? p)       { return p.HasValue? ToDouble(p.Value): SqlDouble.Null; }
 
@@ -6740,9 +6503,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(Byte[] p)          { return p == null || p.Length == 0? SqlDouble.Null: new SqlDouble(ToDouble(p)); }
-#if FW3
 		public static SqlDouble ToSqlDouble(Binary p)          { return p == null || p.Length == 0? SqlDouble.Null: new SqlDouble(ToDouble(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlDouble</c> value.</summary>
 		public static SqlDouble ToSqlDouble(object p)         
@@ -6771,9 +6532,7 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToSqlDouble((Decimal)p);
 			if (p is Boolean)         return ToSqlDouble((Boolean)p);
 			if (p is DateTime)        return ToSqlDouble((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToSqlDouble((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToSqlDouble((TimeSpan)p);
 
 			// SqlTypes
@@ -6795,9 +6554,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlDouble((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlDouble(((Binary)p).ToArray());
-#endif
 
 			return ToDouble(p);
 		}
@@ -6907,9 +6664,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlDecimal</c> value.</summary>
 		public static SqlDecimal ToSqlDecimal(Byte[] p)          { return p == null || p.Length == 0? SqlDecimal.Null: new SqlDecimal(ToDecimal(p)); }
-#if FW3
 		public static SqlDecimal ToSqlDecimal(Binary p)          { return p == null || p.Length == 0? SqlDecimal.Null: new SqlDecimal(ToDecimal(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlDecimal</c> value.</summary>
 		public static SqlDecimal ToSqlDecimal(object p)         
@@ -6956,9 +6711,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlDecimal((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlDecimal(((Binary)p).ToArray());
-#endif
 
 			return ToDecimal(p);
 		}
@@ -7068,9 +6821,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlMoney</c> value.</summary>
 		public static SqlMoney ToSqlMoney(Byte[] p)          { return p == null || p.Length == 0? SqlMoney.Null: new SqlMoney(ToDecimal(p)); }
-#if FW3
 		public static SqlMoney ToSqlMoney(Binary p)          { return p == null || p.Length == 0? SqlMoney.Null: new SqlMoney(ToDecimal(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlMoney</c> value.</summary>
 		public static SqlMoney ToSqlMoney(object p)         
@@ -7117,9 +6868,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlMoney((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlMoney(((Binary)p).ToArray());
-#endif
 
 			return ToDecimal(p);
 		}
@@ -7231,9 +6980,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlBoolean</c> value.</summary>
 		public static SqlBoolean ToSqlBoolean(Byte[] p)          { return p == null || p.Length == 0? SqlBoolean.Null: new SqlBoolean(ToBoolean(p)); }
-#if FW3
 		public static SqlBoolean ToSqlBoolean(Binary p)          { return p == null || p.Length == 0? SqlBoolean.Null: new SqlBoolean(ToBoolean(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlBoolean</c> value.</summary>
 		public static SqlBoolean ToSqlBoolean(object p)         
@@ -7280,9 +7027,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlBoolean((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlBoolean(((Binary)p).ToArray());
-#endif
 
 			return ToBoolean(p);
 		}
@@ -7297,10 +7042,8 @@ namespace BLToolkit.Common
 		public static SqlDateTime ToSqlDateTime(String p)          { return p == null? SqlDateTime.Null: SqlDateTime.Parse(p); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(DateTime p)        { return p; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(DateTimeOffset p)  { return p.LocalDateTime; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(TimeSpan p)        { return ToDateTime(p); }
 		/// <summary>Converts the value from <c>Int64</c> to an equivalent <c>SqlDateTime</c> value.</summary>
@@ -7312,10 +7055,8 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(DateTime? p)       { return p.HasValue?            p.Value:  SqlDateTime.Null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(DateTimeOffset? p) { return p.HasValue?            p.Value.LocalDateTime:  SqlDateTime.Null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(TimeSpan? p)       { return p.HasValue? ToDateTime(p.Value): SqlDateTime.Null; }
 		/// <summary>Converts the value from <c>Int64?</c> to an equivalent <c>SqlDateTime</c> value.</summary>
@@ -7336,9 +7077,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(Byte[] p)          { return p == null || p.Length == 0? SqlDateTime.Null: new SqlDateTime(ToDateTime(p)); }
-#if FW3
 		public static SqlDateTime ToSqlDateTime(Binary p)          { return p == null || p.Length == 0? SqlDateTime.Null: new SqlDateTime(ToDateTime(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlDateTime</c> value.</summary>
 		public static SqlDateTime ToSqlDateTime(object p)         
@@ -7351,9 +7090,7 @@ namespace BLToolkit.Common
 			//
 			if (p is String)          return ToSqlDateTime((String)p);
 			if (p is DateTime)        return ToSqlDateTime((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToSqlDateTime((DateTimeOffset)p);
-			#endif
 
 			// SqlTypes
 			//
@@ -7362,9 +7099,7 @@ namespace BLToolkit.Common
 			// Other Types
 			//
 			if (p is Byte[])          return ToSqlDateTime((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlDateTime(((Binary)p).ToArray());
-#endif
 
 			return ToDateTime(p);
 		}
@@ -7400,9 +7135,7 @@ namespace BLToolkit.Common
 		public static SqlGuid ToSqlGuid(Type p)            { return p == null? SqlGuid.Null: p.GUID; }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlGuid</c> value.</summary>
 		public static SqlGuid ToSqlGuid(Byte[] p)          { return p == null? SqlGuid.Null: new SqlGuid(p); }
-#if FW3
 		public static SqlGuid ToSqlGuid(Binary p)          { return p == null? SqlGuid.Null: new SqlGuid(p.ToArray()); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>SqlGuid</c> value.</summary>
 		public static SqlGuid ToSqlGuid(object p)         
@@ -7424,9 +7157,7 @@ namespace BLToolkit.Common
 			//
 			if (p is Type)            return ToSqlGuid((Type)p);
 			if (p is Byte[])          return ToSqlGuid((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlGuid(((Binary)p).ToArray());
-#endif
 
 			return ToGuid(p);
 		}
@@ -7439,9 +7170,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlBinary</c> value.</summary>
 		public static SqlBinary ToSqlBinary(Byte[] p)          { return p; }
-#if FW3
 		public static SqlBinary ToSqlBinary(Binary p)          { return p == null ? null : p.ToArray(); }
-#endif
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>SqlBinary</c> value.</summary>
 		public static SqlBinary ToSqlBinary(Guid p)            { return p == Guid.Empty? SqlBinary.Null: new SqlGuid(p).ToSqlBinary(); }
 
@@ -7467,9 +7196,7 @@ namespace BLToolkit.Common
 			// Scalar Types.
 			//
 			if (p is Byte[])          return ToSqlBinary((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlBinary(((Binary)p).ToArray());
-#endif
 			if (p is Guid)            return ToSqlBinary((Guid)p);
 
 			// SqlTypes
@@ -7486,9 +7213,7 @@ namespace BLToolkit.Common
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlBytes</c> value.</summary>
 		public static SqlBytes ToSqlBytes(Byte[] p)          { return p == null? SqlBytes.Null: new SqlBytes(p); }
-#if FW3
 		public static SqlBytes ToSqlBytes(Binary p)          { return p == null? SqlBytes.Null: new SqlBytes(p.ToArray()); }
-#endif
 		/// <summary>Converts the value from <c>Stream</c> to an equivalent <c>SqlBytes</c> value.</summary>
 		public static SqlBytes ToSqlBytes(Stream p)          { return p == null? SqlBytes.Null: new SqlBytes(p); }
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>SqlBytes</c> value.</summary>
@@ -7516,9 +7241,7 @@ namespace BLToolkit.Common
 			// Scalar Types.
 			//
 			if (p is Byte[])          return ToSqlBytes((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlBytes(((Binary)p).ToArray());
-#endif
 			if (p is Stream)          return ToSqlBytes((Stream)p);
 			if (p is Guid)            return ToSqlBytes((Guid)p);
 
@@ -7542,9 +7265,7 @@ namespace BLToolkit.Common
 		public static SqlChars ToSqlChars(Char[] p)          { return p == null? SqlChars.Null: new SqlChars(p); }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(Byte[] p)          { return p == null? SqlChars.Null: new SqlChars(ToCharArray(p)); }
-#if FW3
 		public static SqlChars ToSqlChars(Binary p)          { return p == null? SqlChars.Null: new SqlChars(ToCharArray(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value from <c>SByte</c> to an equivalent <c>SqlChars</c> value.</summary>
 		[CLSCompliant(false)]
@@ -7583,10 +7304,8 @@ namespace BLToolkit.Common
 		public static SqlChars ToSqlChars(TimeSpan p)        { return new SqlChars(ToString(p).ToCharArray()); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(DateTime p)        { return new SqlChars(ToString(p).ToCharArray()); }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(DateTimeOffset p)  { return new SqlChars(ToString(p).ToCharArray()); }
-		#endif
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(Guid p)            { return new SqlChars(ToString(p).ToCharArray()); }
 
@@ -7629,10 +7348,8 @@ namespace BLToolkit.Common
 		public static SqlChars ToSqlChars(TimeSpan? p)       { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(DateTime? p)       { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(DateTimeOffset? p) { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; }
-		#endif
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>SqlChars</c> value.</summary>
 		public static SqlChars ToSqlChars(Guid? p)           { return p.HasValue? new SqlChars(p.ToString().ToCharArray()): SqlChars.Null; }
 
@@ -7682,9 +7399,7 @@ namespace BLToolkit.Common
 			if (p is String)          return ToSqlChars((String)p);
 			if (p is Char[])          return ToSqlChars((Char[])p);
 			if (p is Byte[])          return ToSqlChars((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlChars(((Binary)p).ToArray());
-#endif
 
 			if (p is SByte)           return ToSqlChars((SByte)p);
 			if (p is Int16)           return ToSqlChars((Int16)p);
@@ -7743,9 +7458,7 @@ namespace BLToolkit.Common
 		public static SqlXml ToSqlXml(Char[] p)          { return p == null? SqlXml.Null: new SqlXml(new XmlTextReader(new StringReader(new string(p)))); }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SqlXml</c> value.</summary>
 		public static SqlXml ToSqlXml(Byte[] p)          { return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p)); }
-#if FW3
 		public static SqlXml ToSqlXml(Binary p)          { return p == null? SqlXml.Null: new SqlXml(new MemoryStream(p.ToArray())); }
-#endif
 
 		// SqlTypes
 		// 
@@ -7773,9 +7486,7 @@ namespace BLToolkit.Common
 
 			if (p is Char[])          return ToSqlXml((Char[])p);
 			if (p is Byte[])          return ToSqlXml((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToSqlXml(((Binary)p).ToArray());
-#endif
 
 			// SqlTypes
 			//
@@ -7803,9 +7514,7 @@ namespace BLToolkit.Common
 		public static Type ToType(Char[] p)          { return p == null?       null: Type.GetType(new string(p));       }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Byte[] p)          { return p == null?       null: Type.GetTypeFromCLSID(ToGuid(p));  }
-#if FW3
 		public static Type ToType(Binary p)          { return p == null?       null: Type.GetTypeFromCLSID(ToGuid(p.ToArray()));  }
-#endif
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Guid p)            { return p == Guid.Empty? null: Type.GetTypeFromCLSID(p);          }
 
@@ -7835,9 +7544,7 @@ namespace BLToolkit.Common
 			if (p is String)          return ToType((String)p);
 			if (p is Char[])          return ToType((Char[])p);
 			if (p is Byte[])          return ToType((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToType(((Binary)p).ToArray());
-#endif
 			if (p is Guid)            return ToType((Guid)p);
 
 			// SqlTypes
@@ -7859,9 +7566,7 @@ namespace BLToolkit.Common
 		public static Stream ToStream(Guid p)            { return p == Guid.Empty? Stream.Null: new MemoryStream(p.ToByteArray()); }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Stream</c> value.</summary>
 		public static Stream ToStream(Byte[] p)          { return p == null? Stream.Null: new MemoryStream(p); }
-#if FW3
 		public static Stream ToStream(Binary p)          { return p == null? Stream.Null: new MemoryStream(p.ToArray()); }
-#endif
 
 		// Nullable Types.
 		// 
@@ -7888,9 +7593,7 @@ namespace BLToolkit.Common
 			//
 			if (p is Guid)            return ToStream((Guid)p);
 			if (p is Byte[])          return ToStream((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToStream(((Binary)p).ToArray());
-#endif
 
 			// SqlTypes
 			//
@@ -7951,11 +7654,9 @@ namespace BLToolkit.Common
 		public static Byte[] ToByteArray(Char p)            { return BitConverter.GetBytes(p); }
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTime p)        { return ToByteArray(p.ToBinary()); }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTimeOffset p)  { return ToByteArray(p.LocalDateTime.ToBinary()); }
 		public static Byte[] ToByteArray(Binary         p)  { return p.ToArray(); }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(TimeSpan p)        { return ToByteArray(p.Ticks); }
 		/// <summary>Converts the value from <c>Stream</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -8019,10 +7720,8 @@ namespace BLToolkit.Common
 		public static Byte[] ToByteArray(Char? p)           { return p.HasValue? ToByteArray(p.Value): null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTime? p)       { return p.HasValue? ToByteArray(p.Value): null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTimeOffset? p) { return p.HasValue? ToByteArray(p.Value): null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(TimeSpan? p)       { return p.HasValue? ToByteArray(p.Value): null; }
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -8066,9 +7765,7 @@ namespace BLToolkit.Common
 			if (p == null || p is DBNull) return null;
 
 			if (p is Byte[]) return (Byte[])p;
-#if FW3
 			if (p is Binary) return ((Binary)p).ToArray();
-#endif
 
 			// Scalar Types.
 			//
@@ -8089,9 +7786,7 @@ namespace BLToolkit.Common
 
 			if (p is Boolean)         return ToByteArray((Boolean)p);
 			if (p is DateTime)        return ToByteArray((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToByteArray((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToByteArray((TimeSpan)p);
 			if (p is Stream)          return ToByteArray((Stream)p);
 			if (p is Char[])          return ToByteArray((Char[])p);
@@ -8123,7 +7818,6 @@ namespace BLToolkit.Common
 
 		#region Binary
 
-#if FW3
 		// Scalar Types.
 		// 
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -8236,10 +7930,8 @@ namespace BLToolkit.Common
 		public static Binary ToLinqBinary(Char? p)           { return p.HasValue? new Binary(ToByteArray(p.Value)): null; }
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(DateTime? p)       { return p.HasValue? new Binary(ToByteArray(p.Value)): null; }
-		#if FW3
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(DateTimeOffset? p) { return p.HasValue? new Binary(ToByteArray(p.Value)): null; }
-		#endif
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(TimeSpan? p)       { return p.HasValue? new Binary(ToByteArray(p.Value)): null; }
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -8304,9 +7996,7 @@ namespace BLToolkit.Common
 
 			if (p is Boolean)         return ToLinqBinary((Boolean)p);
 			if (p is DateTime)        return ToLinqBinary((DateTime)p);
-			#if FW3
 			if (p is DateTimeOffset)  return ToLinqBinary((DateTimeOffset)p);
-			#endif
 			if (p is TimeSpan)        return ToLinqBinary((TimeSpan)p);
 			if (p is Stream)          return ToLinqBinary((Stream)p);
 			if (p is Char[])          return ToLinqBinary((Char[])p);
@@ -8334,8 +8024,6 @@ namespace BLToolkit.Common
 			throw CreateInvalidCastException(p.GetType(), typeof(Byte[]));
 		}
 
-#endif
-
 		#endregion
 
 		#region Char[]
@@ -8355,29 +8043,23 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Char[]</c> value.</summary>
 		public static Char[] ToCharArray(Byte[] p)
 		{
-				if (p == null) return null;
+			if (p == null) return null;
 
-				Char[] chars = new Char[p.Length / sizeof(Char)];
+			Char[] chars = new Char[p.Length / sizeof(Char)];
 
-				Buffer.BlockCopy(p, 0, chars, 0, p.Length);
-				return chars;
-			
+			Buffer.BlockCopy(p, 0, chars, 0, p.Length);
+			return chars;
 		}
-
-#if FW3
 
 		public static Char[] ToCharArray(Binary p)
 		{
-				if (p == null) return null;
+			if (p == null) return null;
 
-				Char[] chars = new Char[p.Length / sizeof(Char)];
+			Char[] chars = new Char[p.Length / sizeof(Char)];
 
-				Buffer.BlockCopy(p.ToArray(), 0, chars, 0, p.Length);
-				return chars;
-			
+			Buffer.BlockCopy(p.ToArray(), 0, chars, 0, p.Length);
+			return chars;
 		}
-
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Char[]</c> value.</summary>
 		public static Char[] ToCharArray(object p)
@@ -8395,9 +8077,7 @@ namespace BLToolkit.Common
 			if (p is SqlString)       return ToCharArray((SqlString)p);
 			if (p is SqlChars)        return ToCharArray((SqlChars)p);
 			if (p is Byte[])          return ToCharArray((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToCharArray(((Binary)p).ToArray());
-#endif
 
 			return ToString(p).ToCharArray();
 		}
@@ -8435,9 +8115,7 @@ namespace BLToolkit.Common
 		public static XmlReader ToXmlReader(Char[] p)          { return p == null? null: new XmlTextReader(new StringReader(new string(p))); }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>XmlReader</c> value.</summary>
 		public static XmlReader ToXmlReader(Byte[] p)          { return p == null? null: new XmlTextReader(new MemoryStream(p)); }
-#if FW3
 		public static XmlReader ToXmlReader(Binary p)          { return p == null? null: new XmlTextReader(new MemoryStream(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>XmlReader</c> value.</summary>
 		public static XmlReader ToXmlReader(object p)         
@@ -8463,9 +8141,7 @@ namespace BLToolkit.Common
 
 			if (p is Char[])          return ToXmlReader((Char[])p);
 			if (p is Byte[])          return ToXmlReader((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToXmlReader(((Binary)p).ToArray());
-#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(XmlReader));
 		}
@@ -8534,9 +8210,7 @@ namespace BLToolkit.Common
 		public static XmlDocument ToXmlDocument(Char[] p)          { return p == null || p.Length == 0? null: ToXmlDocument(new string(p)); }
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>XmlDocument</c> value.</summary>
 		public static XmlDocument ToXmlDocument(Byte[] p)          { return p == null || p.Length == 0? null: ToXmlDocument(new MemoryStream(p)); }
-#if FW3
 		public static XmlDocument ToXmlDocument(Binary p)          { return p == null || p.Length == 0? null: ToXmlDocument(new MemoryStream(p.ToArray())); }
-#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>XmlDocument</c> value.</summary>
 		public static XmlDocument ToXmlDocument(object p)         
@@ -8559,9 +8233,7 @@ namespace BLToolkit.Common
 
 			if (p is Char[])          return ToXmlDocument((Char[])p);
 			if (p is Byte[])          return ToXmlDocument((Byte[])p);
-#if FW3
 			if (p is Binary)          return ToXmlDocument(((Binary)p).ToArray());
-#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(XmlDocument));
 		}

@@ -1,6 +1,4 @@
-﻿#if FW2 || FW3
-
-namespace System
+﻿namespace System
 {
 	using Collections;
 	using Collections.Generic;
@@ -107,7 +105,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1> tuple = other as Tuple<T1>;
+			var tuple = other as Tuple<T1>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -120,7 +118,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1> tuple = other as Tuple<T1>;
+			var tuple = other as Tuple<T1>;
 
 			if (tuple == null)
 				return false;
@@ -151,7 +149,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -188,12 +186,12 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2> tuple = other as Tuple<T1,T2>;
+			var tuple = other as Tuple<T1,T2>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
 
-			int num = comparer.Compare(_item1, tuple._item1);
+			var num = comparer.Compare(_item1, tuple._item1);
 			if (num == 0)
 				return num;
 			return comparer.Compare(_item2, tuple._item2);
@@ -204,7 +202,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2> tuple = other as Tuple<T1,T2>;
+			var tuple = other as Tuple<T1,T2>;
 
 			if (tuple == null)
 				return false;
@@ -240,7 +238,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -280,7 +278,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2,T3> tuple = other as Tuple<T1,T2,T3>;
+			var tuple = other as Tuple<T1,T2,T3>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -298,7 +296,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2,T3> tuple = other as Tuple<T1,T2,T3>;
+			var tuple = other as Tuple<T1,T2,T3>;
 
 			if (tuple == null)
 				return false;
@@ -340,7 +338,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -383,7 +381,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2,T3,T4> tuple = other as Tuple<T1,T2,T3,T4>;
+			var tuple = other as Tuple<T1,T2,T3,T4>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -402,7 +400,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2,T3,T4> tuple = other as Tuple<T1,T2,T3,T4>;
+			var tuple = other as Tuple<T1,T2,T3,T4>;
 
 			if (tuple == null)
 				return false;
@@ -447,7 +445,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -493,7 +491,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2,T3,T4,T5> tuple = other as Tuple<T1,T2,T3,T4,T5>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -513,7 +511,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2,T3,T4,T5> tuple = other as Tuple<T1,T2,T3,T4,T5>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5>;
 
 			if (tuple == null)
 				return false;
@@ -561,7 +559,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -610,7 +608,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2,T3,T4,T5,T6> tuple = other as Tuple<T1,T2,T3,T4,T5,T6>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5,T6>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -631,7 +629,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2,T3,T4,T5,T6> tuple = other as Tuple<T1,T2,T3,T4,T5,T6>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5,T6>;
 
 			if (tuple == null)
 				return false;
@@ -682,7 +680,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -734,7 +732,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2,T3,T4,T5,T6,T7> tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -756,7 +754,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2,T3,T4,T5,T6,T7> tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7>;
 
 			if (tuple == null)
 				return false;
@@ -810,7 +808,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple) this).ToString(sb);
 		}
@@ -841,9 +839,7 @@ namespace System
 		public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest)
 		{
 			if (!(rest is ITuple))
-			{
 				throw new ArgumentException("Argument 'rest' is not a tuple", "rest");
-			}
 
 			_item1 = item1;
 			_item2 = item2;
@@ -870,7 +866,7 @@ namespace System
 			if (other == null)
 				return 1;
 
-			Tuple<T1,T2,T3,T4,T5,T6,T7,TRest> tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7,TRest>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7,TRest>;
 
 			if (tuple == null)
 				throw new ArgumentException(string.Format("Type '{0}' is not a tuple", other.GetType()), "other");
@@ -893,7 +889,7 @@ namespace System
 			if (other == null)
 				return false;
 
-			Tuple<T1,T2,T3,T4,T5,T6,T7,TRest> tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7,TRest>;
+			var tuple = other as Tuple<T1,T2,T3,T4,T5,T6,T7,TRest>;
 
 			if (tuple == null)
 				return false;
@@ -911,7 +907,7 @@ namespace System
 
 		int IStructuralEquatable.GetHashCode(IEqualityComparer comparer)
 		{
-			ITuple rest = (ITuple)_rest;
+			var rest = (ITuple)_rest;
 
 			if (rest.Size >= 8)
 				return rest.GetHashCode(comparer);
@@ -956,7 +952,7 @@ namespace System
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.Append("(");
 			return ((ITuple)this).ToString(sb);
 		}
@@ -989,5 +985,3 @@ namespace System
 		}
 	}
 }
-
-#endif

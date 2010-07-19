@@ -41,32 +41,28 @@ namespace BLToolkit.ComponentModel.Design
 			{
 				_treeView.Nodes.Clear();
 
-				Dictionary<Assembly, TreeNode>   assemblyNodes  = new Dictionary<Assembly, TreeNode>();
-				Dictionary<string, TreeNode>     namespaceNodes = new Dictionary<string, TreeNode>();
-				Dictionary<Type, TypePicker.TypeNode> typeNodes = new Dictionary<Type, TypePicker.TypeNode>();
-
-				ITypeDiscoveryService service = 
-					(ITypeDiscoveryService)_serviceProvider.GetService(typeof(ITypeDiscoveryService));
-
-				ICollection cTypes = service.GetTypes(_baseType, _systemCheckBox.Checked);
-				List<Type>  types  = new List<Type>(cTypes.Count);
+				var assemblyNodes  = new Dictionary<Assembly, TreeNode>();
+				var namespaceNodes = new Dictionary<string, TreeNode>();
+				var typeNodes      = new Dictionary<Type, TypePicker.TypeNode>();
+				var service        = (ITypeDiscoveryService)_serviceProvider.GetService(typeof(ITypeDiscoveryService));
+				var cTypes         = service.GetTypes(_baseType, _systemCheckBox.Checked);
+				var types          = new List<Type>(cTypes.Count);
 
 				foreach (Type type in cTypes)
 					types.Add(type);
 
-				types.Sort(delegate(Type a, Type b)
-				{
-					return a.Assembly == b.Assembly?
-						string.Compare(a.FullName, b.FullName):
-						string.Compare(a.Assembly.FullName, b.Assembly.FullName);
-				});
+				types.Sort((a, b) =>
+					a.Assembly == b.Assembly ?
+						string.Compare(a.FullName, b.FullName) :
+						string.Compare(a.Assembly.FullName, b.Assembly.FullName));
 
-				foreach (Type type in types)
+				foreach (var type in types)
 				{
 					if (_filter != null && _filter(type) == false)
 						continue;
 
-					Assembly assembly = type.Assembly;
+					var assembly = type.Assembly;
+
 					TreeNode assemblyNode;
 
 					if (!assemblyNodes.TryGetValue(assembly, out assemblyNode))
@@ -75,8 +71,9 @@ namespace BLToolkit.ComponentModel.Design
 							_treeView.Nodes.Add(assembly.FullName, assembly.GetName().Name, 1, 1);
 					}
 
-					string  @namespace    = type.Namespace ?? string.Empty;
-					string   namespaceKey = assembly.FullName + ", " + @namespace;
+					var @namespace    = type.Namespace ?? string.Empty;
+					var namespaceKey = assembly.FullName + ", " + @namespace;
+
 					TreeNode namespaceNode;
 
 					if (!namespaceNodes.TryGetValue(namespaceKey, out namespaceNode))
@@ -85,7 +82,7 @@ namespace BLToolkit.ComponentModel.Design
 							assemblyNode.Nodes.Add(namespaceKey, @namespace, 2, 2);
 					}
 
-					GetTypeNode getTypeNode = null; getTypeNode = delegate(Type t)
+					GetTypeNode getTypeNode = null; getTypeNode = t =>
 					{
 						TypePicker.TypeNode node;
 						
@@ -128,7 +125,7 @@ namespace BLToolkit.ComponentModel.Design
 
 		private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
 		{
-			TypePicker.TypeNode node = e.Node as TypePicker.TypeNode;
+			var node = e.Node as TypePicker.TypeNode;
 
 			_resultType = node != null && node.IsSelectable? node.Type: null;
 

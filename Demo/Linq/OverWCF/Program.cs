@@ -2,6 +2,7 @@
 using System.ServiceModel;
 using System.ServiceModel.Description;
 
+using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.ServiceModel;
 
@@ -11,6 +12,8 @@ namespace Linq.OverWCF
 	{
 		static void Main(string[] args)
 		{
+			DbManager.TurnTraceSwitchOn();
+
 			using (var host = new ServiceHost(new LinqService("Sql2008"), new Uri("net.tcp://localhost:1234")))
 			{
 				host.Description.Behaviors.Add(new ServiceMetadataBehavior());
@@ -34,7 +37,7 @@ namespace Linq.OverWCF
 
 				var client = new DataModel();
 
-				var identity = client.Person.Insert(() => new Person
+				var identity = client.Person.InsertWithIdentity(() => new Person
 				{
 					FirstName = "1",
 					LastName  = "2",

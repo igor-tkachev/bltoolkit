@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using BLToolkit.DataAccess;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
+	using DataAccess;
 	using Extension;
 	using Mapping;
 
@@ -16,9 +16,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			AddProvider(new ExtensionMetadataProvider());
 			AddProvider(new AttributeMetadataProvider());
-#if FW3
 			AddProvider(new LinqMetadataProvider());
-#endif
 		}
 
 		private readonly ArrayList _list = new ArrayList();
@@ -50,7 +48,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				string name = p.GetFieldName(typeExtension, member, out isSet);
+				var name = p.GetFieldName(typeExtension, member, out isSet);
 
 				if (isSet)
 					return name;
@@ -67,7 +65,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				string name = p.GetFieldStorage(typeExtension, member, out isSet);
+				var name = p.GetFieldStorage(typeExtension, member, out isSet);
 
 				if (isSet)
 					return name;
@@ -84,7 +82,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool value = p.GetInheritanceDiscriminator(typeExtension, member, out isSet);
+				var value = p.GetInheritanceDiscriminator(typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -111,7 +109,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool ignore = p.GetMapIgnore(typeExtension, member, out isSet);
+				var ignore = p.GetMapIgnore(typeExtension, member, out isSet);
 
 				if (isSet)
 					return ignore;
@@ -130,7 +128,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			{
 				foreach (MetadataProviderBase p in _list)
 				{
-					bool trimmable = p.GetTrimmable(typeExtension, member, out isSet);
+					var trimmable = p.GetTrimmable(typeExtension, member, out isSet);
 
 					if (isSet)
 						return trimmable;
@@ -148,7 +146,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				MapValue[] value = p.GetMapValues(typeExtension, member, out isSet);
+				var value = p.GetMapValues(typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -161,7 +159,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				MapValue[] value = p.GetMapValues(typeExt, type, out isSet);
+				var value = p.GetMapValues(typeExt, type, out isSet);
 
 				if (isSet)
 					return value;
@@ -178,7 +176,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				object value = p.GetDefaultValue(mappingSchema, typeExtension, member, out isSet);
+				var value = p.GetDefaultValue(mappingSchema, typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -191,7 +189,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				object value = p.GetDefaultValue(mappingSchema, typeExtension, type, out isSet);
+				var value = p.GetDefaultValue(mappingSchema, typeExtension, type, out isSet);
 
 				if (isSet)
 					return value;
@@ -208,7 +206,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool value = p.GetNullable(mappingSchema, typeExtension, member, out isSet);
+				var value = p.GetNullable(mappingSchema, typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -225,7 +223,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				object value = p.GetNullValue(mappingSchema, typeExtension, member, out isSet);
+				var value = p.GetNullValue(mappingSchema, typeExtension, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -242,7 +240,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				string value = p.GetDatabaseName(type, extensions, out isSet);
+				var value = p.GetDatabaseName(type, extensions, out isSet);
 
 				if (isSet)
 					return value;
@@ -259,7 +257,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				string value = p.GetOwnerName(type, extensions, out isSet);
+				var value = p.GetOwnerName(type, extensions, out isSet);
 
 				if (isSet)
 					return value;
@@ -276,7 +274,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				string value = p.GetTableName(type, extensions, out isSet);
+				var value = p.GetTableName(type, extensions, out isSet);
 
 				if (isSet)
 					return value;
@@ -293,7 +291,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				int value = p.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
+				var value = p.GetPrimaryKeyOrder(type, typeExt, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -310,7 +308,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				NonUpdatableAttribute value = p.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
+				var value = p.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
 
 				if (isSet)
 					return value;
@@ -327,7 +325,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				bool ignore = p.GetSqlIgnore(typeExtension, member, out isSet);
+				var ignore = p.GetSqlIgnore(typeExtension, member, out isSet);
 
 				if (isSet)
 					return ignore;
@@ -344,7 +342,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				List<MapRelationBase> relations = p.GetRelations(schema, typeExt, master, slave, out isSet);
+				var relations = p.GetRelations(schema, typeExt, master, slave, out isSet);
 
 				if (isSet)
 					return relations;
@@ -361,7 +359,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				Association attr = p.GetAssociation(typeExtension, member);
+				var attr = p.GetAssociation(typeExtension, member);
 
 				if (attr != null)
 					return attr;
@@ -378,7 +376,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			foreach (MetadataProviderBase p in _list)
 			{
-				InheritanceMappingAttribute[] attrs = p.GetInheritanceMapping(type, typeExtension);
+				var attrs = p.GetInheritanceMapping(type, typeExtension);
 
 				if (attrs.Length > 0)
 					return attrs;

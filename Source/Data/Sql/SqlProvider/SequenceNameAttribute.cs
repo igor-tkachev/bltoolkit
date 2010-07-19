@@ -2,7 +2,6 @@
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
-	[Serializable]
 	[AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
 	public class SequenceNameAttribute : Attribute
 	{

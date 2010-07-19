@@ -4,12 +4,10 @@ using System.Data.Common;
 using System.Data.OracleClient;
 using System.Globalization;
 
-#if FW3
-using BLToolkit.Data.Sql.SqlProvider;
-#endif
-
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 #if FW4
 	[Obsolete("OracleDataProvider has been deprecated. http://go.microsoft.com/fwlink/?LinkID=144260")]
 #pragma warning disable 0618
@@ -137,15 +135,12 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 
-#if FW3
-
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new OracleSqlProvider();
 		}
-
-#endif
 	}
+
 #if FW4
 #pragma warning restore 0618
 #endif

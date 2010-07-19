@@ -58,9 +58,7 @@ namespace BLToolkit.Mapping
 		public override void SetDecimal  (object o, int index, Decimal  value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetGuid     (object o, int index, Guid     value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetDateTime (object o, int index, DateTime value) { _list.Add(ConvertTo<T>.From(value)); }
-#if FW3
 		public override void SetDateTimeOffset(object o, int index, DateTimeOffset value) { _list.Add(ConvertTo<T>.From(value)); }
-#endif
 
 		// Nullable types setters.
 		//
@@ -85,9 +83,7 @@ namespace BLToolkit.Mapping
 		public override void SetNullableDecimal (object o, int index, Decimal?  value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetNullableGuid    (object o, int index, Guid?     value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetNullableDateTime(object o, int index, DateTime? value) { _list.Add(ConvertTo<T>.From(value)); }
-#if FW3
 		public override void SetNullableDateTimeOffset(object o, int index, DateTimeOffset? value) { _list.Add(ConvertTo<T>.From(value)); }
-#endif
 
 		// SQL type setters.
 		//

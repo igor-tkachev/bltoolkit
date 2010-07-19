@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
+using System.Data.Linq;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
@@ -15,11 +17,6 @@ using BLToolkit.Properties;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 using BLToolkit.Reflection.MetadataProvider;
-
-#if FW3
-using System.Data.Linq;
-using System.Linq.Expressions;
-#endif
 
 #region ReSharper disable
 // ReSharper disable SuggestUseVarKeywordEvident
@@ -160,30 +157,28 @@ namespace BLToolkit.Mapping
 
 		public virtual void InitNullValues()
 		{
-			_defaultSByteNullValue       = (SByte)      GetNullValue(typeof(SByte));
-			_defaultInt16NullValue       = (Int16)      GetNullValue(typeof(Int16));
-			_defaultInt32NullValue       = (Int32)      GetNullValue(typeof(Int32));
-			_defaultInt64NullValue       = (Int64)      GetNullValue(typeof(Int64));
-			_defaultByteNullValue        = (Byte)       GetNullValue(typeof(Byte));
-			_defaultUInt16NullValue      = (UInt16)     GetNullValue(typeof(UInt16));
-			_defaultUInt32NullValue      = (UInt32)     GetNullValue(typeof(UInt32));
-			_defaultUInt64NullValue      = (UInt64)     GetNullValue(typeof(UInt64));
-			_defaultCharNullValue        = (Char)       GetNullValue(typeof(Char));
-			_defaultSingleNullValue      = (Single)     GetNullValue(typeof(Single));
-			_defaultDoubleNullValue      = (Double)     GetNullValue(typeof(Double));
-			_defaultBooleanNullValue     = (Boolean)    GetNullValue(typeof(Boolean));
+			_defaultSByteNullValue          = (SByte)         GetNullValue(typeof(SByte));
+			_defaultInt16NullValue          = (Int16)         GetNullValue(typeof(Int16));
+			_defaultInt32NullValue          = (Int32)         GetNullValue(typeof(Int32));
+			_defaultInt64NullValue          = (Int64)         GetNullValue(typeof(Int64));
+			_defaultByteNullValue           = (Byte)          GetNullValue(typeof(Byte));
+			_defaultUInt16NullValue         = (UInt16)        GetNullValue(typeof(UInt16));
+			_defaultUInt32NullValue         = (UInt32)        GetNullValue(typeof(UInt32));
+			_defaultUInt64NullValue         = (UInt64)        GetNullValue(typeof(UInt64));
+			_defaultCharNullValue           = (Char)          GetNullValue(typeof(Char));
+			_defaultSingleNullValue         = (Single)        GetNullValue(typeof(Single));
+			_defaultDoubleNullValue         = (Double)        GetNullValue(typeof(Double));
+			_defaultBooleanNullValue        = (Boolean)       GetNullValue(typeof(Boolean));
 
-			_defaultStringNullValue      = (String)     GetNullValue(typeof(String));
-			_defaultDateTimeNullValue    = (DateTime)   GetNullValue(typeof(DateTime));
-#if FW3
+			_defaultStringNullValue         = (String)        GetNullValue(typeof(String));
+			_defaultDateTimeNullValue       = (DateTime)      GetNullValue(typeof(DateTime));
 			_defaultDateTimeOffsetNullValue = (DateTimeOffset)GetNullValue(typeof(DateTimeOffset));
 			_defaultLinqBinaryNullValue     = (Binary)        GetNullValue(typeof(Binary));
-#endif
-			_defaultDecimalNullValue     = (Decimal)    GetNullValue(typeof(Decimal));
-			_defaultGuidNullValue        = (Guid)       GetNullValue(typeof(Guid));
-			_defaultStreamNullValue      = (Stream)     GetNullValue(typeof(Stream));
-			_defaultXmlReaderNullValue   = (XmlReader)  GetNullValue(typeof(XmlReader));
-			_defaultXmlDocumentNullValue = (XmlDocument)GetNullValue(typeof(XmlDocument));
+			_defaultDecimalNullValue        = (Decimal)       GetNullValue(typeof(Decimal));
+			_defaultGuidNullValue           = (Guid)          GetNullValue(typeof(Guid));
+			_defaultStreamNullValue         = (Stream)        GetNullValue(typeof(Stream));
+			_defaultXmlReaderNullValue      = (XmlReader)     GetNullValue(typeof(XmlReader));
+			_defaultXmlDocumentNullValue    = (XmlDocument)   GetNullValue(typeof(XmlDocument));
 		}
 
 		#region Primitive Types
@@ -415,7 +410,6 @@ namespace BLToolkit.Mapping
 			return ConvertToDateTime(value).TimeOfDay;
 		}
 
-#if FW3
 		private DateTimeOffset _defaultDateTimeOffsetNullValue;
 		public  DateTimeOffset  DefaultDateTimeOffsetNullValue
 		{
@@ -446,7 +440,6 @@ namespace BLToolkit.Mapping
 				value == null || value is DBNull? _defaultLinqBinaryNullValue:
 					Convert.ToLinqBinary(value);
 		}
-#endif
 
 		private decimal _defaultDecimalNullValue;
 		public  decimal  DefaultDecimalNullValue
@@ -657,7 +650,6 @@ namespace BLToolkit.Mapping
 			return dt == null? null : (TimeSpan?)dt.Value.TimeOfDay;
 		}
 
-#if FW3
 		public virtual DateTimeOffset? ConvertToNullableDateTimeOffset(object value)
 		{
 			return
@@ -665,7 +657,6 @@ namespace BLToolkit.Mapping
 				value == null || value is DBNull? null:
 					Convert.ToNullableDateTimeOffset(value);
 		}
-#endif
 
 		public virtual Decimal? ConvertToNullableDecimal(object value)
 		{
@@ -846,9 +837,7 @@ namespace BLToolkit.Mapping
 			if (typeof(Stream)         == typeof(T)) return (T)(object)_defaultStreamNullValue;
 			if (typeof(XmlReader)      == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
 			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)_defaultXmlDocumentNullValue;
-#if FW3
 			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)_defaultDateTimeOffsetNullValue;
-#endif
 
 			return default(T);
 		}
@@ -973,11 +962,8 @@ namespace BLToolkit.Mapping
 					case TypeCode.UInt64:   return ConvertToNullableUInt64  (value);
 				}
 
-				if (typeof(Guid) == conversionType) return ConvertToNullableGuid(value);
-
-#if FW3
+				if (typeof(Guid)           == conversionType) return ConvertToNullableGuid(value);
 				if (typeof(DateTimeOffset) == conversionType) return ConvertToNullableDateTimeOffset(value);
-#endif
 			}
 
 			switch (Type.GetTypeCode(conversionType))
@@ -1004,10 +990,8 @@ namespace BLToolkit.Mapping
 			if (typeof(XmlReader)      == conversionType) return ConvertToXmlReader     (value);
 			if (typeof(XmlDocument)    == conversionType) return ConvertToXmlDocument   (value);
 			if (typeof(byte[])         == conversionType) return ConvertToByteArray     (value);
-#if FW3
 			if (typeof(Binary)         == conversionType) return ConvertToLinqBinary    (value);
 			if (typeof(DateTimeOffset) == conversionType) return ConvertToDateTimeOffset(value);
-#endif
 			if (typeof(char[])         == conversionType) return ConvertToCharArray     (value);
 
 			if (typeof(SqlInt32)       == conversionType) return ConvertToSqlInt32      (value);
@@ -3696,8 +3680,6 @@ namespace BLToolkit.Mapping
 
 		#region GetObjectMapper
 
-#if FW3
-
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>()
 		{
 			return new ExpressionMapper<TSource,TDest>(this).GetMapper();
@@ -3707,8 +3689,6 @@ namespace BLToolkit.Mapping
 		{
 			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy}.GetMapper();
 		}
-
-#endif
 
 		#endregion
 	}

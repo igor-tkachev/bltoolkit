@@ -2,13 +2,11 @@ using System;
 using System.Data;
 using System.Data.OleDb;
 using System.Text.RegularExpressions;
-using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
-#if FW3
+	using Mapping;
 	using Sql.SqlProvider;
-#endif
 
 	public sealed class AccessDataProvider : OleDbDataProvider
 	{
@@ -231,14 +229,10 @@ namespace BLToolkit.Data.DataProvider
 			get { return 0; }
 		}
 
-#if FW3
-
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new AccessSqlProvider();
 		}
-
-#endif
 
 		public override object Convert(object value, ConvertType convertType)
 		{

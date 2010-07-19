@@ -2,9 +2,7 @@ using System;
 
 namespace BLToolkit.Data.DataProvider
 {
-#if FW3
 	using Sql.SqlProvider;
-#endif
 
 	public sealed class Sql2008DataProvider : SqlDataProviderBase
 	{
@@ -13,13 +11,9 @@ namespace BLToolkit.Data.DataProvider
 			get { return DataProvider.ProviderName.MsSql2008; }
 		}
 
-#if FW3
-
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2008SqlProvider();
 		}
-
-#endif
 	}
 }

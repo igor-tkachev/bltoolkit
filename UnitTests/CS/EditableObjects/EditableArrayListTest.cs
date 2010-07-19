@@ -27,7 +27,7 @@ namespace EditableObjects
 			
 			public static EditableTestObject CreateInstance(int id, string name, int seconds)
 			{
-				EditableTestObject instance = CreateInstance();
+				var instance = CreateInstance();
 
 				instance.ID = id;
 				instance.Name = name;
@@ -42,7 +42,7 @@ namespace EditableObjects
 			}
 		}
 		
-		private static readonly EditableTestObject[] _testObjects = new EditableTestObject[6]
+		private static readonly EditableTestObject[] _testObjects = new EditableTestObject[]
 			{
 				EditableTestObject.CreateInstance(0, "Smith",  24),
 				EditableTestObject.CreateInstance(1, "John",   22),
@@ -62,7 +62,7 @@ namespace EditableObjects
 		
 		private void TestList_ListChanged(object sender, ListChangedEventArgs e)
 		{
-			EditableArrayList array = sender as EditableArrayList;
+			var array = sender as EditableArrayList;
 			
 			Assert.IsNotNull(array);
 			if (e.ListChangedType != ListChangedType.Reset)
@@ -70,7 +70,7 @@ namespace EditableObjects
 
 			if(e.ListChangedType == ListChangedType.ItemAdded)
 			{
-				object o = array[e.NewIndex];
+				var o = array[e.NewIndex];
 
 				Assert.IsNotNull(o);
 				Assert.That(array.NewItems.Contains(o));
@@ -89,7 +89,7 @@ namespace EditableObjects
 			_testList.Clear();
 			_testList.RemoveSort();
 
-			for (int i = 0; i < 3; i++)
+			for (var i = 0; i < 3; i++)
 				_testList.Add(_testObjects[i]);
 			
 			Assert.AreEqual(_testList.Count, 3);
@@ -97,15 +97,15 @@ namespace EditableObjects
 			Assert.AreEqual(_testList[1], _testObjects[1]);
 			Assert.AreEqual(_testList[2], _testObjects[2]);
 			
-			EditableTestObject[] _subArray = new EditableTestObject[3];
+			var _subArray = new EditableTestObject[3];
 
-			for (int i = 3; i < _testObjects.Length; i++)
+			for (var i = 3; i < _testObjects.Length; i++)
 				_subArray[i-3] = _testObjects[i];
 
 			_testList.AddRange(_subArray);
 			Assert.AreEqual(_testList.Count, 6);
 			
-			for (int i = 3; i < _testObjects.Length; i++)
+			for (var i = 3; i < _testObjects.Length; i++)
 				Assert.AreEqual(_subArray[i - 3], _testObjects[i]);
 
 			PrintList();
@@ -116,9 +116,10 @@ namespace EditableObjects
 		[Test]
 		public void TestAddNew()
 		{
-			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>();
-			bool listChangedFired = false;
-			list.ListChanged += delegate { listChangedFired = true; };
+			var list = new EditableList<EditableTestObject>();
+			var listChangedFired = false;
+
+			list.ListChanged += (sender, args) => listChangedFired = true;
 
 			list.AddNew();
 			Assert.That(listChangedFired);
@@ -139,7 +140,7 @@ namespace EditableObjects
 			_testList.Clear();
 			_testList.RemoveSort();
 
-			for (int i = 0; i < 3; i++)
+			for (var i = 0; i < 3; i++)
 				_testList.Insert(0, _testObjects[i]);
 
 			Assert.AreEqual(_testList.Count, 3);
@@ -147,9 +148,9 @@ namespace EditableObjects
 			Assert.AreEqual(_testList[1], _testObjects[1]);
 			Assert.AreEqual(_testList[2], _testObjects[0]);
 
-			EditableTestObject[] _subArray = new EditableTestObject[3];
+			var _subArray = new EditableTestObject[3];
 
-			for (int i = 3; i < _testObjects.Length; i++)
+			for (var i = 3; i < _testObjects.Length; i++)
 				_subArray[i-3] = _testObjects[i];
 
 			_testList.InsertRange(0, _subArray);
@@ -243,7 +244,7 @@ namespace EditableObjects
 			_testList.RemoveSort();
 			_testList.ApplySort(_testList.GetItemProperties(null)["Seconds"], ListSortDirection.Descending);
 
-			for (int i = 0; i < 3; i++)
+			for (var i = 0; i < 3; i++)
 				_testList.Add(_testObjects[i]);
 
 			Assert.AreEqual(_testList.Count, 3);
@@ -251,9 +252,9 @@ namespace EditableObjects
 			Assert.AreEqual(_testList[2], _testObjects[1]);
 			Assert.AreEqual(_testList[0], _testObjects[2]);
 
-			EditableTestObject[] _subArray = new EditableTestObject[3];
+			var _subArray = new EditableTestObject[3];
 
-			for (int i = 3; i < _testObjects.Length; i++)
+			for (var i = 3; i < _testObjects.Length; i++)
 				_subArray[i-3] = _testObjects[i];
 
 			_testList.AddRange(_subArray);
@@ -270,7 +271,7 @@ namespace EditableObjects
 
 			_testList.ApplySort(_testList.GetItemProperties(null)["Seconds"], ListSortDirection.Ascending);
 
-			for (int i = 0; i < 3; i++)
+			for (var i = 0; i < 3; i++)
 				_testList.Add(_testObjects[i]);
 
 			Assert.AreEqual(_testList.Count, 3);
@@ -298,7 +299,7 @@ namespace EditableObjects
 			_testList.RemoveSort();
 			_testList.ApplySort(_testList.GetItemProperties(null)["Seconds"], ListSortDirection.Descending);
 
-			for (int i = 0; i < 3; i++)
+			for (var i = 0; i < 3; i++)
 				_testList.Insert(0, _testObjects[i]);
 
 			Assert.AreEqual(_testList.Count, 3);
@@ -306,9 +307,9 @@ namespace EditableObjects
 			Assert.AreEqual(_testList[1], _testObjects[0]);
 			Assert.AreEqual(_testList[2], _testObjects[1]);
 
-			EditableTestObject[] _subArray = new EditableTestObject[3];
+			var _subArray = new EditableTestObject[3];
 
-			for (int i = 3; i < _testObjects.Length; i++)
+			for (var i = 3; i < _testObjects.Length; i++)
 				_subArray[i-3] = _testObjects[i];
 
 			_testList.InsertRange(0, _subArray);
@@ -325,7 +326,7 @@ namespace EditableObjects
 
 			_testList.ApplySort(_testList.GetItemProperties(null)["Seconds"], ListSortDirection.Ascending);
 
-			for (int i = 0; i < 3; i++)
+			for (var i = 0; i < 3; i++)
 				_testList.Insert(0, _testObjects[i]);
 
 			Assert.AreEqual(_testList.Count, 3);
@@ -354,7 +355,7 @@ namespace EditableObjects
 			_testList.ApplySort(_testList.GetItemProperties(null)["Seconds"], ListSortDirection.Descending);
 			_testList.AddRange(_testObjects);
 
-			EditableTestObject eto = EditableTestObject.CreateInstance(6, "Dummy", 10);
+			var eto = EditableTestObject.CreateInstance(6, "Dummy", 10);
 
 			_testList.Add(eto);
 			Assert.AreEqual(_testList.Count, 7);
@@ -401,10 +402,9 @@ namespace EditableObjects
 		{
 			//Configuration.NotifyOnEqualSet = true;
 
-			SerializableObject test = TypeAccessor<SerializableObject>.CreateInstance();
-
-			MemoryStream    stream = new MemoryStream();
-			BinaryFormatter bf     = new BinaryFormatter();
+			var test   = TypeAccessor<SerializableObject>.CreateInstance();
+			var stream = new MemoryStream();
+			var bf     = new BinaryFormatter();
 
 			bf.Serialize(stream, test);
 
@@ -416,22 +416,20 @@ namespace EditableObjects
 		{
 			//Configuration.NotifyOnChangesOnly = true;
 
-			EditableList<SerializableObject> list = new EditableList<SerializableObject>();
+			var list = new EditableList<SerializableObject> { TypeAccessor<SerializableObject>.CreateInstance() };
 
-			list.Add(TypeAccessor<SerializableObject>.CreateInstance());
+			var formatter = new BinaryFormatter();
 
-			BinaryFormatter formatter = new BinaryFormatter();
-
-			using (MemoryStream stream = new MemoryStream())
+			using (var stream = new MemoryStream())
 			{
 				formatter.Serialize(stream, list);
 				stream.Position = 0;
 
-				object result = formatter.Deserialize(stream);
+				var result = formatter.Deserialize(stream);
 
 				Assert.IsNotNull(result);
 
-				EditableList<SerializableObject> eal = (EditableList<SerializableObject>)result;
+				var eal = (EditableList<SerializableObject>)result;
 
 				Console.WriteLine(eal.Count);
 
@@ -454,7 +452,7 @@ namespace EditableObjects
 			//Configuration.NotifyOnChangesOnly = false;
 		}
 
-		private static int _notificationCount = 0;
+		private static int _notificationCount;
 
 		static void eal_ListChanged(object sender, ListChangedEventArgs e)
 		{
@@ -465,23 +463,23 @@ namespace EditableObjects
 		[Test]
 		public void SortTest()
 		{
-			EditableList<EditableTestObject> dataList = new EditableList<EditableTestObject>();
+			var dataList = new EditableList<EditableTestObject>
+			{
+				EditableTestObject.CreateInstance(1, "John",   60),
+				EditableTestObject.CreateInstance(1, "John",   60),
+				EditableTestObject.CreateInstance(1, "John",   60),
+				EditableTestObject.CreateInstance(2, "Tester", 70),
+				EditableTestObject.CreateInstance(2, "Tester", 70),
+				EditableTestObject.CreateInstance(2, "Tester", 70),
+				EditableTestObject.CreateInstance(3, "Tester", 70),
+				EditableTestObject.CreateInstance(3, "Tester", 70),
+				EditableTestObject.CreateInstance(3, "Tester", 70)
+			};
 
-			dataList.Add(EditableTestObject.CreateInstance(1, "John", 60));
-			dataList.Add(EditableTestObject.CreateInstance(1, "John", 60));
-			dataList.Add(EditableTestObject.CreateInstance(1, "John", 60));
-			dataList.Add(EditableTestObject.CreateInstance(2, "Tester", 70));
-			dataList.Add(EditableTestObject.CreateInstance(2, "Tester", 70));
-			dataList.Add(EditableTestObject.CreateInstance(2, "Tester", 70));
-			dataList.Add(EditableTestObject.CreateInstance(3, "Tester", 70));
-			dataList.Add(EditableTestObject.CreateInstance(3, "Tester", 70));
-			dataList.Add(EditableTestObject.CreateInstance(3, "Tester", 70));
+			var bindingSource = new BindingSource(dataList, null) { Sort = "ID" };
+			var prev          = 0;
 
-			BindingSource bindingSource = new BindingSource(dataList, null);
-			bindingSource.Sort = "ID";
-
-			int prev = 0;
-			foreach (EditableTestObject o in dataList)
+			foreach (var o in dataList)
 			{
 				Assert.IsTrue(o.ID >= prev);
 				prev = o.ID;
@@ -490,7 +488,8 @@ namespace EditableObjects
 			bindingSource[0] = EditableTestObject.CreateInstance(2, "John", 60);
 
 			prev = 0;
-			foreach (EditableTestObject o in dataList)
+
+			foreach (var o in dataList)
 			{
 				Assert.IsTrue(o.ID >= prev);
 				prev = o.ID;
@@ -518,13 +517,10 @@ namespace EditableObjects
 		[Test]
 		public void DerivedOnListChanged()
 		{
-			bool called = false;
+			var called = false;
+			var list   = new DerivedEditableList<int>();
 
-			DerivedEditableList<int> list = new DerivedEditableList<int>();
-			list.OnListChangedCalled += delegate
-			{
-				called = true;
-			};
+			list.OnListChangedCalled += (sender, args) => called = true;
 
 			list.Add(1);
 
@@ -545,12 +541,8 @@ namespace EditableObjects
 		[Test]
 		public void CloneTest()
 		{
-			EditableList<int> src = new EditableList<int>();
-			src.Add(1);
-			src.Add(2);
-			src.Add(3);
-
-			EditableList<int> clone = (EditableList<int>)src.Clone();
+			var src   = new EditableList<int> { 1, 2, 3 };
+			var clone = (EditableList<int>)src.Clone();
 
 			Assert.AreEqual(src.Count,          clone.Count);
 			Assert.AreEqual(src.NewItems.Count, clone.NewItems.Count);
@@ -576,7 +568,7 @@ namespace EditableObjects
 		[Test]
 		public void CreateCleanTest()
 		{
-			EditableList<int> list = new EditableList<int>(new int[] { 1, 2, 3 });
+			var list = new EditableList<int>(new[] { 1, 2, 3 });
 
 			Assert.IsFalse(list.IsDirty);
 
@@ -596,7 +588,7 @@ namespace EditableObjects
 		[Test]
 		public void IsDirtyTest()
 		{
-			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>();
+			var list = new EditableList<EditableTestObject>();
 
 			list.AddNew();
 			list.AddNew();
@@ -616,13 +608,13 @@ namespace EditableObjects
 		[Test]
 		public void CreateWithDirtyTest()
 		{
-			EditableTestObject to = EditableTestObject.CreateInstance();
+			var to = EditableTestObject.CreateInstance();
 
 			to.ID = 10;
 
 			Assert.IsTrue(to.IsDirty);
 
-			EditableList<EditableTestObject> list = new EditableList<EditableTestObject>(new EditableTestObject[] { to });
+			var list = new EditableList<EditableTestObject>(new[] { to });
 
 			Assert.IsTrue(to.IsDirty);
 			Assert.IsTrue(list.IsDirty);

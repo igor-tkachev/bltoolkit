@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
 
 namespace BLToolkit.TypeBuilder.Builders
@@ -41,13 +40,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		internal static string GetTypeFullName(Type type)
 		{
-			string name = type.FullName;
+			var name = type.FullName;
 
 			if (type.IsGenericType)
 			{
 				name = name.Split('`')[0];
 
-				foreach (Type t in type.GetGenericArguments())
+				foreach (var t in type.GetGenericArguments())
 					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
 			}
 
@@ -56,13 +55,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		internal static string GetTypeShortName(Type type)
 		{
-			string name = type.Name;
+			var name = type.Name;
 
 			if (type.IsGenericType)
 			{
 				name = name.Split('`')[0];
 
-				foreach (Type t in type.GetGenericArguments())
+				foreach (var t in type.GetGenericArguments())
 					name += "_" + GetTypeFullName(t).Replace('+', '_').Replace('.', '_');
 			}
 
@@ -71,8 +70,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public string GetTypeName()
 		{
-			string typeFullName  = _sourceType.FullName;
-			string typeShortName = _sourceType.Name;
+			var typeFullName  = _sourceType.FullName;
+			var typeShortName = _sourceType.Name;
 
 			if (_sourceType.IsGenericType)
 			{
@@ -96,13 +95,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static AbstractTypeBuilderList GetBuilderList(TypeHelper type)
 		{
-			object[] attrs = type.GetAttributes(typeof(AbstractTypeBuilderAttribute));
-
-			AbstractTypeBuilderList builders = new AbstractTypeBuilderList(attrs.Length);
+			var attrs    = type.GetAttributes(typeof(AbstractTypeBuilderAttribute));
+			var builders = new AbstractTypeBuilderList(attrs.Length);
 
 			foreach (AbstractTypeBuilderAttribute attr in attrs)
 			{
-				IAbstractTypeBuilder builder = attr.TypeBuilder;
+				var builder = attr.TypeBuilder;
 
 				if (builder != null)
 				{
@@ -130,9 +128,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			Build(BuildStep.Before, _builders);
 			Build(BuildStep.Build,  _builders);
 
-			Hashtable ids = new Hashtable();
+			var ids = new Hashtable();
 
-			foreach (IAbstractTypeBuilder builder in _builders)
+			foreach (var builder in _builders)
 				ids[builder] = builder.ID;
 
 			DefineAbstractProperties();
@@ -148,7 +146,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Build(BuildStep.After, _builders);
 
-			MethodInfo initMethod = _context.Type.GetMethod("InitInstance", typeof(InitContext));
+			var initMethod = _context.Type.GetMethod("InitInstance", typeof(InitContext));
 
 			// Finalize constructors.
 			//
@@ -188,22 +186,22 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static void SetID(AbstractTypeBuilderList builders)
 		{
-			foreach (IAbstractTypeBuilder builder in builders)
+			foreach (var builder in builders)
 				builder.ID = ++_idCounter;
 		}
 
 		private static void CheckCompatibility(BuildContext context, AbstractTypeBuilderList builders)
 		{
-			for (int i = 0; i < builders.Count; i++)
+			for (var i = 0; i < builders.Count; i++)
 			{
-				IAbstractTypeBuilder cur = builders[i];
+				var cur = builders[i];
 
 				if (cur == null)
 					continue;
 
-				for (int j = 0; j < builders.Count; j++)
+				for (var j = 0; j < builders.Count; j++)
 				{
-					IAbstractTypeBuilder test = builders[j];
+					var test = builders[j];
 
 					if (i == j || test == null)
 						continue;
@@ -213,14 +211,14 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			for (int i = 0; i < builders.Count; i++)
+			for (var i = 0; i < builders.Count; i++)
 				if (builders[i] == null)
 					builders.RemoveAt(i--);
 		}
 
 		private void DefineNonAbstractType()
 		{
-			List<Type> interfaces = new List<Type>();
+			var interfaces = new List<Type>();
 
 			if (_context.Type.IsInterface)
 			{
@@ -228,13 +226,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				_context.InterfaceMap.Add(_context.Type, null);
 			}
 
-			foreach (IAbstractTypeBuilder tb in _builders)
+			foreach (var tb in _builders)
 			{
-				Type[] types = tb.GetInterfaces();
+				var types = tb.GetInterfaces();
 
 				if (types != null)
 				{
-					foreach (Type t in types)
+					foreach (var t in types)
 					{
 						if (t == null)
 							continue;
@@ -254,7 +252,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			string typeName = GetTypeName();
+			var typeName = GetTypeName();
 
 			_context.TypeBuilder = _context.AssemblyBuilder.DefineType(
 				typeName,
@@ -268,7 +266,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				_context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
 
 /*
-#if FW3
 			var dataContracts = _context.Type.GetCustomAttributes(typeof(DataContractAttribute));
 
 			if (dataContracts.Length > 0)
@@ -305,7 +302,6 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				new GeneratedAttributeBuilder(typeof(KnownTypeAttribute), new object[] { "WcfKnownTypes" }, null, null).Build(_context);
 			}
-#endif
 */
 		}
 
@@ -330,7 +326,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_context.Step = step;
 			_context.TypeBuilders.Clear();
 
-			foreach (IAbstractTypeBuilder builder in builders)
+			foreach (var builder in builders)
 				if (builder.IsApplied(_context, builders))
 					_context.TypeBuilders.Add(builder);
 
@@ -344,9 +340,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			_context.TypeBuilders.Sort(new BuilderComparer(_context));
 
-			for (int i = 0; i < _context.TypeBuilders.Count; i++)
+			for (var i = 0; i < _context.TypeBuilders.Count; i++)
 			{
-				IAbstractTypeBuilder builder = _context.TypeBuilders[i];
+				var builder = _context.TypeBuilders[i];
 
 				builder.Build(_context);
 			}
@@ -357,7 +353,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			_context.CurrentMethod = method;
 			_context.MethodBuilder = _context.TypeBuilder.DefineMethod(method);
 
-			EmitHelper emit = _context.MethodBuilder.Emitter;
+			var emit = _context.MethodBuilder.Emitter;
 
 			// Label right before return and catch block.
 			//
@@ -373,7 +369,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			// Initialize out parameters.
 			//
-			ParameterInfo[] parameters = method.GetParameters();
+			var parameters = method.GetParameters();
 
 			if (parameters != null)
 				emit.InitOutParameters(parameters);
@@ -386,10 +382,10 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			_context.BuildElement = buildElement;
 
-			bool isCatchBlockRequired   = false;
-			bool isFinallyBlockRequired = false;
+			var isCatchBlockRequired   = false;
+			var isFinallyBlockRequired = false;
 
-			foreach (IAbstractTypeBuilder builder in builders)
+			foreach (var builder in builders)
 			{
 				isCatchBlockRequired   = isCatchBlockRequired   || IsApplied(builder, builders, BuildStep.Catch);
 				isFinallyBlockRequired = isFinallyBlockRequired || IsApplied(builder, builders, BuildStep.Finally);
@@ -399,8 +395,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			Build(BuildStep.Begin,  builders);
 
-			EmitHelper emit        = _context.MethodBuilder.Emitter;
-			Label      returnLabel = _context.ReturnLabel;
+			var emit        = _context.MethodBuilder.Emitter;
+			var returnLabel = _context.ReturnLabel;
 
 			// Begin catch block.
 			//
@@ -466,7 +462,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void EndEmitMethod()
 		{
-			EmitHelper emit = _context.MethodBuilder.Emitter;
+			var emit = _context.MethodBuilder.Emitter;
 
 			// Prepare return.
 			//
@@ -486,11 +482,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static AbstractTypeBuilderList GetBuilders(object[] attributes, object target)
 		{
-			AbstractTypeBuilderList builders = new AbstractTypeBuilderList(attributes.Length);
+			var builders = new AbstractTypeBuilderList(attributes.Length);
 
 			foreach (AbstractTypeBuilderAttribute attr in attributes)
 			{
-				IAbstractTypeBuilder builder = attr.TypeBuilder;
+				var builder = attr.TypeBuilder;
 
 				builder.TargetElement = target;
 				builders.Add(builder);
@@ -513,15 +509,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static AbstractTypeBuilderList GetBuilders(ParameterInfo[] parameters)
 		{
-			AbstractTypeBuilderList builders = new AbstractTypeBuilderList();
+			var builders = new AbstractTypeBuilderList();
 
-			foreach (ParameterInfo pi in parameters)
+			foreach (var pi in parameters)
 			{
-				object[] attributes = pi.GetCustomAttributes(typeof(AbstractTypeBuilderAttribute), true);
+				var attributes = pi.GetCustomAttributes(typeof(AbstractTypeBuilderAttribute), true);
 
 				foreach (AbstractTypeBuilderAttribute attr in attributes)
 				{
-					IAbstractTypeBuilder builder = attr.TypeBuilder;
+					var builder = attr.TypeBuilder;
 
 					builder.TargetElement = pi;
 					builders.Add(builder);
@@ -533,9 +529,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static AbstractTypeBuilderList Combine(params AbstractTypeBuilderList[] builders)
 		{
-			AbstractTypeBuilderList list = new AbstractTypeBuilderList();
+			var list = new AbstractTypeBuilderList();
 
-			foreach (AbstractTypeBuilderList l in builders)
+			foreach (var l in builders)
 				list.AddRange(l);
 
 			return list;
@@ -551,7 +547,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			_context.BuildElement = element;
 
-			foreach (IAbstractTypeBuilder builder in builders)
+			foreach (var builder in builders)
 			{
 				if (IsApplied(builder, builders, BuildStep.Before))  return true;
 				if (IsApplied(builder, builders, BuildStep.Build))   return true;
@@ -565,31 +561,31 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static void GetAbstractProperties(Type type, List<PropertyInfo> props)
 		{
-			if (props.Find(delegate(PropertyInfo mi) { return mi.DeclaringType == type; }) == null)
+			if (props.Find(mi => mi.DeclaringType == type) == null)
 			{
 				props.AddRange(
 					type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
 
 				if (type.IsInterface)
-					foreach (Type t in type.GetInterfaces())
+					foreach (var t in type.GetInterfaces())
 						GetAbstractProperties(t, props);
 			}
 		}
 
 		private void DefineAbstractProperties()
 		{
-			List<PropertyInfo> props = new List<PropertyInfo>();
+			var props = new List<PropertyInfo>();
 
 			GetAbstractProperties(_context.Type, props);
 
-			foreach (PropertyInfo pi in props)
+			foreach (var pi in props)
 			{
 				_context.CurrentProperty = pi;
 
-				AbstractTypeBuilderList propertyBuilders = GetBuilders(pi);
+				var propertyBuilders = GetBuilders(pi);
 
-				MethodInfo getter = pi.GetGetMethod(true);
-				MethodInfo setter = pi.GetSetMethod(true);
+				var getter = pi.GetGetMethod(true);
+				var setter = pi.GetSetMethod(true);
 
 				if (getter != null && getter.IsAbstract ||
 					setter != null && setter.IsAbstract)
@@ -605,14 +601,12 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void DefineAbstractGetter(
 			PropertyInfo propertyInfo, MethodInfo getter, AbstractTypeBuilderList propertyBuilders)
 		{
-			AbstractTypeBuilderList builders;
-
 			// Getter can be not defined. We will generate it anyway.
 			//
 			if (getter == null)
 				getter = new FakeGetter(propertyInfo);
 
-			builders = Combine(
+			var builders = Combine(
 				GetBuilders(getter.GetParameters()),
 				GetBuilders(getter.ReturnParameter),
 				GetBuilders(getter),
@@ -627,14 +621,12 @@ namespace BLToolkit.TypeBuilder.Builders
 			MethodInfo              setter,
 			AbstractTypeBuilderList propertyBuilders)
 		{
-			AbstractTypeBuilderList builders;
-
 			// Setter can be not defined. We will generate it anyway.
 			//
 			if (setter == null)
 				setter = new FakeSetter(propertyInfo);
 
-			builders = Combine(
+			var builders = Combine(
 				GetBuilders(setter.GetParameters()),
 				GetBuilders(setter.ReturnParameter),
 				GetBuilders(setter),
@@ -646,28 +638,28 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static void GetAbstractMethods(Type type, List<MethodInfo> methods)
 		{
-			if (methods.Find(delegate(MethodInfo mi) { return mi.DeclaringType == type; }) == null)
+			if (methods.Find(mi => mi.DeclaringType == type) == null)
 			{
 				methods.AddRange(
 					type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
 
 				if (type.IsInterface)
-					foreach (Type t in type.GetInterfaces())
+					foreach (var t in type.GetInterfaces())
 						GetAbstractMethods(t, methods);
 			}
 		}
 
 		private void DefineAbstractMethods()
 		{
-			List<MethodInfo> methods = new List<MethodInfo>();
+			var methods = new List<MethodInfo>();
 
 			GetAbstractMethods(_context.Type, methods);
 
-			foreach (MethodInfo method in methods)
+			foreach (var method in methods)
 			{
 				if (method.IsAbstract && (method.Attributes & MethodAttributes.SpecialName) == 0)
 				{
-					AbstractTypeBuilderList builders = Combine(
+					var builders = Combine(
 						GetBuilders(method.GetParameters()),
 						GetBuilders(method.ReturnParameter),
 						GetBuilders(method),
@@ -680,21 +672,20 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void OverrideVirtualProperties()
 		{
-			PropertyInfo[] props = _context.Type.GetProperties(
-				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			var props = _context.Type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-			foreach (PropertyInfo pi in props)
+			foreach (var pi in props)
 			{
 				_context.CurrentProperty = pi;
 
-				AbstractTypeBuilderList propertyBuilders = GetBuilders(pi);
+				var propertyBuilders = GetBuilders(pi);
 
-				MethodInfo getter = pi.GetGetMethod(true);
+				var getter = pi.GetGetMethod(true);
 
 				if (getter != null && getter.IsVirtual && !getter.IsAbstract && !getter.IsFinal)
 					OverrideGetter(getter, propertyBuilders);
 
-				MethodInfo setter = pi.GetSetMethod(true);
+				var setter = pi.GetSetMethod(true);
 
 				if (setter != null && setter.IsVirtual && !setter.IsAbstract && !setter.IsFinal)
 					OverrideSetter(setter, propertyBuilders);
@@ -705,7 +696,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void OverrideGetter(MethodInfo getter, AbstractTypeBuilderList propertyBuilders)
 		{
-			AbstractTypeBuilderList builders = Combine(
+			var builders = Combine(
 				GetBuilders(getter.GetParameters()),
 				GetBuilders(getter.ReturnParameter),
 				GetBuilders(getter),
@@ -718,7 +709,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void OverrideSetter(MethodInfo setter, AbstractTypeBuilderList propertyBuilders)
 		{
-			AbstractTypeBuilderList builders = Combine(
+			var builders = Combine(
 				GetBuilders(setter.GetParameters()),
 				GetBuilders(setter.ReturnParameter),
 				GetBuilders(setter),
@@ -731,10 +722,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void OverrideVirtualMethods()
 		{
-			MethodInfo[] methods = _context.Type.GetMethods(
-				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			var methods = _context.Type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-			foreach (MethodInfo method in methods)
+			foreach (var method in methods)
 			{
 				if (method.IsVirtual &&
 					method.IsAbstract == false &&
@@ -742,7 +732,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					(method.Attributes & MethodAttributes.SpecialName) == 0 &&
 					method.DeclaringType != typeof(object))
 				{
-					AbstractTypeBuilderList builders = Combine(
+					var builders = Combine(
 						GetBuilders(method.GetParameters()),
 						GetBuilders(method.ReturnParameter),
 						GetBuilders(method),
@@ -756,13 +746,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void DefineInterfaces()
 		{
-			foreach (KeyValuePair<TypeHelper, IAbstractTypeBuilder> de in _context.InterfaceMap)
+			foreach (var de in _context.InterfaceMap)
 			{
 				_context.CurrentInterface = de.Key;
 
-				MethodInfo[] interfaceMethods = _context.CurrentInterface.GetMethods();
+				var interfaceMethods = _context.CurrentInterface.GetMethods();
 
-				foreach (MethodInfo m in interfaceMethods)
+				foreach (var m in interfaceMethods)
 				{
 					if (_context.TypeBuilder.OverriddenMethods.ContainsKey(m))
 						continue;
@@ -771,7 +761,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					// Call builder to build the method.
 					//
-					IAbstractTypeBuilder builder = de.Value;
+					var builder = de.Value;
 
 					if (builder != null)
 					{

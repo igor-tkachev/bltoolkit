@@ -785,7 +785,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					break;
 
-				case QueryElementType.InSubqueryPredicate :
+				case QueryElementType.InSubQueryPredicate :
 					{
 						var p = (SqlQuery.Predicate.InSubQuery)predicate;
 						BuildExpression(sb, GetPrecedence(p), p.Expr1);
@@ -1905,7 +1905,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void CheckAliases(SqlQuery sqlQuery)
 		{
-			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement e)
+			new QueryVisitor().Visit(sqlQuery, e =>
 			{
 				switch (e.ElementType)
 				{

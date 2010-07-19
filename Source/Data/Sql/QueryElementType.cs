@@ -21,7 +21,7 @@ namespace BLToolkit.Data.Sql
 		LikePredicate,
 		BetweenPredicate,
 		IsNullPredicate,
-		InSubqueryPredicate,
+		InSubQueryPredicate,
 		InListPredicate,
 		FuncLikePredicate,
 

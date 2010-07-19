@@ -3,29 +3,28 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	[Serializable]
-	public class ChildContainer<P,C> : Dictionary<string,C>, IDictionary<string,C>
-		where C : IChild<P>
-		where P : class
+	public class ChildContainer<TP,TC> : Dictionary<string,TC>, IDictionary<string,TC>
+		where TC : IChild<TP>
+		where TP : class
 	{
 		internal ChildContainer()
 		{
 		}
 
-		internal ChildContainer(P parent)
+		internal ChildContainer(TP parent)
 		{
 			_parent = parent;
 		}
 
-		readonly P _parent;
-		public   P  Parent { get { return _parent; } }
+		readonly TP _parent;
+		public   TP  Parent { get { return _parent; } }
 
-		public void Add(C item)
+		public void Add(TC item)
 		{
 			Add(item.Name, item);
 		}
 
-		public new void Add(string key, C value)
+		public new void Add(string key, TC value)
 		{
 			if (value.Parent != null) throw new InvalidOperationException("Invalid parent.");
 			value.Parent = _parent;
@@ -33,9 +32,9 @@ namespace BLToolkit.Data.Sql
 			base.Add(key, value);
 		}
 
-		public void AddRange(IEnumerable<C> collection)
+		public void AddRange(IEnumerable<TC> collection)
 		{
-			foreach (C item in collection)
+			foreach (var item in collection)
 				Add(item);
 		}
 	}

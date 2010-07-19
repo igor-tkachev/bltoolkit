@@ -20,9 +20,7 @@ namespace BLToolkit.Data
 	using Mapping;
 	using Properties;
 	using Reflection;
-#if FW3
 	using Sql;
-#endif
 
 	/// <summary>
 	/// The <b>DbManager</b> is a primary class of the <see cref="BLToolkit.Data"/> namespace
@@ -138,6 +136,11 @@ namespace BLToolkit.Data
 		{
 			get { return _traceSwitch ?? (_traceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Warning")); }
 			set { _traceSwitch = value; }
+		}
+
+		public static void TurnTraceSwitchOn()
+		{
+			TraceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Info");
 		}
 
 		private    bool _canRaiseEvents = true;
@@ -1985,8 +1988,6 @@ namespace BLToolkit.Data
 			return SetSpCommand(CommandAction.Select, spName, openNewConnectionToDiscoverParameters, parameterValues);
 		}
 
-#if FW3
-
 		public DbManager SetCommand(SqlQuery sql, params IDbDataParameter[] commandParameters)
 		{
 			var sb = new StringBuilder();
@@ -1996,10 +1997,10 @@ namespace BLToolkit.Data
 			var command = sb.ToString();
 
 #if DEBUG
-			string info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);
+			var info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);
 
 			if (commandParameters != null && commandParameters.Length > 0)
-				foreach (IDbDataParameter p in commandParameters)
+				foreach (var p in commandParameters)
 					info += string.Format("\n{0}\t{1}", p.ParameterName, p.Value);
 
 			Debug.WriteLineIf(TraceSwitch.TraceInfo, info, TraceSwitch.DisplayName);
@@ -2007,8 +2008,6 @@ namespace BLToolkit.Data
 
 			return SetCommand(command, commandParameters);
 		}
-
-#endif
 
 		#endregion
 
@@ -2509,12 +2508,7 @@ namespace BLToolkit.Data
 
 						IDbDataParameter p;
 
-						if ((value == null || value == DBNull.Value) &&
-							type == typeof(byte[])
-#if FW3
-							|| type == typeof(System.Data.Linq.Binary)
-#endif
-							)
+						if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
 						{
 							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
 						}

@@ -145,13 +145,12 @@ namespace BLToolkit.ServiceModel
 		{
 			var ctx = (IQueryContext)query;
 
-			throw new NotImplementedException();
+			using (var client = GetClient())
+				return client.ExecuteScalar(new LinqServiceQuery { Query = ctx.SqlQuery, Parameters = ctx.GetParameters() });
 		}
 
 		IDataReader IDataContext.ExecuteReader(object query)
 		{
-			var ctx = (IQueryContext)query;
-
 			throw new NotImplementedException();
 		}
 

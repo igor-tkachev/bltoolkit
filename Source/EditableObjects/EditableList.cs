@@ -79,11 +79,11 @@ namespace BLToolkit.EditableObjects
 
 		public int RemoveAll(Predicate<T> match)
 		{
-			int n = 0;
+			var n = 0;
 
-			for (int i = 0; i < Count; i++)
+			for (var i = 0; i < Count; i++)
 			{
-				T item = this[i];
+				var item = this[i];
 
 				if (match(item))
 				{
@@ -115,7 +115,7 @@ namespace BLToolkit.EditableObjects
 		{
 			if (match == null) throw new ArgumentNullException("match");
 
-			EditableList<T> list = new EditableList<T>();
+			var list = new EditableList<T>();
 
 			foreach (T t in List)
 				if (match(t))
@@ -145,7 +145,7 @@ namespace BLToolkit.EditableObjects
 			if (match == null)
 				throw new ArgumentNullException("match");
 
-			for (int i = startIndex; i < startIndex + count; i++)
+			for (var i = startIndex; i < startIndex + count; i++)
 				if (match((T)List[i]))
 					return i;
 
@@ -156,9 +156,9 @@ namespace BLToolkit.EditableObjects
 		{
 			if (match == null) throw new ArgumentNullException("match");
 
-			for (int i = List.Count - 1; i >= 0; i--)
+			for (var i = List.Count - 1; i >= 0; i--)
 			{
-				T t = (T)List[i];
+				var t = (T)List[i];
 
 				if (match(t))
 					return t;
@@ -188,9 +188,9 @@ namespace BLToolkit.EditableObjects
 			if (match == null)
 				throw new ArgumentNullException("match");
 
-			for (int i = startIndex; i > startIndex - count; i--)
+			for (var i = startIndex; i > startIndex - count; i--)
 			{
-				T t = (T)List[i];
+				var t = (T)List[i];
 
 				if (match(t))
 					return i;
@@ -216,12 +216,12 @@ namespace BLToolkit.EditableObjects
 		{
 			if (List.Count > 1 && count > 1)
 			{
-				T[] items = new T[count];
+				var items = new T[count];
 
 				List.CopyTo(index, items, 0, count);
-				Array.Sort<T>(items, index, count, comparer);
+				Array.Sort(items, index, count, comparer);
 
-				for (int i = 0; i < count; i++)
+				for (var i = 0; i < count; i++)
 					List[i + index] = items[i];
 
 				OnListChanged(ListChangedType.Reset, 0);
@@ -232,12 +232,12 @@ namespace BLToolkit.EditableObjects
 		{
 			if (List.Count > 1)
 			{
-				T[] items = new T[List.Count];
+				var items = new T[List.Count];
 
 				List.CopyTo(items);
-				Array.Sort<T>(items, comparison);
+				Array.Sort(items, comparison);
 
-				for (int i = 0; i < List.Count; i++)
+				for (var i = 0; i < List.Count; i++)
 					List[i] = items[i];
 
 				OnListChanged(ListChangedType.Reset, 0);

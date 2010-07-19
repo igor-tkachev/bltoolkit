@@ -486,7 +486,6 @@ namespace BLToolkit.DataAccess
 			return db.MappingSchema.ConvertToDateTime(value);
 		}
 
-#if FW3
 		[NoInterception]
 		protected virtual DateTimeOffset ConvertToDateTimeOffset(DbManager db, object value, object parameter)
 		{
@@ -498,7 +497,6 @@ namespace BLToolkit.DataAccess
 		{
 			return db.MappingSchema.ConvertToLinqBinary(value);
 		}
-#endif
 
 		[NoInterception]
 		protected virtual Decimal ConvertToDecimal(DbManager db, object value, object parameter)

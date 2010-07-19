@@ -81,6 +81,24 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		public object ExecuteScalar(LinqServiceQuery query)
+		{
+			ValidateQuery(query.Query, query.Parameters);
+
+			var db = CreateDataContext();
+
+			try
+			{
+				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
+				return db.ExecuteScalar(obj);
+			}
+			finally
+			{
+				if (db is IDisposable)
+					((IDisposable)db).Dispose();
+			}
+		}
+
 		#endregion
 
 		protected virtual void ValidateQuery(SqlQuery query, SqlParameter[] parameters)

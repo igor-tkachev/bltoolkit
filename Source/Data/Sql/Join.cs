@@ -6,7 +6,6 @@ namespace BLToolkit.Data.Sql
 {
 	using Reflection.Extension;
 
-	[Serializable]
 	public class Join : IQueryElement, ICloneableElement
 	{
 		public Join()
@@ -37,7 +36,7 @@ namespace BLToolkit.Data.Sql
 			_tableName = (string)ext["TableName"];
 			_alias     = (string)ext["Alias"];
 
-			AttributeExtensionCollection col = ext.Attributes["On"];
+			var col = ext.Attributes["On"];
 
 			foreach (AttributeExtension ae in col)
 				_joinOns.Add(new JoinOn(ae));
@@ -57,9 +56,9 @@ namespace BLToolkit.Data.Sql
 
 		public Join Clone()
 		{
-			Join join = new Join(_tableName, _alias);
+			var join = new Join(_tableName, _alias);
 
-			foreach (JoinOn on in JoinOns)
+			foreach (var on in JoinOns)
 				join.JoinOns.Add(new JoinOn(on.Field, on.OtherField, on.Expression));
 
 			return join;
@@ -89,7 +88,7 @@ namespace BLToolkit.Data.Sql
 				objectTree.Add(this, clone = new Join(
 					_tableName,
 					_alias,
-					_joinOns.ConvertAll<JoinOn>(delegate(JoinOn j) { return (JoinOn)j.Clone(objectTree, doClone); })));
+					_joinOns.ConvertAll(j => (JoinOn)j.Clone(objectTree, doClone))));
 
 			return clone;
 		}

@@ -5,9 +5,7 @@ using System.Data.SqlClient;
 
 namespace BLToolkit.Data.DataProvider
 {
-#if FW3
 	using Sql.SqlProvider;
-#endif
 
 	/// <summary>
 	/// Implements access to the Data Provider for SQL Server.
@@ -59,8 +57,6 @@ namespace BLToolkit.Data.DataProvider
 		{
 			SqlCommandBuilder.DeriveParameters((SqlCommand)command);
 
-#if FW3
-
 			foreach (SqlParameter p in command.Parameters)
 			{
 				// We have to clear UDT type names.
@@ -75,7 +71,6 @@ namespace BLToolkit.Data.DataProvider
 						p.TypeName = p.TypeName.Substring(lastDot + 1);
 				}
 			}
-#endif
 
 			return true;
 		}
@@ -113,7 +108,6 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
-#if FW3
 		public override void SetUserDefinedType(IDbDataParameter parameter, string typeName)
 		{
 			if (!(parameter is SqlParameter))
@@ -121,7 +115,6 @@ namespace BLToolkit.Data.DataProvider
 
 			((SqlParameter)parameter).TypeName = typeName;
 		}
-#endif
 
 		public override object Convert(object value, ConvertType convertType)
 		{
@@ -164,14 +157,10 @@ namespace BLToolkit.Data.DataProvider
 			get { return NameString; }
 		}
 
-#if FW3
-
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2005SqlProvider();
 		}
-
-#endif
 
 		public override int MaxParameters
 		{
@@ -184,8 +173,6 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		#region GetDataReader
-
-#if FW3
 
 		public override IDataReader GetDataReader(Mapping.MappingSchema schema, IDataReader dataReader)
 		{
@@ -205,8 +192,6 @@ namespace BLToolkit.Data.DataProvider
 				return DataReader.GetDateTimeOffset(i);
 			}
 		}
-
-#endif
 
 		#endregion
 	}

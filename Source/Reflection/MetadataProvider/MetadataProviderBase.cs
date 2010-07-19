@@ -134,9 +134,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 				//member.Type.IsClass ||
 				member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof (Nullable<>);
 				/*||
-#if FW3
 				member.Type == typeof(System.Data.Linq.Binary) ||
-#endif
 				member.Type == typeof(byte[])*/;
 		}
 

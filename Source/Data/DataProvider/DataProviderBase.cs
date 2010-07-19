@@ -1,16 +1,12 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Text;
-
-using BLToolkit.Common;
-using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
-#if FW3
+	using Common;
+	using Mapping;
 	using Sql.SqlProvider;
-#endif
 
 	/// <summary>
 	/// The <b>DataProviderBase</b> is a class that provides specific data provider information
@@ -198,7 +194,6 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
-#if FW3
 			/*
 			if (commandParameters != null) foreach (var p in commandParameters)
 			{
@@ -212,12 +207,10 @@ namespace BLToolkit.Data.DataProvider
 				}
 			}
 			*/
-#endif
 		}
 
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
-#if FW3
 			if (value is System.Data.Linq.Binary)
 			{
 				var arr = ((System.Data.Linq.Binary)value).ToArray();
@@ -227,11 +220,8 @@ namespace BLToolkit.Data.DataProvider
 				parameter.Size   = arr.Length;
 			}
 			else
-#endif
 				parameter.Value = value;
 		}
-
-#if FW3
 
 		public abstract ISqlProvider CreateSqlProvider();
 
@@ -240,8 +230,6 @@ namespace BLToolkit.Data.DataProvider
 		{
 			get { return _sqlProvider ?? (_sqlProvider = CreateSqlProvider()); }
 		}
-
-#endif
 
 		public virtual IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{
@@ -344,9 +332,9 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			#region Implementation of IDataReaderEx
-#if FW3
+
 			public abstract DateTimeOffset GetDateTimeOffset(int i);
-#endif
+
 			#endregion
 		}
 

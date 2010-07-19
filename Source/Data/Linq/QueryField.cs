@@ -24,7 +24,6 @@ namespace BLToolkit.Data.Linq
 
 			public   readonly SqlField          Field;
 			public   readonly QuerySource.Table Table;
-			[NonSerialized]
 			internal readonly MemberMapper      Mapper;
 
 			public override QuerySource[] Sources { get { return new[] { Table }; } }

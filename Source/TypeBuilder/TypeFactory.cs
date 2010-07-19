@@ -3,20 +3,18 @@ using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-
-#if FW3
-using System.Linq.Expressions;
-#endif
 
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Properties;
 using BLToolkit.Configuration;
+using JetBrains.Annotations;
 
 namespace BLToolkit.TypeBuilder
 {
@@ -24,11 +22,11 @@ namespace BLToolkit.TypeBuilder
 	{
 		static TypeFactory()
 		{
-			BLToolkitSection section = BLToolkitSection.Instance;
+			var section = BLToolkitSection.Instance;
 
 			if (section != null)
 			{
-				TypeFactoryElement elm = section.TypeFactory;
+				var elm = section.TypeFactory;
 
 				if (elm != null)
 				{
@@ -40,7 +38,7 @@ namespace BLToolkit.TypeBuilder
 				}
 			}
 
-			SecurityPermission perm = new SecurityPermission(SecurityPermissionFlag.ControlAppDomain);
+			var perm = new SecurityPermission(SecurityPermissionFlag.ControlAppDomain);
 
 #if FW4
 			try
@@ -133,11 +131,11 @@ namespace BLToolkit.TypeBuilder
 
 		private static AssemblyBuilderHelper GetAssemblyBuilder(Type type, string suffix)
 		{
-			AssemblyBuilderHelper ab = GlobalAssemblyBuilder;
+			var ab = GlobalAssemblyBuilder;
 
 			if (ab == null)
 			{
-				string assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
+				var assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
 
 				// Dynamic modules are locationless, so ignore them.
 				// _ModuleBuilder is the base type for both
@@ -146,7 +144,7 @@ namespace BLToolkit.TypeBuilder
 				if (!(type.Module is _ModuleBuilder))
 					assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
 
-				string fullName = type.FullName;
+				var fullName = type.FullName;
 
 				if (type.IsGenericType)
 					fullName = AbstractClassBuilder.GetTypeFullName(type);
@@ -201,8 +199,8 @@ namespace BLToolkit.TypeBuilder
 
 			try
 			{
-				Hashtable builderTable = (Hashtable)_builtTypes[typeBuilder.GetType()];
-				Type      type;
+				var  builderTable = (Hashtable)_builtTypes[typeBuilder.GetType()];
+				Type type;
 
 				if (builderTable != null)
 				{
@@ -230,7 +228,8 @@ namespace BLToolkit.TypeBuilder
 
 					if (_loadTypes)
 					{
-						Assembly originalAssembly = sourceType.Assembly;
+						var originalAssembly = sourceType.Assembly;
+
 						Assembly extensionAssembly;
 
 						if (_assemblies.Contains(originalAssembly))
@@ -253,7 +252,7 @@ namespace BLToolkit.TypeBuilder
 						}
 					}
 
-					AssemblyBuilderHelper assemblyBuilder = GetAssemblyBuilder(sourceType, typeBuilder.AssemblyNameSuffix);
+					var assemblyBuilder = GetAssemblyBuilder(sourceType, typeBuilder.AssemblyNameSuffix);
 
 					type = typeBuilder.Build(assemblyBuilder);
 
@@ -288,21 +287,14 @@ namespace BLToolkit.TypeBuilder
 					GetType(sourceType, sourceType, new AbstractClassBuilder(sourceType));
 		}
 
-#if FW3
 		static class InstanceCreator<T>
 		{
-			public static readonly Func<T> CreateInstance =
-				Expression.Lambda<Func<T>>(Expression.New(TypeFactory.GetType(typeof(T)))).Compile();
+			public static readonly Func<T> CreateInstance = Expression.Lambda<Func<T>>(Expression.New(TypeFactory.GetType(typeof(T)))).Compile();
 		}
-#endif
 
 		public static T CreateInstance<T>() where T: class
 		{
-#if FW3
 			return InstanceCreator<T>.CreateInstance();
-#else
-			return (T)Activator.CreateInstance(GetType(typeof(T)));
-#endif
 		}
 
 		#endregion
@@ -321,8 +313,8 @@ namespace BLToolkit.TypeBuilder
 
 			try
 			{
-				string  originalAssemblyLocation = new Uri(originalAssembly.EscapedCodeBase).LocalPath;
-				string extensionAssemblyLocation = Path.ChangeExtension(
+				var originalAssemblyLocation  = new Uri(originalAssembly.EscapedCodeBase).LocalPath;
+				var extensionAssemblyLocation = Path.ChangeExtension(
 					originalAssemblyLocation, "BLToolkitExtension.dll");
 
 				if (File.GetLastWriteTime(originalAssemblyLocation) <= File.GetLastWriteTime(extensionAssemblyLocation))
@@ -334,9 +326,10 @@ namespace BLToolkit.TypeBuilder
 
 				// Some good man may load this assembly already. Like IIS does it.
 				//
-				AssemblyName extensionAssemblyName = originalAssembly.GetName(true);
+				var extensionAssemblyName = originalAssembly.GetName(true);
 				extensionAssemblyName.Name += ".BLToolkitExtension";
-				foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+
+				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
 				{
 					// Note that assembly version and strong name are compared too.
 					//
@@ -355,10 +348,10 @@ namespace BLToolkit.TypeBuilder
 			return null;
 		}
 
-		[System.Diagnostics.Conditional("DEBUG")]
+		[Conditional("DEBUG")]
 		private static void WriteDebug(string format, params object[] parameters)
 		{
-			System.Diagnostics.Debug.WriteLine(string.Format(format, parameters));
+			Debug.WriteLine(string.Format(format, parameters));
 		}
 
 		#endregion
@@ -377,8 +370,8 @@ namespace BLToolkit.TypeBuilder
 
 		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
 		{
-			string   name      = args.Name;
-			string[] nameParts = name.Split(',');
+			var name      = args.Name;
+			var nameParts = name.Split(',');
 
 			if (nameParts.Length > 0 && nameParts[0].ToLower().EndsWith(".dll"))
 			{
@@ -393,29 +386,28 @@ namespace BLToolkit.TypeBuilder
 						return type.Assembly;
 			}
 
-			int idx = name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix);
+			var idx = name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix);
 
 			if (idx > 0)
 			{
-				string typeName = name.Substring(0, idx);
-
-				Type type = Type.GetType(typeName);
+				var typeName = name.Substring(0, idx);
+				var type     = Type.GetType(typeName);
 
 				if (type == null)
 				{
-					Assembly[] ass = ((AppDomain)sender).GetAssemblies();
+					var ass = ((AppDomain)sender).GetAssemblies();
 
 					// CLR can't find an assembly built on previous AssemblyResolve event.
 					//
-					for (int i = ass.Length - 1; i >= 0; i--)
+					for (var i = ass.Length - 1; i >= 0; i--)
 					{
 						if (string.Compare(ass[i].FullName, name) == 0)
 							return ass[i];
 					}
 
-					for (int i = ass.Length - 1; i >= 0; i--)
+					for (var i = ass.Length - 1; i >= 0; i--)
 					{
-						Assembly a = ass[i];
+						var a = ass[i];
 
 						if (!(a is _AssemblyBuilder) &&
 							(a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0 || a.FullName.StartsWith("System."))) continue;
@@ -424,7 +416,7 @@ namespace BLToolkit.TypeBuilder
 
 						if (type != null) break;
 
-						foreach (Type t in a.GetTypes())
+						foreach (var t in a.GetTypes())
 						{
 							if (!t.IsAbstract)
 								continue;
@@ -437,7 +429,7 @@ namespace BLToolkit.TypeBuilder
 							{
 								if (t.FullName.IndexOf('+') > 0)
 								{
-									string s = typeName;
+									var s = typeName;
 
 									while (type == null && (idx = s.LastIndexOf(".")) > 0)
 									{
@@ -458,7 +450,7 @@ namespace BLToolkit.TypeBuilder
 
 				if (type != null)
 				{
-					Type newType = GetType(type);
+					var newType = GetType(type);
 
 					if (newType.Assembly.FullName == name)
 						return newType.Assembly;

@@ -75,9 +75,8 @@ namespace BLToolkit.Mapping
 		public override Decimal  GetDecimal (object o, int index) { return DataReader.GetDecimal (_index); }
 		public override Guid     GetGuid    (object o, int index) { return DataReader.GetGuid    (_index); }
 		public override DateTime GetDateTime(object o, int index) { return DataReader.GetDateTime(_index); }
-#if FW3
 		public override DateTimeOffset GetDateTimeOffset(object o, int index) { return DataReader.GetDateTime(_index); }
-#endif
+
 		// Nullable type getters.
 		//
 		[CLSCompliant(false)]
@@ -101,9 +100,7 @@ namespace BLToolkit.Mapping
 		public override Decimal?  GetNullableDecimal (object o, int index) { return DataReader.IsDBNull(_index)? null: (Decimal?) DataReader.GetDecimal (_index); }
 		public override Guid?     GetNullableGuid    (object o, int index) { return DataReader.IsDBNull(_index)? null: (Guid?)    DataReader.GetGuid    (_index); }
 		public override DateTime? GetNullableDateTime(object o, int index) { return DataReader.IsDBNull(_index)? null: (DateTime?)DataReader.GetDateTime(_index); }
-#if FW3
 		public override DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return DataReader.IsDBNull(_index)? null: (DateTimeOffset?)DataReader.GetDateTime(_index); }
-#endif
 
 		// SQL type getters.
 		//

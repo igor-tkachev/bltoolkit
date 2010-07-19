@@ -13,9 +13,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
 
-#if FW3
 	using Linq;
-#endif
 
 	public class FirebirdSqlProvider : BasicSqlProvider
 	{
@@ -94,7 +92,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
 
-#if FW3
 					case "DateAdd" :
 						switch ((Sql.DateParts)((SqlValue)func.Parameters[0]).Value)
 						{
@@ -108,8 +105,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						break;
-#endif
-
 				}
 			}
 			else if (expr is SqlExpression)
@@ -168,7 +163,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement element)
 			{
-				if (element.ElementType == QueryElementType.InSubqueryPredicate)
+				if (element.ElementType == QueryElementType.InSubQueryPredicate)
 					new QueryVisitor().Visit(((SqlQuery.Predicate.InSubQuery)element).Expr1, SetNonQueryParameter);
 			});
 

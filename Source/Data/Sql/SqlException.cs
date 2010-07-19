@@ -3,7 +3,6 @@ using System.Runtime.Serialization;
 
 namespace BLToolkit.Data.Sql
 {
-	[Serializable] 
 	public class SqlException : Exception
 	{
 		public SqlException()

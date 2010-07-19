@@ -33,7 +33,7 @@ namespace Data.Linq
 				return null;
 			};
 
-			DbManager.TraceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Info");
+			DbManager.TurnTraceSwitchOn();
 		}
 
 		static readonly List<string> _configurations = new List<string>

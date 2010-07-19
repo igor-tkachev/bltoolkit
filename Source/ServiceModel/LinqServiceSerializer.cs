@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Linq;
 using System.Data.SqlTypes;
 using System.Linq;
@@ -88,9 +89,9 @@ namespace BLToolkit.ServiceModel
 			{
 				switch (e.ElementType)
 				{
-					case QueryElementType.SqlField:
+					case QueryElementType.SqlField :
 						{
-							var fld = (SqlField) e;
+							var fld = (SqlField)e;
 
 							if (fld == fld.Table.All)
 								return;
@@ -103,9 +104,25 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case QueryElementType.SqlTable:
-						GetType(((SqlTable) e).ObjectType);
-						break;
+					case QueryElementType.SqlParameter :
+						{
+							var p = (SqlParameter)e;
+
+							GetType(p.SystemType);
+
+							if (p.EnumTypes != null)
+								foreach (var type in p.EnumTypes)
+									GetType(type);
+
+							break;
+						}
+
+					case QueryElementType.SqlFunction         : GetType(((SqlFunction)        e).SystemType); break;
+					case QueryElementType.SqlExpression       : GetType(((SqlExpression)      e).SystemType); break;
+					case QueryElementType.SqlBinaryExpression : GetType(((SqlBinaryExpression)e).SystemType); break;
+					case QueryElementType.SqlDataType         : GetType(((SqlDataType)        e).Type);       break;
+					case QueryElementType.SqlValue            : GetType(((SqlValue)           e).SystemType); break;
+					case QueryElementType.SqlTable            : GetType(((SqlTable)           e).ObjectType); break;
 				}
 
 				_dic.Add(e, ++_index);
@@ -135,10 +152,95 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
+					case QueryElementType.SqlFunction :
+						{
+							var elem = (SqlFunction)e;
+
+							Append(elem.SystemType);
+							Append(elem.Name);
+							Append(elem.Precedence);
+							Append(elem.Parameters);
+
+							break;
+						}
+
+					case QueryElementType.SqlParameter :
+						{
+							var elem = (SqlParameter)e;
+
+							Append(elem.SystemType);
+							Append(elem.Name);
+							Append(elem.IsQueryParameter);
+							Append(elem.SystemType, elem.Value);
+
+							if (elem.EnumTypes == null)
+								_sb.Append(" -");
+							else
+							{
+								Append(elem.EnumTypes.Count);
+
+								foreach (var type in elem.EnumTypes)
+									Append(type);
+							}
+
+							if (elem.TakeValues == null)
+								_sb.Append(" -");
+							else
+							{
+								Append(elem.TakeValues.Count);
+
+								foreach (var type in elem.TakeValues)
+									Append(type);
+							}
+
+							Append(elem.LikeStart);
+							Append(elem.LikeEnd);
+
+							break;
+						}
+
+					case QueryElementType.SqlExpression :
+						{
+							var elem = (SqlExpression)e;
+
+							Append(elem.SystemType);
+							Append(elem.Expr);
+							Append(elem.Precedence);
+							Append(elem.Parameters);
+
+							break;
+						}
+
+					case QueryElementType.SqlBinaryExpression :
+						{
+							var elem = (SqlBinaryExpression)e;
+
+							Append(elem.SystemType);
+							Append(elem.Expr1);
+							Append(elem.Operation);
+							Append(elem.Expr2);
+							Append(elem.Precedence);
+
+							break;
+						}
+
 					case QueryElementType.SqlValue :
 						{
 							var elem = (SqlValue)e;
 							Append(elem.SystemType, elem.Value);
+							break;
+						}
+
+					case QueryElementType.SqlDataType :
+						{
+							var elem = (SqlDataType)e;
+
+							Append((int)elem.DbType);
+							Append(elem.Type);
+							Append(elem.Length);
+							Append(elem.Precision);
+							Append(elem.Scale);
+
 							break;
 						}
 
@@ -175,12 +277,107 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
+					case QueryElementType.ExprPredicate :
+						{
+							var elem = (SqlQuery.Predicate.Expr)e;
+
+							Append(elem.Expr1);
+							Append(elem.Precedence);
+
+							break;
+						}
+
+					case QueryElementType.NotExprPredicate :
+						{
+							var elem = (SqlQuery.Predicate.NotExpr)e;
+
+							Append(elem.Expr1);
+							Append(elem.IsNot);
+							Append(elem.Precedence);
+
+							break;
+						}
+
+					case QueryElementType.ExprExprPredicate :
+						{
+							var elem = (SqlQuery.Predicate.ExprExpr)e;
+
+							Append(elem.Expr1);
+							Append((int)elem.Operator);
+							Append(elem.Expr2);
+
+							break;
+						}
+
+					case QueryElementType.LikePredicate :
+						{
+							var elem = (SqlQuery.Predicate.Like)e;
+
+							Append(elem.Expr1);
+							Append(elem.IsNot);
+							Append(elem.Expr2);
+							Append(elem.Escape);
+
+							break;
+						}
+
+					case QueryElementType.BetweenPredicate :
+						{
+							var elem = (SqlQuery.Predicate.Between)e;
+
+							Append(elem.Expr1);
+							Append(elem.IsNot);
+							Append(elem.Expr2);
+							Append(elem.Expr3);
+
+							break;
+						}
+
+					case QueryElementType.IsNullPredicate :
+						{
+							var elem = (SqlQuery.Predicate.IsNull)e;
+
+							Append(elem.Expr1);
+							Append(elem.IsNot);
+
+							break;
+						}
+
+					case QueryElementType.InSubQueryPredicate :
+						{
+							var elem = (SqlQuery.Predicate.InSubQuery)e;
+
+							Append(elem.Expr1);
+							Append(elem.IsNot);
+							Append(elem.SubQuery);
+
+							break;
+						}
+
+					case QueryElementType.InListPredicate :
+						{
+							var elem = (SqlQuery.Predicate.InList)e;
+
+							Append(elem.Expr1);
+							Append(elem.IsNot);
+							Append(elem.Values);
+
+							break;
+						}
+
+					case QueryElementType.FuncLikePredicate :
+						{
+							var elem = (SqlQuery.Predicate.FuncLike)e;
+							Append(elem.Function);
+							break;
+						}
+
 					case QueryElementType.SqlQuery :
 						{
-							var elem = (SqlQuery) e;
+							var elem = (SqlQuery)e;
 
 							Append(elem.SourceID);
-							Append((int)elem.QueryType);
+							Append((int) elem.QueryType);
 
 							if (elem.QueryType == QueryType.Update || elem.QueryType == QueryType.Insert)
 								Append(elem.Set);
@@ -198,24 +395,16 @@ namespace BLToolkit.ServiceModel
 							if (!elem.HasUnion)
 								_sb.Append(" -");
 							else
-							{
-								Append(elem.Unions.Count);
+								Append(elem.Unions);
 
-								foreach (var item in elem.Unions)
-									Append(_dic[item]);
-							}
-
-							Append(elem.Parameters.Count);
-
-							foreach (var item in elem.Parameters)
-								Append(_dic[item]);
+							Append(elem.Parameters);
 
 							break;
 						}
 
 					case QueryElementType.Column :
 						{
-							var elem = (SqlQuery.Column)e;
+							var elem = (SqlQuery.Column) e;
 
 							Append(elem.Parent.SourceID);
 							Append(elem.Expression);
@@ -225,16 +414,8 @@ namespace BLToolkit.ServiceModel
 						}
 
 					case QueryElementType.SearchCondition :
-						{
-							var elem = (SqlQuery.SearchCondition)e;
-
-							Append(elem.Conditions.Count);
-
-							foreach (var item in elem.Conditions)
-								Append(_dic[item]);
-
+							Append(((SqlQuery.SearchCondition)e).Conditions);
 							break;
-						}
 
 					case QueryElementType.Condition :
 						{
@@ -243,6 +424,52 @@ namespace BLToolkit.ServiceModel
 							Append(elem.IsNot);
 							Append(elem.Predicate);
 							Append(elem.IsOr);
+
+							break;
+						}
+
+					case QueryElementType.TableSource :
+						{
+							var elem = (SqlQuery.TableSource)e;
+
+							Append(elem.Source);
+							Append(elem._alias);
+							Append(elem.Joins);
+
+							break;
+						}
+
+					case QueryElementType.JoinedTable :
+						{
+							var elem = (SqlQuery.JoinedTable)e;
+
+							Append((int)elem.JoinType);
+							Append(elem.Table);
+							Append(elem.IsWeak);
+							Append(elem.Condition);
+
+							break;
+						}
+
+					case QueryElementType.SelectClause :
+						{
+							var elem = (SqlQuery.SelectClause)e;
+
+							Append(elem.IsDistinct);
+							Append(elem.SkipValue);
+							Append(elem.TakeValue);
+							Append(elem.Columns);
+
+							break;
+						}
+
+					case QueryElementType.SetClause :
+						{
+							var elem = (SqlQuery.SetClause)e;
+
+							Append(elem.Items);
+							Append(elem.Into);
+							Append(elem.WithIdentity);
 
 							break;
 						}
@@ -257,60 +484,27 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case QueryElementType.SetClause :
+					case QueryElementType.FromClause    : Append(((SqlQuery.FromClause)   e).Tables);          break;
+					case QueryElementType.WhereClause   : Append(((SqlQuery.WhereClause)  e).SearchCondition); break;
+					case QueryElementType.GroupByClause : Append(((SqlQuery.GroupByClause)e).Items);           break;
+					case QueryElementType.OrderByClause : Append(((SqlQuery.OrderByClause)e).Items);           break;
+
+					case QueryElementType.OrderByItem :
 						{
-							var elem = (SqlQuery.SetClause)e;
+							var elem = (SqlQuery.OrderByItem)e;
 
-							Append(elem.Items.Count);
-
-							foreach (var item in elem.Items)
-								Append(item);
-
-							Append(elem.Into);
-							Append(elem.WithIdentity);
+							Append(elem.Expression);
+							Append(elem.IsDescending);
 
 							break;
 						}
 
-					case QueryElementType.FromClause :
+					case QueryElementType.Union :
 						{
-							var elem = (SqlQuery.FromClause)e;
+							var elem = (SqlQuery.Union)e;
 
-							Append(elem.Tables.Count);
-
-							foreach (var item in elem.Tables)
-								Append(item);
-
-							break;
-						}
-
-					case QueryElementType.WhereClause :
-						{
-							var elem = (SqlQuery.WhereClause)e;
-							Append(elem.SearchCondition);
-							break;
-						}
-
-					case QueryElementType.GroupByClause :
-						{
-							var elem = (SqlQuery.GroupByClause)e;
-
-							Append(elem.Items.Count);
-
-							foreach (var item in elem.Items)
-								Append(item);
-
-							break;
-						}
-
-					case QueryElementType.OrderByClause :
-						{
-							var elem = (SqlQuery.OrderByClause)e;
-
-							Append(elem.Items.Count);
-
-							foreach (var item in elem.Items)
-								Append(item);
+							Append(elem.SqlQuery);
+							Append(elem.IsAll);
 
 							break;
 						}
@@ -320,6 +514,20 @@ namespace BLToolkit.ServiceModel
 			}
 
 			#region Helpers
+
+			void Append<T>(ICollection<T> exprs)
+				where T : IQueryElement
+			{
+				if (exprs == null)
+					_sb.Append(" -");
+				else
+				{
+					Append(exprs.Count);
+
+					foreach (var e in exprs)
+						Append(_dic[e]);
+				}
+			}
 
 			void Append(Type type, object value)
 			{
@@ -454,7 +662,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int) QueryElementType.SqlField:
+					case (int)QueryElementType.SqlField :
 						{
 							var systemType       = Read<Type>();
 							var name             = ReadString();
@@ -484,17 +692,101 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int) QueryElementType.SqlValue:
+					case (int)QueryElementType.SqlFunction :
 						{
 							var systemType = Read<Type>();
-							var value = ReadValue(systemType);
+							var name       = ReadString();
+							var precedence = ReadInt();
+							var parameters = ReadArray<ISqlExpression>();
+
+							obj = new SqlFunction(systemType, name, precedence, parameters);
+
+							break;
+						}
+
+					case (int)QueryElementType.SqlParameter:
+						{
+							var systemType       = Read<Type>();
+							var name             = ReadString();
+							var isQueryParameter = ReadBool();
+							var value            = ReadValue(systemType);
+							var enumTypes        = ReadList<Type>();
+							var takeValues       = null as List<int>;
+
+							var count = ReadCount();
+
+							if (count != null)
+							{
+								takeValues = new List<int>(count.Value);
+
+								for (var i = 0; i < count; i++)
+									takeValues.Add(ReadInt());
+							}
+
+							var likeStart = ReadString();
+							var likeEnd   = ReadString();
+
+							obj = new SqlParameter(systemType, name, value)
+							{
+								IsQueryParameter = isQueryParameter,
+								EnumTypes        = enumTypes,
+								TakeValues       = takeValues,
+								LikeStart        = likeStart,
+								LikeEnd          = likeEnd,
+							};
+
+							break;
+						}
+
+					case (int)QueryElementType.SqlExpression :
+						{
+							var systemType = Read<Type>();
+							var expr       = ReadString();
+							var precedence = ReadInt();
+							var parameters = ReadArray<ISqlExpression>();
+
+							obj = new SqlExpression(systemType, expr, precedence, parameters);
+
+							break;
+						}
+
+					case (int)QueryElementType.SqlBinaryExpression :
+						{
+							var systemType = Read<Type>();
+							var expr1      = Read<ISqlExpression>();
+							var operation  = ReadString();
+							var expr2      = Read<ISqlExpression>();
+							var precedence = ReadInt();
+
+							obj = new SqlBinaryExpression(systemType, expr1, operation, expr2, precedence);
+
+							break;
+						}
+
+					case (int)QueryElementType.SqlValue :
+						{
+							var systemType = Read<Type>();
+							var value      = ReadValue(systemType);
 
 							obj = new SqlValue(systemType, value);
 
 							break;
 						}
 
-					case (int) QueryElementType.SqlTable:
+					case (int)QueryElementType.SqlDataType :
+						{
+							var dbType     = (SqlDbType)ReadInt();
+							var systemType = Read<Type>();
+							var length     = ReadInt();
+							var precision  = ReadInt();
+							var scale      = ReadInt();
+
+							obj = new SqlDataType(dbType, systemType, length, precision, scale);
+
+							break;
+						}
+
+					case (int)QueryElementType.SqlTable :
 						{
 							var sourceID           = ReadInt();
 							var name               = ReadString();
@@ -519,6 +811,101 @@ namespace BLToolkit.ServiceModel
 
 							obj = new SqlTable(sourceID, name, alias, database, owner, physicalName, objectType, sequenceAttributes, fields);
 
+							break;
+						}
+
+					case (int)QueryElementType.ExprPredicate :
+						{
+							var expr1      = Read<ISqlExpression>();
+							var precedence = ReadInt();
+
+							obj = new SqlQuery.Predicate.Expr(expr1, precedence);
+
+							break;
+						}
+
+					case (int)QueryElementType.NotExprPredicate :
+						{
+							var expr1      = Read<ISqlExpression>();
+							var isNot      = ReadBool();
+							var precedence = ReadInt();
+
+							obj = new SqlQuery.Predicate.NotExpr(expr1, isNot, precedence);
+
+							break;
+						}
+
+					case (int)QueryElementType.ExprExprPredicate :
+						{
+							var expr1     = Read<ISqlExpression>();
+							var @operator = (SqlQuery.Predicate.Operator)ReadInt();
+							var expr2     = Read<ISqlExpression>();
+
+							obj = new SqlQuery.Predicate.ExprExpr(expr1, @operator, expr2);
+
+							break;
+						}
+
+					case (int)QueryElementType.LikePredicate :
+						{
+							var expr1  = Read<ISqlExpression>();
+							var isNot  = ReadBool();
+							var expr2  = Read<ISqlExpression>();
+							var escape = Read<ISqlExpression>();
+
+							obj = new SqlQuery.Predicate.Like(expr1, isNot, expr2, escape);
+
+							break;
+						}
+
+					case (int)QueryElementType.BetweenPredicate :
+						{
+							var expr1 = Read<ISqlExpression>();
+							var isNot = ReadBool();
+							var expr2 = Read<ISqlExpression>();
+							var expr3 = Read<ISqlExpression>();
+
+							obj = new SqlQuery.Predicate.Between(expr1, isNot, expr2, expr3);
+
+							break;
+						}
+
+					case (int)QueryElementType.IsNullPredicate :
+						{
+							var expr1 = Read<ISqlExpression>();
+							var isNot = ReadBool();
+
+							obj = new SqlQuery.Predicate.IsNull(expr1, isNot);
+
+							break;
+						}
+
+					case (int)QueryElementType.InSubQueryPredicate :
+						{
+							var expr1    = Read<ISqlExpression>();
+							var isNot    = ReadBool();
+							var subQuery = Read<SqlQuery>();
+
+							obj = new SqlQuery.Predicate.InSubQuery(expr1, isNot, subQuery);
+
+							break;
+						}
+
+					case (int)QueryElementType.InListPredicate :
+						{
+							var expr1  = Read<ISqlExpression>();
+							var isNot  = ReadBool();
+							var values = ReadList<ISqlExpression>();
+
+							obj = new SqlQuery.Predicate.InList(expr1, isNot, values);
+
+							break;
+						}
+
+					case (int)QueryElementType.FuncLikePredicate :
+						{
+							var func = Read<SqlFunction>();
+							obj = new SqlQuery.Predicate.FuncLike(func);
 							break;
 						}
 
@@ -581,21 +968,52 @@ namespace BLToolkit.ServiceModel
 						obj = new SqlQuery.SearchCondition(ReadArray<SqlQuery.Condition>());
 						break;
 
-					case (int) QueryElementType.Condition:
+					case (int)QueryElementType.Condition :
 						obj = new SqlQuery.Condition(ReadBool(), Read<ISqlPredicate>(), ReadBool());
 						break;
 
-					case (int) QueryElementType.SetExpression:
-						obj = new SqlQuery.SetExpression(Read<ISqlExpression>(), Read<ISqlExpression>());
-						break;
+					case (int)QueryElementType.TableSource :
+						{
+							var source = Read<ISqlTableSource>();
+							var alias  = ReadString();
+							var joins  = ReadArray<SqlQuery.JoinedTable>();
 
-					case (int) QueryElementType.SetClause:
+							obj = new SqlQuery.TableSource(source, alias, joins);
+
+							break;
+						}
+
+					case (int)QueryElementType.JoinedTable :
+						{
+							var joinType  = (SqlQuery.JoinType)ReadInt();
+							var table     = Read<SqlQuery.TableSource>();
+							var isWeak    = ReadBool();
+							var condition = Read<SqlQuery.SearchCondition>();
+
+							obj = new SqlQuery.JoinedTable(joinType, table, isWeak, condition);
+
+							break;
+						}
+
+					case (int)QueryElementType.SelectClause :
+						{
+							var isDistinct = ReadBool();
+							var skipValue  = Read<ISqlExpression>();
+							var takeValue  = Read<ISqlExpression>();
+							var columns    = ReadArray<SqlQuery.Column>();
+
+							obj = new SqlQuery.SelectClause(isDistinct, takeValue, skipValue, columns);
+
+							break;
+						}
+
+					case (int)QueryElementType.SetClause :
 						{
 							var items = ReadArray<SqlQuery.SetExpression>();
 							var into  = Read<SqlTable>();
 							var wid   = ReadBool();
 
-							var c = new SqlQuery.SetClause {Into = into, WithIdentity = wid};
+							var c = new SqlQuery.SetClause { Into = into, WithIdentity = wid };
 
 							c.Items.AddRange(items);
 							obj = c;
@@ -603,11 +1021,15 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int) QueryElementType.FromClause:
+					case (int)QueryElementType.SetExpression :
+						obj = new SqlQuery.SetExpression(Read<ISqlExpression>(), Read<ISqlExpression>());
+						break;
+
+					case (int)QueryElementType.FromClause :
 						obj = new SqlQuery.FromClause(ReadArray<SqlQuery.TableSource>());
 						break;
 
-					case (int) QueryElementType.WhereClause:
+					case (int)QueryElementType.WhereClause :
 						obj = new SqlQuery.WhereClause(Read<SqlQuery.SearchCondition>());
 						break;
 
@@ -618,6 +1040,26 @@ namespace BLToolkit.ServiceModel
 					case (int)QueryElementType.OrderByClause :
 						obj = new SqlQuery.OrderByClause(ReadArray<SqlQuery.OrderByItem>());
 						break;
+
+					case (int)QueryElementType.OrderByItem :
+						{
+							var expression   = Read<ISqlExpression>();
+							var isDescending = ReadBool();
+
+							obj = new SqlQuery.OrderByItem(expression, isDescending);
+
+							break;
+						}
+
+					case (int)QueryElementType.Union :
+						{
+							var sqlQuery = Read<SqlQuery>();
+							var isAll    = ReadBool();
+
+							obj = new SqlQuery.Union(sqlQuery, isAll);
+
+							break;
+						}
 				}
 
 				_dic.Add(idx, obj);
@@ -730,8 +1172,24 @@ namespace BLToolkit.ServiceModel
 
 				var items = new T[count.Value];
 
-				for (var i = 0; i < items.Length; i++)
+				for (var i = 0; i < count; i++)
 					items[i] = Read<T>();
+
+				return items;
+			}
+
+			List<T> ReadList<T>()
+				where T : class
+			{
+				var count = ReadCount();
+
+				if (count == null)
+					return null;
+
+				var items = new List<T>(count.Value);
+
+				for (var i = 0; i < count; i++)
+					items.Add(Read<T>());
 
 				return items;
 			}

@@ -1,15 +1,13 @@
 using System;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Threading;
-
-using BLToolkit.Properties;
-using BLToolkit.Reflection.Emit;
-using BLToolkit.TypeBuilder;
-using BLToolkit.TypeBuilder.Builders;
 
 namespace BLToolkit.Aspects.Builders
 {
+	using Properties;
+	using TypeBuilder;
+	using TypeBuilder.Builders;
+
 	/// <summary>
 	/// This aspect simplifies asynchronous operations.
 	/// </summary>
@@ -34,12 +32,8 @@ namespace BLToolkit.Aspects.Builders
 			if (context.IsBuildStep)
 				return false;
 
-			AbstractTypeBuilderList list = new AbstractTypeBuilderList(2);
-
-			list.Add(this);
-			list.Add(typeBuilder);
-
-			BuildStep step = context.Step;
+			var list = new AbstractTypeBuilderList(2) { this, typeBuilder };
+			var step = context.Step;
 
 			try
 			{
@@ -62,13 +56,13 @@ namespace BLToolkit.Aspects.Builders
 
 		protected override void BuildAbstractMethod()
 		{
-			MethodInfo mi = Context.CurrentMethod;
+			var mi = Context.CurrentMethod;
 
 			if (mi.ReturnType == typeof(IAsyncResult))
 				BuildBeginMethod();
 			else
 			{
-				ParameterInfo[] parameters = mi.GetParameters();
+				var parameters = mi.GetParameters();
 
 				if (parameters.Length == 1 && parameters[0].ParameterType == typeof(IAsyncResult))
 					BuildEndMethod();
@@ -79,13 +73,13 @@ namespace BLToolkit.Aspects.Builders
 
 		private void BuildBeginMethod()
 		{
-			MethodInfo   mi           = Context.CurrentMethod;
-			MethodInfo   method       = GetTargetMethod(Context, "Begin");
-			Type         delegateType = EnsureDelegateType(Context, method);
-			EmitHelper   emit         = Context.MethodBuilder.Emitter;
-			Type         type         = typeof(InternalAsyncResult);
-			LocalBuilder arLocal      = emit.DeclareLocal(type);
-			LocalBuilder dLocal       = emit.DeclareLocal(delegateType);
+			var mi           = Context.CurrentMethod;
+			var method       = GetTargetMethod(Context, "Begin");
+			var delegateType = EnsureDelegateType(Context, method);
+			var emit         = Context.MethodBuilder.Emitter;
+			var type         = typeof(InternalAsyncResult);
+			var arLocal      = emit.DeclareLocal(type);
+			var dLocal       = emit.DeclareLocal(delegateType);
 
 			emit
 				.newobj (type)
@@ -102,9 +96,10 @@ namespace BLToolkit.Aspects.Builders
 				.ldloc  (dLocal)
 				;
 
-			int             callbackIndex  = -1;
-			ParameterInfo[] parameters     = mi.GetParameters();
-			for (int i = 0; i < parameters.Length; ++i)
+			var callbackIndex = -1;
+			var parameters    = mi.GetParameters();
+
+			for (var i = 0; i < parameters.Length; ++i)
 			{
 				if (parameters[i].ParameterType == typeof(AsyncCallback))
 				{
@@ -149,11 +144,11 @@ namespace BLToolkit.Aspects.Builders
 
 		private void BuildEndMethod()
 		{
-			MethodInfo   method       = GetTargetMethod(Context, "End");
-			Type         delegateType = EnsureDelegateType(Context, method);
-			EmitHelper   emit         = Context.MethodBuilder.Emitter;
-			Type         type         = typeof(InternalAsyncResult);
-			LocalBuilder arLocal      = emit.DeclareLocal(type);
+			var method       = GetTargetMethod(Context, "End");
+			var delegateType = EnsureDelegateType(Context, method);
+			var emit         = Context.MethodBuilder.Emitter;
+			var type         = typeof(InternalAsyncResult);
+			var arLocal      = emit.DeclareLocal(type);
 
 			emit
 				.ldarg_1
@@ -172,12 +167,12 @@ namespace BLToolkit.Aspects.Builders
 
 		private MethodInfo GetTargetMethod(BuildContext context, string prefix)
 		{
-			string targetMethodName = _targetMethodName;
+			var targetMethodName = _targetMethodName;
 
 			if (targetMethodName == null)
 			{
-				MethodInfo mi   = context.CurrentMethod;
-				string     name = mi.Name;
+				var mi   = context.CurrentMethod;
+				var name = mi.Name;
 
 				if (name.StartsWith(prefix))
 					targetMethodName = name.Substring(prefix.Length);
@@ -198,41 +193,40 @@ namespace BLToolkit.Aspects.Builders
 			// It's possible, but we can not define and use newly defined type as Emit target in its owner type.
 			// To solve this problem, we should create a top level delegate and make sure its name is unique.
 			//
-			string delegateName = context.TypeBuilder.TypeBuilder.FullName + "$" + method.Name + "$Delegate";
-			Type   delegateType = (Type) context.Items[delegateName];
+			var delegateName = context.TypeBuilder.TypeBuilder.FullName + "$" + method.Name + "$Delegate";
+			var delegateType = (Type) context.Items[delegateName];
 
 			if (delegateType == null)
 			{
-				ParameterInfo[] pi = method.GetParameters();
-				Type[]  parameters = new Type[pi.Length];
+				var pi         = method.GetParameters();
+				var parameters = new Type[pi.Length];
 
-				for (int i = 0; i < pi.Length; i++)
+				for (var i = 0; i < pi.Length; i++)
 					parameters[i] = pi[i].ParameterType;
 
 				const MethodImplAttributes mia = MethodImplAttributes.Runtime | MethodImplAttributes.Managed;
 				const MethodAttributes     ma  = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
 
-				TypeBuilderHelper delegateBuilder = context.AssemblyBuilder.DefineType(delegateName,
+				var delegateBuilder = context.AssemblyBuilder.DefineType(delegateName,
 					TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass,
 					typeof(MulticastDelegate));
 
 				// Create constructor
 				//
-				ConstructorBuilderHelper ctorBuilder = delegateBuilder.DefineConstructor(
+				var ctorBuilder = delegateBuilder.DefineConstructor(
 					MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.RTSpecialName, CallingConventions.Standard,
 					typeof(object), typeof(IntPtr));
 				ctorBuilder.ConstructorBuilder.SetImplementationFlags(mia);
 
 				// Define the BeginInvoke method for the delegate
 				//
-				Type[] beginParameters = new Type[parameters.Length + 2];
+				var beginParameters = new Type[parameters.Length + 2];
 
 				Array.Copy(parameters, 0, beginParameters, 0, parameters.Length);
 				beginParameters[parameters.Length]   = typeof(AsyncCallback);
 				beginParameters[parameters.Length+1] = typeof(object);
 
-				MethodBuilderHelper methodBuilder =
-					delegateBuilder.DefineMethod("BeginInvoke", ma, typeof(IAsyncResult), beginParameters);
+				var methodBuilder = delegateBuilder.DefineMethod("BeginInvoke", ma, typeof(IAsyncResult), beginParameters);
 
 				methodBuilder.MethodBuilder.SetImplementationFlags(mia);
 

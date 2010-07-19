@@ -16,7 +16,11 @@ namespace BLToolkit.ServiceModel
 
 		[OperationContract]
 		[LinqServiceDataContractFormat]
-		int ExecuteNonQuery(LinqServiceQuery query);
+		int    ExecuteNonQuery(LinqServiceQuery query);
+
+		[OperationContract]
+		[LinqServiceDataContractFormat]
+		object ExecuteScalar  (LinqServiceQuery query);
 	}
 
 	class LinqServiceDataContractSerializerOperationBehavior : DataContractSerializerOperationBehavior

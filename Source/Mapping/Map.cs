@@ -955,8 +955,6 @@ namespace BLToolkit.Mapping
 
 		#region GetObjectMapper
 
-#if FW3
-
 		public static Func<TSource,TDest> GetObjectMapper<TSource,TDest>()
 		{
 			return _defaultSchema.GetObjectMapper<TSource,TDest>();
@@ -966,8 +964,6 @@ namespace BLToolkit.Mapping
 		{
 			return _defaultSchema.GetObjectMapper<TSource,TDest>(deepCopy);
 		}
-
-#endif
 
 		#endregion
 	}

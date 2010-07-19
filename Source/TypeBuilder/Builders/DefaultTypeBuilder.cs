@@ -37,8 +37,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void BuildAbstractGetter()
 		{
-			FieldBuilder    field = GetField();
-			ParameterInfo[] index = Context.CurrentProperty.GetIndexParameters();
+			var field = GetField();
+			var index = Context.CurrentProperty.GetIndexParameters();
 
 			switch (index.Length)
 			{
@@ -66,8 +66,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void BuildAbstractSetter()
 		{
-			FieldBuilder    field = GetField();
-			ParameterInfo[] index = Context.CurrentProperty.GetIndexParameters();
+			var field = GetField();
+			var index = Context.CurrentProperty.GetIndexParameters();
 
 			switch (index.Length)
 			{
@@ -115,13 +115,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void CallBaseMethod()
 		{
-			EmitHelper      emit   = Context.MethodBuilder.Emitter;
-			MethodInfo      method = Context.MethodBuilder.OverriddenMethod;
-			ParameterInfo[] ps     = method.GetParameters();
+			var emit   = Context.MethodBuilder.Emitter;
+			var method = Context.MethodBuilder.OverriddenMethod;
+			var ps     = method.GetParameters();
 
 			emit.ldarg_0.end();
 
-			for (int i = 0; i < ps.Length; i++)
+			for (var i = 0; i < ps.Length; i++)
 				emit.ldarg(i + 1);
 
 			emit.call(method);
@@ -159,7 +159,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void BeforeBuildAbstractSetter()
 		{
-			FieldBuilder field = GetField();
+			var field = GetField();
 
 			if (field.FieldType != Context.CurrentProperty.PropertyType)
 				CallLazyInstanceInsurer(field);
@@ -171,10 +171,10 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected FieldBuilder GetField()
 		{
-			PropertyInfo propertyInfo = Context.CurrentProperty;
-			string       fieldName    = GetFieldName();
-			Type         fieldType    = GetFieldType();
-			FieldBuilder field        = Context.GetField(fieldName);
+			var propertyInfo = Context.CurrentProperty;
+			var fieldName    = GetFieldName();
+			var fieldType    = GetFieldType();
+			var field        = Context.GetField(fieldName);
 
 			if (field == null)
 			{
@@ -182,7 +182,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 				if (TypeAccessor.IsInstanceBuildable(fieldType))
 				{
-					bool noInstance = propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length > 0;
+					var noInstance = propertyInfo.GetCustomAttributes(typeof(NoInstanceAttribute), true).Length > 0;
 
 					if (IsObjectHolder && noInstance)
 					{
@@ -213,12 +213,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildHolderInstance(EmitHelper emit)
 		{
-			string       fieldName  = GetFieldName();
-			FieldBuilder field      = Context.GetField(fieldName);
-			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
-			TypeHelper   objectType = new TypeHelper(GetObjectType());
+			var fieldName  = GetFieldName();
+			var field      = Context.GetField(fieldName);
+			var fieldType  = new TypeHelper(field.FieldType);
+			var objectType = new TypeHelper(GetObjectType());
 
-			ConstructorInfo ci = fieldType.GetPublicDefaultConstructor();
+			var ci = fieldType.GetPublicDefaultConstructor();
 
 			if (ci != null)
 			{
@@ -257,7 +257,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else if (objectType.IsArray)
 			{
-				FieldBuilder initializer = GetArrayInitializer(objectType);
+				var initializer = GetArrayInitializer(objectType);
 
 				emit
 					.ldarg_0
@@ -266,14 +266,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-				ConstructorInfo ci = objectType.GetPublicDefaultConstructor();
+				var ci = objectType.GetPublicDefaultConstructor();
 
 				if (ci == null)
 				{
 					if (objectType.Type.IsValueType)
 						return;
 
-					string message = string.Format(
+					var message = string.Format(
 						Resources.TypeBuilder_PropertyTypeHasNoPublicDefaultCtor,
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
@@ -288,13 +288,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					return;
 				}
-				else
-				{
-					emit
-						.ldarg_0
-						.newobj  (ci)
-						;
-				}
+
+				emit
+					.ldarg_0
+					.newobj  (ci)
+					;
 			}
 
 			if (IsObjectHolder)
@@ -318,7 +316,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			Stack<ConstructorInfo> genericNestedConstructors;
 			if (parameters.Length == 1)
 			{
-				object o = parameters[0];
+				var o = parameters[0];
 
 				if (o == null)
 				{
@@ -342,15 +340,11 @@ namespace BLToolkit.TypeBuilder.Builders
 							Type nullableType = null;
 							genericNestedConstructors = GetGenericNestedConstructors(
 								objectType,
-								delegate(TypeHelper typeHelper)
-								{
-									return
-										typeHelper.IsValueType == false ||
-										(typeHelper.Type.IsGenericType &&
-										typeHelper.Type.GetGenericTypeDefinition() == typeof(Nullable<>));
-								},
-								delegate(TypeHelper typeHelper) { nullableType = typeHelper.Type; },
-								delegate() { return nullableType != null; });
+								typeHelper =>
+									typeHelper.IsValueType == false ||
+									(typeHelper.Type.IsGenericType && typeHelper.Type.GetGenericTypeDefinition() == typeof (Nullable<>)),
+								typeHelper => { nullableType = typeHelper.Type; },
+								() => nullableType != null);
 
 							if (nullableType == null)
 								throw new Exception("Cannot find nullable type in generic types chain");
@@ -365,7 +359,8 @@ namespace BLToolkit.TypeBuilder.Builders
 							}
 							else
 							{
-								LocalBuilder nullable = emit.DeclareLocal(nullableType);
+								var nullable = emit.DeclareLocal(nullableType);
+
 								emit
 									.ldloca(nullable)
 									.initobj(nullableType)
@@ -427,13 +422,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			Type[] types = new Type[parameters.Length];
+			var types = new Type[parameters.Length];
 
-			for (int i = 0; i < parameters.Length; i++)
+			for (var i = 0; i < parameters.Length; i++)
 			{
 				if (parameters[i] != null)
 				{
-					Type t = parameters[i].GetType();
+					var t = parameters[i].GetType();
 
 					types[i] = (t.IsEnum) ? Enum.GetUnderlyingType(t) : t;
 				}
@@ -446,10 +441,9 @@ namespace BLToolkit.TypeBuilder.Builders
 			ConstructorInfo objectCtor = null;
 			genericNestedConstructors = GetGenericNestedConstructors(
 				objectType,
-				delegate(TypeHelper typeHelper) { return true; },
-				delegate(TypeHelper typeHelper) { objectCtor = typeHelper.GetPublicConstructor(types); }, 
-				delegate()                      { return objectCtor != null; }
-		);
+				typeHelper => true,
+				typeHelper => { objectCtor = typeHelper.GetPublicConstructor(types); },
+				() => objectCtor != null);
 
 			if (objectCtor == null)
 			{
@@ -465,14 +459,14 @@ namespace BLToolkit.TypeBuilder.Builders
 						objectType.FullName));
 			}
 
-			ParameterInfo[] pi = objectCtor.GetParameters();
+			var pi = objectCtor.GetParameters();
 
 			emit.ldarg_0.end();
 
-			for (int i = 0; i < parameters.Length; i++)
+			for (var i = 0; i < parameters.Length; i++)
 			{
-				object o     = parameters[i];
-				Type   oType = o.GetType();
+				var o     = parameters[i];
+				var oType = o.GetType();
 
 				if (emit.LoadWellKnownValue(o))
 				{
@@ -524,12 +518,6 @@ namespace BLToolkit.TypeBuilder.Builders
 				;
 		}
 
-
-#if !FW3
-		/// <summary>Encapsulates a method that has no parameters and returns a value of the type specified by the <paramref name="TResult" /> parameter.</summary>
-		/// <returns>The return value of the method that this delegate encapsulates.</returns>
-		private delegate TResult Func<TResult>();
-#endif
 		private Stack<ConstructorInfo> GetGenericNestedConstructors(TypeHelper objectType, 
 			Predicate<TypeHelper> isActionable, 
 			Action<TypeHelper> action, 
@@ -542,11 +530,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			while (objectType.Type.IsGenericType && !isBreakCondition())
 			{
-				Type[] typeArgs = objectType.Type.GetGenericArguments();
+				var typeArgs = objectType.Type.GetGenericArguments();
 
 				if (typeArgs.Length == 1)
 				{
-					ConstructorInfo genericCtor = objectType.GetPublicConstructor(typeArgs[0]);
+					var genericCtor = objectType.GetPublicConstructor(typeArgs[0]);
 
 					if (genericCtor != null)
 					{
@@ -579,15 +567,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildInitContextInstance()
 		{
-			string       fieldName  = GetFieldName();
-			FieldBuilder field      = Context.GetField(fieldName);
-			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
-			TypeHelper   objectType = new TypeHelper(GetObjectType());
+			var fieldName  = GetFieldName();
+			var field      = Context.GetField(fieldName);
+			var fieldType  = new TypeHelper(field.FieldType);
+			var objectType = new TypeHelper(GetObjectType());
 
-			EmitHelper emit = Context.TypeBuilder.InitConstructor.Emitter;
+			var emit = Context.TypeBuilder.InitConstructor.Emitter;
 
-			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
-			ConstructorInfo  ci = objectType.GetPublicConstructor(typeof(InitContext));
+			var parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
+			var ci = objectType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null && ci.GetParameters()[0].ParameterType != typeof(InitContext))
 				ci = null;
@@ -606,15 +594,14 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
 
-			MethodInfo memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
-
-			LocalBuilder parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
+			var memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+			var parentField  = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
 
 			if (parentField == null)
 			{
 				Context.Items["$BLToolkit.InitContext.Parent"] = parentField = emit.DeclareLocal(typeof(object));
 
-				Label label = emit.DefineLabel();
+				var label = emit.DefineLabel();
 
 				emit
 					.ldarg_1
@@ -641,7 +628,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 				;
 
-			object isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+			var isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
 
 			if (parameters != null)
 			{
@@ -699,14 +686,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildDefaultInstance()
 		{
-			string       fieldName  = GetFieldName();
-			FieldBuilder field      = Context.GetField(fieldName);
-			TypeHelper   fieldType  = new TypeHelper(field.FieldType);
-			TypeHelper   objectType = new TypeHelper(GetObjectType());
+			var fieldName  = GetFieldName();
+			var field      = Context.GetField(fieldName);
+			var fieldType  = new TypeHelper(field.FieldType);
+			var objectType = new TypeHelper(GetObjectType());
 
-			EmitHelper       emit = Context.TypeBuilder.DefaultConstructor.Emitter;
-			object[]         ps   = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
-			ConstructorInfo  ci   = objectType.GetPublicConstructor(typeof(InitContext));
+			var emit = Context.TypeBuilder.DefaultConstructor.Emitter;
+			var ps   = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
+			var ci   = objectType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null && ci.GetParameters()[0].ParameterType != typeof(InitContext))
 				ci = null;
@@ -724,11 +711,11 @@ namespace BLToolkit.TypeBuilder.Builders
 		{
 			if (IsObjectHolder)
 			{
-				ConstructorInfo holderCi = fieldType.GetPublicConstructor(objectType);
+				var holderCi = fieldType.GetPublicConstructor(objectType);
 
 				if (holderCi == null)
 				{
-					string message = string.Format(
+					var message = string.Format(
 						Resources.TypeBuilder_PropertyTypeHasNoCtorWithParamType,
 						Context.CurrentProperty.Name,
 						Context.Type.FullName,
@@ -760,8 +747,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
 
-			LocalBuilder initField    = GetInitContextBuilder(initContextName, emit);
-			MethodInfo   memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+			var initField    = GetInitContextBuilder(initContextName, emit);
+			var memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
 
 			if (parameters != null)
 			{
@@ -816,7 +803,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		private LocalBuilder GetInitContextBuilder(
 			string initContextName, EmitHelper emit)
 		{
-			LocalBuilder initField = (LocalBuilder)Context.Items[initContextName];
+			var initField = (LocalBuilder)Context.Items[initContextName];
 
 			if (initField == null)
 			{
@@ -848,8 +835,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private bool IsLazyInstance(Type type)
 		{
-			object[] attrs = 
-				Context.CurrentProperty.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
+			var attrs = Context.CurrentProperty.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
 
 			if (attrs.Length > 0)
 				return ((LazyInstanceAttribute)attrs[0]).IsLazy;
@@ -865,16 +851,16 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildLazyInstanceEnsurer()
 		{
-			string              fieldName  = GetFieldName();
-			FieldBuilder        field      = Context.GetField(fieldName);
-			TypeHelper          fieldType  = new TypeHelper(field.FieldType);
-			TypeHelper          objectType = new TypeHelper(GetObjectType());
-			MethodBuilderHelper ensurer    = Context.TypeBuilder.DefineMethod(
+			var fieldName  = GetFieldName();
+			var field      = Context.GetField(fieldName);
+			var fieldType  = new TypeHelper(field.FieldType);
+			var objectType = new TypeHelper(GetObjectType());
+			var ensurer    = Context.TypeBuilder.DefineMethod(
 				string.Format("$EnsureInstance{0}", fieldName),
 				MethodAttributes.Private | MethodAttributes.HideBySig);
 
-			EmitHelper emit = ensurer.Emitter;
-			Label      end  = emit.DefineLabel();
+			var emit = ensurer.Emitter;
+			var end  = emit.DefineLabel();
 
 			emit
 				.ldarg_0
@@ -882,8 +868,8 @@ namespace BLToolkit.TypeBuilder.Builders
 				.brtrue_s (end)
 				;
 
-			object[] parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
-			ConstructorInfo  ci = objectType.GetPublicConstructor(typeof(InitContext));
+			var parameters = TypeHelper.GetPropertyParameters(Context.CurrentProperty);
+			var ci         = objectType.GetPublicConstructor(typeof(InitContext));
 
 			if (ci != null || objectType.IsAbstract)
 				CreateInitContextLazyInstance(field, fieldType, objectType, emit, parameters);
@@ -910,7 +896,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
 
-			LocalBuilder initField = emit.DeclareLocal(InitContextType);
+			var initField = emit.DeclareLocal(InitContextType);
 
 			emit
 				.newobj   (InitContextType.GetPublicDefaultConstructor())
@@ -978,7 +964,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void AfterBuildType()
 		{
-			object isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+			var isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
 
 			if (isDirty != null && (bool)isDirty)
 			{
@@ -989,7 +975,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			LocalBuilder parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
+			var parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
 
 			if (parentField != null)
 			{
@@ -1006,11 +992,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void FinalizeDefaultConstructors()
 		{
-			ConstructorInfo ci = Context.Type.GetDefaultConstructor();
+			var ci = Context.Type.GetDefaultConstructor();
 
 			if (ci == null || Context.TypeBuilder.IsDefaultConstructorDefined)
 			{
-				EmitHelper emit = Context.TypeBuilder.DefaultConstructor.Emitter;
+				var emit = Context.TypeBuilder.DefaultConstructor.Emitter;
 
 				if (ci != null)
 				{
@@ -1022,7 +1008,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 					if (ci != null)
 					{
-						LocalBuilder initField = GetInitContextBuilder("$BLToolkit.DefaultInitContext.", emit);
+						var initField = GetInitContextBuilder("$BLToolkit.DefaultInitContext.", emit);
 
 						emit
 							.ldarg_0
@@ -1042,11 +1028,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void FinalizeInitContextConstructors()
 		{
-			ConstructorInfo ci = Context.Type.GetConstructor(typeof(InitContext));
+			var ci = Context.Type.GetConstructor(typeof(InitContext));
 
 			if (ci != null || Context.TypeBuilder.IsInitConstructorDefined)
 			{
-				EmitHelper emit = Context.TypeBuilder.InitConstructor.Emitter;
+				var emit = Context.TypeBuilder.InitConstructor.Emitter;
 
 				if (ci != null)
 				{

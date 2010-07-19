@@ -445,9 +445,7 @@ namespace BLToolkit.Reflection
 				else
 				{
 					if (type == typeof(DateTime))       return Common.Configuration.NullableValues.DateTime;
-#if FW3
 					if (type == typeof(DateTimeOffset)) return Common.Configuration.NullableValues.DateTimeOffset;
-#endif
 					if (type == typeof(Decimal))        return Common.Configuration.NullableValues.Decimal;
 					if (type == typeof(Guid))           return Common.Configuration.NullableValues.Guid;
 

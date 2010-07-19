@@ -81,14 +81,12 @@ namespace BLToolkit.Common
 
 		public static NameOrIndexParameter[] FromStringArray(string[] names)
 		{
-			return Array.ConvertAll<string, NameOrIndexParameter>(names,
-						delegate(string name) { return new NameOrIndexParameter(name); });
+			return Array.ConvertAll(names, name => new NameOrIndexParameter(name));
 		}
 
 		public static NameOrIndexParameter[] FromIndexArray(int[] indices)
 		{
-			return Array.ConvertAll<int, NameOrIndexParameter>(indices,
-						delegate(int index) { return new NameOrIndexParameter(index); });
+			return Array.ConvertAll(indices, index => new NameOrIndexParameter(index));
 		}
 
 		#endregion
@@ -99,7 +97,7 @@ namespace BLToolkit.Common
 		{
 			if (obj is NameOrIndexParameter)
 			{
-				NameOrIndexParameter nip = (NameOrIndexParameter)obj;
+				var nip = (NameOrIndexParameter)obj;
 
 				if (null != _name && null != nip._name && _name == nip._name)
 					return true; // Same name
@@ -112,13 +110,13 @@ namespace BLToolkit.Common
 
 			if (obj is string)
 			{
-				string name = (string)obj;
+				var name = (string)obj;
 				return (null != _name && _name == name);
 			}
 
 			if (obj is int)
 			{
-				int index = (int)obj;
+				var index = (int)obj;
 				return (null == _name && _index == index);
 			}
 

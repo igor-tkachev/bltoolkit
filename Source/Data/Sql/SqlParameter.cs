@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Sql
 {
-	[Serializable]
+	using Mapping;
+
 	public class SqlParameter : ISqlExpression, IValueContainer
 	{
 		public SqlParameter(Type systemType, string name, object value)
@@ -52,11 +52,10 @@ namespace BLToolkit.Data.Sql
 
 		#region Value Converter
 
-		List<Type> _enumTypes;
-		List<int>  _takeValues;
-		string     _likeStart, _likeEnd;
+		internal List<Type> EnumTypes;
+		internal List<int>  TakeValues;
+		internal string     LikeStart, LikeEnd;
 
-		[NonSerialized]
 		private Converter<object,object> _valueConverter;
 		public  Converter<object,object>  ValueConverter
 		{
@@ -64,14 +63,14 @@ namespace BLToolkit.Data.Sql
 			{
 				if (_valueConverter == null)
 				{
-					if (_enumTypes != null)
-						foreach (var type in _enumTypes)
+					if (EnumTypes != null)
+						foreach (var type in EnumTypes)
 							SetEnumConverter(type, Map.DefaultSchema);
-					else if (_takeValues != null)
-						foreach (var take in _takeValues)
+					else if (TakeValues != null)
+						foreach (var take in TakeValues)
 							SetTakeConverter(take);
-					else if (_likeStart != null)
-						SetLikeConverter(_likeStart, _likeEnd);
+					else if (LikeStart != null)
+						SetLikeConverter(LikeStart, LikeEnd);
 				}
 
 				return _valueConverter;
@@ -82,10 +81,10 @@ namespace BLToolkit.Data.Sql
 
 		internal void SetEnumConverter(Type type, MappingSchema ms)
 		{
-			if (_enumTypes == null)
-				_enumTypes = new List<Type>();
+			if (EnumTypes == null)
+				EnumTypes = new List<Type>();
 
-			_enumTypes.Add(type);
+			EnumTypes.Add(type);
 
 			SetEnumConverterInternal(type, ms);
 		}
@@ -105,10 +104,10 @@ namespace BLToolkit.Data.Sql
 
 		internal void SetTakeConverter(int take)
 		{
-			if (_takeValues == null)
-				_takeValues = new List<int>();
+			if (TakeValues == null)
+				TakeValues = new List<int>();
 
-			_takeValues.Add(take);
+			TakeValues.Add(take);
 
 			SetTakeConverterInternal(take);
 		}
@@ -125,8 +124,8 @@ namespace BLToolkit.Data.Sql
 
 		internal void SetLikeConverter(string start, string end)
 		{
-			_likeStart = start;
-			_likeEnd   = end;
+			LikeStart = start;
+			LikeEnd   = end;
 			_valueConverter = GetLikeEscaper(start, end);
 		}
 

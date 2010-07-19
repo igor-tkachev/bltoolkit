@@ -574,7 +574,6 @@ namespace BLToolkit.Data.DataProvider
 			return new OracleSqlProvider();
 		}
 
-#if FW3
 		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{
 			return dataReader is OracleDataReader ?
@@ -595,7 +594,6 @@ namespace BLToolkit.Data.DataProvider
 				return new DateTimeOffset(ts.Value, ts.GetTimeZoneOffset());
 			}
 		}
-#endif
 
 		private string _parameterPrefix = "P";
 		public  string  ParameterPrefix
@@ -1131,13 +1129,9 @@ namespace BLToolkit.Data.DataProvider
 			public OracleDataReaderMapper(MappingSchema mappingSchema, IDataReader dataReader)
 				: base(mappingSchema, dataReader)
 			{
-#if FW3
 				_dataReader = dataReader is OracleDataReaderEx?
 					((OracleDataReaderEx)dataReader).DataReader:
 					(OracleDataReader)dataReader;
-#else
-				_dataReader = (OracleDataReader)dataReader;
-#endif
 			}
 
 			private readonly OracleDataReader _dataReader;
@@ -1213,13 +1207,10 @@ namespace BLToolkit.Data.DataProvider
 				NameOrIndexParameter nameOrIndex)
 				: base(mappingSchema, dataReader, nameOrIndex)
 			{
-#if FW3
 				_dataReader = dataReader is OracleDataReaderEx?
 					((OracleDataReaderEx)dataReader).DataReader:
 					(OracleDataReader)dataReader;
-#else
-				_dataReader = (OracleDataReader)dataReader;
-#endif
+
 				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
 
 				if (_fieldType != typeof(OracleXmlType) && _fieldType != typeof(OracleBlob))

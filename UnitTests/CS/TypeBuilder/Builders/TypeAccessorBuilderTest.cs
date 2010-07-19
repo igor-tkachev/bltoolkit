@@ -155,28 +155,6 @@ namespace TypeBuilder.Builders
 			Assert.IsNotNull(i);
 		}
 
-#if FW2
-		private class PrivateType
-		{
-		}
-
-		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void PrivateTypeTest()
-		{
-			TypeAccessor.CreateInstance(typeof(PrivateType));
-		}
-
-		internal class InternalType
-		{
-		}
-
-		[Test, ExpectedException(typeof(TypeBuilderException))]
-		public void InternalTypeTest()
-		{
-			TypeAccessor.CreateInstance(typeof(InternalType));
-		}
-#endif
-
 		public class CloneTestObject
 		{
 			public struct CloneableStruct : ICloneable

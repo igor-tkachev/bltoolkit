@@ -141,13 +141,12 @@ namespace BLToolkit.Reflection
 
 		private object[] GetAttributesInternal()
 		{
-			string key = _type.FullName;
-
-			object[] attrs = (object[])_typeAttributes[key];
+			var key   = _type.FullName;
+			var attrs = (object[])_typeAttributes[key];
 
 			if (attrs == null)
 			{
-				ArrayList list = new ArrayList();
+				var list = new ArrayList();
 
 				GetAttributesInternal(list, _type);
 
@@ -160,7 +159,7 @@ namespace BLToolkit.Reflection
 		private static readonly Hashtable _typeAttributesTopInternal = new Hashtable(10);
 		private static void GetAttributesInternal(ArrayList list, Type type)
 		{
-			object[] attrs = (object[])_typeAttributesTopInternal[type];
+			var attrs = (object[])_typeAttributesTopInternal[type];
 
 			if (attrs != null)
 			{
@@ -177,14 +176,14 @@ namespace BLToolkit.Reflection
 		private static readonly Hashtable _typeAttributesInternal = new Hashtable(10);
 		private static void GetAttributesTreeInternal(ArrayList list, Type type)
 		{
-			object[] attrs = (object[])_typeAttributesInternal[type];
+			var attrs = (object[])_typeAttributesInternal[type];
 
 			if (attrs == null)
 				_typeAttributesInternal[type] = attrs = type.GetCustomAttributes(false);
 
 			if (Common.Configuration.FilterOutBaseEqualAttributes)
 			{
-				for (int i = 0; i < attrs.Length; i++)
+				for (var i = 0; i < attrs.Length; i++)
 					if (!list.Contains(attrs[i]))
 						list.Add(attrs[i]);
 			}
@@ -197,18 +196,18 @@ namespace BLToolkit.Reflection
 			// Reflection returns interfaces for the whole inheritance chain.
 			// So, we are going to get some hemorrhoid here to restore the inheritance sequence.
 			//
-			Type[] interfaces      = type.GetInterfaces();
-			int    nBaseInterfaces = type.BaseType != null? type.BaseType.GetInterfaces().Length: 0;
+			var interfaces      = type.GetInterfaces();
+			var nBaseInterfaces = type.BaseType != null? type.BaseType.GetInterfaces().Length: 0;
 
-			for (int i = 0; i < interfaces.Length; i++)
+			for (var i = 0; i < interfaces.Length; i++)
 			{
-				Type intf = interfaces[i];
+				var intf = interfaces[i];
 
 				if (i < nBaseInterfaces)
 				{
-					bool getAttr = false;
+					var getAttr = false;
 
-					foreach (MethodInfo mi in type.GetInterfaceMap(intf).TargetMethods)
+					foreach (var mi in type.GetInterfaceMap(intf).TargetMethods)
 					{
 						// Check if the interface is reimplemented.
 						//
@@ -247,17 +246,16 @@ namespace BLToolkit.Reflection
 			if (type          == null) throw new ArgumentNullException("type");
 			if (attributeType == null) throw new ArgumentNullException("attributeType");
 
-			string key = type.FullName + "#" + attributeType.FullName;
-
-			object[] attrs = (object[])_typeAttributes[key];
+			var key   = type.FullName + "#" + attributeType.FullName;
+			var attrs = (object[])_typeAttributes[key];
 
 			if (attrs == null)
 			{
-				ArrayList list = new ArrayList();
+				var list = new ArrayList();
 
 				GetAttributesInternal(list, type);
 
-				for (int i = 0; i < list.Count; i++)
+				for (var i = 0; i < list.Count; i++)
 					if (attributeType.IsInstanceOfType(list[i]) == false)
 						list.RemoveAt(i--);
 
@@ -277,7 +275,7 @@ namespace BLToolkit.Reflection
 		/// that is applied to element, or null if there is no such attribute.</returns>
 		public static Attribute GetFirstAttribute(Type type, Type attributeType)
 		{
-			object[] attrs = new TypeHelper(type).GetAttributes(attributeType);
+			var attrs = new TypeHelper(type).GetAttributes(attributeType);
 
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
@@ -292,7 +290,7 @@ namespace BLToolkit.Reflection
 		/// that is applied to element, or null if there is no such attribute.</returns>
 		public static T GetFirstAttribute<T>(Type type) where T : Attribute
 		{
-			object[] attrs = new TypeHelper(type).GetAttributes(typeof(T));
+			var attrs = new TypeHelper(type).GetAttributes(typeof(T));
 
 			return attrs.Length > 0? (T)attrs[0]: null;
 		}
@@ -952,9 +950,9 @@ namespace BLToolkit.Reflection
 
 			if (parent.IsInterface)
 			{
-				Type[] interfaces = child.GetInterfaces();
+				var interfaces = child.GetInterfaces();
 
-				foreach (Type t in interfaces)
+				foreach (var t in interfaces)
 					if (t == parent)
 						return true;
 			}
@@ -973,9 +971,9 @@ namespace BLToolkit.Reflection
 
 				if (genericType.IsInterface)
 				{
-					foreach (Type interfaceType in type.GetInterfaces())
+					foreach (var interfaceType in type.GetInterfaces())
 					{
-						Type gType = GetGenericType(genericType, interfaceType);
+						var gType = GetGenericType(genericType, interfaceType);
 
 						if (gType != null)
 							return gType;
@@ -1004,7 +1002,7 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			foreach (MethodInfo method in type.GetMethods(flags))
+			foreach (var method in type.GetMethods(flags))
 			{
 				if (method.IsGenericMethodDefinition == generic && method.Name == methodName)
 					return method;
@@ -1027,13 +1025,7 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			return Array.FindAll(
-				type.GetMethods(flags),
-				delegate(MethodInfo method)
-				{
-					return method.IsGenericMethodDefinition == generic;
-				});
-			
+			return Array.FindAll(type.GetMethods(flags), method => method.IsGenericMethodDefinition == generic);
 		}
 
 		/// <summary>
@@ -1061,7 +1053,8 @@ namespace BLToolkit.Reflection
 		{
 			while (parameterTypes.Length >= requiredParametersCount)
 			{
-				MethodInfo method = type.GetMethod(methodName, parameterTypes);
+				var method = type.GetMethod(methodName, parameterTypes);
+
 				if (null != method)
 					return method;
 
@@ -1079,7 +1072,7 @@ namespace BLToolkit.Reflection
 		{
 			if (propertyInfo == null) throw new ArgumentNullException("propertyInfo");
 
-			object[] attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
+			var attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
 			if (attrs != null && attrs.Length > 0)
 				return ((ParameterAttribute)attrs[0]).Parameters;
@@ -1132,7 +1125,7 @@ namespace BLToolkit.Reflection
 		///<returns>The Type instance that represents the exact runtime type of a list item.</returns>
 		public static Type GetListItemType(object list)
 		{
-			Type typeOfObject = typeof(object);
+			var typeOfObject = typeof(object);
 
 			if (list == null)
 				return typeOfObject;
@@ -1143,7 +1136,7 @@ namespace BLToolkit.Reflection
 			if (list is Array)
 				return list.GetType().GetElementType();
 
-			Type type = list.GetType();
+			var type = list.GetType();
 
 			// object[] attrs = type.GetCustomAttributes(typeof(DefaultMemberAttribute), true);
 			// string   itemMemberName = (attrs.Length == 0)? "Item": ((DefaultMemberAttribute)attrs[0]).MemberName;
@@ -1152,7 +1145,7 @@ namespace BLToolkit.Reflection
 			{
 				PropertyInfo last = null;
 
-				foreach (PropertyInfo pi in type.GetProperties())
+				foreach (var pi in type.GetProperties())
 				{
 					if (pi.GetIndexParameters().Length > 0 && pi.PropertyType != typeOfObject)
 					{
@@ -1171,11 +1164,11 @@ namespace BLToolkit.Reflection
 			{
 				if (list is IList)
 				{
-					IList l = (IList)list;
+					var l = (IList)list;
 
-					for (int i = 0; i < l.Count; i++)
+					for (var i = 0; i < l.Count; i++)
 					{
-						object o = l[i];
+						var o = l[i];
 
 						if (o != null && o.GetType() != typeOfObject)
 							return o.GetType();
@@ -1183,7 +1176,7 @@ namespace BLToolkit.Reflection
 				}
 				else if (list is IEnumerable)
 				{
-					foreach (object o in (IEnumerable)list)
+					foreach (var o in (IEnumerable)list)
 					{
 						if (o != null && o.GetType() != typeOfObject)
 							return o.GetType();
@@ -1206,7 +1199,7 @@ namespace BLToolkit.Reflection
 		{
 			if (listType.IsGenericType)
 			{
-				Type[] elementTypes = GetGenericArguments(listType, typeof(IList));
+				var elementTypes = GetGenericArguments(listType, typeof(IList));
 
 				if (elementTypes != null)
 					return elementTypes[0];
@@ -1216,14 +1209,14 @@ namespace BLToolkit.Reflection
 				IsSameOrParent(typeof(ITypedList),  listType) ||
 				IsSameOrParent(typeof(IListSource), listType))
 			{
-				Type elementType = listType.GetElementType();
+				var elementType = listType.GetElementType();
 
 				if (elementType != null)
 					return elementType;
 
 				PropertyInfo last = null;
 
-				foreach (PropertyInfo pi in listType.GetProperties())
+				foreach (var pi in listType.GetProperties())
 				{
 					if (pi.GetIndexParameters().Length > 0 && pi.PropertyType != typeof(object))
 					{
@@ -1253,17 +1246,17 @@ namespace BLToolkit.Reflection
 				type.GetElementType();
 
 			if (type.IsGenericType)
-				foreach (Type aType in type.GetGenericArguments())
-					if (typeof(IEnumerable<>).MakeGenericType(new Type[] { aType }).IsAssignableFrom(type))
+				foreach (var aType in type.GetGenericArguments())
+					if (typeof(IEnumerable<>).MakeGenericType(new[] { aType }).IsAssignableFrom(type))
 						return aType;
 
-			Type[] interfaces = type.GetInterfaces();
+			var interfaces = type.GetInterfaces();
 
 			if (interfaces != null && interfaces.Length > 0)
 			{
-				foreach (Type iType in interfaces)
+				foreach (var iType in interfaces)
 				{
-					Type eType = GetElementType(iType);
+					var eType = GetElementType(iType);
 
 					if (eType != null)
 						return eType;
@@ -1288,9 +1281,7 @@ namespace BLToolkit.Reflection
 
 			return type.IsValueType
 				|| type == typeof(string)
-#if FW3
 				|| type == typeof(System.Data.Linq.Binary)
-#endif
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
 				|| type == typeof(XmlDocument);
@@ -1306,13 +1297,13 @@ namespace BLToolkit.Reflection
 		/// of a generic type. Returns an empty array if the current type is not a generic type.</returns>
 		public static Type[] GetGenericArguments(Type type, Type baseType)
 		{
-			string baseTypeName = baseType.Name;
+			var baseTypeName = baseType.Name;
 
-			for (Type t = type; t != typeof(object) && t != null; t = t.BaseType)
+			for (var t = type; t != typeof(object) && t != null; t = t.BaseType)
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
 
-			foreach (Type t in type.GetInterfaces())
+			foreach (var t in type.GetInterfaces())
 				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
 					return t.GetGenericArguments();
 
@@ -1342,9 +1333,9 @@ namespace BLToolkit.Reflection
 			//
 			if (type.IsGenericType && type.ContainsGenericParameters)
 			{
-				Type[] genArgs = type.GetGenericArguments();
+				var genArgs = type.GetGenericArguments();
 
-				for (int i = 0; i < genArgs.Length; ++i)
+				for (var i = 0; i < genArgs.Length; ++i)
 					genArgs[i] = TranslateGenericParameters(genArgs[i], typeArguments);
 
 				return type.GetGenericTypeDefinition().MakeGenericType(genArgs);
@@ -1370,9 +1361,9 @@ namespace BLToolkit.Reflection
 
 		public static bool CheckConstraints(Type goal, Type probe)
 		{
-			Type[] constraints = goal.GetGenericParameterConstraints();
+			var constraints = goal.GetGenericParameterConstraints();
 
-			for (int i = 0; i < constraints.Length; i++)
+			for (var i = 0; i < constraints.Length; i++)
 				if (!constraints[i].IsAssignableFrom(probe))
 					return false;
 
@@ -1381,12 +1372,11 @@ namespace BLToolkit.Reflection
 
 		public static bool CompareGenericTypes(Type goal, Type probe)
 		{
-			Type[]  genArgs =  goal.GetGenericArguments();
-			Type[] specArgs = probe.GetGenericArguments();
+			var  genArgs =  goal.GetGenericArguments();
+			var specArgs = probe.GetGenericArguments();
+			var match    = (genArgs.Length == specArgs.Length);
 
-			bool match = (genArgs.Length == specArgs.Length);
-
-			for (int i = 0; match && i < genArgs.Length; i++)
+			for (var i = 0; match && i < genArgs.Length; i++)
 			{
 				if (genArgs[i] == specArgs[i])
 					continue;
@@ -1406,10 +1396,10 @@ namespace BLToolkit.Reflection
 		{
 			if (method != null)
 			{
-				Type         type = method.DeclaringType;
-				BindingFlags attr = BindingFlags.NonPublic | BindingFlags.Public | (method.IsStatic ? BindingFlags.Static : BindingFlags.Instance);
+				var type = method.DeclaringType;
+				var attr = BindingFlags.NonPublic | BindingFlags.Public | (method.IsStatic ? BindingFlags.Static : BindingFlags.Instance);
 
-				foreach (PropertyInfo info in type.GetProperties(attr))
+				foreach (var info in type.GetProperties(attr))
 				{
 					if (info.CanRead && method == info.GetGetMethod(true))
 						return info;

@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#region ReSharper C# 2.0 disable
-// ReSharper disable SuggestUseVarKeywordEvident
-// ReSharper disable SuggestUseVarKeywordEverywhere
-// ReSharper disable ConvertToLambdaExpression
-#endregion
-
 namespace BLToolkit.Data.Sql
 {
 	using VisitFunc   = Action<IQueryElement>;
@@ -42,19 +36,19 @@ namespace BLToolkit.Data.Sql
 			{
 				case QueryElementType.SqlFunction:
 					{
-						foreach (ISqlExpression p in ((SqlFunction)element).Parameters) Visit(p, all, action);
+						foreach (var p in ((SqlFunction)element).Parameters) Visit(p, all, action);
 						break;
 					}
 
 				case QueryElementType.SqlExpression:
 					{
-						foreach (ISqlExpression v in ((SqlExpression)element).Parameters) Visit(v, all, action);
+						foreach (var v in ((SqlExpression)element).Parameters) Visit(v, all, action);
 						break;
 					}
 
 				case QueryElementType.SqlBinaryExpression:
 					{
-						SqlBinaryExpression bexpr = (SqlBinaryExpression)element;
+						var bexpr = (SqlBinaryExpression)element;
 						Visit(bexpr.Expr1, all, action);
 						Visit(bexpr.Expr2, all, action);
 						break;
@@ -62,17 +56,17 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlTable:
 					{
-						SqlTable table = (SqlTable)element;
+						var table = (SqlTable)element;
 
 						Visit(table.All, all, action);
-						foreach (SqlField field in table.Fields.Values) Visit(field, all, action);
-						foreach (Join     join  in table.Joins)         Visit(join,  all, action);
+						foreach (var field in table.Fields.Values) Visit(field, all, action);
+						foreach (var join  in table.Joins)         Visit(join,  all, action);
 						break;
 					}
 
 				case QueryElementType.Join:
 					{
-						foreach (JoinOn j in ((Join)element).JoinOns) Visit(j, all, action);
+						foreach (var j in ((Join)element).JoinOns) Visit(j, all, action);
 						break;
 					}
 
@@ -84,16 +78,16 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.TableSource:
 					{
-						SqlQuery.TableSource table = (SqlQuery.TableSource)element;
+						var table = (SqlQuery.TableSource)element;
 
 						Visit(table.Source, all, action);
-						foreach (SqlQuery.JoinedTable j in table.Joins) Visit(j, all, action);
+						foreach (var j in table.Joins) Visit(j, all, action);
 						break;
 					}
 
 				case QueryElementType.JoinedTable:
 					{
-						SqlQuery.JoinedTable join = (SqlQuery.JoinedTable)element;
+						var join = (SqlQuery.JoinedTable)element;
 						Visit(join.Table,     all, action);
 						Visit(join.Condition, all, action);
 						break;
@@ -101,7 +95,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SearchCondition:
 					{
-						foreach (SqlQuery.Condition c in ((SqlQuery.SearchCondition)element).Conditions) Visit(c, all, action);
+						foreach (var c in ((SqlQuery.SearchCondition)element).Conditions) Visit(c, all, action);
 						break;
 					}
 
@@ -125,7 +119,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.ExprExprPredicate:
 					{
-						SqlQuery.Predicate.ExprExpr p = (SqlQuery.Predicate.ExprExpr)element;
+						var p = (SqlQuery.Predicate.ExprExpr)element;
 						Visit(p.Expr1, all, action);
 						Visit(p.Expr2, all, action);
 						break;
@@ -133,7 +127,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.LikePredicate:
 					{
-						SqlQuery.Predicate.Like p = (SqlQuery.Predicate.Like)element;
+						var p = (SqlQuery.Predicate.Like)element;
 						Visit(p.Expr1,  all, action);
 						Visit(p.Expr2,  all, action);
 						Visit(p.Escape, all, action);
@@ -142,7 +136,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.BetweenPredicate:
 					{
-						SqlQuery.Predicate.Between p = (SqlQuery.Predicate.Between)element;
+						var p = (SqlQuery.Predicate.Between)element;
 						Visit(p.Expr1, all, action);
 						Visit(p.Expr2, all, action);
 						Visit(p.Expr3, all, action);
@@ -155,9 +149,9 @@ namespace BLToolkit.Data.Sql
 						break;
 					}
 
-				case QueryElementType.InSubqueryPredicate:
+				case QueryElementType.InSubQueryPredicate:
 					{
-						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)element;
+						var p = (SqlQuery.Predicate.InSubQuery)element;
 						Visit(p.Expr1,    all, action);
 						Visit(p.SubQuery, all, action);
 						break;
@@ -165,22 +159,22 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.InListPredicate:
 					{
-						SqlQuery.Predicate.InList p = (SqlQuery.Predicate.InList)element;
+						var p = (SqlQuery.Predicate.InList)element;
 						Visit(p.Expr1, all, action);
-						foreach (ISqlExpression value in p.Values) Visit(value, all, action);
+						foreach (var value in p.Values) Visit(value, all, action);
 						break;
 					}
 
 				case QueryElementType.FuncLikePredicate:
 					{
-						SqlQuery.Predicate.FuncLike p = (SqlQuery.Predicate.FuncLike)element;
+						var p = (SqlQuery.Predicate.FuncLike)element;
 						Visit(p.Function, all, action);
 						break;
 					}
 
 				case QueryElementType.SetExpression:
 					{
-						SqlQuery.SetExpression s = (SqlQuery.SetExpression)element;
+						var s = (SqlQuery.SetExpression)element;
 						Visit(s.Column,     all, action);
 						Visit(s.Expression, all, action);
 						break;
@@ -188,28 +182,28 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SetClause:
 					{
-						SqlQuery.SetClause sc = (SqlQuery.SetClause)element;
+						var sc = (SqlQuery.SetClause)element;
 
 						if (sc.Into != null)
 							Visit(sc.Into, all, action);
 
-						foreach (SqlQuery.SetExpression c in sc.Items.ToArray()) Visit(c, all, action);
+						foreach (var c in sc.Items.ToArray()) Visit(c, all, action);
 						break;
 					}
 
 				case QueryElementType.SelectClause:
 					{
-						SqlQuery.SelectClause sc = (SqlQuery.SelectClause)element;
+						var sc = (SqlQuery.SelectClause)element;
 						Visit(sc.TakeValue, all, action);
 						Visit(sc.SkipValue, all, action);
 
-						foreach (SqlQuery.Column c in sc.Columns.ToArray()) Visit(c, all, action);
+						foreach (var c in sc.Columns.ToArray()) Visit(c, all, action);
 						break;
 					}
 
 				case QueryElementType.FromClause:
 					{
-						foreach (SqlQuery.TableSource t in ((SqlQuery.FromClause)element).Tables) Visit(t, all, action);
+						foreach (var t in ((SqlQuery.FromClause)element).Tables) Visit(t, all, action);
 						break;
 					}
 
@@ -221,13 +215,13 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.GroupByClause:
 					{
-						foreach (ISqlExpression i in ((SqlQuery.GroupByClause)element).Items) Visit(i, all, action);
+						foreach (var i in ((SqlQuery.GroupByClause)element).Items) Visit(i, all, action);
 						break;
 					}
 
 				case QueryElementType.OrderByClause:
 					{
-						foreach (SqlQuery.OrderByItem i in ((SqlQuery.OrderByClause)element).Items) Visit(i, all, action);
+						foreach (var i in ((SqlQuery.OrderByClause)element).Items) Visit(i, all, action);
 						break;
 					}
 
@@ -250,7 +244,7 @@ namespace BLToolkit.Data.Sql
 							_visitedElements.Add(element, element);
 						}
 
-						SqlQuery q = (SqlQuery)element;
+						var q = (SqlQuery)element;
 
 						if (q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert)
 							Visit(q.Set, all, action);
@@ -265,7 +259,7 @@ namespace BLToolkit.Data.Sql
 
 						if (q.HasUnion)
 						{
-							foreach (SqlQuery.Union i in q.Unions)
+							foreach (var i in q.Unions)
 							{
 								if (i.SqlQuery == q)
 									throw new InvalidOperationException();
@@ -287,9 +281,9 @@ namespace BLToolkit.Data.Sql
 		IQueryElement Find<T>(IEnumerable<T> arr, FindFunc find)
 			where T : class, IQueryElement
 		{
-			foreach (T item in arr)
+			foreach (var item in arr)
 			{
-				IQueryElement e = Find(item, find);
+				var e = Find(item, find);
 				if (e != null)
 					return e;
 			}
@@ -323,7 +317,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlBinaryExpression:
 					{
-						SqlBinaryExpression bexpr = (SqlBinaryExpression)element;
+						var bexpr = (SqlBinaryExpression)element;
 						return
 							Find(bexpr.Expr1, find) ??
 							Find(bexpr.Expr2, find);
@@ -331,7 +325,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlTable:
 					{
-						SqlTable table = (SqlTable)element;
+						var table = (SqlTable)element;
 						return
 							Find(table.All,           find) ?? 
 							Find(table.Fields.Values, find) ?? 
@@ -340,7 +334,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.TableSource:
 					{
-						SqlQuery.TableSource table = (SqlQuery.TableSource)element;
+						var table = (SqlQuery.TableSource)element;
 						return
 							Find(table.Source, find) ??
 							Find(table.Joins,  find);
@@ -348,7 +342,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.JoinedTable:
 					{
-						SqlQuery.JoinedTable join = (SqlQuery.JoinedTable)element;
+						var join = (SqlQuery.JoinedTable)element;
 						return
 							Find(join.Table,     find) ??
 							Find(join.Condition, find);
@@ -356,7 +350,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.ExprExprPredicate:
 					{
-						SqlQuery.Predicate.ExprExpr p = (SqlQuery.Predicate.ExprExpr)element;
+						var p = (SqlQuery.Predicate.ExprExpr)element;
 						return
 							Find(p.Expr1, find) ??
 							Find(p.Expr2, find);
@@ -364,7 +358,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.LikePredicate:
 					{
-						SqlQuery.Predicate.Like p = (SqlQuery.Predicate.Like)element;
+						var p = (SqlQuery.Predicate.Like)element;
 						return
 							Find(p.Expr1,  find) ??
 							Find(p.Expr2,  find) ??
@@ -373,16 +367,16 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.BetweenPredicate:
 					{
-						SqlQuery.Predicate.Between p = (SqlQuery.Predicate.Between)element;
+						var p = (SqlQuery.Predicate.Between)element;
 						return
 							Find(p.Expr1, find) ??
 							Find(p.Expr2, find) ??
 							Find(p.Expr3, find);
 					}
 
-				case QueryElementType.InSubqueryPredicate:
+				case QueryElementType.InSubQueryPredicate:
 					{
-						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)element;
+						var p = (SqlQuery.Predicate.InSubQuery)element;
 						return
 							Find(p.Expr1,    find) ??
 							Find(p.SubQuery, find);
@@ -390,7 +384,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.InListPredicate:
 					{
-						SqlQuery.Predicate.InList p = (SqlQuery.Predicate.InList)element;
+						var p = (SqlQuery.Predicate.InList)element;
 						return
 							Find(p.Expr1,  find) ??
 							Find(p.Values, find);
@@ -398,7 +392,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SetExpression:
 					{
-						SqlQuery.SetExpression s = (SqlQuery.SetExpression)element;
+						var s = (SqlQuery.SetExpression)element;
 						return
 							Find(s.Column,     find) ??
 							Find(s.Expression, find);
@@ -406,7 +400,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SetClause:
 					{
-						SqlQuery.SetClause sc = (SqlQuery.SetClause)element;
+						var sc = (SqlQuery.SetClause)element;
 						return
 							Find(sc.Into,  find) ??
 							Find(sc.Items, find);
@@ -414,7 +408,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SelectClause:
 					{
-						SqlQuery.SelectClause sc = (SqlQuery.SelectClause)element;
+						var sc = (SqlQuery.SelectClause)element;
 						return
 							Find(sc.TakeValue, find) ??
 							Find(sc.SkipValue, find) ??
@@ -423,8 +417,7 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlQuery:
 					{
-						SqlQuery q = (SqlQuery)element;
-
+						var q = (SqlQuery)element;
 						return
 							Find(q.Select,  find) ??
 							(q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert ? Find(q.Set, find) : null) ??
@@ -461,8 +454,8 @@ namespace BLToolkit.Data.Sql
 			{
 				case QueryElementType.SqlFunction:
 					{
-						SqlFunction      func  = (SqlFunction)element;
-						ISqlExpression[] parms = Convert(func.Parameters, action);
+						var func  = (SqlFunction)element;
+						var parms = Convert(func.Parameters, action);
 
 						if (parms != null && !ReferenceEquals(parms, func.Parameters))
 							newElement = new SqlFunction(func.SystemType, func.Name, func.Precedence, parms);
@@ -472,8 +465,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlExpression:
 					{
-						SqlExpression    expr      = (SqlExpression)element;
-						ISqlExpression[] parameter = Convert(expr.Parameters, action);
+						var expr      = (SqlExpression)element;
+						var parameter = Convert(expr.Parameters, action);
 
 						if (parameter != null && !ReferenceEquals(parameter, expr.Parameters))
 							newElement = new SqlExpression(expr.SystemType, expr.Expr, expr.Precedence, parameter);
@@ -483,9 +476,9 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlBinaryExpression:
 					{
-						SqlBinaryExpression bexpr = (SqlBinaryExpression)element;
-						ISqlExpression      expr1 = (ISqlExpression)ConvertInternal(bexpr.Expr1, action);
-						ISqlExpression      expr2 = (ISqlExpression)ConvertInternal(bexpr.Expr2, action);
+						var bexpr = (SqlBinaryExpression)element;
+						var expr1 = (ISqlExpression)ConvertInternal(bexpr.Expr1, action);
+						var expr2 = (ISqlExpression)ConvertInternal(bexpr.Expr2, action);
 
 						if (expr1 != null && !ReferenceEquals(expr1, bexpr.Expr1) ||
 							expr2 != null && !ReferenceEquals(expr2, bexpr.Expr2))
@@ -496,14 +489,12 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlTable:
 					{
-						SqlTable table = (SqlTable)element;
-
-						SqlField[] fields1 = ToArray(table.Fields);
-						SqlField[] fields2 = Convert(fields1, action, delegate(SqlField f) { return new SqlField(f); });
-						List<Join> joins   = Convert(table.Joins, action, delegate(Join j) { return j.Clone();       });
-
-						bool fe = fields2 == null || ReferenceEquals(fields1,     fields2);
-						bool je = joins   == null || ReferenceEquals(table.Joins, joins);
+						var table   = (SqlTable)element;
+						var fields1 = ToArray(table.Fields);
+						var fields2 = Convert(fields1,     action, f => new SqlField(f));
+						var joins   = Convert(table.Joins, action, j => j.Clone());
+						var fe      = fields2 == null || ReferenceEquals(fields1,     fields2);
+						var je      = joins   == null || ReferenceEquals(table.Joins, joins);
 
 						if (!fe || !je)
 						{
@@ -511,9 +502,9 @@ namespace BLToolkit.Data.Sql
 							{
 								fields2 = fields1;
 
-								for (int i = 0; i < fields2.Length; i++)
+								for (var i = 0; i < fields2.Length; i++)
 								{
-									SqlField field = fields2[i];
+									var field = fields2[i];
 
 									fields2[i] = new SqlField(field);
 
@@ -531,8 +522,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.Join:
 					{
-						Join         join = (Join)element;
-						List<JoinOn> ons  = Convert(join.JoinOns, action);
+						var join = (Join)element;
+						var ons  = Convert(join.JoinOns, action);
 
 						if (ons != null && !ReferenceEquals(join.JoinOns, ons))
 							newElement = new Join(join.TableName, join.Alias, ons);
@@ -542,8 +533,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.Column:
 					{
-						SqlQuery.Column col  = (SqlQuery.Column)element;
-						ISqlExpression  expr = (ISqlExpression)ConvertInternal(col.Expression, action);
+						var col  = (SqlQuery.Column)element;
+						var expr = (ISqlExpression)ConvertInternal(col.Expression, action);
 
 						IQueryElement parent;
 						_visitedElements.TryGetValue(col.Parent, out parent);
@@ -556,9 +547,9 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.TableSource:
 					{
-						SqlQuery.TableSource       table  = (SqlQuery.TableSource)element;
-						ISqlTableSource            source = (ISqlTableSource)ConvertInternal(table.Source, action);
-						List<SqlQuery.JoinedTable> joins  = Convert(table.Joins, action);
+						var table  = (SqlQuery.TableSource)element;
+						var source = (ISqlTableSource)ConvertInternal(table.Source, action);
+						var joins  = Convert(table.Joins, action);
 
 						if (source != null && !ReferenceEquals(source, table.Source) ||
 							joins  != null && !ReferenceEquals(table.Joins, joins))
@@ -569,9 +560,9 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.JoinedTable:
 					{
-						SqlQuery.JoinedTable     join  = (SqlQuery.JoinedTable)element;
-						SqlQuery.TableSource     table = (SqlQuery.TableSource)    ConvertInternal(join.Table,     action);
-						SqlQuery.SearchCondition cond  = (SqlQuery.SearchCondition)ConvertInternal(join.Condition, action);
+						var join  = (SqlQuery.JoinedTable)element;
+						var table = (SqlQuery.TableSource)    ConvertInternal(join.Table,     action);
+						var cond  = (SqlQuery.SearchCondition)ConvertInternal(join.Condition, action);
 
 						if (table != null && !ReferenceEquals(table, join.Table) ||
 							cond  != null && !ReferenceEquals(cond,  join.Condition))
@@ -582,8 +573,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SearchCondition:
 					{
-						SqlQuery.SearchCondition sc    = (SqlQuery.SearchCondition)element;
-						List<SqlQuery.Condition> conds = Convert(sc.Conditions, action);
+						var sc    = (SqlQuery.SearchCondition)element;
+						var conds = Convert(sc.Conditions, action);
 
 						if (conds != null && !ReferenceEquals(sc.Conditions, conds))
 							newElement = new SqlQuery.SearchCondition(conds);
@@ -593,8 +584,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.Condition:
 					{
-						SqlQuery.Condition c = (SqlQuery.Condition)element;
-						ISqlPredicate      p = (ISqlPredicate)ConvertInternal(c.Predicate, action);
+						var c = (SqlQuery.Condition)element;
+						var p = (ISqlPredicate)ConvertInternal(c.Predicate, action);
 
 						if (p != null && !ReferenceEquals(c.Predicate, p))
 							newElement = new SqlQuery.Condition(c.IsNot, p, c.IsOr);
@@ -604,8 +595,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.ExprPredicate:
 					{
-						SqlQuery.Predicate.Expr p = (SqlQuery.Predicate.Expr)element;
-						ISqlExpression          e = (ISqlExpression)ConvertInternal(p.Expr1, action);
+						var p = (SqlQuery.Predicate.Expr)element;
+						var e = (ISqlExpression)ConvertInternal(p.Expr1, action);
 
 						if (e != null && !ReferenceEquals(p.Expr1, e))
 							newElement = new SqlQuery.Predicate.Expr(e, p.Precedence);
@@ -615,8 +606,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.NotExprPredicate:
 					{
-						SqlQuery.Predicate.NotExpr p = (SqlQuery.Predicate.NotExpr)element;
-						ISqlExpression             e = (ISqlExpression)ConvertInternal(p.Expr1, action);
+						var p = (SqlQuery.Predicate.NotExpr)element;
+						var e = (ISqlExpression)ConvertInternal(p.Expr1, action);
 
 						if (e != null && !ReferenceEquals(p.Expr1, e))
 							newElement = new SqlQuery.Predicate.NotExpr(e, p.IsNot, p.Precedence);
@@ -626,9 +617,9 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.ExprExprPredicate:
 					{
-						SqlQuery.Predicate.ExprExpr p  = (SqlQuery.Predicate.ExprExpr)element;
-						ISqlExpression              e1 = (ISqlExpression)ConvertInternal(p.Expr1, action);
-						ISqlExpression              e2 = (ISqlExpression)ConvertInternal(p.Expr2, action);
+						var p  = (SqlQuery.Predicate.ExprExpr)element;
+						var e1 = (ISqlExpression)ConvertInternal(p.Expr1, action);
+						var e2 = (ISqlExpression)ConvertInternal(p.Expr2, action);
 
 						if (e1 != null && !ReferenceEquals(p.Expr1, e1) || e2 != null && !ReferenceEquals(p.Expr2, e2))
 							newElement = new SqlQuery.Predicate.ExprExpr(e1 ?? p.Expr1, p.Operator, e2 ?? p.Expr2);
@@ -638,10 +629,10 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.LikePredicate:
 					{
-						SqlQuery.Predicate.Like p  = (SqlQuery.Predicate.Like)element;
-						ISqlExpression          e1 = (ISqlExpression)ConvertInternal(p.Expr1,  action);
-						ISqlExpression          e2 = (ISqlExpression)ConvertInternal(p.Expr2,  action);
-						ISqlExpression          es = (ISqlExpression)ConvertInternal(p.Escape, action);
+						var p  = (SqlQuery.Predicate.Like)element;
+						var e1 = (ISqlExpression)ConvertInternal(p.Expr1,  action);
+						var e2 = (ISqlExpression)ConvertInternal(p.Expr2,  action);
+						var es = (ISqlExpression)ConvertInternal(p.Escape, action);
 
 						if (e1 != null && !ReferenceEquals(p.Expr1, e1) ||
 							e2 != null && !ReferenceEquals(p.Expr2, e2) ||
@@ -653,10 +644,10 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.BetweenPredicate:
 					{
-						SqlQuery.Predicate.Between p = (SqlQuery.Predicate.Between)element;
-						ISqlExpression             e1 = (ISqlExpression)ConvertInternal(p.Expr1, action);
-						ISqlExpression             e2 = (ISqlExpression)ConvertInternal(p.Expr2, action);
-						ISqlExpression             e3 = (ISqlExpression)ConvertInternal(p.Expr3, action);
+						var p = (SqlQuery.Predicate.Between)element;
+						var e1 = (ISqlExpression)ConvertInternal(p.Expr1, action);
+						var e2 = (ISqlExpression)ConvertInternal(p.Expr2, action);
+						var e3 = (ISqlExpression)ConvertInternal(p.Expr3, action);
 
 						if (e1 != null && !ReferenceEquals(p.Expr1, e1) ||
 							e2 != null && !ReferenceEquals(p.Expr2, e2) ||
@@ -668,8 +659,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.IsNullPredicate:
 					{
-						SqlQuery.Predicate.IsNull p = (SqlQuery.Predicate.IsNull)element;
-						ISqlExpression            e = (ISqlExpression)ConvertInternal(p.Expr1, action);
+						var p = (SqlQuery.Predicate.IsNull)element;
+						var e = (ISqlExpression)ConvertInternal(p.Expr1, action);
 
 						if (e != null && !ReferenceEquals(p.Expr1, e))
 							newElement = new SqlQuery.Predicate.IsNull(e, p.IsNot);
@@ -677,11 +668,11 @@ namespace BLToolkit.Data.Sql
 						break;
 					}
 
-				case QueryElementType.InSubqueryPredicate:
+				case QueryElementType.InSubQueryPredicate:
 					{
-						SqlQuery.Predicate.InSubQuery p = (SqlQuery.Predicate.InSubQuery)element;
-						ISqlExpression                e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
-						SqlQuery                      q = (SqlQuery)ConvertInternal(p.SubQuery, action);
+						var p = (SqlQuery.Predicate.InSubQuery)element;
+						var e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
+						var q = (SqlQuery)ConvertInternal(p.SubQuery, action);
 
 						if (e != null && !ReferenceEquals(p.Expr1, e) || q != null && !ReferenceEquals(p.SubQuery, q))
 							newElement = new SqlQuery.Predicate.InSubQuery(e ?? p.Expr1, p.IsNot, q ?? p.SubQuery);
@@ -691,9 +682,9 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.InListPredicate:
 					{
-						SqlQuery.Predicate.InList p = (SqlQuery.Predicate.InList)element;
-						ISqlExpression            e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
-						List<ISqlExpression>      v = Convert(p.Values, action);
+						var p = (SqlQuery.Predicate.InList)element;
+						var e = (ISqlExpression)ConvertInternal(p.Expr1,    action);
+						var v = Convert(p.Values, action);
 
 						if (e != null && !ReferenceEquals(p.Expr1, e) || v != null && !ReferenceEquals(p.Values, v))
 							newElement = new SqlQuery.Predicate.InList(e ?? p.Expr1, p.IsNot, v ?? p.Values);
@@ -703,8 +694,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.FuncLikePredicate:
 					{
-						SqlQuery.Predicate.FuncLike p = (SqlQuery.Predicate.FuncLike)element;
-						SqlFunction                 f = (SqlFunction)ConvertInternal(p.Function, action);
+						var p = (SqlQuery.Predicate.FuncLike)element;
+						var f = (SqlFunction)ConvertInternal(p.Function, action);
 
 						if (f != null && !ReferenceEquals(p.Function, f))
 							newElement = new SqlQuery.Predicate.FuncLike(f);
@@ -714,9 +705,9 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SetExpression:
 					{
-						SqlQuery.SetExpression s = (SqlQuery.SetExpression)element;
-						ISqlExpression         c = (ISqlExpression)ConvertInternal(s.Column,     action);
-						ISqlExpression         e = (ISqlExpression)ConvertInternal(s.Expression, action);
+						var s = (SqlQuery.SetExpression)element;
+						var c = (ISqlExpression)ConvertInternal(s.Column,     action);
+						var e = (ISqlExpression)ConvertInternal(s.Expression, action);
 
 						if (c != null && !ReferenceEquals(s.Column, c) || e != null && !ReferenceEquals(s.Expression, e))
 							newElement = new SqlQuery.SetExpression(c ?? s.Column, e ?? s.Expression);
@@ -726,13 +717,13 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SetClause:
 					{
-						SqlQuery.SetClause           s = (SqlQuery.SetClause)element;
-						SqlTable                     t = s.Into != null ? (SqlTable)ConvertInternal(s.Into, action) : null;
-						List<SqlQuery.SetExpression> i = Convert(s.Items, action);
+						var s = (SqlQuery.SetClause)element;
+						var t = s.Into != null ? (SqlTable)ConvertInternal(s.Into, action) : null;
+						var i = Convert(s.Items, action);
 
 						if (t != null && !ReferenceEquals(s.Into, t) || i != null && !ReferenceEquals(s.Items, i))
 						{
-							SqlQuery.SetClause sc = new SqlQuery.SetClause();
+							var sc = new SqlQuery.SetClause();
 							sc.Into = t ?? sc.Into;
 							sc.Items.AddRange(i ?? s.Items);
 							sc.WithIdentity = s.WithIdentity;
@@ -745,10 +736,10 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SelectClause:
 					{
-						SqlQuery.SelectClause sc   = (SqlQuery.SelectClause)element;
-						List<SqlQuery.Column> cols = Convert(sc.Columns, action);
-						ISqlExpression        take = (ISqlExpression)ConvertInternal(sc.TakeValue, action);
-						ISqlExpression        skip = (ISqlExpression)ConvertInternal(sc.SkipValue, action);
+						var sc   = (SqlQuery.SelectClause)element;
+						var cols = Convert(sc.Columns, action);
+						var take = (ISqlExpression)ConvertInternal(sc.TakeValue, action);
+						var skip = (ISqlExpression)ConvertInternal(sc.SkipValue, action);
 
 						IQueryElement parent;
 						_visitedElements.TryGetValue(sc.SqlQuery, out parent);
@@ -767,8 +758,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.FromClause:
 					{
-						SqlQuery.FromClause        fc   = (SqlQuery.FromClause)element;
-						List<SqlQuery.TableSource> ts = Convert(fc.Tables, action);
+						var fc   = (SqlQuery.FromClause)element;
+						var ts = Convert(fc.Tables, action);
 
 						IQueryElement parent;
 						_visitedElements.TryGetValue(fc.SqlQuery, out parent);
@@ -784,8 +775,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.WhereClause:
 					{
-						SqlQuery.WhereClause     wc   = (SqlQuery.WhereClause)element;
-						SqlQuery.SearchCondition cond = (SqlQuery.SearchCondition)ConvertInternal(wc.SearchCondition, action);
+						var wc   = (SqlQuery.WhereClause)element;
+						var cond = (SqlQuery.SearchCondition)ConvertInternal(wc.SearchCondition, action);
 
 						IQueryElement parent;
 						_visitedElements.TryGetValue(wc.SqlQuery, out parent);
@@ -801,8 +792,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.GroupByClause:
 					{
-						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)element;
-						List<ISqlExpression>   es = Convert(gc.Items, action);
+						var gc = (SqlQuery.GroupByClause)element;
+						var es = Convert(gc.Items, action);
 
 						IQueryElement parent;
 						_visitedElements.TryGetValue(gc.SqlQuery, out parent);
@@ -818,8 +809,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.OrderByClause:
 					{
-						SqlQuery.OrderByClause     oc = (SqlQuery.OrderByClause)element;
-						List<SqlQuery.OrderByItem> es = Convert(oc.Items, action);
+						var oc = (SqlQuery.OrderByClause)element;
+						var es = Convert(oc.Items, action);
 
 						IQueryElement parent;
 						_visitedElements.TryGetValue(oc.SqlQuery, out parent);
@@ -835,8 +826,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.OrderByItem:
 					{
-						SqlQuery.OrderByItem i = (SqlQuery.OrderByItem)element;
-						ISqlExpression       e = (ISqlExpression)ConvertInternal(i.Expression, action);
+						var i = (SqlQuery.OrderByItem)element;
+						var e = (ISqlExpression)ConvertInternal(i.Expression, action);
 
 						if (e != null && !ReferenceEquals(i.Expression, e))
 							newElement = new SqlQuery.OrderByItem(e, i.IsDescending);
@@ -846,8 +837,8 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.Union:
 					{
-						SqlQuery.Union u = (SqlQuery.Union)element;
-						SqlQuery       q = (SqlQuery)ConvertInternal(u.SqlQuery, action);
+						var u = (SqlQuery.Union)element;
+						var q = (SqlQuery)ConvertInternal(u.SqlQuery, action);
 
 						if (q != null && !ReferenceEquals(u.SqlQuery, q))
 							newElement = new SqlQuery.Union(q, u.IsAll);
@@ -857,16 +848,16 @@ namespace BLToolkit.Data.Sql
 
 				case QueryElementType.SqlQuery:
 					{
-						SqlQuery q = (SqlQuery)element;
+						var q = (SqlQuery)element;
 						IQueryElement parent = null;
 
-						bool doConvert = q.ParentSql != null && !_visitedElements.TryGetValue(q.ParentSql, out parent);
+						var doConvert = q.ParentSql != null && !_visitedElements.TryGetValue(q.ParentSql, out parent);
 
 						if (!doConvert)
 						{
-							doConvert = null != Find(q, delegate(IQueryElement e)
+							doConvert = null != Find(q, e =>
 							{
-								IQueryElement ret = action(e);
+								var ret = action(e);
 
 								if (ret != null && !ReferenceEquals(e, ret))
 								{
@@ -881,22 +872,22 @@ namespace BLToolkit.Data.Sql
 						if (!doConvert)
 							break;
 
-						SqlQuery nq = new SqlQuery { QueryType = q.QueryType };
+						var nq = new SqlQuery { QueryType = q.QueryType };
 
 						_visitedElements.Add(q, nq);
 
-						SqlQuery.FromClause    fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
-						SqlQuery.SelectClause  sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
-						SqlQuery.SetClause     tc = q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert ? ((SqlQuery.SetClause)ConvertInternal(q.Set, action) ?? q.Set) : null;
-						SqlQuery.WhereClause   wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   action) ?? q.Where;
-						SqlQuery.GroupByClause gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, action) ?? q.GroupBy;
-						SqlQuery.WhereClause   hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  action) ?? q.Having;
-						SqlQuery.OrderByClause oc = (SqlQuery.OrderByClause)ConvertInternal(q.OrderBy, action) ?? q.OrderBy;
-						List<SqlQuery.Union>   us = q.HasUnion ? Convert(q.Unions, action) : q.Unions;
+						var fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
+						var sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
+						var tc = q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert ? ((SqlQuery.SetClause)ConvertInternal(q.Set, action) ?? q.Set) : null;
+						var wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   action) ?? q.Where;
+						var gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, action) ?? q.GroupBy;
+						var hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  action) ?? q.Having;
+						var oc = (SqlQuery.OrderByClause)ConvertInternal(q.OrderBy, action) ?? q.OrderBy;
+						var us = q.HasUnion ? Convert(q.Unions, action) : q.Unions;
 
-						List<SqlParameter> ps = new List<SqlParameter>(q.Parameters.Count);
+						var ps = new List<SqlParameter>(q.Parameters.Count);
 
-						foreach (SqlParameter p in q.Parameters)
+						foreach (var p in q.Parameters)
 						{
 							IQueryElement e;
 
@@ -926,10 +917,10 @@ namespace BLToolkit.Data.Sql
 
 		static TE[] ToArray<TK,TE>(IDictionary<TK,TE> dic)
 		{
-			TE[] es = new TE[dic.Count];
-			int  i  = 0;
+			var es = new TE[dic.Count];
+			var i  = 0;
 
-			foreach (TE e in dic.Values)
+			foreach (var e in dic.Values)
 				es[i++] = e;
 
 			return es;
@@ -948,10 +939,10 @@ namespace BLToolkit.Data.Sql
 		{
 			T[] arr2 = null;
 
-			for (int i = 0; i < arr1.Length; i++)
+			for (var i = 0; i < arr1.Length; i++)
 			{
-				T elem1 = arr1[i];
-				T elem2 = (T)ConvertInternal(elem1, action);
+				var elem1 = arr1[i];
+				var elem2 = (T)ConvertInternal(elem1, action);
 
 				if (elem2 != null && !ReferenceEquals(elem1, elem2))
 				{
@@ -959,7 +950,7 @@ namespace BLToolkit.Data.Sql
 					{
 						arr2 = new T[arr1.Length];
 
-						for (int j = 0; j < i; j++)
+						for (var j = 0; j < i; j++)
 							arr2[j] = clone == null ? arr1[j] : clone(arr1[j]);
 					}
 
@@ -983,10 +974,10 @@ namespace BLToolkit.Data.Sql
 		{
 			List<T> list2 = null;
 
-			for (int i = 0; i < list1.Count; i++)
+			for (var i = 0; i < list1.Count; i++)
 			{
-				T elem1 = list1[i];
-				T elem2 = (T)ConvertInternal(elem1, action);
+				var elem1 = list1[i];
+				var elem2 = (T)ConvertInternal(elem1, action);
 
 				if (elem2 != null && !ReferenceEquals(elem1, elem2))
 				{
@@ -994,7 +985,7 @@ namespace BLToolkit.Data.Sql
 					{
 						list2 = new List<T>(list1.Count);
 
-						for (int j = 0; j < i; j++)
+						for (var j = 0; j < i; j++)
 							list2.Add(clone == null ? list1[j] : clone(list1[j]));
 					}
 

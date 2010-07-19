@@ -30,10 +30,8 @@ namespace BLToolkit.Mapping
 			_complexMemberAccessor = mapMemberInfo.ComplexMemberAccessor;
 			_mappingSchema         = mapMemberInfo.MappingSchema;
 
-#if FW3
 			if (_storage != null)
 				_memberAccessor = ExprMemberAccessor.GetMemberAccessor(_memberAccessor.TypeAccessor, _storage);
-#endif
 		}
 
 		internal static MemberMapper CreateMemberMapper(MapMemberInfo mi)
@@ -143,9 +141,7 @@ namespace BLToolkit.Mapping
 		public virtual Decimal  GetDecimal (object o) { return _memberAccessor.GetDecimal (o); }
 		public virtual Guid     GetGuid    (object o) { return _memberAccessor.GetGuid    (o); }
 		public virtual DateTime GetDateTime(object o) { return _memberAccessor.GetDateTime(o); }
-#if FW3
 		public virtual DateTimeOffset GetDateTimeOffset(object o) { return _memberAccessor.GetDateTimeOffset(o); }
-#endif
 
 		// Nullable type getters.
 		//
@@ -170,9 +166,7 @@ namespace BLToolkit.Mapping
 		public virtual Decimal?  GetNullableDecimal (object o) { return _memberAccessor.GetNullableDecimal (o); }
 		public virtual Guid?     GetNullableGuid    (object o) { return _memberAccessor.GetNullableGuid    (o); }
 		public virtual DateTime? GetNullableDateTime(object o) { return _memberAccessor.GetNullableDateTime(o); }
-#if FW3
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o) { return _memberAccessor.GetNullableDateTimeOffset(o); }
-#endif
 
 		// SQL type getters.
 		//
@@ -219,9 +213,7 @@ namespace BLToolkit.Mapping
 		public virtual void SetDecimal (object o, Decimal  value) { _memberAccessor.SetDecimal (o, value); }
 		public virtual void SetGuid    (object o, Guid     value) { _memberAccessor.SetGuid    (o, value); }
 		public virtual void SetDateTime(object o, DateTime value) { _memberAccessor.SetDateTime(o, value); }
-#if FW3
 		public virtual void SetDateTimeOffset(object o, DateTimeOffset value) { _memberAccessor.SetDateTimeOffset(o, value); }
-#endif
 
 		// Nullable type setters.
 		//
@@ -246,9 +238,7 @@ namespace BLToolkit.Mapping
 		public virtual void SetNullableDecimal (object o, Decimal?  value) { _memberAccessor.SetNullableDecimal (o, value); }
 		public virtual void SetNullableGuid    (object o, Guid?     value) { _memberAccessor.SetNullableGuid    (o, value); }
 		public virtual void SetNullableDateTime(object o, DateTime? value) { _memberAccessor.SetNullableDateTime(o, value); }
-#if FW3
 		public virtual void SetNullableDateTimeOffset(object o, DateTimeOffset? value) { _memberAccessor.SetNullableDateTimeOffset(o, value); }
-#endif
 
 		// SQL type setters.
 		//
@@ -341,9 +331,7 @@ namespace BLToolkit.Mapping
 			public override Decimal  GetDecimal (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultDecimalNullValue:  _mapper.GetDecimal (obj); }
 			public override Guid     GetGuid    (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultGuidNullValue:     _mapper.GetGuid    (obj); }
 			public override DateTime GetDateTime(object o) { var obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultDateTimeNullValue: _mapper.GetDateTime(obj); }
-#if FW3
 			public override DateTimeOffset GetDateTimeOffset(object o) { var obj = _memberAccessor.GetValue(o); return obj == null? MappingSchema.DefaultDateTimeOffsetNullValue: _mapper.GetDateTimeOffset(obj); }
-#endif
 
 			// Nullable type getters.
 			//
@@ -364,9 +352,7 @@ namespace BLToolkit.Mapping
 			public override Decimal?  GetNullableDecimal (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDecimal (obj); }
 			public override Guid?     GetNullableGuid    (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableGuid    (obj); }
 			public override DateTime? GetNullableDateTime(object o) { var obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDateTime(obj); }
-#if FW3
 			public override DateTimeOffset? GetNullableDateTimeOffset(object o) { var obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDateTimeOffset(obj); }
-#endif
 
 			// SQL type getters.
 			//
@@ -412,9 +398,7 @@ namespace BLToolkit.Mapping
 			public override void SetDecimal (object o, Decimal  value) { var obj = GetObject(o); if (obj != null) _mapper.SetDecimal (obj, value); }
 			public override void SetGuid    (object o, Guid     value) { var obj = GetObject(o); if (obj != null) _mapper.SetGuid    (obj, value); }
 			public override void SetDateTime(object o, DateTime value) { var obj = GetObject(o); if (obj != null) _mapper.SetDateTime(obj, value); }
-#if FW3
 			public override void SetDateTimeOffset(object o, DateTimeOffset value) { var obj = GetObject(o); if (obj != null) _mapper.SetDateTimeOffset(obj, value); }
-#endif
 
 			// Nullable type setters.
 			//
@@ -435,9 +419,7 @@ namespace BLToolkit.Mapping
 			public override void SetNullableDecimal (object o, Decimal?  value) { var obj = GetObject(o); if (obj != null) _mapper.SetNullableDecimal (obj, value); }
 			public override void SetNullableGuid    (object o, Guid?     value) { var obj = GetObject(o); if (obj != null) _mapper.SetNullableGuid    (obj, value); }
 			public override void SetNullableDateTime(object o, DateTime? value) { var obj = GetObject(o); if (obj != null) _mapper.SetNullableDateTime(obj, value); }
-#if FW3
 			public override void SetNullableDateTimeOffset(object o, DateTimeOffset? value) { var obj = GetObject(o); if (obj != null) _mapper.SetNullableDateTimeOffset(obj, value); }
-#endif
 
 			// SQL type setters.
 			//
@@ -934,9 +916,7 @@ namespace BLToolkit.Mapping
 				else              return n? new StringMapper.Nullable()           : new StringMapper();
 
 			if (type == typeof(DateTime))    return n? new DateTimeMapper.Nullable()   : new DateTimeMapper();
-#if FW3
 			if (type == typeof(DateTimeOffset)) return n? new DateTimeOffsetMapper.Nullable()   : new DateTimeOffsetMapper();
-#endif
 			if (type == typeof(Decimal))     return n? new DecimalMapper.Nullable()    : new DecimalMapper();
 			if (type == typeof(Guid))        return n? new GuidMapper.Nullable()       : new GuidMapper();
 			if (type == typeof(Stream))      return n? new StreamMapper.Nullable()     : new StreamMapper();
@@ -1033,7 +1013,6 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-#if FW3
 		class DateTimeOffsetMapper : MemberMapper
 		{
 			DateTimeOffset _nullValue;
@@ -1069,7 +1048,6 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
-#endif
 
 		class DecimalMapper : MemberMapper
 		{

@@ -170,9 +170,8 @@ namespace BLToolkit.Reflection
 		public virtual Guid     GetGuid    (object o) { return (Guid)    GetValue(o); }
 		public virtual DateTime GetDateTime(object o) { return (DateTime)GetValue(o); }
 		public virtual TimeSpan GetTimeSpan(object o) { return (TimeSpan)GetValue(o); }
-#if FW3
 		public virtual DateTimeOffset GetDateTimeOffset(object o) { return (DateTimeOffset)GetValue(o); }
-#endif
+
 		// Nullable types getters.
 		//
 		[CLSCompliant(false)]
@@ -197,9 +196,7 @@ namespace BLToolkit.Reflection
 		public virtual Guid?     GetNullableGuid    (object o) { return (Guid?)    GetValue(o); }
 		public virtual DateTime? GetNullableDateTime(object o) { return (DateTime?)GetValue(o); }
 		public virtual TimeSpan? GetNullableTimeSpan(object o) { return (TimeSpan?)GetValue(o); }
-#if FW3
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o) { return (DateTimeOffset?)GetValue(o); }
-#endif
 
 		// SQL type getters.
 		//
@@ -240,9 +237,7 @@ namespace BLToolkit.Reflection
 		public virtual void    SetGuid    (object o, Guid     value) { SetValue(o, value); }
 		public virtual void    SetDateTime(object o, DateTime value) { SetValue(o, value); }
 		public virtual void    SetTimeSpan(object o, TimeSpan value) { SetValue(o, value); }
-#if FW3
 		public virtual void    SetDateTimeOffset(object o, DateTimeOffset value) { SetValue(o, value); }
-#endif
 
 		// Simple type setters.
 		//
@@ -268,9 +263,7 @@ namespace BLToolkit.Reflection
 		public virtual void    SetNullableGuid    (object o, Guid?     value) { SetValue(o, value); }
 		public virtual void    SetNullableDateTime(object o, DateTime? value) { SetValue(o, value); }
 		public virtual void    SetNullableTimeSpan(object o, TimeSpan? value) { SetValue(o, value); }
-#if FW3
 		public virtual void    SetNullableDateTimeOffset(object o, DateTimeOffset? value) { SetValue(o, value); }
-#endif
 
 		// SQL type setters.
 		//

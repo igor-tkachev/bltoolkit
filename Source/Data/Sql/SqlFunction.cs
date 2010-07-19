@@ -5,7 +5,6 @@ using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
-	[Serializable]
 	public class SqlFunction : ISqlTableSource
 	{
 		[Obsolete]
@@ -31,7 +30,7 @@ namespace BLToolkit.Data.Sql
 
 			if (parameters == null) throw new ArgumentNullException("parameters");
 
-			foreach (ISqlExpression p in parameters)
+			foreach (var p in parameters)
 				if (p == null) throw new ArgumentNullException("parameters");
 
 			_systemType = systemType;
@@ -70,7 +69,7 @@ namespace BLToolkit.Data.Sql
 		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 		{
-			for (int i = 0; i < _parameters.Length; i++)
+			for (var i = 0; i < _parameters.Length; i++)
 				_parameters[i] = _parameters[i].Walk(skipColumns, action);
 
 			return action(this);
@@ -85,12 +84,12 @@ namespace BLToolkit.Data.Sql
 			if (this == other)
 				return true;
 
-			SqlFunction func = other as SqlFunction;
+			var func = other as SqlFunction;
 
 			if (func == null || _name != func._name || _parameters.Length != func._parameters.Length && _systemType != func._systemType)
 				return false;
 
-			for (int i = 0; i < _parameters.Length; i++)
+			for (var i = 0; i < _parameters.Length; i++)
 				if (!_parameters[i].Equals(func._parameters[i]))
 					return false;
 
@@ -101,8 +100,8 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlTableSource Members
 
-		private int _sourceID;
-		public  int  SourceID { get { return _sourceID; } }
+		readonly int _sourceID;
+		public   int  SourceID { get { return _sourceID; } }
 
 		SqlField _all;
 		SqlField  ISqlTableSource.All
@@ -150,7 +149,7 @@ namespace BLToolkit.Data.Sql
 					_systemType,
 					_name,
 					_precedence,
-					Array.ConvertAll<ISqlExpression,ISqlExpression>(_parameters, delegate(ISqlExpression e) { return (ISqlExpression)e.Clone(objectTree, doClone); })));
+					Array.ConvertAll(_parameters, e => (ISqlExpression) e.Clone(objectTree, doClone))));
 			}
 
 			return clone;
@@ -168,7 +167,7 @@ namespace BLToolkit.Data.Sql
 				.Append(Name)
 				.Append("(");
 
-			foreach (ISqlExpression p in Parameters)
+			foreach (var p in Parameters)
 			{
 				p.ToString(sb, dic);
 				sb.Append(", ");

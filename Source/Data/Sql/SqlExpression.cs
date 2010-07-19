@@ -4,7 +4,6 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
-	[Serializable]
 	public class SqlExpression : ISqlExpression
 	{
 		public SqlExpression(Type systemType, string expr, int precedence, params ISqlExpression[] parameters)
@@ -14,10 +13,10 @@ namespace BLToolkit.Data.Sql
 			foreach (var value in parameters)
 				if (value == null) throw new ArgumentNullException("parameters");
 
-			_systemType = systemType;
-			_expr       = expr;
-			_precedence = precedence;
-			_parameters     = parameters;
+			SystemType = systemType;
+			Expr       = expr;
+			Precedence = precedence;
+			Parameters = parameters;
 		}
 
 		public SqlExpression(string expr, int precedence, params ISqlExpression[] parameters)
@@ -35,10 +34,10 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
-		readonly Type             _systemType; public Type             SystemType { get { return _systemType; } }
-		readonly string           _expr;       public string           Expr       { get { return _expr;       } }
-		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
-		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters;     } }
+		public Type             SystemType { get; private set; }
+		public string           Expr       { get; private set; }
+		public int              Precedence { get; private set; }
+		public ISqlExpression[] Parameters { get; private set; }
 
 		#region Overrides
 
@@ -58,8 +57,8 @@ namespace BLToolkit.Data.Sql
 		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
-			for (var i = 0; i < _parameters.Length; i++)
-				_parameters[i] = _parameters[i].Walk(skipColumns, func);
+			for (var i = 0; i < Parameters.Length; i++)
+				Parameters[i] = Parameters[i].Walk(skipColumns, func);
 
 			return func(this);
 		}
@@ -75,11 +74,11 @@ namespace BLToolkit.Data.Sql
 
 			var expr = other as SqlExpression;
 
-			if (expr == null || _systemType != expr._systemType || _expr != expr._expr || _parameters.Length != expr._parameters.Length)
+			if (expr == null || SystemType != expr.SystemType || Expr != expr.Expr || Parameters.Length != expr.Parameters.Length)
 				return false;
 
-			for (var i = 0; i < _parameters.Length; i++)
-				if (!_parameters[i].Equals(expr._parameters[i]))
+			for (var i = 0; i < Parameters.Length; i++)
+				if (!Parameters[i].Equals(expr.Parameters[i]))
 					return false;
 
 			return true;
@@ -112,10 +111,10 @@ namespace BLToolkit.Data.Sql
 			if (!objectTree.TryGetValue(this, out clone))
 			{
 				objectTree.Add(this, clone = new SqlExpression(
-					_systemType,
-					_expr,
-					_precedence,
-					Array.ConvertAll(_parameters, e => (ISqlExpression)e.Clone(objectTree, doClone))));
+					SystemType,
+					Expr,
+					Precedence,
+					Array.ConvertAll(Parameters, e => (ISqlExpression)e.Clone(objectTree, doClone))));
 			}
 
 			return clone;

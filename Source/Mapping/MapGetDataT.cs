@@ -44,9 +44,7 @@ namespace BLToolkit.Mapping
 			if (t == typeof(Char))         return (MB<T>)(object)(new C());
 			if (t == typeof(Guid))         return (MB<T>)(object)(new G());
 			if (t == typeof(DateTime))     return (MB<T>)(object)(new DT());
-#if FW3
 			if (t == typeof(DateTimeOffset)) return (MB<T>)(object)(new DTO());
-#endif
 
 			// Enums.
 			//
@@ -86,9 +84,7 @@ namespace BLToolkit.Mapping
 			if (t == typeof(Char?))        return (MB<T>)(object)(new NC());
 			if (t == typeof(Guid?))        return (MB<T>)(object)(new NG());
 			if (t == typeof(DateTime?))    return (MB<T>)(object)(new NDT());
-#if FW3
 			if (t == typeof(DateTimeOffset?)) return (MB<T>)(object)(new NDTO());
-#endif
 
 			// Nullable Enums.
 			//
@@ -154,9 +150,7 @@ namespace BLToolkit.Mapping
 		sealed class C           : MB<Char>        { public override Char        From(IMapDataSource s, object o, int i) { return s.GetChar        (o, i); } }
 		sealed class G           : MB<Guid>        { public override Guid        From(IMapDataSource s, object o, int i) { return s.GetGuid        (o, i); } }
 		sealed class DT          : MB<DateTime>    { public override DateTime    From(IMapDataSource s, object o, int i) { return s.GetDateTime    (o, i); } }
-#if FW3
 		sealed class DTO         : MB<DateTimeOffset> { public override DateTimeOffset From(IMapDataSource s, object o, int i) { return s.GetDateTimeOffset    (o, i); } }
-#endif
 		// Enums.
 		//
 		sealed class EI8<E>      : MB<E>           { public override E           From(IMapDataSource s, object o, int i) { return (E)(object)s.GetSByte   (o, i); } }
@@ -190,9 +184,8 @@ namespace BLToolkit.Mapping
 		sealed class NC          : MB<Char?>       { public override Char?       From(IMapDataSource s, object o, int i) { return s.GetNullableChar       (o, i); } }
 		sealed class NG          : MB<Guid?>       { public override Guid?       From(IMapDataSource s, object o, int i) { return s.GetNullableGuid       (o, i); } }
 		sealed class NDT         : MB<DateTime?>   { public override DateTime?   From(IMapDataSource s, object o, int i) { return s.GetNullableDateTime   (o, i); } }
-#if FW3
 		sealed class NDTO        : MB<DateTimeOffset?> { public override DateTimeOffset? From(IMapDataSource s, object o, int i) { return s.GetNullableDateTimeOffset    (o, i); } }
-#endif
+
 		// Nullable Enums.
 		//
 		sealed class NEI8<E>     : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetSByte (o, i); } }

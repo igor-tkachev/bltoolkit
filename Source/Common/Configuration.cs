@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Data.SqlTypes;
 
 namespace BLToolkit.Common
 {
@@ -24,17 +22,12 @@ namespace BLToolkit.Common
 			set { _checkNullReturnIfNull = value; }
 		}
 
-		private static bool _trimOnMapping;
 		/// <summary>
 		/// Controls global trimming behaviour of mapper. Specifies whether trailing spaces
 		/// should be trimmed when mapping from one entity to another. Default is: false. 
 		/// To specify trimming behaviour other than global, please user <see cref="TrimmableAttribute"/>.
 		/// </summary>
-		public  static bool  TrimOnMapping
-		{
-			get { return _trimOnMapping;  }
-			set { _trimOnMapping = value; }
-		}
+		public static bool TrimOnMapping { get; set; }
 
 		private static bool _trimDictionaryKey = true;
 		/// <summary>
@@ -60,7 +53,6 @@ namespace BLToolkit.Common
 			set { _notifyOnEqualSet = value; }
 		}
 
-		private static bool _filterOutBaseEqualAttributes;
 		/// <summary>
 		/// Controls whether attributes specified on base types should be always added to list of attributes
 		/// when scanning hierarchy tree or they should be compared to attributes found on derived classes
@@ -69,11 +61,7 @@ namespace BLToolkit.Common
 		/// use only when side effects are noticed with attribute being present on derived and base classes. 
 		/// For builder attributes use provided attribute compatibility mechanism.
 		/// </summary>
-		public static bool FilterOutBaseEqualAttributes
-		{
-			get { return _filterOutBaseEqualAttributes; }
-			set { _filterOutBaseEqualAttributes = value; }
-		}
+		public static bool FilterOutBaseEqualAttributes { get; set; }
 
 		private static bool _openNewConnectionToDiscoverParameters = true;
 		/// <summary>
@@ -90,12 +78,10 @@ namespace BLToolkit.Common
 			set { _openNewConnectionToDiscoverParameters = value; }
 		}
 
-#if FW3
 		public static class Linq
 		{
 			public static bool PreloadGroups { get; set; }
 		}
-#endif
 
 		public static class NullableValues
 		{
@@ -117,9 +103,7 @@ namespace BLToolkit.Common
 			public static Char           Char           = '\x0';
 			public static DateTime       DateTime       = DateTime.MinValue;
 			public static TimeSpan       TimeSpan       = TimeSpan.MinValue;
-#if FW3
 			public static DateTimeOffset DateTimeOffset = DateTimeOffset.MinValue;
-#endif
 			public static Decimal        Decimal        = 0m;
 			public static Guid           Guid           = Guid.Empty;
 			public static String         String         = string.Empty;

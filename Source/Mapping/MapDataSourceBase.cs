@@ -41,9 +41,7 @@ namespace BLToolkit.Mapping
 		public virtual  Decimal  GetDecimal  (object o, int index) { return Map.DefaultSchema.ConvertToDecimal (GetValue(o, index)); }
 		public virtual  Guid     GetGuid     (object o, int index) { return Map.DefaultSchema.ConvertToGuid    (GetValue(o, index)); }
 		public virtual  DateTime GetDateTime (object o, int index) { return Map.DefaultSchema.ConvertToDateTime(GetValue(o, index)); }
-#if FW3
 		public virtual DateTimeOffset GetDateTimeOffset(object o, int index) { return Map.DefaultSchema.ConvertToDateTimeOffset(GetValue(o, index)); }
-#endif
 
 		// Nullable type getters.
 		//
@@ -68,9 +66,7 @@ namespace BLToolkit.Mapping
 		public virtual Decimal?  GetNullableDecimal (object o, int index) { return Map.DefaultSchema.ConvertToNullableDecimal (GetValue(o, index)); }
 		public virtual Guid?     GetNullableGuid    (object o, int index) { return Map.DefaultSchema.ConvertToNullableGuid    (GetValue(o, index)); }
 		public virtual DateTime? GetNullableDateTime(object o, int index) { return Map.DefaultSchema.ConvertToNullableDateTime(GetValue(o, index)); }
-#if FW3
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return Map.DefaultSchema.ConvertToNullableDateTimeOffset(GetValue(o, index)); }
-#endif
 
 		// SQL type getters.
 		//

@@ -33,6 +33,11 @@ namespace BLToolkit.ServiceModel
 			return Channel.ExecuteNonQuery(query);
 		}
 
+		public object ExecuteScalar(LinqServiceQuery query)
+		{
+			return Channel.ExecuteScalar(query);
+		}
+
 		#endregion
 
 		#region IDisposable Members
