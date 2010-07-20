@@ -48,13 +48,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataModel.generated.cs">
+    <Compile Include="MSSqlDataModel.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>DataModel.tt</DependentUpon>
+      <DependentUpon>MSSqlDataModel.tt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PostgreSQLDataModel.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PostgreSQLDataModel.tt</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SybaseDataModel.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SybaseDataModel.tt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Templates\BLT4Toolkit.ttinclude">
@@ -66,15 +78,29 @@
     <None Include="..\..\Source\Templates\MSSQL.ttinclude">
       <Link>MSSQL.ttinclude</Link>
     </None>
+    <None Include="..\..\Source\Templates\PostgreSQL.ttinclude">
+      <Link>PostgreSQL.ttinclude</Link>
+    </None>
     <None Include="..\..\Source\Templates\Sybase.ttinclude">
       <Link>Sybase.ttinclude</Link>
     </None>
     <None Include="..\..\Source\Templates\WCFAttributes.ttinclude">
       <Link>WCFAttributes.ttinclude</Link>
     </None>
-    <None Include="DataModel.tt">
+    <None Include="PostgreSQLDataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DataModel.generated.cs</LastGenOutput>
+      <LastGenOutput>PostgreSQLDataModel.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Templates.PostgreSQL</CustomToolNamespace>
+    </None>
+    <None Include="SybaseDataModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SybaseDataModel.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Templates.Sybase</CustomToolNamespace>
+    </None>
+    <None Include="MSSqlDataModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MSSqlDataModel.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Templates.MSSql</CustomToolNamespace>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,15 @@
+﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
+<#@ output extension=".generated.cs" #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLToolkit.ttinclude"   #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLT4Toolkit.ttinclude" #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\PostgreSql.ttinclude"  #>
+<#
+	ConnectionString     = "Server=DBHost;Port=5432;Database=BLToolkitData;User Id=postgres;Password=TestPassword;";
+	DataProviderAssembly = @"E:\Projects\SVN\BLToolkit\trunk\Redist\PostgreSql\Npgsql.dll";
+
+	//Assemblies.Add("Mono.Security", @"E:\Projects\SVN\BLToolkit\trunk\Redist\PostgreSql\Mono.Security.dll");
+
+	System.Reflection.Assembly.LoadFile(@"E:\Projects\SVN\BLToolkit\trunk\Redist\PostgreSql\Mono.Security.dll");
+
+	GenerateModel();
+#>

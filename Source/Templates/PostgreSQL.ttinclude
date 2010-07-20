@@ -1,0 +1,260 @@
+﻿<#
+	ConnectionType = "Npgsql.NpgsqlConnection";
+#><#+
+private void LoadServerMetadata()
+{
+	var tables  = CreateList(new { ID = 0, Table  = new Table()  });
+	var columns = CreateList(new { ID = 0, Column = new Column() });
+
+	using (var conn = GetConnection())
+	using (var cmd  = conn.CreateCommand())
+	{
+		// Load tables & vies.
+		//
+		cmd.CommandText = @"
+			SELECT 
+				pg_class.oid,
+				pg_user.usename,
+				pg_class.relname,
+				pg_class.relkind
+			FROM 
+				pg_class
+				INNER JOIN pg_user ON (pg_class.relowner = pg_user.usesysid)
+				INNER JOIN pg_namespace ON (pg_class.relnamespace = pg_namespace.oid)
+			WHERE
+				pg_class.relkind IN ('r','v')
+				AND pg_namespace.nspname NOT IN ('pg_catalog','information_schema')";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var t = new
+				{
+					ID    = Convert.ToInt32(rd[0]),
+					Table = new Table
+					{
+						Owner         = rd[1].ToString(),
+						TableName     = rd[2].ToString(),
+						ClassName     = rd[2].ToString(),
+						IsView        = rd[3].ToString() == "v",
+						BaseClassName = BaseEntityClass,
+					}
+				};
+
+				tables.Add(t);
+			}
+		}
+
+		// Load columns.
+		//
+		cmd.CommandText = @"
+			SELECT 
+				pg_attribute.attrelid as id,
+				pg_attribute.attnum as colid,
+				pg_attribute.attname as name,
+				0 as status,
+				0 as usertype,
+				pg_attribute.atttypid as type,
+				COALESCE(CAST(substring(format_type(pg_attribute.atttypid, pg_attribute.atttypmod) from '[0-9]{1,}') as INTEGER),0) as lenght,
+				CASE WHEN pg_attribute.atttypid = 1700 AND format_type(pg_attribute.atttypid, pg_attribute.atttypmod) != 'numeric' THEN
+					COALESCE(CAST(regexp_replace(regexp_replace(format_type(pg_attribute.atttypid, pg_attribute.atttypmod),'[^,]*,',''),'[)]$','') as INTEGER),0)
+				ELSE
+					0
+				END as prec,
+				format_type(pg_attribute.atttypid, pg_attribute.atttypmod) as typename,
+				CASE WHEN CAST(pg_attribute.atttypid AS TEXT) IN ('17','25','1042','1043') THEN
+					false
+				ELSE
+					NOT pg_attribute.attnotnull
+				END as ""isNullable"",
+				COALESCE(pg_attrdef.adsrc ~* 'nextval',FALSE) as ""isIdentity""
+			FROM 
+				pg_attribute
+				LEFT JOIN pg_attrdef ON (pg_attribute.attrelid = pg_attrdef.adrelid AND 
+    				pg_attribute.attnum = pg_attrdef.adnum)
+				INNER JOIN pg_class ON (pg_attribute.attrelid = pg_class.oid)
+				INNER JOIN pg_namespace ON (pg_class.relnamespace = pg_namespace.oid)
+			WHERE    
+				pg_class.relkind IN ('r','v') AND
+				pg_namespace.nspname NOT IN ('pg_catalog','information_schema') AND   
+				pg_attribute.attnum > 0 AND
+				NOT pg_attribute.attisdropped";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var col = new
+				{
+					ID     = Convert.ToInt32(rd["id"]),
+					Column = new Column
+					{
+						ID         = Convert.ToInt16(rd["colid"]),
+						ColumnName = Convert.ToString (rd["name"]),
+						MemberName = Convert.ToString (rd["name"]),
+						IsNullable = Convert.ToBoolean(rd["isNullable"]),
+						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
+					}
+				};
+
+				var c = col.Column;
+
+				switch (Convert.ToInt32(rd["type"]))
+				{
+					case   16 /* bool     */ : c.Type = "Boolean";  c.DbType = DbType.Boolean;  c.SqlDbType = SqlDbType.Bit;              break;
+					case   17 /* bytea    */ : c.Type = "Byte[]";   c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.Binary;           break;
+					case   20 /* int8     */ : c.Type = "Int64";    c.DbType = DbType.Int64;    c.SqlDbType = SqlDbType.BigInt;           break;
+					case   21 /* int2     */ : c.Type = "Int16";    c.DbType = DbType.Int16;    c.SqlDbType = SqlDbType.SmallInt;         break;
+					case   23 /* int4     */ : c.Type = "Int32";    c.DbType = DbType.Int32;    c.SqlDbType = SqlDbType.Int;              break;
+					case   25 /* text     */ : c.Type = "String";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.Text;             break;
+					case  142 /* xml      */ : c.Type = "Xml";      c.DbType = DbType.Xml;      c.SqlDbType = SqlDbType.Xml;              break;
+					case  700 /* float4   */ : c.Type = "Single";   c.DbType = DbType.Single;   c.SqlDbType = SqlDbType.Real;             break;
+					case  701 /* float8   */ : c.Type = "Double";   c.DbType = DbType.Double;   c.SqlDbType = SqlDbType.Float;            break;
+					case  790 /* money    */ : c.Type = "Decimal";  c.DbType = DbType.Decimal;  c.SqlDbType = SqlDbType.Money;            break;
+					case 1042 /* char     */ : c.Type = "String";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.Char;             break;
+					case 1043 /* varchar  */ : c.Type = "String";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.VarChar;          break;
+					case 1082 /* date     */ : c.Type = "DateTime"; c.DbType = DbType.Date;     c.SqlDbType = SqlDbType.Date;             break;
+					case 1083 /* time     */ : c.Type = "DateTime"; c.DbType = DbType.Time;     c.SqlDbType = SqlDbType.Time;             break;
+					case 1114 /* datetime */ : c.Type = "DateTime"; c.DbType = DbType.DateTime; c.SqlDbType = SqlDbType.DateTime;         break;
+					case 1700 /* numeric  */ : c.Type = "Decimal";  c.DbType = DbType.Decimal;  c.SqlDbType = SqlDbType.Decimal;          break;
+					case 2950 /* Guid     */ : c.Type = "Guid";     c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.UniqueIdentifier; break;
+
+					default:
+						throw new Exception(string.Format("Type '{0}' is not expected in PostgreSQL.tt",rd["type"].ToString()));
+						//break;
+				}
+
+				switch (c.Type)
+				{
+					case "string" :
+					case "byte[]" : c.IsClass = true; break;
+				}
+
+				if (c.IsNullable && !c.IsClass)
+					c.Type += "?";
+
+				columns.Add(col);
+			}
+		}
+
+		// Load PKs.
+		//
+		cmd.CommandText = @"
+			SELECT
+				pg_constraint.conrelid as id,
+				pg_constraint.conname as ""name"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid and attnum = pg_constraint.conkey[1]) as colname,
+				pg_constraint.conkey[1] as ""order"",    
+				pg_constraint.conkey[1] as colid
+			FROM
+				pg_constraint
+			WHERE
+			pg_constraint.contype = 'p'";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var id    = Convert.ToInt32(rd["id"]);
+				var colid = Convert.ToInt32(rd["colid"]);
+
+				columns.Single(_ => _.ID == id && _.Column.ID == colid).Column.PKIndex = colid;
+			}
+		}
+
+		// Load FKs.
+		//
+		cmd.CommandText = @"
+			SELECT 
+				pg_constraint.conname as ""Name"",
+				pg_constraint.conrelid as ""ThisTable"",
+				pg_constraint.confrelid as ""OtherTable"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[01]) as ""ThisColumn1"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[02]) as ""ThisColumn2"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[03]) as ""ThisColumn3"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[04]) as ""ThisColumn4"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[05]) as ""ThisColumn5"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[06]) as ""ThisColumn6"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[07]) as ""ThisColumn7"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[08]) as ""ThisColumn8"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[09]) as ""ThisColumn9"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[10]) as ""ThisColumn10"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[11]) as ""ThisColumn11"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[12]) as ""ThisColumn12"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[13]) as ""ThisColumn13"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[14]) as ""ThisColumn14"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[15]) as ""ThisColumn15"",
+				(select attname from pg_attribute where attrelid = pg_constraint.conrelid  and attnum = pg_constraint.conkey[16]) as ""ThisColumn16"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[01]) as ""OtherColumn1"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[02]) as ""OtherColumn2"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[03]) as ""OtherColumn3"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[04]) as ""OtherColumn4"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[05]) as ""OtherColumn5"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[06]) as ""OtherColumn6"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[07]) as ""OtherColumn7"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[08]) as ""OtherColumn8"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[09]) as ""OtherColumn9"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[10]) as ""OtherColumn10"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[11]) as ""OtherColumn11"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[12]) as ""OtherColumn12"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[13]) as ""OtherColumn13"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[14]) as ""OtherColumn14"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[15]) as ""OtherColumn15"",
+				(select attname from pg_attribute where attrelid = pg_constraint.confrelid and attnum = pg_constraint.confkey[16]) as ""OtherColumn16""
+			FROM
+				pg_constraint          
+			WHERE
+				pg_constraint.contype = 'f'";
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var name            = Convert.ToString(rd["Name"]);
+				var thisTableID     = Convert.ToInt32 (rd["ThisTable"]);
+				var otherTableID    = Convert.ToInt32 (rd["OtherTable"]);
+
+				var thisTable   = (from t in tables  where t.ID == thisTableID  select t.Table).Single();
+				var otherTable  = (from t in tables  where t.ID == otherTableID select t.Table).Single();
+
+				thisTable.ForeignKeys.Add(name, new ForeignKey { KeyName = name, MemberName = name, OtherTable = otherTable });
+
+				for (int i = 1; i <= 16; i++)
+				{
+					if (rd.IsDBNull(rd.GetOrdinal("ThisColumn"  + i)))
+						break;
+
+					var thisColumnName  = Convert.ToString(rd["ThisColumn"  + i]);
+					var otherColumnName = Convert.ToString(rd["OtherColumn" + i]);
+
+					var thisColumn  = (from c in columns where c.ID == thisTableID  && c.Column.ColumnName == thisColumnName  select c.Column).Single();
+					var otherColumn = (from c in columns where c.ID == otherTableID && c.Column.ColumnName == otherColumnName select c.Column).Single();
+
+					var key = thisTable.ForeignKeys[name];
+
+					key.ThisColumns. Add(thisColumn);
+					key.OtherColumns.Add(otherColumn);
+				}
+			}
+		}
+	}
+
+	var qc =
+		from c in columns
+		group c by c.ID into gr
+		join t in tables on gr.Key equals t.ID
+		select new { t.Table, gr };
+
+	foreach (var c in qc)
+	{
+		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
+			c.Table.Columns.Add(col.ColumnName, col);
+
+		if (c.Table.Owner == "postgres")
+			c.Table.Owner = null;
+
+		Tables.Add(c.Table.TableName, c.Table);
+	}
+}
+#>
