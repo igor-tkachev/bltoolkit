@@ -157,6 +157,32 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void NewGuid()
+		{
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.Firebird, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access },
+			db =>
+			{
+				db.Types.Delete(_ => _.ID > 1000);
+				db.Types.Insert(() => new LinqDataTypes
+				{
+					ID            = 1001,
+					MoneyValue    = 1001,
+					DateTimeValue = Sql.CurrentTimestamp,
+					BoolValue     = true,
+					GuidValue     = Sql.NewGuid(),
+					BinaryValue   = new Binary(new byte[] { 1 }),
+					SmallIntValue = 1001
+				});
+
+				var guid = db.Types.Single(_ => _.ID == 1001).GuidValue;
+
+				Assert.AreEqual(1001, db.Types.Single(_ => _.GuidValue == guid).ID);
+
+				db.Types.Delete(_ => _.ID > 1000);
+			});
+		}
+
+		[Test]
 		public void UpdateBinary1()
 		{
 			ForEachProvider(db =>
