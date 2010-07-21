@@ -7,12 +7,12 @@ namespace BLToolkit.Data.Linq
 	{
 		public class DataContextContext
 		{
-			public IDataContext DataContext;
-			public bool         InUse;
+			public IDataContextInfo DataContextInfo;
+			public bool             InUse;
 		}
 
-		public IDataContext RootDataContext;
-		public int          Counter;
+		public IDataContextInfo RootDataContext;
+		public int              Counter;
 
 		List<DataContextContext> _contexts;
 
@@ -20,7 +20,7 @@ namespace BLToolkit.Data.Linq
 		{
 			if (_contexts == null)
 			{
-				RootDataContext.OnClosing += OnRootClosing;
+				RootDataContext.DataContext.OnClosing += OnRootClosing;
 				_contexts = new List<DataContextContext>(1);
 			}
 
@@ -33,7 +33,7 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			var ctx = new DataContextContext { DataContext = RootDataContext.Clone(), InUse = true };
+			var ctx = new DataContextContext { DataContextInfo = RootDataContext.Clone(), InUse = true };
 
 			_contexts.Add(ctx);
 
@@ -48,10 +48,10 @@ namespace BLToolkit.Data.Linq
 		void OnRootClosing(object sender, EventArgs e)
 		{
 			foreach (var context in _contexts)
-				if (context.DataContext is IDisposable)
-					((IDisposable)context.DataContext).Dispose();
+				if (context.DataContextInfo.DataContext is IDisposable)
+					((IDisposable)context.DataContextInfo.DataContext).Dispose();
 
-			RootDataContext.OnClosing -= OnRootClosing;
+			RootDataContext.DataContext.OnClosing -= OnRootClosing;
 
 			_contexts = null;
 		}

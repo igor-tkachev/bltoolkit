@@ -74,12 +74,12 @@ namespace BLToolkit.Data.DataProvider
 			if (connection == null)
 				throw new ArgumentNullException("connection");
 
-			ICloneable cloneable = connection as ICloneable;
+			var cloneable = connection as ICloneable;
 
 			if (cloneable != null)
 				return (IDbConnection)cloneable.Clone();
 
-			IDbConnection newConnection = CreateConnectionObject();
+			var newConnection = CreateConnectionObject();
 
 			// This is definitelly not enought when PersistSecurityInfo set to false.
 			//

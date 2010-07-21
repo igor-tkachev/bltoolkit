@@ -41,7 +41,7 @@ namespace BLTgen
 	{
 		public static void Main(string[] args)
 		{
-			Arguments parsedArgs = new Arguments();
+			var parsedArgs = new Arguments();
 
 			Map.MapSourceToDestination(new StringListMapper(args), args,
 				Map.GetObjectMapper(typeof(Arguments)), parsedArgs);
@@ -56,11 +56,11 @@ namespace BLTgen
 
 		private static void GenerateExtensionAssembly(Arguments parsedArgs)
 		{
-			bool     verbose                  = parsedArgs.Debug != null;
-			Assembly sourceAsm                = Assembly.LoadFrom(parsedArgs.SourceAssembly);
-			string   extensionAssemblyPath    = GetOutputAssemblyLocation(sourceAsm.Location, parsedArgs.OutputDirectory);
-			Version  extensionAssemblyVersion = parsedArgs.Version != null? new Version(parsedArgs.Version): sourceAsm.GetName().Version;
-			string   extensionAssemblyFolder  = Path.GetDirectoryName(extensionAssemblyPath);
+			var verbose                  = parsedArgs.Debug != null;
+			var sourceAsm                = Assembly.LoadFrom(parsedArgs.SourceAssembly);
+			var extensionAssemblyPath    = GetOutputAssemblyLocation(sourceAsm.Location, parsedArgs.OutputDirectory);
+			var extensionAssemblyVersion = parsedArgs.Version != null? new Version(parsedArgs.Version): sourceAsm.GetName().Version;
+			var extensionAssemblyFolder  = Path.GetDirectoryName(extensionAssemblyPath);
 
 			if (verbose)
 				Console.WriteLine("{0} =>{1}{2}", sourceAsm.Location, Environment.NewLine, extensionAssemblyPath);
@@ -68,7 +68,7 @@ namespace BLTgen
 			if (!string.IsNullOrEmpty(extensionAssemblyFolder) && !Directory.Exists(extensionAssemblyFolder))
 				Directory.CreateDirectory(extensionAssemblyFolder);
 
-			Type[] typesToProcess = sourceAsm.GetExportedTypes();
+			var typesToProcess = sourceAsm.GetExportedTypes();
 
 			typesToProcess = FilterBaseTypes(typesToProcess, parsedArgs.BaseTypes);
 			typesToProcess = FilterTypes(typesToProcess, parsedArgs.Include, true);
@@ -78,7 +78,7 @@ namespace BLTgen
 			{
 				AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
 				{
-					foreach (Assembly asm in ((AppDomain)sender).GetAssemblies())
+					foreach (var asm in ((AppDomain)sender).GetAssemblies())
 					{
 						if (string.Compare(asm.FullName, args.Name) == 0)
 							return asm;
@@ -90,7 +90,7 @@ namespace BLTgen
 				TypeFactory.SaveTypes = true;
 				TypeFactory.SetGlobalAssembly(extensionAssemblyPath, extensionAssemblyVersion, parsedArgs.KeyPairFile);
 
-				foreach (Type t in typesToProcess)
+				foreach (var t in typesToProcess)
 				{
 					if (verbose)
 						Console.Write(GetFullTypeName(t));
@@ -130,11 +130,11 @@ namespace BLTgen
 			if (string.IsNullOrEmpty(pattern))
 				return types;
 
-			Regex re = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
+			var re = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
 
 			return Array.FindAll(types, delegate(Type t)
 			{
-				for (Type bt = t.BaseType; bt != null; bt = bt.BaseType)
+				for (var bt = t.BaseType; bt != null; bt = bt.BaseType)
 				{
 					if (re.Match(GetFullTypeName(bt)).Success)
 						return true;
@@ -148,12 +148,9 @@ namespace BLTgen
 			if (string.IsNullOrEmpty(pattern))
 				return types;
 
-			Regex re = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
+			var re = new Regex("^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace(";", "$|") + "$");
 
-			return Array.FindAll(types, delegate(Type t)
-			{
-				return re.Match(GetFullTypeName(t)).Success == include;
-			});
+			return Array.FindAll(types, t => re.Match(GetFullTypeName(t)).Success == include);
 		}
 
 		// System.Type.FullName may be null under some conditions. See
@@ -161,7 +158,7 @@ namespace BLTgen
 		//
 		private static string GetFullTypeName(Type t)
 		{
-			string fullName = t.FullName;
+			var fullName = t.FullName;
 
 			if (fullName != null)
 				return fullName;
@@ -183,7 +180,7 @@ namespace BLTgen
 			if (string.IsNullOrEmpty(outputDirectory))
 				outputDirectory = Path.GetDirectoryName(sourceAssembly);
 
-			string fileName = Path.ChangeExtension(Path.GetFileName(sourceAssembly), "BLToolkitExtension.dll");
+			var fileName = Path.ChangeExtension(Path.GetFileName(sourceAssembly), "BLToolkitExtension.dll");
 			return Path.Combine(Path.GetFullPath(outputDirectory), fileName);
 		}
 
@@ -191,10 +188,10 @@ namespace BLTgen
 
 		private static void WriteBanner()
 		{
-			Assembly asm = Assembly.GetExecutingAssembly();
-			AssemblyDescriptionAttribute descriptionAttribute = (AssemblyDescriptionAttribute)
+			var asm = Assembly.GetExecutingAssembly();
+			var descriptionAttribute = (AssemblyDescriptionAttribute)
 				Attribute.GetCustomAttribute(asm, typeof (AssemblyDescriptionAttribute));
-			AssemblyCopyrightAttribute copyrightAttribute = (AssemblyCopyrightAttribute)
+			var copyrightAttribute = (AssemblyCopyrightAttribute)
 				Attribute.GetCustomAttribute(asm, typeof(AssemblyCopyrightAttribute));
 
 			Console.WriteLine("{0}, Version {1}", descriptionAttribute.Description, asm.GetName().Version);
@@ -209,14 +206,14 @@ namespace BLTgen
 
 		private static string GetDescription(MemberMapper mm)
 		{
-			DescriptionAttribute desc = mm.MemberAccessor.GetAttribute<DescriptionAttribute>();
+			var desc = mm.MemberAccessor.GetAttribute<DescriptionAttribute>();
 
 			return (null != desc) ? desc.Description : string.Empty;
 		}
 
 		private static void Usage()
 		{
-			ObjectMapper om = Map.GetObjectMapper(typeof(Arguments));
+			var om = Map.GetObjectMapper(typeof(Arguments));
 
 			Console.Write("Usage: {0}", ExecutableName);
 

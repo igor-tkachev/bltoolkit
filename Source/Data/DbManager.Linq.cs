@@ -21,6 +21,12 @@ namespace BLToolkit.Data
 			return new Table<T>(this);
 		}
 
+		public Table<T> GetTable<T>(bool dispose)
+			where T : class
+		{
+			return new Table<T>(new DataContextInfo(this, dispose));
+		}
+
 		class PreparedQuery
 		{
 			public string[]           Commands;

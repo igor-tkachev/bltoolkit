@@ -6,41 +6,49 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using BLToolkit.Mapping;
-using BLToolkit.Reflection;
-
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
+	using Reflection;
+
 	public class Table<T> : IOrderedQueryable<T>, IQueryProvider
 	{
 		#region Init
 
-		public Table()
+		public Table(IDataContextInfo dataContextInfo, Expression expression)
 		{
-			Expression = Expression.Constant(this);
+			DataContextInfo = dataContextInfo ?? new DefaultDataContextInfo();
+			Expression      = expression      ?? Expression.Constant(this);
+		}
+
+		public Table(IDataContextInfo dataContextInfo)
+			: this(dataContextInfo, null)
+		{
+		}
+
+		public Table()
+			: this((IDataContextInfo)null, null)
+		{
 		}
 
 		public Table(IDataContext dataContext)
+			: this(dataContext == null ? null : new DataContextInfo(dataContext), null)
 		{
-			DataContext = dataContext;
-			Expression  = Expression.Constant(this);
 		}
 
 		public Table(Expression expression)
+			: this((IDataContextInfo)null, expression)
 		{
-			Expression = expression;
 		}
 
 		public Table(IDataContext dataContext, Expression expression)
+			: this(dataContext == null ? null : new DataContextInfo(dataContext), expression)
 		{
-			DataContext = dataContext;
-			Expression  = expression;
 		}
 
-		public    Expression        Expression  { get; set; }
-		public    IDataContext      DataContext { get; set; }
+		[NotNull] public Expression       Expression      { get; set; }
+		[NotNull] public IDataContextInfo DataContextInfo { get; set; }
 
 		internal  ExpressionInfo<T> Info;
 		internal  object[]          Parameters;
@@ -64,7 +72,7 @@ namespace BLToolkit.Data.Linq
 				if (_sqlTextHolder == null)
 				{
 					var info = GetExpressionInfo(Expression, true);
-					_sqlTextHolder = info.GetSqlText(DataContext ?? new DbManager(), Expression, Parameters, 0);
+					_sqlTextHolder = info.GetSqlText(DataContextInfo.DataContext, Expression, Parameters, 0);
 				}
 
 				return _sqlTextHolder;
@@ -75,9 +83,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Execute
 
-		IEnumerable<T> Execute(IDataContext dataContext, Expression expression)
+		IEnumerable<T> Execute(IDataContextInfo dataContextInfo, Expression expression)
 		{
-			return GetExpressionInfo(expression, true).GetIEnumerable(null, dataContext, expression, Parameters);
+			return GetExpressionInfo(expression, true).GetIEnumerable(null, dataContextInfo, expression, Parameters);
 		}
 
 		private ExpressionInfo<T> GetExpressionInfo(Expression expression, bool cache)
@@ -85,11 +93,7 @@ namespace BLToolkit.Data.Linq
 			if (cache && Info != null)
 				return Info;
 
-			var contextID     = DataContext != null ? DataContext.ContextID         : Settings.GetDefaultContextID;
-			var mappingSchema = DataContext != null ? DataContext.MappingSchema     : Map.DefaultSchema;
-			var sqlProvider   = DataContext != null ? DataContext.CreateSqlProvider : Settings.GetDefaultCreateSqlProvider;
-
-			var info = ExpressionInfo<T>.GetExpressionInfo(contextID, mappingSchema, sqlProvider, expression);
+			var info = ExpressionInfo<T>.GetExpressionInfo(DataContextInfo, expression);
 
 			if (cache)
 				Info = info;
@@ -140,7 +144,7 @@ namespace BLToolkit.Data.Linq
 			if (expression == null)
 				throw new ArgumentNullException("expression");
 
-			return new Query<TElement>(DataContext, expression);
+			return new Query<TElement>(DataContextInfo, expression);
 		}
 
 		IQueryable IQueryProvider.CreateQuery(Expression expression)
@@ -152,7 +156,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { DataContext, expression });
+				return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { DataContextInfo, expression });
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -162,12 +166,12 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			return (TResult)GetExpressionInfo(expression, false).GetElement(null, DataContext, expression, Parameters);
+			return (TResult)GetExpressionInfo(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
 		}
 
 		object IQueryProvider.Execute(Expression expression)
 		{
-			return Execute(DataContext, expression);
+			return Execute(DataContextInfo, expression);
 		}
 
 		#endregion
@@ -176,12 +180,12 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			return Execute(DataContext, Expression).GetEnumerator();
+			return Execute(DataContextInfo, Expression).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Execute(DataContext, Expression).GetEnumerator();
+			return Execute(DataContextInfo, Expression).GetEnumerator();
 		}
 
 		#endregion

@@ -227,7 +227,7 @@ namespace BLToolkit.Data
 			if (Connection is ICloneable || ConfigurationString == null)
 				return _dataProvider.CloneConnection(_connection);
 
-			IDbConnection con = DataProvider.CreateConnectionObject();
+			var con = DataProvider.CreateConnectionObject();
 
 			con.ConnectionString = GetConnectionString(ConfigurationString);
 
@@ -251,7 +251,7 @@ namespace BLToolkit.Data
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
 
-			BLToolkitSection section = BLToolkitSection.Instance;
+			var section = BLToolkitSection.Instance;
 
 			if (section != null)
 			{
@@ -259,8 +259,8 @@ namespace BLToolkit.Data
 
 				foreach (DataProviderElement provider in section.DataProviders)
 				{
-					Type             dataProviderType = Type.GetType(provider.TypeName, true);
-					DataProviderBase providerInstance = (DataProviderBase)Activator.CreateInstance(dataProviderType);
+					var dataProviderType = Type.GetType(provider.TypeName, true);
+					var providerInstance = (DataProviderBase)Activator.CreateInstance(dataProviderType);
 
 					if (!string.IsNullOrEmpty(provider.Name))
 						providerInstance.UniqueName = provider.Name;
@@ -283,12 +283,12 @@ namespace BLToolkit.Data
 				}
 			}
 
-			string dataProviders = ConfigurationManager.AppSettings.Get("BLToolkit.DataProviders");
+			var dataProviders = ConfigurationManager.AppSettings.Get("BLToolkit.DataProviders");
 
 			if (dataProviders != null)
 			{
 				Debug.WriteLineIf(TraceSwitch.TraceWarning, "Using appSettings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TraceSwitch.DisplayName);
-				foreach (string dataProviderTypeName in dataProviders.Split(';'))
+				foreach (var dataProviderTypeName in dataProviders.Split(';'))
 					AddDataProvider(Type.GetType(dataProviderTypeName, true));
 			}
 
@@ -308,7 +308,7 @@ namespace BLToolkit.Data
 		{
 			if (connection == null) throw new ArgumentNullException("connection");
 
-			DataProviderBase dp = _dataProviderTypeList[connection.GetType()];
+			var dp = _dataProviderTypeList[connection.GetType()];
 
 			if (dp == null)
 				throw new DataException(string.Format(
@@ -327,17 +327,17 @@ namespace BLToolkit.Data
 			if (configurationString == _firstConfiguration)
 				return _firstProvider;
 
-			DataProviderBase dp = (DataProviderBase)_configurationList[configurationString];
+			var dp = (DataProviderBase)_configurationList[configurationString];
 
 			if (dp == null)
 			{
-				ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
+				var css = ConfigurationManager.ConnectionStrings[configurationString];
 
 				if (css != null && !string.IsNullOrEmpty(css.ProviderName))
 				{
 					// This hack should be redone.
 					//
-					string provider = css.ProviderName == "System.Data.SqlClient" ?
+					var provider = css.ProviderName == "System.Data.SqlClient" ?
 						configurationString.IndexOf("2008") >= 0 ?
 							"MSSQL2008" :
 							css.ProviderName :
@@ -359,14 +359,14 @@ namespace BLToolkit.Data
 					//
 					// Default provider is SqlDataProvider
 					//
-					string cs  = configurationString.ToUpper();
-					string key = _defaultDataProviderName;
+					var cs  = configurationString.ToUpper();
+					var key = _defaultDataProviderName;
 
 					if (cs.Length > 0)
 					{
 						cs += ProviderNameDivider;
 
-						foreach (string k in _dataProviderNameList.Keys)
+						foreach (var k in _dataProviderNameList.Keys)
 						{
 							if (cs.StartsWith(k + ProviderNameDivider))
 							{
@@ -414,16 +414,16 @@ namespace BLToolkit.Data
 
 		private static DataProviderBase FindFirstSuitableProvider(string configurationString)
 		{
-			string cs = (string)_anyProviderConfigurationList[configurationString];
-			bool searchRequired = (cs == null);
+			var cs = (string)_anyProviderConfigurationList[configurationString];
+			var searchRequired = (cs == null);
 
 			if (searchRequired)
 			{
-				string csWithoutProvider = configurationString.Substring(AnyProvider.Length);
+				var csWithoutProvider = configurationString.Substring(AnyProvider.Length);
 
 				if (configurationString.Length == 0) throw new ArgumentNullException("configurationString");
 
-				foreach (string str in _connectionStringList.Keys)
+				foreach (var str in _connectionStringList.Keys)
 				{
 					if (IsMatchedConfigurationString(str, csWithoutProvider))
 					{
@@ -446,11 +446,11 @@ namespace BLToolkit.Data
 
 				if (cs == null)
 				{
-					foreach (string name in ConfigurationManager.AppSettings.AllKeys)
+					foreach (var name in ConfigurationManager.AppSettings.AllKeys)
 					{
 						if (name.StartsWith("ConnectionString" + ProviderNameDivider))
 						{
-							string str = name.Substring(name.IndexOf(ProviderNameDivider) + ProviderNameDivider.Length);
+							var str = name.Substring(name.IndexOf(ProviderNameDivider) + ProviderNameDivider.Length);
 
 							if (IsMatchedConfigurationString(str, csWithoutProvider))
 							{
@@ -465,7 +465,7 @@ namespace BLToolkit.Data
 					cs = csWithoutProvider;
 			}
 
-			DataProviderBase dp = GetDataProvider(cs);
+			var dp = GetDataProvider(cs);
 
 			if (searchRequired)
 				_anyProviderConfigurationList[configurationString] = cs;
@@ -493,10 +493,10 @@ namespace BLToolkit.Data
 				{
 					// Connection string is not in the cache.
 					//
-					string key = string.Format("ConnectionString{0}{1}",
+					var key = string.Format("ConnectionString{0}{1}",
 						configurationString.Length == 0? String.Empty: ProviderNameDivider, configurationString);
 
-					ConnectionStringSettings css = ConfigurationManager.ConnectionStrings[configurationString];
+					var css = ConfigurationManager.ConnectionStrings[configurationString];
 
 					str = css != null? css.ConnectionString: ConfigurationManager.AppSettings.Get(key);
 
@@ -710,7 +710,7 @@ namespace BLToolkit.Data
 				{
 					// Grab first registered configuration.
 					//
-					foreach (KeyValuePair<string, string> de in _connectionStringList)
+					foreach (var de in _connectionStringList)
 					{
 						_defaultConfiguration = de.Key;
 						break;

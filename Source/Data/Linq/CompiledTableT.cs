@@ -27,6 +27,8 @@ namespace BLToolkit.Data.Linq
 
 		ExpressionInfo<T> GetInfo(IDataContext dataContext)
 		{
+			var dataContextInfo = DataContextInfo.Create(dataContext);
+
 			string            lastContextID;
 			MappingSchema     lastMappingSchema;
 			ExpressionInfo<T> info;
@@ -38,8 +40,8 @@ namespace BLToolkit.Data.Linq
 				info              = _lastInfo;
 			}
 
-			var contextID     = dataContext != null ? dataContext.ContextID     : Settings.GetDefaultContextID;
-			var mappingSchema = dataContext != null ? dataContext.MappingSchema : Map.DefaultSchema;
+			var contextID     = dataContextInfo.ContextID;
+			var mappingSchema = dataContextInfo.MappingSchema;
 
 			if (lastContextID != contextID || lastMappingSchema != mappingSchema)
 				info = null;
@@ -62,7 +64,7 @@ namespace BLToolkit.Data.Linq
 							info = new ExpressionParser<T>().Parse(
 								contextID,
 								mappingSchema,
-								dataContext != null ? dataContext.CreateSqlProvider : Settings.GetDefaultCreateSqlProvider,
+								dataContextInfo.CreateSqlProvider,
 								_expression,
 								_lambda.Parameters.ToArray());
 
@@ -87,8 +89,10 @@ namespace BLToolkit.Data.Linq
 
 		public T Execute(object[] parameters)
 		{
-			var db = (IDataContext)parameters[0];
-			return (T)GetInfo(db).GetElement(null, db, _expression, parameters);
+			var db  = (IDataContext)parameters[0];
+			var ctx = DataContextInfo.Create(db);
+
+			return (T)GetInfo(db).GetElement(null, ctx, _expression, parameters);
 		}
 	}
 }

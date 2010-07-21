@@ -84,8 +84,8 @@ namespace BLToolkit.Data
 				new DbManager(0)
 				{
 					_configurationString = _configurationString,
-					_dataProvider = _dataProvider,
-					_mappingSchema = _mappingSchema
+					_dataProvider        = _dataProvider,
+					_mappingSchema       = _mappingSchema
 				};
 
 			if (_connection != null)

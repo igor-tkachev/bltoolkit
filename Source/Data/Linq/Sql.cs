@@ -32,7 +32,7 @@ namespace BLToolkit.Data.Linq
 		#region Guid Functions
 
 		[SqlFunction  ("Oracle",    "Sys_Guid", ServerSideOnly=true)]
-		//[SqlFunction  ("Firebird",  "Gen_Uuid", ServerSideOnly=true)]
+		[SqlFunction  ("Firebird",  "Gen_Uuid", ServerSideOnly=true)]
 		[SqlFunction  ("MySql",     "Uuid",     ServerSideOnly=true)]
 		//[SqlFunction  ("SQLite",    "Uuid",     ServerSideOnly=true)]
 		[SqlExpression("Sybase",    "NewID(1)", ServerSideOnly=true)]

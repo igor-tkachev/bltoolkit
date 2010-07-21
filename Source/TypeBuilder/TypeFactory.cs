@@ -24,6 +24,8 @@ namespace BLToolkit.TypeBuilder
 		{
 			var section = BLToolkitSection.Instance;
 
+			SealTypes = true;
+
 			if (section != null)
 			{
 				var elm = section.TypeFactory;
@@ -81,19 +83,8 @@ namespace BLToolkit.TypeBuilder
 			}
 		}
 
-		private static bool _saveTypes;
-		public  static bool  SaveTypes
-		{
-			get { return _saveTypes;  }
-			set { _saveTypes = value; }
-		}
-
-		private static bool _sealTypes = true;
-		public  static bool  SealTypes
-		{
-			get { return _sealTypes;  }
-			set { _sealTypes = value; }
-		}
+		public static bool SaveTypes { get; set; }
+		public static bool SealTypes { get; set; }
 
 		[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 		public static void SetGlobalAssembly(string path)
@@ -158,7 +149,7 @@ namespace BLToolkit.TypeBuilder
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		private static void SaveAssembly(AssemblyBuilderHelper assemblyBuilder, Type type)
 		{
-			if (!_saveTypes || _globalAssembly != null)
+			if (!SaveTypes || _globalAssembly != null)
 				return;
 			try
 			{
@@ -184,12 +175,7 @@ namespace BLToolkit.TypeBuilder
 		private static readonly Hashtable _builtTypes = new Hashtable(10);
 		private static readonly Hashtable _assemblies = new Hashtable(10);
 
-		private static bool _loadTypes;
-		public  static bool  LoadTypes
-		{
-			get { return _loadTypes;  }
-			set { _loadTypes = value; }
-		}
+		public static bool LoadTypes { get; set; }
 
 		public static Type GetType(object hashKey, Type sourceType, ITypeBuilder typeBuilder)
 		{
@@ -226,7 +212,7 @@ namespace BLToolkit.TypeBuilder
 						_builtTypes.Add(typeBuilder.GetType(), builderTable = new Hashtable());
 					}
 
-					if (_loadTypes)
+					if (LoadTypes)
 					{
 						var originalAssembly = sourceType.Assembly;
 

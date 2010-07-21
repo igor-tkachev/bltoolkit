@@ -126,6 +126,9 @@
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Data\Linq\DataContextInfo.cs" />
+    <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
+    <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Properties\BLToolkitConstants.cs" />
     <Compile Include="Common\ArrayT.cs" />
     <Compile Include="Common\Compatibility4.cs" />

@@ -26,8 +26,8 @@ namespace BLToolkit.Data.Linq
 		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
 		public Func<ISqlProvider>    CreateSqlProvider;
 
-		public Func<QueryContext,IDataContext,Expression,object[],IEnumerable<T>> GetIEnumerable;
-		public Func<QueryContext,IDataContext,Expression,object[],object>         GetElement;
+		public Func<QueryContext,IDataContextInfo,Expression,object[],IEnumerable<T>> GetIEnumerable;
+		public Func<QueryContext,IDataContextInfo,Expression,object[],object>         GetElement;
 
 		private ISqlProvider _sqlProvider; 
 		public  ISqlProvider  SqlProvider
@@ -43,19 +43,24 @@ namespace BLToolkit.Data.Linq
 		static readonly object            _sync      = new object();
 		const           int               _cacheSize = 100;
 
-		public static ExpressionInfo<T> GetExpressionInfo(string contextID, MappingSchema mappingSchema, Func<ISqlProvider> sqlProvider, Expression expr)
+		public static ExpressionInfo<T> GetExpressionInfo(IDataContextInfo dataContextInfo, Expression expr)
 		{
-			var info = FindInfo(contextID, mappingSchema, expr);
+			var info = FindInfo(dataContextInfo, expr);
 
 			if (info == null)
 			{
 				lock (_sync)
 				{
-					info = FindInfo(contextID, mappingSchema, expr);
+					info = FindInfo(dataContextInfo, expr);
 
 					if (info == null)
 					{
-						info = new ExpressionParser<T>().Parse(contextID, mappingSchema, sqlProvider, expr, null);
+						info = new ExpressionParser<T>().Parse(
+							dataContextInfo.ContextID,
+							dataContextInfo.MappingSchema,
+							dataContextInfo.CreateSqlProvider,
+							expr,
+							null);
 						info.Next = _first;
 						_first = info;
 					}
@@ -65,14 +70,14 @@ namespace BLToolkit.Data.Linq
 			return info;
 		}
 
-		static ExpressionInfo<T> FindInfo(string contextID, MappingSchema mappingSchema, Expression expr)
+		static ExpressionInfo<T> FindInfo(IDataContextInfo dataContextInfo, Expression expr)
 		{
 			ExpressionInfo<T> prev = null;
 			var n = 0;
 
 			for (var info = _first; info != null; info = info.Next)
 			{
-				if (info.Compare(contextID, mappingSchema, expr))
+				if (info.Compare(dataContextInfo.ContextID, dataContextInfo.MappingSchema, expr))
 				{
 					if (prev != null)
 					{
@@ -128,12 +133,9 @@ namespace BLToolkit.Data.Linq
 			GetElement = (ctx, db, expr, ps) => NonQueryQuery(db, expr, ps);
 		}
 
-		int NonQueryQuery(IDataContext dataContext, Expression expr, object[] parameters)
+		int NonQueryQuery(IDataContextInfo dataContextInfo, Expression expr, object[] parameters)
 		{
-			var dispose = dataContext == null;
-
-			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext(null);
+			var dataContext = dataContextInfo.DataContext;
 
 			try
 			{
@@ -142,7 +144,7 @@ namespace BLToolkit.Data.Linq
 			}
 			finally
 			{
-				if (dispose && dataContext is IDisposable)
+				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
 					((IDisposable)dataContext).Dispose();
 			}
 		}
@@ -163,12 +165,9 @@ namespace BLToolkit.Data.Linq
 			GetElement = (ctx, db, expr, ps) => ScalarQuery<TS>(db, expr, ps);
 		}
 
-		TS ScalarQuery<TS>(IDataContext dataContext, Expression expr, object[] parameters)
+		TS ScalarQuery<TS>(IDataContextInfo dataContextInfo, Expression expr, object[] parameters)
 		{
-			var dispose = dataContext == null;
-
-			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext(null);
+			var dataContext = dataContextInfo.DataContext;
 
 			try
 			{
@@ -177,7 +176,7 @@ namespace BLToolkit.Data.Linq
 			}
 			finally
 			{
-				if (dispose && dataContext is IDisposable)
+				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
 					((IDisposable)dataContext).Dispose();
 			}
 		}
@@ -198,12 +197,9 @@ namespace BLToolkit.Data.Linq
 			GetElement = (ctx, db, expr, ps) => Query(ctx, db, expr, ps, mapper);
 		}
 
-		TE Query<TE>(QueryContext ctx, IDataContext dataContext, Expression expr, object[] parameters, Mapper<TE> mapper)
+		TE Query<TE>(QueryContext ctx, IDataContextInfo dataContextInfo, Expression expr, object[] parameters, Mapper<TE> mapper)
 		{
-			var dispose = dataContext == null;
-
-			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext(null);
+			var dataContext = dataContextInfo.DataContext;
 
 			try
 			{
@@ -216,7 +212,7 @@ namespace BLToolkit.Data.Linq
 			}
 			finally
 			{
-				if (dispose && dataContext is IDisposable)
+				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
 					((IDisposable)dataContext).Dispose();
 			}
 		}
@@ -234,7 +230,7 @@ namespace BLToolkit.Data.Linq
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
 
-			Func<IDataContext,Expression,object[],int,IEnumerable<IDataReader>> query = Query;
+			Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> query = Query;
 
 			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
@@ -289,7 +285,7 @@ namespace BLToolkit.Data.Linq
 
 				var slot = GetMapperSlot(index);
 
-				GetIEnumerable = (_, db, expr, ps) => Map(db, query(db, expr, ps, 0), slot);
+				GetIEnumerable = (_, db, expr, ps) => Map(db.DataContext, query(db, expr, ps, 0), slot);
 			}
 		}
 
@@ -306,12 +302,9 @@ namespace BLToolkit.Data.Linq
 			throw new InvalidOperationException();
 		}
 
-		IEnumerable<IDataReader> Query(IDataContext dataContext, Expression expr, object[] parameters, int queryNumber)
+		IEnumerable<IDataReader> Query(IDataContextInfo dataContextInfo, Expression expr, object[] parameters, int queryNumber)
 		{
-			var dispose = dataContext == null;
-
-			if (dataContext == null)
-				dataContext = Settings.CreateDefaultDataContext(null);
+			var dataContext = dataContextInfo.DataContext;
 
 			try
 			{
@@ -322,7 +315,7 @@ namespace BLToolkit.Data.Linq
 			}
 			finally
 			{
-				if (dispose && dataContext is IDisposable)
+				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
 					((IDisposable)dataContext).Dispose();
 			}
 		}
@@ -333,15 +326,15 @@ namespace BLToolkit.Data.Linq
 				yield return (T)MapDataReaderToObject(typeof(T), dataContext, dr, slot);
 		}
 
-		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, IDataContext dataContext, Expression expr, object[] ps, Mapper<T> mapper)
+		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, IDataContextInfo dataContextInfo, Expression expr, object[] ps, Mapper<T> mapper)
 		{
 			if (context == null)
-				context = new QueryContext { RootDataContext = dataContext };
+				context = new QueryContext { RootDataContext = dataContextInfo };
 
 			foreach (var dr in data)
 			{
 				context.AfterQuery();
-				yield return mapper(this, context, dataContext, dr, MappingSchema, expr, ps);
+				yield return mapper(this, context, dataContextInfo.DataContext, dr, MappingSchema, expr, ps);
 			}
 		}
 
@@ -578,7 +571,7 @@ namespace BLToolkit.Data.Linq
 				ps = ps == null ? new object[1] : ps.ToArray();
 				ps[0] = key;
 
-				var values = valueReader.GetIEnumerable(context, db.DataContext, valueReader.Expression, ps);
+				var values = valueReader.GetIEnumerable(context, db.DataContextInfo, valueReader.Expression, ps);
 
 				return new Grouping<TKey, TElement>(key, Configuration.Linq.PreloadGroups ? values.ToList() : values);
 			}
@@ -731,29 +724,29 @@ namespace BLToolkit.Data.Linq
 
 		#region Insert
 
-		public static int Insert(IDataContext dataContext, T obj)
+		public static int Insert(IDataContextInfo dataContextInfo, T obj)
 		{
 			if (Equals(default(T), obj))
 				return 0;
 
 			ExpressionInfo<int> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.ContextID };
+			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
 			if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
 				lock (_sync)
 					if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
 					{
-						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
 
 						sqlQuery.Set.Into = sqlTable;
 
 						ei = new ExpressionInfo<int>
 						{
-							MappingSchema     = dataContext.MappingSchema,
-							ContextID         = dataContext.ContextID,
-							CreateSqlProvider = dataContext.CreateSqlProvider,
+							MappingSchema     = dataContextInfo.MappingSchema,
+							ContextID         = dataContextInfo.ContextID,
+							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
 							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
@@ -761,7 +754,7 @@ namespace BLToolkit.Data.Linq
 						{
 							if (field.Value.IsInsertable)
 							{
-								var param = GetParameter<int>(dataContext, field.Value);
+								var param = GetParameter<int>(dataContextInfo.DataContext, field.Value);
 
 								ei.Queries[0].Parameters.Add(param);
 
@@ -774,27 +767,27 @@ namespace BLToolkit.Data.Linq
 						ObjectOperation<T>.Insert.Add(key, ei);
 					}
 
-			return (int)ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
 		}
 
 		#endregion
 
 		#region InsertWithIdentity
 
-		public static object InsertWithIdentity(IDataContext dataContext, T obj)
+		public static object InsertWithIdentity(IDataContextInfo dataContextInfo, T obj)
 		{
 			if (Equals(default(T), obj))
 				return 0;
 
 			ExpressionInfo<object> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.ContextID };
+			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
 			if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
 				lock (_sync)
 					if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
 					{
-						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
 
 						sqlQuery.Set.Into         = sqlTable;
@@ -802,9 +795,9 @@ namespace BLToolkit.Data.Linq
 
 						ei = new ExpressionInfo<object>
 						{
-							MappingSchema     = dataContext.MappingSchema,
-							ContextID         = dataContext.ContextID,
-							CreateSqlProvider = dataContext.CreateSqlProvider,
+							MappingSchema     = dataContextInfo.MappingSchema,
+							ContextID         = dataContextInfo.ContextID,
+							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
 							Queries           = { new ExpressionInfo<object>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
@@ -812,7 +805,7 @@ namespace BLToolkit.Data.Linq
 						{
 							if (field.Value.IsInsertable)
 							{
-								var param = GetParameter<object>(dataContext, field.Value);
+								var param = GetParameter<object>(dataContextInfo.DataContext, field.Value);
 
 								ei.Queries[0].Parameters.Add(param);
 
@@ -825,36 +818,36 @@ namespace BLToolkit.Data.Linq
 						ObjectOperation<T>.InsertWithIdentity.Add(key, ei);
 					}
 
-			return ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+			return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
 		}
 
 		#endregion
 
 		#region Update
 
-		public static int Update(IDataContext dataContext, T obj)
+		public static int Update(IDataContextInfo dataContextInfo, T obj)
 		{
 			if (Equals(default(T), obj))
 				return 0;
 
 			ExpressionInfo<int> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.ContextID };
+			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
 			if (!ObjectOperation<T>.Update.TryGetValue(key, out ei))
 				lock (_sync)
 					if (!ObjectOperation<T>.Update.TryGetValue(key, out ei))
 					{
-						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Update };
 
 						sqlQuery.From.Table(sqlTable);
 
 						ei = new ExpressionInfo<int>
 						{
-							MappingSchema     = dataContext.MappingSchema,
-							ContextID         = dataContext.ContextID,
-							CreateSqlProvider = dataContext.CreateSqlProvider,
+							MappingSchema     = dataContextInfo.MappingSchema,
+							ContextID         = dataContextInfo.ContextID,
+							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
 							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
@@ -867,7 +860,7 @@ namespace BLToolkit.Data.Linq
 
 						foreach (var field in fields)
 						{
-							var param = GetParameter<int>(dataContext, field);
+							var param = GetParameter<int>(dataContextInfo.DataContext, field);
 
 							ei.Queries[0].Parameters.Add(param);
 
@@ -876,7 +869,7 @@ namespace BLToolkit.Data.Linq
 
 						foreach (var field in keys)
 						{
-							var param = GetParameter<int>(dataContext, field);
+							var param = GetParameter<int>(dataContextInfo.DataContext, field);
 
 							ei.Queries[0].Parameters.Add(param);
 
@@ -888,36 +881,36 @@ namespace BLToolkit.Data.Linq
 						ObjectOperation<T>.Update.Add(key, ei);
 					}
 
-			return (int)ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
 		}
 
 		#endregion
 
 		#region Delete
 
-		public static int Delete(IDataContext dataContext, T obj)
+		public static int Delete(IDataContextInfo dataContextInfo, T obj)
 		{
 			if (Equals(default(T), obj))
 				return 0;
 
 			ExpressionInfo<int> ei;
 
-			var key = new { dataContext.MappingSchema, dataContext.ContextID };
+			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
 			if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
 				lock (_sync)
 					if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
 					{
-						var sqlTable = new SqlTable<T>(dataContext.MappingSchema);
+						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Delete };
 
 						sqlQuery.From.Table(sqlTable);
 
 						ei = new ExpressionInfo<int>
 						{
-							MappingSchema     = dataContext.MappingSchema,
-							ContextID         = dataContext.ContextID,
-							CreateSqlProvider = dataContext.CreateSqlProvider,
+							MappingSchema     = dataContextInfo.MappingSchema,
+							ContextID         = dataContextInfo.ContextID,
+							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
 							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
@@ -929,7 +922,7 @@ namespace BLToolkit.Data.Linq
 
 						foreach (var field in keys)
 						{
-							var param = GetParameter<int>(dataContext, field);
+							var param = GetParameter<int>(dataContextInfo.DataContext, field);
 
 							ei.Queries[0].Parameters.Add(param);
 
@@ -941,7 +934,7 @@ namespace BLToolkit.Data.Linq
 						ObjectOperation<T>.Delete.Add(key, ei);
 					}
 
-			return (int)ei.GetElement(null, dataContext, Expression.Constant(obj), null);
+			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
 		}
 
 		#endregion

@@ -683,9 +683,15 @@ namespace BLToolkit.Data.Linq
 
 		#region Insert
 
+		public static int Insert<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			return ExpressionInfo<T>.Insert(dataContextInfo, obj);
+		}
+
 		public static int Insert<T>(this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.Insert(dataContext, obj);
+			return ExpressionInfo<T>.Insert(DataContextInfo.Create(dataContext), obj);
 		}
 
 		public static int Insert<T>(this DbManager dataContext, params T[] list)
@@ -707,18 +713,30 @@ namespace BLToolkit.Data.Linq
 
 		#region InsertWithIdentity
 
+		public static object InsertWithIdentity<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			return ExpressionInfo<T>.InsertWithIdentity(dataContextInfo, obj);
+		}
+
 		public static object InsertWithIdentity<T>(this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.InsertWithIdentity(dataContext, obj);
+			return ExpressionInfo<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
 		}
 
 		#endregion
 
 		#region Update
 
+		public static int Update<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			return ExpressionInfo<T>.Update(dataContextInfo, obj);
+		}
+
 		public static int Update<T>(this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.Update(dataContext, obj);
+			return ExpressionInfo<T>.Update(DataContextInfo.Create(dataContext), obj);
 		}
 
 		public static int Update<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
@@ -735,9 +753,15 @@ namespace BLToolkit.Data.Linq
 
 		#region Delete
 
-		public static int Delete<T>(this IDataContext dataContext, T obj)
+		public static int Delete<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
-			return ExpressionInfo<T>.Delete(dataContext, obj);
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			return ExpressionInfo<T>.Delete(dataContextInfo, obj);
+		}
+
+		public static int Delete<T>([NotNull] this IDataContext dataContext, T obj)
+		{
+			return ExpressionInfo<T>.Delete(DataContextInfo.Create(dataContext), obj);
 		}
 
 		public static int Delete<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)

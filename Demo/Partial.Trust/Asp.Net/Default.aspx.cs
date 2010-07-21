@@ -21,18 +21,18 @@ namespace Partial.Trust.Asp.Net
 			var q =
 				from c in new Table<Customers>()
 				where c.CustomerID == list[0].CustomerID
-				select c;
+				select c.ContactName;
 
-			Label2.Text = q.First().ContactName;
+			Label2.Text = q.First();
 
 			using (var db = new DbManager())
-				Label3.Text = _compiledQuery(db, list[0].CustomerID).ToList().First().ContactName;
+				Label3.Text = _compiledQuery(db, list[0].CustomerID).ToList().First();
 		}
 
-		static readonly Func<DbManager,string,IQueryable<Customers>> _compiledQuery =
+		static readonly Func<DbManager,string,IQueryable<string>> _compiledQuery =
 			CompiledQuery.Compile((DbManager db, string id) => 
 				from c in db.GetTable<Customers>()
 				where c.CustomerID == id
-				select c);
+				select c.ContactName);
 	}
 }

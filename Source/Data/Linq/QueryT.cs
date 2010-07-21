@@ -5,21 +5,24 @@ namespace BLToolkit.Data.Linq
 {
 	class Query<T> : Table<T>
 	{
+		[Obsolete]
 		public Query()
 		{
 		}
 
+		[Obsolete]
 		public Query(DbManager dbManager)
 			: base(dbManager)
 		{
 		}
 
+		[Obsolete]
 		public Query(Expression expression)
 			: base(expression)
 		{
 		}
 
-		public Query(IDataContext dataContext, Expression expression)
+		public Query(IDataContextInfo dataContext, Expression expression)
 			: base(dataContext, expression)
 		{
 		}
