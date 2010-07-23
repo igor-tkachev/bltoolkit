@@ -394,9 +394,7 @@ namespace BLToolkit.Data.Linq
 										return BuildSubQuerySource(ma, (QueryField.SubQueryColumn)field, converter);
 
 									if (field is QueryField.GroupByColumn)
-									{
 										return BuildGroupBy(ma, (QueryField.GroupByColumn)field, converter);
-									}
 
 									if (field is QuerySource.SubQuerySourceColumn)
 										return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)field, converter);
@@ -978,6 +976,7 @@ namespace BLToolkit.Data.Linq
 			}
 
 			var result = BuildNewExpression(field.GroupBySource.Lambda, source, field.GroupBySource.Lambda.Body, converter);
+
 			ParsingTracer.DecIndentLevel();
 			return result;
 		}

@@ -2950,7 +2950,7 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			throw new InvalidOperationException();
+			return null;
 		}
 
 		static void ResolveFields(QueryData data)
@@ -2976,7 +2976,12 @@ namespace BLToolkit.Data.Sql
 				}
 
 				if (!found)
-					dic.Add(field, GetColumn(data, field));
+				{
+					var expr = GetColumn(data, field);
+
+					if (expr != null)
+						dic.Add(field, expr);
+				}
 			}
 
 			if (dic.Count > 0)
