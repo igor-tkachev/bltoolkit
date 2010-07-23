@@ -3,54 +3,73 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Sql
 {
-	using VisitFunc   = Action<IQueryElement>;
+	using VisitFunc   = Func<IQueryElement,bool>;
 	using FindFunc    = Func<IQueryElement,bool>;
 	using ConvertFunc = Func<IQueryElement,IQueryElement>;
 
 	public class QueryVisitor
 	{
+		#region Visit
+
 		readonly Dictionary<IQueryElement,IQueryElement> _visitedElements = new Dictionary<IQueryElement, IQueryElement>();
 		public   Dictionary<IQueryElement,IQueryElement>  VisitedElements
 		{
 			get { return _visitedElements; }
 		}
 
-		public void Visit(IQueryElement element, VisitFunc action)
+		public void Visit(IQueryElement element, Action<IQueryElement> action)
 		{
 			_visitedElements.Clear();
-			Visit(element, false, action);
+			Visit(element, false, false, e => { action(e); return true; });
 		}
 
-		public void VisitAll(IQueryElement element, VisitFunc action)
+		public void Visit(IQueryElement element, bool parentFirst, VisitFunc action)
 		{
 			_visitedElements.Clear();
-			Visit(element, true, action);
+			Visit(element, false, parentFirst, action);
 		}
 
-		void Visit(IQueryElement element, bool all, VisitFunc action)
+		public void VisitAll(IQueryElement element, Action<IQueryElement> action)
+		{
+			_visitedElements.Clear();
+			Visit(element, true, false, e => { action(e); return true; });
+		}
+
+		void Visit(IQueryElement element, bool all, bool parentFirst, VisitFunc action)
 		{
 			if (element == null || !all && _visitedElements.ContainsKey(element))
 				return;
+
+			if (parentFirst)
+			{
+				var @continue = action(element);
+
+				if (!all)
+					_visitedElements.Add(element, element);
+
+				if (!@continue)
+					return;
+			}
 
 			switch (element.ElementType)
 			{
 				case QueryElementType.SqlFunction:
 					{
-						foreach (var p in ((SqlFunction)element).Parameters) Visit(p, all, action);
+						foreach (var p in ((SqlFunction)element).Parameters) Visit(p, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.SqlExpression:
 					{
-						foreach (var v in ((SqlExpression)element).Parameters) Visit(v, all, action);
+						foreach (var v in ((SqlExpression)element).Parameters) Visit(v, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.SqlBinaryExpression:
 					{
 						var bexpr = (SqlBinaryExpression)element;
-						Visit(bexpr.Expr1, all, action);
-						Visit(bexpr.Expr2, all, action);
+						Visit(bexpr.Expr1, all, parentFirst, action);
+						Visit(bexpr.Expr2, all, parentFirst, action);
 						break;
 					}
 
@@ -58,21 +77,21 @@ namespace BLToolkit.Data.Sql
 					{
 						var table = (SqlTable)element;
 
-						Visit(table.All, all, action);
-						foreach (var field in table.Fields.Values) Visit(field, all, action);
-						foreach (var join  in table.Joins)         Visit(join,  all, action);
+						Visit(table.All, all, parentFirst, action);
+						foreach (var field in table.Fields.Values) Visit(field, all, parentFirst, action);
+						foreach (var join  in table.Joins)         Visit(join,  all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.Join:
 					{
-						foreach (var j in ((Join)element).JoinOns) Visit(j, all, action);
+						foreach (var j in ((Join)element).JoinOns) Visit(j, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.Column:
 					{
-						Visit(((SqlQuery.Column)element).Expression, all, action);
+						Visit(((SqlQuery.Column)element).Expression, all, parentFirst, action);
 						break;
 					}
 
@@ -80,103 +99,103 @@ namespace BLToolkit.Data.Sql
 					{
 						var table = (SqlQuery.TableSource)element;
 
-						Visit(table.Source, all, action);
-						foreach (var j in table.Joins) Visit(j, all, action);
+						Visit(table.Source, all, parentFirst, action);
+						foreach (var j in table.Joins) Visit(j, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.JoinedTable:
 					{
 						var join = (SqlQuery.JoinedTable)element;
-						Visit(join.Table,     all, action);
-						Visit(join.Condition, all, action);
+						Visit(join.Table,     all, parentFirst, action);
+						Visit(join.Condition, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.SearchCondition:
 					{
-						foreach (var c in ((SqlQuery.SearchCondition)element).Conditions) Visit(c, all, action);
+						foreach (var c in ((SqlQuery.SearchCondition)element).Conditions) Visit(c, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.Condition:
 					{
-						Visit(((SqlQuery.Condition)element).Predicate, all, action);
+						Visit(((SqlQuery.Condition)element).Predicate, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.ExprPredicate:
 					{
-						Visit(((SqlQuery.Predicate.Expr)element).Expr1, all, action);
+						Visit(((SqlQuery.Predicate.Expr)element).Expr1, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.NotExprPredicate:
 					{
-						Visit(((SqlQuery.Predicate.NotExpr)element).Expr1, all, action);
+						Visit(((SqlQuery.Predicate.NotExpr)element).Expr1, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.ExprExprPredicate:
 					{
 						var p = (SqlQuery.Predicate.ExprExpr)element;
-						Visit(p.Expr1, all, action);
-						Visit(p.Expr2, all, action);
+						Visit(p.Expr1, all, parentFirst, action);
+						Visit(p.Expr2, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.LikePredicate:
 					{
 						var p = (SqlQuery.Predicate.Like)element;
-						Visit(p.Expr1,  all, action);
-						Visit(p.Expr2,  all, action);
-						Visit(p.Escape, all, action);
+						Visit(p.Expr1,  all, parentFirst, action);
+						Visit(p.Expr2,  all, parentFirst, action);
+						Visit(p.Escape, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.BetweenPredicate:
 					{
 						var p = (SqlQuery.Predicate.Between)element;
-						Visit(p.Expr1, all, action);
-						Visit(p.Expr2, all, action);
-						Visit(p.Expr3, all, action);
+						Visit(p.Expr1, all, parentFirst, action);
+						Visit(p.Expr2, all, parentFirst, action);
+						Visit(p.Expr3, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.IsNullPredicate:
 					{
-						Visit(((SqlQuery.Predicate.IsNull)element).Expr1, all, action);
+						Visit(((SqlQuery.Predicate.IsNull)element).Expr1, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.InSubQueryPredicate:
 					{
 						var p = (SqlQuery.Predicate.InSubQuery)element;
-						Visit(p.Expr1,    all, action);
-						Visit(p.SubQuery, all, action);
+						Visit(p.Expr1,    all, parentFirst, action);
+						Visit(p.SubQuery, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.InListPredicate:
 					{
 						var p = (SqlQuery.Predicate.InList)element;
-						Visit(p.Expr1, all, action);
-						foreach (var value in p.Values) Visit(value, all, action);
+						Visit(p.Expr1, all, parentFirst, action);
+						foreach (var value in p.Values) Visit(value, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.FuncLikePredicate:
 					{
 						var p = (SqlQuery.Predicate.FuncLike)element;
-						Visit(p.Function, all, action);
+						Visit(p.Function, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.SetExpression:
 					{
 						var s = (SqlQuery.SetExpression)element;
-						Visit(s.Column,     all, action);
-						Visit(s.Expression, all, action);
+						Visit(s.Column,     all, parentFirst, action);
+						Visit(s.Expression, all, parentFirst, action);
 						break;
 					}
 
@@ -185,54 +204,54 @@ namespace BLToolkit.Data.Sql
 						var sc = (SqlQuery.SetClause)element;
 
 						if (sc.Into != null)
-							Visit(sc.Into, all, action);
+							Visit(sc.Into, all, parentFirst, action);
 
-						foreach (var c in sc.Items.ToArray()) Visit(c, all, action);
+						foreach (var c in sc.Items.ToArray()) Visit(c, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.SelectClause:
 					{
 						var sc = (SqlQuery.SelectClause)element;
-						Visit(sc.TakeValue, all, action);
-						Visit(sc.SkipValue, all, action);
+						Visit(sc.TakeValue, all, parentFirst, action);
+						Visit(sc.SkipValue, all, parentFirst, action);
 
-						foreach (var c in sc.Columns.ToArray()) Visit(c, all, action);
+						foreach (var c in sc.Columns.ToArray()) Visit(c, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.FromClause:
 					{
-						foreach (var t in ((SqlQuery.FromClause)element).Tables) Visit(t, all, action);
+						foreach (var t in ((SqlQuery.FromClause)element).Tables) Visit(t, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.WhereClause:
 					{
-						Visit(((SqlQuery.WhereClause)element).SearchCondition, all, action);
+						Visit(((SqlQuery.WhereClause)element).SearchCondition, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.GroupByClause:
 					{
-						foreach (var i in ((SqlQuery.GroupByClause)element).Items) Visit(i, all, action);
+						foreach (var i in ((SqlQuery.GroupByClause)element).Items) Visit(i, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.OrderByClause:
 					{
-						foreach (var i in ((SqlQuery.OrderByClause)element).Items) Visit(i, all, action);
+						foreach (var i in ((SqlQuery.OrderByClause)element).Items) Visit(i, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.OrderByItem:
 					{
-						Visit(((SqlQuery.OrderByItem)element).Expression, all, action);
+						Visit(((SqlQuery.OrderByItem)element).Expression, all, parentFirst, action);
 						break;
 					}
 
 				case QueryElementType.Union:
-					Visit(((SqlQuery.Union)element).SqlQuery, all, action);
+					Visit(((SqlQuery.Union)element).SqlQuery, all, parentFirst, action);
 					break;
 
 				case QueryElementType.SqlQuery:
@@ -247,15 +266,15 @@ namespace BLToolkit.Data.Sql
 						var q = (SqlQuery)element;
 
 						if (q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert)
-							Visit(q.Set, all, action);
+							Visit(q.Set, all, parentFirst, action);
 						else
-							Visit(q.Select, all, action);
+							Visit(q.Select, all, parentFirst, action);
 
-						Visit(q.From,    all, action);
-						Visit(q.Where,   all, action);
-						Visit(q.GroupBy, all, action);
-						Visit(q.Having,  all, action);
-						Visit(q.OrderBy, all, action);
+						Visit(q.From,    all, parentFirst, action);
+						Visit(q.Where,   all, parentFirst, action);
+						Visit(q.GroupBy, all, parentFirst, action);
+						Visit(q.Having,  all, parentFirst, action);
+						Visit(q.OrderBy, all, parentFirst, action);
 
 						if (q.HasUnion)
 						{
@@ -264,7 +283,7 @@ namespace BLToolkit.Data.Sql
 								if (i.SqlQuery == q)
 									throw new InvalidOperationException();
 
-								Visit(i, all, action);
+								Visit(i, all, parentFirst, action);
 							}
 						}
 
@@ -272,11 +291,18 @@ namespace BLToolkit.Data.Sql
 					}
 			}
 
-			action(element);
+			if (!parentFirst)
+			{
+				action(element);
 
-			if (!all)
-				_visitedElements.Add(element, element);
+				if (!all)
+					_visitedElements.Add(element, element);
+			}
 		}
+
+		#endregion
+
+		#region Find
 
 		IQueryElement Find<T>(IEnumerable<T> arr, FindFunc find)
 			where T : class, IQueryElement
@@ -432,6 +458,10 @@ namespace BLToolkit.Data.Sql
 
 			return null;
 		}
+
+		#endregion
+
+		#region Convert
 
 		public T Convert<T>(T element, ConvertFunc action)
 			where T : class, IQueryElement
@@ -997,5 +1027,7 @@ namespace BLToolkit.Data.Sql
 
 			return list2;
 		}
+
+		#endregion
 	}
 }

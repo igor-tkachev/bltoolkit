@@ -207,6 +207,50 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void SubQuery3()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in
+					from ch in Child
+					select new { ch, n = ch.ChildID + 1 }
+				group ch by ch.n into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _.ch.ParentID)
+				},
+				from ch in
+					from ch in db.Child
+					select new { ch, n = ch.ChildID + 1 }
+				group ch by ch.n into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _.ch.ParentID)
+				}));
+		}
+
+		[Test]
+		public void SubQuery4()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by new { n = ch.ChildID + 1 } into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _.ParentID)
+				},
+				from ch in db.Child
+				group ch by new { n = ch.ChildID + 1 } into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _.ParentID)
+				}));
+		}
+
+		[Test]
 		public void Calculated1()
 		{
 			var expected = 

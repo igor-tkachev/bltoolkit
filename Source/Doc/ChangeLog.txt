@@ -7,7 +7,7 @@ Bug fixes
 Enhancement
 
 - No more .NET Framework 2.0 support.
-- T4 Templates for Sybase and MS SQL Server.
+- T4 Templates for Sybase, MS SQL Server, and PostgreSQL.
 
 
 v 3.2

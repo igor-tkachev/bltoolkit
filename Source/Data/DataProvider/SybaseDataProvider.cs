@@ -110,6 +110,20 @@ namespace BLToolkit.Data.DataProvider
 			return new SybaseSqlProvider();
 		}
 
+		public override bool InitParameter(IDbDataParameter parameter)
+		{
+			if (parameter.Value is Guid)
+			{
+				parameter.Value  = parameter.Value.ToString();
+				parameter.DbType = DbType.StringFixedLength;
+				parameter.Size   = 36;
+
+				return true;
+			}
+
+			return false;
+		}
+
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);

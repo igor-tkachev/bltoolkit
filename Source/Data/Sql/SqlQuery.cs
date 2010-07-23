@@ -527,7 +527,7 @@ namespace BLToolkit.Data.Sql
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak, SearchCondition searchCondition)
 			{
-				JoinType   = joinType;
+				JoinType  = joinType;
 				Table     = table;
 				IsWeak    = isWeak;
 				Condition = searchCondition;
@@ -741,7 +741,7 @@ namespace BLToolkit.Data.Sql
 				}
 
 				public new Operator   Operator { get; private set; }
-				public ISqlExpression Expr2    { get; private set; }
+				public ISqlExpression Expr2    { get; internal set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
@@ -810,8 +810,8 @@ namespace BLToolkit.Data.Sql
 					Escape = escape;
 				}
 
-				public ISqlExpression Expr2  { get; private set; }
-				public ISqlExpression Escape { get; private set; }
+				public ISqlExpression Expr2  { get; internal set; }
+				public ISqlExpression Escape { get; internal set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
@@ -870,8 +870,8 @@ namespace BLToolkit.Data.Sql
 					Expr3 = exp3;
 				}
 
-				public ISqlExpression Expr2 { get; private set; }
-				public ISqlExpression Expr3 { get; private set; }
+				public ISqlExpression Expr2 { get; internal set; }
+				public ISqlExpression Expr3 { get; internal set; }
 
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
@@ -1619,7 +1619,7 @@ namespace BLToolkit.Data.Sql
 				IsDescending = isDescending;
 			}
 
-			public ISqlExpression Expression   { get; private set; }
+			public ISqlExpression Expression   { get; internal set; }
 			public bool           IsDescending { get; private set; }
 
 			[Obsolete]
@@ -2857,11 +2857,261 @@ namespace BLToolkit.Data.Sql
 
 			OptimizeUnions();
 			FinalizeAndValidateInternal();
+			ResolveFields();
 			SetAliases();
 
 #if DEBUG
 			sqlText = SqlText;
 #endif
+		}
+
+		class QueryData
+		{
+			public SqlQuery             Query;
+			public List<ISqlExpression> Fields  = new List<ISqlExpression>();
+			public List<QueryData>      Queries = new List<QueryData>();
+		}
+
+		void ResolveFields()
+		{
+			var root = GetQueryData();
+
+			ResolveFields(root);
+		}
+
+		QueryData GetQueryData()
+		{
+			var data = new QueryData { Query = this };
+
+			new QueryVisitor().Visit(this, true, e =>
+			{
+				switch (e.ElementType)
+				{
+					case QueryElementType.SqlField :
+						{
+							var field = (SqlField)e;
+
+							if (field.Name.Length != 1 || field.Name[0] != '*')
+								data.Fields.Add(field);
+
+							break;
+						}
+
+					case QueryElementType.SqlQuery :
+						{
+							if (e != this)
+							{
+								data.Queries.Add(((SqlQuery)e).GetQueryData());
+								return false;
+							}
+
+							break;
+						}
+
+					case QueryElementType.Column :
+						return ((Column)e).Parent == this;
+
+					case QueryElementType.SqlTable :
+						return false;
+				}
+
+				return true;
+			});
+
+			return data;
+		}
+
+		static TableSource FindField(SqlField field, TableSource table)
+		{
+			if (field.Table == table.Source)
+				return table;
+
+			foreach (var @join in table.Joins)
+			{
+				var t = FindField(field, @join.Table);
+
+				if (t != null)
+					return @join.Table;
+			}
+
+			return null;
+		}
+
+		static ISqlExpression GetColumn(QueryData data, SqlField field)
+		{
+			foreach (var query in data.Queries)
+			{
+				foreach (var table in query.Query.From.Tables)
+				{
+					var t = FindField(field, table);
+
+					if (t != null)
+						return query.Query.Select.Columns[query.Query.Select.Add(field)];
+				}
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		static void ResolveFields(QueryData data)
+		{
+			if (data.Queries.Count == 0)
+				return;
+
+			var dic = new Dictionary<ISqlExpression,ISqlExpression>();
+
+			foreach (SqlField field in data.Fields)
+			{
+				if (dic.ContainsKey(field))
+					continue;
+
+				var found = false;
+
+				foreach (var table in data.Query.From.Tables)
+				{
+					found = FindField(field, table) != null;
+
+					if (found)
+						break;
+				}
+
+				if (!found)
+					dic.Add(field, GetColumn(data, field));
+			}
+
+			if (dic.Count > 0)
+				new QueryVisitor().Visit(data.Query, true, e =>
+				{
+					ISqlExpression ex;
+
+					switch (e.ElementType)
+					{
+						case QueryElementType.SqlQuery :
+							return e == data.Query;
+
+						case QueryElementType.SqlFunction :
+							{
+								var parms = ((SqlFunction)e).Parameters;
+
+								for (var i = 0; i < parms.Length; i++)
+									if (dic.TryGetValue(parms[i], out ex))
+										parms[i] = ex;
+
+								break;
+							}
+
+						case QueryElementType.SqlExpression :
+							{
+								var parms = ((SqlExpression)e).Parameters;
+
+								for (var i = 0; i < parms.Length; i++)
+									if (dic.TryGetValue(parms[i], out ex))
+										parms[i] = ex;
+
+								break;
+							}
+
+						case QueryElementType.SqlBinaryExpression :
+							{
+								var expr = (SqlBinaryExpression)e;
+								if (dic.TryGetValue(expr.Expr1, out ex)) expr.Expr1 = ex;
+								if (dic.TryGetValue(expr.Expr2, out ex)) expr.Expr2 = ex;
+								break;
+							}
+
+						case QueryElementType.ExprPredicate       :
+						case QueryElementType.NotExprPredicate    :
+						case QueryElementType.IsNullPredicate     :
+						case QueryElementType.InSubQueryPredicate :
+							{
+								var expr = (Predicate.Expr)e;
+								if (dic.TryGetValue(expr.Expr1, out ex)) expr.Expr1 = ex;
+								break;
+							}
+
+						case QueryElementType.ExprExprPredicate :
+							{
+								var expr = (Predicate.ExprExpr)e;
+								if (dic.TryGetValue(expr.Expr1, out ex)) expr.Expr1 = ex;
+								if (dic.TryGetValue(expr.Expr2, out ex)) expr.Expr2 = ex;
+								break;
+							}
+
+						case QueryElementType.LikePredicate :
+							{
+								var expr = (Predicate.Like)e;
+								if (dic.TryGetValue(expr.Expr1,  out ex)) expr.Expr1  = ex;
+								if (dic.TryGetValue(expr.Expr2,  out ex)) expr.Expr2  = ex;
+								if (dic.TryGetValue(expr.Escape, out ex)) expr.Escape = ex;
+								break;
+							}
+
+						case QueryElementType.BetweenPredicate :
+							{
+								var expr = (Predicate.Between)e;
+								if (dic.TryGetValue(expr.Expr1, out ex)) expr.Expr1 = ex;
+								if (dic.TryGetValue(expr.Expr2, out ex)) expr.Expr2 = ex;
+								if (dic.TryGetValue(expr.Expr3, out ex)) expr.Expr3 = ex;
+								break;
+							}
+
+						case QueryElementType.InListPredicate :
+							{
+								var expr = (Predicate.InList)e;
+
+								if (dic.TryGetValue(expr.Expr1, out ex)) expr.Expr1 = ex;
+
+								for (var i = 0; i < expr.Values.Count; i++)
+									if (dic.TryGetValue(expr.Values[i], out ex))
+										expr.Values[i] = ex;
+
+								break;
+							}
+
+						case QueryElementType.Column :
+							{
+								var expr = (Column)e;
+
+								if (expr.Parent != data.Query)
+									return false;
+
+								if (dic.TryGetValue(expr.Expression, out ex)) expr.Expression = ex;
+
+								break;
+							}
+
+						case QueryElementType.SetExpression :
+							{
+								var expr = (SetExpression)e;
+								if (dic.TryGetValue(expr.Expression, out ex)) expr.Expression = ex;
+								break;
+							}
+
+						case QueryElementType.GroupByClause :
+							{
+								var expr = (GroupByClause)e;
+
+								for (var i = 0; i < expr.Items.Count; i++)
+									if (dic.TryGetValue(expr.Items[i], out ex))
+										expr.Items[i] = ex;
+
+								break;
+							}
+
+						case QueryElementType.OrderByItem :
+							{
+								var expr = (OrderByItem)e;
+								if (dic.TryGetValue(expr.Expression, out ex)) expr.Expression = ex;
+								break;
+							}
+					}
+
+					return true;
+				});
+
+			foreach (var query in data.Queries)
+				if (query.Queries.Count > 0)
+					ResolveFields(query);
 		}
 
 		void OptimizeUnions()

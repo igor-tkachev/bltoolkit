@@ -573,16 +573,16 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDC">
+		/// <typeparam name="TDc">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDC,TResult> Compile<TDC,TResult>(
+		static public Func<TDc,TResult> Compile<TDc,TResult>(
 			[NotNull] this IDataContext dataContext,
-			[NotNull] Expression<Func<TDC,TResult>> query)
-			where TDC : IDataContext
+			[NotNull] Expression<Func<TDc,TResult>> query)
+			where TDc : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -597,7 +597,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDC">
+		/// <typeparam name="TDc">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -606,10 +606,10 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDC,TArg1,TResult> Compile<TDC,TArg1, TResult>(
+		static public Func<TDc,TArg1,TResult> Compile<TDc,TArg1, TResult>(
 			[NotNull] this IDataContext dataContext,
-			[NotNull] Expression<Func<TDC,TArg1,TResult>> query)
-			where TDC : IDataContext
+			[NotNull] Expression<Func<TDc,TArg1,TResult>> query)
+			where TDc : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -624,7 +624,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDC">
+		/// <typeparam name="TDc">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -636,10 +636,10 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDC,TArg1,TArg2,TResult> Compile<TDC,TArg1,TArg2,TResult>(
+		static public Func<TDc,TArg1,TArg2,TResult> Compile<TDc,TArg1,TArg2,TResult>(
 			[NotNull] this IDataContext dataContext,
-			[NotNull] Expression<Func<TDC,TArg1,TArg2,TResult>> query)
-			where TDC : IDataContext
+			[NotNull] Expression<Func<TDc,TArg1,TArg2,TResult>> query)
+			where TDc : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -654,7 +654,7 @@ namespace BLToolkit.Data.Linq
 		/// <param name="query">
 		/// The query expression to be compiled.
 		/// </param>
-		/// <typeparam name="TDC">
+		/// <typeparam name="TDc">
 		/// Represents the type of the parameter that has to be passed in when executing the delegate returned by the method.
 		/// </typeparam>
 		/// <typeparam name="TArg1">
@@ -669,10 +669,10 @@ namespace BLToolkit.Data.Linq
 		/// <typeparam name="TResult">
 		/// Returned type of the delegate returned by the method.
 		/// </typeparam>
-		static public Func<TDC,TArg1,TArg2,TArg3,TResult> Compile<TDC,TArg1,TArg2,TArg3,TResult>(
+		static public Func<TDc,TArg1,TArg2,TArg3,TResult> Compile<TDc,TArg1,TArg2,TArg3,TResult>(
 			[NotNull] this IDataContext dataContext,
-			[NotNull] Expression<Func<TDC,TArg1,TArg2,TArg3,TResult>> query)
-			where TDC : IDataContext
+			[NotNull] Expression<Func<TDc,TArg1,TArg2,TArg3,TResult>> query)
+			where TDc : IDataContext
 		{
 			return CompiledQuery.Compile(query);
 		}
@@ -694,7 +694,7 @@ namespace BLToolkit.Data.Linq
 			return ExpressionInfo<T>.Insert(DataContextInfo.Create(dataContext), obj);
 		}
 
-		public static int Insert<T>(this DbManager dataContext, params T[] list)
+		public static int Insert<T>(this DbManager dataContext, T[] list)
 		{
 			return Insert(dataContext, int.MaxValue, list);
 		}

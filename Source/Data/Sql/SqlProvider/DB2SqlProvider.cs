@@ -170,7 +170,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			new QueryVisitor().Visit(sqlQuery.Select, delegate(IQueryElement element)
+			new QueryVisitor().Visit(sqlQuery.Select, element =>
 			{
 				if (element.ElementType == QueryElementType.SqlParameter)
 					((SqlParameter)element).IsQueryParameter = false;

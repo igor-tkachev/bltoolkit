@@ -364,7 +364,7 @@ namespace BLToolkit.Data.Linq
 								return BuildSubQuery(pi, query, converter);
 
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
-								return BuildField(lambda, query.BaseQuery, pi);
+								return BuildField(lambda, query.BaseQuery, pi, converter);
 
 							var ma = (MemberExpression)pi;
 							var ex = ma.Expression;
@@ -492,7 +492,7 @@ namespace BLToolkit.Data.Linq
 							}
 
 							if (query is QuerySource.Scalar && CurrentSql.Select.Columns.Count == 0 && expr == pi)
-								return BuildField(lambda, query.BaseQuery, pi);
+								return BuildField(lambda, query.BaseQuery, pi, converter);
 
 							if (query is QuerySource.SubQuerySourceColumn)
 								return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)query, converter);
@@ -502,12 +502,12 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Coalesce:
 						if (pi.Type == typeof(string) && _info.MappingSchema.GetDefaultNullValue<string>() != null)
-							return BuildField(lambda, query.BaseQuery, pi);
+							return BuildField(lambda, query.BaseQuery, pi, converter);
 						goto case ExpressionType.Conditional;
 
 					case ExpressionType.Conditional:
 						if (CanBeTranslatedToSql(lambda, pi, true, query.BaseQuery))
-							return BuildField(lambda, query.BaseQuery, pi);
+							return BuildField(lambda, query.BaseQuery, pi, converter);
 						break;
 
 					case ExpressionType.Call:
@@ -523,7 +523,7 @@ namespace BLToolkit.Data.Linq
 								return BuildSubQuery(pi, query, converter);
 
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
-								return BuildField(lambda, query.BaseQuery, pi);
+								return BuildField(lambda, query.BaseQuery, pi, converter);
 						}
 
 						break;
@@ -540,7 +540,7 @@ namespace BLToolkit.Data.Linq
 						default:
 							if (CanBeCompiled(pi))
 								break;
-							return BuildField(lambda, query.BaseQuery, pi);
+							return BuildField(lambda, query.BaseQuery, pi, converter);
 					}
 				}
 
@@ -986,7 +986,7 @@ namespace BLToolkit.Data.Linq
 
 		#region BuildField
 
-		Expression BuildField(LambdaInfo lambda, QuerySource query, Expression expr)
+		Expression BuildField(LambdaInfo lambda, QuerySource query, Expression expr, IndexConverter converter)
 		{
 			ParsingTracer.WriteLine(expr);
 			ParsingTracer.WriteLine(query);

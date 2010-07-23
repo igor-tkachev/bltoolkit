@@ -26,9 +26,9 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
-		public ISqlExpression Expr1      { get; private set; }
+		public ISqlExpression Expr1      { get; internal set; }
 		public string         Operation  { get; private set; }
-		public ISqlExpression Expr2      { get; private set; }
+		public ISqlExpression Expr2      { get; internal set; }
 		public Type           SystemType { get; private set; }
 		public int            Precedence { get; private set; }
 

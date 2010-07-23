@@ -161,7 +161,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			new QueryVisitor().Visit(sqlQuery.Select, SetNonQueryParameter);
 
-			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement element)
+			new QueryVisitor().Visit(sqlQuery, element =>
 			{
 				if (element.ElementType == QueryElementType.InSubQueryPredicate)
 					new QueryVisitor().Visit(((SqlQuery.Predicate.InSubQuery)element).Expr1, SetNonQueryParameter);

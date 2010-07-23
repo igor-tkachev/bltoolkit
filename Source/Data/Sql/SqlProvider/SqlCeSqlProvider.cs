@@ -108,13 +108,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			sqlQuery = base.Finalize(sqlQuery);
 
-			new QueryVisitor().Visit(sqlQuery.Select, delegate(IQueryElement element)
+			new QueryVisitor().Visit(sqlQuery.Select, element =>
 			{
 				if (element.ElementType == QueryElementType.SqlParameter)
 					((SqlParameter)element).IsQueryParameter = false;
 			});
 
-			new QueryVisitor().Visit(sqlQuery, delegate(IQueryElement element)
+			new QueryVisitor().Visit(sqlQuery, element =>
 			{
 				if (element.ElementType != QueryElementType.SqlQuery)
 					return;
@@ -130,7 +130,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						var subQuery = (SqlQuery)col.Expression;
 						var tables   = new Dictionary<ISqlTableSource,object>();
 
-						new QueryVisitor().Visit(subQuery, delegate(IQueryElement e)
+						new QueryVisitor().Visit(subQuery, e =>
 						{
 							if (e is ISqlTableSource && subQuery.From.IsChild((ISqlTableSource)e))
 								tables.Add((ISqlTableSource)e, null);
