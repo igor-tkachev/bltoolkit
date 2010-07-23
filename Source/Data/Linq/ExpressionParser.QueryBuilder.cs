@@ -972,7 +972,34 @@ namespace BLToolkit.Data.Linq
 				if (source.BaseQuery is QuerySource.Scalar)
 					return BuildField(ma, field.GroupBySource, converter);
 
-				return BuildNewExpression(field.GroupBySource.Lambda, source, field.GroupBySource.Lambda.Body, converter /*i => converter(source.EnsureField(i.Field).Select(this)[0])*/);
+				if (source.BaseQuery is QuerySource.Expr)
+				{
+					if (field.GroupBySource.Lambda.Body.NodeType == ExpressionType.New)
+					{
+						var newExpr = (NewExpression)field.GroupBySource.Lambda.Body;
+
+						return newExpr.Convert(e =>
+						{
+							var arg = newExpr.Arguments
+								.Select((a,i) => new { a, i })
+								.Where(_ => _.a == e)
+								.Select(_ => (int?)_.i)
+								.FirstOrDefault();
+
+							if (arg != null)
+							{
+								var fld = source.BaseQuery.GetField(field.GroupBySource.Lambda, e, 0);
+								var ex  = fld.GetExpressions(this)[0];
+								var col = fld.Sources[0].SqlQuery.Select.Columns[fld.Sources[0].SqlQuery.Select.Add(ex)];
+								var idx = CurrentSql.Select.Add(col);
+
+								return BuildField(e, new[] { idx });
+							}
+
+							return e;
+						});
+					}
+				}
 			}
 
 			var result = BuildNewExpression(field.GroupBySource.Lambda, source, field.GroupBySource.Lambda.Body, converter);
