@@ -164,6 +164,7 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
+    <Compile Include="ExtensionTests.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="VisualBasicTest.cs" />
     <Compile Include="DmlTest.cs" />
@@ -190,7 +191,6 @@
     <Compile Include="Exceptions\JoinTest.cs" />
     <Compile Include="JoinTest.cs" />
     <Compile Include="DateTimeFunctions.cs" />
-    <Compile Include="ProviderSpecific\MySql.cs" />
     <Compile Include="SelectManyTest.cs" />
     <Compile Include="StringFunctions.cs" />
     <Compile Include="SelectTest.cs" />

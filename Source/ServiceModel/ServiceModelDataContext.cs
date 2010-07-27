@@ -151,7 +151,14 @@ namespace BLToolkit.ServiceModel
 
 		IDataReader IDataContext.ExecuteReader(object query)
 		{
-			throw new NotImplementedException();
+			var ctx = (IQueryContext)query;
+
+			LinqServiceResult ret;
+
+			using (var client = GetClient())
+				ret = client.ExecuteReader(new LinqServiceQuery { Query = ctx.SqlQuery, Parameters = ctx.GetParameters() });
+
+			return new ServiceModelDataReader(ret);
 		}
 
 		object IDataContext.CreateInstance(InitContext context)

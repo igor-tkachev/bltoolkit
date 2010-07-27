@@ -36,7 +36,7 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (path == null) throw new ArgumentNullException("path");
 
-			int idx = path.IndexOf(',');
+			var idx = path.IndexOf(',');
 
 			if (idx > 0)
 			{
@@ -48,7 +48,7 @@ namespace BLToolkit.Reflection.Emit
 
 					if (idx > 0)
 					{
-						int idx2 = path.LastIndexOf('.');
+						var idx2 = path.LastIndexOf('.');
 
 						if (idx2 > 0 && idx2 > idx)
 							path = path.Substring(0, idx + 1) + path.Substring(idx2 + 1);
@@ -62,9 +62,9 @@ namespace BLToolkit.Reflection.Emit
 			{
 				path = path.Substring(0, 248);
 
-				for (int i = 0; i < int.MaxValue; i++)
+				for (var i = 0; i < int.MaxValue; i++)
 				{
-					string newPath = string.Format("{0}_{1:0000}.dll", path, i);
+					var newPath = string.Format("{0}_{1:0000}.dll", path, i);
 
 					if (!System.IO.File.Exists(newPath))
 					{
@@ -74,10 +74,10 @@ namespace BLToolkit.Reflection.Emit
 				}
 			}
 
-			string assemblyName = System.IO.Path.GetFileNameWithoutExtension(path);
-			string assemblyDir  = System.IO.Path.GetDirectoryName(path);
+			var assemblyName = System.IO.Path.GetFileNameWithoutExtension(path);
+			var assemblyDir  = System.IO.Path.GetDirectoryName(path);
 
-			_path              = path;
+			Path               = path;
 			_assemblyName.Name = assemblyName;
 
 			if (version != null)
@@ -95,7 +95,7 @@ namespace BLToolkit.Reflection.Emit
 			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileOptimizer;
 #endif
 
-			_createAssemblyBuilder = delegate(int _)
+			_createAssemblyBuilder = _ =>
 			{
 				_assemblyBuilder =
 					string.IsNullOrEmpty(assemblyDir)?
@@ -111,14 +111,10 @@ namespace BLToolkit.Reflection.Emit
 			};
 		}
 
-		private readonly string _path;
 		/// <summary>
 		/// Gets the path where the assembly will be saved.
 		/// </summary>
-		public  string  Path
-		{
-			get { return _path; }
-		}
+		public string Path { get; private set; }
 
 		private readonly AssemblyName _assemblyName = new AssemblyName();
 		/// <summary>
@@ -182,8 +178,8 @@ namespace BLToolkit.Reflection.Emit
 			{
 				if (_blToolkitAttribute == null)
 				{
-					Type            at = typeof(TypeBuilder.BLToolkitGeneratedAttribute);
-					ConstructorInfo ci = at.GetConstructor(Type.EmptyTypes);
+					var at = typeof(TypeBuilder.BLToolkitGeneratedAttribute);
+					var ci = at.GetConstructor(Type.EmptyTypes);
 
 					_blToolkitAttribute = new CustomAttributeBuilder(ci, new object[0]);
 				}

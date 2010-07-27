@@ -14,13 +14,9 @@ namespace BLToolkit.ServiceModel
 		[OperationContract]
 		string GetSqlProviderType();
 
-		[OperationContract]
-		[LinqServiceDataContractFormat]
-		int    ExecuteNonQuery(LinqServiceQuery query);
-
-		[OperationContract]
-		[LinqServiceDataContractFormat]
-		object ExecuteScalar  (LinqServiceQuery query);
+		[OperationContract, LinqServiceDataContractFormat] int               ExecuteNonQuery(LinqServiceQuery query);
+		[OperationContract, LinqServiceDataContractFormat] object            ExecuteScalar  (LinqServiceQuery query);
+		[OperationContract, LinqServiceDataContractFormat] LinqServiceResult ExecuteReader  (LinqServiceQuery query);
 	}
 
 	class LinqServiceDataContractSerializerOperationBehavior : DataContractSerializerOperationBehavior
@@ -30,16 +26,16 @@ namespace BLToolkit.ServiceModel
 
 		public override XmlObjectSerializer CreateSerializer(Type type, string name, string ns, IList<Type> knownTypes)
 		{
-			if (type == typeof(LinqServiceQuery))
-				return new LinqServiceSerializer();
+			if (type == typeof(LinqServiceQuery))  return new LinqServiceSerializer.XmlQuerySerializer();
+			if (type == typeof(LinqServiceResult)) return new LinqServiceSerializer.XmlResultSerializer();
 
 			return base.CreateSerializer(type, name, ns, knownTypes);
 		}
 
 		public override XmlObjectSerializer CreateSerializer(Type type, XmlDictionaryString name, XmlDictionaryString ns, IList<Type> knownTypes)
 		{
-			if (type == typeof(LinqServiceQuery))
-				return new LinqServiceSerializer();
+			if (type == typeof(LinqServiceQuery))  return new LinqServiceSerializer.XmlQuerySerializer();
+			if (type == typeof(LinqServiceResult)) return new LinqServiceSerializer.XmlResultSerializer();
 
 			return base.CreateSerializer(type, name, ns, knownTypes);
 		}

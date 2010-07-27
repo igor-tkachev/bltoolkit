@@ -38,6 +38,11 @@ namespace BLToolkit.ServiceModel
 			return Channel.ExecuteScalar(query);
 		}
 
+		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
+		{
+			return Channel.ExecuteReader(query);
+		}
+
 		#endregion
 
 		#region IDisposable Members

@@ -14,51 +14,403 @@ using BLToolkit.Mapping;
 
 namespace BLToolkit.ServiceModel
 {
-	class LinqServiceSerializer: XmlObjectSerializer
+	class LinqServiceSerializer
 	{
-		#region Overrides
-
-		public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
+		internal class XmlQuerySerializer : XmlObjectSerializer
 		{
-			writer.WriteStartElement("Query");
+			#region Overrides
+
+			public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
+			{
+				writer.WriteStartElement("Query");
+			}
+
+			public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
+			{
+				new QuerySerializer(writer).Serialize((LinqServiceQuery)graph);
+			}
+
+			public override void WriteEndObject(XmlDictionaryWriter writer)
+			{
+				writer.WriteEndElement();
+			}
+
+			public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
+			{
+				return new QueryDeserializer(reader).Deserialize();
+			}
+
+			public override bool IsStartObject(XmlDictionaryReader reader)
+			{
+				return reader.Name == "Query";
+			}
+
+			#endregion
 		}
 
-		public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
+		internal class XmlResultSerializer : XmlObjectSerializer
 		{
-			new Serializer(writer).Serialize((LinqServiceQuery)graph);
+			#region Overrides
+
+			public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
+			{
+				writer.WriteStartElement("QueryResult");
+			}
+
+			public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
+			{
+				new ResultSerializer(writer).Serialize((LinqServiceResult)graph);
+			}
+
+			public override void WriteEndObject(XmlDictionaryWriter writer)
+			{
+				writer.WriteEndElement();
+			}
+
+			public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
+			{
+				return new ResultDeserializer(reader).Deserialize();
+			}
+
+			public override bool IsStartObject(XmlDictionaryReader reader)
+			{
+				return reader.Name == "QueryResult";
+			}
+
+			#endregion
 		}
 
-		public override void WriteEndObject(XmlDictionaryWriter writer)
-		{
-			writer.WriteEndElement();
-		}
-
-		public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
-		{
-			return new Deserializer(reader).Deserialize();
-		}
-
-		public override bool IsStartObject(XmlDictionaryReader reader)
-		{
-			return reader.Name == "Query";
-		}
-
-		#endregion
+		#region SerializerBase
 
 		const int _typeIndex  = -1;
 		const int _paramIndex = -2;
 
-		class Serializer
+		class SerializerBase
 		{
-			public Serializer(XmlDictionaryWriter writer)
+			protected readonly StringBuilder          Builder = new StringBuilder();
+			protected readonly Dictionary<object,int> Dic     = new Dictionary<object,int>();
+			protected int                             Index;
+
+			protected void Append(Type type, object value)
+			{
+				Append(type);
+				Append(value == null ? null : Common.Convert.ToString(value));
+			}
+
+			protected void Append(int value)
+			{
+				Builder.Append(' ').Append(value);
+			}
+
+			protected void Append(Type value)
+			{
+				Builder.Append(' ').Append(value == null ? 0 : GetType(value));
+			}
+
+			protected void Append(bool value)
+			{
+				Builder.Append(' ').Append(value ? '1' : '0');
+			}
+
+			protected void Append(IQueryElement element)
+			{
+				Builder.Append(' ').Append(element == null ? 0 : Dic[element]);
+			}
+
+			protected void Append(string str)
+			{
+				Builder.Append(' ');
+
+				if (str == null)
+				{
+					Builder.Append('-');
+				}
+				else if (str.Length == 0)
+				{
+					Builder.Append('0');
+				}
+				else
+				{
+					Builder
+						.Append(str.Length)
+						.Append(':')
+						.Append(str);
+				}
+			}
+
+			protected int GetType(Type type)
+			{
+				if (type == null)
+					return 0;
+
+				int idx;
+
+				if (!Dic.TryGetValue(type, out idx))
+				{
+					Dic.Add(type, idx = ++Index);
+
+					Builder
+						.Append(idx)
+						.Append(' ')
+						.Append(_typeIndex)
+						.Append(' ');
+
+					Append(type.FullName);
+
+					Builder.AppendLine();
+				}
+
+				return idx;
+			}
+		}
+
+		#endregion
+
+		#region DeserializerBase
+
+		class DeserializerBase
+		{
+			protected readonly Dictionary<int,object> Dic = new Dictionary<int,object>();
+
+			protected string Str;
+			protected int    Pos;
+
+			protected char Peek()
+			{
+				return Str[Pos];
+			}
+
+			char Next()
+			{
+				return Str[++Pos];
+			}
+
+			bool Get(char c)
+			{
+				if (Peek() == c)
+				{
+					Pos++;
+					return true;
+				}
+
+				return false;
+			}
+
+			protected int ReadInt()
+			{
+				Get(' ');
+
+				var minus = Get('-');
+				var value = 0;
+
+				for (var c = Peek(); char.IsDigit(c); c = Next())
+					value = value * 10 + (c - '0');
+
+				return minus ? -value : value;
+			}
+
+			protected int? ReadCount()
+			{
+				Get(' ');
+
+				if (Get('-'))
+					return null;
+
+				var value = 0;
+
+				for (var c = Peek(); char.IsDigit(c); c = Next())
+					value = value * 10 + (c - '0');
+
+				return value;
+			}
+
+			protected string ReadString()
+			{
+				Get(' ');
+
+				var c = Peek();
+
+				if (c == '-')
+				{
+					Pos++;
+					return null;
+				}
+
+				if (c == '0')
+				{
+					Pos++;
+					return string.Empty;
+				}
+
+				var len   = ReadInt();
+				var value = Str.Substring(++Pos, len);
+
+				Pos += len;
+
+				return value;
+			}
+
+			protected bool ReadBool()
+			{
+				Get(' ');
+
+				var value = Peek() == '1';
+
+				Pos++;
+
+				return value;
+			}
+
+			protected T Read<T>()
+				where T : class
+			{
+				var idx = ReadInt();
+				return idx == 0 ? null : (T)Dic[idx];
+			}
+
+			protected T[] ReadArray<T>()
+				where T : class
+			{
+				var count = ReadCount();
+
+				if (count == null)
+					return null;
+
+				var items = new T[count.Value];
+
+				for (var i = 0; i < count; i++)
+					items[i] = Read<T>();
+
+				return items;
+			}
+
+			protected List<T> ReadList<T>()
+				where T : class
+			{
+				var count = ReadCount();
+
+				if (count == null)
+					return null;
+
+				var items = new List<T>(count.Value);
+
+				for (var i = 0; i < count; i++)
+					items.Add(Read<T>());
+
+				return items;
+			}
+
+			protected void NextLine()
+			{
+				while (Pos < Str.Length && (Peek() == '\n' || Peek() == '\r'))
+					Pos++;
+			}
+
+			protected object ReadValue(Type type)
+			{
+				var str = ReadString();
+
+				if (str == null)
+					return null;
+
+				if (type == typeof(string))
+					return str;
+
+				var underlyingType = type;
+				var isNullable     = false;
+
+				if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					underlyingType = underlyingType.GetGenericArguments()[0];
+					isNullable     = true;
+				}
+
+				if (underlyingType.IsEnum)
+					return Enum.Parse(type, str);
+
+				if (isNullable)
+				{
+					switch (Type.GetTypeCode(underlyingType))
+					{
+						case TypeCode.Boolean  : return Common.Convert.ToNullableBoolean (str);
+						case TypeCode.Char     : return Common.Convert.ToNullableChar    (str);
+						case TypeCode.SByte    : return Common.Convert.ToNullableSByte   (str);
+						case TypeCode.Byte     : return Common.Convert.ToNullableByte    (str);
+						case TypeCode.Int16    : return Common.Convert.ToNullableInt16   (str);
+						case TypeCode.UInt16   : return Common.Convert.ToNullableUInt16  (str);
+						case TypeCode.Int32    : return Common.Convert.ToNullableInt32   (str);
+						case TypeCode.UInt32   : return Common.Convert.ToNullableUInt32  (str);
+						case TypeCode.Int64    : return Common.Convert.ToNullableInt64   (str);
+						case TypeCode.UInt64   : return Common.Convert.ToNullableUInt64  (str);
+						case TypeCode.Single   : return Common.Convert.ToNullableSingle  (str);
+						case TypeCode.Double   : return Common.Convert.ToNullableDouble  (str);
+						case TypeCode.Decimal  : return Common.Convert.ToNullableDecimal (str);
+						case TypeCode.DateTime : return Common.Convert.ToNullableDateTime(str);
+						case TypeCode.Object   :
+							if (type == typeof(Guid))           return Common.Convert.ToNullableGuid          (str);
+							if (type == typeof(DateTimeOffset)) return Common.Convert.ToNullableDateTimeOffset(str);
+							if (type == typeof(TimeSpan))       return Common.Convert.ToNullableTimeSpan      (str);
+							break;
+						default                : break;
+					}
+				}
+				else
+				{
+					switch (Type.GetTypeCode(underlyingType))
+					{
+						case TypeCode.Boolean  : return Common.Convert.ToBoolean(str);
+						case TypeCode.Char     : return Common.Convert.ToChar    (str);
+						case TypeCode.SByte    : return Common.Convert.ToSByte   (str);
+						case TypeCode.Byte     : return Common.Convert.ToByte    (str);
+						case TypeCode.Int16    : return Common.Convert.ToInt16   (str);
+						case TypeCode.UInt16   : return Common.Convert.ToUInt16  (str);
+						case TypeCode.Int32    : return Common.Convert.ToInt32   (str);
+						case TypeCode.UInt32   : return Common.Convert.ToUInt32  (str);
+						case TypeCode.Int64    : return Common.Convert.ToInt64   (str);
+						case TypeCode.UInt64   : return Common.Convert.ToUInt64  (str);
+						case TypeCode.Single   : return Common.Convert.ToSingle  (str);
+						case TypeCode.Double   : return Common.Convert.ToDouble  (str);
+						case TypeCode.Decimal  : return Common.Convert.ToDecimal (str);
+						case TypeCode.DateTime : return Common.Convert.ToDateTime(str);
+						case TypeCode.Object   :
+							if (type == typeof(Guid))           return Common.Convert.ToGuid          (str);
+							if (type == typeof(DateTimeOffset)) return Common.Convert.ToDateTimeOffset(str);
+							if (type == typeof(TimeSpan))       return Common.Convert.ToTimeSpan      (str);
+							if (type == typeof(Binary))         return Common.Convert.ToLinqBinary    (str);
+							break;
+						default                : break;
+					}
+				}
+
+				if (type == typeof(SqlByte))     return Common.Convert.ToSqlByte    (str);
+				if (type == typeof(SqlInt16))    return Common.Convert.ToSqlInt16   (str);
+				if (type == typeof(SqlInt32))    return Common.Convert.ToSqlInt32   (str);
+				if (type == typeof(SqlInt64))    return Common.Convert.ToSqlInt64   (str);
+				if (type == typeof(SqlSingle))   return Common.Convert.ToSqlSingle  (str);
+				if (type == typeof(SqlBoolean))  return Common.Convert.ToSqlBoolean (str);
+				if (type == typeof(SqlDouble))   return Common.Convert.ToSqlDouble  (str);
+				if (type == typeof(SqlDateTime)) return Common.Convert.ToSqlDateTime(str);
+				if (type == typeof(SqlDecimal))  return Common.Convert.ToSqlDecimal (str);
+				if (type == typeof(SqlMoney))    return Common.Convert.ToSqlMoney   (str);
+				if (type == typeof(SqlString))   return Common.Convert.ToSqlString  (str);
+				if (type == typeof(SqlGuid))     return Common.Convert.ToSqlGuid    (str);
+
+				throw new InvalidOperationException();
+			}
+		}
+
+		#endregion
+
+		#region QuerySerializer
+
+		class QuerySerializer : SerializerBase
+		{
+			public QuerySerializer(XmlDictionaryWriter writer)
 			{
 				_writer = writer;
 			}
 
-			readonly XmlDictionaryWriter    _writer;
-			readonly StringBuilder          _sb    = new StringBuilder();
-			readonly Dictionary<object,int> _dic   = new Dictionary<object,int>();
-			private  int                    _index;
+			readonly XmlDictionaryWriter _writer;
 
 			public void Serialize(LinqServiceQuery query)
 			{
@@ -67,11 +419,11 @@ namespace BLToolkit.ServiceModel
 				visitor.Visit(query.Query, Visit);
 
 				foreach (var parameter in query.Parameters)
-					if (!_dic.ContainsKey(parameter))
+					if (!Dic.ContainsKey(parameter))
 						Visit(parameter);
 
-				_sb
-					.Append(++_index)
+				Builder
+					.Append(++Index)
 					.Append(' ')
 					.Append(_paramIndex);
 
@@ -80,9 +432,9 @@ namespace BLToolkit.ServiceModel
 				foreach (var parameter in query.Parameters)
 					Append(parameter);
 
-				_sb.AppendLine();
+				Builder.AppendLine();
 
-				_writer.WriteCData(_sb.ToString());
+				_writer.WriteCData(Builder.ToString());
 			}
 
 			void Visit(IQueryElement e)
@@ -125,10 +477,10 @@ namespace BLToolkit.ServiceModel
 					case QueryElementType.SqlTable            : GetType(((SqlTable)           e).ObjectType); break;
 				}
 
-				_dic.Add(e, ++_index);
+				Dic.Add(e, ++Index);
 
-				_sb
-					.Append(_index)
+				Builder
+					.Append(Index)
 					.Append(' ')
 					.Append((int)e.ElementType);
 
@@ -174,7 +526,7 @@ namespace BLToolkit.ServiceModel
 							Append(elem.SystemType, elem.Value);
 
 							if (elem.EnumTypes == null)
-								_sb.Append(" -");
+								Builder.Append(" -");
 							else
 							{
 								Append(elem.EnumTypes.Count);
@@ -184,7 +536,7 @@ namespace BLToolkit.ServiceModel
 							}
 
 							if (elem.TakeValues == null)
-								_sb.Append(" -");
+								Builder.Append(" -");
 							else
 							{
 								Append(elem.TakeValues.Count);
@@ -257,7 +609,7 @@ namespace BLToolkit.ServiceModel
 							Append(elem.ObjectType);
 
 							if (elem.SequenceAttributes == null)
-								_sb.Append(" -");
+								Builder.Append(" -");
 							else
 							{
 								Append(elem.SequenceAttributes.Length);
@@ -272,7 +624,7 @@ namespace BLToolkit.ServiceModel
 							Append(elem.Fields.Count);
 
 							foreach (var field in elem.Fields)
-								Append(_dic[field.Value]);
+								Append(Dic[field.Value]);
 
 							break;
 						}
@@ -393,7 +745,7 @@ namespace BLToolkit.ServiceModel
 							Append(elem.ParameterDependent);
 
 							if (!elem.HasUnion)
-								_sb.Append(" -");
+								Builder.Append(" -");
 							else
 								Append(elem.Unions);
 
@@ -510,121 +862,46 @@ namespace BLToolkit.ServiceModel
 						}
 				}
 
-				_sb.AppendLine();
+				Builder.AppendLine();
 			}
-
-			#region Helpers
 
 			void Append<T>(ICollection<T> exprs)
 				where T : IQueryElement
 			{
 				if (exprs == null)
-					_sb.Append(" -");
+					Builder.Append(" -");
 				else
 				{
 					Append(exprs.Count);
 
 					foreach (var e in exprs)
-						Append(_dic[e]);
+						Append(Dic[e]);
 				}
 			}
-
-			void Append(Type type, object value)
-			{
-				Append(type);
-				Append(value == null ? null : Common.Convert.ToString(value));
-			}
-
-			void Append(int value)
-			{
-				_sb.Append(' ').Append(value);
-			}
-
-			void Append(Type value)
-			{
-				_sb.Append(' ').Append(value == null ? 0 : GetType(value));
-			}
-
-			void Append(bool value)
-			{
-				_sb.Append(' ').Append(value ? '1' : '0');
-			}
-
-			void Append(IQueryElement element)
-			{
-				_sb.Append(' ').Append(element == null ? 0 : _dic[element]);
-			}
-
-			void Append(string str)
-			{
-				_sb.Append(' ');
-
-				if (str == null)
-				{
-					_sb.Append('-');
-				}
-				else if (str.Length == 0)
-				{
-					_sb.Append('0');
-				}
-				else
-				{
-					_sb
-						.Append(str.Length)
-						.Append(':')
-						.Append(str);
-				}
-			}
-
-			int GetType(Type type)
-			{
-				if (type == null)
-					return 0;
-
-				int idx;
-
-				if (!_dic.TryGetValue(type, out idx))
-				{
-					_dic.Add(type, idx = ++_index);
-
-					_sb
-						.Append(idx)
-						.Append(' ')
-						.Append(_typeIndex)
-						.Append(' ');
-
-					Append(type.FullName);
-
-					_sb.AppendLine();
-				}
-
-				return idx;
-			}
-
-			#endregion
 		}
 
-		class Deserializer
+		#endregion
+
+		#region QueryDeserializer
+
+		class QueryDeserializer : DeserializerBase
 		{
-			public Deserializer(XmlDictionaryReader reader)
+			public QueryDeserializer(XmlDictionaryReader reader)
 			{
 				_reader = reader;
 			}
 
-			readonly XmlDictionaryReader    _reader;
-			readonly Dictionary<int,object> _dic = new Dictionary<int,object>();
+			readonly XmlDictionaryReader _reader;
 
 			SqlQuery       _query;
 			SqlParameter[] _parameters;
-			string         _str;
-			int            _pos;
 
 			readonly Dictionary<int,SqlQuery> _queries = new Dictionary<int,SqlQuery>();
 			readonly List<Action>             _actions = new List<Action>();
 
 			public LinqServiceQuery Deserialize()
 			{
-				_str = _reader.ReadString();
+				Str = _reader.ReadString();
 
 				while (Parse()) {}
 
@@ -638,15 +915,14 @@ namespace BLToolkit.ServiceModel
 
 			bool Parse()
 			{
-				while (_pos < _str.Length && (Peek() == '\n' || Peek() == '\r'))
-					_pos++;
+				NextLine();
 
-				if (_pos >= _str.Length)
+				if (Pos >= Str.Length)
 					return false;
 
 				var obj  = null as object;
-				var idx  = ReadInt(); _pos++;
-				var type = ReadInt(); _pos++;
+				var idx  = ReadInt(); Pos++;
+				var type = ReadInt(); Pos++;
 
 				switch (type)
 				{
@@ -1062,231 +1338,107 @@ namespace BLToolkit.ServiceModel
 						}
 				}
 
-				_dic.Add(idx, obj);
+				Dic.Add(idx, obj);
 
 				return true;
 			}
-
-			#region Helpers
-
-			char Peek()
-			{
-				return _str[_pos];
-			}
-
-			char Next()
-			{
-				return _str[++_pos];
-			}
-
-			bool Get(char c)
-			{
-				if (Peek() == c)
-				{
-					_pos++;
-					return true;
-				}
-
-				return false;
-			}
-
-			int ReadInt()
-			{
-				Get(' ');
-
-				var minus = Get('-');
-				var value = 0;
-
-				for (var c = Peek(); char.IsDigit(c); c = Next())
-					value = value * 10 + (c - '0');
-
-				return minus ? -value : value;
-			}
-
-			int? ReadCount()
-			{
-				Get(' ');
-
-				if (Get('-'))
-					return null;
-
-				var value = 0;
-
-				for (var c = Peek(); char.IsDigit(c); c = Next())
-					value = value * 10 + (c - '0');
-
-				return value;
-			}
-
-			string ReadString()
-			{
-				Get(' ');
-
-				var c = Peek();
-
-				if (c == '-')
-				{
-					_pos++;
-					return null;
-				}
-
-				if (c == '0')
-				{
-					_pos++;
-					return string.Empty;
-				}
-
-				var len   = ReadInt();
-				var value = _str.Substring(++_pos, len);
-
-				_pos += len;
-
-				return value;
-			}
-
-			bool ReadBool()
-			{
-				Get(' ');
-
-				var value = Peek() == '1';
-
-				_pos++;
-
-				return value;
-			}
-
-			T Read<T>()
-				where T : class
-			{
-				var idx = ReadInt();
-				return idx == 0 ? null : (T)_dic[idx];
-			}
-
-			T[] ReadArray<T>()
-				where T : class
-			{
-				var count = ReadCount();
-
-				if (count == null)
-					return null;
-
-				var items = new T[count.Value];
-
-				for (var i = 0; i < count; i++)
-					items[i] = Read<T>();
-
-				return items;
-			}
-
-			List<T> ReadList<T>()
-				where T : class
-			{
-				var count = ReadCount();
-
-				if (count == null)
-					return null;
-
-				var items = new List<T>(count.Value);
-
-				for (var i = 0; i < count; i++)
-					items.Add(Read<T>());
-
-				return items;
-			}
-
-			object ReadValue(Type type)
-			{
-				var str = ReadString();
-
-				if (str == null)
-					return null;
-
-				if (type == typeof(string))
-					return str;
-
-				var underlyingType = type;
-				var isNullable     = false;
-
-				if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(Nullable<>))
-				{
-					underlyingType = underlyingType.GetGenericArguments()[0];
-					isNullable     = true;
-				}
-
-				if (underlyingType.IsEnum)
-					return Enum.Parse(type, str);
-
-				if (isNullable)
-				{
-					switch (Type.GetTypeCode(underlyingType))
-					{
-						case TypeCode.Boolean  : return Common.Convert.ToNullableBoolean (str);
-						case TypeCode.Char     : return Common.Convert.ToNullableChar    (str);
-						case TypeCode.SByte    : return Common.Convert.ToNullableSByte   (str);
-						case TypeCode.Byte     : return Common.Convert.ToNullableByte    (str);
-						case TypeCode.Int16    : return Common.Convert.ToNullableInt16   (str);
-						case TypeCode.UInt16   : return Common.Convert.ToNullableUInt16  (str);
-						case TypeCode.Int32    : return Common.Convert.ToNullableInt32   (str);
-						case TypeCode.UInt32   : return Common.Convert.ToNullableUInt32  (str);
-						case TypeCode.Int64    : return Common.Convert.ToNullableInt64   (str);
-						case TypeCode.UInt64   : return Common.Convert.ToNullableUInt64  (str);
-						case TypeCode.Single   : return Common.Convert.ToNullableSingle  (str);
-						case TypeCode.Double   : return Common.Convert.ToNullableDouble  (str);
-						case TypeCode.Decimal  : return Common.Convert.ToNullableDecimal (str);
-						case TypeCode.DateTime : return Common.Convert.ToNullableDateTime(str);
-						case TypeCode.Object   :
-							if (type == typeof(Guid))           return Common.Convert.ToNullableGuid          (str);
-							if (type == typeof(DateTimeOffset)) return Common.Convert.ToNullableDateTimeOffset(str);
-							if (type == typeof(TimeSpan))       return Common.Convert.ToNullableTimeSpan      (str);
-							break;
-						default                : break;
-					}
-				}
-				else
-				{
-					switch (Type.GetTypeCode(underlyingType))
-					{
-						case TypeCode.Boolean  : return Common.Convert.ToBoolean(str);
-						case TypeCode.Char     : return Common.Convert.ToChar    (str);
-						case TypeCode.SByte    : return Common.Convert.ToSByte   (str);
-						case TypeCode.Byte     : return Common.Convert.ToByte    (str);
-						case TypeCode.Int16    : return Common.Convert.ToInt16   (str);
-						case TypeCode.UInt16   : return Common.Convert.ToUInt16  (str);
-						case TypeCode.Int32    : return Common.Convert.ToInt32   (str);
-						case TypeCode.UInt32   : return Common.Convert.ToUInt32  (str);
-						case TypeCode.Int64    : return Common.Convert.ToInt64   (str);
-						case TypeCode.UInt64   : return Common.Convert.ToUInt64  (str);
-						case TypeCode.Single   : return Common.Convert.ToSingle  (str);
-						case TypeCode.Double   : return Common.Convert.ToDouble  (str);
-						case TypeCode.Decimal  : return Common.Convert.ToDecimal (str);
-						case TypeCode.DateTime : return Common.Convert.ToDateTime(str);
-						case TypeCode.Object   :
-							if (type == typeof(Guid))           return Common.Convert.ToGuid          (str);
-							if (type == typeof(DateTimeOffset)) return Common.Convert.ToDateTimeOffset(str);
-							if (type == typeof(TimeSpan))       return Common.Convert.ToTimeSpan      (str);
-							if (type == typeof(Binary))         return Common.Convert.ToLinqBinary    (str);
-							break;
-						default                : break;
-					}
-				}
-
-				if (type == typeof(SqlByte))     return Common.Convert.ToSqlByte    (str);
-				if (type == typeof(SqlInt16))    return Common.Convert.ToSqlInt16   (str);
-				if (type == typeof(SqlInt32))    return Common.Convert.ToSqlInt32   (str);
-				if (type == typeof(SqlInt64))    return Common.Convert.ToSqlInt64   (str);
-				if (type == typeof(SqlSingle))   return Common.Convert.ToSqlSingle  (str);
-				if (type == typeof(SqlBoolean))  return Common.Convert.ToSqlBoolean (str);
-				if (type == typeof(SqlDouble))   return Common.Convert.ToSqlDouble  (str);
-				if (type == typeof(SqlDateTime)) return Common.Convert.ToSqlDateTime(str);
-				if (type == typeof(SqlDecimal))  return Common.Convert.ToSqlDecimal (str);
-				if (type == typeof(SqlMoney))    return Common.Convert.ToSqlMoney   (str);
-				if (type == typeof(SqlString))   return Common.Convert.ToSqlString  (str);
-				if (type == typeof(SqlGuid))     return Common.Convert.ToSqlGuid    (str);
-
-				throw new InvalidOperationException();
-			}
-
-			#endregion
 		}
+
+		#endregion
+
+		#region ResultSerializer
+
+		class ResultSerializer : SerializerBase
+		{
+			public ResultSerializer(XmlDictionaryWriter writer)
+			{
+				_writer = writer;
+			}
+
+			readonly XmlDictionaryWriter _writer;
+
+			public void Serialize(LinqServiceResult result)
+			{
+				Append(result.FieldCount);
+				Append(result.RowCount);
+				Append(result.QueryID.ToString());
+
+				Builder.AppendLine();
+
+				foreach (var name in result.FieldNames)
+				{
+					Append(name);
+					Builder.AppendLine();
+				}
+
+				foreach (var type in result.FieldTypes)
+				{
+					Append(type.FullName);
+					Builder.AppendLine();
+				}
+
+				foreach (var data in result.Data)
+				{
+					foreach (var str in data)
+						Append(str);
+
+					Builder.AppendLine();
+				}
+
+				_writer.WriteCData(Builder.ToString());
+			}
+		}
+
+		#endregion
+
+		#region ResultDeserializer
+
+		class ResultDeserializer : DeserializerBase
+		{
+			public ResultDeserializer(XmlDictionaryReader reader)
+			{
+				_reader = reader;
+			}
+
+			readonly XmlDictionaryReader _reader;
+
+			public LinqServiceResult Deserialize()
+			{
+				Str = _reader.ReadString();
+
+				var fieldCount = ReadInt();
+
+				var result = new LinqServiceResult
+				{
+					FieldCount = fieldCount,
+					RowCount   = ReadInt(),
+					QueryID    = new Guid(ReadString()),
+					FieldNames = new string[fieldCount],
+					FieldTypes = new Type  [fieldCount],
+					Data       = new List<string[]>(),
+				};
+
+				NextLine();
+
+				for (var i = 0; i < fieldCount; i++) { result.FieldNames[i] = ReadString();                      NextLine(); }
+				for (var i = 0; i < fieldCount; i++) { result.FieldTypes[i] = Type.GetType(ReadString(), false); NextLine(); }
+
+				for (var n = 0; n < result.RowCount; n++)
+				{
+					var data = new string[fieldCount];
+
+					for (var i = 0; i < fieldCount; i++)
+						data[i] = ReadString();
+
+					result.Data.Add(data);
+
+					NextLine();
+				}
+
+				return result;
+			}
+		}
+
+		#endregion
 	}
 }

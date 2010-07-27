@@ -127,6 +127,7 @@ namespace BLToolkit.Data.Linq
 
 				ParsingTracer.DecIndentLevel();
 				ParsingTracer.WriteLine(QuerySource);
+
 				return _index;
 			}
 

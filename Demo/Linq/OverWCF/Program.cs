@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 
@@ -37,14 +38,19 @@ namespace Linq.OverWCF
 
 				var client = new DataModel();
 
-				var identity = client.Person.InsertWithIdentity(() => new Person
-				{
-					FirstName = "1",
-					LastName  = "2",
-					Gender    = 'F',
-				});
+				var q =
+					from p in client.Person
+					select new
+					{
+						p.PersonID,
+						p.FirstName,
+						p.MiddleName,
+						p.LastName,
+						p.Gender
+					};
 
-				Console.WriteLine(identity);
+				foreach (var p in q)
+					Console.WriteLine(p);
 
 				Console.ReadLine();
 

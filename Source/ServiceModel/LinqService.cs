@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ServiceModel;
-
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
 
 namespace BLToolkit.ServiceModel
 {
+	using Common;
+	using Data;
+	using Data.Linq;
+	using Data.Sql;
+
 	[ServiceBehavior(
 		InstanceContextMode = InstanceContextMode.Single,
 		ConcurrencyMode     = ConcurrencyMode.Multiple)]
@@ -91,6 +95,58 @@ namespace BLToolkit.ServiceModel
 			{
 				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
 				return db.ExecuteScalar(obj);
+			}
+			finally
+			{
+				if (db is IDisposable)
+					((IDisposable)db).Dispose();
+			}
+		}
+
+		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
+		{
+			ValidateQuery(query.Query, query.Parameters);
+
+			var db = CreateDataContext();
+
+			try
+			{
+				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
+
+				using (var rd = db.ExecuteReader(obj))
+				{
+					var ret = new LinqServiceResult
+					{
+						QueryID    = Guid.NewGuid(),
+						FieldCount = rd.FieldCount,
+						FieldNames = new string[rd.FieldCount],
+						FieldTypes = new Type  [rd.FieldCount],
+						Data       = new List<string[]>(),
+					};
+
+					for (var i = 0; i < ret.FieldCount; i++)
+					{
+						ret.FieldNames[i] = rd.GetName(i);
+						ret.FieldTypes[i] = rd.GetFieldType(i);
+					}
+
+					while (rd.Read())
+					{
+						var data = new string[rd.FieldCount];
+
+						ret.RowCount++;
+
+						for (var i = 0; i < ret.FieldCount; i++)
+						{
+							if (!rd.IsDBNull(i))
+								data[i] = (rd.GetValue(i) ?? "").ToString();
+						}
+
+						ret.Data.Add(data);
+					}
+
+					return ret;
+				}
 			}
 			finally
 			{
