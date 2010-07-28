@@ -33,40 +33,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Firebird\FirebirdSql.Data.FirebirdClient.dll</HintPath>
-    </Reference>
-    <Reference Include="IBM.Data.DB2, Version=9.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\IBM\IBM.Data.DB2.dll</HintPath>
-    </Reference>
-    <Reference Include="IBM.Data.Informix, Version=3.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\IBM\IBM.Data.Informix.dll</HintPath>
-    </Reference>
-    <Reference Include="MySql.Data, Version=5.2.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\MySql\MySql.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Npgsql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\PostgreSql\Npgsql.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Oracle.DataAccess, Version=2.102.4.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Oracle\Oracle.DataAccess.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Sybase.AdoNet2.AseClient, Version=1.15.192.0, Culture=neutral, PublicKeyToken=95d94fac46c88e1e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Sybase\Sybase.AdoNet2.AseClient.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -80,10 +49,6 @@
       <HintPath>..\..\Redist\SQLite\System.Data.SQLite.DLL</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\SqlCe\System.Data.SqlServerCe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
@@ -96,33 +61,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Source\Data\DataProvider\DB2DataProvider.cs">
-      <Link>Providers\DB2DataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\FdpDataProvider.cs">
-      <Link>Providers\FdpDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\InformixDataProvider.cs">
-      <Link>Providers\InformixDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\MySqlDataProvider.cs">
-      <Link>Providers\MySqlDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\OdpDataProvider.cs">
-      <Link>Providers\OdpDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\PostgreSQLDataProvider.cs">
-      <Link>Providers\PostgreSQLDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\SqlCeDataProvider.cs">
-      <Link>Providers\SqlCeDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\SQLiteDataProvider.cs">
-      <Link>Providers\SQLiteDataProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Source\Data\DataProvider\SybaseDataProvider.cs">
-      <Link>Providers\SybaseDataProvider.cs</Link>
-    </Compile>
     <Compile Include="Common.cs" />
     <Compile Include="ConvertTest.cs" />
     <Compile Include="CompileTest.cs" />
@@ -169,6 +107,42 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.DB2.3.csproj">
+      <Project>{86BF4F10-3606-4016-9919-84C3335813B6}</Project>
+      <Name>BLToolkit.Data.DataProvider.DB2.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Firebird.3.csproj">
+      <Project>{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}</Project>
+      <Name>BLToolkit.Data.DataProvider.Firebird.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Informix.3.csproj">
+      <Project>{B1DEA25C-7667-471B-BBAD-64D017FDD104}</Project>
+      <Name>BLToolkit.Data.DataProvider.Informix.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.3.csproj">
+      <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
+      <Name>BLToolkit.Data.DataProvider.MySql.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.3.csproj">
+      <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
+      <Name>BLToolkit.Data.DataProvider.Oracle.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.3.csproj">
+      <Project>{5A556D57-0D68-433B-AD78-02849583582B}</Project>
+      <Name>BLToolkit.Data.DataProvider.PostgreSQL.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SqlCe.3.csproj">
+      <Project>{85E90F57-8DE1-4912-8414-28578F4D71CD}</Project>
+      <Name>BLToolkit.Data.DataProvider.SqlCe.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.3.csproj">
+      <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
+      <Name>BLToolkit.Data.DataProvider.SQLite.3</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Sybase.3.csproj">
+      <Project>{6CD8CC3D-643D-4D09-8660-A26085C44FBC}</Project>
+      <Name>BLToolkit.Data.DataProvider.Sybase.3</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.3</Name>

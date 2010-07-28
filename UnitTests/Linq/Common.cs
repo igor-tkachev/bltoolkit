@@ -126,7 +126,7 @@ namespace Data.Linq
 				public Test TestField = null;
 			}
 
-			public Test TestClosure(TestDbManager db)
+			public Test TestClosure(ITestDataContext db)
 			{
 				return db.Person.Select(_ => new Entity { TestField = this }).First().TestField;
 			}

@@ -545,7 +545,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var mc = (MethodCallExpression)expression;
 
-					if (mc.Object == _info.Parameters[0])
+					if (mc.Object == _info.Parameters[0] || mc.Arguments.Count > 0 && mc.Arguments[0] == _info.Parameters[0])
 						return CreateTable(CurrentSql, new LambdaInfo(expression));
 				}
 			}

@@ -23,7 +23,7 @@ namespace Data.Linq
 			});
 		}
 
-		static void TakeParam(TestDbManager db, int n)
+		static void TakeParam(ITestDataContext db, int n)
 		{
 			Assert.AreEqual(n, (from ch in db.Child select ch).Take(n).ToList().Count);
 		}

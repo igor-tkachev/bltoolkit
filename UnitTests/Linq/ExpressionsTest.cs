@@ -70,14 +70,14 @@ namespace Data.Linq
 		}
 
 		[MethodExpression("Count5Expression")]
-		static int Count5(TestDbManager db, Parent p, int n)
+		static int Count5(ITestDataContext db, Parent p, int n)
 		{
 			return (_count5Expression ?? (_count5Expression = Count5Expression().Compile()))(db, p, n);
 		}
 
-		static Func<TestDbManager,Parent,int,int> _count5Expression;
+		static Func<ITestDataContext,Parent,int,int> _count5Expression;
 
-		static Expression<Func<TestDbManager,Parent,int,int>> Count5Expression()
+		static Expression<Func<ITestDataContext,Parent,int,int>> Count5Expression()
 		{
 			return (db, p, n) => Sql.AsSql(db.Child.Where(c => c.ParentID == p.ParentID).Count() + n);
 		}

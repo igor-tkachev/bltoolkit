@@ -10,11 +10,20 @@ namespace BLToolkit.Data.Linq
 {
 	using DataAccess;
 
+	public static class Extensions1
+	{
+		static public Table<T> GetTable<T>(this IDataContext dataContext)
+			where T : class
+		{
+			return new Table<T>(dataContext);
+		}
+	}
+
 	public static class Extensions
 	{
 		#region Table Helpers
 
-		static public Table<T> GetTable<T>(this IDataContext dataContext)
+		static public Table<T> GetTable1<T>(this IDataContext dataContext)
 			where T : class
 		{
 			return new Table<T>(dataContext);
@@ -694,16 +703,34 @@ namespace BLToolkit.Data.Linq
 			return ExpressionInfo<T>.Insert(DataContextInfo.Create(dataContext), obj);
 		}
 
+		public static int InsertBatch<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
+		{
+			return new SqlQuery<T>().Insert(dataContext, maxBatchSize, list);
+		}
+
+		public static int InsertBatch<T>(this DbManager dataContext, IEnumerable<T> list)
+		{
+			return InsertBatch(dataContext, int.MaxValue, list);
+		}
+
+		public static int InsertBatch<T>(this DbManager dataContext, T[] list)
+		{
+			return InsertBatch(dataContext, int.MaxValue, list);
+		}
+
+		[Obsolete("Use InsertBatch instead.")]
 		public static int Insert<T>(this DbManager dataContext, T[] list)
 		{
 			return Insert(dataContext, int.MaxValue, list);
 		}
 
+		[Obsolete("Use InsertBatch instead.")]
 		public static int Insert<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
 			return new SqlQuery<T>().Insert(dataContext, maxBatchSize, list);
 		}
 
+		[Obsolete("Use InsertBatch instead.")]
 		public static int Insert<T>(this DbManager dataContext, IEnumerable<T> list)
 		{
 			return Insert(dataContext, int.MaxValue, list);

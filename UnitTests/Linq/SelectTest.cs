@@ -5,6 +5,7 @@ using System.Windows.Forms;
 
 using NUnit.Framework;
 
+using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.Mapping;
@@ -252,26 +253,29 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				db.MappingSchema = _myMapSchema;
+				if (db is DbManager)
+				{
+					((DbManager)db).MappingSchema = _myMapSchema;
 
-				var q = (
+					var q = (
 
-					from p in db.Person
-					where p.ID == 1
-					select new
-					{
-						p.ID,
-						FirstName  = p.MiddleName ?? p.FirstName  ?? "None",
-						LastName   = p.LastName   ?? p.FirstName  ?? "None",
-						MiddleName = p.MiddleName ?? p.MiddleName ?? "None"
-					}
+						from p in db.Person
+						where p.ID == 1
+						select new
+						{
+							p.ID,
+							FirstName  = p.MiddleName ?? p.FirstName  ?? "None",
+							LastName   = p.LastName   ?? p.FirstName  ?? "None",
+							MiddleName = p.MiddleName ?? p.MiddleName ?? "None"
+						}
 
-				).ToList().First();
+					).ToList().First();
 
-				Assert.AreEqual(1,        q.ID);
-				Assert.AreEqual("John",   q.FirstName);
-				Assert.AreEqual("Pupkin", q.LastName);
-				Assert.AreEqual("None",   q.MiddleName);
+					Assert.AreEqual(1,        q.ID);
+					Assert.AreEqual("John",   q.FirstName);
+					Assert.AreEqual("Pupkin", q.LastName);
+					Assert.AreEqual("None",   q.MiddleName);
+				}
 			});
 		}
 

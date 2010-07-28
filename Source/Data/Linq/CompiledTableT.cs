@@ -70,9 +70,9 @@ namespace BLToolkit.Data.Linq
 
 							_infos.Add(key, info);
 
-							_lastContextID  = contextID;
+							_lastContextID     = contextID;
 							_lastMappingSchema = mappingSchema;
-							_lastInfo = info;
+							_lastInfo          = info;
 						}
 					}
 				}

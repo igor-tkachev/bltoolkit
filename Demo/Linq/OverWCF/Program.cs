@@ -4,14 +4,13 @@ using System.ServiceModel;
 using System.ServiceModel.Description;
 
 using BLToolkit.Data;
-using BLToolkit.Data.Linq;
 using BLToolkit.ServiceModel;
 
 namespace Linq.OverWCF
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
 			DbManager.TurnTraceSwitchOn();
 

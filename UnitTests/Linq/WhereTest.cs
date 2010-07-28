@@ -157,7 +157,7 @@ namespace Data.Linq
 			MethodParam(2);
 		}
 
-		static IQueryable<Person> TestDirectParam(TestDbManager db, int id)
+		static IQueryable<Person> TestDirectParam(ITestDataContext db, int id)
 		{
 			var name = "John";
 			return from p in db.Person where p.ID == id && p.FirstName == name select p;
@@ -544,7 +544,7 @@ namespace Data.Linq
 				where ch != null
 				select p;
 
-			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<TestDbManager,IQueryable<Parent>>(db =>
+			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<ITestDataContext,IQueryable<Parent>>(db =>
 				from p in db.Parent
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -27,6 +28,8 @@ namespace Data.Linq
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\Oracle\Oracle.DataAccess.dll");
 				if (args.Name.IndexOf("IBM.Data.DB2") >= 0)
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\IBM\IBM.Data.DB2.dll");
+				if (args.Name.IndexOf("Npgsql") >= 0)
+					return Assembly.LoadFrom(@"..\..\..\..\Redist\PostgreSql\Npgsql.dll");
 				if (args.Name.IndexOf("Mono.Security") >= 0)
 					return Assembly.LoadFrom(@"..\..\..\..\Redist\PostgreSql\Mono.Security.dll");
 
@@ -34,66 +37,106 @@ namespace Data.Linq
 			};
 
 			DbManager.TurnTraceSwitchOn();
-		}
 
-		static readonly List<string> _configurations = new List<string>
-		{
-			"Sql2008",
-			"Sql2005",
-			ProviderName.SqlCe,
-			ProviderName.DB2,
-			ProviderName.Informix,
-			"Oracle",
-			ProviderName.Firebird,
-			ProviderName.PostgreSQL,
-			ProviderName.MySql,
-			ProviderName.Sybase,
-			ProviderName.SQLite,
-			ProviderName.Access,
-		};
+			var path = Path.GetDirectoryName(typeof(DbManager).Assembly.CodeBase.Replace("file:///", ""));
 
-		protected void ForEachProvider(Action<TestDbManager> func)
-		{
-			ForEachProvider(Array<string>.Empty, func);
-		}
-
-		protected void ForEachProvider(string[] exceptList, Action<TestDbManager> func)
-		{
-			for (var i = 0; i < _configurations.Count; i++)
+			foreach (var info in _providers)
 			{
-				if (exceptList.Contains(_configurations[i]))
-					continue;
-
-				Debug.WriteLine(_configurations[i], "Provider ");
-
-				var reThrow = false;
-
 				try
 				{
-					using (var db = new TestDbManager(_configurations[i]))
+					Type type;
+
+					if (info.Assembly == null)
 					{
-						//var conn = db.Connection;
-
-						reThrow = true;
-						func(db);
+						type = typeof(DbManager).Assembly.GetType(info.Type, true);
 					}
-				}
-				catch
-				{
-					if (reThrow) throw;
+					else
+					{
+#if FW4
+						var fileName = info.Assembly + ".4.dll";
+#else
+						var fileName = info.Assembly + ".3.dll";
+#endif
 
-					_configurations.RemoveAt(i);
-					i--;
+						var assembly = Assembly.LoadFile(Path.Combine(path, fileName));
+
+						type = assembly.GetType(info.Type, true);
+					}
+
+					DbManager.AddDataProvider(type);
+
+					info.Loaded = true;
+				}
+				catch (Exception)
+				{
+					info.Loaded = false;
 				}
 			}
 		}
 
-		protected void Not0ForEachProvider(Func<TestDbManager, int> func)
+		class ProviderInfo
+		{
+			public ProviderInfo(string name, string assembly, string type)
+			{
+				Name     = name;
+				Assembly = assembly;
+				Type     = type;
+			}
+
+			public readonly string Name;
+			public readonly string Assembly;
+			public readonly string Type;
+			public          bool   Loaded;
+		}
+
+		static readonly List<ProviderInfo> _providers = new List<ProviderInfo>
+		{
+			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
+			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
+			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",      "BLToolkit.Data.DataProvider.SqlCeDataProvider"),
+			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",        "BLToolkit.Data.DataProvider.DB2DataProvider"),
+			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
+			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",   "BLToolkit.Data.DataProvider.FdpDataProvider"),
+			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
+			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL", "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
+			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",      "BLToolkit.Data.DataProvider.MySqlDataProvider"),
+			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
+			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
+			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
+		};
+
+		protected void ForEachProvider(Action<ITestDataContext> func)
+		{
+			ForEachProvider(Array<string>.Empty, func);
+		}
+
+		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
+		{
+			foreach (var info in _providers)
+			{
+				if (exceptList.Contains(info.Name))
+					continue;
+
+				Debug.WriteLine(info, "Provider ");
+
+				if (!info.Loaded)
+					continue;
+
+				using (var db = new TestDbManager(info.Name))
+				{
+					//var conn = db.Connection;
+
+					func(db);
+				}
+			}
+		}
+
+		protected void Not0ForEachProvider(Func<ITestDataContext, int> func)
 		{
 			ForEachProvider(db => Assert.Less(0, func(db)));
 		}
 
-		protected void TestPerson(int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestPerson(int id, string firstName, Func<ITestDataContext,IQueryable<Person>> func)
 		{
 			ForEachProvider(db =>
 			{
@@ -104,12 +147,12 @@ namespace Data.Linq
 			});
 		}
 
-		protected void TestJohn(Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestJohn(Func<ITestDataContext,IQueryable<Person>> func)
 		{
 			TestPerson(1, "John", func);
 		}
 
-		protected void TestOnePerson(string[] exceptList, int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestOnePerson(string[] exceptList, int id, string firstName, Func<ITestDataContext,IQueryable<Person>> func)
 		{
 			ForEachProvider(exceptList, db =>
 			{
@@ -124,17 +167,17 @@ namespace Data.Linq
 			});
 		}
 
-		protected void TestOnePerson(int id, string firstName, Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestOnePerson(int id, string firstName, Func<ITestDataContext,IQueryable<Person>> func)
 		{
 			TestOnePerson(Array<string>.Empty, id, firstName, func);
 		}
 
-		protected void TestOneJohn(string[] exceptList, Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestOneJohn(string[] exceptList, Func<ITestDataContext,IQueryable<Person>> func)
 		{
 			TestOnePerson(exceptList, 1, "John", func);
 		}
 
-		protected void TestOneJohn(Func<TestDbManager,IQueryable<Person>> func)
+		protected void TestOneJohn(Func<ITestDataContext,IQueryable<Person>> func)
 		{
 			TestOnePerson(Array<string>.Empty, 1, "John", func);
 		}

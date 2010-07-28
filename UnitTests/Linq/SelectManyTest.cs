@@ -106,7 +106,7 @@ namespace Data.Linq
 			});
 		}
 
-		public void SubQuery2(TestDbManager db)
+		public void SubQuery2(ITestDataContext db)
 		{
 			var q1 = from p in db.Person where p.ID == 1 || p.ID == 2 select p;
 			var q2 = from p in db.Person where !(p.ID == 2) select p;
@@ -134,7 +134,7 @@ namespace Data.Linq
 			});
 		}
 
-		IQueryable<Person> GetPersonQuery(TestDbManager db, int id)
+		IQueryable<Person> GetPersonQuery(ITestDataContext db, int id)
 		{
 			return from p in db.Person where p.ID == id select new Person { ID = p.ID + 1, FirstName = p.FirstName };
 		}

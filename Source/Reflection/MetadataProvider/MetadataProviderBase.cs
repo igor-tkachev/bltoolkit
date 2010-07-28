@@ -132,7 +132,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			isSet = false;
 			return
 				//member.Type.IsClass ||
-				member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof (Nullable<>);
+				member.Type.IsGenericType && member.Type.GetGenericTypeDefinition() == typeof (Nullable<>)
 				/*||
 				member.Type == typeof(System.Data.Linq.Binary) ||
 				member.Type == typeof(byte[])*/;
@@ -149,7 +149,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			if (member.Type.IsEnum)
 				return null;
 
-			object value = mappingSchema.GetNullValue(member.Type);
+			var value = mappingSchema.GetNullValue(member.Type);
 
 			if (value is Type && (Type)value == typeof(DBNull))
 			{
@@ -248,7 +248,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 				if (isSetFlag)
 				{
-					string name = mdp.GetFieldName(tex, sma, out isSetFlag);
+					var name = mdp.GetFieldName(tex, sma, out isSetFlag);
 					keys.Add(name);
 				}
 			}

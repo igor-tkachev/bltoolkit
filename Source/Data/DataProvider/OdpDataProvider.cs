@@ -40,12 +40,11 @@ namespace BLToolkit.Data.DataProvider
 		{
 			// Fix Oracle.Net bug #1: Array types are not handled.
 			//
-			Type OraDb_DbTypeTableType = typeof(OracleParameter).Assembly
-				.GetType("Oracle.DataAccess.Client.OraDb_DbTypeTable");
+			var oraDbDbTypeTableType = typeof(OracleParameter).Assembly.GetType("Oracle.DataAccess.Client.OraDb_DbTypeTable");
 
-			if (null != OraDb_DbTypeTableType)
+			if (null != oraDbDbTypeTableType)
 			{
-				Hashtable typeTable = (Hashtable)OraDb_DbTypeTableType.InvokeMember(
+				var typeTable = (Hashtable)oraDbDbTypeTableType.InvokeMember(
 					"s_table", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.GetField,
 					null, null, Type.EmptyTypes);
 
@@ -135,10 +134,11 @@ namespace BLToolkit.Data.DataProvider
 
 		public override IDbCommand CreateCommandObject(IDbConnection connection)
 		{
-			OracleConnection oraConnection = connection as OracleConnection;
+			var oraConnection = connection as OracleConnection;
+
 			if (null != oraConnection)
 			{
-				OracleCommand oraCommand = oraConnection.CreateCommand();
+				var oraCommand = oraConnection.CreateCommand();
 
 				// Fix Oracle.Net bug #2: Empty arrays can not be sent to the server.
 				//
@@ -152,28 +152,28 @@ namespace BLToolkit.Data.DataProvider
 
 		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = (parameter is OracleParameterWrap)?
+			var oraParameter = (parameter is OracleParameterWrap)?
 				(parameter as OracleParameterWrap).OracleParameter: parameter as OracleParameter;
 
 			if (null != oraParameter)
 			{
-				OracleParameter oraParameterClone = (OracleParameter)oraParameter.Clone();
+				var oraParameterClone = (OracleParameter)oraParameter.Clone();
 
 				// Fix Oracle.Net bug #3: CollectionType property is not cloned.
 				//
 				oraParameterClone.CollectionType = oraParameter.CollectionType;
 
-                // Fix Oracle.Net bug #8423178
-                // See http://forums.oracle.com/forums/thread.jspa?threadID=975902&tstart=0
-                //
-                if (oraParameterClone.OracleDbType == OracleDbType.RefCursor)
-                {
-                    // Set OracleDbType to itself to reset m_bSetDbType and m_bOracleDbTypeExSet
-                    //
-                    oraParameterClone.OracleDbType = OracleDbType.RefCursor;
-                }
+				// Fix Oracle.Net bug #8423178
+				// See http://forums.oracle.com/forums/thread.jspa?threadID=975902&tstart=0
+				//
+				if (oraParameterClone.OracleDbType == OracleDbType.RefCursor)
+				{
+					// Set OracleDbType to itself to reset m_bSetDbType and m_bOracleDbTypeExSet
+					//
+					oraParameterClone.OracleDbType = OracleDbType.RefCursor;
+				}
 
-                return OracleParameterWrap.CreateInstance(oraParameterClone);
+				return OracleParameterWrap.CreateInstance(oraParameterClone);
 			}
 
 			return base.CloneParameter(parameter);
@@ -181,7 +181,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void SetUserDefinedType(IDbDataParameter parameter, string typeName)
 		{
-			OracleParameter oraParameter = (parameter is OracleParameterWrap) ?
+			var oraParameter = (parameter is OracleParameterWrap) ?
 				(parameter as OracleParameterWrap).OracleParameter : parameter as OracleParameter;
 
 			if (oraParameter == null)
@@ -216,7 +216,8 @@ namespace BLToolkit.Data.DataProvider
 		/// the Parameters of this command.</param>
 		public override bool DeriveParameters(IDbCommand command)
 		{
-			OracleCommand oraCommand = command as OracleCommand;
+			var oraCommand = command as OracleCommand;
+
 			if (null != oraCommand)
 			{
 				try
@@ -245,7 +246,8 @@ namespace BLToolkit.Data.DataProvider
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
 				case ConvertType.SprocParameterToName:
-					string name = (string)value;
+					var name = (string)value;
+
 					if (name.Length > 0)
 					{
 						if (name[0] == ':')
@@ -257,6 +259,7 @@ namespace BLToolkit.Data.DataProvider
 							return name.Substring(ParameterPrefix.Length);
 						}
 					}
+
 					break;
 
 				case ConvertType.ExceptionToErrorNumber:
@@ -282,7 +285,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = (parameter is OracleParameterWrap)?
+			var oraParameter = (parameter is OracleParameterWrap)?
 				(parameter as OracleParameterWrap).OracleParameter: parameter as OracleParameter;
 
 			if (null != oraParameter)
@@ -292,7 +295,8 @@ namespace BLToolkit.Data.DataProvider
 					if (oraParameter.Direction == ParameterDirection.Input
 						|| oraParameter.Direction == ParameterDirection.InputOutput)
 					{
-						Array ar = oraParameter.Value as Array;
+						var ar = oraParameter.Value as Array;
+
 						if (null != ar && !(ar is byte[] || ar is char[]))
 						{
 							oraParameter.Size = ar.Length;
@@ -300,8 +304,9 @@ namespace BLToolkit.Data.DataProvider
 							if (oraParameter.DbType == DbType.String
 								&& oraParameter.Direction == ParameterDirection.InputOutput)
 							{
-								int[] arrayBindSize = new int[oraParameter.Size];
-								for (int i = 0; i < oraParameter.Size; ++i)
+								var arrayBindSize = new int[oraParameter.Size];
+
+								for (var i = 0; i < oraParameter.Size; ++i)
 								{
 									arrayBindSize[i] = 1024;
 								}
@@ -320,9 +325,9 @@ namespace BLToolkit.Data.DataProvider
 
 						if (oraParameter.Value is Stream[])
 						{
-							Stream[]     streams = (Stream[]) oraParameter.Value;
+							var streams = (Stream[]) oraParameter.Value;
 
-							for (int i = 0; i < oraParameter.Size; ++i)
+							for (var i = 0; i < oraParameter.Size; ++i)
 							{
 								if (streams[i] is OracleBFile || streams[i] is OracleBlob ||
 									streams[i] is OracleClob || streams[i] is OracleXmlStream)
@@ -337,19 +342,22 @@ namespace BLToolkit.Data.DataProvider
 						}
 						else if (oraParameter.Value is XmlDocument[])
 						{
-							XmlDocument[] xmlDocuments = (XmlDocument[]) oraParameter.Value;
-							object[]      values       = new object[oraParameter.Size];
+							var xmlDocuments = (XmlDocument[]) oraParameter.Value;
+							var values       = new object[oraParameter.Size];
 
 							switch (oraParameter.OracleDbType)
 							{
 								case OracleDbType.XmlType:
-									for (int i = 0; i < oraParameter.Size; ++i)
+
+									for (var i = 0; i < oraParameter.Size; ++i)
 									{
 										values[i] = xmlDocuments[i].DocumentElement == null?
 											(object) DBNull.Value:
 											new OracleXmlType((OracleConnection)command.Connection, xmlDocuments[i]);
 									}
+
 									oraParameter.Value = values;
+
 									break;
 
 								// Fix Oracle.Net bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
@@ -361,13 +369,15 @@ namespace BLToolkit.Data.DataProvider
 								case OracleDbType.NVarchar2:
 								case OracleDbType.Char:
 								case OracleDbType.NChar:
-									for (int i = 0; i < oraParameter.Size; ++i)
+									for (var i = 0; i < oraParameter.Size; ++i)
 									{
 										values[i] = xmlDocuments[i].DocumentElement == null?
 											(object) DBNull.Value:
 											xmlDocuments[i].InnerXml;
 									}
+
 									oraParameter.Value = values;
+
 									break;
 
 								// Or convert to bytes if need.
@@ -377,18 +387,20 @@ namespace BLToolkit.Data.DataProvider
 								case OracleDbType.Raw:
 								case OracleDbType.Long:
 								case OracleDbType.LongRaw:
-									for (int i = 0; i < oraParameter.Size; ++i)
+									for (var i = 0; i < oraParameter.Size; ++i)
 									{
 										if (xmlDocuments[i].DocumentElement == null)
 											values[i] = DBNull.Value;
 										else
-											using (MemoryStream s = new MemoryStream())
+											using (var s = new MemoryStream())
 											{
 												xmlDocuments[i].Save(s);
 												values[i] = s.GetBuffer();
 											}
 									}
+
 									oraParameter.Value = values;
+
 									break;
 							}
 						}
@@ -400,8 +412,8 @@ namespace BLToolkit.Data.DataProvider
 						if (oraParameter.DbType == DbType.String)
 						{
 							oraParameter.Size = 1024;
-							int[] arrayBindSize = new int[oraParameter.Size];
-							for (int i = 0; i < oraParameter.Size; ++i)
+							var arrayBindSize = new int[oraParameter.Size];
+							for (var i = 0; i < oraParameter.Size; ++i)
 							{
 								arrayBindSize[i] = 1024;
 							}
@@ -416,7 +428,7 @@ namespace BLToolkit.Data.DataProvider
 				}
 				else if (oraParameter.Value is Stream)
 				{
-					Stream stream = (Stream) oraParameter.Value;
+					var stream = (Stream) oraParameter.Value;
 
 					if (!(stream is OracleBFile) && !(stream is OracleBlob) &&
 						!(stream is OracleClob) && !(stream is OracleXmlStream))
@@ -426,7 +438,7 @@ namespace BLToolkit.Data.DataProvider
 				}
 				else if (oraParameter.Value is Byte[])
 				{
-					Byte[] bytes = (Byte[]) oraParameter.Value;
+					var bytes = (Byte[]) oraParameter.Value;
 
 					if (bytes.Length > 32000)
 					{
@@ -435,7 +447,7 @@ namespace BLToolkit.Data.DataProvider
 				}
 				else if (oraParameter.Value is XmlDocument)
 				{
-					XmlDocument xmlDocument = (XmlDocument)oraParameter.Value;
+					var xmlDocument = (XmlDocument)oraParameter.Value;
 					if (xmlDocument.DocumentElement == null)
 						oraParameter.Value = DBNull.Value;
 					else
@@ -470,7 +482,7 @@ namespace BLToolkit.Data.DataProvider
 							case OracleDbType.Raw:
 							case OracleDbType.Long:
 							case OracleDbType.LongRaw:
-								using (MemoryStream s = new MemoryStream())
+								using (var s = new MemoryStream())
 								{
 									xmlDocument.Save(s);
 									oraParameter.Value = s.GetBuffer();
@@ -488,19 +500,19 @@ namespace BLToolkit.Data.DataProvider
 
 		private static Stream CopyStream(Stream stream, OracleCommand cmd)
 		{
-			return CopyStream(BLToolkit.Common.Convert.ToByteArray(stream), cmd);
+			return CopyStream(Common.Convert.ToByteArray(stream), cmd);
 		}
 
 		private static Stream CopyStream(Byte[] bytes, OracleCommand cmd)
 		{
-			OracleBlob ret = new OracleBlob(cmd.Connection);
+			var ret = new OracleBlob(cmd.Connection);
 			ret.Write(bytes, 0, bytes.Length);
 			return ret;
 		}
 
 		public override bool IsValueParameter(IDbDataParameter parameter)
 		{
-			OracleParameter oraParameter = (parameter is OracleParameterWrap)?
+			var oraParameter = (parameter is OracleParameterWrap)?
 				(parameter as OracleParameterWrap).OracleParameter: parameter as OracleParameter;
 
 			if (null != oraParameter)
@@ -518,7 +530,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override IDbDataParameter CreateParameterObject(IDbCommand command)
 		{
-			IDbDataParameter parameter = base.CreateParameterObject(command);
+			var parameter = base.CreateParameterObject(command);
 
 			if (parameter is OracleParameter)
 				parameter = OracleParameterWrap.CreateInstance(parameter as OracleParameter);
@@ -528,7 +540,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override IDbDataParameter GetParameter(IDbCommand command, NameOrIndexParameter nameOrIndex)
 		{
-			IDbDataParameter parameter = base.GetParameter(command, nameOrIndex);
+			var parameter = base.GetParameter(command, nameOrIndex);
 
 			if (parameter is OracleParameter)
 				parameter = OracleParameterWrap.CreateInstance(parameter as OracleParameter);
@@ -590,7 +602,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{
-				OracleTimeStampTZ ts = DataReader.GetOracleTimeStampTZ(i);
+				var ts = DataReader.GetOracleTimeStampTZ(i);
 				return new DateTimeOffset(ts.Value, ts.GetTimeZoneOffset());
 			}
 		}
@@ -612,7 +624,7 @@ namespace BLToolkit.Data.DataProvider
 		/// <param name="attributes">Provider specific attributes.</param>
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
 		{
-			string val = attributes["ParameterPrefix"];
+			var val = attributes["ParameterPrefix"];
 			if (val != null)
 				ParameterPrefix = val;
 
@@ -644,7 +656,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultSByteNullValue: (SByte)oraDecimal.Value;
 				}
 
@@ -655,7 +667,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultInt16NullValue: oraDecimal.ToInt16();
 				}
 
@@ -666,7 +678,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultInt32NullValue: oraDecimal.ToInt32();
 				}
 
@@ -677,7 +689,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultInt64NullValue: oraDecimal.ToInt64();
 				}
 
@@ -688,7 +700,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultByteNullValue: oraDecimal.ToByte();
 				}
 
@@ -700,7 +712,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultUInt16NullValue: (UInt16)oraDecimal.Value;
 				}
 
@@ -712,7 +724,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultUInt32NullValue: (UInt32)oraDecimal.Value;
 				}
 
@@ -724,7 +736,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultUInt64NullValue: (UInt64)oraDecimal.Value;
 				}
 
@@ -735,7 +747,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultSingleNullValue: oraDecimal.ToSingle();
 				}
 
@@ -746,7 +758,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultDoubleNullValue: oraDecimal.ToDouble();
 				}
 
@@ -757,7 +769,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultBooleanNullValue: (oraDecimal.Value != 0);
 				}
 
@@ -768,7 +780,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDate)
 				{
-					OracleDate oraDate = (OracleDate)value;
+					var oraDate = (OracleDate)value;
 					return oraDate.IsNull? DefaultDateTimeNullValue: oraDate.Value;
 				}
 
@@ -779,7 +791,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? DefaultDecimalNullValue: oraDecimal.Value;
 				}
 
@@ -790,13 +802,13 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleString)
 				{
-					OracleString oraString = (OracleString)value;
+					var oraString = (OracleString)value;
 					return oraString.IsNull? DefaultGuidNullValue: new Guid(oraString.Value);
 				}
 
 				if (value is OracleBlob)
 				{
-					OracleBlob oraBlob = (OracleBlob)value;
+					var oraBlob = (OracleBlob)value;
 					return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
 				}
 
@@ -807,19 +819,19 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleString)
 				{
-					OracleString oraString = (OracleString)value;
+					var oraString = (OracleString)value;
 					return oraString.IsNull? DefaultStringNullValue: oraString.Value;
 				}
 
 				if (value is OracleXmlType)
 				{
-					OracleXmlType oraXmlType = (OracleXmlType)value;
+					var oraXmlType = (OracleXmlType)value;
 					return oraXmlType.IsNull ? DefaultStringNullValue : oraXmlType.Value;
 				}
 
 				if (value is OracleClob)
 				{
-					OracleClob oraClob = (OracleClob)value;
+					var oraClob = (OracleClob)value;
 					return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
 				}
 
@@ -831,7 +843,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleXmlType)
 				{
-					OracleXmlType oraXml = (OracleXmlType)value;
+					var oraXml = (OracleXmlType)value;
 					return oraXml.IsNull? DefaultStreamNullValue: oraXml.GetStream();
 				}
 
@@ -842,7 +854,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleXmlType)
 				{
-					OracleXmlType oraXml = (OracleXmlType)value;
+					var oraXml = (OracleXmlType)value;
 					return oraXml.IsNull? DefaultXmlReaderNullValue: oraXml.GetXmlReader();
 				}
 
@@ -853,7 +865,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleXmlType)
 				{
-					OracleXmlType oraXml = (OracleXmlType)value;
+					var oraXml = (OracleXmlType)value;
 					return oraXml.IsNull? DefaultXmlDocumentNullValue: oraXml.GetXmlDocument();
 				}
 
@@ -864,19 +876,19 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleBlob)
 				{
-					OracleBlob oraBlob = (OracleBlob)value;
+					var oraBlob = (OracleBlob)value;
 					return oraBlob.IsNull? null: oraBlob.Value;
 				}
 
 				if (value is OracleBinary)
 				{
-					OracleBinary oraBinary = (OracleBinary)value;
+					var oraBinary = (OracleBinary)value;
 					return oraBinary.IsNull? null: oraBinary.Value;
 				}
 				
 				if (value is OracleBFile)
 				{
-					OracleBFile oraBFile = (OracleBFile)value;
+					var oraBFile = (OracleBFile)value;
 					return oraBFile.IsNull? null: oraBFile.Value;
 				}
 
@@ -887,13 +899,13 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleString)
 				{
-					OracleString oraString = (OracleString)value;
+					var oraString = (OracleString)value;
 					return oraString.IsNull? null: oraString.Value.ToCharArray();
 				}
 
 				if (value is OracleClob)
 				{
-					OracleClob oraClob = (OracleClob)value;
+					var oraClob = (OracleClob)value;
 					return oraClob.IsNull? null: oraClob.Value.ToCharArray();
 				}
 
@@ -909,7 +921,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (SByte?)oraDecimal.Value;
 				}
 
@@ -920,7 +932,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Int16?)oraDecimal.ToInt16();
 				}
 
@@ -931,7 +943,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Int32?)oraDecimal.ToInt32();
 				}
 
@@ -942,7 +954,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Int64?)oraDecimal.ToInt64();
 				}
 
@@ -953,7 +965,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Byte?)oraDecimal.ToByte();
 				}
 
@@ -965,7 +977,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (UInt16?)oraDecimal.Value;
 				}
 
@@ -977,7 +989,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (UInt32?)oraDecimal.Value;
 				}
 
@@ -989,7 +1001,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (UInt64?)oraDecimal.Value;
 				}
 
@@ -1000,7 +1012,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Single?)oraDecimal.ToSingle();
 				}
 
@@ -1011,7 +1023,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Double?)oraDecimal.ToDouble();
 				}
 
@@ -1022,7 +1034,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Boolean?)(oraDecimal.Value != 0);
 				}
 
@@ -1033,7 +1045,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDate)
 				{
-					OracleDate oraDate = (OracleDate)value;
+					var oraDate = (OracleDate)value;
 					return oraDate.IsNull? null: (DateTime?)oraDate.Value;
 				}
 
@@ -1044,7 +1056,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleDecimal)
 				{
-					OracleDecimal oraDecimal = (OracleDecimal)value;
+					var oraDecimal = (OracleDecimal)value;
 					return oraDecimal.IsNull? null: (Decimal?)oraDecimal.Value;
 				}
 
@@ -1055,13 +1067,13 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleString)
 				{
-					OracleString oraString = (OracleString)value;
+					var oraString = (OracleString)value;
 					return oraString.IsNull? null: (Guid?)new Guid(oraString.Value);
 				}
 
 				if (value is OracleBlob)
 				{
-					OracleBlob oraBlob = (OracleBlob)value;
+					var oraBlob = (OracleBlob)value;
 					return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
 				}
 
@@ -1076,12 +1088,12 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleString)
 				{
-					OracleString oracleValue = (OracleString)value;
+					var oracleValue = (OracleString)value;
 					value = oracleValue.IsNull? null: oracleValue.Value;
 				}
 				else if (value is OracleDecimal)
 				{
-					OracleDecimal oracleValue = (OracleDecimal)value;
+					var oracleValue = (OracleDecimal)value;
 					if (oracleValue.IsNull)
 						value = null;
 					else 
@@ -1138,7 +1150,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public override Type GetFieldType(int index)
 			{
-				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
+				var fieldType = _dataReader.GetProviderSpecificFieldType(index);
 
 				if (fieldType != typeof(OracleXmlType) && fieldType != typeof(OracleBlob))
 					fieldType = _dataReader.GetFieldType(index);
@@ -1148,17 +1160,17 @@ namespace BLToolkit.Data.DataProvider
 
 			public override object GetValue(object o, int index)
 			{
-				Type fieldType = _dataReader.GetProviderSpecificFieldType(index);
+				var fieldType = _dataReader.GetProviderSpecificFieldType(index);
 
 				if (fieldType == typeof(OracleXmlType))
 				{
-					OracleXmlType xml = _dataReader.GetOracleXmlType(index);
+					var xml = _dataReader.GetOracleXmlType(index);
 					return MappingSchema.ConvertToXmlDocument(xml);
 				}
 
 				if (fieldType == typeof(OracleBlob))
 				{
-					OracleBlob blob = _dataReader.GetOracleBlob(index);
+					var blob = _dataReader.GetOracleBlob(index);
 					return MappingSchema.ConvertToStream(blob);
 				}
 
@@ -1228,13 +1240,13 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (_fieldType == typeof(OracleXmlType))
 				{
-					OracleXmlType xml = _dataReader.GetOracleXmlType(Index);
+					var xml = _dataReader.GetOracleXmlType(Index);
 					return MappingSchema.ConvertToXmlDocument(xml);
 				}
 
 				if (_fieldType == typeof(OracleBlob))
 				{
-					OracleBlob blob = _dataReader.GetOracleBlob(Index);
+					var blob = _dataReader.GetOracleBlob(Index);
 					return MappingSchema.ConvertToStream(blob);
 				}
 
@@ -1288,7 +1300,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public static IDbDataParameter CreateInstance(OracleParameter oraParameter)
 			{
-				OracleParameterWrap wrap = TypeAccessor<OracleParameterWrap>.CreateInstanceEx();
+				var wrap = TypeAccessor<OracleParameterWrap>.CreateInstanceEx();
 
 				wrap._oracleParameter = oraParameter;
 
@@ -1399,8 +1411,8 @@ namespace BLToolkit.Data.DataProvider
 						}
 						else if (value is IConvertible)
 						{
-							IConvertible convertible = (IConvertible)value;
-							TypeCode        typeCode = convertible.GetTypeCode();
+							var convertible = (IConvertible)value;
+							var typeCode   = convertible.GetTypeCode();
 
 							switch (typeCode)
 							{

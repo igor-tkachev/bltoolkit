@@ -142,7 +142,7 @@ namespace BLToolkit.Data.DataProvider
 
 		private static IDbDataParameter GetParameter(string parameterName, IDbDataParameter[] commandParameters)
 		{
-			foreach (IDbDataParameter par in commandParameters)
+			foreach (var par in commandParameters)
 				if (string.Compare(parameterName, par.ParameterName, true) == 0)
 					return par;
 			return null;
@@ -160,18 +160,20 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
-			if (commandParameters != null) foreach (IDbDataParameter par in commandParameters)
+			if (commandParameters != null) foreach (var par in commandParameters)
 			{
 				if (par.Value is bool)
 				{
-					string value = (bool)par.Value ? "1" : "0";
+					var value = (bool)par.Value ? "1" : "0";
+
 					par.DbType = DbType.AnsiString;
 					par.Value  = value;
 					par.Size   = value.Length;
 				}
 				else if (par.Value is Guid)
 				{
-					string value = par.Value.ToString();
+					var value = par.Value.ToString();
+
 					par.DbType = DbType.AnsiStringFixedLength;
 					par.Value  = value;
 					par.Size   = value.Length;
@@ -181,8 +183,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (commandType == CommandType.StoredProcedure && IsInOutParameterEmulation)
 				{
-					string           iParameterName  = GetInputParameterName(par.ParameterName);
-					IDbDataParameter fakeIOParameter = GetParameter(iParameterName, commandParameters);
+					var iParameterName  = GetInputParameterName(par.ParameterName);
+					var fakeIOParameter = GetParameter(iParameterName, commandParameters);
 
 					if (fakeIOParameter != null)
 					{
@@ -207,14 +209,16 @@ namespace BLToolkit.Data.DataProvider
 		{
 			if (parameter.Value is bool)
 			{
-				string value = (bool)parameter.Value ? "1" : "0";
+				var value = (bool)parameter.Value ? "1" : "0";
+
 				parameter.DbType = DbType.AnsiString;
 				parameter.Value  = value;
 				parameter.Size   = value.Length;
 			}
 			else if (parameter.Value is Guid)
 			{
-				string value = parameter.Value.ToString();
+				var value = parameter.Value.ToString();
+
 				parameter.DbType = DbType.AnsiStringFixedLength;
 				parameter.Value  = value;
 				parameter.Size   = value.Length;
@@ -225,25 +229,25 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
 		{
-			string inOutInputParameterPrefix = attributes["InOutInputParameterPrefix"];
+			var inOutInputParameterPrefix = attributes["InOutInputParameterPrefix"];
 			if (inOutInputParameterPrefix != null)
 				InOutInputParameterPrefix = inOutInputParameterPrefix;
 
-			string returnParameterName = attributes["ReturnParameterName"];
+			var returnParameterName = attributes["ReturnParameterName"];
 			if (returnParameterName != null)
 				ReturnParameterName = returnParameterName;
 
-			string isReturnValueEmulation = attributes["IsReturnValueEmulation"];
+			var isReturnValueEmulation = attributes["IsReturnValueEmulation"];
 			if (isReturnValueEmulation != null)
-				IsReturnValueEmulation = BLToolkit.Common.Convert.ToBoolean(isReturnValueEmulation);
+				IsReturnValueEmulation = Common.Convert.ToBoolean(isReturnValueEmulation);
 
-			string isInOutParameterEmulation = attributes["IsInOutParameterEmulation"];
+			var isInOutParameterEmulation = attributes["IsInOutParameterEmulation"];
 			if (isInOutParameterEmulation != null)
-				IsInOutParameterEmulation = BLToolkit.Common.Convert.ToBoolean(isInOutParameterEmulation);
+				IsInOutParameterEmulation = Common.Convert.ToBoolean(isInOutParameterEmulation);
 
-			string quoteIdentifiers = attributes["QuoteIdentifiers"];
+			var quoteIdentifiers = attributes["QuoteIdentifiers"];
 			if (quoteIdentifiers != null)
-				QuoteIdentifiers = BLToolkit.Common.Convert.ToBoolean(quoteIdentifiers);
+				QuoteIdentifiers = Common.Convert.ToBoolean(quoteIdentifiers);
 
 			base.Configure(attributes);
 		}
@@ -267,11 +271,11 @@ namespace BLToolkit.Data.DataProvider
 
 			public new object GetValue(int i)
 			{
-				object value = DataReader.GetValue(i);
+				var value = DataReader.GetValue(i);
 
 				if (value is DateTime)
 				{
-					DateTime dt = (DateTime)value;
+					var dt = (DateTime)value;
 
 					if (dt.Year == 1970 && dt.Month == 1 && dt.Day == 1)
 						return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
@@ -282,7 +286,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public new DateTime GetDateTime(int i)
 			{
-				DateTime dt = DataReader.GetDateTime(i);
+				var dt = DataReader.GetDateTime(i);
 
 				if (dt.Year == 1970 && dt.Month == 1 && dt.Day == 1)
 					return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
@@ -345,7 +349,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public System.Data.SqlTypes.SqlBinary ConvertToSqlBinary(string value)
 			{
-				return BLToolkit.Common.Convert.ToSqlBinary(ConvertToByteArray(value));
+				return Common.Convert.ToSqlBinary(ConvertToByteArray(value));
 			}
 
 			public override System.Data.SqlTypes.SqlBinary ConvertToSqlBinary(object value)
@@ -357,7 +361,7 @@ namespace BLToolkit.Data.DataProvider
 
 			public System.Data.SqlTypes.SqlBytes ConvertToSqlBytes(string value)
 			{
-				return BLToolkit.Common.Convert.ToSqlBytes(ConvertToByteArray(value));
+				return Common.Convert.ToSqlBytes(ConvertToByteArray(value));
 			}
 
 			public override System.Data.SqlTypes.SqlBytes ConvertToSqlBytes(object value)
@@ -384,14 +388,14 @@ namespace BLToolkit.Data.DataProvider
 
 			protected override object MapInternal(Reflection.InitContext initContext)
 			{
-				FbDataReader dr = initContext.SourceObject as FbDataReader;
+				var dr = initContext.SourceObject as FbDataReader;
 
 				// Fb's SP returns single row with nulls if selected object doesn't exists
 				// so for all DBNull's (null) should be returned, instead of object instance
 				//
 				if (dr != null)
 				{
-					int i = dr.FieldCount;
+					var i = dr.FieldCount;
 					while (--i >= 0)
 						if (!dr.IsDBNull(i))
 							break;

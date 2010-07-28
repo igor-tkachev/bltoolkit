@@ -79,11 +79,8 @@ namespace Update
 			{
 				db.GrandChild1.Delete(gc => new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value));
 
-				db.Insert(new[]
-				{
-					new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 },
-					new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 }
-				});
+				db.GrandChild.Insert(() => new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 });
+				db.GrandChild.Insert(() => new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 });
 
 				Assert.AreEqual(3, db.GrandChild1.Count(gc => gc.ParentID == 1));
 				Assert.AreEqual(2, db.GrandChild1.Where(gc => gc.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value)).Delete());
@@ -100,11 +97,8 @@ namespace Update
 
 				db.Parent.Delete(_ => _.ParentID > 1000);
 
-				db.Insert(new[]
-				{
-					new Parent { ParentID = values[0], Value1 = 1 },
-					new Parent { ParentID = values[1], Value1 = 1 }
-				});
+				db.Parent.Insert(() => new Parent { ParentID = values[0], Value1 = 1 });
+				db.Parent.Insert(() => new Parent { ParentID = values[1], Value1 = 1 });
 
 				Assert.AreEqual(2, db.Parent.Count(_ => _.ParentID > 1000));
 				Assert.AreEqual(2, db.Parent.Delete(_ => values.Contains(_.ParentID)));

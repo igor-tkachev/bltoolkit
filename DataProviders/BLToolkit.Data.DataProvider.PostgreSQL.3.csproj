@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D527524F-EC92-465E-9CAE-86278121675A}</ProjectGuid>
+    <ProjectGuid>{5A556D57-0D68-433B-AD78-02849583582B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnitTests.Linq.Interface</RootNamespace>
-    <AssemblyName>UnitTests.Linq.Interface</AssemblyName>
+    <RootNamespace>BLToolkit.Data.DataProvider.PostgreSQL</RootNamespace>
+    <AssemblyName>BLToolkit.Data.DataProvider.PostgreSQL.3</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,11 +31,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Npgsql, Version=2.0.9.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Redist\PostgreSql\Npgsql.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml.Linq">
@@ -48,28 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ITestDataContext.cs" />
-    <Compile Include="Model\BinaryData.cs" />
-    <Compile Include="Model\DataTypeTest.cs" />
-    <Compile Include="Model\Doctor.cs" />
-    <Compile Include="Model\EditableParent.cs" />
-    <Compile Include="Model\Gender.cs" />
-    <Compile Include="Model\LinqDataTypes.cs" />
-    <Compile Include="Model\Northwind.cs" />
-    <Compile Include="Model\NorthwindDB.cs">
-      <SubType>Component</SubType>
+    <Compile Include="..\Source\Data\DataProvider\PostgreSQLDataProvider.cs">
+      <Link>PostgreSQLDataProvider.cs</Link>
     </Compile>
-    <Compile Include="Model\ParentChild.cs" />
-    <Compile Include="Model\Patient.cs" />
-    <Compile Include="Model\Person.cs" />
-    <Compile Include="Model\TypeValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestDbManager.cs">
-      <SubType>Component</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
+    <ProjectReference Include="..\Source\BLToolkit.3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.3</Name>
     </ProjectReference>

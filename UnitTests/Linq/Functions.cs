@@ -43,7 +43,7 @@ namespace Data.Linq
 				where new[] { 1, n }.Contains(p.ParentID)
 				select p;
 
-			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<TestDbManager,IQueryable<Parent>>(db =>
+			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<ITestDataContext,IQueryable<Parent>>(db =>
 				from p in db.Parent
 				where new[] { 1, n }.Contains(p.ParentID)
 				select p)(data)));
@@ -59,7 +59,7 @@ namespace Data.Linq
 				where arr.Contains(p.ParentID)
 				select p;
 
-			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<TestDbManager,IQueryable<Parent>>(db =>
+			ForEachProvider(data => AreEqual(expected, CompiledQuery.Compile<ITestDataContext,IQueryable<Parent>>(db =>
 				from p in db.Parent
 				where arr.Contains(p.ParentID)
 				select p)(data)));
@@ -76,7 +76,7 @@ namespace Data.Linq
 
 			ForEachProvider(data =>
 			{
-				var cq = CompiledQuery.Compile<TestDbManager,int[],IQueryable<Parent>>((db,a) =>
+				var cq = CompiledQuery.Compile<ITestDataContext,int[],IQueryable<Parent>>((db,a) =>
 					from p in db.Parent
 					where a.Contains(p.ParentID)
 					select p);

@@ -7,7 +7,7 @@ namespace Data.Linq
 {
 	using Model;
 
-	public class TestDbManager : DbManager
+	public class TestDbManager : DbManager, ITestDataContext
 	{
 		public TestDbManager(string configString)
 			: base(configString)
