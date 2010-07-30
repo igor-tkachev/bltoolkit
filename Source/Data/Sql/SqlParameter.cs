@@ -11,9 +11,9 @@ namespace BLToolkit.Data.Sql
 		public SqlParameter(Type systemType, string name, object value)
 		{
 			IsQueryParameter = true;
-			Name       = name;
-			SystemType = systemType;
-			_value      = value;
+			Name             = name;
+			SystemType       = systemType;
+			_value           = value;
 		}
 
 		public SqlParameter(Type systemType, string name, object value, Converter<object,object> valueConverter)
@@ -64,10 +64,10 @@ namespace BLToolkit.Data.Sql
 				if (_valueConverter == null)
 				{
 					if (EnumTypes != null)
-						foreach (var type in EnumTypes)
+						foreach (var type in EnumTypes.ToArray())
 							SetEnumConverter(type, Map.DefaultSchema);
 					else if (TakeValues != null)
-						foreach (var take in TakeValues)
+						foreach (var take in TakeValues.ToArray())
 							SetTakeConverter(take);
 					else if (LikeStart != null)
 						SetLikeConverter(LikeStart, LikeEnd);

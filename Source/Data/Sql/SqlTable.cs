@@ -37,6 +37,17 @@ namespace BLToolkit.Data.Sql
 
 			_fields  = new ChildContainer<ISqlTableSource,SqlField>(this);
 			_fields.AddRange(fields);
+
+			foreach (var field in fields)
+			{
+				if (field.Name == "*")
+				{
+					_all = field;
+					_fields.Remove("*");
+					((IChild<ISqlTableSource>)_all).Parent = this;
+					break;
+				}
+			}
 		}
 
 		#endregion

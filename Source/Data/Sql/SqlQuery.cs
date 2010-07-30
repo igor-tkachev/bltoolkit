@@ -3897,6 +3897,14 @@ namespace BLToolkit.Data.Sql
 
 				return _all;
 			}
+
+			internal set
+			{
+				_all = value;
+
+				if (_all != null)
+					((IChild<ISqlTableSource>)_all).Parent = this;
+			}
 		}
 
 		List<ISqlExpression> _keys;

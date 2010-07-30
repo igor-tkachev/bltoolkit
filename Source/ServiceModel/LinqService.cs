@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ServiceModel;
 
 namespace BLToolkit.ServiceModel
 {
-	using Common;
-	using Data;
 	using Data.Linq;
 	using Data.Sql;
 
@@ -159,7 +156,8 @@ namespace BLToolkit.ServiceModel
 
 		protected virtual void ValidateQuery(SqlQuery query, SqlParameter[] parameters)
 		{
-			
 		}
+
+		public static Func<string,Type> TypeResolver = _ => null;
 	}
 }

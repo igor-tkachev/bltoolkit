@@ -1,7 +1,7 @@
 ﻿<#
 	{
 		var wcfPrevBeforeGenerateModel = BeforeGenerateModel;
-	
+
 		BeforeGenerateModel = tt =>
 		{
 			wcfPrevBeforeGenerateModel(tt);

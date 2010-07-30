@@ -1052,6 +1052,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case QueryElementType.SqlField:
 					{
 						var field = (SqlField)expr;
+
 						if (field == field.Table.All)
 						{
 							sb.Append("*");

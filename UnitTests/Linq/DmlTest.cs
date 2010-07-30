@@ -19,9 +19,11 @@ namespace Update
 	public class DmlTest : TestBase
 	{
 		[TestFixtureTearDown]
-		public void TearDown()
+		public new void TearDown()
 		{
 			ForEachProvider(db => db.Parent.Delete(p => p.ParentID >= 1000));
+
+			base.TearDown();
 		}
 
 		[Test]

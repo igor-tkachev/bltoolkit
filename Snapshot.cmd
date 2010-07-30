@@ -18,6 +18,7 @@ cd Source
 %windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLToolkit.3.csproj /property:Configuration=Release 
 %windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.4.csproj /property:Configuration=Release
 copy bin\Release\*.dll .
+md DataProviders
 
 cd ..\Tools\BLTgen
 %windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLTgen.csproj /property:Configuration=Release 
@@ -43,9 +44,9 @@ cd ..\..\DataProviders
 %windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.Data.DataProvider.SqlCe.4.csproj      /property:Configuration=Release 
 %windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.Data.DataProvider.SQLite.4.csproj     /property:Configuration=Release 
 %windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.Data.DataProvider.Sybase.4.csproj     /property:Configuration=Release 
-copy bin\Release\*.exe ..\..\Source\DataProviders
+copy bin\Release\BLToolkit.Data.*.dll ..\Source\DataProviders
 cd ..\Source
 
-"%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* -x*\bin\* -x*\obj\* c:\temp\BLToolkitSnapshot\bltoolkit_bin *.exe *.dll Data\DataProvider\
+"%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* -x*\bin\* -x*\obj\* c:\temp\BLToolkitSnapshot\bltoolkit_bin *.exe *.dll DataProvider\ Data\DataProvider\
 
 ftp -s:e:\documents\copybltsnapshot.txt ftp.bltoolkit.net

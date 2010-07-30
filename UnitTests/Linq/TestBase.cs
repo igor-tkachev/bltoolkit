@@ -4,11 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.ServiceModel;
+using System.ServiceModel.Description;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
+using BLToolkit.Data.Linq;
 using BLToolkit.Mapping;
+using BLToolkit.ServiceModel;
 
 using NUnit.Framework;
 
@@ -74,6 +78,48 @@ namespace Data.Linq
 			}
 		}
 
+		ServiceHost _host;
+
+		[TestFixtureSetUp]
+		public void SetUp()
+		{
+			LinqService.TypeResolver = str =>
+			{
+				switch (str)
+				{
+					case "Data.Linq.Model.Gender": return typeof(Gender);
+					default : return null;
+				}
+			};
+
+			_host = new ServiceHost(new LinqService("Sql2008"), new Uri("net.tcp://localhost:1234"));
+
+			_host.Description.Behaviors.Add(new ServiceMetadataBehavior());
+			_host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
+			_host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "mex");
+			_host.AddServiceEndpoint(
+				typeof(ILinqService),
+				new NetTcpBinding(SecurityMode.None)
+				{
+					MaxReceivedMessageSize = 10000000,
+					MaxBufferPoolSize      = 10000000,
+					MaxBufferSize          = 10000000,
+					CloseTimeout           = new TimeSpan(00, 01, 00),
+					OpenTimeout            = new TimeSpan(00, 01, 00),
+					ReceiveTimeout         = new TimeSpan(00, 10, 00),
+					SendTimeout            = new TimeSpan(00, 10, 00),
+				},
+				"LinqOverWCF");
+
+			_host.Open();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown()
+		{
+			_host.Close();
+		}
+
 		class ProviderInfo
 		{
 			public ProviderInfo(string name, string assembly, string type)
@@ -105,30 +151,67 @@ namespace Data.Linq
 			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
 		};
 
-		protected void ForEachProvider(Action<ITestDataContext> func)
+		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			ForEachProvider(Array<string>.Empty, func);
-		}
+			var dx = new TestServiceModelDataContext();
+			Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+			yield return dx;
 
-		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
-		{
 			foreach (var info in _providers)
 			{
 				if (exceptList.Contains(info.Name))
 					continue;
 
-				Debug.WriteLine(info, "Provider ");
+				Debug.WriteLine(info.Name, "Provider ");
 
 				if (!info.Loaded)
 					continue;
 
-				using (var db = new TestDbManager(info.Name))
-				{
-					//var conn = db.Connection;
+				yield return new TestDbManager(info.Name);
+			}
+		}
 
+		protected void ForEachProvider(Type expectedException, string[] exceptList, Action<ITestDataContext> func)
+		{
+			Exception ex = null;
+
+			foreach (var db in GetProviders(exceptList))
+			{
+				try
+				{
 					func(db);
 				}
+				catch (Exception e)
+				{
+					if (expectedException == null || e.GetType() != expectedException)
+						throw;
+
+					ex = e;
+				}
+				finally
+				{
+					if (db is IDisposable)
+						((IDisposable)db).Dispose();
+				}
 			}
+
+			if (ex != null)
+				throw ex;
+		}
+
+		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
+		{
+			ForEachProvider(null, exceptList, func);
+		}
+
+		protected void ForEachProvider(Action<ITestDataContext> func)
+		{
+			ForEachProvider(Array<string>.Empty, func);
+		}
+
+		protected void ForEachProvider(Type expectedException, Action<ITestDataContext> func)
+		{
+			ForEachProvider(expectedException, Array<string>.Empty, func);
 		}
 
 		protected void Not0ForEachProvider(Func<ITestDataContext, int> func)

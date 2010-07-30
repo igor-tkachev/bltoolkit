@@ -179,7 +179,7 @@ namespace BLToolkit.ServiceModel
 
 		public object GetValue(int i)
 		{
-			return Convert.ChangeType(_data[i], _result.FieldTypes[i]);
+			return Common.Convert.ChangeTypeFromString(_data[i], _result.FieldTypes[i]);
 		}
 
 		public int GetValues(object[] values)
@@ -194,12 +194,12 @@ namespace BLToolkit.ServiceModel
 
 		public object this[string name]
 		{
-			get { throw new NotImplementedException(); }
+			get { return GetValue(GetOrdinal(name)); }
 		}
 
 		public object this[int i]
 		{
-			get { throw new NotImplementedException(); }
+			get { return GetValue(i); }
 		}
 
 		#endregion

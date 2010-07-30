@@ -14,7 +14,7 @@ namespace Data.Exceptions
 		[Test, ExpectedException(typeof(LinqException))]
 		public void MapIgnore()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(typeof(LinqException), db =>
 			{
 				var q = from p in db.Person where p.Name == "123" select p;
 				q.ToList();

@@ -15,7 +15,7 @@ namespace Data.Exceptions
 		[Test, ExpectedException(typeof(LinqException))]
 		public void Test1()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(typeof(LinqException), db =>
 			{
 				var q = from p in db.ParentInheritance2 select p;
 				q.ToList();

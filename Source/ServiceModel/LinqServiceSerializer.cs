@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Linq;
-using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-
+using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.ServiceModel
 {
@@ -82,8 +83,9 @@ namespace BLToolkit.ServiceModel
 
 		#region SerializerBase
 
-		const int _typeIndex  = -1;
-		const int _paramIndex = -2;
+		const int _paramIndex     = -1;
+		const int _typeIndex      = -2;
+		const int _typeArrayIndex = -3;
 
 		class SerializerBase
 		{
@@ -94,7 +96,35 @@ namespace BLToolkit.ServiceModel
 			protected void Append(Type type, object value)
 			{
 				Append(type);
-				Append(value == null ? null : Common.Convert.ToString(value));
+
+				if (value == null)
+					Append((string)null);
+				else if (!type.IsArray)
+					Append(Common.Convert.ToString(value));
+				else
+				{
+					var elementType = type.GetElementType();
+
+					Builder.Append(' ');
+
+					var len = Builder.Length;
+					var cnt = 0;
+
+					if (elementType.IsArray)
+						foreach (var val in (IEnumerable)value)
+						{
+							Append(elementType, val);
+							cnt++;
+						}
+					else
+						foreach (var val in (IEnumerable)value)
+						{
+							Append(val == null ? null : Common.Convert.ToString(val));
+							cnt++;
+						}
+
+					Builder.Insert(len, cnt);
+				}
 			}
 
 			protected void Append(int value)
@@ -147,15 +177,30 @@ namespace BLToolkit.ServiceModel
 
 				if (!Dic.TryGetValue(type, out idx))
 				{
-					Dic.Add(type, idx = ++Index);
+					if (type.IsArray)
+					{
+						var elementType = GetType(type.GetElementType());
 
-					Builder
-						.Append(idx)
-						.Append(' ')
-						.Append(_typeIndex)
-						.Append(' ');
+						Dic.Add(type, idx = ++Index);
 
-					Append(type.FullName);
+						Builder
+							.Append(idx)
+							.Append(' ')
+							.Append(_typeArrayIndex)
+							.Append(' ')
+							.Append(elementType);
+					}
+					else
+					{
+						Dic.Add(type, idx = ++Index);
+
+						Builder
+							.Append(idx)
+							.Append(' ')
+							.Append(_typeIndex);
+
+						Append(type.FullName);
+					}
 
 					Builder.AppendLine();
 				}
@@ -175,7 +220,7 @@ namespace BLToolkit.ServiceModel
 			protected string Str;
 			protected int    Pos;
 
-			protected char Peek()
+			char Peek()
 			{
 				return Str[Pos];
 			}
@@ -306,96 +351,80 @@ namespace BLToolkit.ServiceModel
 					Pos++;
 			}
 
+			interface IDeserializerHelper
+			{
+				object GetArray(DeserializerBase deserializer);
+			}
+
+			class DeserializerHelper<T> : IDeserializerHelper
+			{
+				public object GetArray(DeserializerBase deserializer)
+				{
+					var count = deserializer.ReadInt();
+					var arr   = new T[count];
+					var type  = typeof(T);
+
+					for (var i = 0; i < count; i++)
+						arr[i] = (T)deserializer.ReadValue(type);
+
+					return arr;
+				}
+			}
+
+			static readonly Dictionary<Type,Func<DeserializerBase,object>> _arrayDeserializers =
+				new Dictionary<Type,Func<DeserializerBase,object>>();
+
 			protected object ReadValue(Type type)
 			{
-				var str = ReadString();
+				if (type == null)
+					return ReadString();
 
+				if (type.IsArray)
+				{
+					var elem = type.GetElementType();
+
+					Func<DeserializerBase, object > deserializer;
+
+					lock (_arrayDeserializers)
+					{
+						if (!_arrayDeserializers.TryGetValue(elem, out deserializer))
+						{
+							var helper = (IDeserializerHelper)Activator.CreateInstance(typeof(DeserializerHelper<>).MakeGenericType(elem));
+							_arrayDeserializers.Add(elem, deserializer = helper.GetArray);
+						}
+					}
+
+					return deserializer(this);
+				}
+
+				var str = ReadString();
+				return Common.Convert.ChangeTypeFromString(str, type);
+			}
+
+			protected readonly List<string> UnresolvedTypes = new List<string>();
+
+			protected Type ResolveType(string str)
+			{
 				if (str == null)
 					return null;
 
-				if (type == typeof(string))
-					return str;
+				var type = Type.GetType(str, false);
 
-				var underlyingType = type;
-				var isNullable     = false;
-
-				if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(Nullable<>))
+				if (type == null)
 				{
-					underlyingType = underlyingType.GetGenericArguments()[0];
-					isNullable     = true;
-				}
+					type = LinqService.TypeResolver(str);
 
-				if (underlyingType.IsEnum)
-					return Enum.Parse(type, str);
-
-				if (isNullable)
-				{
-					switch (Type.GetTypeCode(underlyingType))
+					if (type == null)
 					{
-						case TypeCode.Boolean  : return Common.Convert.ToNullableBoolean (str);
-						case TypeCode.Char     : return Common.Convert.ToNullableChar    (str);
-						case TypeCode.SByte    : return Common.Convert.ToNullableSByte   (str);
-						case TypeCode.Byte     : return Common.Convert.ToNullableByte    (str);
-						case TypeCode.Int16    : return Common.Convert.ToNullableInt16   (str);
-						case TypeCode.UInt16   : return Common.Convert.ToNullableUInt16  (str);
-						case TypeCode.Int32    : return Common.Convert.ToNullableInt32   (str);
-						case TypeCode.UInt32   : return Common.Convert.ToNullableUInt32  (str);
-						case TypeCode.Int64    : return Common.Convert.ToNullableInt64   (str);
-						case TypeCode.UInt64   : return Common.Convert.ToNullableUInt64  (str);
-						case TypeCode.Single   : return Common.Convert.ToNullableSingle  (str);
-						case TypeCode.Double   : return Common.Convert.ToNullableDouble  (str);
-						case TypeCode.Decimal  : return Common.Convert.ToNullableDecimal (str);
-						case TypeCode.DateTime : return Common.Convert.ToNullableDateTime(str);
-						case TypeCode.Object   :
-							if (type == typeof(Guid))           return Common.Convert.ToNullableGuid          (str);
-							if (type == typeof(DateTimeOffset)) return Common.Convert.ToNullableDateTimeOffset(str);
-							if (type == typeof(TimeSpan))       return Common.Convert.ToNullableTimeSpan      (str);
-							break;
-						default                : break;
-					}
-				}
-				else
-				{
-					switch (Type.GetTypeCode(underlyingType))
-					{
-						case TypeCode.Boolean  : return Common.Convert.ToBoolean(str);
-						case TypeCode.Char     : return Common.Convert.ToChar    (str);
-						case TypeCode.SByte    : return Common.Convert.ToSByte   (str);
-						case TypeCode.Byte     : return Common.Convert.ToByte    (str);
-						case TypeCode.Int16    : return Common.Convert.ToInt16   (str);
-						case TypeCode.UInt16   : return Common.Convert.ToUInt16  (str);
-						case TypeCode.Int32    : return Common.Convert.ToInt32   (str);
-						case TypeCode.UInt32   : return Common.Convert.ToUInt32  (str);
-						case TypeCode.Int64    : return Common.Convert.ToInt64   (str);
-						case TypeCode.UInt64   : return Common.Convert.ToUInt64  (str);
-						case TypeCode.Single   : return Common.Convert.ToSingle  (str);
-						case TypeCode.Double   : return Common.Convert.ToDouble  (str);
-						case TypeCode.Decimal  : return Common.Convert.ToDecimal (str);
-						case TypeCode.DateTime : return Common.Convert.ToDateTime(str);
-						case TypeCode.Object   :
-							if (type == typeof(Guid))           return Common.Convert.ToGuid          (str);
-							if (type == typeof(DateTimeOffset)) return Common.Convert.ToDateTimeOffset(str);
-							if (type == typeof(TimeSpan))       return Common.Convert.ToTimeSpan      (str);
-							if (type == typeof(Binary))         return Common.Convert.ToLinqBinary    (str);
-							break;
-						default                : break;
+						UnresolvedTypes.Add(str);
+
+						Debug.WriteLine(
+							string.Format("Type '{0}' cannot be resolved. Use LinqService.TypeResolver to resolve unknown types.", str),
+							"LinqServiceSerializer");
 					}
 				}
 
-				if (type == typeof(SqlByte))     return Common.Convert.ToSqlByte    (str);
-				if (type == typeof(SqlInt16))    return Common.Convert.ToSqlInt16   (str);
-				if (type == typeof(SqlInt32))    return Common.Convert.ToSqlInt32   (str);
-				if (type == typeof(SqlInt64))    return Common.Convert.ToSqlInt64   (str);
-				if (type == typeof(SqlSingle))   return Common.Convert.ToSqlSingle  (str);
-				if (type == typeof(SqlBoolean))  return Common.Convert.ToSqlBoolean (str);
-				if (type == typeof(SqlDouble))   return Common.Convert.ToSqlDouble  (str);
-				if (type == typeof(SqlDateTime)) return Common.Convert.ToSqlDateTime(str);
-				if (type == typeof(SqlDecimal))  return Common.Convert.ToSqlDecimal (str);
-				if (type == typeof(SqlMoney))    return Common.Convert.ToSqlMoney   (str);
-				if (type == typeof(SqlString))   return Common.Convert.ToSqlString  (str);
-				if (type == typeof(SqlGuid))     return Common.Convert.ToSqlGuid    (str);
-
-				throw new InvalidOperationException();
+				return type;
 			}
 		}
 
@@ -445,13 +474,13 @@ namespace BLToolkit.ServiceModel
 						{
 							var fld = (SqlField)e;
 
-							if (fld == fld.Table.All)
-								return;
+							if (fld != fld.Table.All)
+							{
+								GetType(fld.SystemType);
 
-							GetType(fld.SystemType);
-
-							if (fld.MemberMapper != null)
-								GetType(fld.MemberMapper.MemberAccessor.TypeAccessor.OriginalType);
+								if (fld.MemberMapper != null)
+									GetType(fld.MemberMapper.MemberAccessor.TypeAccessor.OriginalType);
+							}
 
 							break;
 						}
@@ -460,11 +489,19 @@ namespace BLToolkit.ServiceModel
 						{
 							var p = (SqlParameter)e;
 
-							GetType(p.SystemType);
+							if (p.Value == null || p.SystemType.IsArray || !(p.Value is IEnumerable))
+							{
+								GetType(p.SystemType);
+							}
+							else
+							{
+								var elemType = TypeHelper.GetElementType(p.Value.GetType());
+								GetType(GetArrayType(elemType));
+							}
 
-							if (p.EnumTypes != null)
-								foreach (var type in p.EnumTypes)
-									GetType(type);
+							//if (p.EnumTypes != null)
+							//	foreach (var type in p.EnumTypes)
+							//		GetType(type);
 
 							break;
 						}
@@ -520,11 +557,22 @@ namespace BLToolkit.ServiceModel
 						{
 							var elem = (SqlParameter)e;
 
-							Append(elem.SystemType);
 							Append(elem.Name);
 							Append(elem.IsQueryParameter);
-							Append(elem.SystemType, elem.Value);
 
+							if (elem.Value == null || elem.SystemType.IsArray || !(elem.Value is IEnumerable))
+							{
+								Append(elem.SystemType, elem.Value);
+							}
+							else
+							{
+								var elemType = TypeHelper.GetElementType(elem.Value.GetType());
+								var value    = ConvertIEnumerableToArray(elem.Value, elemType);
+
+								Append(GetArrayType(elemType), value);
+							}
+
+							/*
 							if (elem.EnumTypes == null)
 								Builder.Append(" -");
 							else
@@ -547,6 +595,7 @@ namespace BLToolkit.ServiceModel
 
 							Append(elem.LikeStart);
 							Append(elem.LikeEnd);
+							*/
 
 							break;
 						}
@@ -621,6 +670,7 @@ namespace BLToolkit.ServiceModel
 								}
 							}
 
+							Append(Dic[elem.All]);
 							Append(elem.Fields.Count);
 
 							foreach (var field in elem.Fields)
@@ -750,6 +800,11 @@ namespace BLToolkit.ServiceModel
 								Append(elem.Unions);
 
 							Append(elem.Parameters);
+
+							if (Dic.ContainsKey(elem.All))
+								Append(Dic[elem.All]);
+							else
+								Builder.Append(" -");
 
 							break;
 						}
@@ -926,17 +981,9 @@ namespace BLToolkit.ServiceModel
 
 				switch (type)
 				{
-					case _typeIndex:
-						{
-							obj = Type.GetType(ReadString(), false);
-							break;
-						}
-
-					case _paramIndex:
-						{
-							obj = _parameters = ReadArray<SqlParameter>();
-							break;
-						}
+					case _paramIndex     : obj = _parameters = ReadArray<SqlParameter>(); break;
+					case _typeIndex      : obj = ResolveType(ReadString());               break;
+					case _typeArrayIndex : obj = GetArrayType(Read<Type>());              break;
 
 					case (int)QueryElementType.SqlField :
 						{
@@ -961,8 +1008,8 @@ namespace BLToolkit.ServiceModel
 								isIdentity
 									? new DataAccess.IdentityAttribute()
 									: isInsertable || isUpdatable
-									  	? new DataAccess.NonUpdatableAttribute(isInsertable, isUpdatable, false)
-									  	: null,
+										? new DataAccess.NonUpdatableAttribute(isInsertable, isUpdatable, false)
+										: null,
 								memberMapper);
 
 							break;
@@ -980,15 +1027,16 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlParameter:
+					case (int)QueryElementType.SqlParameter :
 						{
-							var systemType       = Read<Type>();
 							var name             = ReadString();
 							var isQueryParameter = ReadBool();
+							var systemType       = Read<Type>();
 							var value            = ReadValue(systemType);
-							var enumTypes        = ReadList<Type>();
-							var takeValues       = null as List<int>;
+							//var enumTypes        = ReadList<Type>();
+							//var takeValues       = null as List<int>;
 
+							/*
 							var count = ReadCount();
 
 							if (count != null)
@@ -1001,15 +1049,25 @@ namespace BLToolkit.ServiceModel
 
 							var likeStart = ReadString();
 							var likeEnd   = ReadString();
+							*/
 
 							obj = new SqlParameter(systemType, name, value)
 							{
 								IsQueryParameter = isQueryParameter,
-								EnumTypes        = enumTypes,
-								TakeValues       = takeValues,
-								LikeStart        = likeStart,
-								LikeEnd          = likeEnd,
+								//EnumTypes        = enumTypes,
+								//TakeValues       = takeValues,
+								//LikeStart        = likeStart,
+								//LikeEnd          = likeEnd,
 							};
+
+							/*
+							if (enumTypes != null && UnresolvedTypes.Count > 0)
+								foreach (var et in enumTypes)
+									if (et == null)
+										throw new LinqException(
+											"Query cannot be deserialized. The possible reason is that the deserializer could not resolve the following types: {0}. Use LinqService.TypeResolver to resolve types.",
+											string.Join(", ", UnresolvedTypes.Select(_ => "'" + _ + "'").ToArray()));
+							*/
 
 							break;
 						}
@@ -1083,9 +1141,14 @@ namespace BLToolkit.ServiceModel
 									sequenceAttributes[i] = new SequenceNameAttribute(ReadString(), ReadString());
 							}
 
+							var all    = Read<SqlField>();
 							var fields = ReadArray<SqlField>();
+							var flds   = new SqlField[fields.Length + 1];
 
-							obj = new SqlTable(sourceID, name, alias, database, owner, physicalName, objectType, sequenceAttributes, fields);
+							flds[0] = all;
+							Array.Copy(fields, 0, flds, 1, fields.Length);
+
+							obj = new SqlTable(sourceID, name, alias, database, owner, physicalName, objectType, sequenceAttributes, flds);
 
 							break;
 						}
@@ -1222,12 +1285,16 @@ namespace BLToolkit.ServiceModel
 							if (parentSql != 0)
 								_actions.Add(() => query.ParentSql = _queries[parentSql]);
 
+							query.All = Read<SqlField>();
+
+							obj = query;
+
 							break;
 						}
 
 					case (int)QueryElementType.Column :
 						{
-							var sid        = ReadInt();
+							var sid         = ReadInt();
 							var expression = Read<ISqlExpression>();
 							var alias      = ReadString();
 
@@ -1297,25 +1364,11 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SetExpression :
-						obj = new SqlQuery.SetExpression(Read<ISqlExpression>(), Read<ISqlExpression>());
-						break;
-
-					case (int)QueryElementType.FromClause :
-						obj = new SqlQuery.FromClause(ReadArray<SqlQuery.TableSource>());
-						break;
-
-					case (int)QueryElementType.WhereClause :
-						obj = new SqlQuery.WhereClause(Read<SqlQuery.SearchCondition>());
-						break;
-
-					case (int)QueryElementType.GroupByClause :
-						obj = new SqlQuery.GroupByClause(ReadArray<ISqlExpression>());
-						break;
-
-					case (int)QueryElementType.OrderByClause :
-						obj = new SqlQuery.OrderByClause(ReadArray<SqlQuery.OrderByItem>());
-						break;
+					case (int)QueryElementType.SetExpression : obj = new SqlQuery.SetExpression(Read<ISqlExpression>(), Read<ISqlExpression>()); break;
+					case (int)QueryElementType.FromClause    : obj = new SqlQuery.FromClause(ReadArray<SqlQuery.TableSource>());                 break;
+					case (int)QueryElementType.WhereClause   : obj = new SqlQuery.WhereClause(Read<SqlQuery.SearchCondition>());                 break;
+					case (int)QueryElementType.GroupByClause : obj = new SqlQuery.GroupByClause(ReadArray<ISqlExpression>());                    break;
+					case (int)QueryElementType.OrderByClause : obj = new SqlQuery.OrderByClause(ReadArray<SqlQuery.OrderByItem>());              break;
 
 					case (int)QueryElementType.OrderByItem :
 						{
@@ -1420,8 +1473,8 @@ namespace BLToolkit.ServiceModel
 
 				NextLine();
 
-				for (var i = 0; i < fieldCount; i++) { result.FieldNames[i] = ReadString();                      NextLine(); }
-				for (var i = 0; i < fieldCount; i++) { result.FieldTypes[i] = Type.GetType(ReadString(), false); NextLine(); }
+				for (var i = 0; i < fieldCount; i++) { result.FieldNames[i] = ReadString();              NextLine(); }
+				for (var i = 0; i < fieldCount; i++) { result.FieldTypes[i] = ResolveType(ReadString()); NextLine(); }
 
 				for (var n = 0; n < result.RowCount; n++)
 				{
@@ -1437,6 +1490,64 @@ namespace BLToolkit.ServiceModel
 
 				return result;
 			}
+		}
+
+		#endregion
+
+		#region Helpers
+
+		interface IArrayHelper
+		{
+			Type   GetArrayType();
+			object ConvertToArray(object list);
+		}
+
+		class ArrayHelper<T> : IArrayHelper
+		{
+			public Type GetArrayType()
+			{
+				return typeof(T[]);
+			}
+
+			public object ConvertToArray(object list)
+			{
+				return ((IEnumerable<T>)list).ToArray();
+			}
+		}
+
+		static readonly Dictionary<Type,Type>                 _arrayTypes      = new Dictionary<Type,Type>();
+		static readonly Dictionary<Type,Func<object,object >> _arrayConverters = new Dictionary<Type,Func<object,object>>();
+
+		static Type GetArrayType(Type elementType)
+		{
+			Type arrayType;
+
+			lock (_arrayTypes)
+			{
+				if (!_arrayTypes.TryGetValue(elementType, out arrayType))
+				{
+					var helper = (IArrayHelper)Activator.CreateInstance(typeof(ArrayHelper<>).MakeGenericType(elementType));
+					_arrayTypes.Add(elementType, arrayType = helper.GetArrayType());
+				}
+			}
+
+			return arrayType;
+		}
+
+		static object ConvertIEnumerableToArray(object list, Type elementType)
+		{
+			Func<object,object> converter;
+
+			lock (_arrayConverters)
+			{
+				if (!_arrayConverters.TryGetValue(elementType, out converter))
+				{
+					var helper = (IArrayHelper)Activator.CreateInstance(typeof(ArrayHelper<>).MakeGenericType(elementType));
+					_arrayConverters.Add(elementType, converter = helper.ConvertToArray);
+				}
+			}
+
+			return converter(list);
 		}
 
 		#endregion

@@ -59,21 +59,22 @@ namespace BLToolkit.ServiceModel
 			if (binding         == null) throw new ArgumentNullException("binding");
 			if (endpointAddress == null) throw new ArgumentNullException("endpointAddress");
 
-			_binding         = binding;
+			Binding          = binding;
 			_endpointAddress = endpointAddress;
 		}
 
 		string          _endpointConfigurationName;
 		string          _remoteAddress;
 		EndpointAddress _endpointAddress;
-		Binding         _binding;
+
+		public Binding Binding { get; private set; }
 
 		#endregion
 
 		LinqServiceClient GetClient()
 		{
-			if (_binding != null)
-				return new LinqServiceClient(_binding, _endpointAddress);
+			if (Binding != null)
+				return new LinqServiceClient(Binding, _endpointAddress);
 
 			if (_endpointAddress != null)
 				return new LinqServiceClient(_endpointConfigurationName, _endpointAddress);
@@ -244,7 +245,7 @@ namespace BLToolkit.ServiceModel
 				_endpointConfigurationName = _endpointConfigurationName,
 				_remoteAddress             = _remoteAddress,
 				_endpointAddress           = _endpointAddress,
-				_binding                   = _binding,
+				Binding                   = Binding,
 			};
 		}
 

@@ -7533,7 +7533,7 @@ namespace BLToolkit.Common
 		public static Type ToType(SqlGuid p)         { return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);    }
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Type</c> value.</summary>
-		public static Type ToType(object p)         
+		public static Type ToType(object p)
 		{
 			if (p == null || p is DBNull) return null;
 
@@ -7620,8 +7620,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Decimal</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Decimal p)        
 		{
-			int[]  bits  = Decimal.GetBits(p);
-			Byte[] bytes = new Byte[Buffer.ByteLength(bits)];
+			var bits  = Decimal.GetBits(p);
+			var bytes = new Byte[Buffer.ByteLength(bits)];
 
 			Buffer.BlockCopy(bits, 0, bytes, 0, bytes.Length);
 			return bytes;
@@ -7675,7 +7675,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Char[]</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Char[] p)         
 		{
-			Byte[] bytes = new Byte[Buffer.ByteLength(p)];
+			var bytes = new Byte[Buffer.ByteLength(p)];
 
 			Buffer.BlockCopy(p, 0, bytes, 0, bytes.Length);
 			return bytes;
@@ -7830,8 +7830,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Decimal</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(Decimal p)        
 		{
-			int[]  bits  = Decimal.GetBits(p);
-			Byte[] bytes = new Byte[Buffer.ByteLength(bits)];
+			var bits  = Decimal.GetBits(p);
+			var bytes = new Byte[Buffer.ByteLength(bits)];
 
 			Buffer.BlockCopy(bits, 0, bytes, 0, bytes.Length);
 			return new Binary(bytes);
@@ -7875,8 +7875,8 @@ namespace BLToolkit.Common
 			if (p == null)         return null;
 			if (p is MemoryStream) return ((MemoryStream)p).ToArray();
 
-			long   position = p.Seek(0, SeekOrigin.Begin);
-			Byte[] bytes = new Byte[p.Length];
+			var position = p.Seek(0, SeekOrigin.Begin);
+			var bytes = new Byte[p.Length];
 			p.Read(bytes, 0, bytes.Length);
 			p.Position = position;
 
@@ -7885,7 +7885,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Char[]</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(Char[] p)
 		{
-			Byte[] bytes = new Byte[Buffer.ByteLength(p)];
+			var bytes = new Byte[Buffer.ByteLength(p)];
 
 			Buffer.BlockCopy(p, 0, bytes, 0, bytes.Length);
 			return new Binary(bytes);
@@ -8239,6 +8239,109 @@ namespace BLToolkit.Common
 		}
 
 		#endregion
+
+		#endregion
+
+		#region ChangeTypeFromString
+
+		public static object ChangeTypeFromString(string str, Type type)
+		{
+			if (str == null)
+				return null;
+
+			if (type == typeof(string))
+				return str;
+
+			var underlyingType = type;
+			var isNullable     = false;
+
+			if (underlyingType.IsGenericType && underlyingType.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				underlyingType = underlyingType.GetGenericArguments()[0];
+				isNullable     = true;
+			}
+
+			if (underlyingType.IsEnum)
+				return Enum.Parse(type, str);
+
+			if (isNullable)
+			{
+				switch (Type.GetTypeCode(underlyingType))
+				{
+					case TypeCode.Boolean  : return ToNullableBoolean (str);
+					case TypeCode.Char     : return ToNullableChar    (str);
+					case TypeCode.SByte    : return ToNullableSByte   (str);
+					case TypeCode.Byte     : return ToNullableByte    (str);
+					case TypeCode.Int16    : return ToNullableInt16   (str);
+					case TypeCode.UInt16   : return ToNullableUInt16  (str);
+					case TypeCode.Int32    : return ToNullableInt32   (str);
+					case TypeCode.UInt32   : return ToNullableUInt32  (str);
+					case TypeCode.Int64    : return ToNullableInt64   (str);
+					case TypeCode.UInt64   : return ToNullableUInt64  (str);
+					case TypeCode.Single   : return ToNullableSingle  (str);
+					case TypeCode.Double   : return ToNullableDouble  (str);
+					case TypeCode.Decimal  : return ToNullableDecimal (str);
+					case TypeCode.DateTime : return ToNullableDateTime(str);
+					case TypeCode.Object   :
+						if (type == typeof(Guid))           return ToNullableGuid          (str);
+						if (type == typeof(DateTimeOffset)) return ToNullableDateTimeOffset(str);
+						if (type == typeof(TimeSpan))       return ToNullableTimeSpan      (str);
+						break;
+					default                : break;
+				}
+			}
+			else
+			{
+				switch (Type.GetTypeCode(underlyingType))
+				{
+					case TypeCode.Boolean  : return ToBoolean(str);
+					case TypeCode.Char     : return ToChar    (str);
+					case TypeCode.SByte    : return ToSByte   (str);
+					case TypeCode.Byte     : return ToByte    (str);
+					case TypeCode.Int16    : return ToInt16   (str);
+					case TypeCode.UInt16   : return ToUInt16  (str);
+					case TypeCode.Int32    : return ToInt32   (str);
+					case TypeCode.UInt32   : return ToUInt32  (str);
+					case TypeCode.Int64    : return ToInt64   (str);
+					case TypeCode.UInt64   : return ToUInt64  (str);
+					case TypeCode.Single   : return ToSingle  (str);
+					case TypeCode.Double   : return ToDouble  (str);
+					case TypeCode.Decimal  : return ToDecimal (str);
+					case TypeCode.DateTime : return ToDateTime(str);
+					default                : break;
+				}
+
+				if (type.IsArray)
+				{
+					if (type == typeof(byte[])) return ToByteArray(str);
+				}
+
+				if (type.IsClass)
+				{
+					if (type == typeof(Binary)) return ToLinqBinary    (str);
+				}
+			}
+
+			if (type == typeof(Guid))           return ToGuid          (str);
+			if (type == typeof(DateTimeOffset)) return ToDateTimeOffset(str);
+			if (type == typeof(TimeSpan))       return ToTimeSpan      (str);
+
+			if (type == typeof(SqlByte))        return ToSqlByte    (str);
+			if (type == typeof(SqlInt16))       return ToSqlInt16   (str);
+			if (type == typeof(SqlInt32))       return ToSqlInt32   (str);
+			if (type == typeof(SqlInt64))       return ToSqlInt64   (str);
+			if (type == typeof(SqlSingle))      return ToSqlSingle  (str);
+			if (type == typeof(SqlBoolean))     return ToSqlBoolean (str);
+			if (type == typeof(SqlDouble))      return ToSqlDouble  (str);
+			if (type == typeof(SqlDateTime))    return ToSqlDateTime(str);
+			if (type == typeof(SqlDecimal))     return ToSqlDecimal (str);
+			if (type == typeof(SqlMoney))       return ToSqlMoney   (str);
+			if (type == typeof(SqlString))      return ToSqlString  (str);
+			if (type == typeof(SqlGuid))        return ToSqlGuid    (str);
+
+			return System.Convert.ChangeType(str, type);
+		}
+
 
 		#endregion
 
