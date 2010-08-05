@@ -214,6 +214,10 @@ namespace BLToolkit.Data
 			return ExecuteReader();
 		}
 
+		void IDataContext.ReleaseQuery(object query)
+		{
+		}
+
 		#endregion
 
 		#region GetSqlText

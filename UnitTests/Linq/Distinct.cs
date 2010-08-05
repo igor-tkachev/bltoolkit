@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Linq;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class DistinctTest : TestBase
 	{

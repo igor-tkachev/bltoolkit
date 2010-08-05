@@ -35,19 +35,8 @@ namespace BLToolkit.ServiceModel
 		public virtual string GetSqlProviderType()
 		{
 			if (SqlProviderType == null)
-			{
-				var ctx = CreateDataContext();
-
-				try
-				{
+				using (var ctx = CreateDataContext())
 					SqlProviderType = ctx.CreateSqlProvider().GetType();
-				}
-				finally
-				{
-					if (ctx is IDisposable)
-						((IDisposable)ctx).Dispose();
-				}
-			}
 
 			return SqlProviderType.FullName;
 		}
@@ -68,17 +57,10 @@ namespace BLToolkit.ServiceModel
 		{
 			ValidateQuery(query.Query, query.Parameters);
 
-			var db = CreateDataContext();
-
-			try
+			using (var db = CreateDataContext())
 			{
 				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
 				return db.ExecuteNonQuery(obj);
-			}
-			finally
-			{
-				if (db is IDisposable)
-					((IDisposable)db).Dispose();
 			}
 		}
 
@@ -86,17 +68,10 @@ namespace BLToolkit.ServiceModel
 		{
 			ValidateQuery(query.Query, query.Parameters);
 
-			var db = CreateDataContext();
-
-			try
+			using (var db = CreateDataContext())
 			{
 				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
 				return db.ExecuteScalar(obj);
-			}
-			finally
-			{
-				if (db is IDisposable)
-					((IDisposable)db).Dispose();
 			}
 		}
 
@@ -104,9 +79,7 @@ namespace BLToolkit.ServiceModel
 		{
 			ValidateQuery(query.Query, query.Parameters);
 
-			var db = CreateDataContext();
-
-			try
+			using (var db = CreateDataContext())
 			{
 				var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
 
@@ -144,11 +117,6 @@ namespace BLToolkit.ServiceModel
 
 					return ret;
 				}
-			}
-			finally
-			{
-				if (db is IDisposable)
-					((IDisposable)db).Dispose();
 			}
 		}
 

@@ -483,6 +483,7 @@ namespace BLToolkit.Data
 
 			if (_anyProviderConfigurationList.Contains(configurationString))
 				configurationString = (string)_anyProviderConfigurationList[configurationString];
+
 			string str;
 
 			// Check cached strings first.

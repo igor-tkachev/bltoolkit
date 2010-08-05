@@ -129,37 +129,53 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		class QueryContext
+		{
+			public IQueryContext     Query;
+			public LinqServiceClient Client;
+		}
+
 		object IDataContext.SetQuery(IQueryContext queryContext)
 		{
-			return queryContext;
+			return new QueryContext { Query = queryContext };
 		}
 
 		int IDataContext.ExecuteNonQuery(object query)
 		{
-			var ctx = (IQueryContext)query;
+			var ctx = (QueryContext)query;
 
-			using (var client = GetClient())
-				return client.ExecuteNonQuery(new LinqServiceQuery { Query = ctx.SqlQuery, Parameters = ctx.GetParameters() });
+			ctx.Client = GetClient();
+
+			return ctx.Client.ExecuteNonQuery(new LinqServiceQuery { Query = ctx.Query.SqlQuery, Parameters = ctx.Query.GetParameters() });
 		}
 
 		object IDataContext.ExecuteScalar(object query)
 		{
-			var ctx = (IQueryContext)query;
+			var ctx = (QueryContext)query;
 
-			using (var client = GetClient())
-				return client.ExecuteScalar(new LinqServiceQuery { Query = ctx.SqlQuery, Parameters = ctx.GetParameters() });
+			ctx.Client = GetClient();
+
+			return ctx.Client.ExecuteScalar(new LinqServiceQuery { Query = ctx.Query.SqlQuery, Parameters = ctx.Query.GetParameters() });
 		}
 
 		IDataReader IDataContext.ExecuteReader(object query)
 		{
-			var ctx = (IQueryContext)query;
+			var ctx = (QueryContext)query;
+
+			ctx.Client = GetClient();
 
 			LinqServiceResult ret;
 
-			using (var client = GetClient())
-				ret = client.ExecuteReader(new LinqServiceQuery { Query = ctx.SqlQuery, Parameters = ctx.GetParameters() });
+			ret = ctx.Client.ExecuteReader(new LinqServiceQuery { Query = ctx.Query.SqlQuery, Parameters = ctx.Query.GetParameters() });
 
 			return new ServiceModelDataReader(ret);
+		}
+
+		public void ReleaseQuery(object query)
+		{
+			var ctx = (QueryContext)query;
+
+			((IDisposable)ctx.Client).Dispose();
 		}
 
 		object IDataContext.CreateInstance(InitContext context)
@@ -169,7 +185,7 @@ namespace BLToolkit.ServiceModel
 
 		string IDataContext.GetSqlText(object query)
 		{
-			var ctx         = (IQueryContext)query;
+			var ctx         = (QueryContext)query;
 			var sqlProvider = ((IDataContext)this).CreateSqlProvider();
 			var sb          = new StringBuilder();
 
@@ -182,9 +198,9 @@ namespace BLToolkit.ServiceModel
 				.Append(sqlProvider.Name)
 				.AppendLine();
 
-			if (ctx.SqlQuery.Parameters != null && ctx.SqlQuery.Parameters.Count > 0)
+			if (ctx.Query.SqlQuery.Parameters != null && ctx.Query.SqlQuery.Parameters.Count > 0)
 			{
-				foreach (var p in ctx.SqlQuery.Parameters)
+				foreach (var p in ctx.Query.SqlQuery.Parameters)
 					sb
 						.Append("-- DECLARE ")
 						.Append(p.Name)
@@ -194,7 +210,7 @@ namespace BLToolkit.ServiceModel
 
 				sb.AppendLine();
 
-				foreach (var p in ctx.SqlQuery.Parameters)
+				foreach (var p in ctx.Query.SqlQuery.Parameters)
 				{
 					var value = p.Value;
 
@@ -212,27 +228,22 @@ namespace BLToolkit.ServiceModel
 				sb.AppendLine();
 			}
 
-			var cc       = sqlProvider.CommandCount(ctx.SqlQuery);
+			var cc       = sqlProvider.CommandCount(ctx.Query.SqlQuery);
 			var commands = new string[cc];
 
 			for (var i = 0; i < cc; i++)
 			{
 				sb.Length = 0;
 
-				sqlProvider.BuildSql(i, ctx.SqlQuery, sb, 0, 0, false);
+				sqlProvider.BuildSql(i, ctx.Query.SqlQuery, sb, 0, 0, false);
 				commands[i] = sb.ToString();
 			}
 
-			if (!ctx.SqlQuery.ParameterDependent)
-				ctx.Context = commands;
+			if (!ctx.Query.SqlQuery.ParameterDependent)
+				ctx.Query.Context = commands;
 
 			foreach (var command in commands)
 				sb.AppendLine(command);
-
-			if (OnClosing != null)
-			{
-				
-			}
 
 			return sb.ToString();
 		}
@@ -250,5 +261,11 @@ namespace BLToolkit.ServiceModel
 		}
 
 		public event EventHandler OnClosing;
+
+		public void Dispose()
+		{
+			if (OnClosing != null)
+				OnClosing(this, EventArgs.Empty);
+		}
 	}
 }

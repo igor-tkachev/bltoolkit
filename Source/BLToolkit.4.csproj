@@ -163,7 +163,9 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\DataContext.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
+    <Compile Include="Data\Linq\DataContextTransaction.cs" />
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
     <Compile Include="Data\Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />

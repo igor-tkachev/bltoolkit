@@ -137,15 +137,20 @@ namespace BLToolkit.Data.Linq
 		{
 			var dataContext = dataContextInfo.DataContext;
 
+			object query = null;
+
 			try
 			{
-				var query = SetCommand(dataContext, expr, parameters, 0);
+				query = SetCommand(dataContext, expr, parameters, 0);
 				return dataContext.ExecuteNonQuery(query);
 			}
 			finally
 			{
-				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
-					((IDisposable)dataContext).Dispose();
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
 			}
 		}
 
@@ -169,15 +174,20 @@ namespace BLToolkit.Data.Linq
 		{
 			var dataContext = dataContextInfo.DataContext;
 
+			object query = null;
+
 			try
 			{
-				var query = SetCommand(dataContext, expr, parameters, 0);
+				query = SetCommand(dataContext, expr, parameters, 0);
 				return (TS)dataContext.ExecuteScalar(query);
 			}
 			finally
 			{
-				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
-					((IDisposable)dataContext).Dispose();
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
 			}
 		}
 
@@ -201,9 +211,12 @@ namespace BLToolkit.Data.Linq
 		{
 			var dataContext = dataContextInfo.DataContext;
 
+			object query = null;
+
 			try
 			{
-				var query = SetCommand(dataContext, expr, parameters, 0);
+				query = SetCommand(dataContext, expr, parameters, 0);
+
 				using (var dr = dataContext.ExecuteReader(query))
 					while (dr.Read())
 						return mapper(this, ctx, dataContext, dr, MappingSchema, expr, parameters);
@@ -212,8 +225,11 @@ namespace BLToolkit.Data.Linq
 			}
 			finally
 			{
-				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
-					((IDisposable)dataContext).Dispose();
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
 			}
 		}
 
@@ -306,17 +322,23 @@ namespace BLToolkit.Data.Linq
 		{
 			var dataContext = dataContextInfo.DataContext;
 
+			object query = null;
+
 			try
 			{
-				var query = SetCommand(dataContext, expr, parameters, queryNumber);
+				query = SetCommand(dataContext, expr, parameters, queryNumber);
+
 				using (var dr = dataContext.ExecuteReader(query))
 					while (dr.Read())
 						yield return dr;
 			}
 			finally
 			{
-				if (dataContextInfo.DisposeContext && dataContext is IDisposable)
-					((IDisposable)dataContext).Dispose();
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
 			}
 		}
 

@@ -7,7 +7,7 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Reflection;
 
-	public interface IDataContext
+	public interface IDataContext : IDisposable
 	{
 		string             ContextID         { get; }
 		MappingSchema      MappingSchema     { get; }
@@ -17,6 +17,8 @@ namespace BLToolkit.Data.Linq
 		int                ExecuteNonQuery (object query);
 		object             ExecuteScalar   (object query);
 		IDataReader        ExecuteReader   (object query);
+		void               ReleaseQuery    (object query);
+
 		object             CreateInstance  (InitContext context);
 
 		string             GetSqlText      (object query);
