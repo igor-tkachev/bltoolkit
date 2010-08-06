@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.ServiceModel;
+using System.Text;
 
 namespace BLToolkit.ServiceModel
 {
@@ -102,14 +104,35 @@ namespace BLToolkit.ServiceModel
 
 					while (rd.Read())
 					{
-						var data = new string[rd.FieldCount];
+						var data  = new string  [rd.FieldCount];
+						var codes = new TypeCode[rd.FieldCount];
+
+						for (var i = 0; i < ret.FieldCount; i++)
+							codes[i] = Type.GetTypeCode(ret.FieldTypes[i]);
 
 						ret.RowCount++;
 
 						for (var i = 0; i < ret.FieldCount; i++)
 						{
 							if (!rd.IsDBNull(i))
-								data[i] = (rd.GetValue(i) ?? "").ToString();
+							{
+								switch (codes[i])
+								{
+									case TypeCode.Decimal  : data[i] = rd.GetDecimal (i).ToString(CultureInfo.InvariantCulture); break;
+									case TypeCode.Double   : data[i] = rd.GetDouble  (i).ToString(CultureInfo.InvariantCulture); break;
+									case TypeCode.Single   : data[i] = rd.GetFloat   (i).ToString(CultureInfo.InvariantCulture); break;
+									case TypeCode.DateTime : data[i] = rd.GetDateTime(i).ToString(CultureInfo.InvariantCulture); break;
+									default                :
+										{
+											if (ret.FieldTypes[i] == typeof(byte[]))
+												data[i] = Common.ConvertTo<string>.From((byte[])rd.GetValue(i));
+											else
+												data[i] = (rd.GetValue(i) ?? "").ToString();
+
+											break;
+										}
+								}
+							}
 						}
 
 						ret.Data.Add(data);

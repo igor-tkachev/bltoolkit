@@ -265,10 +265,24 @@ namespace BLToolkit.Data.Sql
 
 						var q = (SqlQuery)element;
 
-						if (q.QueryType == QueryType.Update || q.QueryType == QueryType.Insert)
-							Visit(q.Set, all, parentFirst, action);
-						else
-							Visit(q.Select, all, parentFirst, action);
+						switch (q.QueryType)
+						{
+							case QueryType.Update :
+								Visit(q.Set, all, parentFirst, action);
+								break;
+
+							case QueryType.Insert :
+								Visit(q.Set, all, parentFirst, action);
+
+								if (q.From.Tables.Count == 0)
+									break;
+
+								goto default;
+
+							default :
+								Visit(q.Select, all, parentFirst, action);
+								break;
+						}
 
 						Visit(q.From,    all, parentFirst, action);
 						Visit(q.Where,   all, parentFirst, action);

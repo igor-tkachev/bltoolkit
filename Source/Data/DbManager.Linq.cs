@@ -63,23 +63,7 @@ namespace BLToolkit.Data
 				 };
 			}
 
-			var sql = query.SqlQuery;
-
-			if (sql.ParameterDependent)
-			{
-				sql = new QueryVisitor().Convert(query.SqlQuery, e =>
-				{
-					if (e.ElementType == QueryElementType.SqlParameter)
-					{
-						var p = (SqlParameter)e;
-
-						if (p.Value == null)
-							return new SqlValue(null);
-					}
-
-					return null;
-				});
-			}
+			var sql = query.SqlQuery.ProcessParameters();
 
 			var newSql = ProcessQuery(sql);
 

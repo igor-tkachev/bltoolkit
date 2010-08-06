@@ -3,18 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
-using BLToolkit.Data.Sql.SqlProvider;
-using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.ServiceModel
 {
+	using Data.Sql;
+	using Data.Sql.SqlProvider;
+	using Mapping;
+	using Reflection;
+
 	class LinqServiceSerializer
 	{
 		internal class XmlQuerySerializer : XmlObjectSerializer
@@ -100,7 +101,16 @@ namespace BLToolkit.ServiceModel
 				if (value == null)
 					Append((string)null);
 				else if (!type.IsArray)
-					Append(Common.Convert.ToString(value));
+				{
+					switch (Type.GetTypeCode(type))
+					{
+						case TypeCode.Decimal  : Append(((decimal) value).ToString(CultureInfo.InvariantCulture)); break;
+						case TypeCode.Double   : Append(((double)  value).ToString(CultureInfo.InvariantCulture)); break;
+						case TypeCode.Single   : Append(((float)   value).ToString(CultureInfo.InvariantCulture)); break;
+						case TypeCode.DateTime : Append(((DateTime)value).ToString(CultureInfo.InvariantCulture)); break;
+						default                : Append(Common.Convert.ToString(value)); break;
+					}
+				}
 				else
 				{
 					var elementType = type.GetElementType();
@@ -398,6 +408,15 @@ namespace BLToolkit.ServiceModel
 				}
 
 				var str = ReadString();
+
+				switch (Type.GetTypeCode(type))
+				{
+					case TypeCode.Decimal  : return decimal. Parse(str, CultureInfo.InvariantCulture);
+					case TypeCode.Double   : return double.  Parse(str, CultureInfo.InvariantCulture);
+					case TypeCode.Single   : return float.   Parse(str, CultureInfo.InvariantCulture);
+					case TypeCode.DateTime : return DateTime.Parse(str, CultureInfo.InvariantCulture);
+				}
+
 				return Common.Convert.ChangeTypeFromString(str, type);
 			}
 
@@ -412,6 +431,9 @@ namespace BLToolkit.ServiceModel
 
 				if (type == null)
 				{
+					if (str == "System.Data.Linq.Binary")
+						return typeof(System.Data.Linq.Binary);
+
 					type = LinqService.TypeResolver(str);
 
 					if (type == null)
@@ -779,14 +801,19 @@ namespace BLToolkit.ServiceModel
 							var elem = (SqlQuery)e;
 
 							Append(elem.SourceID);
-							Append((int) elem.QueryType);
-
-							if (elem.QueryType == QueryType.Update || elem.QueryType == QueryType.Insert)
-								Append(elem.Set);
-							else
-								Append(elem.Select);
-
+							Append((int)elem.QueryType);
 							Append(elem.From);
+
+							switch (elem.QueryType)
+							{
+								case QueryType.Update : Append(elem.Set); break;
+								case QueryType.Insert : Append(elem.Set); 
+									if (elem.From.Tables.Count == 0)
+										break;
+									goto default;
+								default               : Append(elem.Select); break;
+							}
+
 							Append(elem.Where);
 							Append(elem.GroupBy);
 							Append(elem.Having);
@@ -1252,10 +1279,10 @@ namespace BLToolkit.ServiceModel
 						{
 							var sid                = ReadInt();
 							var queryType          = (QueryType)ReadInt();
+							var from               = Read<SqlQuery.FromClause>();
 							var readSet            = queryType == QueryType.Update || queryType == QueryType.Insert;
 							var set                = readSet ? Read<SqlQuery.SetClause>() : null;
-							var select             = readSet ? new SqlQuery.SelectClause(null) : Read<SqlQuery.SelectClause>();
-							var from               = Read<SqlQuery.FromClause>();
+							var select             = readSet && (queryType == QueryType.Update || from.Tables.Count == 0) ? new SqlQuery.SelectClause(null) : Read<SqlQuery.SelectClause>();
 							var where              = Read<SqlQuery.WhereClause>();
 							var groupBy            = Read<SqlQuery.GroupByClause>();
 							var having             = Read<SqlQuery.WhereClause>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -3561,7 +3562,20 @@ namespace BLToolkit.Data.Sql
 				var query = expr as SqlQuery;
 					
 				if (query != null && query.From.Tables.Count == 0 && query.Select.Columns.Count == 1)
+				{
+					new QueryVisitor().Visit(query.Select.Columns[0].Expression, e =>
+					{
+						if (e.ElementType == QueryElementType.SqlQuery)
+						{
+							var q = (SqlQuery)e;
+
+							if (q.ParentSql == query)
+								q.ParentSql = query.ParentSql;
+						}
+					});
+
 					return query.Select.Columns[0].Expression;
+				}
 
 				return expr;
 			});
@@ -3709,6 +3723,123 @@ namespace BLToolkit.Data.Sql
 						break;
 				}
 			});
+		}
+
+		#endregion
+
+		#region ProcessParameters
+
+		public SqlQuery ProcessParameters()
+		{
+			if (ParameterDependent)
+			{
+				return new QueryVisitor().Convert(this, e =>
+				{
+					switch (e.ElementType)
+					{
+						case QueryElementType.SqlParameter :
+							{
+								var p = (SqlParameter)e;
+
+								if (p.Value == null)
+									return new SqlValue(null);
+
+								break;
+							}
+
+						case QueryElementType.InListPredicate :
+							return ConvertInListPredicate((Predicate.InList)e);
+					}
+
+					return null;
+				});
+			}
+
+			return this;
+		}
+
+		static Predicate ConvertInListPredicate(Predicate.InList p)
+		{
+			if (p.Values == null || p.Values.Count == 0)
+				return new Predicate.Expr(new SqlValue(p.IsNot));
+
+			if (p.Values.Count == 1 && p.Values[0] is SqlParameter)
+			{
+				var pr = (SqlParameter)p.Values[0];
+
+				if (pr.Value == null)
+					return new Predicate.Expr(new SqlValue(p.IsNot));
+
+				if (pr.Value is IEnumerable && p.Expr1 is ISqlTableSource)
+				{
+					var items = (IEnumerable)pr.Value;
+					var table = (ISqlTableSource)p.Expr1;
+					var keys  = table.GetKeys(true);
+
+					if (keys == null || keys.Count == 0)
+						throw new SqlException("Cant create IN expression.");
+
+					if (keys.Count == 1)
+					{
+						var values = new List<ISqlExpression>();
+						var field  = GetUnderlayingField(keys[0]);
+
+						foreach (var item in items)
+						{
+							var value = field.MemberMapper.GetValue(item);
+							values.Add(new SqlValue(value));
+						}
+
+						if (values.Count == 0)
+							return new Predicate.Expr(new SqlValue(p.IsNot));
+
+						return new Predicate.InList(keys[0], p.IsNot, values);
+					}
+
+					{
+						var sc = new SearchCondition();
+
+						foreach (var item in items)
+						{
+							var itemCond = new SearchCondition();
+
+							foreach (var key in keys)
+							{
+								var field = GetUnderlayingField(key);
+								var value = field.MemberMapper.GetValue(item);
+								var cond  = value == null ?
+									new Condition(false, new Predicate.IsNull  (field, false)) :
+									new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, new SqlValue(value)));
+
+								itemCond.Conditions.Add(cond);
+							}
+
+							sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
+						}
+
+						if (sc.Conditions.Count == 0)
+							return new Predicate.Expr(new SqlValue(p.IsNot));
+
+						if (p.IsNot)
+							return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
+
+						return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
+					}
+				}
+			}
+
+			return null;
+		}
+
+		static SqlField GetUnderlayingField(ISqlExpression expr)
+		{
+			switch (expr.ElementType)
+			{
+				case QueryElementType.SqlField: return (SqlField)expr;
+				case QueryElementType.Column  : return GetUnderlayingField(((Column)expr).Expression);
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		#endregion

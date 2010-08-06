@@ -28,6 +28,7 @@ namespace BLToolkit.Data.Linq
 		public DataProviderBase DataProvider        { get; private set; }
 		public string           ContextID           { get; set;         }
 		public MappingSchema    MappingSchema       { get; set;         }
+		public string           LastQuery           { get; set;         }
 
 		private bool _keepConnectionAlive;
 		public  bool  KeepConnectionAlive
@@ -62,6 +63,8 @@ namespace BLToolkit.Data.Linq
 
 		internal void ReleaseQuery()
 		{
+			LastQuery = _dbManager.LastQuery;
+
 			if (_dbManager != null && LockDbManagerCounter == 0 && KeepConnectionAlive == false)
 			{
 				_dbManager.Dispose();

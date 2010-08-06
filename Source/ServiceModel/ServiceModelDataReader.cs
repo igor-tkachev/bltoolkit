@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 
 namespace BLToolkit.ServiceModel
 {
+	using Common;
+
 	class ServiceModelDataReader : IDataReader
 	{
 		public ServiceModelDataReader(LinqServiceResult result)
@@ -119,17 +122,17 @@ namespace BLToolkit.ServiceModel
 
 		public DateTime GetDateTime(int i)
 		{
-			return DateTime.Parse(_data[i]);
+			return DateTime.Parse(_data[i], CultureInfo.InvariantCulture);
 		}
 
 		public decimal GetDecimal(int i)
 		{
-			return decimal.Parse(_data[i]);
+			return decimal.Parse(_data[i], CultureInfo.InvariantCulture);
 		}
 
 		public double GetDouble(int i)
 		{
-			return double.Parse(_data[i]);
+			return double.Parse(_data[i], CultureInfo.InvariantCulture);
 		}
 
 		public Type GetFieldType(int i)
@@ -139,7 +142,7 @@ namespace BLToolkit.ServiceModel
 
 		public float GetFloat(int i)
 		{
-			return float.Parse(_data[i]);
+			return float.Parse(_data[i], CultureInfo.InvariantCulture);
 		}
 
 		public Guid GetGuid(int i)
@@ -179,7 +182,7 @@ namespace BLToolkit.ServiceModel
 
 		public object GetValue(int i)
 		{
-			return Common.Convert.ChangeTypeFromString(_data[i], _result.FieldTypes[i]);
+			return Convert.ChangeTypeFromString(_data[i], _result.FieldTypes[i]);
 		}
 
 		public int GetValues(object[] values)

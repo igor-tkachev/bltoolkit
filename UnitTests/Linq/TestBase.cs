@@ -190,8 +190,7 @@ namespace Data.Linq
 				}
 				finally
 				{
-					if (db is IDisposable)
-						((IDisposable)db).Dispose();
+					db.Dispose();
 				}
 			}
 

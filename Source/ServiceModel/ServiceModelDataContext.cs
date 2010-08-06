@@ -146,7 +146,13 @@ namespace BLToolkit.ServiceModel
 
 			ctx.Client = GetClient();
 
-			return ctx.Client.ExecuteNonQuery(new LinqServiceQuery { Query = ctx.Query.SqlQuery, Parameters = ctx.Query.GetParameters() });
+			var q = ctx.Query.SqlQuery.ProcessParameters();
+
+			return ctx.Client.ExecuteNonQuery(new LinqServiceQuery
+			{
+				Query      = q,
+				Parameters = q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()
+			});
 		}
 
 		object IDataContext.ExecuteScalar(object query)
@@ -155,7 +161,13 @@ namespace BLToolkit.ServiceModel
 
 			ctx.Client = GetClient();
 
-			return ctx.Client.ExecuteScalar(new LinqServiceQuery { Query = ctx.Query.SqlQuery, Parameters = ctx.Query.GetParameters() });
+			var q = ctx.Query.SqlQuery.ProcessParameters();
+
+			return ctx.Client.ExecuteScalar(new LinqServiceQuery
+			{
+				Query      = q,
+				Parameters = q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()
+			});
 		}
 
 		IDataReader IDataContext.ExecuteReader(object query)
@@ -164,9 +176,15 @@ namespace BLToolkit.ServiceModel
 
 			ctx.Client = GetClient();
 
+			var q = ctx.Query.SqlQuery.ProcessParameters();
+
 			LinqServiceResult ret;
 
-			ret = ctx.Client.ExecuteReader(new LinqServiceQuery { Query = ctx.Query.SqlQuery, Parameters = ctx.Query.GetParameters() });
+			ret = ctx.Client.ExecuteReader(new LinqServiceQuery
+			{
+				Query      = q,
+				Parameters = q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()
+			});
 
 			return new ServiceModelDataReader(ret);
 		}
