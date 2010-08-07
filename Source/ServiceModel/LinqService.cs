@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.ServiceModel;
-using System.Text;
 
 namespace BLToolkit.ServiceModel
 {
@@ -55,9 +54,9 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		public virtual int ExecuteNonQuery(LinqServiceQuery query)
+		public int ExecuteNonQuery(LinqServiceQuery query)
 		{
-			ValidateQuery(query.Query, query.Parameters);
+			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
 			{
@@ -68,7 +67,7 @@ namespace BLToolkit.ServiceModel
 
 		public object ExecuteScalar(LinqServiceQuery query)
 		{
-			ValidateQuery(query.Query, query.Parameters);
+			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
 			{
@@ -79,7 +78,7 @@ namespace BLToolkit.ServiceModel
 
 		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
 		{
-			ValidateQuery(query.Query, query.Parameters);
+			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
 			{
@@ -168,8 +167,12 @@ namespace BLToolkit.ServiceModel
 
 		#endregion
 
-		protected virtual void ValidateQuery(SqlQuery query, SqlParameter[] parameters)
+		public bool AllowUpdates { get; set; }
+
+		protected virtual void ValidateQuery(LinqServiceQuery query)
 		{
+			if (AllowUpdates == false && query.Query.QueryType != QueryType.Select)
+				throw new LinqException("Insert/Update/Delete requests are not allowed by the service policy.");
 		}
 
 		public static Func<string,Type> TypeResolver = _ => null;

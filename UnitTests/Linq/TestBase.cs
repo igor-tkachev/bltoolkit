@@ -102,7 +102,7 @@ namespace Data.Linq
 				if (!info.Loaded)
 					continue;
 
-				var host = new ServiceHost(new LinqService(info.Name), new Uri("net.tcp://localhost:" + ip));
+				var host = new ServiceHost(new LinqService(info.Name) { AllowUpdates = true }, new Uri("net.tcp://localhost:" + ip));
 
 				host.Description.Behaviors.Add(new ServiceMetadataBehavior());
 				host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
