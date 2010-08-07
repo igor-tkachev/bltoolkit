@@ -16,7 +16,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-	public abstract partial class DataProviderBase
+	public abstract partial class DataProviderBase : IMappingSchemaProvider
 	{
 		#region Abstract Properties
 

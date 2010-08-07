@@ -182,7 +182,19 @@ namespace BLToolkit.ServiceModel
 
 		public object GetValue(int i)
 		{
-			return Convert.ChangeTypeFromString(_data[i], _result.FieldTypes[i]);
+			var type  = _result.FieldTypes[i];
+			var value = _data[i];
+
+			if (_result.VaryingTypes.Length > 0 && !string.IsNullOrEmpty(value) && value[0] == '\0')
+			{
+				type  = _result.VaryingTypes[value[1]];
+				value = value.Substring(2);
+			}
+
+			if (type.IsArray && type == typeof(byte[]))
+				return value == null ? null : System.Convert.FromBase64String(value);
+
+			return Convert.ChangeTypeFromString(value, type);
 		}
 
 		public int GetValues(object[] values)

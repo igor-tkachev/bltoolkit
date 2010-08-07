@@ -126,6 +126,7 @@
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs">
@@ -133,6 +134,7 @@
     </Compile>
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
+    <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Properties\BLToolkitConstants.cs" />
     <Compile Include="Common\ArrayT.cs" />
     <Compile Include="Common\Compatibility4.cs" />

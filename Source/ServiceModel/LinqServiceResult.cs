@@ -12,6 +12,7 @@ namespace BLToolkit.ServiceModel
 		[DataMember] public Guid           QueryID      { get; set; }
 		[DataMember] public string[]       FieldNames   { get; set; }
 		[DataMember] public Type[]         FieldTypes   { get; set; }
+		[DataMember] public Type[]         VaryingTypes { get; set; }
 		[DataMember] public List<string[]> Data         { get; set; }
 	}
 }

@@ -112,7 +112,7 @@ namespace BLToolkit.Data.Linq
 		{
 			foreach (var sql in Queries)
 			{
-				sql.SqlQuery = SqlProvider.Finalize(sql.SqlQuery);
+				sql.SqlQuery   = SqlProvider.Finalize(sql.SqlQuery);
 				sql.Parameters = sql.Parameters
 					.Select(p => new { p, idx = sql.SqlQuery.Parameters.IndexOf(p.SqlParameter) })
 					.OrderBy(p => p.idx)

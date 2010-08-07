@@ -102,6 +102,8 @@ namespace BLToolkit.ServiceModel
 						ret.FieldTypes[i] = rd.GetFieldType(i);
 					}
 
+					var varyingTypes = new List<Type>();
+
 					while (rd.Read())
 					{
 						var data  = new string  [rd.FieldCount];
@@ -116,7 +118,23 @@ namespace BLToolkit.ServiceModel
 						{
 							if (!rd.IsDBNull(i))
 							{
-								switch (codes[i])
+								var code = codes[i];
+								var type = rd.GetFieldType(i);
+								var idx = -1;
+
+								if (type != ret.FieldTypes[i])
+								{
+									code = Type.GetTypeCode(type);
+									idx  = varyingTypes.IndexOf(type);
+
+									if (idx < 0)
+									{
+										varyingTypes.Add(type);
+										idx = varyingTypes.Count - 1;
+									}
+								}
+
+								switch (code)
 								{
 									case TypeCode.Decimal  : data[i] = rd.GetDecimal (i).ToString(CultureInfo.InvariantCulture); break;
 									case TypeCode.Double   : data[i] = rd.GetDouble  (i).ToString(CultureInfo.InvariantCulture); break;
@@ -125,18 +143,23 @@ namespace BLToolkit.ServiceModel
 									default                :
 										{
 											if (ret.FieldTypes[i] == typeof(byte[]))
-												data[i] = Common.ConvertTo<string>.From((byte[])rd.GetValue(i));
+												data[i] = Convert.ToBase64String((byte[])rd.GetValue(i));
 											else
 												data[i] = (rd.GetValue(i) ?? "").ToString();
 
 											break;
 										}
 								}
+
+								if (idx >= 0)
+									data[i] = "\0" + (char)idx + data[i];
 							}
 						}
 
 						ret.Data.Add(data);
 					}
+
+					ret.VaryingTypes = varyingTypes.ToArray();
 
 					return ret;
 				}

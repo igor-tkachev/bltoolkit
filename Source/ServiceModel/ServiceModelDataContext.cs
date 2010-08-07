@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
+
 using JetBrains.Annotations;
 
 namespace BLToolkit.ServiceModel
@@ -22,7 +23,6 @@ namespace BLToolkit.ServiceModel
 
 		ServiceModelDataContext()
 		{
-			MappingSchema = Map.DefaultSchema;
 		}
 
 		public ServiceModelDataContext([NotNull] string endpointConfigurationName)
@@ -85,12 +85,28 @@ namespace BLToolkit.ServiceModel
 			return new LinqServiceClient(_endpointConfigurationName);
 		}
 
+		string             _contextID;
 		string IDataContext.ContextID
 		{
-			get { return "ServiceModelDataContext"; }
+			get { return _contextID ?? (_contextID = "LinqService_" + SqlProviderType.Name.Replace("SqlProvider", "")); }
 		}
 
-		public         MappingSchema MappingSchema   { get; set; }
+		private MappingSchema _mappingSchema;
+		public  MappingSchema  MappingSchema
+		{
+			get
+			{
+				if (_mappingSchema == null)
+				{
+					var sp = ((IDataContext)this).CreateSqlProvider();
+					_mappingSchema = sp is IMappingSchemaProvider ? ((IMappingSchemaProvider)sp).MappingSchema : Map.DefaultSchema;
+				}
+
+				return _mappingSchema;
+			}
+
+			set { _mappingSchema = value; }
+		}
 
 		private        Type _sqlProviderType;
 		public virtual Type  SqlProviderType

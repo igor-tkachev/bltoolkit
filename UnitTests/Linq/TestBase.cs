@@ -78,7 +78,7 @@ namespace Data.Linq
 			}
 		}
 
-		ServiceHost _host;
+		readonly List<ServiceHost> _hosts = new List<ServiceHost>();
 
 		[TestFixtureSetUp]
 		public void SetUp()
@@ -88,36 +88,50 @@ namespace Data.Linq
 				switch (str)
 				{
 					case "Data.Linq.Model.Gender": return typeof(Gender);
+					case "Data.Linq.Model.Person": return typeof(Person);
 					default : return null;
 				}
 			};
 
-			_host = new ServiceHost(new LinqService("Sql2008"), new Uri("net.tcp://localhost:1234"));
+			var ip = 1234;
 
-			_host.Description.Behaviors.Add(new ServiceMetadataBehavior());
-			_host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
-			_host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "mex");
-			_host.AddServiceEndpoint(
-				typeof(ILinqService),
-				new NetTcpBinding(SecurityMode.None)
-				{
-					MaxReceivedMessageSize = 10000000,
-					MaxBufferPoolSize      = 10000000,
-					MaxBufferSize          = 10000000,
-					CloseTimeout           = new TimeSpan(00, 01, 00),
-					OpenTimeout            = new TimeSpan(00, 01, 00),
-					ReceiveTimeout         = new TimeSpan(00, 10, 00),
-					SendTimeout            = new TimeSpan(00, 10, 00),
-				},
-				"LinqOverWCF");
+			foreach (var info in _providers)
+			{
+				ip++;
 
-			_host.Open();
+				if (!info.Loaded)
+					continue;
+
+				var host = new ServiceHost(new LinqService(info.Name), new Uri("net.tcp://localhost:" + ip));
+
+				host.Description.Behaviors.Add(new ServiceMetadataBehavior());
+				host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
+				host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "mex");
+				host.AddServiceEndpoint(
+					typeof(ILinqService),
+					new NetTcpBinding(SecurityMode.None)
+					{
+						MaxReceivedMessageSize = 10000000,
+						MaxBufferPoolSize      = 10000000,
+						MaxBufferSize          = 10000000,
+						CloseTimeout           = new TimeSpan(00, 01, 00),
+						OpenTimeout            = new TimeSpan(00, 01, 00),
+						ReceiveTimeout         = new TimeSpan(00, 10, 00),
+						SendTimeout            = new TimeSpan(00, 10, 00),
+					},
+					"LinqOverWCF");
+
+				host.Open();
+
+				_hosts.Add(host);
+			}
 		}
 
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
-			_host.Close();
+			foreach (var host in _hosts)
+				host.Close();
 		}
 
 		class ProviderInfo
@@ -153,12 +167,12 @@ namespace Data.Linq
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			var dx = new TestServiceModelDataContext();
-			Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
-			yield return dx;
+			var ip = 1234;
 
 			foreach (var info in _providers)
 			{
+				ip++;
+
 				if (exceptList.Contains(info.Name))
 					continue;
 
@@ -168,6 +182,12 @@ namespace Data.Linq
 					continue;
 
 				yield return new TestDbManager(info.Name);
+
+				var dx = new TestServiceModelDataContext(ip);
+
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+
+				yield return dx;
 			}
 		}
 

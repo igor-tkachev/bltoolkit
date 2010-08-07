@@ -21,7 +21,11 @@ namespace Update
 		[TestFixtureTearDown]
 		public new void TearDown()
 		{
-			ForEachProvider(db => db.Parent.Delete(p => p.ParentID >= 1000));
+			ForEachProvider(db =>
+			{
+				if (db is TestDbManager)
+					db.Parent.Delete(p => p.ParentID >= 1000);
+			});
 
 			base.TearDown();
 		}

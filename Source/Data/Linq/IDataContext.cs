@@ -7,10 +7,9 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Reflection;
 
-	public interface IDataContext : IDisposable
+	public interface IDataContext : IMappingSchemaProvider, IDisposable
 	{
 		string             ContextID         { get; }
-		MappingSchema      MappingSchema     { get; }
 		Func<ISqlProvider> CreateSqlProvider { get; }
 
 		object             SetQuery        (IQueryContext queryContext);

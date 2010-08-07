@@ -230,7 +230,7 @@ namespace BLToolkit.ServiceModel
 			protected string Str;
 			protected int    Pos;
 
-			char Peek()
+			protected char Peek()
 			{
 				return Str[Pos];
 			}
@@ -240,7 +240,7 @@ namespace BLToolkit.ServiceModel
 				return Str[++Pos];
 			}
 
-			bool Get(char c)
+			protected bool Get(char c)
 			{
 				if (Peek() == c)
 				{
@@ -510,14 +510,15 @@ namespace BLToolkit.ServiceModel
 					case QueryElementType.SqlParameter :
 						{
 							var p = (SqlParameter)e;
+							var t = p.Value == null ? p.SystemType : p.Value.GetType();
 
-							if (p.Value == null || p.SystemType.IsArray || !(p.Value is IEnumerable))
+							if (p.Value == null || t.IsArray || t == typeof(string) || !(p.Value is IEnumerable))
 							{
-								GetType(p.SystemType);
+								GetType(t);
 							}
 							else
 							{
-								var elemType = TypeHelper.GetElementType(p.Value.GetType());
+								var elemType = TypeHelper.GetElementType(t);
 								GetType(GetArrayType(elemType));
 							}
 
@@ -582,13 +583,15 @@ namespace BLToolkit.ServiceModel
 							Append(elem.Name);
 							Append(elem.IsQueryParameter);
 
-							if (elem.Value == null || elem.SystemType.IsArray || !(elem.Value is IEnumerable))
+							var type = elem.Value == null ? elem.SystemType : elem.Value.GetType();
+
+							if (elem.Value == null || type.IsArray || type == typeof(string) || !(elem.Value is IEnumerable))
 							{
-								Append(elem.SystemType, elem.Value);
+								Append(type, elem.Value);
 							}
 							else
 							{
-								var elemType = TypeHelper.GetElementType(elem.Value.GetType());
+								var elemType = TypeHelper.GetElementType(type);
 								var value    = ConvertIEnumerableToArray(elem.Value, elemType);
 
 								Append(GetArrayType(elemType), value);
@@ -1440,6 +1443,7 @@ namespace BLToolkit.ServiceModel
 			public void Serialize(LinqServiceResult result)
 			{
 				Append(result.FieldCount);
+				Append(result.VaryingTypes.Length);
 				Append(result.RowCount);
 				Append(result.QueryID.ToString());
 
@@ -1457,10 +1461,25 @@ namespace BLToolkit.ServiceModel
 					Builder.AppendLine();
 				}
 
+				foreach (var type in result.VaryingTypes)
+				{
+					Append(type.FullName);
+					Builder.AppendLine();
+				}
+
 				foreach (var data in result.Data)
 				{
 					foreach (var str in data)
-						Append(str);
+					{
+						if (result.VaryingTypes.Length > 0 && !string.IsNullOrEmpty(str) && str[0] == '\0')
+						{
+							Builder.Append('*');
+							Append((int)str[1]);
+							Append(str.Substring(2));
+						}
+						else
+							Append(str);
+					}
 
 					Builder.AppendLine();
 				}
@@ -1486,29 +1505,47 @@ namespace BLToolkit.ServiceModel
 			{
 				Str = _reader.ReadString();
 
-				var fieldCount = ReadInt();
+				var fieldCount  = ReadInt();
+				var varTypesLen = ReadInt();
 
 				var result = new LinqServiceResult
 				{
-					FieldCount = fieldCount,
-					RowCount   = ReadInt(),
-					QueryID    = new Guid(ReadString()),
-					FieldNames = new string[fieldCount],
-					FieldTypes = new Type  [fieldCount],
-					Data       = new List<string[]>(),
+					FieldCount   = fieldCount,
+					RowCount     = ReadInt(),
+					VaryingTypes = new Type[varTypesLen],
+					QueryID      = new Guid(ReadString()),
+					FieldNames   = new string[fieldCount],
+					FieldTypes   = new Type  [fieldCount],
+					Data         = new List<string[]>(),
 				};
 
 				NextLine();
 
-				for (var i = 0; i < fieldCount; i++) { result.FieldNames[i] = ReadString();              NextLine(); }
-				for (var i = 0; i < fieldCount; i++) { result.FieldTypes[i] = ResolveType(ReadString()); NextLine(); }
+				for (var i = 0; i < fieldCount;  i++) { result.FieldNames  [i] = ReadString();              NextLine(); }
+				for (var i = 0; i < fieldCount;  i++) { result.FieldTypes  [i] = ResolveType(ReadString()); NextLine(); }
+				for (var i = 0; i < varTypesLen; i++) { result.VaryingTypes[i] = ResolveType(ReadString()); NextLine(); }
 
 				for (var n = 0; n < result.RowCount; n++)
 				{
 					var data = new string[fieldCount];
 
 					for (var i = 0; i < fieldCount; i++)
-						data[i] = ReadString();
+					{
+						if (varTypesLen > 0)
+						{
+							Get(' ');
+
+							if (Get('*'))
+							{
+								var idx = ReadInt();
+								data[i] = "\0" + (char)idx + ReadString();
+							}
+							else
+								data[i] = ReadString();
+						}
+						else
+							data[i] = ReadString();
+					}
 
 					result.Data.Add(data);
 

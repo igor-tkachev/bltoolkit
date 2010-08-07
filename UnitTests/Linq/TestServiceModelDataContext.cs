@@ -10,7 +10,7 @@ namespace Data.Linq
 
 	public class TestServiceModelDataContext : ServiceModelDataContext, ITestDataContext
 	{
-		public TestServiceModelDataContext() : base(
+		public TestServiceModelDataContext(int ip) : base(
 			new NetTcpBinding(SecurityMode.None)
 			{
 				MaxReceivedMessageSize = 10000000,
@@ -21,7 +21,7 @@ namespace Data.Linq
 				ReceiveTimeout         = new TimeSpan(00, 10, 00),
 				SendTimeout            = new TimeSpan(00, 10, 00),
 			},
-			new EndpointAddress("net.tcp://localhost:1234/LinqOverWCF"))
+			new EndpointAddress("net.tcp://localhost:" + ip + "/LinqOverWCF"))
 		{
 			((NetTcpBinding)Binding).ReaderQuotas.MaxStringContentLength = 1000000;
 		}

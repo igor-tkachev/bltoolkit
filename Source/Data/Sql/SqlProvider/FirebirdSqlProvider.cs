@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-
+using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
 #region ReSharper disable
@@ -15,7 +15,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	using Linq;
 
-	public class FirebirdSqlProvider : BasicSqlProvider
+	public class FirebirdSqlProvider : BasicSqlProvider, IMappingSchemaProvider
 	{
 		public FirebirdSqlProvider()
 		{
@@ -129,10 +129,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (type.DbType)
 			{
 				case SqlDbType.Decimal       :
-					if (type == SqlDataType.DbDecimal || type == SqlDataType.UInt64)
-						base.BuildDataType(sb, new SqlDataType(type.DbType, type.Type, 18, type.Scale));
-					else
-						base.BuildDataType(sb, type);
+					base.BuildDataType(sb, type.Precision > 18 ? new SqlDataType(type.DbType, type.Type, 18, type.Scale) : type);
 					break;
 				case SqlDbType.TinyInt       : sb.Append("SmallInt");        break;
 				case SqlDbType.Money         : sb.Append("Decimal(18,4)");   break;
@@ -231,5 +228,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+
+		#region IMappingSchemaProvider Members
+
+		readonly FirebirdMappingSchema _mappingSchema = new FirebirdMappingSchema();
+
+		MappingSchema IMappingSchemaProvider.MappingSchema
+		{
+			get { return _mappingSchema; }
+		}
+
+		#endregion
 	}
 }
