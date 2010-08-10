@@ -120,6 +120,7 @@
       <HintPath>..\..\Redist\SqlCe\System.Data.SqlServerCe.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
@@ -164,6 +165,7 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
+    <Compile Include="DataContextTest.cs" />
     <Compile Include="ExtensionTests.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="VisualBasicTest.cs" />

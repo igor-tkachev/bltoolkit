@@ -7,12 +7,31 @@ namespace BLToolkit.ServiceModel
 	[DataContract]
 	public class LinqServiceResult
 	{
-		[DataMember] public int            FieldCount   { get; set; }
-		[DataMember] public int            RowCount     { get; set; }
-		[DataMember] public Guid           QueryID      { get; set; }
-		[DataMember] public string[]       FieldNames   { get; set; }
-		[DataMember] public Type[]         FieldTypes   { get; set; }
-		[DataMember] public Type[]         VaryingTypes { get; set; }
-		[DataMember] public List<string[]> Data         { get; set; }
+		public int            FieldCount   { get; set; }
+		public int            RowCount     { get; set; }
+		public Guid           QueryID      { get; set; }
+		public string[]       FieldNames   { get; set; }
+		public Type[]         FieldTypes   { get; set; }
+		public Type[]         VaryingTypes { get; set; }
+		public List<string[]> Data         { get; set; }
+
+		string _resultData;
+
+		[DataMember]
+		string ResultData
+		{
+			get { return _resultData ?? (_resultData = Serialize()); }
+			set { if (Data == null) Deserialize(value); }
+		}
+
+		protected virtual string Serialize()
+		{
+			return LinqServiceSerializer.Serialize(this);
+		}
+
+		protected virtual void Deserialize(string data)
+		{
+			LinqServiceSerializer.Deserialize(this, data);
+		}
 	}
 }

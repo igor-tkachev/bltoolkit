@@ -1,5 +1,8 @@
 using System;
+
+#if !SILVERLIGHT
 using System.Data.SqlTypes;
+#endif
 
 namespace BLToolkit.Mapping
 {
@@ -68,6 +71,8 @@ namespace BLToolkit.Mapping
 		DateTimeOffset? GetNullableDateTimeOffset(object o, int index);
 		Guid?     GetNullableGuid    (object o, int index);
 
+#if !SILVERLIGHT
+
 		// SQL type getters.
 		//
 		SqlByte     GetSqlByte     (object o, int index);
@@ -82,5 +87,7 @@ namespace BLToolkit.Mapping
 		SqlMoney    GetSqlMoney    (object o, int index);
 		SqlGuid     GetSqlGuid     (object o, int index);
 		SqlString   GetSqlString   (object o, int index);
+
+#endif
 	}
 }

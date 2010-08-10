@@ -226,7 +226,7 @@ namespace BLToolkit.Data.Linq
 				return null;
 			}
 
-			public override QueryField GetField(MemberInfo mi)
+			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
 				return GetField(mi.Name) ?? GetAssociation(mi);
 			}
@@ -441,18 +441,21 @@ namespace BLToolkit.Data.Linq
 
 			protected readonly Dictionary<MemberInfo,QueryField> Members = new Dictionary<MemberInfo,QueryField>();
 
-			public override QueryField GetField(MemberInfo mi)
+			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
 				QueryField fld;
 				if (Members.TryGetValue(mi, out fld))
 					return fld;
 
-				fld = BaseQuery.GetField(mi) as QuerySource;
+				fld = BaseQuery.GetField(mi);
 
-				if (fld != null)
+				if (fld != null && test(fld))
+				{
 					Members.Add(mi, fld);
+					return fld;
+				}
 
-				return fld;
+				return null;
 			}
 
 			public override List<QueryField> GetKeyFields(bool allIfEmpty)
@@ -584,7 +587,7 @@ namespace BLToolkit.Data.Linq
 				return col;
 			}
 
-			public override QueryField GetField(MemberInfo mi)
+			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
 				return EnsureField(BaseQuery.GetField(mi));
 			}
@@ -736,7 +739,7 @@ namespace BLToolkit.Data.Linq
 
 			QueryField _field;
 
-			public override QueryField GetField(MemberInfo mi)
+			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
 				if (Lambda.Body.NodeType == ExpressionType.MemberAccess)
 				{
@@ -887,7 +890,7 @@ namespace BLToolkit.Data.Linq
 				return field == null ? null : QuerySource.EnsureField(field);
 			}
 
-			public override QueryField GetField(MemberInfo mi)
+			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
 				var field = SourceColumn.GetField(mi);
 				return field == null ? null : QuerySource.EnsureField(field);
@@ -1083,8 +1086,13 @@ namespace BLToolkit.Data.Linq
 		public virtual Type              ObjectType { get { return Lambda.Body.Type; }}
 
 		public abstract QueryField       GetField    (LambdaInfo lambda, Expression expr, int currentMember);
-		public abstract QueryField       GetField    (MemberInfo mi);
+		public abstract QueryField       GetField    (MemberInfo mi, Func<QueryField,bool> test);
 		public abstract List<QueryField> GetKeyFields(bool allIfEmpty);
+
+		public QueryField GetField(MemberInfo mi)
+		{
+			return GetField(mi, _ => true);
+		}
 
 		protected virtual QueryField GetField(List<MemberInfo> members, int currentMember)
 		{

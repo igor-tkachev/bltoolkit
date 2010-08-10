@@ -255,6 +255,8 @@ namespace BLToolkit.Data.Sql
 				default                : break;
 			}
 
+#if !SILVERLIGHT
+
 			if (type == typeof(SqlByte))     return SqlByte;
 			if (type == typeof(SqlInt16))    return SqlInt16;
 			if (type == typeof(SqlInt32))    return SqlInt32;
@@ -271,6 +273,8 @@ namespace BLToolkit.Data.Sql
 			if (type == typeof(SqlBytes))    return SqlBytes;
 			if (type == typeof(SqlChars))    return SqlChars;
 			if (type == typeof(SqlXml))      return SqlXml;
+
+#endif
 
 			return DbVariant;
 		}
@@ -303,7 +307,9 @@ namespace BLToolkit.Data.Sql
 				case SqlDbType.VarBinary        : return DbVarBinary;
 				case SqlDbType.VarChar          : return DbVarChar;
 				case SqlDbType.Variant          : return DbVariant;
+#if !SILVERLIGHT
 				case SqlDbType.Xml              : return DbXml;
+#endif
 				case SqlDbType.Udt              : return DbUdt;
 				case SqlDbType.Structured       : return DbStructured;
 				case SqlDbType.Date             : return DbDate;
@@ -382,7 +388,9 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType DbUniqueIdentifier = new SqlDataType(SqlDbType.UniqueIdentifier, typeof(Guid),                   0,               0,  0);
 
 		public static readonly SqlDataType DbVariant          = new SqlDataType(SqlDbType.Variant,          typeof(Object),                 0,               0,  0);
+#if !SILVERLIGHT
 		public static readonly SqlDataType DbXml              = new SqlDataType(SqlDbType.Xml,              typeof(SqlXml),                 0,               0,  0);
+#endif
 		public static readonly SqlDataType DbUdt              = new SqlDataType(SqlDbType.Udt,              typeof(Object),                 0,               0,  0);
 		public static readonly SqlDataType DbStructured       = new SqlDataType(SqlDbType.Structured,       typeof(Object),                 0,               0,  0);
 
@@ -408,6 +416,7 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType DateTimeOffset     = DbDateTimeOffset;
 		public static readonly SqlDataType TimeSpan           = DbTime;
 
+#if !SILVERLIGHT
 		public static readonly SqlDataType SqlByte            = new SqlDataType(SqlDbType.TinyInt,          typeof(SqlByte),                0,               0,  0);
 		public static readonly SqlDataType SqlInt16           = new SqlDataType(SqlDbType.SmallInt,         typeof(SqlInt16),               0,               0,  0);
 		public static readonly SqlDataType SqlInt32           = new SqlDataType(SqlDbType.Int,              typeof(SqlInt32),               0,               0,  0);
@@ -424,6 +433,7 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType SqlBytes           = new SqlDataType(SqlDbType.Image,            typeof(SqlBytes),    GetMaxLength,               0,  0);
 		public static readonly SqlDataType SqlChars           = new SqlDataType(SqlDbType.Text,             typeof(SqlChars),    GetMaxLength,               0,  0);
 		public static readonly SqlDataType SqlXml             = new SqlDataType(SqlDbType.Xml,              typeof(SqlXml),                 0,               0,  0);
+#endif
 
 		#endregion
 

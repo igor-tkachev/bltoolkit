@@ -1,20 +1,16 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace BLToolkit.Reflection.Extension
 {
-	public class ExtensionList : ICollection
+	public class ExtensionList : Dictionary<string,TypeExtension>
 	{
-		#region ExtensionList
-		
-		private readonly Hashtable _types = new Hashtable();
-
-		public TypeExtension this[string typeName]
+		public new TypeExtension this[string typeName]
 		{
 			get
 			{
-				TypeExtension value = (TypeExtension)_types[typeName];
-				return value ?? TypeExtension.Null;
+				TypeExtension value;
+				return TryGetValue(typeName, out value) ? value : TypeExtension.Null;
 			}
 		}
 
@@ -22,7 +18,7 @@ namespace BLToolkit.Reflection.Extension
 		{
 			get
 			{
-				foreach (TypeExtension ext in _types.Values)
+				foreach (var ext in Values)
 					if (ext.Name == type.Name || ext.Name == type.FullName)
 						return ext;
 
@@ -35,42 +31,7 @@ namespace BLToolkit.Reflection.Extension
 
 		public void Add(TypeExtension typeInfo)
 		{
-			_types[typeInfo.Name] = typeInfo;
+			Add(typeInfo.Name, typeInfo);
 		}
-
-		#endregion
-
-		#region ICollection Members
-
-		public void CopyTo(Array array, int index)
-		{
-			_types.CopyTo(array, index);
-		}
-
-		public int Count
-		{
-			get { return _types.Count; }
-		}
-
-		public bool IsSynchronized
-		{
-			get { return _types.IsSynchronized; }
-		}
-
-		public object SyncRoot
-		{
-			get { return _types.SyncRoot; }
-		}
-
-		#endregion
-
-		#region IEnumerable Members
-
-		public IEnumerator GetEnumerator()
-		{
-			return _types.Values.GetEnumerator();
-		}
-
-		#endregion
 	}
 }

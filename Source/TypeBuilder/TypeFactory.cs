@@ -9,12 +9,15 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 
+using JetBrains.Annotations;
+
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 using BLToolkit.TypeBuilder.Builders;
 using BLToolkit.Properties;
+#if !SILVERLIGHT
 using BLToolkit.Configuration;
-using JetBrains.Annotations;
+#endif
 
 namespace BLToolkit.TypeBuilder
 {
@@ -22,9 +25,11 @@ namespace BLToolkit.TypeBuilder
 	{
 		static TypeFactory()
 		{
-			var section = BLToolkitSection.Instance;
-
 			SealTypes = true;
+
+#if !SILVERLIGHT
+
+			var section = BLToolkitSection.Instance;
 
 			if (section != null)
 			{
@@ -39,6 +44,10 @@ namespace BLToolkit.TypeBuilder
 					SetGlobalAssembly(elm.AssemblyPath, elm.Version, elm.KeyFile);
 				}
 			}
+
+#endif
+
+#if !SILVERLIGHT
 
 			var perm = new SecurityPermission(SecurityPermissionFlag.ControlAppDomain);
 
@@ -57,6 +66,8 @@ namespace BLToolkit.TypeBuilder
 #else
 			if (SecurityManager.IsGranted(perm))
 				SubscribeAssemblyResolver();
+#endif
+
 #endif
 		}
 

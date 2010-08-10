@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 using BLToolkit.Mapping;
@@ -21,17 +21,11 @@ namespace BLToolkit.Reflection
 		[CLSCompliant(false)]
 		public IMapDataSource DataSource       { get; set; }
 
-		private Hashtable _items;
-		public  Hashtable  Items
+		private Dictionary<object,object> _items;
+		public  Dictionary<object,object>  Items
 		{
 			[DebuggerStepThrough] 
-			get 
-			{
-				if (_items == null)
-					_items = new Hashtable();
-
-				return _items;
-			}
+			get { return _items ?? (_items = new Dictionary<object, object>()); }
 		}
 
 		public  bool  IsDestination

@@ -143,8 +143,10 @@ namespace BLToolkit.Reflection
 		public virtual void CloneValue(object source, object dest)
 		{
 			var value = GetValue(source);
+
 			SetValue(dest, value is ICloneable? ((ICloneable)value).Clone(): value);
 		}
+
 
 		// Simple types getters.
 		//
@@ -198,6 +200,8 @@ namespace BLToolkit.Reflection
 		public virtual TimeSpan? GetNullableTimeSpan(object o) { return (TimeSpan?)GetValue(o); }
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o) { return (DateTimeOffset?)GetValue(o); }
 
+#if !SILVERLIGHT
+
 		// SQL type getters.
 		//
 		public virtual SqlByte     GetSqlByte    (object o) { return (SqlByte)    GetValue(o); }
@@ -212,6 +216,8 @@ namespace BLToolkit.Reflection
 		public virtual SqlMoney    GetSqlMoney   (object o) { return (SqlMoney)   GetValue(o); }
 		public virtual SqlGuid     GetSqlGuid    (object o) { return (SqlGuid)    GetValue(o); }
 		public virtual SqlString   GetSqlString  (object o) { return (SqlString)  GetValue(o); }
+
+#endif
 
 		// Simple type setters.
 		//
@@ -265,6 +271,8 @@ namespace BLToolkit.Reflection
 		public virtual void    SetNullableTimeSpan(object o, TimeSpan? value) { SetValue(o, value); }
 		public virtual void    SetNullableDateTimeOffset(object o, DateTimeOffset? value) { SetValue(o, value); }
 
+#if !SILVERLIGHT
+
 		// SQL type setters.
 		//
 		public virtual void SetSqlByte    (object o, SqlByte     value) { SetValue(o, value); }
@@ -279,6 +287,8 @@ namespace BLToolkit.Reflection
 		public virtual void SetSqlMoney   (object o, SqlMoney    value) { SetValue(o, value); }
 		public virtual void SetSqlGuid    (object o, SqlGuid     value) { SetValue(o, value); }
 		public virtual void SetSqlString  (object o, SqlString   value) { SetValue(o, value); }
+
+#endif
 
 		#endregion
 	}

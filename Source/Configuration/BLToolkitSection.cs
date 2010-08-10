@@ -7,7 +7,7 @@ namespace BLToolkit.Configuration
 	/// <summary>
 	/// Implementation of custom configuration section.
 	/// </summary>
-	internal class BLToolkitSection: ConfigurationSection
+	internal class BLToolkitSection : ConfigurationSection
 	{
 		private const string SectionName = "bltoolkit";
 		private static readonly ConfigurationPropertyCollection _properties =

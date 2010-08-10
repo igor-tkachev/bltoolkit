@@ -56,7 +56,7 @@ namespace BLToolkit.Mapping
 
 		public virtual void InitMapping(InitContext initContext)
 		{
-			ISupportMapping sm = _dic as ISupportMapping;
+			var sm = _dic as ISupportMapping;
 
 			if (sm != null)
 			{

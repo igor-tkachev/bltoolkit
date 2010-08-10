@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.4", "DataProviders\BLToolkit.Data.DataProvider.Sybase.4.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.SL.4", "Source\BLToolkit.SL.4.csproj", "{663D4BFC-F565-41F7-9409-510B560CCEE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,6 +187,16 @@ Global
 		{6CD8CC3D-643D-4D09-8660-A26085C44FBC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{6CD8CC3D-643D-4D09-8660-A26085C44FBC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{6CD8CC3D-643D-4D09-8660-A26085C44FBC}.Release|x86.ActiveCfg = Release|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{663D4BFC-F565-41F7-9409-510B560CCEE8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

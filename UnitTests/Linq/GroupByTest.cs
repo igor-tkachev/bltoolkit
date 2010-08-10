@@ -251,6 +251,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void SubQuery5()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				join p in Parent on ch.ParentID equals p.ParentID into pg
+				from p in pg.DefaultIfEmpty()
+				group ch by ch.ChildID into g
+				select g.Sum(_ => _.ParentID),
+				from ch in db.Child
+				join p in db.Parent on ch.ParentID equals p.ParentID into pg
+				from p in pg.DefaultIfEmpty()
+				group ch by ch.ChildID into g
+				select g.Sum(_ => _.ParentID)));
+		}
+
+		[Test]
 		public void Calculated1()
 		{
 			var expected = 

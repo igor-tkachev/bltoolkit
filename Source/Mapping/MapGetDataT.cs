@@ -104,6 +104,8 @@ namespace BLToolkit.Mapping
 				if (t == typeof(UInt64)) return (MB<T>)Activator.CreateInstance(typeof(NEU64<>).MakeGenericType(typeof(T), enumType));
 			}
 
+#if !SILVERLIGHT
+
 			// SqlTypes.
 			//
 			if (t == typeof(SqlString))    return (MB<T>)(object)(new dbS());
@@ -121,6 +123,8 @@ namespace BLToolkit.Mapping
 			if (t == typeof(SqlBoolean))   return (MB<T>)(object)(new dbB());
 			if (t == typeof(SqlGuid))      return (MB<T>)(object)(new dbG());
 			if (t == typeof(SqlDateTime))  return (MB<T>)(object)(new dbDT());
+
+#endif
 
 			return new Default<T>();
 		}
@@ -198,6 +202,8 @@ namespace BLToolkit.Mapping
 		sealed class NEU32<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetUInt32(o, i); } }
 		sealed class NEU64<E>    : MB<E?> where E : struct { public override E?  From(IMapDataSource s, object o, int i) { return /*s.IsNull(o, i) ? (E?)null :*/ (E)(object)s.GetUInt64(o, i); } }
 
+#if !SILVERLIGHT
+
 		// SqlTypes.
 		//
 		sealed class dbS         : MB<SqlString>   { public override SqlString   From(IMapDataSource s, object o, int i) { return s.GetSqlString   (o, i); } }
@@ -215,5 +221,7 @@ namespace BLToolkit.Mapping
 		sealed class dbB         : MB<SqlBoolean>  { public override SqlBoolean  From(IMapDataSource s, object o, int i) { return s.GetSqlBoolean  (o, i); } }
 		sealed class dbG         : MB<SqlGuid>     { public override SqlGuid     From(IMapDataSource s, object o, int i) { return s.GetSqlGuid     (o, i); } }
 		sealed class dbDT        : MB<SqlDateTime> { public override SqlDateTime From(IMapDataSource s, object o, int i) { return s.GetSqlDateTime (o, i); } }
+
+#endif
 	}
 }

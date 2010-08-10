@@ -31,27 +31,18 @@ namespace BLToolkit.Mapping
 						"Association '{0}.{1}' has different number of keys for parent and child objects.",
 						memberAccessor.TypeAccessor.Type.Name, memberAccessor.Name));
 
-			_memberAccessor = memberAccessor;
-			_thisKey        = thisKey;
-			_otherKey       = otherKey;
-			_storage        = storage;
-			_canBeNull      = canBeNull;
+			MemberAccessor = memberAccessor;
+			ThisKey        = thisKey;
+			OtherKey       = otherKey;
+			Storage        = storage;
+			CanBeNull      = canBeNull;
 		}
 
-		private MemberAccessor _memberAccessor;
-		public  MemberAccessor  MemberAccessor { get { return _memberAccessor; } set { _memberAccessor = value; } }
-
-		private string[] _thisKey;
-		public  string[]  ThisKey { get { return _thisKey; } set { _thisKey = value; } }
-
-		private string[] _otherKey;
-		public  string[]  OtherKey { get { return _otherKey; } set { _otherKey = value; } }
-
-		private string _storage;
-		public  string  Storage { get { return _storage; } set { _storage = value; } }
-
-		private bool _canBeNull;
-		public  bool  CanBeNull { get { return _canBeNull; } set { _canBeNull = value; } }
+		public MemberAccessor MemberAccessor { get; set; }
+		public string[]       ThisKey        { get; set; }
+		public string[]       OtherKey       { get; set; }
+		public string         Storage        { get; set; }
+		public bool           CanBeNull      { get; set; }
 
 		public static string[] ParseKeys(string keys)
 		{

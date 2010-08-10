@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Xml;
 
 using BLToolkit.Common;
@@ -177,7 +178,9 @@ namespace BLToolkit.Mapping
 			_defaultGuidNullValue           = (Guid)          GetNullValue(typeof(Guid));
 			_defaultStreamNullValue         = (Stream)        GetNullValue(typeof(Stream));
 			_defaultXmlReaderNullValue      = (XmlReader)     GetNullValue(typeof(XmlReader));
+#if !SILVERLIGHT
 			_defaultXmlDocumentNullValue    = (XmlDocument)   GetNullValue(typeof(XmlDocument));
+#endif
 		}
 
 		#region Primitive Types
@@ -492,6 +495,8 @@ namespace BLToolkit.Mapping
 			set { _defaultXmlReaderNullValue = value; }
 		}
 
+#if !SILVERLIGHT
+
 		public virtual XmlReader ConvertToXmlReader(object value)
 		{
 			return
@@ -514,6 +519,8 @@ namespace BLToolkit.Mapping
 				value == null || value is DBNull? _defaultXmlDocumentNullValue:
 					Convert.ToXmlDocument(value);
 		}
+
+#endif
 
 		public virtual byte[] ConvertToByteArray(object value)
 		{
@@ -677,6 +684,8 @@ namespace BLToolkit.Mapping
 
 		#region SqlTypes
 
+#if !SILVERLIGHT
+
 		public virtual SqlByte ConvertToSqlByte(object value)
 		{
 			return
@@ -807,6 +816,8 @@ namespace BLToolkit.Mapping
 					Convert.ToSqlXml(value);
 		}
 
+#endif
+
 		#endregion
 
 		#region General case
@@ -835,7 +846,9 @@ namespace BLToolkit.Mapping
 			if (typeof(Guid)           == typeof(T)) return (T)(object)_defaultGuidNullValue;
 			if (typeof(Stream)         == typeof(T)) return (T)(object)_defaultStreamNullValue;
 			if (typeof(XmlReader)      == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
+#if !SILVERLIGHT
 			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)_defaultXmlDocumentNullValue;
+#endif
 			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)_defaultDateTimeOffsetNullValue;
 
 			return default(T);
@@ -845,7 +858,7 @@ namespace BLToolkit.Mapping
 		{
 			return Equals(value, default(TP))?
 				GetDefaultNullValue<T>():
-				Convert<T, TP>.From(value);
+				Convert<T,TP>.From(value);
 		}
 
 		public virtual object ConvertChangeType(object value, Type conversionType)
@@ -900,10 +913,13 @@ namespace BLToolkit.Mapping
 					}
 					else
 					{
-						int arrayLength  = 1;
-						int[] dimensions = new int[rank];
-						int[] indices    = new int[rank];
-						int[] lbounds    = new int[rank];
+#if SILVERLIGHT
+						throw new InvalidOperationException();
+#else
+						var arrayLength = 1;
+						var dimensions  = new int[rank];
+						var indices     = new int[rank];
+						var lbounds     = new int[rank];
 
 						for (int i = 0; i < rank; ++i)
 						{
@@ -912,10 +928,12 @@ namespace BLToolkit.Mapping
 						}
 
 						dstArray = Array.CreateInstance(dstElementType, dimensions, lbounds);
+
 						for (int i = 0; i < arrayLength; ++i)
 						{
-							int index = i;
-							for (int j = rank - 1; j >= 0; --j)
+							var index = i;
+
+							for (var j = rank - 1; j >= 0; --j)
 							{
 								indices[j] = index % dimensions[j] + lbounds[j];
 								index /= dimensions[j];
@@ -923,6 +941,8 @@ namespace BLToolkit.Mapping
 
 							dstArray.SetValue(ConvertChangeType(srcArray.GetValue(indices), dstElementType, isNullable), indices);
 						}
+
+#endif
 					}
 
 					return dstArray;
@@ -986,12 +1006,16 @@ namespace BLToolkit.Mapping
 
 			if (typeof(Guid)           == conversionType) return ConvertToGuid          (value);
 			if (typeof(Stream)         == conversionType) return ConvertToStream        (value);
+#if !SILVERLIGHT
 			if (typeof(XmlReader)      == conversionType) return ConvertToXmlReader     (value);
 			if (typeof(XmlDocument)    == conversionType) return ConvertToXmlDocument   (value);
+#endif
 			if (typeof(byte[])         == conversionType) return ConvertToByteArray     (value);
 			if (typeof(Binary)         == conversionType) return ConvertToLinqBinary    (value);
 			if (typeof(DateTimeOffset) == conversionType) return ConvertToDateTimeOffset(value);
 			if (typeof(char[])         == conversionType) return ConvertToCharArray     (value);
+
+#if !SILVERLIGHT
 
 			if (typeof(SqlInt32)       == conversionType) return ConvertToSqlInt32      (value);
 			if (typeof(SqlString)      == conversionType) return ConvertToSqlString     (value);
@@ -1010,7 +1034,9 @@ namespace BLToolkit.Mapping
 			if (typeof(SqlChars)       == conversionType) return ConvertToSqlChars      (value);
 			if (typeof(SqlXml)         == conversionType) return ConvertToSqlXml        (value);
 
-			return System.Convert.ChangeType(value, conversionType);
+#endif
+
+			return System.Convert.ChangeType(value, conversionType, Thread.CurrentThread.CurrentCulture);
 		}
 
 		#endregion
@@ -1043,6 +1069,8 @@ namespace BLToolkit.Mapping
 			return new DataReaderListMapper(CreateDataReaderMapper(reader, nameOrIndex));
 		}
 
+#if !SILVERLIGHT
+
 		public virtual DataRowMapper CreateDataRowMapper(
 			DataRow        row,
 			DataRowVersion version)
@@ -1056,6 +1084,8 @@ namespace BLToolkit.Mapping
 		{
 			return new DataTableMapper(dataTable, CreateDataRowMapper(null, version));
 		}
+
+#endif
 
 		public virtual DictionaryMapper CreateDictionaryMapper(IDictionary dictionary)
 		{

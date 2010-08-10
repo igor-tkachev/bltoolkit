@@ -267,7 +267,7 @@ namespace BLToolkit.Data.Linq
 						{
 							if (mi != null)
 							{
-								var f = union.GetField(mi);
+								var f = union.GetField(mi, _ => _ is QuerySource);
 
 								if (f != null)
 								{

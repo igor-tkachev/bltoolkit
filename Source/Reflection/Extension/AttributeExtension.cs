@@ -6,40 +6,30 @@ namespace BLToolkit.Reflection.Extension
 	{
 		public AttributeExtension()
 		{
-			_values = new ValueCollection();
+			Values = new ValueCollection();
 		}
 
 		private AttributeExtension(ValueCollection values)
 		{
-			_values = values;
+			Values = values;
 		}
 
-		private string _name;
-		public  string  Name
-		{
-			get { return _name;  }
-			set { _name = value; }
-		}
+		public string          Name   { get; set; }
+		public ValueCollection Values { get; private set; }
 
 		public object Value
 		{
-			get { return this == _null? null: _values.Value; }
+			get { return this == _null? null: Values.Value; }
 		}
 
 		public object this[string valueName]
 		{
-			get { return this == _null? null: _values[valueName]; }
+			get { return this == _null? null: Values[valueName]; }
 		}
 
 		public object this[string valueName, object defaultValue]
 		{
 			get { return this[valueName] ?? defaultValue; }
-		}
-
-		private readonly ValueCollection _values;
-		public           ValueCollection  Values
-		{
-			get { return _values; }
 		}
 
 		private AttributeNameCollection _attributes;

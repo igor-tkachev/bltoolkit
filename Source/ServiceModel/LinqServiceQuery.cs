@@ -1,14 +1,33 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-using BLToolkit.Data.Sql;
-
 namespace BLToolkit.ServiceModel
 {
+	using Data.Sql;
+
 	[DataContract]
 	public class LinqServiceQuery
 	{
-		[DataMember] public SqlQuery       Query      { get; set; }
-		[DataMember] public SqlParameter[] Parameters { get; set; }
+		public SqlQuery       Query      { get; set; }
+		public SqlParameter[] Parameters { get; set; }
+
+		string _queryData;
+
+		[DataMember]
+		string QueryData
+		{
+			get { return _queryData ?? (_queryData = Serialize()); }
+			set { if (Query == null) Deserialize(value); }
+		}
+
+		protected virtual string Serialize()
+		{
+			return LinqServiceSerializer.Serialize(this);
+		}
+
+		protected virtual void Deserialize(string data)
+		{
+			LinqServiceSerializer.Deserialize(this, data);
+		}
 	}
 }

@@ -600,6 +600,8 @@ namespace BLToolkit.Mapping
 		public override DateTime? GetNullableDateTime(object o, int index) { return this[index].GetNullableDateTime(o); }
 		public override DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return this[index].GetNullableDateTimeOffset(o); }
 
+#if !SILVERLIGHT
+
 		// SQL type getters.
 		//
 		public override SqlByte     GetSqlByte    (object o, int index) { return this[index].GetSqlByte    (o); }
@@ -614,6 +616,8 @@ namespace BLToolkit.Mapping
 		public override SqlMoney    GetSqlMoney   (object o, int index) { return this[index].GetSqlMoney   (o); }
 		public override SqlGuid     GetSqlGuid    (object o, int index) { return this[index].GetSqlGuid    (o); }
 		public override SqlString   GetSqlString  (object o, int index) { return this[index].GetSqlString  (o); }
+
+#endif
 
 		#endregion
 
@@ -688,6 +692,8 @@ namespace BLToolkit.Mapping
 		public override void SetNullableDateTime(object o, int index, DateTime? value) { this[index].SetNullableDateTime(o, value); }
 		public override void SetNullableDateTimeOffset(object o, int index, DateTimeOffset? value) { this[index].SetNullableDateTimeOffset(o, value); }
 
+#if !SILVERLIGHT
+
 		// SQL type setters.
 		//
 		public override void SetSqlByte    (object o, int index, SqlByte     value) { this[index].SetSqlByte    (o, value); }
@@ -702,6 +708,8 @@ namespace BLToolkit.Mapping
 		public override void SetSqlMoney   (object o, int index, SqlMoney    value) { this[index].SetSqlMoney   (o, value); }
 		public override void SetSqlGuid    (object o, int index, SqlGuid     value) { this[index].SetSqlGuid    (o, value); }
 		public override void SetSqlString  (object o, int index, SqlString   value) { this[index].SetSqlString  (o, value); }
+
+#endif
 
 		#endregion
 

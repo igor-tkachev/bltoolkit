@@ -137,13 +137,7 @@ namespace BLToolkit.TypeBuilder.Builders
 		private   static TypeHelper _initContextType;
 		protected static TypeHelper  InitContextType
 		{
-			get
-			{
-				if (_initContextType == null)
-					_initContextType = new TypeHelper(typeof(InitContext));
-
-				return _initContextType;
-			}
+			get { return _initContextType ?? (_initContextType = new TypeHelper(typeof(InitContext))); }
 		}
 
 		#endregion
@@ -595,11 +589,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				return;
 
 			var memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
-			var parentField  = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
+			var parentField  = Context.GetItem<LocalBuilder>("$BLToolkit.InitContext.Parent");
 
 			if (parentField == null)
 			{
-				Context.Items["$BLToolkit.InitContext.Parent"] = parentField = emit.DeclareLocal(typeof(object));
+				Context.Items.Add("$BLToolkit.InitContext.Parent", parentField = emit.DeclareLocal(typeof(object)));
 
 				var label = emit.DefineLabel();
 
@@ -628,7 +622,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 				;
 
-			var isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+			var isDirty = Context.GetItem<bool?>("$BLToolkit.InitContext.DirtyParameters");
 
 			if (parameters != null)
 			{
@@ -647,7 +641,10 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			Context.Items["$BLToolkit.InitContext.DirtyParameters"] = parameters != null;
+			if (Context.Items.ContainsKey("$BLToolkit.InitContext.DirtyParameters"))
+				Context.Items["$BLToolkit.InitContext.DirtyParameters"] = (bool?)(parameters != null);
+			else
+				Context.Items.Add("$BLToolkit.InitContext.DirtyParameters", (bool?)(parameters != null));
 
 			if (objectType.IsAbstract)
 			{
@@ -803,11 +800,11 @@ namespace BLToolkit.TypeBuilder.Builders
 		private LocalBuilder GetInitContextBuilder(
 			string initContextName, EmitHelper emit)
 		{
-			var initField = (LocalBuilder)Context.Items[initContextName];
+			var initField = Context.GetItem<LocalBuilder>(initContextName);
 
 			if (initField == null)
 			{
-				Context.Items[initContextName] = initField = emit.DeclareLocal(InitContextType);
+				Context.Items.Add(initContextName, initField = emit.DeclareLocal(InitContextType));
 
 				emit
 					.newobj   (InitContextType.GetPublicDefaultConstructor())
@@ -964,9 +961,9 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void AfterBuildType()
 		{
-			var isDirty = Context.Items["$BLToolkit.InitContext.DirtyParameters"];
+			var isDirty = Context.GetItem<bool?>("$BLToolkit.InitContext.DirtyParameters");
 
-			if (isDirty != null && (bool)isDirty)
+			if (isDirty != null && isDirty.Value)
 			{
 				Context.TypeBuilder.InitConstructor.Emitter
 					.ldarg_1
@@ -975,13 +972,13 @@ namespace BLToolkit.TypeBuilder.Builders
 					;
 			}
 
-			var parentField = (LocalBuilder)Context.Items["$BLToolkit.InitContext.Parent"];
+			var localBuilder = Context.GetItem<LocalBuilder>("$BLToolkit.InitContext.Parent");
 
-			if (parentField != null)
+			if (localBuilder != null)
 			{
 				Context.TypeBuilder.InitConstructor.Emitter
 					.ldarg_1
-					.ldloc    (parentField)
+					.ldloc    (localBuilder)
 					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 					;
 			}

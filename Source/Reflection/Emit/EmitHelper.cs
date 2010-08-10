@@ -4,8 +4,11 @@ using System.Diagnostics.SymbolStore;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+
 using BLToolkit.Common;
 using BLToolkit.Properties;
+
+// ReSharper disable InconsistentNaming
 
 namespace BLToolkit.Reflection.Emit
 {
@@ -729,6 +732,8 @@ namespace BLToolkit.Reflection.Emit
 			return call(methodInfo);
 		}
 
+#if !SILVERLIGHT
+
 		/// <summary>
 		/// Calls ILGenerator.EmitCalli(<see cref="OpCodes.Calli"/>, <see cref="CallingConvention"/>, Type, Type[]) that
 		/// calls the method indicated on the evaluation stack (as a pointer to an entry point) 
@@ -741,7 +746,8 @@ namespace BLToolkit.Reflection.Emit
 		/// <seealso cref="System.Reflection.Emit.ILGenerator.EmitCalli(OpCode,CallingConvention,Type,Type[])">ILGenerator.EmitCalli</seealso>
 		public EmitHelper calli(CallingConvention unmanagedCallConv, Type returnType, Type[] parameterTypes)
 		{
-			_ilGenerator.EmitCalli(OpCodes.Calli, unmanagedCallConv, returnType, parameterTypes); return this;
+			_ilGenerator.EmitCalli(OpCodes.Calli, unmanagedCallConv, returnType, parameterTypes);
+			return this;
 		}
 
 		/// <summary>
@@ -760,6 +766,8 @@ namespace BLToolkit.Reflection.Emit
 			_ilGenerator.EmitCalli(OpCodes.Calli, callingConvention, returnType, parameterTypes, optionalParameterTypes);
 			return this;
 		}
+
+#endif
 
 		/// <summary>
 		/// Calls ILGenerator.Emit(<see cref="OpCodes.Callvirt"/>, methodInfo) that

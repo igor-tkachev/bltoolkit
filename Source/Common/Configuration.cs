@@ -2,9 +2,7 @@ using System;
 
 namespace BLToolkit.Common
 {
-	using EditableObjects;
 	using Mapping;
-	using TypeBuilder;
 
 	public static class Configuration
 	{
@@ -42,10 +40,10 @@ namespace BLToolkit.Common
 
 		private static bool _notifyOnEqualSet = true;
 		/// <summary>
-		/// Specifies default behavior for PropertyChange generation. If set to true, <see cref="EditableObject.OnPropertyChanged"/>
-		/// is invoked even when current value is same as new one. If set to false,  <see cref="EditableObject.OnPropertyChanged"/> 
+		/// Specifies default behavior for PropertyChange generation. If set to true, <see cref="BLToolkit.EditableObjects.EditableObject.OnPropertyChanged"/>
+		/// is invoked even when current value is same as new one. If set to false,  <see cref="BLToolkit.EditableObjects.EditableObject.OnPropertyChanged"/> 
 		/// is invoked only when new value is being assigned. To specify notification behaviour other than default, please see 
-		/// <see cref="PropertyChangedAttribute"/>
+		/// <see cref="BLToolkit.TypeBuilder.PropertyChangedAttribute"/>
 		/// </summary>
 		public  static bool  NotifyOnEqualSet
 		{

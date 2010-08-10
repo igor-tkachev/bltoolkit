@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Threading;
 
 namespace BLToolkit.Common
 {
@@ -25,9 +26,12 @@ namespace BLToolkit.Common
 		/// <exception cref="T:System.ArgumentNullException">array is null.-or-converter is null.</exception>
 		public static T[] FromArray(P[] src)
 		{
-			// Note that type parameters are in reverse order.
-			//
-			return Array.ConvertAll(src, (Converter<P,T>)((object)From));
+			var arr = new T[src.Length];
+
+			for (var i = 0; i < arr.Length; i++)
+				arr[i] = From(src[i]);
+
+			return arr;
 		}
 
 		///<summary>
@@ -110,7 +114,7 @@ namespace BLToolkit.Common
 
 		private static P SameType  (P p) { return p; }
 		private static T Assignable(P p) { return (T)(object)p; }
-		private static T Default   (P p) { return (T)System.Convert.ChangeType(p, typeof(T)); }
+		private static T Default   (P p) { return (T)System.Convert.ChangeType(p, typeof(T), Thread.CurrentThread.CurrentCulture); }
 	}
 
 	/// <summary>

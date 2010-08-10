@@ -55,7 +55,7 @@ namespace Data.Sql
 					.Expr(new SqlExpression("{0} + {1}", Order["Number"], Order["Number"]))
 				;
 
-			Assert.AreEqual(3, sb.Select.Columns.Count);
+			Assert.AreEqual(2, sb.Select.Columns.Count);
 		}
 	}
 }

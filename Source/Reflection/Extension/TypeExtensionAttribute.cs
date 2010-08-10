@@ -16,22 +16,11 @@ namespace BLToolkit.Reflection.Extension
 
 		public TypeExtensionAttribute(string fileName, string typeName)
 		{
-			_fileName = fileName;
-			_typeName = typeName;
+			FileName = fileName;
+			TypeName = typeName;
 		}
 
-		private string _fileName;
-		public  string  FileName
-		{
-			get { return _fileName;  }
-			set { _fileName = value; }
-		}
-
-		private string _typeName;
-		public  string  TypeName
-		{
-			get { return _typeName;  }
-			set { _typeName = value; }
-		}
+		public string FileName { get; set; }
+		public string TypeName { get; set; }
 	}
 }

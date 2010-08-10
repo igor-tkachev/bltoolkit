@@ -15,12 +15,5 @@ namespace BLToolkit.Data.Linq
 		public Expression            Body;
 		public ParameterExpression[] Parameters;
 		public MethodInfo            MethodInfo;
-
-		[Obsolete]
-		public LambdaInfo ConvertTo<T>()
-			where T : Expression
-		{
-			return new LambdaInfo((T)Body, Parameters);
-		}
 	}
 }

@@ -1,13 +1,10 @@
 using System;
-using System.Collections;
-using System.Reflection;
 using System.Reflection.Emit;
-
-using BLToolkit.Reflection.Emit;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
+	using Reflection;
+
 	class ImplementInterfaceBuilder : AbstractTypeBuilderBase
 	{
 		public ImplementInterfaceBuilder(Type type)
@@ -19,7 +16,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override Type[] GetInterfaces()
 		{
-			return new Type[] { _type };
+			return new[] { _type };
 		}
 
 		public override bool IsApplied(BuildContext context, AbstractTypeBuilderList builders)
@@ -31,49 +28,48 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected override void BuildInterfaceMethod()
 		{
-			bool returnIfNonZero = false;
-			bool returnIfZero    = false;
+			var returnIfNonZero = false;
+			var returnIfZero    = false;
 			
 			if (Context.ReturnValue != null)
 			{
-				object[] attrs = 
-					Context.MethodBuilder.OverriddenMethod.ReturnTypeCustomAttributes.GetCustomAttributes(true);
+				var attrs = Context.MethodBuilder.OverriddenMethod.ReturnTypeCustomAttributes.GetCustomAttributes(true);
 
-				foreach (object o in attrs)
+				foreach (var o in attrs)
 				{
 					if      (o is ReturnIfNonZeroAttribute) returnIfNonZero = true;
 					else if (o is ReturnIfZeroAttribute)    returnIfZero    = true;
 				}
 			}
 
-			Type       interfaceType = Context.CurrentInterface;
-			EmitHelper emit          = Context.MethodBuilder.Emitter;
+			var interfaceType = Context.CurrentInterface;
+			var emit          = Context.MethodBuilder.Emitter;
 
-			foreach (DictionaryEntry de in Context.Fields)
+			foreach (var de in Context.Fields)
 			{
-				PropertyInfo property = (PropertyInfo)de.Key;
-				FieldBuilder field    = (FieldBuilder)de.Value;
+				var property = de.Key;
+				var field    = de.Value;
 
 				if (field.FieldType.IsPrimitive || field.FieldType == typeof(string))
 					continue;
 
-				Type[] types = field.FieldType.GetInterfaces();
+				var types = field.FieldType.GetInterfaces();
 
-				foreach (Type type in types)
+				foreach (var type in types)
 				{
-					if (type != interfaceType)
+					if (type != interfaceType.Type)
 						continue;
 
-					InterfaceMapping im = field.FieldType.GetInterfaceMap(type);
+					var im = field.FieldType.GetInterfaceMap(type);
 
-					for (int j = 0; j < im.InterfaceMethods.Length; j++)
+					for (var j = 0; j < im.InterfaceMethods.Length; j++)
 					{
 						if (im.InterfaceMethods[j] == Context.MethodBuilder.OverriddenMethod)
 						{
-							MethodInfo targetMethod = im.TargetMethods[j];
+							var targetMethod = im.TargetMethods[j];
 
-							Label label     = new Label();
-							bool  checkNull = false;
+							var label     = new Label();
+							var checkNull = false;
 
 							if (CallLazyInstanceInsurer(field) == false && field.FieldType.IsClass)
 							{
@@ -119,14 +115,14 @@ namespace BLToolkit.TypeBuilder.Builders
 
 							// Check parameter attributes.
 							//
-							ParameterInfo[] pi = Context.MethodBuilder.OverriddenMethod.GetParameters();
+							var pi = Context.MethodBuilder.OverriddenMethod.GetParameters();
 
-							for (int k = 0; k < pi.Length; k++)
+							for (var k = 0; k < pi.Length; k++)
 							{
-								object[] attrs = pi[k].GetCustomAttributes(true);
-								bool     stop  = false;
+								var attrs = pi[k].GetCustomAttributes(true);
+								var stop  = false;
 
-								foreach (object a in attrs)
+								foreach (var a in attrs)
 								{
 									// Parent - set this.
 									//
@@ -151,7 +147,7 @@ namespace BLToolkit.TypeBuilder.Builders
 									//
 									if (a is PropertyInfoAttribute)
 									{
-										FieldBuilder ifb = GetPropertyInfoField(property);
+										var ifb = GetPropertyInfoField(property);
 
 										emit.ldsfld(ifb);
 										stop = true;

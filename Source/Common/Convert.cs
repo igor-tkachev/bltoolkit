@@ -3,11 +3,12 @@ using System.Data.Linq;
 using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Xml;
 
 namespace BLToolkit.Common
 {
-	using BLToolkit.Properties;
+	using Properties;
 
 	/// <summary>Converts a base data type to another base data type.</summary>
 	public class Convert
@@ -104,6 +105,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(Guid? p)           { return p.ToString(); }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>String</c> value.</summary>
@@ -136,15 +139,19 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlXml</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(SqlXml p)          { return p.IsNull?  null : p.Value; }
 
+#endif
+
 		// Other Types
 		// 
 		/// <summary>Converts the value from <c>Type</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(Type p)            { return p == null? null: p.FullName; }
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>XmlDocument</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(XmlDocument p)     { return p == null? null: p.InnerXml; }
+#endif
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>String</c> value.</summary>
-		public static String ToString(Byte[] p)          { return p == null? null: System.Text.Encoding.UTF8.GetString(p); }
-		public static String ToString(Binary p)          { return p == null? null: System.Text.Encoding.UTF8.GetString(p.ToArray()); }
+		public static String ToString(Byte[] p)          { return p == null? null: System.Text.Encoding.UTF8.GetString(p, 0, p.Length); }
+		public static String ToString(Binary p)          { return ToString(p.ToArray()); }
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>String</c> value.</summary>
 		public static String ToString(object p)
@@ -171,6 +178,8 @@ namespace BLToolkit.Common
 			if (p is Boolean)         return ToString((Boolean)p);
 			if (p is Decimal)         return ToString((Decimal)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToString((SqlString)p);
@@ -189,10 +198,14 @@ namespace BLToolkit.Common
 			if (p is SqlChars)        return ToString((SqlChars)p);
 			if (p is SqlXml)          return ToString((SqlXml)p);
 
+#endif
+
 			// Other Types
 			//
 			if (p is Type)            return ToString((Type)p);
+#if !SILVERLIGHT
 			if (p is XmlDocument)     return ToString((XmlDocument)p);
+#endif
 			if (p is Byte[])          return ToString((Byte[])p);
 			if (p is Binary)          return ToString(((Binary)p).ToArray());
 
@@ -298,6 +311,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static SByte ToSByte(Boolean? p)        { return (p.HasValue && p.Value)?   (SByte)1: (SByte)0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>SByte</c> value.</summary>
@@ -334,6 +349,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static SByte ToSByte(SqlBoolean p)      { return p.IsNull? (SByte)0:        ToSByte(p.Value); }
 
+#endif
+
 		// Other Types
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>SByte</c> value.</summary>
@@ -369,6 +386,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToSByte((Decimal)p);
 			if (p is Boolean)         return ToSByte((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToSByte((SqlString)p);
@@ -384,6 +403,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToSByte((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToSByte((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -473,6 +494,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Int16</c> value.</summary>
 		public static Int16 ToInt16(Boolean? p)        { return (p.HasValue && p.Value)?   (Int16)1: (Int16)0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlInt16</c> to an equivalent <c>Int16</c> value.</summary>
@@ -498,6 +521,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Int16</c> value.</summary>
 		public static Int16 ToInt16(SqlBoolean p)      { return p.IsNull? (Int16)0:        ToInt16(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -531,6 +556,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToInt16((Decimal)p);
 			if (p is Boolean)         return ToInt16((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlInt16)        return ToInt16((SqlInt16)p);
@@ -546,6 +573,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToInt16((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToInt16((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -635,6 +664,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Int32</c> value.</summary>
 		public static Int32 ToInt32(Boolean? p)        { return (p.HasValue && p.Value)?   1: 0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlInt32</c> to an equivalent <c>Int32</c> value.</summary>
@@ -660,6 +691,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Int32</c> value.</summary>
 		public static Int32 ToInt32(SqlBoolean p)      { return p.IsNull? 0: ToInt32(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -693,6 +726,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToInt32((Decimal)p);
 			if (p is Boolean)         return ToInt32((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlInt32)        return ToInt32((SqlInt32)p);
@@ -709,6 +744,7 @@ namespace BLToolkit.Common
 
 			if (p is SqlBoolean)      return ToInt32((SqlBoolean)p);
 
+#endif
 			// Other Types
 			//
 			if (p is Byte[])          return ToInt32((Byte[])p);
@@ -809,6 +845,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(TimeSpan? p)       { return p.HasValue? p.Value.Ticks: 0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlInt64</c> to an equivalent <c>Int64</c> value.</summary>
@@ -836,6 +874,8 @@ namespace BLToolkit.Common
 		public static Int64 ToInt64(SqlBoolean p)      { return p.IsNull? 0: ToInt64(p.Value); }
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>Int64</c> value.</summary>
 		public static Int64 ToInt64(SqlDateTime p)     { return p.IsNull? 0: ToInt64(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -872,6 +912,8 @@ namespace BLToolkit.Common
 			if (p is DateTimeOffset)  return ToInt64((DateTimeOffset)p);
 			if (p is TimeSpan)        return ToInt64((TimeSpan)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlInt64)        return ToInt64((SqlInt64)p);
@@ -887,6 +929,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToInt64((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToInt64((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -976,6 +1020,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Byte</c> value.</summary>
 		public static Byte ToByte(Boolean? p)        { return (p.HasValue && p.Value)?   (Byte)1: (Byte)0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlByte</c> to an equivalent <c>Byte</c> value.</summary>
@@ -1001,6 +1047,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Byte</c> value.</summary>
 		public static Byte ToByte(SqlBoolean p)      { return p.IsNull? (Byte)0:        ToByte(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -1034,6 +1082,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToByte((Decimal)p);
 			if (p is Boolean)         return ToByte((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlByte)         return ToByte((SqlByte)p);
@@ -1049,6 +1099,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToByte((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToByte((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -1156,6 +1208,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt16 ToUInt16(Boolean? p)        { return (p.HasValue && p.Value)?   (UInt16)1: (UInt16)0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>UInt16</c> value.</summary>
@@ -1192,6 +1246,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt16 ToUInt16(SqlBoolean p)      { return p.IsNull? (UInt16)0:        ToUInt16(p.Value); }
 
+#endif
+
 		// Other Types
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt16</c> value.</summary>
@@ -1227,6 +1283,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToUInt16((Decimal)p);
 			if (p is Boolean)         return ToUInt16((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToUInt16((SqlString)p);
@@ -1242,6 +1300,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToUInt16((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToUInt16((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -1349,6 +1409,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(Boolean? p)        { return (p.HasValue && p.Value)?   (UInt32)1: 0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>UInt32</c> value.</summary>
@@ -1385,6 +1447,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt32 ToUInt32(SqlBoolean p)      { return p.IsNull? 0:        ToUInt32(p.Value); }
 
+#endif
+
 		// Other Types
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt32</c> value.</summary>
@@ -1420,6 +1484,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToUInt32((Decimal)p);
 			if (p is Boolean)         return ToUInt32((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToUInt32((SqlString)p);
@@ -1435,6 +1501,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToUInt32((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToUInt32((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -1542,6 +1610,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(Boolean? p)        { return (p.HasValue && p.Value)?   (UInt64)1: 0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>UInt64</c> value.</summary>
@@ -1578,6 +1648,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt64 ToUInt64(SqlBoolean p)      { return p.IsNull? 0:        ToUInt64(p.Value); }
 
+#endif
+
 		// Other Types
 		// 
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>UInt64</c> value.</summary>
@@ -1613,6 +1685,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToUInt64((Decimal)p);
 			if (p is Boolean)         return ToUInt64((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToUInt64((SqlString)p);
@@ -1628,6 +1702,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToUInt64((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToUInt64((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -1646,7 +1722,7 @@ namespace BLToolkit.Common
 		// Scalar Types.
 		// 
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Char</c> value.</summary>
-		public static Char ToChar(String p)          { return p == null? (Char)0: Char.Parse(p); }
+		public static Char ToChar(String p)          { return string.IsNullOrEmpty(p)? (Char)0 : p[0]; }
 
 		/// <summary>Converts the value from <c>SByte</c> to an equivalent <c>Char</c> value.</summary>
 		[CLSCompliant(false)]
@@ -1717,6 +1793,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Char</c> value.</summary>
 		public static Char ToChar(Boolean? p)        { return (p.HasValue && p.Value)?   (Char)1: (Char)0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>Char</c> value.</summary>
@@ -1742,6 +1820,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Char</c> value.</summary>
 		public static Char ToChar(SqlBoolean p)      { return p.IsNull? (Char)0:        ToChar(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -1776,6 +1856,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToChar((Decimal)p);
 			if (p is Boolean)         return ToChar((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToChar((SqlString)p);
@@ -1791,6 +1873,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToChar((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToChar((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -1880,6 +1964,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Single</c> value.</summary>
 		public static Single ToSingle(Boolean? p)        { return (p.HasValue && p.Value)?        1.0f: 0.0f; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlSingle</c> to an equivalent <c>Single</c> value.</summary>
@@ -1905,6 +1991,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Single</c> value.</summary>
 		public static Single ToSingle(SqlBoolean p)      { return p.IsNull? 0.0f:        ToSingle(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -1938,6 +2026,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToSingle((Decimal)p);
 			if (p is Boolean)         return ToSingle((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlSingle)       return ToSingle((SqlSingle)p);
@@ -1953,6 +2043,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToSingle((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToSingle((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -2054,6 +2146,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(TimeSpan? p)       { return p.HasValue? p.Value.TotalDays: 0.0; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>Double</c> value.</summary>
@@ -2081,6 +2175,8 @@ namespace BLToolkit.Common
 		public static Double ToDouble(SqlBoolean p)      { return p.IsNull? 0.0:        ToDouble(p.Value); }
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>Double</c> value.</summary>
 		public static Double ToDouble(SqlDateTime p)     { return p.IsNull? 0.0:        ToDouble(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -2117,6 +2213,8 @@ namespace BLToolkit.Common
 			if (p is DateTimeOffset)  return ToDouble((DateTimeOffset)p);
 			if (p is TimeSpan)        return ToDouble((TimeSpan)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDouble)       return ToDouble((SqlDouble)p);
@@ -2132,6 +2230,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToDouble((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToDouble((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -2243,6 +2343,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Char?</c> to an equivalent <c>Boolean</c> value.</summary>
 		public static Boolean ToBoolean(Char? p)           { return p.HasValue? ToBoolean(p.Value): false; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Boolean</c> value.</summary>
@@ -2268,6 +2370,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlMoney</c> to an equivalent <c>Boolean</c> value.</summary>
 		public static Boolean ToBoolean(SqlMoney p)        { return p.IsNull? false: ToBoolean(p.Value); }
 
+#endif
 
 		// Other Types
 		// 
@@ -2303,6 +2406,8 @@ namespace BLToolkit.Common
 
 			if (p is Char)            return ToBoolean((Char)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlBoolean)      return ToBoolean((SqlBoolean)p);
@@ -2318,6 +2423,7 @@ namespace BLToolkit.Common
 			if (p is SqlDecimal)      return ToBoolean((SqlDecimal)p);
 			if (p is SqlMoney)        return ToBoolean((SqlMoney)p);
 
+#endif
 
 			// Other Types
 			//
@@ -2407,6 +2513,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Decimal</c> value.</summary>
 		public static Decimal ToDecimal(Boolean? p)        { return (p.HasValue && p.Value)?         1.0m: 0.0m; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlDecimal</c> to an equivalent <c>Decimal</c> value.</summary>
@@ -2432,6 +2540,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Decimal</c> value.</summary>
 		public static Decimal ToDecimal(SqlBoolean p)      { return p.IsNull? 0.0m: ToDecimal(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -2482,6 +2592,8 @@ namespace BLToolkit.Common
 
 			if (p is Boolean)         return ToDecimal((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDecimal)      return ToDecimal((SqlDecimal)p);
@@ -2497,6 +2609,8 @@ namespace BLToolkit.Common
 			if (p is SqlDouble)       return ToDecimal((SqlDouble)p);
 
 			if (p is SqlBoolean)      return ToDecimal((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -2538,6 +2652,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(Double? p)         { return p.HasValue? DateTime.MinValue + TimeSpan.FromDays(p.Value): DateTime.MinValue; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>DateTime</c> value.</summary>
@@ -2548,6 +2664,8 @@ namespace BLToolkit.Common
 		public static DateTime ToDateTime(SqlInt64 p)        { return p.IsNull? DateTime.MinValue: DateTime.MinValue +        TimeSpan.FromTicks(p.Value); }
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>DateTime</c> value.</summary>
 		public static DateTime ToDateTime(SqlDouble p)       { return p.IsNull? DateTime.MinValue: DateTime.MinValue + TimeSpan.FromDays(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -2570,12 +2688,16 @@ namespace BLToolkit.Common
 			if (p is Double)          return ToDateTime((Double)p);
 			if (p is DateTimeOffset)  return ToDateTime((DateTimeOffset)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDateTime)     return ToDateTime((SqlDateTime)p);
 			if (p is SqlString)       return ToDateTime((SqlString)p);
 			if (p is SqlInt64)        return ToDateTime((SqlInt64)p);
 			if (p is SqlDouble)       return ToDateTime((SqlDouble)p);
+
+#endif
 
 			// Other Types
 			//
@@ -2617,6 +2739,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>DateTimeOffset</c> value.</summary>
 		public static DateTimeOffset ToDateTimeOffset(Double? p)         { return p.HasValue? DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value): DateTimeOffset.MinValue; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>DateTimeOffset</c> value.</summary>
@@ -2627,6 +2751,8 @@ namespace BLToolkit.Common
 		public static DateTimeOffset ToDateTimeOffset(SqlInt64 p)        { return p.IsNull? DateTimeOffset.MinValue: DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value); }
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>DateTimeOffset</c> value.</summary>
 		public static DateTimeOffset ToDateTimeOffset(SqlDouble p)       { return p.IsNull? DateTimeOffset.MinValue: DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -2649,12 +2775,16 @@ namespace BLToolkit.Common
 			if (p is Double)          return ToDateTimeOffset((Double)p);
 			if (p is DateTime)        return ToDateTimeOffset((DateTime)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDateTime)     return ToDateTimeOffset((SqlDateTime)p);
 			if (p is SqlString)       return ToDateTimeOffset((SqlString)p);
 			if (p is SqlInt64)        return ToDateTimeOffset((SqlInt64)p);
 			if (p is SqlDouble)       return ToDateTimeOffset((SqlDouble)p);
+
+#endif
 
 			// Other Types
 			//
@@ -2696,6 +2826,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(Double? p)         { return p.HasValue? TimeSpan.FromDays(p.Value): TimeSpan.MinValue; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>TimeSpan</c> value.</summary>
@@ -2706,6 +2838,8 @@ namespace BLToolkit.Common
 		public static TimeSpan ToTimeSpan(SqlInt64 p)        { return p.IsNull? TimeSpan.MinValue: TimeSpan.FromTicks(p.Value); }
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>TimeSpan</c> value.</summary>
 		public static TimeSpan ToTimeSpan(SqlDouble p)       { return p.IsNull? TimeSpan.MinValue: TimeSpan.FromDays(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -2728,12 +2862,16 @@ namespace BLToolkit.Common
 			if (p is Int64)           return ToTimeSpan((Int64)p);
 			if (p is Double)          return ToTimeSpan((Double)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToTimeSpan((SqlString)p);
 			if (p is SqlDateTime)     return ToTimeSpan((SqlDateTime)p);
 			if (p is SqlInt64)        return ToTimeSpan((SqlInt64)p);
 			if (p is SqlDouble)       return ToTimeSpan((SqlDouble)p);
+
+#endif
 
 			// Other Types
 			//
@@ -2757,6 +2895,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Guid</c> value.</summary>
 		public static Guid ToGuid(Guid? p)           { return p.HasValue? p.Value : Guid.Empty; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlGuid</c> to an equivalent <c>Guid</c> value.</summary>
@@ -2765,6 +2905,8 @@ namespace BLToolkit.Common
 		public static Guid ToGuid(SqlString p)       { return p.IsNull? Guid.Empty: new Guid(p.Value);   }
 		/// <summary>Converts the value from <c>SqlBinary</c> to an equivalent <c>Guid</c> value.</summary>
 		public static Guid ToGuid(SqlBinary p)       { return p.IsNull? Guid.Empty: p.ToSqlGuid().Value; }
+
+#endif
 
 		// Other Types.
 		// 
@@ -2785,11 +2927,15 @@ namespace BLToolkit.Common
 			//
 			if (p is String)          return ToGuid((String)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlGuid)         return ToGuid((SqlGuid)p);
 			if (p is SqlString)       return ToGuid((SqlString)p);
 			if (p is SqlBinary)       return ToGuid((SqlBinary)p);
+
+#endif
 
 			// Other Types.
 			//
@@ -2899,6 +3045,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static SByte? ToNullableSByte(Boolean? p)        { return p.HasValue? (SByte?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>SByte?</c> value.</summary>
@@ -2934,6 +3082,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>SByte?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static SByte? ToNullableSByte(SqlBoolean p)      { return p.IsNull? null: ToNullableSByte(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -2971,6 +3121,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableSByte((Decimal)p);
 			if (p is Boolean)         return ToNullableSByte((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToNullableSByte((SqlString)p);
@@ -2986,6 +3138,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableSByte((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableSByte((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -3074,6 +3228,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Int16?</c> value.</summary>
 		public static Int16? ToNullableInt16(Boolean? p)        { return p.HasValue? (Int16?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlInt16</c> to an equivalent <c>Int16?</c> value.</summary>
@@ -3099,6 +3255,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Int16?</c> value.</summary>
 		public static Int16? ToNullableInt16(SqlBoolean p)      { return p.IsNull? null: ToNullableInt16(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -3133,6 +3291,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableInt16((Decimal)p);
 			if (p is Boolean)         return ToNullableInt16((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlInt16)        return ToNullableInt16((SqlInt16)p);
@@ -3148,6 +3308,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableInt16((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableInt16((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -3236,6 +3398,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Int32?</c> value.</summary>
 		public static Int32? ToNullableInt32(Boolean? p)        { return p.HasValue? (Int32?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlInt32</c> to an equivalent <c>Int32?</c> value.</summary>
@@ -3261,6 +3425,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Int32?</c> value.</summary>
 		public static Int32? ToNullableInt32(SqlBoolean p)      { return p.IsNull? null: ToNullableInt32(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -3295,6 +3461,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableInt32((Decimal)p);
 			if (p is Boolean)         return ToNullableInt32((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlInt32)        return ToNullableInt32((SqlInt32)p);
@@ -3310,6 +3478,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableInt32((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableInt32((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -3410,6 +3580,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(TimeSpan? p)       { return p.HasValue? (Int64?)p.Value.Ticks: null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlInt64</c> to an equivalent <c>Int64?</c> value.</summary>
@@ -3437,6 +3609,8 @@ namespace BLToolkit.Common
 		public static Int64? ToNullableInt64(SqlBoolean p)      { return p.IsNull? null: ToNullableInt64(p.Value); }
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>Int64?</c> value.</summary>
 		public static Int64? ToNullableInt64(SqlDateTime p)     { return p.IsNull? null: ToNullableInt64(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -3474,6 +3648,8 @@ namespace BLToolkit.Common
 			if (p is DateTimeOffset)  return ToNullableInt64((DateTimeOffset)p);
 			if (p is TimeSpan)        return ToNullableInt64((TimeSpan)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlInt64)        return ToNullableInt64((SqlInt64)p);
@@ -3489,6 +3665,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableInt64((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableInt64((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -3577,6 +3755,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Byte?</c> value.</summary>
 		public static Byte? ToNullableByte(Boolean? p)        { return p.HasValue? (Byte?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlByte</c> to an equivalent <c>Byte?</c> value.</summary>
@@ -3602,6 +3782,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Byte?</c> value.</summary>
 		public static Byte? ToNullableByte(SqlBoolean p)      { return p.IsNull? null: ToNullableByte(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -3636,6 +3818,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableByte((Decimal)p);
 			if (p is Boolean)         return ToNullableByte((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlByte)         return ToNullableByte((SqlByte)p);
@@ -3651,6 +3835,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableByte((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableByte((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -3757,6 +3943,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt16? ToNullableUInt16(Boolean? p)        { return p.HasValue? (UInt16?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>UInt16?</c> value.</summary>
@@ -3792,6 +3980,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>UInt16?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt16? ToNullableUInt16(SqlBoolean p)      { return p.IsNull? null: ToNullableUInt16(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -3829,6 +4019,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableUInt16((Decimal)p);
 			if (p is Boolean)         return ToNullableUInt16((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToNullableUInt16((SqlString)p);
@@ -3844,6 +4036,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableUInt16((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableUInt16((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -3950,6 +4144,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt32? ToNullableUInt32(Boolean? p)        { return p.HasValue? (UInt32?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>UInt32?</c> value.</summary>
@@ -3985,6 +4181,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>UInt32?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt32? ToNullableUInt32(SqlBoolean p)      { return p.IsNull? null: ToNullableUInt32(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -4022,6 +4220,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableUInt32((Decimal)p);
 			if (p is Boolean)         return ToNullableUInt32((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToNullableUInt32((SqlString)p);
@@ -4037,6 +4237,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableUInt32((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableUInt32((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -4143,6 +4345,8 @@ namespace BLToolkit.Common
 		[CLSCompliant(false)]
 		public static UInt64? ToNullableUInt64(Boolean? p)        { return p.HasValue? (UInt64?)(p.Value? 1: 0):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>UInt64?</c> value.</summary>
@@ -4178,6 +4382,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>UInt64?</c> value.</summary>
 		[CLSCompliant(false)]
 		public static UInt64? ToNullableUInt64(SqlBoolean p)      { return p.IsNull? null: ToNullableUInt64(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -4215,6 +4421,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableUInt64((Decimal)p);
 			if (p is Boolean)         return ToNullableUInt64((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToNullableUInt64((SqlString)p);
@@ -4230,6 +4438,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableUInt64((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableUInt64((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -4250,7 +4460,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Char</c> to an equivalent <c>Char?</c> value.</summary>
 		public static Char? ToNullableChar(Char p)            { return p; }
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Char?</c> value.</summary>
-		public static Char? ToNullableChar(String p)          { return p == null? null: (Char?)Char.Parse(p); }
+		public static Char? ToNullableChar(String p)          { return string.IsNullOrEmpty(p)? null: (Char?)p[0]; }
 
 		/// <summary>Converts the value from <c>SByte</c> to an equivalent <c>Char?</c> value.</summary>
 		[CLSCompliant(false)]
@@ -4318,6 +4528,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Char?</c> value.</summary>
 		public static Char? ToNullableChar(Boolean? p)        { return p.HasValue? (Char?)(p.Value? 1: 0)  : null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>Char?</c> value.</summary>
@@ -4343,6 +4555,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Char?</c> value.</summary>
 		public static Char? ToNullableChar(SqlBoolean p)      { return p.IsNull? null: ToNullableChar(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -4378,6 +4592,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableChar((Decimal)p);
 			if (p is Boolean)         return ToNullableChar((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToNullableChar((SqlString)p);
@@ -4393,6 +4609,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableChar((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableChar((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -4481,6 +4699,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Single?</c> value.</summary>
 		public static Single? ToNullableSingle(Boolean? p)        { return p.HasValue? (Single?)(p.Value? 1.0f: 0.0f):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlSingle</c> to an equivalent <c>Single?</c> value.</summary>
@@ -4506,6 +4726,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Single?</c> value.</summary>
 		public static Single? ToNullableSingle(SqlBoolean p)      { return p.IsNull? null: ToNullableSingle(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -4540,6 +4762,8 @@ namespace BLToolkit.Common
 			if (p is Decimal)         return ToNullableSingle((Decimal)p);
 			if (p is Boolean)         return ToNullableSingle((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlSingle)       return ToNullableSingle((SqlSingle)p);
@@ -4555,6 +4779,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToNullableSingle((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToNullableSingle((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -4655,8 +4881,10 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>TimeSpan?</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(TimeSpan? p)       { return p.HasValue? (Double?)p.Value.TotalDays: null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
-		// 
+		//
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(SqlDouble p)       { return p.IsNull? null:         (Double?)p.Value;  }
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>Double?</c> value.</summary>
@@ -4682,6 +4910,8 @@ namespace BLToolkit.Common
 		public static Double? ToNullableDouble(SqlBoolean p)      { return p.IsNull? null: ToNullableDouble(p.Value); }
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>Double?</c> value.</summary>
 		public static Double? ToNullableDouble(SqlDateTime p)     { return p.IsNull? null: (Double?)(p.Value - DateTime.MinValue).TotalDays; }
+
+#endif
 
 		// Other Types
 		// 
@@ -4719,6 +4949,8 @@ namespace BLToolkit.Common
 			if (p is DateTimeOffset)  return ToNullableDouble((DateTimeOffset)p);
 			if (p is TimeSpan)        return ToNullableDouble((TimeSpan)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDouble)       return ToNullableDouble((SqlDouble)p);
@@ -4735,6 +4967,8 @@ namespace BLToolkit.Common
 
 			if (p is SqlBoolean)      return ToNullableDouble((SqlBoolean)p);
 			if (p is SqlDateTime)     return ToNullableDouble((SqlDateTime)p);
+
+#endif
 
 			// Other Types
 			//
@@ -4823,6 +5057,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Char?</c> to an equivalent <c>Boolean?</c> value.</summary>
 		public static Boolean? ToNullableBoolean(Char? p)           { return p.HasValue? (Boolean?)ToBoolean(p.Value): null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Boolean?</c> value.</summary>
@@ -4848,6 +5084,7 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlMoney</c> to an equivalent <c>Boolean?</c> value.</summary>
 		public static Boolean? ToNullableBoolean(SqlMoney p)        { return p.IsNull? null: (Boolean?)ToBoolean(p.Value); }
 
+#endif
 
 		// Other Types
 		// 
@@ -4882,6 +5119,8 @@ namespace BLToolkit.Common
 
 			if (p is Decimal)         return ToNullableBoolean((Decimal)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlBoolean)      return ToNullableBoolean((SqlBoolean)p);
@@ -4897,6 +5136,7 @@ namespace BLToolkit.Common
 			if (p is SqlDecimal)      return ToNullableBoolean((SqlDecimal)p);
 			if (p is SqlMoney)        return ToNullableBoolean((SqlMoney)p);
 
+#endif
 
 			// Other Types
 			//
@@ -4985,8 +5225,10 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Boolean?</c> to an equivalent <c>Decimal?</c> value.</summary>
 		public static Decimal? ToNullableDecimal(Boolean? p)        { return p.HasValue? (Decimal?)(p.Value? 1.0m: 0.0m):  null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
-		// 
+		//
 		/// <summary>Converts the value from <c>SqlDecimal</c> to an equivalent <c>Decimal?</c> value.</summary>
 		public static Decimal? ToNullableDecimal(SqlDecimal p)      { return p.IsNull? null:         (Decimal?)p.Value;  }
 		/// <summary>Converts the value from <c>SqlMoney</c> to an equivalent <c>Decimal?</c> value.</summary>
@@ -5010,6 +5252,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Decimal?</c> value.</summary>
 		public static Decimal? ToNullableDecimal(SqlBoolean p)      { return p.IsNull? null: ToNullableDecimal(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -5044,6 +5288,8 @@ namespace BLToolkit.Common
 
 			if (p is Boolean)         return ToNullableDecimal((Boolean)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDecimal)      return ToNullableDecimal((SqlDecimal)p);
@@ -5059,6 +5305,8 @@ namespace BLToolkit.Common
 			if (p is SqlDouble)       return ToNullableDecimal((SqlDouble)p);
 
 			if (p is SqlBoolean)      return ToNullableDecimal((SqlBoolean)p);
+
+#endif
 
 			// Other Types
 			//
@@ -5101,8 +5349,10 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(DateTimeOffset? p) { return p.HasValue? p.Value.LocalDateTime: (DateTime?)null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
-		// 
+		//
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(SqlDateTime p)     { return p.IsNull? (DateTime?)null:                                               p.Value;  }
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>DateTime?</c> value.</summary>
@@ -5111,6 +5361,8 @@ namespace BLToolkit.Common
 		public static DateTime? ToNullableDateTime(SqlInt64 p)        { return p.IsNull? (DateTime?)null: DateTime.MinValue +        TimeSpan.FromTicks(p.Value); }
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>DateTime?</c> value.</summary>
 		public static DateTime? ToNullableDateTime(SqlDouble p)       { return p.IsNull? (DateTime?)null: DateTime.MinValue + TimeSpan.FromDays(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -5135,12 +5387,16 @@ namespace BLToolkit.Common
 			if (p is Int64)           return ToNullableDateTime((Int64)p);
 			if (p is Double)          return ToNullableDateTime((Double)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDateTime)     return ToNullableDateTime((SqlDateTime)p);
 			if (p is SqlString)       return ToNullableDateTime((SqlString)p);
 			if (p is SqlInt64)        return ToNullableDateTime((SqlInt64)p);
 			if (p is SqlDouble)       return ToNullableDateTime((SqlDouble)p);
+
+#endif
 
 			// Other Types
 			//
@@ -5183,6 +5439,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>DateTimeOffset?</c> value.</summary>
 		public static DateTimeOffset? ToNullableDateTimeOffset(DateTime? p)       { return p.HasValue? p: null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlDateTime</c> to an equivalent <c>DateTimeOffset?</c> value.</summary>
@@ -5193,6 +5451,8 @@ namespace BLToolkit.Common
 		public static DateTimeOffset? ToNullableDateTimeOffset(SqlInt64 p)        { return p.IsNull? (DateTimeOffset?)null: DateTimeOffset.MinValue +        TimeSpan.FromTicks(p.Value); }
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>DateTimeOffset?</c> value.</summary>
 		public static DateTimeOffset? ToNullableDateTimeOffset(SqlDouble p)       { return p.IsNull? (DateTimeOffset?)null: DateTimeOffset.MinValue + TimeSpan.FromDays(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -5217,12 +5477,16 @@ namespace BLToolkit.Common
 			if (p is Int64)           return ToNullableDateTimeOffset((Int64)p);
 			if (p is Double)          return ToNullableDateTimeOffset((Double)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlDateTime)     return ToNullableDateTimeOffset((SqlDateTime)p);
 			if (p is SqlString)       return ToNullableDateTimeOffset((SqlString)p);
 			if (p is SqlInt64)        return ToNullableDateTimeOffset((SqlInt64)p);
 			if (p is SqlDouble)       return ToNullableDateTimeOffset((SqlDouble)p);
+
+#endif
 
 			// Other Types
 			//
@@ -5264,6 +5528,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(Double? p)         { return p.HasValue? TimeSpan.FromDays(p.Value): (TimeSpan?)null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>TimeSpan?</c> value.</summary>
@@ -5274,6 +5540,8 @@ namespace BLToolkit.Common
 		public static TimeSpan? ToNullableTimeSpan(SqlInt64 p)        { return p.IsNull? (TimeSpan?)null: TimeSpan.FromTicks(p.Value); }
 		/// <summary>Converts the value from <c>SqlDouble</c> to an equivalent <c>TimeSpan?</c> value.</summary>
 		public static TimeSpan? ToNullableTimeSpan(SqlDouble p)       { return p.IsNull? (TimeSpan?)null: TimeSpan.FromDays(p.Value); }
+
+#endif
 
 		// Other Types
 		// 
@@ -5297,12 +5565,16 @@ namespace BLToolkit.Common
 			if (p is Int64)           return ToNullableTimeSpan((Int64)p);
 			if (p is Double)          return ToNullableTimeSpan((Double)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToNullableTimeSpan((SqlString)p);
 			if (p is SqlDateTime)     return ToNullableTimeSpan((SqlDateTime)p);
 			if (p is SqlInt64)        return ToNullableTimeSpan((SqlInt64)p);
 			if (p is SqlDouble)       return ToNullableTimeSpan((SqlDouble)p);
+
+#endif
 
 			// Other Types
 			//
@@ -5323,6 +5595,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Guid?</c> value.</summary>
 		public static Guid? ToNullableGuid(String p)          { return p == null? null: (Guid?)new Guid(p); }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlGuid</c> to an equivalent <c>Guid?</c> value.</summary>
@@ -5331,6 +5605,8 @@ namespace BLToolkit.Common
 		public static Guid? ToNullableGuid(SqlString p)       { return p.IsNull? null: (Guid?)new Guid(p.Value);   }
 		/// <summary>Converts the value from <c>SqlBinary</c> to an equivalent <c>Guid?</c> value.</summary>
 		public static Guid? ToNullableGuid(SqlBinary p)       { return p.IsNull? null: (Guid?)p.ToSqlGuid().Value; }
+
+#endif
 
 		// Other Types.
 		// 
@@ -5352,11 +5628,15 @@ namespace BLToolkit.Common
 			if (p is Guid)            return ToNullableGuid((Guid)p);
 			if (p is String)          return ToNullableGuid((String)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlGuid)         return ToNullableGuid((SqlGuid)p);
 			if (p is SqlString)       return ToNullableGuid((SqlString)p);
 			if (p is SqlBinary)       return ToNullableGuid((SqlBinary)p);
+
+#endif
 
 			// Other Types.
 			//
@@ -5372,6 +5652,8 @@ namespace BLToolkit.Common
 		#endregion
 
 		#region SqlTypes
+
+#if !SILVERLIGHT
 
 		#region SqlString
 
@@ -7500,6 +7782,8 @@ namespace BLToolkit.Common
 
 		#endregion
 
+#endif
+
 		#endregion
 
 		#region Other Types
@@ -7512,6 +7796,9 @@ namespace BLToolkit.Common
 		public static Type ToType(String p)          { return p == null?       null: Type.GetType(p);                   }
 		/// <summary>Converts the value from <c>Char[]</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Char[] p)          { return p == null?       null: Type.GetType(new string(p));       }
+
+#if !SILVERLIGHT
+
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Byte[] p)          { return p == null?       null: Type.GetTypeFromCLSID(ToGuid(p));  }
 		public static Type ToType(Binary p)          { return p == null?       null: Type.GetTypeFromCLSID(ToGuid(p.ToArray()));  }
@@ -7532,6 +7819,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlGuid</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(SqlGuid p)         { return p.IsNull       ? null: Type.GetTypeFromCLSID(p.Value);    }
 
+#endif
+
 		/// <summary>Converts the value of a specified object to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(object p)
 		{
@@ -7547,11 +7836,15 @@ namespace BLToolkit.Common
 			if (p is Binary)          return ToType(((Binary)p).ToArray());
 			if (p is Guid)            return ToType((Guid)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToType((SqlString)p);
 			if (p is SqlChars)        return ToType((SqlChars)p);
 			if (p is SqlGuid)         return ToType((SqlGuid)p);
+
+#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(Type));
 		}
@@ -7573,6 +7866,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Stream</c> value.</summary>
 		public static Stream ToStream(Guid? p)           { return p.HasValue? new MemoryStream(p.Value.ToByteArray()): Stream.Null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlBytes</c> to an equivalent <c>Stream</c> value.</summary>
@@ -7581,6 +7876,8 @@ namespace BLToolkit.Common
 		public static Stream ToStream(SqlBinary p)       { return p.IsNull? Stream.Null: new MemoryStream(p.Value); }
 		/// <summary>Converts the value from <c>SqlGuid</c> to an equivalent <c>Stream</c> value.</summary>
 		public static Stream ToStream(SqlGuid p)         { return p.IsNull? Stream.Null: new MemoryStream(p.Value.ToByteArray()); }
+
+#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Stream</c> value.</summary>
 		public static Stream ToStream(object p)         
@@ -7595,11 +7892,15 @@ namespace BLToolkit.Common
 			if (p is Byte[])          return ToStream((Byte[])p);
 			if (p is Binary)          return ToStream(((Binary)p).ToArray());
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlBytes)        return ToStream((SqlBytes)p);
 			if (p is SqlBinary)       return ToStream((SqlBinary)p);
 			if (p is SqlGuid)         return ToStream((SqlGuid)p);
+
+#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(Stream));
 		}
@@ -7652,10 +7953,12 @@ namespace BLToolkit.Common
 		public static Byte[] ToByteArray(Boolean p)         { return BitConverter.GetBytes(p); }
 		/// <summary>Converts the value from <c>Char</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Char p)            { return BitConverter.GetBytes(p); }
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTime p)        { return ToByteArray(p.ToBinary()); }
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTimeOffset p)  { return ToByteArray(p.LocalDateTime.ToBinary()); }
+#endif
 		public static Byte[] ToByteArray(Binary         p)  { return p.ToArray(); }
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(TimeSpan p)        { return ToByteArray(p.Ticks); }
@@ -7727,6 +8030,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Guid? p)           { return p.HasValue? ToByteArray(p.Value): null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlBinary</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -7758,6 +8063,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(SqlBoolean p)      { return p.IsNull? null: ToByteArray(p.Value); }
+
+#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(object p)
@@ -7792,6 +8099,8 @@ namespace BLToolkit.Common
 			if (p is Char[])          return ToByteArray((Char[])p);
 			if (p is Guid)            return ToByteArray((Guid)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlBinary)       return ToByteArray((SqlBinary)p);
@@ -7810,6 +8119,8 @@ namespace BLToolkit.Common
 			if (p is SqlMoney)        return ToByteArray((SqlMoney)p);
 
 			if (p is SqlBoolean)      return ToByteArray((SqlBoolean)p);
+
+#endif
 
 			throw CreateInvalidCastException(p.GetType(), typeof(Byte[]));
 		}
@@ -7862,10 +8173,12 @@ namespace BLToolkit.Common
 		public static Binary ToLinqBinary(Boolean p)         { return new Binary(BitConverter.GetBytes(p)); }
 		/// <summary>Converts the value from <c>Char</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(Char p)            { return new Binary(BitConverter.GetBytes(p)); }
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(DateTime p)        { return new Binary(ToByteArray(p.ToBinary())); }
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(DateTimeOffset p)  { return new Binary(ToByteArray(p.LocalDateTime.ToBinary())); }
+#endif
 		public static Binary ToLinqBinary(Byte[]         p)  { return new Binary(p); }
 		/// <summary>Converts the value from <c>TimeSpan</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(TimeSpan p)        { return new Binary(ToByteArray(p.Ticks)); }
@@ -7937,6 +8250,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(Guid? p)           { return p.HasValue? new Binary(ToByteArray(p.Value)): null; }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlBinary</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -7968,6 +8283,8 @@ namespace BLToolkit.Common
 
 		/// <summary>Converts the value from <c>SqlBoolean</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(SqlBoolean p)      { return p.IsNull? null: new Binary(ToByteArray(p.Value)); }
+
+#endif
 
 		/// <summary>Converts the value of a specified object to an equivalent <c>Byte[]</c> value.</summary>
 		public static Binary ToLinqBinary(object p)
@@ -8002,6 +8319,8 @@ namespace BLToolkit.Common
 			if (p is Char[])          return ToLinqBinary((Char[])p);
 			if (p is Guid)            return ToLinqBinary((Guid)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlBinary)       return ToLinqBinary((SqlBinary)p);
@@ -8021,6 +8340,8 @@ namespace BLToolkit.Common
 
 			if (p is SqlBoolean)      return ToLinqBinary((SqlBoolean)p);
 
+#endif
+
 			throw CreateInvalidCastException(p.GetType(), typeof(Byte[]));
 		}
 
@@ -8033,6 +8354,8 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Char[]</c> value.</summary>
 		public static Char[] ToCharArray(String p)          { return p == null? null: p.ToCharArray(); }
 
+#if !SILVERLIGHT
+
 		// SqlTypes
 		// 
 		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>Char[]</c> value.</summary>
@@ -8040,12 +8363,14 @@ namespace BLToolkit.Common
 		/// <summary>Converts the value from <c>SqlChars</c> to an equivalent <c>Char[]</c> value.</summary>
 		public static Char[] ToCharArray(SqlChars p)        { return p.IsNull? null: p.Value; }
 
+#endif
+
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Char[]</c> value.</summary>
 		public static Char[] ToCharArray(Byte[] p)
 		{
 			if (p == null) return null;
 
-			Char[] chars = new Char[p.Length / sizeof(Char)];
+			var chars = new Char[p.Length / sizeof(Char)];
 
 			Buffer.BlockCopy(p, 0, chars, 0, p.Length);
 			return chars;
@@ -8055,7 +8380,7 @@ namespace BLToolkit.Common
 		{
 			if (p == null) return null;
 
-			Char[] chars = new Char[p.Length / sizeof(Char)];
+			var chars = new Char[p.Length / sizeof(Char)];
 
 			Buffer.BlockCopy(p.ToArray(), 0, chars, 0, p.Length);
 			return chars;
@@ -8072,10 +8397,14 @@ namespace BLToolkit.Common
 			//
 			if (p is String)          return ToCharArray((String)p);
 
+#if !SILVERLIGHT
+
 			// SqlTypes
 			//
 			if (p is SqlString)       return ToCharArray((SqlString)p);
 			if (p is SqlChars)        return ToCharArray((SqlChars)p);
+
+#endif
 			if (p is Byte[])          return ToCharArray((Byte[])p);
 			if (p is Binary)          return ToCharArray(((Binary)p).ToArray());
 
@@ -8085,6 +8414,8 @@ namespace BLToolkit.Common
 		#endregion
 
 		#region XmlReader
+
+#if !SILVERLIGHT
 
 		// Scalar Types.
 		// 
@@ -8146,9 +8477,13 @@ namespace BLToolkit.Common
 			throw CreateInvalidCastException(p.GetType(), typeof(XmlReader));
 		}
 
+#endif
+
 		#endregion
 
 		#region XmlDocument
+
+#if !SILVERLIGHT
 
 		// Scalar Types.
 		// 
@@ -8238,6 +8573,8 @@ namespace BLToolkit.Common
 			throw CreateInvalidCastException(p.GetType(), typeof(XmlDocument));
 		}
 
+#endif
+
 		#endregion
 
 		#endregion
@@ -8262,7 +8599,7 @@ namespace BLToolkit.Common
 			}
 
 			if (underlyingType.IsEnum)
-				return Enum.Parse(type, str);
+				return Enum.Parse(type, str, false);
 
 			if (isNullable)
 			{
@@ -8326,6 +8663,8 @@ namespace BLToolkit.Common
 			if (type == typeof(DateTimeOffset)) return ToDateTimeOffset(str);
 			if (type == typeof(TimeSpan))       return ToTimeSpan      (str);
 
+#if !SILVERLIGHT
+
 			if (type == typeof(SqlByte))        return ToSqlByte    (str);
 			if (type == typeof(SqlInt16))       return ToSqlInt16   (str);
 			if (type == typeof(SqlInt32))       return ToSqlInt32   (str);
@@ -8339,7 +8678,9 @@ namespace BLToolkit.Common
 			if (type == typeof(SqlString))      return ToSqlString  (str);
 			if (type == typeof(SqlGuid))        return ToSqlGuid    (str);
 
-			return System.Convert.ChangeType(str, type);
+#endif
+
+			return System.Convert.ChangeType(str, type, Thread.CurrentThread.CurrentCulture);
 		}
 
 

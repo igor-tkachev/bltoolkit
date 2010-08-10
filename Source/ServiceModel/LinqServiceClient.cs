@@ -52,7 +52,7 @@ namespace BLToolkit.ServiceModel
 			try
 			{
 				if (State != CommunicationState.Faulted)
-					Close();
+					((ICommunicationObject)this).Close();
 				else
 					Abort();
 			}

@@ -34,10 +34,14 @@ namespace BLToolkit.ServiceModel
 			get { return 0; }
 		}
 
+#if !SILVERLIGHT
+
 		public DataTable GetSchemaTable()
 		{
 			throw new NotImplementedException();
 		}
+
+#endif
 
 		public bool IsClosed
 		{
@@ -102,7 +106,7 @@ namespace BLToolkit.ServiceModel
 
 		public char GetChar(int i)
 		{
-			return char.Parse(_data[i]);
+			return _data[i][0];
 		}
 
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)

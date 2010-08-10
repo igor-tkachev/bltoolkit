@@ -11,7 +11,9 @@ using System.Reflection;
 
 using BLToolkit.Common;
 using BLToolkit.ComponentModel;
+#if !SILVERLIGHT
 using BLToolkit.EditableObjects;
+#endif
 using BLToolkit.Mapping;
 using BLToolkit.TypeBuilder;
 using BLToolkit.TypeBuilder.Builders;
@@ -24,7 +26,10 @@ namespace BLToolkit.Reflection
 	public delegate bool   IsNullHandler    (object obj);
 
 	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
-	public abstract class TypeAccessor : ICollection, ITypeDescriptionProvider, IEnumerable<MemberAccessor>
+	public abstract class TypeAccessor : ICollection<MemberAccessor>
+#if !SILVERLIGHT
+		, ITypeDescriptionProvider
+#endif
 	{
 		#region Protected Emit Helpers
 
@@ -105,6 +110,7 @@ namespace BLToolkit.Reflection
 
 		internal static object CopyInternal(object source, object dest, TypeAccessor ta)
 		{
+#if !SILVERLIGHT
 			var isDirty        = false;
 			var sourceEditable = source as IMemberwiseEditable;
 			var destEditable   = dest   as IMemberwiseEditable;
@@ -119,6 +125,7 @@ namespace BLToolkit.Reflection
 				}
 			}
 			else
+#endif
 			{
 				foreach (MemberAccessor ma in ta)
 					ma.CloneValue(source, dest);
@@ -207,25 +214,28 @@ namespace BLToolkit.Reflection
 
 		#region Items
 
-		private readonly ArrayList _members     = new ArrayList();
-		private readonly Hashtable _memberNames = new Hashtable();
+		private readonly List<MemberAccessor>              _members     = new List<MemberAccessor>();
+		private readonly Dictionary<string,MemberAccessor> _memberNames = new Dictionary<string,MemberAccessor>();
 
 		public MemberAccessor this[string memberName]
 		{
-			get { return (MemberAccessor)_memberNames[memberName]; }
+			get
+			{
+				MemberAccessor ma;
+				return _memberNames.TryGetValue(memberName, out ma) ? ma : null;
+			}
 		}
 
 		public MemberAccessor this[int index]
 		{
-			get { return (MemberAccessor)_members[index]; }
+			get { return _members[index]; }
 		}
 
 		public MemberAccessor this[NameOrIndexParameter nameOrIndex]
 		{
 			get
 			{
-				return (MemberAccessor)
-					(nameOrIndex.ByName ? _memberNames[nameOrIndex.Name] : _members[nameOrIndex.Index]);
+				return nameOrIndex.ByName ? _memberNames[nameOrIndex.Name] : _members[nameOrIndex.Index];
 			}
 		}
 
@@ -240,41 +250,35 @@ namespace BLToolkit.Reflection
 			set { TypeFactory.LoadTypes = value; }
 		}
 
-		private static readonly Hashtable _accessors  = new Hashtable(10);
+		private static readonly Dictionary<Type,TypeAccessor> _accessors = new Dictionary<Type,TypeAccessor>(10);
 
 		public static TypeAccessor GetAccessor(Type originalType)
 		{
 			if (originalType == null) throw new ArgumentNullException("originalType");
 
-			var accessor = (TypeAccessor)_accessors[originalType];
-
-			if (accessor == null)
+			lock (_accessors)
 			{
-				lock (_accessors.SyncRoot)
-				{
-					accessor = (TypeAccessor)_accessors[originalType];
+				TypeAccessor accessor;
 
-					if (accessor == null)
-					{
-						if (IsAssociatedType(originalType))
-							return (TypeAccessor)_accessors[originalType];
+				if (_accessors.TryGetValue(originalType, out accessor))
+					return accessor;
 
-						var instanceType = (IsClassBulderNeeded(originalType)? null: originalType) ?? TypeFactory.GetType(originalType);
+				if (IsAssociatedType(originalType))
+					return _accessors[originalType];
 
-						var accessorType = TypeFactory.GetType(originalType,
-							originalType, new TypeAccessorBuilder(instanceType, originalType));
+				var instanceType = (IsClassBulderNeeded(originalType) ? null : originalType) ?? TypeFactory.GetType(originalType);
 
-						accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
+				var accessorType = TypeFactory.GetType(originalType, originalType, new TypeAccessorBuilder(instanceType, originalType));
 
-						_accessors[originalType] = accessor;
+				accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
 
-						if (originalType != instanceType)
-							_accessors[instanceType] = accessor;
-					}
-				}
+				_accessors.Add(originalType, accessor);
+
+				if (originalType != instanceType)
+					_accessors.Add(instanceType, accessor);
+
+				return accessor;
 			}
-
-			return accessor;
 		}
 
 		public static TypeAccessor GetAccessor([JNotNull] object obj)
@@ -317,9 +321,9 @@ namespace BLToolkit.Reflection
 			if (!type.IsInterface)
 				return true;
 
-			lock (_accessors.SyncRoot)
+			lock (_accessors)
 			{
-				if (_accessors[type] != null)
+				if (_accessors.ContainsKey(type))
 					return true;
 
 				if (IsAssociatedType(type))
@@ -398,8 +402,8 @@ namespace BLToolkit.Reflection
 
 			accessor = (TypeAccessor)Activator.CreateInstance(accessor.GetType());
 
-			lock (_accessors.SyncRoot)
-				_accessors[parent] = accessor;
+			lock (_accessors)
+				_accessors.Add(parent, accessor);
 
 			return accessor;
 		}
@@ -449,6 +453,8 @@ namespace BLToolkit.Reflection
 					if (type == typeof(Decimal))        return Common.Configuration.NullableValues.Decimal;
 					if (type == typeof(Guid))           return Common.Configuration.NullableValues.Guid;
 
+#if !SILVERLIGHT
+
 					if (type == typeof(SqlInt32))       return SqlInt32.   Null;
 					if (type == typeof(SqlString))      return SqlString.  Null;
 					if (type == typeof(SqlBoolean))     return SqlBoolean. Null;
@@ -462,6 +468,8 @@ namespace BLToolkit.Reflection
 					if (type == typeof(SqlMoney))       return SqlMoney.   Null;
 					if (type == typeof(SqlSingle))      return SqlSingle.  Null;
 					if (type == typeof(SqlBinary))      return SqlBinary.  Null;
+
+#endif
 				}
 			}
 			else
@@ -469,7 +477,9 @@ namespace BLToolkit.Reflection
 				if (type == typeof(String)) return Common.Configuration.NullableValues.String;
 				if (type == typeof(DBNull)) return DBNull.Value;
 				if (type == typeof(Stream)) return Stream.Null;
+#if !SILVERLIGHT
 				if (type == typeof(SqlXml)) return SqlXml.Null;
+#endif
 			}
 
 			return null;
@@ -477,14 +487,15 @@ namespace BLToolkit.Reflection
 
 		const FieldAttributes EnumField = FieldAttributes.Public | FieldAttributes.Static | FieldAttributes.Literal;
 
-		private static readonly Hashtable _nullValues = new Hashtable();
+		static readonly Dictionary<Type,object> _nullValues = new Dictionary<Type,object>();
 
-		private static object GetEnumNullValue(Type type)
+		static object GetEnumNullValue(Type type)
 		{
-			var nullValue = _nullValues[type];
+			object nullValue;
 
-			if (nullValue != null || _nullValues.Contains(type))
-				return nullValue;
+			lock (_nullValues)
+				if (_nullValues.TryGetValue(type, out nullValue))
+					return nullValue;
 
 			var fields = type.GetFields();
 
@@ -496,13 +507,15 @@ namespace BLToolkit.Reflection
 
 					if (attrs.Length > 0)
 					{
-						nullValue = Enum.Parse(type, fi.Name);
+						nullValue = Enum.Parse(type, fi.Name, false);
 						break;
 					}
 				}
 			}
 
-			_nullValues[type] = nullValue;
+			lock (_nullValues)
+				if (!_nullValues.ContainsKey(type))
+					_nullValues.Add(type, nullValue);
 
 			return nullValue;
 		}
@@ -528,9 +541,29 @@ namespace BLToolkit.Reflection
 
 		#region ICollection Members
 
-		public void CopyTo(Array array, int index)
+		void ICollection<MemberAccessor>.Add(MemberAccessor item)
 		{
-			_members.CopyTo(array, index);
+			_members.Add(item);
+		}
+
+		void ICollection<MemberAccessor>.Clear()
+		{
+			_members.Clear();
+		}
+
+		bool ICollection<MemberAccessor>.Contains(MemberAccessor item)
+		{
+			return _members.Contains(item);
+		}
+
+		void ICollection<MemberAccessor>.CopyTo(MemberAccessor[] array, int arrayIndex)
+		{
+			_members.CopyTo(array, arrayIndex);
+		}
+
+		bool ICollection<MemberAccessor>.Remove(MemberAccessor item)
+		{
+			return _members.Remove(item);
 		}
 
 		public int Count
@@ -538,14 +571,9 @@ namespace BLToolkit.Reflection
 			get { return _members.Count; }
 		}
 
-		public bool IsSynchronized
+		bool ICollection<MemberAccessor>.IsReadOnly
 		{
-			get { return _members.IsSynchronized; }
-		}
-
-		public object SyncRoot
-		{
-			get { return _members.SyncRoot; }
+			get { return ((ICollection<MemberAccessor>)_members).IsReadOnly; }
 		}
 
 		public int IndexOf(MemberAccessor ma)
@@ -560,6 +588,16 @@ namespace BLToolkit.Reflection
 		public IEnumerator GetEnumerator()
 		{
 			return _members.GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerable<MemberAccessor> Members
+
+		IEnumerator<MemberAccessor> IEnumerable<MemberAccessor>.GetEnumerator()
+		{
+			foreach (MemberAccessor member in _members)
+				yield return member;
 		}
 
 		#endregion
@@ -647,12 +685,12 @@ namespace BLToolkit.Reflection
 			var nameLen = 0;
 			var typeLen = 0;
 
-			foreach (DictionaryEntry de in ta._memberNames)
+			foreach (var de in ta._memberNames)
 			{
-				if (nameLen < de.Key.ToString().Length)
-					nameLen = de.Key.ToString().Length;
+				if (nameLen < de.Key.Length)
+					nameLen = de.Key.Length;
 
-				ma = (MemberAccessor)de.Value;
+				ma = de.Value;
 
 				if (typeLen < MapTypeName(ma.Type).Length)
 					typeLen = MapTypeName(ma.Type).Length;
@@ -664,9 +702,9 @@ namespace BLToolkit.Reflection
 
 			var format = string.Format("{{0,-{0}}} {{1,-{1}}} : {{2}}", typeLen, nameLen);
 
-			foreach (DictionaryEntry de in ta._memberNames)
+			foreach (var de in ta._memberNames)
 			{
-				ma = (MemberAccessor)de.Value;
+				ma = de.Value;
 
 				var value = ma.GetValue(o);
 
@@ -684,6 +722,10 @@ namespace BLToolkit.Reflection
 		}
 
 		#endregion
+
+		#region TypeDescriptor
+
+#if !SILVERLIGHT
 
 		#region CustomTypeDescriptor
 
@@ -1097,13 +1139,7 @@ namespace BLToolkit.Reflection
 
 		#endregion
 
-		#region IEnumerable<MemberAccessor> Members
-
-		IEnumerator<MemberAccessor> IEnumerable<MemberAccessor>.GetEnumerator()
-		{
-			foreach (MemberAccessor member in _members)
-				yield return member;
-		}
+#endif
 
 		#endregion
 	}

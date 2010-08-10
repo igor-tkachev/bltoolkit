@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Xml;
+using System.Threading;
+using System.Xml.Linq;
 
 namespace BLToolkit.Reflection.Extension
 {
@@ -39,9 +41,8 @@ namespace BLToolkit.Reflection.Extension
 		#region Public Instance Members
 
 		public TypeExtension()
+			: this(new MemberExtensionCollection(), new AttributeNameCollection())
 		{
-			_members    = new MemberExtensionCollection();
-			_attributes = new AttributeNameCollection();
 		}
 
 		private TypeExtension(
@@ -52,12 +53,7 @@ namespace BLToolkit.Reflection.Extension
 			_attributes = attributes;
 		}
 
-		private string _name;
-		public  string  Name
-		{
-			get { return _name;  }
-			set { _name = value; }
-		}
+		public string Name { get; set; }
 
 		public MemberExtension this[string memberName]
 		{
@@ -98,7 +94,7 @@ namespace BLToolkit.Reflection.Extension
 				if (value is bool)
 					return (bool)value;
 
-				string s = value as string;
+				var s = value as string;
 
 				if (s != null)
 				{
@@ -131,10 +127,10 @@ namespace BLToolkit.Reflection.Extension
 			if (type.IsEnum)
 			{
 				if (value is string)
-					return Enum.Parse(type, value.ToString());
+					return Enum.Parse(type, value.ToString(), false);
 			}
 
-			return Convert.ChangeType(value, type);
+			return Convert.ChangeType(value, type, Thread.CurrentThread.CurrentCulture);
 		}
 
 		#endregion
@@ -156,29 +152,28 @@ namespace BLToolkit.Reflection.Extension
 				{
 					streamReader = File.OpenText(xmlFile);
 				}
+#if !SILVERLIGHT
 				else
 				{
-					string combinePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, xmlFile);
+					var combinePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, xmlFile);
 
 					if (File.Exists(combinePath))
 						streamReader = File.OpenText(combinePath);
 				}
+#endif
 
-				bool embedded = streamReader == null;
-				
-				Stream stream = embedded?
-					assembly.GetManifestResourceStream(xmlFile):
-					streamReader.BaseStream;
+				var embedded = streamReader == null;
+				var stream   = embedded ? assembly.GetManifestResourceStream(xmlFile) : streamReader.BaseStream;
 
 				if (embedded && stream == null)
 				{
-					string[] names = assembly.GetManifestResourceNames();
+					var names = assembly.GetManifestResourceNames();
 
 					// Prepend file anme with a dot to avoid partial name matching.
 					//
 					xmlFile = "." + xmlFile;
 
-					foreach (string name in names)
+					foreach (var name in names)
 					{
 						if (name.EndsWith(xmlFile))
 						{
@@ -204,20 +199,18 @@ namespace BLToolkit.Reflection.Extension
 
 		public static ExtensionList GetExtensions(Stream xmlDocStream)
 		{
-			XmlDocument doc = new XmlDocument();
-
-			doc.Load(xmlDocStream);
+			var doc = XDocument.Load(new StreamReader(xmlDocStream));
 
 			return CreateTypeInfo(doc);
 		}
 
 		public static TypeExtension GetTypeExtension(Type type, ExtensionList typeExtensions)
 		{
-			object[] attrs = type.GetCustomAttributes(typeof(TypeExtensionAttribute), true);
+			var attrs = type.GetCustomAttributes(typeof(TypeExtensionAttribute), true);
 
 			if (attrs != null && attrs.Length != 0)
 			{
-				TypeExtensionAttribute attr = (TypeExtensionAttribute)attrs[0];
+				var attr = (TypeExtensionAttribute)attrs[0];
 
 				if (!string.IsNullOrEmpty(attr.FileName))
 					typeExtensions = GetExtensions(attr.FileName, type.Assembly);
@@ -233,35 +226,31 @@ namespace BLToolkit.Reflection.Extension
 
 		#region Private Static Members
 
-		private static ExtensionList CreateTypeInfo(XmlDocument doc)
+		private static ExtensionList CreateTypeInfo(XDocument doc)
 		{
-			ExtensionList list = new ExtensionList();
+			var list = new ExtensionList();
 
-			foreach (XmlNode typeNode in doc.DocumentElement.ChildNodes)
-				if (typeNode.LocalName == NodeName.Type)
-					list.Add(ParseType(typeNode));
+			foreach (var typeNode in doc.Root.Elements().Where(_ => _.Name.LocalName == NodeName.Type))
+				list.Add(ParseType(typeNode));
 
 			return list;
 		}
 
-		private static TypeExtension ParseType(XmlNode typeNode)
+		private static TypeExtension ParseType(XElement typeNode)
 		{
-			TypeExtension ext = new TypeExtension();
+			var ext = new TypeExtension();
 
-			if (typeNode.Attributes != null)
+			foreach (var attr in typeNode.Attributes())
 			{
-				foreach (XmlAttribute attr in typeNode.Attributes)
-				{
-					if (attr.LocalName == AttrName.Name)
-						ext.Name = attr.Value;
-					else
-						ext.Attributes.Add(attr.LocalName, attr.Value);
-				}
+				if (attr.Name.LocalName == AttrName.Name)
+					ext.Name = attr.Value;
+				else
+					ext.Attributes.Add(attr.Name.LocalName, attr.Value);
 			}
 
-			foreach (XmlNode node in typeNode.ChildNodes)
+			foreach (var node in typeNode.Elements())
 			{
-				if (node.LocalName == NodeName.Member)
+				if (node.Name.LocalName == NodeName.Member)
 					ext.Members.Add(ParseMember(node));
 				else
 					ext.Attributes.Add(ParseAttribute(node));
@@ -270,47 +259,42 @@ namespace BLToolkit.Reflection.Extension
 			return ext;
 		}
 
-		private static MemberExtension ParseMember(XmlNode memberNode)
+		private static MemberExtension ParseMember(XElement memberNode)
 		{
-			MemberExtension ext = new MemberExtension();
+			var ext = new MemberExtension();
 
-			if (memberNode.Attributes != null)
+			foreach (var attr in memberNode.Attributes())
 			{
-				foreach (XmlAttribute attr in memberNode.Attributes)
-				{
-					if (attr.LocalName == AttrName.Name)
-						ext.Name = attr.Value;
-					else
-						ext.Attributes.Add(attr.LocalName, attr.Value);
-				}
+				if (attr.Name.LocalName == AttrName.Name)
+					ext.Name = attr.Value;
+				else
+					ext.Attributes.Add(attr.Name.LocalName, attr.Value);
 			}
 
-			foreach (XmlNode node in memberNode.ChildNodes)
+			foreach (var node in memberNode.Elements())
 				ext.Attributes.Add(ParseAttribute(node));
 
 			return ext;
 		}
 
-		private static AttributeExtension ParseAttribute(XmlNode attributeNode)
+		private static AttributeExtension ParseAttribute(XElement attributeNode)
 		{
-			AttributeExtension ext = new AttributeExtension();
-
-			ext.Name = attributeNode.LocalName;
-
-			if (attributeNode.Attributes != null)
+			var ext = new AttributeExtension
 			{
-				ext.Values.Add(ValueName.Value, attributeNode.InnerText);
+				Name = attributeNode.Name.LocalName
+			};
 
-				foreach (XmlAttribute attr in attributeNode.Attributes)
-				{
-					if (attr.LocalName == ValueName.Type)
-						ext.Values.Add(ValueName.ValueType, attr.Value);
-					else
-						ext.Values.Add(attr.LocalName, attr.Value);
-				}
+			ext.Values.Add(ValueName.Value, attributeNode.Value);
+
+			foreach (var attr in attributeNode.Attributes())
+			{
+				if (attr.Name.LocalName == ValueName.Type)
+					ext.Values.Add(ValueName.ValueType, attr.Value);
+				else
+					ext.Values.Add(attr.Name.LocalName, attr.Value);
 			}
 
-			foreach (XmlNode node in attributeNode.ChildNodes)
+			foreach (var node in attributeNode.Elements())
 				ext.Attributes.Add(ParseAttribute(node));
 
 			return ext;

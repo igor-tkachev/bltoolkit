@@ -5,9 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
-using System.Xml;
 
 namespace BLToolkit.ServiceModel
 {
@@ -16,70 +14,26 @@ namespace BLToolkit.ServiceModel
 	using Mapping;
 	using Reflection;
 
-	class LinqServiceSerializer
+	static class LinqServiceSerializer
 	{
-		internal class XmlQuerySerializer : XmlObjectSerializer
+		public static string Serialize(LinqServiceQuery query)
 		{
-			#region Overrides
-
-			public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
-			{
-				writer.WriteStartElement("Query");
-			}
-
-			public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
-			{
-				new QuerySerializer(writer).Serialize((LinqServiceQuery)graph);
-			}
-
-			public override void WriteEndObject(XmlDictionaryWriter writer)
-			{
-				writer.WriteEndElement();
-			}
-
-			public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
-			{
-				return new QueryDeserializer(reader).Deserialize();
-			}
-
-			public override bool IsStartObject(XmlDictionaryReader reader)
-			{
-				return reader.Name == "Query";
-			}
-
-			#endregion
+			return new QuerySerializer().Serialize(query);
 		}
 
-		internal class XmlResultSerializer : XmlObjectSerializer
+		public static void Deserialize(LinqServiceQuery query, string str)
 		{
-			#region Overrides
+			new QueryDeserializer().Deserialize(query, str);
+		}
 
-			public override void WriteStartObject(XmlDictionaryWriter writer, object graph)
-			{
-				writer.WriteStartElement("QueryResult");
-			}
+		public static string Serialize(LinqServiceResult result)
+		{
+			return new ResultSerializer().Serialize(result);
+		}
 
-			public override void WriteObjectContent(XmlDictionaryWriter writer, object graph)
-			{
-				new ResultSerializer(writer).Serialize((LinqServiceResult)graph);
-			}
-
-			public override void WriteEndObject(XmlDictionaryWriter writer)
-			{
-				writer.WriteEndElement();
-			}
-
-			public override object ReadObject(XmlDictionaryReader reader, bool verifyObjectName)
-			{
-				return new ResultDeserializer(reader).Deserialize();
-			}
-
-			public override bool IsStartObject(XmlDictionaryReader reader)
-			{
-				return reader.Name == "QueryResult";
-			}
-
-			#endregion
+		public static void Deserialize(LinqServiceResult result, string str)
+		{
+			new ResultDeserializer().Deserialize(result, str);
 		}
 
 		#region SerializerBase
@@ -223,7 +177,7 @@ namespace BLToolkit.ServiceModel
 
 		#region DeserializerBase
 
-		class DeserializerBase
+		public class DeserializerBase
 		{
 			protected readonly Dictionary<int,object> Dic = new Dictionary<int,object>();
 
@@ -456,14 +410,7 @@ namespace BLToolkit.ServiceModel
 
 		class QuerySerializer : SerializerBase
 		{
-			public QuerySerializer(XmlDictionaryWriter writer)
-			{
-				_writer = writer;
-			}
-
-			readonly XmlDictionaryWriter _writer;
-
-			public void Serialize(LinqServiceQuery query)
+			public string Serialize(LinqServiceQuery query)
 			{
 				var visitor = new QueryVisitor();
 
@@ -485,7 +432,7 @@ namespace BLToolkit.ServiceModel
 
 				Builder.AppendLine();
 
-				_writer.WriteCData(Builder.ToString());
+				return Builder.ToString();
 			}
 
 			void Visit(IQueryElement e)
@@ -969,33 +916,25 @@ namespace BLToolkit.ServiceModel
 
 		#region QueryDeserializer
 
-		class QueryDeserializer : DeserializerBase
+		public class QueryDeserializer : DeserializerBase
 		{
-			public QueryDeserializer(XmlDictionaryReader reader)
-			{
-				_reader = reader;
-			}
-
-			readonly XmlDictionaryReader _reader;
-
 			SqlQuery       _query;
 			SqlParameter[] _parameters;
 
 			readonly Dictionary<int,SqlQuery> _queries = new Dictionary<int,SqlQuery>();
 			readonly List<Action>             _actions = new List<Action>();
 
-			public LinqServiceQuery Deserialize()
+			public void Deserialize(LinqServiceQuery query, string str)
 			{
-				Str = _reader.ReadString();
+				Str = str;
 
 				while (Parse()) {}
 
 				foreach (var action in _actions)
 					action();
 
-				var query = new LinqServiceQuery { Query = _query, Parameters = _parameters};
-
-				return query;
+				query.Query      = _query;
+				query.Parameters = _parameters;
 			}
 
 			bool Parse()
@@ -1433,14 +1372,7 @@ namespace BLToolkit.ServiceModel
 
 		class ResultSerializer : SerializerBase
 		{
-			public ResultSerializer(XmlDictionaryWriter writer)
-			{
-				_writer = writer;
-			}
-
-			readonly XmlDictionaryWriter _writer;
-
-			public void Serialize(LinqServiceResult result)
+			public string Serialize(LinqServiceResult result)
 			{
 				Append(result.FieldCount);
 				Append(result.VaryingTypes.Length);
@@ -1484,7 +1416,7 @@ namespace BLToolkit.ServiceModel
 					Builder.AppendLine();
 				}
 
-				_writer.WriteCData(Builder.ToString());
+				return Builder.ToString();
 			}
 		}
 
@@ -1494,30 +1426,20 @@ namespace BLToolkit.ServiceModel
 
 		class ResultDeserializer : DeserializerBase
 		{
-			public ResultDeserializer(XmlDictionaryReader reader)
+			public void Deserialize(LinqServiceResult result, string str)
 			{
-				_reader = reader;
-			}
-
-			readonly XmlDictionaryReader _reader;
-
-			public LinqServiceResult Deserialize()
-			{
-				Str = _reader.ReadString();
+				Str = str;
 
 				var fieldCount  = ReadInt();
 				var varTypesLen = ReadInt();
 
-				var result = new LinqServiceResult
-				{
-					FieldCount   = fieldCount,
-					RowCount     = ReadInt(),
-					VaryingTypes = new Type[varTypesLen],
-					QueryID      = new Guid(ReadString()),
-					FieldNames   = new string[fieldCount],
-					FieldTypes   = new Type  [fieldCount],
-					Data         = new List<string[]>(),
-				};
+				result.FieldCount   = fieldCount;
+				result.RowCount     = ReadInt();
+				result.VaryingTypes = new Type[varTypesLen];
+				result.QueryID      = new Guid(ReadString());
+				result.FieldNames   = new string[fieldCount];
+				result.FieldTypes   = new Type  [fieldCount];
+				result.Data         = new List<string[]>();
 
 				NextLine();
 
@@ -1552,7 +1474,7 @@ namespace BLToolkit.ServiceModel
 					NextLine();
 				}
 
-				return result;
+				return;
 			}
 		}
 
@@ -1579,8 +1501,8 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		static readonly Dictionary<Type,Type>                 _arrayTypes      = new Dictionary<Type,Type>();
-		static readonly Dictionary<Type,Func<object,object >> _arrayConverters = new Dictionary<Type,Func<object,object>>();
+		static readonly Dictionary<Type,Type>                _arrayTypes      = new Dictionary<Type,Type>();
+		static readonly Dictionary<Type,Func<object,object>> _arrayConverters = new Dictionary<Type,Func<object,object>>();
 
 		static Type GetArrayType(Type elementType)
 		{

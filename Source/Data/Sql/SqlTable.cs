@@ -161,7 +161,7 @@ namespace BLToolkit.Data.Sql
 			_owner        = (string)te.Attributes["Owner"].       Value;
 			_physicalName = (string)te.Attributes["PhysicalName"].Value;
 
-			foreach (MemberExtension me in te.Members)
+			foreach (var me in te.Members.Values)
 				Fields.Add(new SqlField(
 					(Type)me["Type"].Value,
 					me.Name,
@@ -171,7 +171,7 @@ namespace BLToolkit.Data.Sql
 					(bool?)me["Identity"].Value == true ? new IdentityAttribute() : null,
 					null));
 
-			foreach (AttributeExtension ae in te.Attributes["Join"])
+			foreach (var ae in te.Attributes["Join"])
 				Joins.Add(new Join(ae));
 
 			var baseExtension = (string)te.Attributes["BaseExtension"].Value;
@@ -197,7 +197,7 @@ namespace BLToolkit.Data.Sql
 					Fields.Add(new SqlField(field));
 
 			foreach (var join in baseTable.Joins)
-				if (Joins.Find(j => j.TableName == join.TableName) == null)
+				if (Joins.FirstOrDefault(j => j.TableName == join.TableName) == null)
 					Joins.Add(join);
 		}
 

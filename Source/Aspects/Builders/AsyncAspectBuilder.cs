@@ -194,7 +194,7 @@ namespace BLToolkit.Aspects.Builders
 			// To solve this problem, we should create a top level delegate and make sure its name is unique.
 			//
 			var delegateName = context.TypeBuilder.TypeBuilder.FullName + "$" + method.Name + "$Delegate";
-			var delegateType = (Type) context.Items[delegateName];
+			var delegateType = context.GetItem<Type>(delegateName);
 
 			if (delegateType == null)
 			{
@@ -240,7 +240,7 @@ namespace BLToolkit.Aspects.Builders
 				methodBuilder = delegateBuilder.DefineMethod("Invoke", ma, method.ReturnType, parameters);
 				methodBuilder.MethodBuilder.SetImplementationFlags(mia);
 
-				context.Items[delegateName] = delegateType = delegateBuilder.Create();
+				context.Items.Add(delegateName, delegateType = delegateBuilder.Create());
 			}
 
 			return delegateType;

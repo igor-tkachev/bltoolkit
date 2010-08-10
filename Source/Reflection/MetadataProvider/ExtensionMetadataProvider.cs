@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+
 using BLToolkit.Common;
 using BLToolkit.DataAccess;
+
 using Convert=System.Convert;
 
 namespace BLToolkit.Reflection.MetadataProvider
@@ -17,7 +19,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private static object GetValue(TypeExtension typeExtension, MemberAccessor member, string elemName, out bool isSet)
 		{
-			object value = typeExtension[member.Name][elemName].Value;
+			var value = typeExtension[member.Name][elemName].Value;
 
 			isSet = value != null;
 
@@ -30,7 +32,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override string GetFieldName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(typeExtension, member, "MapField", out isSet);
+			var value = GetValue(typeExtension, member, "MapField", out isSet);
 
 			if (value != null)
 				return value.ToString();
@@ -44,7 +46,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(typeExtension, member, "FieldStorage", out isSet);
+			var value = GetValue(typeExtension, member, "FieldStorage", out isSet);
 
 			if (value != null)
 				return value.ToString();
@@ -58,7 +60,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetInheritanceDiscriminator(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(typeExtension, member, "IsInheritanceDiscriminator", out isSet);
+			var value = GetValue(typeExtension, member, "IsInheritanceDiscriminator", out isSet);
 
 			if (value != null)
 				return TypeExtension.ToBoolean(value);
@@ -72,7 +74,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetMapIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(typeExtension, member, "MapIgnore", out isSet);
+			var value = GetValue(typeExtension, member, "MapIgnore", out isSet);
 
 			if (value != null)
 				return TypeExtension.ToBoolean(value);
@@ -88,7 +90,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			if (member.Type == typeof(string))
 			{
-				object value = GetValue(typeExtension, member, "Trimmable", out isSet);
+				var value = GetValue(typeExtension, member, "Trimmable", out isSet);
 
 				if (value != null)
 					return TypeExtension.ToBoolean(value);
@@ -103,16 +105,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override MapValue[] GetMapValues(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			AttributeExtensionCollection extList = typeExtension[member.Name]["MapValue"];
+			var extList = typeExtension[member.Name]["MapValue"];
 
 			if (extList == AttributeExtensionCollection.Null)
 				return GetMapValues(typeExtension, member.Type, out isSet);
 
-			List<MapValue> list = new List<MapValue>(extList.Count);
+			var list = new List<MapValue>(extList.Count);
 
-			foreach (AttributeExtension ext in extList)
+			foreach (var ext in extList)
 			{
-				object origValue = ext["OrigValue"];
+				var origValue = ext["OrigValue"];
 
 				if (origValue != null)
 				{
@@ -131,21 +133,22 @@ namespace BLToolkit.Reflection.MetadataProvider
 		static List<MapValue> GetEnumMapValues(TypeExtension typeExt, Type type)
 		{
 			List<MapValue> mapValues = null;
-			FieldInfo[]    fields    = type.GetFields();
 
-			foreach (FieldInfo fi in fields)
+			var fields = type.GetFields();
+
+			foreach (var fi in fields)
 			{
 				if ((fi.Attributes & EnumField) == EnumField)
 				{
-					AttributeExtensionCollection attrExt = typeExt[fi.Name]["MapValue"];
+					var attrExt = typeExt[fi.Name]["MapValue"];
 
 					if (attrExt.Count == 0)
 						continue;
 
-					ArrayList list      = new ArrayList(attrExt.Count);
-					object    origValue = Enum.Parse(type, fi.Name);
+					var list      = new ArrayList(attrExt.Count);
+					var origValue = Enum.Parse(type, fi.Name);
 
-					foreach (AttributeExtension ae in attrExt)
+					foreach (var ae in attrExt)
 						if (ae.Value != null)
 							list.Add(ae.Value);
 
@@ -164,16 +167,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		static List<MapValue> GetTypeMapValues(TypeExtension typeExt, Type type)
 		{
-			AttributeExtensionCollection extList = typeExt.Attributes["MapValue"];
+			var extList = typeExt.Attributes["MapValue"];
 
 			if (extList == AttributeExtensionCollection.Null)
 				return null;
 
-			List<MapValue> attrs = new List<MapValue>(extList.Count);
+			var attrs = new List<MapValue>(extList.Count);
 
-			foreach (AttributeExtension ext in extList)
+			foreach (var ext in extList)
 			{
-				object origValue = ext["OrigValue"];
+				var origValue = ext["OrigValue"];
 
 				if (origValue != null)
 				{
@@ -209,11 +212,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override object GetDefaultValue(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = typeExtension[member.Name]["DefaultValue"].Value;
+			var value = typeExtension[member.Name]["DefaultValue"].Value;
 
 			if (value != null)
 			{
-				isSet = value != null;
+				isSet = true;
 				return TypeExtension.ChangeType(value, member.Type);
 			}
 
@@ -237,9 +240,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private static object GetEnumDefaultValueFromExtension(TypeExtension typeExt, Type type)
 		{
-			FieldInfo[] fields = type.GetFields();
+			var fields = type.GetFields();
 
-			foreach (FieldInfo fi in fields)
+			foreach (var fi in fields)
 				if ((fi.Attributes & EnumField) == EnumField)
 					if (typeExt[fi.Name]["DefaultValue"].Value != null)
 						return Enum.Parse(type, fi.Name);
@@ -255,7 +258,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			// Check extension <Member1 Nullable='true' />
 			//
-			object value = GetValue(typeExtension, member, "Nullable", out isSet);
+			var value = GetValue(typeExtension, member, "Nullable", out isSet);
 
 			if (isSet)
 				return TypeExtension.ToBoolean(value);
@@ -276,7 +279,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 		{
 			// Check extension <Member1 NullValue='-1' />
 			//
-			object value = GetValue(typeExtension, member, "NullValue", out isSet);
+			var value = GetValue(typeExtension, member, "NullValue", out isSet);
 
 			return isSet? TypeExtension.ChangeType(value, member.Type): null;
 		}
@@ -287,9 +290,8 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override string GetDatabaseName(Type type, ExtensionList extensions, out bool isSet)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, extensions);
-
-			object value = typeExt.Attributes["DatabaseName"].Value;
+			var typeExt = TypeExtension.GetTypeExtension(type, extensions);
+			var value   = typeExt.Attributes["DatabaseName"].Value;
 
 			if (value != null)
 			{
@@ -306,9 +308,8 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override string GetOwnerName(Type type, ExtensionList extensions, out bool isSet)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, extensions);
-
-			object value = typeExt.Attributes["OwnerName"].Value;
+			var typeExt = TypeExtension.GetTypeExtension(type, extensions);
+			var value   = typeExt.Attributes["OwnerName"].Value;
 
 			if (value != null)
 			{
@@ -325,9 +326,8 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override string GetTableName(Type type, ExtensionList extensions, out bool isSet)
 		{
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, extensions);
-
-			object value = typeExt.Attributes["TableName"].Value;
+			var typeExt = TypeExtension.GetTypeExtension(type, extensions);
+			var value   = typeExt.Attributes["TableName"].Value;
 
 			if (value != null)
 			{
@@ -344,7 +344,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override int GetPrimaryKeyOrder(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			object value = typeExt[member.Name]["PrimaryKey"].Value;
+			var value = typeExt[member.Name]["PrimaryKey"].Value;
 
 			if (value != null)
 			{
@@ -361,7 +361,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
-			object value = typeExt[member.Name]["NonUpdatable"].Value;
+			var value = typeExt[member.Name]["NonUpdatable"].Value;
 
 			if (value != null)
 			{
@@ -386,7 +386,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override bool GetSqlIgnore(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
-			object value = GetValue(typeExtension, member, "SqlIgnore", out isSet);
+			var value = GetValue(typeExtension, member, "SqlIgnore", out isSet);
 
 			if (value != null)
 				return TypeExtension.ToBoolean(value);
@@ -400,27 +400,27 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override List<MapRelationBase> GetRelations(MappingSchema schema, ExtensionList typeExt, Type master, Type slave, out bool isSet)
 		{
-			List<MapRelationBase> relations = new List<MapRelationBase>();
-			TypeExtension         ext       = typeExt != null ? typeExt[master] : TypeExtension.Null;
+			var relations = new List<MapRelationBase>();
+			var ext       = typeExt != null ? typeExt[master] : TypeExtension.Null;
 
 			isSet = ext != TypeExtension.Null;
 
 			if (!isSet)
 				return relations;
 
-			TypeAccessor ta = TypeAccessor.GetAccessor(master);
+			var ta = TypeAccessor.GetAccessor(master);
 
-			foreach (MemberExtension mex in ext.Members)
+			foreach (var mex in ext.Members.Values)
 			{
-				AttributeExtensionCollection relationInfos = mex.Attributes[TypeExtension.NodeName.Relation];
+				var relationInfos = mex.Attributes[TypeExtension.NodeName.Relation];
 
 				if (relationInfos == AttributeExtensionCollection.Null)
 					continue;
 
-				string         destinationTypeName = relationInfos[0][TypeExtension.AttrName.DestinationType, string.Empty].ToString();
-				Type           destinationType     = slave;
-				MemberAccessor ma                  = ta[mex.Name];
-				bool           toMany              = TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Type);
+				var destinationTypeName = relationInfos[0][TypeExtension.AttrName.DestinationType, string.Empty].ToString();
+				var destinationType     = slave;
+				var ma                  = ta[mex.Name];
+				var toMany              = TypeHelper.IsSameOrParent(typeof(IEnumerable), ma.Type);
 
 				if (destinationTypeName == string.Empty)
 				{
@@ -450,20 +450,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 				if (slave != null && !TypeHelper.IsSameOrParent(slave, destinationType))
 					continue;
 
-				List<string> masterIndexFields = new List<string>();
-				List<string> slaveIndexFields  = new List<string>();
+				var masterIndexFields = new List<string>();
+				var slaveIndexFields  = new List<string>();
 
-				foreach (AttributeExtension ae in relationInfos[0].Attributes[TypeExtension.NodeName.MasterIndex])
+				foreach (var ae in relationInfos[0].Attributes[TypeExtension.NodeName.MasterIndex])
 					masterIndexFields.Add(ae[TypeExtension.AttrName.Name].ToString());
 
-				foreach (AttributeExtension ae in relationInfos[0].Attributes[TypeExtension.NodeName.SlaveIndex])
+				foreach (var ae in relationInfos[0].Attributes[TypeExtension.NodeName.SlaveIndex])
 					slaveIndexFields.Add(ae[TypeExtension.AttrName.Name].ToString());
 
 
 				if (slaveIndexFields.Count == 0)
 				{
-					TypeAccessor  accessor = toMany ? ta : TypeAccessor.GetAccessor(destinationType);
-					TypeExtension tex      = TypeExtension.GetTypeExtension(accessor.Type, typeExt);
+					var  accessor = toMany ? ta : TypeAccessor.GetAccessor(destinationType);
+					var tex      = TypeExtension.GetTypeExtension(accessor.Type, typeExt);
 
 					slaveIndexFields = GetPrimaryKeyFields(schema, accessor, tex);
 				}
@@ -471,10 +471,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 				if (slaveIndexFields.Count == 0)
 					throw new InvalidOperationException("Slave index is not set for relation: " + ma.Type.FullName + "." + ma.Name);
 
-				MapIndex slaveIndex  = new MapIndex(slaveIndexFields.ToArray());
-				MapIndex masterIndex = masterIndexFields.Count > 0 ? new MapIndex(masterIndexFields.ToArray()) : slaveIndex;
-
-				MapRelationBase mapRelation = new MapRelationBase(destinationType, slaveIndex, masterIndex, mex.Name);
+				var slaveIndex  = new MapIndex(slaveIndexFields.ToArray());
+				var masterIndex = masterIndexFields.Count > 0 ? new MapIndex(masterIndexFields.ToArray()) : slaveIndex;
+				var mapRelation = new MapRelationBase(destinationType, slaveIndex, masterIndex, mex.Name);
 
 				relations.Add(mapRelation);
 
@@ -493,12 +492,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 			if (typeExtension == TypeExtension.Null)
 				return null;
 
-			MemberExtension mex = typeExtension[member.Name];
+			var mex = typeExtension[member.Name];
 
 			if (mex == MemberExtension.Null)
 				return null;
 
-			AttributeExtensionCollection attrs = mex.Attributes[TypeExtension.NodeName.Association];
+			var attrs = mex.Attributes[TypeExtension.NodeName.Association];
 
 			if (attrs == AttributeExtensionCollection.Null)
 				return null;
@@ -517,27 +516,28 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override InheritanceMappingAttribute[] GetInheritanceMapping(Type type, TypeExtension typeExtension)
 		{
-			AttributeExtensionCollection extList = typeExtension.Attributes["InheritanceMapping"];
+			var extList = typeExtension.Attributes["InheritanceMapping"];
 
 			if (extList == AttributeExtensionCollection.Null)
 				return Array<InheritanceMappingAttribute>.Empty;
 
-			InheritanceMappingAttribute[] attrs = new InheritanceMappingAttribute[extList.Count];
+			var attrs = new InheritanceMappingAttribute[extList.Count];
 
-			for (int i = 0; i < extList.Count; i++)
+			for (var i = 0; i < extList.Count; i++)
 			{
-				AttributeExtension ext = extList[i];
+				var ext = extList[i];
 
-				attrs[i] = new InheritanceMappingAttribute();
-				attrs[i].Code      = ext["Code"];
-				attrs[i].IsDefault = TypeExtension.ToBoolean(ext["IsDefault", "False"], false);
-				attrs[i].Type      = Type.GetType(Convert.ToString(ext["Type"]));
+				attrs[i] = new InheritanceMappingAttribute
+				{
+					Code      = ext["Code"],
+					IsDefault = TypeExtension.ToBoolean(ext["IsDefault", "False"], false),
+					Type      = Type.GetType(Convert.ToString(ext["Type"]))
+				};
 			}
 
 			return attrs;
 		}
 
 		#endregion
-
 	}
 }

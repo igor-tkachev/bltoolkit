@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.Reflection.Extension
 {
 	public class MemberExtension
@@ -12,12 +14,7 @@ namespace BLToolkit.Reflection.Extension
 			_attributes = attributes;
 		}
 
-		private string _name;
-		public  string  Name
-		{
-			get { return _name;  }
-			set { _name = value; }
-		}
+		public string Name { get; set; }
 
 		public AttributeExtensionCollection this[string attributeName]
 		{

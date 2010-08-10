@@ -72,9 +72,13 @@ namespace BLToolkit.Mapping
 				MemberMapper mm = _mapper[_index];
 				_typeMismatch = !TypeHelper.IsSameOrParent(typeof(K), mm.Type);
 
+#if !SILVERLIGHT
+
 				Debug.WriteLineIf(_typeMismatch, string.Format(
 					"Member {0} type '{1}' does not match dictionary key type '{2}'.",
 						mm.Name, mm.Type.Name, (typeof(K).Name)));
+
+#endif
 			}
 		}
 

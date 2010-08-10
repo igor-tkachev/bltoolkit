@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -21,13 +22,13 @@ namespace BLToolkit.TypeBuilder.Builders
 			_originalType = originalType;
 		}
 
-		readonly TypeHelper        _type;
-		readonly TypeHelper        _originalType;
-		readonly TypeHelper        _accessorType   = new TypeHelper(typeof(TypeAccessor));
-		readonly TypeHelper        _memberAccessor = new TypeHelper(typeof(MemberAccessor));
-		readonly ArrayList         _nestedTypes    = new ArrayList();
-		         TypeBuilderHelper _typeBuilder;
-		         bool              _friendlyAssembly;
+		readonly TypeHelper              _type;
+		readonly TypeHelper              _originalType;
+		readonly TypeHelper              _accessorType   = new TypeHelper(typeof(TypeAccessor));
+		readonly TypeHelper              _memberAccessor = new TypeHelper(typeof(MemberAccessor));
+		readonly List<TypeBuilderHelper> _nestedTypes    = new List<TypeBuilderHelper>();
+		         TypeBuilderHelper       _typeBuilder;
+		         bool                    _friendlyAssembly;
 
 		public string AssemblyNameSuffix
 		{
@@ -201,7 +202,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private void BuildMembers()
 		{
-			var members = new ListDictionary();
+			var members = new Dictionary<string,MemberInfo>();
 
 			foreach (var fi in _originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
 				AddMemberToDictionary(members, fi);
@@ -233,18 +234,17 @@ namespace BLToolkit.TypeBuilder.Builders
 				BuildMember(mi);
 		}
 
-		private static void AddMemberToDictionary(IDictionary members, MemberInfo mi)
+		private static void AddMemberToDictionary(IDictionary<string,MemberInfo> members, MemberInfo mi)
 		{
+			MemberInfo existing;
+
 			var name = mi.Name;
 
-			if (!members.Contains(name))
+			if (!members.TryGetValue(name, out existing))
 			{
 				members.Add(name, mi);
-				return;
 			}
-
-			var existing = (MemberInfo)members[name];
-			if (mi.DeclaringType.IsSubclassOf(existing.DeclaringType))
+			else if (mi.DeclaringType.IsSubclassOf(existing.DeclaringType))
 			{
 				// mi is a member of the most descendant type.
 				//

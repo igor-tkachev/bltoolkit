@@ -2,12 +2,11 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Emit;
-using BLToolkit.TypeBuilder.Builders;
-
 namespace BLToolkit.Aspects.Builders
 {
+	using Reflection;
+	using TypeBuilder.Builders;
+
 	public class InterceptorAspectBuilder : AbstractTypeBuilderBase
 	{
 		public InterceptorAspectBuilder(
@@ -39,9 +38,9 @@ namespace BLToolkit.Aspects.Builders
 			if (_interceptorType == null && _interceptType == 0)
 				return false;
 
-			foreach (IAbstractTypeBuilder builder in builders)
+			foreach (var builder in builders)
 			{
-				InterceptorAspectBuilder interceptor = builder as InterceptorAspectBuilder;
+				var interceptor = builder as InterceptorAspectBuilder;
 
 				if (interceptor != null)
 				{
@@ -68,7 +67,7 @@ namespace BLToolkit.Aspects.Builders
 
 		public override bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
 		{
-			InterceptorAspectBuilder builder = typeBuilder as InterceptorAspectBuilder;
+			var builder = typeBuilder as InterceptorAspectBuilder;
 
 			return builder == null || _interceptorType != builder._interceptorType;
 		}
@@ -83,15 +82,15 @@ namespace BLToolkit.Aspects.Builders
 
 			Context = context;
 
-			EmitHelper emit = Context.MethodBuilder.Emitter;
+			var emit = Context.MethodBuilder.Emitter;
 
 			// Push ref & out parameters.
 			//
-			ParameterInfo[] parameters = Context.CurrentMethod.GetParameters();
+			var parameters = Context.CurrentMethod.GetParameters();
 
-			for (int i = 0; i < parameters.Length; i++)
+			for (var i = 0; i < parameters.Length; i++)
 			{
-				ParameterInfo p = parameters[i];
+				var p = parameters[i];
 
 				if (!p.ParameterType.IsByRef)
 					continue;
@@ -177,14 +176,14 @@ namespace BLToolkit.Aspects.Builders
 
 			// Pop ref & out parameters.
 			//
-			for (int i = 0; i < parameters.Length; i++)
+			for (var i = 0; i < parameters.Length; i++)
 			{
-				ParameterInfo p = parameters[i];
+				var p = parameters[i];
 
 				if (!p.ParameterType.IsByRef)
 					continue;
 
-				Type type = p.ParameterType.GetElementType();
+				var type = p.ParameterType.GetElementType();
 
 				emit
 					.ldarg          (p)
@@ -210,7 +209,7 @@ namespace BLToolkit.Aspects.Builders
 
 		private LocalBuilder GetInfoField()
 		{
-			LocalBuilder field = (LocalBuilder)Context.Items["$BLToolkit.InfoField"];
+			var field = Context.GetItem<LocalBuilder>("$BLToolkit.InfoField");
 
 			if (field == null)
 			{
@@ -218,12 +217,12 @@ namespace BLToolkit.Aspects.Builders
 
 				// Create MethodInfo field.
 				//
-				FieldBuilder methodInfo = Context.CreatePrivateStaticField(
+				var methodInfo = Context.CreatePrivateStaticField(
 					"_methodInfo$" + Context.CurrentMethod.Name + _methodCounter, typeof(CallMethodInfo));
 
-				EmitHelper emit = Context.MethodBuilder.Emitter;
+				var emit = Context.MethodBuilder.Emitter;
 
-				Label checkMethodInfo = emit.DefineLabel();
+				var checkMethodInfo = emit.DefineLabel();
 
 				emit
 					.LoadField (methodInfo)
@@ -250,11 +249,11 @@ namespace BLToolkit.Aspects.Builders
 					.callvirt (typeof(InterceptCallInfo).GetProperty("CallMethodInfo").GetSetMethod())
 					;
 
-				ParameterInfo[] parameters = Context.CurrentMethod.GetParameters();
+				var parameters = Context.CurrentMethod.GetParameters();
 
-				for (int i = 0; i < parameters.Length; i++)
+				for (var i = 0; i < parameters.Length; i++)
 				{
-					ParameterInfo p = parameters[i];
+					var p = parameters[i];
 
 					if (p.ParameterType.IsByRef)
 						continue;
@@ -280,9 +279,8 @@ namespace BLToolkit.Aspects.Builders
 
 		private FieldBuilder GetInterceptorField()
 		{
-			string fieldName = "_interceptor$" + _interceptorType.FullName + "$_" + Context.CurrentMethod.Name + _methodCounter;
-
-			FieldBuilder field = Context.GetField(fieldName);
+			var fieldName = "_interceptor$" + _interceptorType.FullName + "$_" + Context.CurrentMethod.Name + _methodCounter;
+			var field     = Context.GetField(fieldName);
 
 			if (field == null)
 			{
@@ -292,10 +290,10 @@ namespace BLToolkit.Aspects.Builders
 					Context.CreatePrivateField      (fieldName, typeof(IInterceptor)):
 					Context.CreatePrivateStaticField(fieldName, typeof(IInterceptor));
 
-				EmitHelper emit = Context.MethodBuilder.Emitter;
+				var emit = Context.MethodBuilder.Emitter;
 
-				Label        checkInterceptor = emit.DefineLabel();
-				FieldBuilder methodInfo       = (FieldBuilder)Context.Items["$BLToolkit.MethodInfo"];
+				var checkInterceptor = emit.DefineLabel();
+				var methodInfo       = Context.GetItem<FieldBuilder>("$BLToolkit.MethodInfo");
 
 				emit
 					.LoadField (field)

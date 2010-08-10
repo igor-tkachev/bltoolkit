@@ -122,7 +122,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			{
 				if (_attributeBuilder != null)
 				{
-					FieldBuilder field = (FieldBuilder)context.Fields[TargetElement];
+					var field = context.Fields[(PropertyInfo)TargetElement];
 
 					field.SetCustomAttribute(_attributeBuilder);
 

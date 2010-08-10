@@ -1,21 +1,20 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace BLToolkit.Reflection.Extension
 {
-	public class AttributeNameCollection : ICollection
+	public class AttributeNameCollection : Dictionary<string,AttributeExtensionCollection>
 	{
-		public AttributeExtensionCollection this[string attributeName]
+		public new AttributeExtensionCollection this[string attributeName]
 		{
 			get
 			{
 				if (this == _null)
 					return AttributeExtensionCollection.Null;
 
-				AttributeExtensionCollection ext =
-					(AttributeExtensionCollection)_attributes[attributeName];
+				AttributeExtensionCollection ext;
 
-				return ext ?? AttributeExtensionCollection.Null;
+				return TryGetValue(attributeName, out ext) ? ext : AttributeExtensionCollection.Null;
 			}
 		}
 
@@ -25,11 +24,10 @@ namespace BLToolkit.Reflection.Extension
 			{
 				// Add attribute.
 				//
-				AttributeExtensionCollection attr =
-					(AttributeExtensionCollection)_attributes[attributeExtension.Name];
+				AttributeExtensionCollection attr;
 
-				if (attr == null)
-					_attributes[attributeExtension.Name] = attr = new AttributeExtensionCollection();
+				if (!TryGetValue(attributeExtension.Name, out attr))
+					Add(attributeExtension.Name, attr = new AttributeExtensionCollection());
 
 				attr.Add(attributeExtension);
 
@@ -67,10 +65,9 @@ namespace BLToolkit.Reflection.Extension
 		{
 			if (this != _null)
 			{
-				string attrName  = name;
-				string valueName = string.Empty;
-
-				int idx = name.IndexOf(TypeExtension.ValueName.Delimiter);
+				var attrName  = name;
+				var valueName = string.Empty;
+				var idx       = name.IndexOf(TypeExtension.ValueName.Delimiter);
 
 				if (idx > 0)
 				{
@@ -83,18 +80,14 @@ namespace BLToolkit.Reflection.Extension
 				else if (valueName == TypeExtension.ValueName.Type)
 					valueName = TypeExtension.ValueName.ValueType;
 
-				AttributeExtensionCollection ext =
-					(AttributeExtensionCollection)_attributes[attrName];
+				AttributeExtensionCollection ext;
 
-				if (ext != null)
-				{
+				if (TryGetValue(attrName, out ext))
 					ext[0].Values.Add(valueName, value);
-				}
 				else
 				{
-					AttributeExtension attributeExtension = new AttributeExtension();
+					var attributeExtension = new AttributeExtension { Name = name };
 
-					attributeExtension.Name = name;
 					attributeExtension.Values.Add(valueName, value);
 
 					Add(attributeExtension);
@@ -102,45 +95,10 @@ namespace BLToolkit.Reflection.Extension
 			}
 		}
 
-		private readonly Hashtable _attributes = new Hashtable();
-
 		private static readonly AttributeNameCollection _null = new AttributeNameCollection();
 		public  static          AttributeNameCollection  Null
 		{
 			get { return _null; }
 		}
-
-		#region ICollection Members
-
-		public void CopyTo(Array array, int index)
-		{
-			_attributes.CopyTo(array, index);
-		}
-
-		public int Count
-		{
-			get { return _attributes.Count; }
-		}
-
-		public bool IsSynchronized
-		{
-			get { return _attributes.IsSynchronized; }
-		}
-
-		public object SyncRoot
-		{
-			get { return _attributes.SyncRoot; }
-		}
-
-		#endregion
-
-		#region IEnumerable Members
-
-		public IEnumerator GetEnumerator()
-		{
-			return _attributes.Values.GetEnumerator();
-		}
-
-		#endregion
 	}
 }

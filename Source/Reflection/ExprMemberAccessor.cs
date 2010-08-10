@@ -96,6 +96,8 @@ namespace BLToolkit.Reflection
 				}
 			}
 
+#if !SILVERLIGHT
+
 			if (type == typeof(SqlByte))     return new SqlByteAccessor    (typeAccessor, par, expr);
 			if (type == typeof(SqlInt16))    return new SqlInt16Accessor   (typeAccessor, par, expr);
 			if (type == typeof(SqlInt32))    return new SqlInt32Accessor   (typeAccessor, par, expr);
@@ -108,6 +110,8 @@ namespace BLToolkit.Reflection
 			if (type == typeof(SqlMoney))    return new SqlMoneyAccessor   (typeAccessor, par, expr);
 			if (type == typeof(SqlString))   return new SqlStringAccessor  (typeAccessor, par, expr);
 			if (type == typeof(SqlGuid))     return new SqlGuidAccessor    (typeAccessor, par, expr);
+
+#endif
 
 			return (MemberAccessor)Activator.CreateInstance(
 				typeof(BaseAccessor<>).MakeGenericType(type),
@@ -563,6 +567,8 @@ namespace BLToolkit.Reflection
 
 		#region Sql Types
 
+#if !SILVERLIGHT
+
 		class SqlByteAccessor : BaseAccessor<SqlByte>
 		{
 			public SqlByteAccessor(TypeAccessor accessor, ParameterExpression expression, MemberExpression expr)
@@ -694,6 +700,8 @@ namespace BLToolkit.Reflection
 			public override SqlGuid GetSqlGuid(object obj)                 { return Getter(obj); }
 			public override void     SetSqlGuid(object obj, SqlGuid value) { Setter(obj, value); }
 		}
+
+#endif
 
 		#endregion
 	}

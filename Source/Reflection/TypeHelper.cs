@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
 
-using BLToolkit.EditableObjects;
-using BLToolkit.TypeBuilder;
-
 namespace BLToolkit.Reflection
 {
+#if !SILVERLIGHT
+	using EditableObjects;
+#endif
+	using TypeBuilder;
+
 	/// <summary>
 	/// A wrapper around the <see cref="Type"/> class.
 	/// </summary>
@@ -139,47 +142,50 @@ namespace BLToolkit.Reflection
 
 		#region Attributes cache
 
-		private object[] GetAttributesInternal()
+		object[] GetAttributesInternal()
 		{
-			var key   = _type.FullName;
-			var attrs = (object[])_typeAttributes[key];
-
-			if (attrs == null)
+			lock (_typeAttributes)
 			{
-				var list = new ArrayList();
+				var key = _type.FullName;
 
-				GetAttributesInternal(list, _type);
+				object[] attrs;
 
-				_typeAttributes[key] = attrs = (object[])list.ToArray(typeof(Attribute));
+				if (!_typeAttributes.TryGetValue(key, out attrs))
+				{
+					var list = new List<object>();
+
+					GetAttributesInternal(list, _type);
+
+					_typeAttributes.Add(key, attrs = list.ToArray());
+				}
+
+				return attrs;
 			}
-
-			return attrs;
 		}
 
-		private static readonly Hashtable _typeAttributesTopInternal = new Hashtable(10);
-		private static void GetAttributesInternal(ArrayList list, Type type)
-		{
-			var attrs = (object[])_typeAttributesTopInternal[type];
+		static readonly Dictionary<Type,object[]> _typeAttributesTopInternal = new Dictionary<Type,object[]>(10);
 
-			if (attrs != null)
-			{
+		static void GetAttributesInternal(List<object> list, Type type)
+		{
+			object[] attrs;
+
+			if (_typeAttributesTopInternal.TryGetValue(type, out attrs))
 				list.AddRange(attrs);
-			}
 			else
 			{
 				GetAttributesTreeInternal(list, type);
-
-				_typeAttributesTopInternal[type] = list.ToArray(typeof(Attribute));
+				_typeAttributesTopInternal.Add(type, list.ToArray());
 			}
 		}
 
-		private static readonly Hashtable _typeAttributesInternal = new Hashtable(10);
-		private static void GetAttributesTreeInternal(ArrayList list, Type type)
-		{
-			var attrs = (object[])_typeAttributesInternal[type];
+		static readonly Dictionary<Type,object[]> _typeAttributesInternal = new Dictionary<Type,object[]>(10);
 
-			if (attrs == null)
-				_typeAttributesInternal[type] = attrs = type.GetCustomAttributes(false);
+		static void GetAttributesTreeInternal(List<object> list, Type type)
+		{
+			object[] attrs;
+
+			if (!_typeAttributesInternal.TryGetValue(type, out attrs))
+				_typeAttributesInternal.Add(type, attrs = type.GetCustomAttributes(false));
 
 			if (Common.Configuration.FilterOutBaseEqualAttributes)
 			{
@@ -229,7 +235,7 @@ namespace BLToolkit.Reflection
 				GetAttributesTreeInternal(list, type.BaseType);
 		}
 
-		private static readonly Hashtable _typeAttributes = new Hashtable(10);
+		static readonly Dictionary<string,object[]> _typeAttributes = new Dictionary<string, object[]>(10);
 
 		#endregion
 
@@ -246,23 +252,27 @@ namespace BLToolkit.Reflection
 			if (type          == null) throw new ArgumentNullException("type");
 			if (attributeType == null) throw new ArgumentNullException("attributeType");
 
-			var key   = type.FullName + "#" + attributeType.FullName;
-			var attrs = (object[])_typeAttributes[key];
-
-			if (attrs == null)
+			lock (_typeAttributes)
 			{
-				var list = new ArrayList();
+				var key   = type.FullName + "#" + attributeType.FullName;
 
-				GetAttributesInternal(list, type);
+				object[] attrs;
 
-				for (var i = 0; i < list.Count; i++)
-					if (attributeType.IsInstanceOfType(list[i]) == false)
-						list.RemoveAt(i--);
+				if (!_typeAttributes.TryGetValue(key, out attrs))
+				{
+					var list = new List<object>();
 
-				_typeAttributes[key] = attrs = (object[])list.ToArray(typeof(Attribute));
+					GetAttributesInternal(list, type);
+
+					for (var i = 0; i < list.Count; i++)
+						if (attributeType.IsInstanceOfType(list[i]) == false)
+							list.RemoveAt(i--);
+
+					_typeAttributes.Add(key, attrs = list.ToArray());
+				}
+
+				return attrs;
 			}
-
-			return attrs;
 		}
 
 		/// <summary>
@@ -360,7 +370,14 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public bool IsSerializable
 		{
-			get { return _type.IsSerializable; }
+			get
+			{
+#if SILVERLIGHT
+				return false;
+#else
+				return _type.IsSerializable;
+#endif
+			}
 		}
 
 		#endregion
@@ -1025,7 +1042,7 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			return Array.FindAll(type.GetMethods(flags), method => method.IsGenericMethodDefinition == generic);
+			return type.GetMethods(flags).Where(method => method.IsGenericMethodDefinition == generic).ToArray();
 		}
 
 		/// <summary>
@@ -1130,8 +1147,12 @@ namespace BLToolkit.Reflection
 			if (list == null)
 				return typeOfObject;
 
+#if !SILVERLIGHT
+
 			if (list is EditableArrayList)
 				return ((EditableArrayList)list).ItemType;
+
+#endif
 
 			if (list is Array)
 				return list.GetType().GetElementType();
@@ -1141,7 +1162,11 @@ namespace BLToolkit.Reflection
 			// object[] attrs = type.GetCustomAttributes(typeof(DefaultMemberAttribute), true);
 			// string   itemMemberName = (attrs.Length == 0)? "Item": ((DefaultMemberAttribute)attrs[0]).MemberName;
 
-			if (list is IList || list is ITypedList || list is IListSource)
+			if (list is IList
+#if !SILVERLIGHT
+				|| list is ITypedList || list is IListSource
+#endif
+				)
 			{
 				PropertyInfo last = null;
 
@@ -1205,9 +1230,12 @@ namespace BLToolkit.Reflection
 					return elementTypes[0];
 			}
 
-			if (IsSameOrParent(typeof(IList),       listType) ||
-				IsSameOrParent(typeof(ITypedList),  listType) ||
-				IsSameOrParent(typeof(IListSource), listType))
+			if (IsSameOrParent(typeof(IList),       listType)
+#if !SILVERLIGHT
+				|| IsSameOrParent(typeof(ITypedList),  listType)
+				|| IsSameOrParent(typeof(IListSource), listType)
+#endif
+				)
 			{
 				var elementType = listType.GetElementType();
 
@@ -1284,7 +1312,10 @@ namespace BLToolkit.Reflection
 				|| type == typeof(System.Data.Linq.Binary)
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
-				|| type == typeof(XmlDocument);
+#if !SILVERLIGHT
+				|| type == typeof(XmlDocument)
+#endif
+				;
 		}
 
 		///<summary>
