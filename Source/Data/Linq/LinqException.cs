@@ -64,6 +64,8 @@ namespace BLToolkit.Data.Linq
 		{
 		}
 
+#if !SILVERLIGHT
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LinqException"/> class
 		/// with serialized data.
@@ -78,6 +80,8 @@ namespace BLToolkit.Data.Linq
 			: base(info, context)
 		{
 		}
+
+#endif
 	}
 }
 

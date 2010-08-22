@@ -2043,7 +2043,7 @@ namespace BLToolkit.Data.Linq
 
 				ParseSetter(setter, source, select);
 
-				CurrentSql.Select.Columns.RemoveAll(_ => true);
+				CurrentSql.Select.Columns.Clear();
 
 				foreach (var item in CurrentSql.Set.Items)
 					CurrentSql.Select.Columns.Add(new SqlQuery.Column(CurrentSql, item.Expression));

@@ -1,6 +1,8 @@
 using System;
 using System.Data;
+#if !SILVERLIGHT
 using System.Data.Common;
+#endif
 using System.IO;
 using System.Text;
 
@@ -76,7 +78,18 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private bool ReadRecord()
+		static string Encode(string value)
+		{
+			var arr = Convert.FromBase64String(value.Substring(1));
+
+#if SILVERLIGHT
+			return new UnicodeEncoding(false, true).GetString(arr, 0, arr.Length);
+#else
+			return Encoding.Unicode.GetString(arr);
+#endif
+		}
+
+		bool ReadRecord()
 		{
 			if (!IsEof)
 			{
@@ -85,17 +98,16 @@ namespace BLToolkit.Mapping
 
 				if (_line.StartsWith("**") && _line.Length > 3)
 				{
-					string[] values = _line.Substring(3).Split(_line[2]);
+					var values = _line.Substring(3).Split(_line[2]);
 
-					for (int i = 0; i < _values.Length && i < values.Length; i++)
+					for (var i = 0; i < _values.Length && i < values.Length; i++)
 					{
-						string value = values[i];
+						var value = values[i];
 
 						_values[i] =
 							value.Length == 0? null:
 							value[0] == '*'?   value.Substring(1):
-							value[0] == '+'?   Encoding.Unicode.GetString(Convert.FromBase64String(value.Substring(1))):
-							                   value;
+							value[0] == '+'?   Encode(value.Substring(1)) : value;
 					}
 
 					ReadNextLine();
@@ -134,6 +146,7 @@ namespace BLToolkit.Mapping
 			return _names[index];
 		}
 
+#if !SILVERLIGHT
 		private DataTable _schemaTable;
 
 		public virtual DataTable GetSchemaTable()
@@ -191,6 +204,8 @@ namespace BLToolkit.Mapping
 
 			return _schemaTable;
 		}
+
+#endif
 
 		public virtual int FieldCount
 		{

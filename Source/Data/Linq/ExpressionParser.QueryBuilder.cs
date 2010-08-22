@@ -514,7 +514,7 @@ namespace BLToolkit.Data.Linq
 							var cm = ConvertMethod(ce);
 
 							if (cm != null)
-								if (ce.Method.GetCustomAttributes(typeof (MethodExpressionAttribute), true).Length != 0)
+								if (ce.Method.GetCustomAttributes(typeof(MethodExpressionAttribute), true).Length != 0)
 									return BuildNewExpression(lambda, query, cm, converter);
 
 							if (IsSubQuery(pi, query))
@@ -684,7 +684,7 @@ namespace BLToolkit.Data.Linq
 							var field1  = (SqlField)ee.Expr1;
 							var column1 = (QueryField.Column)table.ParentAssociation.GetField(field1);
 
-							checkNullOnly = CurrentSql.Select.Columns.Find(col => col.Expression == column1.Field) == null;
+							checkNullOnly = CurrentSql.Select.Columns.FirstOrDefault(col => col.Expression == column1.Field) == null;
 
 							if (checkNullOnly)
 								break;
@@ -2223,8 +2223,10 @@ namespace BLToolkit.Data.Linq
 										break;
 								}
 							}
+#if !SILVERLIGHT
 							else if (e.Method == Functions.String.Like11) predicate = ParseLikePredicate(e, queries);
 							else if (e.Method == Functions.String.Like12) predicate = ParseLikePredicate(e, queries);
+#endif
 							else if (e.Method == Functions.String.Like21) predicate = ParseLikePredicate(e, queries);
 							else if (e.Method == Functions.String.Like22) predicate = ParseLikePredicate(e, queries);
 
@@ -2431,7 +2433,7 @@ namespace BLToolkit.Data.Linq
 			{
 				case ExpressionType.Constant:
 					{
-						var    origValue = Enum.Parse(type, Enum.GetName(type, ((ConstantExpression)value).Value));
+						var    origValue = Enum.Parse(type, Enum.GetName(type, ((ConstantExpression)value).Value), false);
 						object mapValue;
 
 						if (!dic.TryGetValue(origValue, out mapValue))
@@ -3377,7 +3379,7 @@ namespace BLToolkit.Data.Linq
 		{
 			if (member.Name == "Count")
 			{
-				if (member.DeclaringType.IsSubclassOf(typeof(CollectionBase)))
+				if (typeof(ICollection).IsAssignableFrom(member.DeclaringType))
 					return true;
 
 				foreach (var t in member.DeclaringType.GetInterfaces())

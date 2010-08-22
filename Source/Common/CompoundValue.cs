@@ -52,14 +52,14 @@ namespace BLToolkit.Common
 
 		public int CompareTo(object obj)
 		{
-			object[] objValues = ((CompoundValue)obj)._values;
+			var objValues = ((CompoundValue)obj)._values;
 
 			if (_values.Length != objValues.Length)
 				return _values.Length - objValues.Length;
 
-			for (int i = 0; i < _values.Length; i++)
+			for (var i = 0; i < _values.Length; i++)
 			{
-				int n = Comparer.Default.Compare(_values[i], objValues[i]);
+				var n = Comparer.Default.Compare(_values[i], objValues[i]);
 
 				if (n != 0)
 					return n;

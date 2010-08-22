@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 using BLToolkit.Common;
@@ -145,12 +146,10 @@ namespace BLToolkit.Reflection.MetadataProvider
 					if (attrExt.Count == 0)
 						continue;
 
-					var list      = new ArrayList(attrExt.Count);
-					var origValue = Enum.Parse(type, fi.Name);
+					var list      = new List<object>(attrExt.Count);
+					var origValue = Enum.Parse(type, fi.Name, false);
 
-					foreach (var ae in attrExt)
-						if (ae.Value != null)
-							list.Add(ae.Value);
+					list.AddRange(from ae in attrExt where ae.Value != null select ae.Value);
 
 					if (list.Count > 0)
 					{
@@ -245,7 +244,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			foreach (var fi in fields)
 				if ((fi.Attributes & EnumField) == EnumField)
 					if (typeExt[fi.Name]["DefaultValue"].Value != null)
-						return Enum.Parse(type, fi.Name);
+						return Enum.Parse(type, fi.Name, false);
 
 			return null;
 		}

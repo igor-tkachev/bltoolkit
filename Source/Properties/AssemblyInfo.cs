@@ -37,7 +37,9 @@ using BLToolkit;
 // The AllowPartiallyTrustedCallersAttribute requires the assembly to be signed with a strong name key.
 // This attribute is necessary since the control is called by either an intranet or Internet
 // Web page that should be running under restricted permissions.
+#if !SILVERLIGHT
 [assembly: AllowPartiallyTrustedCallers]
+#endif
 
 [assembly: CLSCompliant(true)]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]

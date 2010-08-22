@@ -137,54 +137,48 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private readonly Hashtable _nameToMember       = new Hashtable();
-		private readonly Hashtable _memberNameToMember = new Hashtable();
+		private readonly Dictionary<string,MemberMapper> _nameToMember       = new Dictionary<string,MemberMapper>();
+		private readonly Dictionary<string,MemberMapper> _memberNameToMember = new Dictionary<string,MemberMapper>();
 		public  MemberMapper this[string name]
 		{
 			get
 			{
 				if (name == null) throw new ArgumentNullException("name");
 
-				var mm = (MemberMapper)_nameToMember[name];
-
-				if (mm == null)
+				lock (_nameToMember)
 				{
-					lock (_nameToMember.SyncRoot)
+					MemberMapper mm;
+
+					if (!_nameToMember.TryGetValue(name, out mm))
 					{
-						mm = (MemberMapper)_nameToMember[name];
-
-						if (mm == null)
+						if (!_nameToMember.TryGetValue(name.ToLower(CultureInfo.CurrentCulture), out mm))
 						{
-							mm = (MemberMapper)_nameToMember[name.ToLower(CultureInfo.CurrentCulture)];
-
-							if (mm == null)
-							{
-								if (_memberNameToMember.ContainsKey(name)
-									|| _memberNameToMember.ContainsKey(name.ToLower(CultureInfo.CurrentCulture)))
+							lock (_memberNameToMember)
+								if (_memberNameToMember.ContainsKey(name) || _memberNameToMember.ContainsKey(name.ToLower(CultureInfo.CurrentCulture)))
 									return null;
 
-								mm = GetComplexMapper(name, name);
+							mm = GetComplexMapper(name, name);
 
-								if (mm != null)
+							if (mm != null)
+							{
+								if (_members.Contains(mm))
 								{
-									if (_members.Contains(mm))
-									{
-										//throw new MappingException(string.Format(
-										//    "Wrong mapping field name: '{0}', type: '{1}'. Use field name '{2}' instead.",
-										//    name, _typeAccessor.OriginalType.Name, mm.Name));
-										return null;
-									}
-
-									Add(mm);
+									//throw new MappingException(string.Format(
+									//    "Wrong mapping field name: '{0}', type: '{1}'. Use field name '{2}' instead.",
+									//    name, _typeAccessor.OriginalType.Name, mm.Name));
+									return null;
 								}
-							}
-							else
-								_nameToMember[name] = mm;
-						}
-					}
-				}
 
-				return mm;
+								Add(mm);
+							}
+						}
+						else
+							_nameToMember.Add(name, mm);
+					}
+
+					return mm;
+					
+				}
 			}
 		}
 
@@ -192,8 +186,11 @@ namespace BLToolkit.Mapping
 		{
 			get
 			{
+				MemberMapper mm;
+
 				if (byPropertyName)
-					return (MemberMapper)_memberNameToMember[name];
+					lock (_memberNameToMember)
+						return _memberNameToMember.TryGetValue(name, out mm) ? mm : null;
 
 				return this[name];
 			}
@@ -300,7 +297,7 @@ namespace BLToolkit.Mapping
 				}
 			}
 
-			foreach (AttributeExtension ae in _extension.Attributes["MapField"])
+			foreach (var ae in _extension.Attributes["MapField"])
 			{
 				var mapName  = (string)ae["MapName"];
 				var origName = (string)ae["OrigName"];
@@ -342,8 +339,7 @@ namespace BLToolkit.Mapping
 			return mm;
 		}
 
-		private readonly Hashtable _nameToComplexMapper          = new Hashtable();
-		private readonly Hashtable _nameToNotFoundComplexMappers = new Hashtable();
+		private readonly Dictionary<string,MemberMapper> _nameToComplexMapper = new Dictionary<string,MemberMapper>();
 
 		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "stack0")]
 		[SuppressMessage("Microsoft.Performance", "CA1807:AvoidUnnecessaryStringCreation", MessageId = "origName")]
@@ -353,71 +349,85 @@ namespace BLToolkit.Mapping
 
 			var name = origName.ToLower();
 			var idx  = origName.IndexOf('.');
-			var mm   = (MemberMapper)_nameToComplexMapper[name];
-			
-			if (mm != null)
-				return mm;
 
-			if (_nameToNotFoundComplexMappers.ContainsKey(name))
-				return null;
-
-			if (idx > 0)
+			lock (_nameToComplexMapper)
 			{
-				name = name.Substring(0, idx);
+				MemberMapper mm;
 
-				foreach (MemberAccessor ma in TypeAccessor)
+				if (_nameToComplexMapper.TryGetValue(name, out mm))
+					return mm;
+
+				if (idx > 0)
 				{
-					if (ma.Name.Length == name.Length && ma.Name.ToLower() == name)
+					name = name.Substring(0, idx);
+
+					foreach (MemberAccessor ma in TypeAccessor)
 					{
-						var om = MappingSchema.GetObjectMapper(ma.Type);
-
-						if (om != null)
+						if (ma.Name.Length == name.Length && ma.Name.ToLower() == name)
 						{
-							mm = om.GetComplexMapper(mapName, origName.Substring(idx + 1));
+							var om = MappingSchema.GetObjectMapper(ma.Type);
 
-							if (mm != null)
+							if (om != null)
 							{
-								var mi = new MapMemberInfo
+								mm = om.GetComplexMapper(mapName, origName.Substring(idx + 1));
+
+								if (mm != null)
 								{
-									MemberAccessor        = ma,
-									ComplexMemberAccessor = mm.ComplexMemberAccessor,
-									Type                  = mm.Type,
-									MappingSchema         = MappingSchema,
-									Name                  = mapName,
-									MemberName            = origName
-								};
+									var mi = new MapMemberInfo
+									{
+										MemberAccessor        = ma,
+										ComplexMemberAccessor = mm.ComplexMemberAccessor,
+										Type                  = mm.Type,
+										MappingSchema         = MappingSchema,
+										Name                  = mapName,
+										MemberName            = origName
+									};
 
-								var mapper = new MemberMapper.ComplexMapper(mm);
+									var mapper = new MemberMapper.ComplexMapper(mm);
+									var key    = origName.ToLower();
 
-								mapper.Init(mi);
+									mapper.Init(mi);
 
-								_nameToComplexMapper[origName.ToLower()] = mapper;
+									if (_nameToComplexMapper.ContainsKey(key))
+										_nameToComplexMapper[key] = mapper;
+									else
+										_nameToComplexMapper.Add(key, mapper);
 
-								return mapper;
+									return mapper;
+								}
 							}
-						}
 
-						break;
+							break;
+						}
 					}
 				}
-			}
-			else
-			{
-				foreach (var m in _members)
-					if (m.MemberAccessor.Name.Length == name.Length && m.MemberAccessor.Name.ToLower() == name)
-					{
-						_nameToComplexMapper[name] = m;
-						return m;
-					}
+				else
+				{
+					foreach (var m in _members)
+						if (m.MemberAccessor.Name.Length == name.Length && m.MemberAccessor.Name.ToLower() == name)
+						{
+							if (_nameToComplexMapper.ContainsKey(name))
+								_nameToComplexMapper[name] = m;
+							else
+								_nameToComplexMapper.Add(name, m);
+
+							return m;
+						}
+				}
+
+				// Under some conditions, this way lead to memory leaks.
+				// In other hand, shaking mappers up every time lead to performance loss.
+				// So we cache failed requests.
+				// If this optimization is a memory leak for you, just comment out next line.
+				//
+				if (_nameToComplexMapper.ContainsKey(name))
+					_nameToComplexMapper[name] = null;
+				else
+					_nameToComplexMapper.Add(name, null);
+
+				return null;
 			}
 
-			// Under some conditions, this way lead to memory leaks.
-			// In other hand, shaking mappers up every time lead to performance loss.
-			// So we cache failed requests.
-			// If this optimization is a memory leak for you, just comment out next line.
-			//
-			_nameToNotFoundComplexMappers[name] = null;
-			return null;
 		}
 
 		private MapValue[] GetMapValues(MemberAccessor member)
@@ -541,7 +551,11 @@ namespace BLToolkit.Mapping
 
 		public override object GetValue(object o, string name)
 		{
-			var mm = (MemberMapper)_nameToMember[name] ?? this[name];
+			MemberMapper mm;
+
+			lock (_nameToMember)
+				if (!_nameToMember.TryGetValue(name, out mm))
+					mm = this[name];
 
 			return mm == null? null: mm.GetValue(o);
 		}
@@ -625,7 +639,11 @@ namespace BLToolkit.Mapping
 
 		public override int GetOrdinal(string name)
 		{
-			var mm = (MemberMapper)_nameToMember[name] ?? this[name];
+			MemberMapper mm;
+
+			lock (_nameToMember)
+				if (!_nameToMember.TryGetValue(name, out mm))
+					mm = this[name];
 
 			return mm == null? -1: mm.Ordinal;
 		}

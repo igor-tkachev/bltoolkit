@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -135,6 +136,8 @@ namespace BLToolkit.TypeBuilder
 		{
 			var ab = GlobalAssemblyBuilder;
 
+#if !SILVERLIGHT
+
 			if (ab == null)
 			{
 				var assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -153,6 +156,8 @@ namespace BLToolkit.TypeBuilder
 
 				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + fullName + "." + suffix + ".dll");
 			}
+
+#endif
 
 			return ab;
 		}
@@ -183,8 +188,8 @@ namespace BLToolkit.TypeBuilder
 
 		#region GetType
 
-		private static readonly Hashtable _builtTypes = new Hashtable(10);
-		private static readonly Hashtable _assemblies = new Hashtable(10);
+		static readonly Dictionary<Type,IDictionary<object,Type>> _builtTypes = new Dictionary<Type,IDictionary<object,Type>>(10);
+		static readonly Dictionary<Assembly,Assembly>             _assemblies = new Dictionary<Assembly, Assembly>(10);
 
 		public static bool LoadTypes { get; set; }
 
@@ -196,32 +201,18 @@ namespace BLToolkit.TypeBuilder
 
 			try
 			{
-				var  builderTable = (Hashtable)_builtTypes[typeBuilder.GetType()];
-				Type type;
-
-				if (builderTable != null)
+				lock (_builtTypes)
 				{
-					type = (Type)builderTable[hashKey];
+					Type type;
+					IDictionary<object,Type> builderTable;
 
-					if (type != null)
-						return type;
-				}
-
-				lock (_builtTypes.SyncRoot)
-				{
-					builderTable = (Hashtable)_builtTypes[typeBuilder.GetType()];
-
-					if (builderTable != null)
+					if (_builtTypes.TryGetValue(typeBuilder.GetType(), out builderTable))
 					{
-						type = (Type)builderTable[hashKey];
-
-						if (type != null)
+						if (builderTable.TryGetValue(hashKey, out type))
 							return type;
 					}
 					else
-					{
-						_builtTypes.Add(typeBuilder.GetType(), builderTable = new Hashtable());
-					}
+						_builtTypes.Add(typeBuilder.GetType(), builderTable = new Dictionary<object,Type>());
 
 					if (LoadTypes)
 					{
@@ -229,9 +220,7 @@ namespace BLToolkit.TypeBuilder
 
 						Assembly extensionAssembly;
 
-						if (_assemblies.Contains(originalAssembly))
-							extensionAssembly = (Assembly)_assemblies[originalAssembly];
-						else
+						if (!_assemblies.TryGetValue(originalAssembly, out extensionAssembly))
 						{
 							extensionAssembly = LoadExtensionAssembly(originalAssembly);
 							_assemblies.Add(originalAssembly, extensionAssembly);
@@ -298,8 +287,10 @@ namespace BLToolkit.TypeBuilder
 
 		#region Private Helpers
 
-		private static Assembly LoadExtensionAssembly(Assembly originalAssembly)
+		static Assembly LoadExtensionAssembly(Assembly originalAssembly)
 		{
+#if !SILVERLIGHT
+
 			if (originalAssembly is _AssemblyBuilder)
 			{
 				// This is a generated assembly. Even if it has a valid Location,
@@ -342,6 +333,8 @@ namespace BLToolkit.TypeBuilder
 				Debug.WriteLine(ex, typeof(TypeAccessor).FullName);
 			}
 
+#endif
+
 			return null;
 		}
 
@@ -376,12 +369,12 @@ namespace BLToolkit.TypeBuilder
 				name         = string.Join(",", nameParts);
 			}
 
-			lock (_builtTypes.SyncRoot)
-			{
-				foreach (Type type in _builtTypes.Keys)
+			lock (_builtTypes)
+				foreach (var type in _builtTypes.Keys)
 					if (type.FullName == name)
 						return type.Assembly;
-			}
+
+#if !SILVERLIGHT
 
 			var idx = name.IndexOf("." + TypeBuilderConsts.AssemblyNameSuffix);
 
@@ -453,6 +446,8 @@ namespace BLToolkit.TypeBuilder
 						return newType.Assembly;
 				}
 			}
+
+#endif
 
 			return null;
 		}

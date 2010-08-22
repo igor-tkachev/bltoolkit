@@ -56,7 +56,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						.ldfld          (field)
 						.ldarg_1
 						.boxIfValueType (index[0].ParameterType)
-						.callvirt       (typeof(Hashtable), "get_Item", typeof(object))
+						.callvirt       (typeof(Dictionary<object,object>), "get_Item", typeof(object))
 						.castType       (Context.CurrentProperty.PropertyType)
 						.stloc          (Context.ReturnValue)
 						;
@@ -88,7 +88,7 @@ namespace BLToolkit.TypeBuilder.Builders
 						.boxIfValueType (index[0].ParameterType)
 						.ldarg_2
 						.boxIfValueType (Context.CurrentProperty.PropertyType)
-						.callvirt       (typeof(Hashtable), "set_Item", typeof(object), typeof(object))
+						.callvirt       (typeof(Dictionary<object,object>), "set_Item", typeof(object), typeof(object))
 					;
 					break;
 			}

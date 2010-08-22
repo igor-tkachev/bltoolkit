@@ -17,11 +17,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			var attr = GetSequenceNameAttribute();
+			var attr = GetSequenceNameAttribute(false);
+			var name =
+				attr != null ?
+					attr.SequenceName :
+					string.Format("{0}_{1}_seq", SqlQuery.Set.Into.PhysicalName, SqlQuery.Set.Into.GetIdentityField().PhysicalName);
 
 			AppendIndent(sb)
 				.Append("SELECT currval('")
-				.Append(attr.SequenceName)
+				.Append(name)
 				.AppendLine("')");
 		}
 

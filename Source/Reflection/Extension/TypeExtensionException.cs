@@ -66,6 +66,8 @@ namespace BLToolkit.Reflection.Extension
 		{
 		}
 
+#if !SILVERLIGHT
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TypeExtensionException"/> class
 		/// with serialized data.
@@ -79,6 +81,8 @@ namespace BLToolkit.Reflection.Extension
 			: base(info, context) 
 		{
 		}
+
+#endif
 	}
 }
 

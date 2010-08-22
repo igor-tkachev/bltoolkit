@@ -7,7 +7,11 @@ namespace BLToolkit.Validation
 	public class RegExAttribute : ValidatorBaseAttribute 
 	{
 		public RegExAttribute(string pattern)
-			:this(pattern, RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled)
+			: this(pattern, RegexOptions.IgnorePatternWhitespace
+#if !SILVERLIGHT
+				| RegexOptions.Compiled
+#endif
+			)
 		{
 		}
 

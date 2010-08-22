@@ -102,6 +102,8 @@ namespace BLToolkit.Mapping
 		public override DateTime? GetNullableDateTime(object o, int index) { return DataReader.IsDBNull(_index)? null: (DateTime?)DataReader.GetDateTime(_index); }
 		public override DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return DataReader.IsDBNull(_index)? null: (DateTimeOffset?)DataReader.GetDateTime(_index); }
 
+#if !SILVERLIGHT
+
 		// SQL type getters.
 		//
 		public override SqlByte     GetSqlByte    (object o, int index) { return DataReader.IsDBNull(_index)? SqlByte.    Null: DataReader.GetByte    (_index); }
@@ -116,6 +118,8 @@ namespace BLToolkit.Mapping
 		public override SqlMoney    GetSqlMoney   (object o, int index) { return DataReader.IsDBNull(_index)? SqlMoney.   Null: DataReader.GetDecimal (_index); }
 		public override SqlGuid     GetSqlGuid    (object o, int index) { return DataReader.IsDBNull(_index)? SqlGuid.    Null: DataReader.GetGuid    (_index); }
 		public override SqlString   GetSqlString  (object o, int index) { return DataReader.IsDBNull(_index)? SqlString.  Null: DataReader.GetString  (_index); }
+
+#endif
 
 		#endregion
 	}

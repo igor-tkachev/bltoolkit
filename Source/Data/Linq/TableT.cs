@@ -18,7 +18,13 @@ namespace BLToolkit.Data.Linq
 
 		public Table(IDataContextInfo dataContextInfo, Expression expression)
 		{
+#if SILVERLIGHT
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+
+			DataContextInfo = dataContextInfo;
+#else
 			DataContextInfo = dataContextInfo ?? new DefaultDataContextInfo();
+#endif
 			Expression      = expression      ?? Expression.Constant(this);
 		}
 
@@ -27,18 +33,22 @@ namespace BLToolkit.Data.Linq
 		{
 		}
 
+#if !SILVERLIGHT
+
 		public Table()
 			: this((IDataContextInfo)null, null)
 		{
 		}
 
-		public Table(IDataContext dataContext)
-			: this(dataContext == null ? null : new DataContextInfo(dataContext), null)
+		public Table(Expression expression)
+			: this((IDataContextInfo)null, expression)
 		{
 		}
 
-		public Table(Expression expression)
-			: this((IDataContextInfo)null, expression)
+#endif
+
+		public Table(IDataContext dataContext)
+			: this(dataContext == null ? null : new DataContextInfo(dataContext), null)
 		{
 		}
 

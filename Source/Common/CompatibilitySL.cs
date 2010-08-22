@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace System
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate, Inherited = false)]
 	class SerializableAttribute : Attribute
+	{
+	}
+
+	class NonSerializedAttribute : Attribute
 	{
 	}
 
@@ -19,6 +26,44 @@ namespace System
 
 	namespace Collections
 	{
+		public class Comparer : IComparer
+		{
+			readonly CompareInfo _compareInfo; 
+
+			public static readonly Comparer Default          = new Comparer(CultureInfo.CurrentCulture);
+			public static readonly Comparer DefaultInvariant = new Comparer(CultureInfo.InvariantCulture); 
+
+			private const String CompareInfoName = "CompareInfo";
+
+			public Comparer([NotNull] CultureInfo culture)
+			{
+				if (culture == null) throw new ArgumentNullException("culture");
+				_compareInfo = culture.CompareInfo;
+			}
+
+			public int Compare(object a, object b)
+			{
+				if (a == b)    return  0;
+				if (a == null) return -1;
+				if (b == null) return  1;
+
+				if (_compareInfo != null) {
+					var sa = a as String;
+					var sb = b as String;
+
+					if (sa != null && sb != null)
+						return _compareInfo.Compare(sa, sb);
+				} 
+
+				var ia = a as IComparable;
+
+				if (ia != null)
+					return ia.CompareTo(b);
+
+				throw new ArgumentException("Object should implement IComparable interface.");
+			}
+		}
+
 		namespace Generic
 		{
 			public static class Extensions
@@ -37,6 +82,27 @@ namespace System
 					return list.Any(item => match(item));
 				}
 			}
+		}
+	}
+
+	namespace ComponentModel
+	{
+		[AttributeUsage(AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Class | AttributeTargets.Method)]
+		public class DisplayNameAttribute : Attribute
+		{
+			public static readonly DisplayNameAttribute Default = new DisplayNameAttribute();
+
+			public DisplayNameAttribute()
+			{
+				DisplayName = string.Empty;
+			}
+ 
+			public DisplayNameAttribute(string displayName)
+			{
+				DisplayName = displayName;
+			}
+
+			public string DisplayName{ get; set; }
 		}
 	}
 

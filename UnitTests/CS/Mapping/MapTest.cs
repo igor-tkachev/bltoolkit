@@ -35,14 +35,14 @@ namespace Mapping
 		[Test]
 		public void EnumToInt()
 		{
-			ArrayList list = new ArrayList();
+			var list1 = new ArrayList();
 
-			list.Add(new EnumClass());
+			list1.Add(new EnumClass());
 
-			list = Map.ListToList(list, typeof(IntClass));
+			var list2 = Map.ListToList(list1, typeof(IntClass));
 
-			Assert.AreEqual(1, ((IntClass)list[0]).Value);
-			Assert.AreEqual(2, ((IntClass)list[0]).NullableValue);
+			Assert.AreEqual(1, ((IntClass)list2[0]).Value);
+			Assert.AreEqual(2, ((IntClass)list2[0]).NullableValue);
 		}
 
 		#endregion
@@ -229,9 +229,9 @@ namespace Mapping
 		[Test]
 		public void DictionaryToObject()
 		{
-			SourceObject so = new SourceObject();
-			Hashtable    ht = Map.ObjectToDictionary(so);
-			Object1      o1 = (Object1)Map.DictionaryToObject(ht, typeof(Object1));
+			var so = new SourceObject();
+			var ht = Map.ObjectToDictionary(so);
+			var o1 = (Object1)Map.DictionaryToObject(ht, typeof(Object1));
 
 			Assert.AreEqual(10, o1.Field1);
 			Assert.AreEqual(20, o1.Field2);

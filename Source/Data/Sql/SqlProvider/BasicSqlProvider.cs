@@ -1844,7 +1844,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Helpers
 
-		protected SequenceNameAttribute GetSequenceNameAttribute()
+		protected SequenceNameAttribute GetSequenceNameAttribute(bool throwException)
 		{
 			var table         = SqlQuery.Set.Into;
 			var identityField = table.GetIdentityField();
@@ -1853,12 +1853,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				throw new SqlException("Identity field must be defined for '{0}'.", table.Name);
 
 			if (table.ObjectType == null)
-				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+				if (throwException)
+					throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+				else
+					return null;
 
 			var attrs = table.SequenceAttributes;
 
 			if (attrs == null)
-				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+				if (throwException)
+					throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+				else
+					return null;
 
 			SequenceNameAttribute defaultAttr = null;
 
@@ -1872,7 +1878,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			if (defaultAttr == null)
-				throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+				if (throwException)
+					throw new SqlException("Sequence name can not be retrieved for the '{0}' table.", table.Name);
+				else
+					return null;
 
 			return defaultAttr;
 		}

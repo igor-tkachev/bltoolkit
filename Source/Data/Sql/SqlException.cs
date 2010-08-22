@@ -31,10 +31,14 @@ namespace BLToolkit.Data.Sql
 		{
 		}
 
+#if !SILVERLIGHT
+
 		protected SqlException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+#endif
 	}
 }
 

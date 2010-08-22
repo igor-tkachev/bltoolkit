@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using System.Reflection;
 
@@ -105,21 +106,18 @@ namespace BLToolkit.Reflection.Emit
 
 			_methodBuilder = methodBuilder;
 
-			string[] genArgNames = Array.ConvertAll<Type, string>(genericArguments, delegate (Type t)
-			{
-				return t.Name;
-			});
-
-			GenericTypeParameterBuilder[] genParams = methodBuilder.DefineGenericParameters(genArgNames);
+			var genArgNames = genericArguments.Select(t => t.Name).ToArray();
+			var genParams   = methodBuilder.DefineGenericParameters(genArgNames);
 
 			// Copy parameter constraints.
 			//
 			List<Type> interfaceConstraints = null;
-			for (int i = 0; i < genParams.Length; i++)
+
+			for (var i = 0; i < genParams.Length; i++)
 			{
 				genParams[i].SetGenericParameterAttributes(genericArguments[i].GenericParameterAttributes);
 
-				foreach (Type constraint in genericArguments[i].GetGenericParameterConstraints())
+				foreach (var constraint in genericArguments[i].GetGenericParameterConstraints())
 				{
 					if (constraint.IsClass)
 						genParams[i].SetBaseTypeConstraint(constraint);
@@ -141,7 +139,7 @@ namespace BLToolkit.Reflection.Emit
 			// When a method contains a generic parameter we need to replace all
 			// generic types from methodInfoDeclaration with local ones.
 			//
-			for (int i = 0; i < parameterTypes.Length; i++)
+			for (var i = 0; i < parameterTypes.Length; i++)
 				parameterTypes[i] = TypeHelper.TranslateGenericParameters(parameterTypes[i], genParams);
 
 			methodBuilder.SetParameters(parameterTypes);

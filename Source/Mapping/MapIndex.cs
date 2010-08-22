@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using BLToolkit.Common;
 using BLToolkit.Properties;
 
@@ -14,7 +15,7 @@ namespace BLToolkit.Mapping
 			if (names.Length == 0)
 				throw new ArgumentException(Resources.MapIndex_EmptyNames, "names");
 
-			_fields = NameOrIndexParameter.FromStringArray(names);
+			Fields = NameOrIndexParameter.FromStringArray(names);
 		}
 
 		public MapIndex(int[] indices)
@@ -25,7 +26,7 @@ namespace BLToolkit.Mapping
 			if (indices.Length == 0)
 				throw new ArgumentException(Resources.MapIndex_EmptyIndices, "indices");
 
-			_fields = NameOrIndexParameter.FromIndexArray(indices);
+			Fields = NameOrIndexParameter.FromIndexArray(indices);
 		}
 		
 		public MapIndex(params NameOrIndexParameter[] fields)
@@ -36,31 +37,15 @@ namespace BLToolkit.Mapping
 			if (fields.Length == 0)
 				throw new ArgumentException(Resources.MapIndex_EmptyFields, "fields");
 			
-			_fields = fields;
+			Fields = fields;
 		}
 
-		private readonly NameOrIndexParameter[] _fields;
-		public           NameOrIndexParameter[]  Fields
-		{
-			get { return _fields; }
-		}
+		public NameOrIndexParameter[] Fields { get; private set; }
 
 		private string _id;
 		public  string  ID
 		{
-			get
-			{
-				if (_id == null)
-				{
-					_id = string.Join(".", Array.ConvertAll<NameOrIndexParameter, string>(_fields,
-						delegate(NameOrIndexParameter nameOrIndex)
-						{
-							return nameOrIndex.ToString();
-						}));
-				}
-
-				return _id;
-			}
+			get { return _id ?? (_id = string.Join(".", Fields.Select(_ => _.ToString()).ToArray())); }
 		}
 
 		[CLSCompliant(false)]
@@ -69,18 +54,18 @@ namespace BLToolkit.Mapping
 			if (source == null)
 				throw new ArgumentNullException("source");
 
-			object value = _fields[index].ByName?
-				source.GetValue(obj, _fields[index].Name):
-				source.GetValue(obj, _fields[index].Index);
+			var value = Fields[index].ByName?
+				source.GetValue(obj, Fields[index].Name):
+				source.GetValue(obj, Fields[index].Index);
 
 			if (value == null)
 			{
-				ObjectMapper objectMapper = source as ObjectMapper;
+				var objectMapper = source as ObjectMapper;
 
 				if (objectMapper != null)
 				{
-					MemberMapper mm = _fields[index].ByName?
-						objectMapper[_fields[index].Name]: objectMapper[_fields[index].Index];
+					var mm = Fields[index].ByName?
+						objectMapper[Fields[index].Name]: objectMapper[Fields[index].Index];
 
 					if (mm == null)
 						throw new MappingException(string.Format(Resources.MapIndex_BadField,
@@ -102,9 +87,9 @@ namespace BLToolkit.Mapping
 		[CLSCompliant(false)]
 		public CompoundValue GetIndexValue(IMapDataSource source, object obj)
 		{
-			object[] values = new object[Fields.Length];
+			var values = new object[Fields.Length];
 
-			for (int i = 0; i < values.Length; i++)
+			for (var i = 0; i < values.Length; i++)
 				values[i] = GetValue(source, obj, i);
 
 			return new CompoundValue(values);

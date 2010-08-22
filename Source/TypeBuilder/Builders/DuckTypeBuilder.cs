@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+
 using BLToolkit.Patterns;
 using BLToolkit.Properties;
 using BLToolkit.Reflection.Emit;
@@ -85,7 +86,11 @@ namespace BLToolkit.TypeBuilder.Builders
 				ParameterInfo p1 = ps1[i];
 				ParameterInfo p2 = ps2[i];
 
-				if (p1.ParameterType != p2.ParameterType || p1.IsIn != p2.IsIn || p1.IsOut != p2.IsOut)
+				if (p1.ParameterType != p2.ParameterType ||
+#if !SILVERLIGHT
+					p1.IsIn != p2.IsIn ||
+#endif
+					p1.IsOut != p2.IsOut)
 					return false;
 			}
 

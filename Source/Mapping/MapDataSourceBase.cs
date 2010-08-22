@@ -68,6 +68,8 @@ namespace BLToolkit.Mapping
 		public virtual DateTime? GetNullableDateTime(object o, int index) { return Map.DefaultSchema.ConvertToNullableDateTime(GetValue(o, index)); }
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o, int index) { return Map.DefaultSchema.ConvertToNullableDateTimeOffset(GetValue(o, index)); }
 
+#if !SILVERLIGHT
+
 		// SQL type getters.
 		//
 		public virtual SqlByte     GetSqlByte     (object o, int index) { return Map.DefaultSchema.ConvertToSqlByte    (GetValue(o, index)); }
@@ -82,6 +84,8 @@ namespace BLToolkit.Mapping
 		public virtual SqlMoney    GetSqlMoney    (object o, int index) { return Map.DefaultSchema.ConvertToSqlMoney   (GetValue(o, index)); }
 		public virtual SqlGuid     GetSqlGuid     (object o, int index) { return Map.DefaultSchema.ConvertToSqlGuid    (GetValue(o, index)); }
 		public virtual SqlString   GetSqlString   (object o, int index) { return Map.DefaultSchema.ConvertToSqlString  (GetValue(o, index)); }
+
+#endif
 
 		#endregion
 	}

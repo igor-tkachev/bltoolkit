@@ -28,7 +28,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			SequenceNameAttribute attr = GetSequenceNameAttribute();
+			SequenceNameAttribute attr = GetSequenceNameAttribute(true);
 
 			AppendIndent(sb)
 				.Append("SELECT gen_id(")

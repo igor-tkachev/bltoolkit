@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Linq.SqlClient;
 using System.Globalization;
 using System.Reflection;
 
@@ -231,18 +230,26 @@ namespace BLToolkit.Data.Linq
 			return str == null || startIndex == null || length == null ? null : str.Substring(startIndex.Value, length.Value);
 		}
 
-		[SqlFunction]
+		[SqlFunction(ServerSideOnly = true)]
 		public static bool Like(string matchExpression, string pattern)
 		{
-			return matchExpression == null || pattern == null ? false : SqlMethods.Like(matchExpression, pattern);
+#if SILVERLIGHT
+			throw new InvalidOperationException();
+#else
+			return matchExpression == null || pattern == null ? false : System.Data.Linq.SqlClient.SqlMethods.Like(matchExpression, pattern);
+#endif
 		}
 
-		[SqlFunction]
+		[SqlFunction(ServerSideOnly = true)]
 		public static bool Like(string matchExpression, string pattern, char? escapeCharacter)
 		{
+#if SILVERLIGHT
+			throw new InvalidOperationException();
+#else
 			return matchExpression == null || pattern == null || escapeCharacter == null ?
 				false :
-				SqlMethods.Like(matchExpression, pattern, escapeCharacter.Value);
+				System.Data.Linq.SqlClient.SqlMethods.Like(matchExpression, pattern, escapeCharacter.Value);
+#endif
 		}
 
 		[SqlFunction]
@@ -649,7 +656,7 @@ namespace BLToolkit.Data.Linq
 
 		[SqlFunction("Informix", "Ceil")]
 		[SqlFunction("Oracle",   "Ceil")]
-		[SqlFunction] public static Decimal? Ceiling(Decimal? value) { return value == null ? null : (Decimal?)Math.Ceiling(value.Value); }
+		[SqlFunction] public static Decimal? Ceiling(Decimal? value) { return value == null ? null : (Decimal?)decimal.Ceiling(value.Value); }
 		[SqlFunction("Informix", "Ceil")]
 		[SqlFunction("Oracle",   "Ceil")]
 		[SqlFunction] public static Double?  Ceiling(Double?  value) { return value == null ? null : (Double?)Math.Ceiling(value.Value); }
@@ -672,9 +679,9 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction] public static Double?  Exp    (Double?  value) { return value == null ? null : (Double?)Math.Exp    (value.Value); }
 
 		[SqlFunction("Access", "Int")]
-		[SqlFunction] public static Decimal? Floor  (Decimal? value) { return value == null ? null : (Decimal?)Math.Floor  (value.Value); }
+		[SqlFunction] public static Decimal? Floor  (Decimal? value) { return value == null ? null : (Decimal?)decimal.Floor(value.Value); }
 		[SqlFunction("Access", "Int")]
-		[SqlFunction] public static Double?  Floor  (Double?  value) { return value == null ? null : (Double?) Math.Floor  (value.Value); }
+		[SqlFunction] public static Double?  Floor  (Double?  value) { return value == null ? null : (Double?) Math.   Floor(value.Value); }
 
 		[SqlFunction("Informix",   "LogN")]
 		[SqlFunction("Oracle",     "Ln")]
@@ -709,17 +716,68 @@ namespace BLToolkit.Data.Linq
 			return x == null || y == null ? null : (Double?)Math.Pow(x.Value, y.Value);
 		}
 
+		[SqlFunction]
+		public static Decimal? RoundToEven(Decimal? value)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null ? null : (Decimal?)Math.Round(value.Value, MidpointRounding.ToEven);
+#endif
+		}
+
+		[SqlFunction]
+		public static Double? RoundToEven(Double? value)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null ? null : (Double?) Math.Round(value.Value, MidpointRounding.ToEven);
+#endif
+		}
+
 		[SqlFunction] public static Decimal? Round(Decimal? value) { return Round(value, 0); }
 		[SqlFunction] public static Double?  Round(Double?  value) { return Round(value, 0); }
 
-		[SqlFunction] public static Decimal? Round(Decimal? value, int? precision) { return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero); }
-		[SqlFunction] public static Double?  Round(Double?  value, int? precision) { return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero); }
+		[SqlFunction]
+		public static Decimal? Round(Decimal? value, int? precision)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero);
+#endif
+		}
 
-		[SqlFunction] public static Decimal? RoundToEven(Decimal? value) { return value == null ? null : (Decimal?)Math.Round(value.Value, MidpointRounding.ToEven); }
-		[SqlFunction] public static Double?  RoundToEven(Double?  value) { return value == null ? null : (Double?) Math.Round(value.Value, MidpointRounding.ToEven); }
+		[SqlFunction]
+		public static Double? Round(Double?  value, int? precision)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero);
+#endif
+		}
 
-		[SqlFunction] public static Decimal? RoundToEven(Decimal? value, int? precision) { return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.ToEven); }
-		[SqlFunction] public static Double?  RoundToEven(Double?  value, int? precision) { return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.ToEven); }
+		[SqlFunction]
+		public static Decimal? RoundToEven(Decimal? value, int? precision)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.ToEven);
+#endif
+		}
+
+		[SqlFunction]
+		public static Double? RoundToEven(Double?  value, int? precision)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.ToEven);
+#endif
+		}
 
 		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Decimal? value) { return value == null ? null : (int?)Math.Sign(value.Value); }
 		[SqlFunction("Access", "Sgn"), SqlFunction] public static int? Sign(Double?  value) { return value == null ? null : (int?)Math.Sign(value.Value); }
@@ -746,7 +804,15 @@ namespace BLToolkit.Data.Linq
 		[SqlExpression("PostgreSQL", "Trunc({0}, 0)")]
 		[SqlExpression("MySql",      "Truncate({0}, 0)")]
 		[SqlExpression("SqlCe",      "Round({0}, 0, 1)")]
-		[SqlFunction] public static Decimal? Truncate(Decimal? value) { return value == null ? null : (Decimal?)Math.Truncate(value.Value); }
+		[SqlFunction]
+		public static Decimal? Truncate(Decimal? value)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null ? null : (Decimal?)decimal.Truncate(value.Value);
+#endif
+		}
 
 		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
@@ -757,7 +823,15 @@ namespace BLToolkit.Data.Linq
 		[SqlExpression("PostgreSQL", "Trunc({0}, 0)")]
 		[SqlExpression("MySql",      "Truncate({0}, 0)")]
 		[SqlExpression("SqlCe",      "Round({0}, 0, 1)")]
-		[SqlFunction] public static Double?  Truncate(Double?  value) { return value == null ? null : (Double?) Math.Truncate(value.Value); }
+		[SqlFunction]
+		public static Double? Truncate(Double? value)
+		{
+#if SILVERLIGHT
+			throw new NotImplementedException();
+#else
+			return value == null ? null : (Double?) Math.Truncate(value.Value);
+#endif
+		}
 
 		#endregion
 	}

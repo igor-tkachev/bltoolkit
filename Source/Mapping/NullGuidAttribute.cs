@@ -29,10 +29,14 @@ namespace BLToolkit.Mapping
 		{
 		}
 
+#if !SILVERLIGHT
+
 		[CLSCompliant(false)]
 		public NullGuidAttribute(uint a, ushort b, ushort c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k)
 			: base(new Guid(a, b, c, d, e, f, g, h, i, j, k))
 		{
 		}
+
+#endif
 	}
 }

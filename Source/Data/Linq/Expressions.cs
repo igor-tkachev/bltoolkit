@@ -5,7 +5,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
+#if !SILVERLIGHT
 using Microsoft.VisualBasic.CompilerServices;
+#endif
 
 using JetBrains.Annotations;
 
@@ -187,7 +189,9 @@ namespace BLToolkit.Data.Linq
 
 				{ M(() => Boolean. Parse("")), L<String,Boolean> (p0 => Sql.ConvertTo<Boolean>. From(p0) ) },
 				{ M(() => Byte.    Parse("")), L<String,Byte>    (p0 => Sql.ConvertTo<Byte>.    From(p0) ) },
+#if !SILVERLIGHT
 				{ M(() => Char.    Parse("")), L<String,Char>    (p0 => Sql.ConvertTo<Char>.    From(p0) ) },
+#endif
 				{ M(() => DateTime.Parse("")), L<String,DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
 				{ M(() => Decimal. Parse("")), L<String,Decimal> (p0 => Sql.ConvertTo<Decimal>. From(p0) ) },
 				{ M(() => Double.  Parse("")), L<String,Double>  (p0 => Sql.ConvertTo<Double>.  From(p0) ) },
@@ -554,12 +558,16 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Math.Asin   (0)   ), L<F,F>  ( p    => Sql.Asin   (p)   .Value ) },
 				{ M(() => Math.Atan   (0)   ), L<F,F>  ( p    => Sql.Atan   (p)   .Value ) },
 				{ M(() => Math.Atan2  (0,0) ), L<F,F,F>((x,y) => Sql.Atan2  (x, y).Value ) },
+#if !SILVERLIGHT
 				{ M(() => Math.Ceiling((M)0)), L<M,M>  ( p    => Sql.Ceiling(p)   .Value ) },
+#endif
 				{ M(() => Math.Ceiling((F)0)), L<F,F>  ( p    => Sql.Ceiling(p)   .Value ) },
 				{ M(() => Math.Cos    (0)   ), L<F,F>  ( p    => Sql.Cos    (p)   .Value ) },
 				{ M(() => Math.Cosh   (0)   ), L<F,F>  ( p    => Sql.Cosh   (p)   .Value ) },
 				{ M(() => Math.Exp    (0)   ), L<F,F>  ( p    => Sql.Exp    (p)   .Value ) },
+#if !SILVERLIGHT
 				{ M(() => Math.Floor  ((M)0)), L<M,M>  ( p    => Sql.Floor  (p)   .Value ) },
+#endif
 				{ M(() => Math.Floor  ((F)0)), L<F,F>  ( p    => Sql.Floor  (p)   .Value ) },
 				{ M(() => Math.Log    (0)   ), L<F,F>  ( p    => Sql.Log    (p)   .Value ) },
 				{ M(() => Math.Log    (0,0) ), L<F,F,F>((m,n) => Sql.Log    (n, m).Value ) },
@@ -606,11 +614,13 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Math.Round     (0m, 0)), L<M,I,M>   ((d,n) => Sql.RoundToEven(d, n).Value ) },
 				{ M(() => Math.Round     (0.0,0)), L<F,I,F>   ((d,n) => Sql.RoundToEven(d, n).Value ) },
 
+#if !SILVERLIGHT
 				{ M(() => Math.Round (0m,    MidpointRounding.ToEven)), L<M,  MidpointRounding,M>((d,  p) => p == MidpointRounding.ToEven ? Sql.RoundToEven(d).  Value : Sql.Round(d).  Value ) },
 				{ M(() => Math.Round (0.0,   MidpointRounding.ToEven)), L<F,  MidpointRounding,F>((d,  p) => p == MidpointRounding.ToEven ? Sql.RoundToEven(d).  Value : Sql.Round(d).  Value ) },
 
 				{ M(() => Math.Round (0m, 0, MidpointRounding.ToEven)), L<M,I,MidpointRounding,M>((d,n,p) => p == MidpointRounding.ToEven ? Sql.RoundToEven(d,n).Value : Sql.Round(d,n).Value ) },
 				{ M(() => Math.Round (0.0,0, MidpointRounding.ToEven)), L<F,I,MidpointRounding,F>((d,n,p) => p == MidpointRounding.ToEven ? Sql.RoundToEven(d,n).Value : Sql.Round(d,n).Value ) },
+#endif
 
 				{ M(() => Math.Sign  ((Decimal)0)), L<Decimal,I>(p => Sql.Sign(p).Value ) },
 				{ M(() => Math.Sign  ((Double) 0)), L<Double, I>(p => Sql.Sign(p).Value ) },
@@ -626,14 +636,18 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Math.Tan   (0)), L<F,F>( p => Sql.Tan (p).Value ) },
 				{ M(() => Math.Tanh  (0)), L<F,F>( p => Sql.Tanh(p).Value ) },
 
+#if !SILVERLIGHT
 				{ M(() => Math.Truncate(0m)),  L<M,M>( p => Sql.Truncate(p).Value ) },
 				{ M(() => Math.Truncate(0.0)), L<F,F>( p => Sql.Truncate(p).Value ) },
+#endif
 
 				#endregion
 
 				#region Visual Basic Compiler Services
 
+#if !SILVERLIGHT
 				{ M(() => Operators.CompareString("","",false)), L<S,S,B,I>((s1,s2,b) => b ? string.CompareOrdinal(s1.ToUpper(), s2.ToUpper()) : string.CompareOrdinal(s1, s2)) },
+#endif
 
 				#endregion
 			}},

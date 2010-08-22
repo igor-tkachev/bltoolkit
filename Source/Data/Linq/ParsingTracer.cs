@@ -11,13 +11,17 @@ namespace BLToolkit.Data.Linq
 		[Conditional("TRACE_PARSING")]
 		public static void IncIndentLevel()
 		{
+#if !SILVERLIGHT
 			Debug.IndentLevel++;
+#endif
 		}
 
 		[Conditional("TRACE_PARSING")]
 		public static void DecIndentLevel()
 		{
+#if !SILVERLIGHT
 			Debug.IndentLevel--;
+#endif
 		}
 
 		[Conditional("TRACE_PARSING")]

@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+
 using BLToolkit.Common;
 using BLToolkit.Properties;
 using BLToolkit.Reflection;
@@ -22,7 +24,7 @@ namespace BLToolkit.Patterns
 	{
 		#region Single Duck
 
-		private static readonly Hashtable _duckTypes = new Hashtable();
+		static readonly Dictionary<Type,Dictionary<object,Type>> _duckTypes = new Dictionary<Type,Dictionary<object,Type>>();
 
 		/// <summary>
 		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.
@@ -37,37 +39,22 @@ namespace BLToolkit.Patterns
 			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
 				throw new ArgumentException(Resources.DuckTyping_InterfaceMustBePublic, "interfaceType");
 
-			Hashtable types = (Hashtable)_duckTypes[interfaceType];
+			Dictionary<object,Type> types;
 
-			if (types == null)
+			lock(_duckTypes)
+				if (!_duckTypes.TryGetValue(interfaceType, out types))
+					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type>());
+
+			Type type;
+
+			lock (types) if (!types.TryGetValue(objectType, out type))
 			{
-				lock (_duckTypes.SyncRoot)
-				{
-					types = (Hashtable)_duckTypes[interfaceType];
+				type = TypeFactory.GetType(
+					new CompoundValue(interfaceType, objectType),
+					interfaceType, //objectType,
+					new DuckTypeBuilder(MustImplementAttribute.Default, interfaceType, new[] { objectType }));
 
-					if (types == null)
-						_duckTypes.Add(interfaceType, types = new Hashtable());
-				}
-			}
-
-			Type type = (Type)types[objectType];
-
-			if (type == null)
-			{
-				lock (types.SyncRoot)
-				{
-					type = (Type)types[objectType];
-
-					if (type != null || types.ContainsKey(objectType))
-						return type;
-
-					type = TypeFactory.GetType(
-						new CompoundValue(interfaceType, objectType),
-						interfaceType, //objectType,
-						new DuckTypeBuilder(MustImplementAttribute.Default, interfaceType, new Type[] { objectType }));
-
-					types.Add(objectType, type);
-				}
+				types.Add(objectType, type);
 			}
 
 			return type;
@@ -87,14 +74,15 @@ namespace BLToolkit.Patterns
 		{
 			if (obj == null) throw new ArgumentNullException("obj");
 
-			Type objType = obj.GetType();
+			var objType = obj.GetType();
 
 			if (TypeHelper.IsSameOrParent(interfaceType, objType))
 				return obj;
 
 			if (obj is DuckType)
 			{
-				DuckType duckObject = (DuckType)obj;
+				var duckObject = (DuckType)obj;
+
 				if (duckObject.Objects.Length == 1)
 				{
 					// Switch to underlying objects when a duck object was passed.
@@ -110,15 +98,14 @@ namespace BLToolkit.Patterns
 			if (baseObjectType == null)
 				baseObjectType = objType;
 			else if (!TypeHelper.IsSameOrParent(baseObjectType, objType))
-				throw new ArgumentException(
-					string.Format(Resources.DuckTyping_NotASubtypeOf, objType.FullName, baseObjectType.FullName), "obj");
+				throw new ArgumentException(string.Format(Resources.DuckTyping_NotASubtypeOf, objType.FullName, baseObjectType.FullName), "obj");
 
-			Type duckType = GetDuckType(interfaceType, baseObjectType);
+			var duckType = GetDuckType(interfaceType, baseObjectType);
 
 			if (duckType == null)
 				return null;
 
-			object duck = TypeAccessor.CreateInstanceEx(duckType);
+			var duck = TypeAccessor.CreateInstanceEx(duckType);
 
 			((DuckType)duck).SetObjects(obj);
 
@@ -273,38 +260,23 @@ namespace BLToolkit.Patterns
 			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
 				throw new ArgumentException(Resources.DuckTyping_InterfaceMustBePublic, "interfaceType");
 
-			Hashtable types = (Hashtable)_duckTypes[interfaceType];
+			Dictionary<object,Type> types;
 
-			if (types == null)
+			lock (_duckTypes)
+				if (!_duckTypes.TryGetValue(interfaceType, out types))
+					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type>());
+
+			object key = new CompoundValue(objectTypes);
+			Type   type;
+
+			lock (types) if (!types.TryGetValue(key, out type))
 			{
-				lock (_duckTypes.SyncRoot)
-				{
-					types = (Hashtable)_duckTypes[interfaceType];
+				type = TypeFactory.GetType(
+					new CompoundValue(interfaceType, key),
+					interfaceType,
+					new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, objectTypes));
 
-					if (types == null)
-						_duckTypes.Add(interfaceType, types = new Hashtable());
-				}
-			}
-
-			object key  = new CompoundValue(objectTypes);
-			Type   type = (Type)types[key];
-
-			if (type == null)
-			{
-				lock (types.SyncRoot)
-				{
-					type = (Type)types[key];
-
-					if (type != null || types.ContainsKey(key))
-						return type;
-
-					type = TypeFactory.GetType(
-						new CompoundValue(interfaceType, key),
-						interfaceType,
-						new DuckTypeBuilder(MustImplementAttribute.Aggregate, interfaceType, objectTypes));
-
-					types.Add(key, type);
-				}
+				types.Add(key, type);
 			}
 
 			return type;

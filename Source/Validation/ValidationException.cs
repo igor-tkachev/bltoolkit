@@ -65,6 +65,8 @@ namespace BLToolkit.Validation
 		{
 		}
 
+#if !SILVERLIGHT
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ValidationException"/> class
 		/// with serialized data.
@@ -78,5 +80,7 @@ namespace BLToolkit.Validation
 			: base(info, context)
 		{
 		}
+
+#endif
 	}
 }

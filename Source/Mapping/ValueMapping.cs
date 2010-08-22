@@ -121,8 +121,8 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 				{
-					MapSetData<T>.MB<T> setter = MapSetData<T>.I;
-					MapGetData<T>.MB<T> getter = MapGetData<T>.I;
+					var setter = MapSetData<T>.I;
+					var getter = MapGetData<T>.I;
 
 					setter.To(dest, destObject, destIndex,
 						getter.From(source, sourceObject, sourceIndex));
@@ -140,9 +140,9 @@ namespace BLToolkit.Mapping
 					dest.SetNull(destObject, destIndex);
 				else
 				{
-					MapSetData<D>.MB<D>        setter    = MapSetData<D>.I;
-					MapGetData<S>.MB<S>        getter    = MapGetData<S>.I;
-					Convert<D,S>.ConvertMethod converter = Convert<D,S>.From;
+					var setter    = MapSetData<D>.I;
+					var getter    = MapGetData<S>.I;
+					var converter = Convert<D,S>.From;
 
 					setter.To(dest, destObject, destIndex,
 						converter(getter.From(source, sourceObject, sourceIndex)));

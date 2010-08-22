@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BLToolkit.Data.Sql
@@ -114,7 +115,7 @@ namespace BLToolkit.Data.Sql
 					SystemType,
 					Expr,
 					Precedence,
-					Array.ConvertAll(Parameters, e => (ISqlExpression)e.Clone(objectTree, doClone))));
+					Parameters.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
 			}
 
 			return clone;
@@ -129,15 +130,15 @@ namespace BLToolkit.Data.Sql
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
 			var len = sb.Length;
-			var ss  = Array.ConvertAll(Parameters, p =>
+			var ss  = Parameters.Select(p =>
 			{
 				p.ToString(sb, dic);
 				var s = sb.ToString(len, sb.Length - len);
 				sb.Length = len;
-				return s;
+				return (object)s;
 			});
 			
-			return sb.AppendFormat(Expr, ss);
+			return sb.AppendFormat(Expr, ss.ToArray());
 		}
 
 		#endregion

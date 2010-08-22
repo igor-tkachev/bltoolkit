@@ -58,14 +58,7 @@ namespace BLToolkit.Mapping
 		private IList _list;
 		public  IList  List
 		{
-			get
-			{
-				if (_list == null)
-					_list = new ArrayList();
-
-				return _list;
-			}
-
+			get { return _list ?? (_list = new List<object>()); }
 			set { _list = value; }
 		}
 
@@ -111,31 +104,32 @@ namespace BLToolkit.Mapping
 			AddRelation(slaveResultSet, relation.SlaveIndex, relation.MasterIndex, relation.ContainerName);
 		}
 
-		private Dictionary<string, Hashtable> _indexies = new Dictionary<string, Hashtable>();
-		public  Hashtable GetIndex(MappingSchema ms, MapIndex masterIndex)
+		readonly Dictionary<string,IDictionary<object,IList>> _indexies = new Dictionary<string,IDictionary<object,IList>>();
+
+		public  IDictionary<object,IList> GetIndex(MappingSchema ms, MapIndex masterIndex)
 		{
-			string     indexId  = masterIndex.ID;
-			Hashtable indexHash = null;
+			var indexId = masterIndex.ID;
+
+			IDictionary<object,IList> indexHash;
 
 			if (_indexies.TryGetValue(indexId, out indexHash))
 				return indexHash;
 
-			ObjectMapper   masterMapper = ms.GetObjectMapper(ObjectType);
-			List<MapIndex> createIndex  = new List<MapIndex>();
+			var masterMapper = ms.GetObjectMapper(ObjectType);
 
-			indexHash = new Hashtable();
+			indexHash = new Dictionary<object, IList>();
 
-			foreach (object o in List)
+			foreach (var o in List)
 			{
-				object key = masterIndex.GetValueOrIndex(masterMapper, o);
+				var key = masterIndex.GetValueOrIndex(masterMapper, o);
 
 				if (ms.IsNull(key))
 					continue;
 
-				ArrayList matches = (ArrayList)indexHash[key];
+				IList matches;
 
-				if (matches == null)
-					indexHash[key] = matches = new ArrayList();
+				if (!indexHash.TryGetValue(key, out matches))
+					indexHash.Add(key, matches = new List<object>());
 
 				matches.Add(o);
 			}
@@ -143,11 +137,10 @@ namespace BLToolkit.Mapping
 			return indexHash;
 		}
 
-		public Hashtable GetIndex(MappingSchema ms, MapRelation relation)
+		public IDictionary<object,IList> GetIndex(MappingSchema ms, MapRelation relation)
 		{
 			return GetIndex(ms, relation.MasterIndex);
 		}
-
 	}
 }
 

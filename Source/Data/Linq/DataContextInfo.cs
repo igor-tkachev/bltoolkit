@@ -36,7 +36,12 @@ namespace BLToolkit.Data.Linq
 
 		public static IDataContextInfo Create(IDataContext dataContext)
 		{
+#if SILVERLIGHT
+			if (dataContext == null) throw new ArgumentNullException("dataContext");
+			return new DataContextInfo(dataContext);
+#else
 			return dataContext == null ? (IDataContextInfo)new DefaultDataContextInfo() : new DataContextInfo(dataContext);
+#endif
 		}
 	}
 }

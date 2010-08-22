@@ -250,7 +250,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 						if (list == null)
 							list = new List<MapValue>(fields.Length);
 
-						var origValue = Enum.Parse(type, fi.Name);
+						var origValue = Enum.Parse(type, fi.Name, false);
 
 						list.Add(new MapValue(origValue, attr.Values));
 					}
@@ -351,7 +351,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 					var attrs = Attribute.GetCustomAttributes(fi, typeof(DefaultValueAttribute));
 
 					if (attrs.Length > 0)
-						return Enum.Parse(type, fi.Name);
+						return Enum.Parse(type, fi.Name, false);
 				}
 			}
 

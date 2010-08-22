@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace BLToolkit.Mapping
 {
@@ -72,33 +73,41 @@ namespace BLToolkit.Mapping
 
 		public override object GetValue(object o, string name)
 		{
-			return _dictionary[name];
+			return _dictionary.Contains(name) ? _dictionary[name] : null;
 		}
 
 		#endregion
 
 		#region IMapDataDestination Members
 
-		private ArrayList _nameList;
+		private List<string> _nameList;
 
 		public override int GetOrdinal(string name)
 		{
 			if (_nameList == null)
-				_nameList = new ArrayList();
+				_nameList = new List<string>();
 
-			int idx = _nameList.IndexOf(name);
+			var idx = _nameList.IndexOf(name);
 
-			return idx >= 0? idx: _nameList.Add(name);
+			if (idx >= 0)
+				return idx;
+
+			_nameList.Add(name);
+
+			return _nameList.Count - 1;
 		}
 
 		public override void SetValue(object o, int index, object value)
 		{
-			_dictionary[_nameList[index]] = value;
+			SetValue(o, _nameList[index], value);
 		}
 
 		public override void SetValue(object o, string name, object value)
 		{
-			_dictionary[name] = value;
+			if (_dictionary.Contains(name))
+				_dictionary[name] = value;
+			else
+				_dictionary.Add(name, value);
 		}
 
 		#endregion

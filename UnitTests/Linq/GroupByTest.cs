@@ -175,6 +175,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void MemberInit()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by new Child { ParentID = ch.ParentID } into g
+				select g.Key,
+				from ch in db.Child
+				group ch by new Child { ParentID = ch.ParentID } into g
+				select g.Key));
+		}
+
+		[Test]
 		public void SubQuery1()
 		{
 			var n = 1;

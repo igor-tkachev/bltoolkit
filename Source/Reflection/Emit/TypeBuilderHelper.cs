@@ -223,7 +223,11 @@ namespace BLToolkit.Reflection.Emit
 			// and the following condition should've been used below:
 			// if ((methodInfoDeclaration is FakeMethodInfo) == false)
 			//
-			if (methodInfoDeclaration.DeclaringType.IsInterface && !(methodInfoDeclaration is FakeMethodInfo))
+			if (methodInfoDeclaration.DeclaringType.IsInterface
+#if !SILVERLIGHT
+				&& !(methodInfoDeclaration is FakeMethodInfo)
+#endif
+				)
 			{
 				OverriddenMethods.Add(methodInfoDeclaration, method.MethodBuilder);
 				_typeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
@@ -257,14 +261,18 @@ namespace BLToolkit.Reflection.Emit
 		{
 			if (methodInfoDeclaration == null) throw new ArgumentNullException("methodInfoDeclaration");
 
-			bool isInterface = methodInfoDeclaration.DeclaringType.IsInterface;
-			bool isFake      = methodInfoDeclaration is FakeMethodInfo;
+			var isInterface = methodInfoDeclaration.DeclaringType.IsInterface;
+#if SILVERLIGHT
+			var isFake      = false;
+#else
+			var isFake      = methodInfoDeclaration is FakeMethodInfo;
+#endif
 
-			string name = isInterface && !isFake?
+			var name = isInterface && !isFake?
 				methodInfoDeclaration.DeclaringType.FullName + "." + methodInfoDeclaration.Name:
 				methodInfoDeclaration.Name;
 
-			MethodAttributes attributes = 
+			var attributes = 
 				MethodAttributes.Virtual |
 				MethodAttributes.HideBySig |
 				MethodAttributes.PrivateScope |

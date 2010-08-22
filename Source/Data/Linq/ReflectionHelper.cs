@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Data.Linq.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq.Expressions;
@@ -203,8 +202,10 @@ namespace BLToolkit.Data.Linq
 				{ typeof(Decimal),         MethodExpressor(m => m.ConvertToDecimal               (null)) },
 				{ typeof(Guid),            MethodExpressor(m => m.ConvertToGuid                  (null)) },
 				{ typeof(Stream),          MethodExpressor(m => m.ConvertToStream                (null)) },
+#if !SILVERLIGHT
 				{ typeof(XmlReader),       MethodExpressor(m => m.ConvertToXmlReader             (null)) },
 				{ typeof(XmlDocument),     MethodExpressor(m => m.ConvertToXmlDocument           (null)) },
+#endif
 				{ typeof(Byte[]),          MethodExpressor(m => m.ConvertToByteArray             (null)) },
 				{ typeof(LinqBinary),      MethodExpressor(m => m.ConvertToLinqBinary            (null)) },
 				{ typeof(Char[]),          MethodExpressor(m => m.ConvertToCharArray             (null)) },
@@ -229,6 +230,8 @@ namespace BLToolkit.Data.Linq
 				{ typeof(Decimal?),        MethodExpressor(m => m.ConvertToNullableDecimal       (null)) },
 				{ typeof(Guid?),           MethodExpressor(m => m.ConvertToNullableGuid          (null)) },
 
+#if !SILVERLIGHT
+
 				// SqlTypes
 				//
 				{ typeof(SqlByte),         MethodExpressor(m => m.ConvertToSqlByte               (null)) },
@@ -247,6 +250,8 @@ namespace BLToolkit.Data.Linq
 				{ typeof(SqlBytes),        MethodExpressor(m => m.ConvertToSqlBytes              (null)) },
 				{ typeof(SqlChars),        MethodExpressor(m => m.ConvertToSqlChars              (null)) },
 				{ typeof(SqlXml),          MethodExpressor(m => m.ConvertToSqlXml                (null)) },
+
+#endif
 			};
 		}
 
@@ -257,8 +262,12 @@ namespace BLToolkit.Data.Linq
 				//public static MethodInfo Contains   = MethodExpressor(s => s.Contains(""));
 				//public static MethodInfo StartsWith = MethodExpressor(s => s.StartsWith(""));
 				//public static MethodInfo EndsWith   = MethodExpressor(s => s.EndsWith(""));
-				public static MethodInfo Like11     = MethodExpressor(s => SqlMethods.Like("", ""));
-				public static MethodInfo Like12     = MethodExpressor(s => SqlMethods.Like("", "", ' '));
+
+#if !SILVERLIGHT
+				public static MethodInfo Like11     = MethodExpressor(s => System.Data.Linq.SqlClient.SqlMethods.Like("", ""));
+				public static MethodInfo Like12     = MethodExpressor(s => System.Data.Linq.SqlClient.SqlMethods.Like("", "", ' '));
+#endif
+
 				public static MethodInfo Like21     = MethodExpressor(s => Sql.Like(s, ""));
 				public static MethodInfo Like22     = MethodExpressor(s => Sql.Like(s, "", ' '));
 			}

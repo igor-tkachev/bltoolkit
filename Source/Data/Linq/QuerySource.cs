@@ -848,7 +848,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var f = ((Column)field).Field;
 
-					if (SqlQuery.GroupBy.Items.Find(e => e == f) == null)
+					if (SqlQuery.GroupBy.Items.FirstOrDefault(e => e == f) == null)
 						SqlQuery.GroupBy.Expr(f);
 				}
 
@@ -1064,7 +1064,7 @@ namespace BLToolkit.Data.Linq
 
 				qs.SqlQuery = (SqlQuery)SqlQuery.Clone(objectTree, doClone);
 				qs.Lambda   = Lambda;
-				qs._sources = Array. ConvertAll(Sources, q => (QuerySource)q.Clone(objectTree, doClone));
+				qs._sources = Sources.Select(q => (QuerySource)q.Clone(objectTree, doClone)).ToArray();
 				qs._fields  = Fields.ConvertAll(f => (QueryField)f.Clone(objectTree, doClone));
 
 				clone = qs;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Data;
 using System.Data.Linq;
 using System.Data.SqlTypes;
@@ -43,67 +42,67 @@ namespace BLToolkit.Mapping
 
 		#region ObjectMapper Support
 
-		private readonly Hashtable      _mappers        = new Hashtable();
-		private readonly ListDictionary _pendingMappers = new ListDictionary();
+		private readonly Dictionary<Type,ObjectMapper> _mappers        = new Dictionary<Type,ObjectMapper>();
+		private readonly Dictionary<Type,ObjectMapper> _pendingMappers = new Dictionary<Type,ObjectMapper>();
 
 		public ObjectMapper GetObjectMapper(Type type)
 		{
-			ObjectMapper om = (ObjectMapper)_mappers[type];
+			ObjectMapper om;
 
-			if (om == null)
+			lock (_mappers)
 			{
-				lock (_mappers.SyncRoot)
+				if (_mappers.TryGetValue(type, out om))
+					return om;
+
+				// This object mapper is initializing right now.
+				// Note that only one thread can access to _pendingMappers each time.
+				//
+				if (_pendingMappers.TryGetValue(type, out om))
+					return om;
+
+				om = CreateObjectMapper(type);
+
+				if (om == null)
+					throw new MappingException(
+						string.Format("Cannot create object mapper for the '{0}' type.", type.FullName));
+
+				_pendingMappers.Add(type, om);
+
+				try
 				{
-					om = (ObjectMapper)_mappers[type];
-
-					// This object mapper is initializing right now.
-					// Note that only one thread can access to _pendingMappers each time.
-					//
-					if (om == null)
-						om = (ObjectMapper)_pendingMappers[type];
-
-					if (om == null)
-					{
-						om = CreateObjectMapper(type);
-
-						if (om == null)
-							throw new MappingException(
-								string.Format("Cannot create object mapper for the '{0}' type.", type.FullName));
-
-						_pendingMappers[type] = om;
-
-						try
-						{
-							om.Init(this, type);
-						}
-						finally
-						{
-							_pendingMappers.Remove(type);
-						}
-
-						// Officially publish this ready to use object mapper.
-						//
-						SetObjectMapperInternal(type, om);
-					}
+					om.Init(this, type);
 				}
-			}
+				finally
+				{
+					_pendingMappers.Remove(type);
+				}
 
-			return om;
+				// Officially publish this ready to use object mapper.
+				//
+				SetObjectMapperInternal(type, om);
+
+				return om;
+			}
 		}
 
 		private void SetObjectMapperInternal(Type type, ObjectMapper om)
 		{
-			_mappers[type] = om;
+			_mappers.Add(type, om);
 
 			if (type.IsAbstract)
-				_mappers[TypeAccessor.GetAccessor(type).Type] = om;
+			{
+				var actualType = TypeAccessor.GetAccessor(type).Type;
+
+				if (!_mappers.ContainsKey(actualType))
+					_mappers.Add(actualType, om);
+			}
 		}
 
 		public void SetObjectMapper(Type type, ObjectMapper om)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			lock (_mappers.SyncRoot)
+			lock (_mappers)
 				SetObjectMapperInternal(type, om);
 		}
 
@@ -126,12 +125,7 @@ namespace BLToolkit.Mapping
 		public  MetadataProviderBase  MetadataProvider
 		{
 			[DebuggerStepThrough]
-			get
-			{
-				if (_metadataProvider == null)
-					_metadataProvider = CreateMetadataProvider();
-				return _metadataProvider;
-			}
+			get { return _metadataProvider ?? (_metadataProvider = CreateMetadataProvider()); }
 			set { _metadataProvider = value; }
 		}
 
@@ -144,12 +138,7 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		private ExtensionList _extensions;
-		public  ExtensionList  Extensions
-		{
-			get { return _extensions;  }
-			set { _extensions = value; }
-		}
+		public ExtensionList Extensions { get; set; }
 
 		#endregion
 
@@ -170,16 +159,16 @@ namespace BLToolkit.Mapping
 			_defaultDoubleNullValue         = (Double)        GetNullValue(typeof(Double));
 			_defaultBooleanNullValue        = (Boolean)       GetNullValue(typeof(Boolean));
 
-			_defaultStringNullValue         = (String)        GetNullValue(typeof(String));
-			_defaultDateTimeNullValue       = (DateTime)      GetNullValue(typeof(DateTime));
-			_defaultDateTimeOffsetNullValue = (DateTimeOffset)GetNullValue(typeof(DateTimeOffset));
-			_defaultLinqBinaryNullValue     = (Binary)        GetNullValue(typeof(Binary));
-			_defaultDecimalNullValue        = (Decimal)       GetNullValue(typeof(Decimal));
-			_defaultGuidNullValue           = (Guid)          GetNullValue(typeof(Guid));
-			_defaultStreamNullValue         = (Stream)        GetNullValue(typeof(Stream));
-			_defaultXmlReaderNullValue      = (XmlReader)     GetNullValue(typeof(XmlReader));
+			DefaultStringNullValue         = (String)        GetNullValue(typeof(String));
+			DefaultDateTimeNullValue       = (DateTime)      GetNullValue(typeof(DateTime));
+			DefaultDateTimeOffsetNullValue = (DateTimeOffset)GetNullValue(typeof(DateTimeOffset));
+			DefaultLinqBinaryNullValue     = (Binary)        GetNullValue(typeof(Binary));
+			DefaultDecimalNullValue        = (Decimal)       GetNullValue(typeof(Decimal));
+			DefaultGuidNullValue           = (Guid)          GetNullValue(typeof(Guid));
+			DefaultStreamNullValue         = (Stream)        GetNullValue(typeof(Stream));
 #if !SILVERLIGHT
-			_defaultXmlDocumentNullValue    = (XmlDocument)   GetNullValue(typeof(XmlDocument));
+			DefaultXmlReaderNullValue      = (XmlReader)     GetNullValue(typeof(XmlReader));
+			DefaultXmlDocumentNullValue    = (XmlDocument)   GetNullValue(typeof(XmlDocument));
 #endif
 		}
 
@@ -377,33 +366,23 @@ namespace BLToolkit.Mapping
 
 		#region Simple Types
 
-		private string _defaultStringNullValue;
-		public  string  DefaultStringNullValue
-		{
-			get { return _defaultStringNullValue;  }
-			set { _defaultStringNullValue = value; }
-		}
+		public string DefaultStringNullValue { get; set; }
 
 		public virtual String ConvertToString(object value)
 		{
 			return
 				value is String? (String)value :
-				value == null || value is DBNull? _defaultStringNullValue:
+				value == null || value is DBNull? DefaultStringNullValue:
 					Convert.ToString(value);
 		}
 
-		private DateTime _defaultDateTimeNullValue;
-		public  DateTime  DefaultDateTimeNullValue
-		{
-			get { return _defaultDateTimeNullValue;  }
-			set { _defaultDateTimeNullValue = value; }
-		}
+		public DateTime DefaultDateTimeNullValue { get; set; }
 
 		public virtual DateTime ConvertToDateTime(object value)
 		{
 			return
 				value is DateTime? (DateTime)value:
-				value == null || value is DBNull? _defaultDateTimeNullValue:
+				value == null || value is DBNull? DefaultDateTimeNullValue:
 					Convert.ToDateTime(value);
 		}
 
@@ -412,111 +391,76 @@ namespace BLToolkit.Mapping
 			return ConvertToDateTime(value).TimeOfDay;
 		}
 
-		private DateTimeOffset _defaultDateTimeOffsetNullValue;
-		public  DateTimeOffset  DefaultDateTimeOffsetNullValue
-		{
-			get { return _defaultDateTimeOffsetNullValue;  }
-			set { _defaultDateTimeOffsetNullValue = value; }
-		}
+		public DateTimeOffset DefaultDateTimeOffsetNullValue { get; set; }
 
 		public virtual DateTimeOffset ConvertToDateTimeOffset(object value)
 		{
 			return
 				value is DateTimeOffset? (DateTimeOffset)value:
-				value == null || value is DBNull? _defaultDateTimeOffsetNullValue:
+				value == null || value is DBNull? DefaultDateTimeOffsetNullValue:
 					Convert.ToDateTimeOffset(value);
 		}
 
-		private Binary _defaultLinqBinaryNullValue;
-		public  Binary  DefaultLinqBinaryNullValue
-		{
-			get { return _defaultLinqBinaryNullValue;  }
-			set { _defaultLinqBinaryNullValue = value; }
-		}
+		public Binary DefaultLinqBinaryNullValue { get; set; }
 
 		public virtual Binary ConvertToLinqBinary(object value)
 		{
 			return
 				value is Binary ? (Binary)value:
 				value is byte[] ? new Binary((byte[])value) : 
-				value == null || value is DBNull? _defaultLinqBinaryNullValue:
+				value == null || value is DBNull? DefaultLinqBinaryNullValue:
 					Convert.ToLinqBinary(value);
 		}
 
-		private decimal _defaultDecimalNullValue;
-		public  decimal  DefaultDecimalNullValue
-		{
-			get { return _defaultDecimalNullValue;  }
-			set { _defaultDecimalNullValue = value; }
-		}
+		public decimal DefaultDecimalNullValue { get; set; }
 
 		public virtual Decimal ConvertToDecimal(object value)
 		{
 			return
 				value is Decimal? (Decimal)value:
-				value == null || value is DBNull? _defaultDecimalNullValue:
+				value == null || value is DBNull? DefaultDecimalNullValue:
 					Convert.ToDecimal(value);
 		}
 
-		private Guid _defaultGuidNullValue;
-		public  Guid  DefaultGuidNullValue
-		{
-			get { return _defaultGuidNullValue;  }
-			set { _defaultGuidNullValue = value; }
-		}
+		public Guid DefaultGuidNullValue { get; set; }
 
 		public virtual Guid ConvertToGuid(object value)
 		{
 			return
 				value is Guid? (Guid)value:
-				value == null || value is DBNull? _defaultGuidNullValue:
+				value == null || value is DBNull? DefaultGuidNullValue:
 					Convert.ToGuid(value);
 		}
 
-		private Stream _defaultStreamNullValue;
-		public  Stream  DefaultStreamNullValue
-		{
-			get { return _defaultStreamNullValue; }
-			set { _defaultStreamNullValue = value; }
-		}
+		public Stream DefaultStreamNullValue { get; set; }
 
 		public virtual Stream ConvertToStream(object value)
 		{
 			return
 				value is Stream? (Stream)value:
-				value == null || value is DBNull? _defaultStreamNullValue:
+				value == null || value is DBNull? DefaultStreamNullValue:
 					 Convert.ToStream(value);
 		}
 
-		private XmlReader _defaultXmlReaderNullValue;
-		public  XmlReader  DefaultXmlReaderNullValue
-		{
-			get { return _defaultXmlReaderNullValue; }
-			set { _defaultXmlReaderNullValue = value; }
-		}
-
 #if !SILVERLIGHT
+
+		public XmlReader DefaultXmlReaderNullValue { get; set; }
 
 		public virtual XmlReader ConvertToXmlReader(object value)
 		{
 			return
 				value is XmlReader? (XmlReader)value:
-				value == null || value is DBNull? _defaultXmlReaderNullValue:
+				value == null || value is DBNull? DefaultXmlReaderNullValue:
 					Convert.ToXmlReader(value);
 		}
 
-		private XmlDocument _defaultXmlDocumentNullValue;
-		public  XmlDocument  DefaultXmlDocumentNullValue
-		{
-			get { return _defaultXmlDocumentNullValue; }
-			set { _defaultXmlDocumentNullValue = value; }
-		}
+		public XmlDocument DefaultXmlDocumentNullValue { get; set; }
 
 		public virtual XmlDocument ConvertToXmlDocument(object value)
 		{
 			return
 				value is XmlDocument? (XmlDocument)value:
-				value == null || value is DBNull? _defaultXmlDocumentNullValue:
+				value == null || value is DBNull? DefaultXmlDocumentNullValue:
 					Convert.ToXmlDocument(value);
 		}
 
@@ -829,27 +773,27 @@ namespace BLToolkit.Mapping
 				case TypeCode.Boolean:  return (T)(object)_defaultBooleanNullValue;
 				case TypeCode.Byte:     return (T)(object)_defaultByteNullValue;
 				case TypeCode.Char:     return (T)(object)_defaultCharNullValue;
-				case TypeCode.DateTime: return (T)(object)_defaultDateTimeNullValue;
-				case TypeCode.Decimal:  return (T)(object)_defaultDecimalNullValue;
+				case TypeCode.DateTime: return (T)(object)DefaultDateTimeNullValue;
+				case TypeCode.Decimal:  return (T)(object)DefaultDecimalNullValue;
 				case TypeCode.Double:   return (T)(object)_defaultDoubleNullValue;
 				case TypeCode.Int16:    return (T)(object)_defaultInt16NullValue;
 				case TypeCode.Int32:    return (T)(object)_defaultInt32NullValue;
 				case TypeCode.Int64:    return (T)(object)_defaultInt64NullValue;
 				case TypeCode.SByte:    return (T)(object)_defaultSByteNullValue;
 				case TypeCode.Single:   return (T)(object)_defaultSingleNullValue;
-				case TypeCode.String:   return (T)(object)_defaultStringNullValue;
+				case TypeCode.String:   return (T)(object)DefaultStringNullValue;
 				case TypeCode.UInt16:   return (T)(object)_defaultUInt16NullValue;
 				case TypeCode.UInt32:   return (T)(object)_defaultUInt32NullValue;
 				case TypeCode.UInt64:   return (T)(object)_defaultUInt64NullValue;
 			}
 
-			if (typeof(Guid)           == typeof(T)) return (T)(object)_defaultGuidNullValue;
-			if (typeof(Stream)         == typeof(T)) return (T)(object)_defaultStreamNullValue;
-			if (typeof(XmlReader)      == typeof(T)) return (T)(object)_defaultXmlReaderNullValue;
+			if (typeof(Guid)           == typeof(T)) return (T)(object)DefaultGuidNullValue;
+			if (typeof(Stream)         == typeof(T)) return (T)(object)DefaultStreamNullValue;
 #if !SILVERLIGHT
-			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)_defaultXmlDocumentNullValue;
+			if (typeof(XmlReader)      == typeof(T)) return (T)(object)DefaultXmlReaderNullValue;
+			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)DefaultXmlDocumentNullValue;
 #endif
-			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)_defaultDateTimeOffsetNullValue;
+			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)DefaultDateTimeOffsetNullValue;
 
 			return default(T);
 		}
@@ -1177,50 +1121,56 @@ namespace BLToolkit.Mapping
 
 		#region GetMapValues
 
-		private readonly Hashtable _mapValues = new Hashtable();
+		private readonly Dictionary<Type,MapValue[]> _mapValues = new Dictionary<Type,MapValue[]>();
 
-		public virtual MapValue[] GetMapValues(Type type)
+		public virtual MapValue[] GetMapValues([JetBrains.Annotations.NotNull] Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			MapValue[] mapValues = (MapValue[])_mapValues[type];
+			lock (_mapValues)
+			{
+				MapValue[] mapValues;
 
-			if (mapValues != null || _mapValues.Contains(type))
+				if (_mapValues.TryGetValue(type, out mapValues))
+					return mapValues;
+
+				var  typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+				bool isSet;
+
+				mapValues = MetadataProvider.GetMapValues(typeExt, type, out isSet);
+
+				_mapValues.Add(type, mapValues);
+
 				return mapValues;
-
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			bool          isSet;
-
-			mapValues = MetadataProvider.GetMapValues(typeExt, type, out isSet);
-
-			_mapValues[type] = mapValues;
-
-			return mapValues;
+			}
 		}
 
 		#endregion
 
 		#region GetDefaultValue
 
-		private readonly Hashtable _defaultValues = new Hashtable();
+		private readonly Dictionary<Type,object> _defaultValues = new Dictionary<Type,object>();
 
-		public virtual object GetDefaultValue(Type type)
+		public virtual object GetDefaultValue([JetBrains.Annotations.NotNull] Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			object defaultValue = _defaultValues[type];
+			lock (_defaultValues)
+			{
+				object defaultValue;
 
-			if (defaultValue != null || _defaultValues.Contains(type))
+				if (_defaultValues.TryGetValue(type, out defaultValue))
+					return defaultValue;
+
+				var  typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+				bool isSet;
+
+				defaultValue = MetadataProvider.GetDefaultValue(this, typeExt, type, out isSet);
+
+				_defaultValues.Add(type, defaultValue = TypeExtension.ChangeType(defaultValue, type));
+
 				return defaultValue;
-
-			TypeExtension typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-			bool          isSet;
-
-			defaultValue = MetadataProvider.GetDefaultValue(this, typeExt, type, out isSet);
-
-			_defaultValues[type] = defaultValue = TypeExtension.ChangeType(defaultValue, type);
-
-			return defaultValue;
+			}
 		}
 
 		#endregion
@@ -1238,6 +1188,8 @@ namespace BLToolkit.Mapping
 			if (obj is IDataReader)
 				return CreateDataReaderMapper((IDataReader)obj);
 
+#if !SILVERLIGHT
+
 			if (obj is DataRow)
 				return CreateDataRowMapper((DataRow)obj, DataRowVersion.Default);
 
@@ -1248,6 +1200,44 @@ namespace BLToolkit.Mapping
 
 			if (obj is DataTable)
 				return CreateDataRowMapper(((DataTable)(obj)).Rows[0], DataRowVersion.Default);
+
+#endif
+
+			if (obj is IDictionary)
+				return CreateDictionaryMapper((IDictionary)obj);
+
+			return GetObjectMapper(obj.GetType());
+		}
+
+		[CLSCompliant(false)]
+		public virtual IMapDataDestination GetDataDestination(object obj)
+		{
+			if (obj == null) throw new ArgumentNullException("obj");
+
+			if (obj is IMapDataDestination)
+				return (IMapDataDestination)obj;
+
+#if !SILVERLIGHT
+
+			if (obj is DataRow)
+				return CreateDataRowMapper((DataRow)obj, DataRowVersion.Default);
+
+			if (obj is DataRowView)
+				return CreateDataRowMapper(
+					((DataRowView)obj).Row,
+					((DataRowView)obj).RowVersion);
+
+			if (obj is DataTable)
+			{
+				DataTable dt = obj as DataTable;
+				DataRow   dr = dt.NewRow();
+
+				dt.Rows.Add(dr);
+
+				return CreateDataRowMapper(dr, DataRowVersion.Default);
+			}
+
+#endif
 
 			if (obj is IDictionary)
 				return CreateDictionaryMapper((IDictionary)obj);
@@ -1271,38 +1261,6 @@ namespace BLToolkit.Mapping
 			return TypeHelper.IsScalar(type)?
 				(IMapDataSourceList)CreateScalarSourceListMapper((IList)obj, type):
 				CreateObjectListMapper((IList)obj, CreateObjectMapper(type));
-		}
-
-		[CLSCompliant(false)]
-		public virtual IMapDataDestination GetDataDestination(object obj)
-		{
-			if (obj == null) throw new ArgumentNullException("obj");
-
-			if (obj is IMapDataDestination)
-				return (IMapDataDestination)obj;
-
-			if (obj is DataRow)
-				return CreateDataRowMapper((DataRow)obj, DataRowVersion.Default);
-
-			if (obj is DataRowView)
-				return CreateDataRowMapper(
-					((DataRowView)obj).Row,
-					((DataRowView)obj).RowVersion);
-
-			if (obj is DataTable)
-			{
-				DataTable dt = obj as DataTable;
-				DataRow   dr = dt.NewRow();
-
-				dt.Rows.Add(dr);
-
-				return CreateDataRowMapper(dr, DataRowVersion.Default);
-			}
-
-			if (obj is IDictionary)
-				return CreateDictionaryMapper((IDictionary)obj);
-
-			return GetObjectMapper(obj.GetType());
 		}
 
 		[CLSCompliant(false)]
@@ -1330,8 +1288,8 @@ namespace BLToolkit.Mapping
 			get { return ValueMapping.DefaultMapper; }
 		}
 
-		internal readonly Hashtable SameTypeMappers      = new Hashtable();
-		internal readonly Hashtable DifferentTypeMappers = new Hashtable();
+		internal readonly Dictionary<Type,IValueMapper>     SameTypeMappers      = new Dictionary<Type,IValueMapper>();
+		internal readonly Dictionary<KeyValue,IValueMapper> DifferentTypeMappers = new Dictionary<KeyValue,IValueMapper>();
 
 		[CLSCompliant(false)]
 		public void SetValueMapper(
@@ -1344,24 +1302,28 @@ namespace BLToolkit.Mapping
 
 			if (sourceType == destType)
 			{
-				lock (SameTypeMappers.SyncRoot)
+				lock (SameTypeMappers)
 				{
 					if (mapper == null)
 						SameTypeMappers.Remove(sourceType);
-					else
+					else if (SameTypeMappers.ContainsKey(sourceType))
 						SameTypeMappers[sourceType] = mapper;
+					else
+						SameTypeMappers.Add(sourceType, mapper);
 				}
 			}
 			else
 			{
 				KeyValue key = new KeyValue(sourceType, destType);
 
-				lock (DifferentTypeMappers.SyncRoot)
+				lock (DifferentTypeMappers)
 				{
 					if (mapper == null)
 						DifferentTypeMappers.Remove(key);
-					else
+					else if (DifferentTypeMappers.ContainsKey(key))
 						DifferentTypeMappers[key] = mapper;
+					else
+						DifferentTypeMappers.Add(key, mapper);
 				}
 			}
 		}
@@ -1401,39 +1363,24 @@ namespace BLToolkit.Mapping
 				if (sourceType == null) sourceType = typeof(object);
 				if (destType   == null) destType   = typeof(object);
 
+				IValueMapper t;
+
 				if (sourceType == destType)
 				{
-					IValueMapper t = (IValueMapper)SameTypeMappers[sourceType];
-
-					if (t == null)
-					{
-						lock (SameTypeMappers.SyncRoot)
-						{
-							t = (IValueMapper)SameTypeMappers[sourceType];
-							if (t == null)
-								SameTypeMappers[sourceType] = t = GetValueMapper(sourceType, destType);
-						}
-					}
-
-					mappers[i] = t;
+					lock (SameTypeMappers)
+						if (!SameTypeMappers.TryGetValue(sourceType, out t))
+							SameTypeMappers.Add(sourceType, t = GetValueMapper(sourceType, destType));
 				}
 				else
 				{
-					KeyValue     key = new KeyValue(sourceType, destType);
-					IValueMapper t   = (IValueMapper)DifferentTypeMappers[key];
+					var key = new KeyValue(sourceType, destType);
 
-					if (t == null)
-					{
-						lock (DifferentTypeMappers.SyncRoot)
-						{
-							t = (IValueMapper)DifferentTypeMappers[key];
-							if (t == null)
+					lock (DifferentTypeMappers)
+						if (!DifferentTypeMappers.TryGetValue(key, out t))
 								DifferentTypeMappers[key] = t = GetValueMapper(sourceType, destType);
-						}
-					}
-
-					mappers[i] = t;
 				}
+
+				mappers[i] = t;
 			}
 
 			return mappers;
@@ -1821,8 +1768,8 @@ namespace BLToolkit.Mapping
 				}
 			}
 
-			return convertToUnderlyingType?
-				System.Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType())):
+			return convertToUnderlyingType ?
+				System.Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType()), Thread.CurrentThread.CurrentCulture) :
 				value;
 		}
 
@@ -1902,6 +1849,8 @@ namespace BLToolkit.Mapping
 
 		#region MapObjectToDataRow
 
+#if !SILVERLIGHT
+
 		public DataRow MapObjectToDataRow(
 			object  sourceObject,
 			DataRow destRow)
@@ -1937,6 +1886,8 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
+#endif
+
 		#endregion
 
 		#region MapObjectToDictionary
@@ -1956,13 +1907,13 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapObjectToDictionary(object sourceObject)
+		public IDictionary MapObjectToDictionary(object sourceObject)
 		{
 			if (sourceObject == null) throw new ArgumentNullException("sourceObject");
 
 			ObjectMapper om = GetObjectMapper(sourceObject.GetType());
 
-			Hashtable destDictionary = new Hashtable(om.Count);
+			var destDictionary = new Dictionary<object,object>(om.Count);
 
 			MapInternal(
 				null,
@@ -1978,6 +1929,8 @@ namespace BLToolkit.Mapping
 		#endregion
 
 		#region DataRow
+
+#if !SILVERLIGHT
 
 		#region MapDataRowToObject
 
@@ -2197,6 +2150,8 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+#endif
+
 		#endregion
 
 		#region DataReader
@@ -2246,6 +2201,8 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToDataRow
 
+#if !SILVERLIGHT
+
 		public DataRow MapDataReaderToDataRow(IDataReader dataReader, DataRow destRow)
 		{
 			MapInternal(
@@ -2276,6 +2233,8 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
+#endif
+
 		#endregion
 
 		#region MapDataReaderToDictionary
@@ -2293,11 +2252,11 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapDataReaderToDictionary(IDataReader dataReader)
+		public IDictionary MapDataReaderToDictionary(IDataReader dataReader)
 		{
 			if (dataReader == null) throw new ArgumentNullException("dataReader");
 
-			Hashtable destDictionary = new Hashtable(dataReader.FieldCount);
+			var destDictionary = new Dictionary<object,object>(dataReader.FieldCount);
 
 			MapInternal(
 				null,
@@ -2357,6 +2316,8 @@ namespace BLToolkit.Mapping
 
 		#region MapDictionaryToDataRow
 
+#if !SILVERLIGHT
+
 		public DataRow MapDictionaryToDataRow(
 			IDictionary sourceDictionary,
 			DataRow     destRow)
@@ -2389,6 +2350,8 @@ namespace BLToolkit.Mapping
 			return destRow;
 		}
 
+#endif
+
 		#endregion
 
 		#endregion
@@ -2413,14 +2376,14 @@ namespace BLToolkit.Mapping
 			return destList;
 		}
 
-		public ArrayList MapListToList(
+		public IList MapListToList(
 			ICollection     sourceList,
 			Type            destObjectType,
 			params object[] parameters)
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
-			ArrayList destList = new ArrayList();
+			var destList = new List<object>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper(sourceList.GetEnumerator()),
@@ -2461,6 +2424,8 @@ namespace BLToolkit.Mapping
 
 		#region MapListToDataTable
 
+#if !SILVERLIGHT
+
 		public DataTable MapListToDataTable(
 			ICollection sourceList,
 			DataTable   destTable)
@@ -2490,6 +2455,8 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
+#endif
+
 		#endregion
 
 		#region MapListToDictionary
@@ -2511,7 +2478,7 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapListToDictionary(
+		public IDictionary MapListToDictionary(
 			ICollection          sourceList,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
@@ -2519,7 +2486,7 @@ namespace BLToolkit.Mapping
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
-			Hashtable destDictionary = new Hashtable();
+			IDictionary destDictionary = new Dictionary<object,object>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceList.GetEnumerator()),
@@ -2579,7 +2546,7 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapListToDictionary(
+		public IDictionary MapListToDictionary(
 			ICollection     sourceList,
 			MapIndex        index,
 			Type            destObjectType,
@@ -2587,7 +2554,7 @@ namespace BLToolkit.Mapping
 		{
 			if (sourceList == null) throw new ArgumentNullException("sourceList");
 
-			Hashtable destDictionary = new Hashtable();
+			IDictionary destDictionary = new Dictionary<object,object>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceList.GetEnumerator()),
@@ -2631,6 +2598,9 @@ namespace BLToolkit.Mapping
 		#endregion
 
 		#region Table
+
+#if !SILVERLIGHT
+
 
 		#region MapDataTableToDataTable
 
@@ -2939,6 +2909,8 @@ namespace BLToolkit.Mapping
 
 		#endregion
 
+#endif
+
 		#endregion
 
 		#region DataReader
@@ -2959,12 +2931,12 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public ArrayList MapDataReaderToList(
+		public IList MapDataReaderToList(
 			IDataReader     reader,
 			Type            destObjectType,
 			params object[] parameters)
 		{
-			ArrayList list = new ArrayList();
+			IList list = new List<object>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
@@ -3019,12 +2991,12 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-		public ArrayList MapDataReaderToScalarList(
+		public IList MapDataReaderToScalarList(
 			IDataReader          reader,
 			NameOrIndexParameter nameOrIndex,
 			Type                 type)
 		{
-			ArrayList list = new ArrayList();
+			IList list = new List<object>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader, nameOrIndex),
@@ -3065,6 +3037,8 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToDataTable
 
+#if !SILVERLIGHT
+
 		public DataTable MapDataReaderToDataTable(
 			IDataReader reader,
 			DataTable   destTable)
@@ -3090,6 +3064,8 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
+#endif
+
 		#endregion
 
 		#region MapDataReaderToDictionary
@@ -3109,13 +3085,13 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapDataReaderToDictionary(
+		public IDictionary MapDataReaderToDictionary(
 			IDataReader          reader,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
 			params object[]      parameters)
 		{
-			Hashtable dest = new Hashtable();
+			IDictionary dest = new Dictionary<object,object>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
@@ -3188,13 +3164,13 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapDataReaderToDictionary(
+		public IDictionary MapDataReaderToDictionary(
 			IDataReader     reader,
 			MapIndex        index,
 			Type            destObjectType,
 			params object[] parameters)
 		{
-			Hashtable destDictionary = new Hashtable();
+			IDictionary destDictionary = new Dictionary<object,object>();
 
 			MapSourceListToDestinationList(
 				CreateDataReaderListMapper(reader),
@@ -3272,14 +3248,14 @@ namespace BLToolkit.Mapping
 			return destList;
 		}
 
-		public ArrayList MapDictionaryToList(
+		public IList MapDictionaryToList(
 			IDictionary     sourceDictionary,
 			Type            destObjectType,
 			params object[] parameters)
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
-			ArrayList destList = new ArrayList();
+			IList destList = new List<object>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper(sourceDictionary.Values.GetEnumerator()),
@@ -3324,6 +3300,8 @@ namespace BLToolkit.Mapping
 
 		#region MapDictionaryToDataTable
 
+#if !SILVERLIGHT
+
 		public DataTable MapDictionaryToDataTable(
 			IDictionary sourceDictionary,
 			DataTable   destTable)
@@ -3353,6 +3331,8 @@ namespace BLToolkit.Mapping
 			return destTable;
 		}
 
+#endif
+
 		#endregion
 
 		#region MapDictionaryToDictionary
@@ -3374,7 +3354,7 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapDictionaryToDictionary(
+		public IDictionary MapDictionaryToDictionary(
 			IDictionary          sourceDictionary,
 			NameOrIndexParameter keyFieldNameOrIndex,
 			Type                 destObjectType,
@@ -3382,7 +3362,7 @@ namespace BLToolkit.Mapping
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
-			Hashtable dest = new Hashtable();
+			IDictionary dest = new Dictionary<object,object>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceDictionary.Values.GetEnumerator()),
@@ -3446,7 +3426,7 @@ namespace BLToolkit.Mapping
 			return destDictionary;
 		}
 
-		public Hashtable MapDictionaryToDictionary(
+		public IDictionary MapDictionaryToDictionary(
 			IDictionary     sourceDictionary,
 			MapIndex        index,
 			Type            destObjectType,
@@ -3454,7 +3434,7 @@ namespace BLToolkit.Mapping
 		{
 			if (sourceDictionary == null) throw new ArgumentNullException("sourceDictionary");
 
-			Hashtable destDictionary = new Hashtable();
+			IDictionary destDictionary = new Dictionary<object,object>();
 
 			MapSourceListToDestinationList(
 				CreateEnumeratorMapper    (sourceDictionary.Values.GetEnumerator()),
@@ -3505,9 +3485,10 @@ namespace BLToolkit.Mapping
 
 		public void MapResultSets(MapResultSet[] resultSets)
 		{
-			Hashtable   initTable     = new Hashtable();
-			object      lastContainer = null;
-			InitContext context       = new InitContext();
+			var initTable = new Dictionary<object,object>();
+			var context   = new InitContext();
+
+			object lastContainer = null;
 
 			context.MappingSchema = this;
 
@@ -3534,9 +3515,9 @@ namespace BLToolkit.Mapping
 
 						// Map.
 						//
-						MapResultSet slave        = r.SlaveResultSet;
-						ObjectMapper slaveMapper  = GetObjectMapper(r.SlaveResultSet.ObjectType);
-						Hashtable    indexedLists = rs.GetIndex(this, r.MasterIndex);
+						var slave        = r.SlaveResultSet;
+						var slaveMapper  = GetObjectMapper(r.SlaveResultSet.ObjectType);
+						var indexedLists = rs.GetIndex(this, r.MasterIndex);
 
 						foreach (object o in slave.List)
 						{
@@ -3545,7 +3526,8 @@ namespace BLToolkit.Mapping
 							if (IsNull(key))
 								continue;
 
-							ArrayList masterList = (ArrayList)indexedLists[key];
+							IList masterList = indexedLists[key];
+
 							if (masterList == null)
 								continue;
 
@@ -3617,6 +3599,8 @@ namespace BLToolkit.Mapping
 			MapResultSets(resultSets);
 		}
 
+#if !SILVERLIGHT
+
 		public void MapDataSetToResultSet(
 			DataSet        dataSet,
 			MapResultSet[] resultSets)
@@ -3630,6 +3614,8 @@ namespace BLToolkit.Mapping
 
 			MapResultSets(resultSets);
 		}
+
+#endif
 
 		public MapResultSet[] Clone(MapResultSet[] resultSets)
 		{

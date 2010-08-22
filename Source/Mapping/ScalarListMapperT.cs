@@ -85,6 +85,8 @@ namespace BLToolkit.Mapping
 		public override void SetNullableDateTime(object o, int index, DateTime? value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetNullableDateTimeOffset(object o, int index, DateTimeOffset? value) { _list.Add(ConvertTo<T>.From(value)); }
 
+#if !SILVERLIGHT
+
 		// SQL type setters.
 		//
 		public override void SetSqlByte    (object o, int index, SqlByte     value) { _list.Add(ConvertTo<T>.From(value)); }
@@ -99,6 +101,8 @@ namespace BLToolkit.Mapping
 		public override void SetSqlMoney   (object o, int index, SqlMoney    value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetSqlGuid    (object o, int index, SqlGuid     value) { _list.Add(ConvertTo<T>.From(value)); }
 		public override void SetSqlString  (object o, int index, SqlString   value) { _list.Add(ConvertTo<T>.From(value)); }
+
+#endif
 
 		#endregion
 	}

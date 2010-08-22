@@ -67,6 +67,8 @@ namespace BLToolkit.Mapping
 		{
 		}
 
+#if !SILVERLIGHT
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MappingException"/> class
 		/// with serialized data.
@@ -80,5 +82,7 @@ namespace BLToolkit.Mapping
 			: base(info,context) 
 		{
 		}
+
+#endif
 	}
 }

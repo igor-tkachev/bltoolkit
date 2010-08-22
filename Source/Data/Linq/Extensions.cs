@@ -178,7 +178,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IUpdateable<T>     source,
+			[NotNull] this IUpdateable<T>    source,
 			[NotNull] Expression<Func<T,TV>> extract,
 			[NotNull] Expression<Func<T,TV>> update)
 		{
@@ -703,6 +703,12 @@ namespace BLToolkit.Data.Linq
 			return ExpressionInfo<T>.Insert(DataContextInfo.Create(dataContext), obj);
 		}
 
+		#endregion
+
+		#region InsertBatch
+
+#if !SILVERLIGHT
+
 		public static int InsertBatch<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
 			return new SqlQuery<T>().Insert(dataContext, maxBatchSize, list);
@@ -736,6 +742,8 @@ namespace BLToolkit.Data.Linq
 			return Insert(dataContext, int.MaxValue, list);
 		}
 
+#endif
+
 		#endregion
 
 		#region InsertWithIdentity
@@ -766,6 +774,8 @@ namespace BLToolkit.Data.Linq
 			return ExpressionInfo<T>.Update(DataContextInfo.Create(dataContext), obj);
 		}
 
+#if !SILVERLIGHT
+
 		public static int Update<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
 			return new SqlQuery<T>().Update(dataContext, maxBatchSize, list);
@@ -775,6 +785,8 @@ namespace BLToolkit.Data.Linq
 		{
 			return Update(dataContext, int.MaxValue, list);
 		}
+
+#endif
 
 		#endregion
 
@@ -791,6 +803,8 @@ namespace BLToolkit.Data.Linq
 			return ExpressionInfo<T>.Delete(DataContextInfo.Create(dataContext), obj);
 		}
 
+#if !SILVERLIGHT
+
 		public static int Delete<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
 			return new SqlQuery<T>().Delete(dataContext, maxBatchSize, list);
@@ -800,6 +814,8 @@ namespace BLToolkit.Data.Linq
 		{
 			return Delete(dataContext, int.MaxValue, list);
 		}
+
+#endif
 
 		#endregion
 

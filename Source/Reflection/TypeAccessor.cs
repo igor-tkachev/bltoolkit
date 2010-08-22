@@ -10,8 +10,8 @@ using System.IO;
 using System.Reflection;
 
 using BLToolkit.Common;
-using BLToolkit.ComponentModel;
 #if !SILVERLIGHT
+using BLToolkit.ComponentModel;
 using BLToolkit.EditableObjects;
 #endif
 using BLToolkit.Mapping;

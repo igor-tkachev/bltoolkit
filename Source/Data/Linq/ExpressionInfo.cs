@@ -461,39 +461,24 @@ namespace BLToolkit.Data.Linq
 					if (sourceType == null) sourceType = typeof(object);
 					if (destType   == null) destType   = typeof(object);
 
+					IValueMapper t;
+
 					if (sourceType == destType)
 					{
-						var t = (IValueMapper)MappingSchema.SameTypeMappers[sourceType];
-
-						if (t == null)
-						{
-							lock (MappingSchema.SameTypeMappers.SyncRoot)
-							{
-								t = (IValueMapper)MappingSchema.SameTypeMappers[sourceType];
-								if (t == null)
-									MappingSchema.SameTypeMappers[sourceType] = t = MappingSchema.GetValueMapper(sourceType, destType);
-							}
-						}
-
-						mappers[i] = t;
+						lock (MappingSchema.SameTypeMappers)
+							if (!MappingSchema.SameTypeMappers.TryGetValue(sourceType, out t))
+								MappingSchema.SameTypeMappers.Add(sourceType, t = MappingSchema.GetValueMapper(sourceType, destType));
 					}
 					else
 					{
 						var key = new KeyValuePair<Type,Type>(sourceType, destType);
-						var t   = (IValueMapper)MappingSchema.DifferentTypeMappers[key];
 
-						if (t == null)
-						{
-							lock (MappingSchema.DifferentTypeMappers.SyncRoot)
-							{
-								t = (IValueMapper)MappingSchema.DifferentTypeMappers[key];
-								if (t == null)
-									MappingSchema.DifferentTypeMappers[key] = t = MappingSchema.GetValueMapper(sourceType, destType);
-							}
-						}
-
-						mappers[i] = t;
+						lock (MappingSchema.DifferentTypeMappers)
+							if (!MappingSchema.DifferentTypeMappers.TryGetValue(key, out t))
+								MappingSchema.DifferentTypeMappers.Add(key, t = MappingSchema.GetValueMapper(sourceType, destType));
 					}
+
+					mappers[i] = t;
 				}
 
 				slot.ValueMappers = mappers;

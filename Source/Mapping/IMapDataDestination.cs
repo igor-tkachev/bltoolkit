@@ -65,6 +65,8 @@ namespace BLToolkit.Mapping
 		void SetNullableDateTime  (object o, int index, DateTime? value);
 		void SetNullableDateTimeOffset(object o, int index, DateTimeOffset? value);
 
+#if !SILVERLIGHT
+
 		// SQL type setters.
 		//
 		void SetSqlByte    (object o, int index, SqlByte     value);
@@ -79,5 +81,7 @@ namespace BLToolkit.Mapping
 		void SetSqlMoney   (object o, int index, SqlMoney    value);
 		void SetSqlGuid    (object o, int index, SqlGuid     value);
 		void SetSqlString  (object o, int index, SqlString   value);
+
+#endif
 	}
 }

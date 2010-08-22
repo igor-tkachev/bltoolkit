@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -149,7 +150,7 @@ namespace BLToolkit.Data.Sql
 					_systemType,
 					_name,
 					_precedence,
-					Array.ConvertAll(_parameters, e => (ISqlExpression) e.Clone(objectTree, doClone))));
+					_parameters.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
 			}
 
 			return clone;

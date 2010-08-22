@@ -128,6 +128,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Linq", "Linq", "{4ABA64DA-8981-42F5-9144-DFD5350BEC2D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq.OverWCF", "Demo\Linq\OverWCF\Linq.OverWCF.csproj", "{7ED3B518-7CEA-4991-98BD-9752E5F32F58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{711A3803-4395-4E92-9B26-DC8DDDF80366} = {711A3803-4395-4E92-9B26-DC8DDDF80366}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq.Demo", "Demo\Linq\Demo\Linq.Demo.csproj", "{57CE5505-44CB-42E4-A346-3471F68A5B60}"
 EndProject

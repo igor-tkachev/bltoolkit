@@ -3,7 +3,9 @@ using System.Data.SqlTypes;
 using System.Reflection;
 using System.ComponentModel;
 
+#if !SILVERLIGHT
 using BLToolkit.ComponentModel;
+#endif
 
 namespace BLToolkit.Reflection
 {
@@ -29,6 +31,8 @@ namespace BLToolkit.Reflection
 			get { return _typeAccessor; }
 		}
 
+#if !SILVERLIGHT
+
 		private PropertyDescriptor _propertyDescriptor;
 		public  PropertyDescriptor  PropertyDescriptor
 		{
@@ -40,6 +44,8 @@ namespace BLToolkit.Reflection
 				return _propertyDescriptor;
 			}
 		}
+
+#endif
 
 		public virtual bool HasGetter { get { return false; } }
 		public virtual bool HasSetter { get { return false; } }

@@ -12,8 +12,8 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public override ParameterInfo[] GetParameters()
 		{
-			ParameterInfo[] index = _property.GetIndexParameters();
-			ParameterInfo[] pi    = new ParameterInfo[index.Length + 1];
+			var index = _property.GetIndexParameters();
+			var pi    = new ParameterInfo[index.Length + 1];
 
 			index.CopyTo(pi, 0);
 			pi[index.Length] = new FakeParameterInfo("value", _property.PropertyType, _property, null);

@@ -104,6 +104,8 @@ namespace BLToolkit.Mapping
 				if (t == typeof(UInt64)) return (MB<T>)Activator.CreateInstance(typeof(NEU64<>).MakeGenericType(typeof(T), enumType));
 			}
 
+#if !SILVERLIGHT
+
 			// SqlTypes.
 			//
 			if (t == typeof(SqlString))    return (MB<T>)(object)(new dbS());
@@ -121,6 +123,8 @@ namespace BLToolkit.Mapping
 			if (t == typeof(SqlBoolean))   return (MB<T>)(object)(new dbB());
 			if (t == typeof(SqlGuid))      return (MB<T>)(object)(new dbG());
 			if (t == typeof(SqlDateTime))  return (MB<T>)(object)(new dbDT());
+
+#endif
 
 			return new Default<T>();
 		}
@@ -199,6 +203,8 @@ namespace BLToolkit.Mapping
 		sealed class NEU32<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetUInt32(o, i, (UInt32)(object)v.Value); } }
 		sealed class NEU64<E> : MB<E?> where E : struct { public override  void To(IMapDataDestination d, object o, int i, E? v) { /*if (null == v) d.SetNull(o, i); else*/ d.SetUInt64(o, i, (UInt64)(object)v.Value); } }
 
+#if !SILVERLIGHT
+
 		// SqlTypes.
 		//
 		sealed class dbS   : MB<SqlString>   { public override  void To(IMapDataDestination d, object o, int i, SqlString   v) { d.SetSqlString   (o, i, v); } }
@@ -216,5 +222,7 @@ namespace BLToolkit.Mapping
 		sealed class dbB   : MB<SqlBoolean>  { public override  void To(IMapDataDestination d, object o, int i, SqlBoolean  v) { d.SetSqlBoolean  (o, i, v); } }
 		sealed class dbG   : MB<SqlGuid>     { public override  void To(IMapDataDestination d, object o, int i, SqlGuid     v) { d.SetSqlGuid     (o, i, v); } }
 		sealed class dbDT  : MB<SqlDateTime> { public override  void To(IMapDataDestination d, object o, int i, SqlDateTime v) { d.SetSqlDateTime (o, i, v); } }
+
+#endif
 	}
 }

@@ -109,7 +109,9 @@ namespace BLToolkit.Validation
 			{
 				return
 					_memberInfo         != null? _memberInfo.Name:
+#if !SILVERLIGHT
 					_propertyDescriptor != null? _propertyDescriptor.Name:
+#endif
 						null;
 			}
 		}

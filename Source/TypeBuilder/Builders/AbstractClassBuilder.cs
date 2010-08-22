@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 
@@ -128,10 +129,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			Build(BuildStep.Before, _builders);
 			Build(BuildStep.Build,  _builders);
 
-			var ids = new Hashtable();
-
-			foreach (var builder in _builders)
-				ids[builder] = builder.ID;
+			var ids = _builders.ToDictionary(builder => builder, builder => builder.ID);
 
 			DefineAbstractProperties();
 			DefineAbstractMethods();
@@ -139,8 +137,8 @@ namespace BLToolkit.TypeBuilder.Builders
 			OverrideVirtualMethods();
 			DefineInterfaces();
 
-			foreach (IAbstractTypeBuilder builder in ids.Keys)
-				builder.ID = (int)ids[builder];
+			foreach (var builder in ids.Keys)
+				builder.ID = ids[builder];
 
 			_context.BuildElement = BuildElement.Type;
 
@@ -561,7 +559,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static void GetAbstractProperties(Type type, List<PropertyInfo> props)
 		{
-			if (props.Find(mi => mi.DeclaringType == type) == null)
+			if (props.FirstOrDefault(mi => mi.DeclaringType == type) == null)
 			{
 				props.AddRange(
 					type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
@@ -604,7 +602,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Getter can be not defined. We will generate it anyway.
 			//
 			if (getter == null)
+#if SILVERLIGHT
+				return;
+#else
 				getter = new FakeGetter(propertyInfo);
+#endif
 
 			var builders = Combine(
 				GetBuilders(getter.GetParameters()),
@@ -624,7 +626,11 @@ namespace BLToolkit.TypeBuilder.Builders
 			// Setter can be not defined. We will generate it anyway.
 			//
 			if (setter == null)
+#if SILVERLIGHT
+				return;
+#else
 				setter = new FakeSetter(propertyInfo);
+#endif
 
 			var builders = Combine(
 				GetBuilders(setter.GetParameters()),
@@ -638,7 +644,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		private static void GetAbstractMethods(Type type, List<MethodInfo> methods)
 		{
-			if (methods.Find(mi => mi.DeclaringType == type) == null)
+			if (!methods.Exists(mi => mi.DeclaringType == type))
 			{
 				methods.AddRange(
 					type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));

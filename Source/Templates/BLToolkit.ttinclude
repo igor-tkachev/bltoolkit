@@ -501,7 +501,7 @@ partial class ForeignKey
 	}
 }
 
-
+/*
 // Shamelessly jacked from http://www.bennysutton.com/C-sharp/Plural-Singular-Words.aspx with little modifications.
 //
 
@@ -947,5 +947,6 @@ public sealed class Plurals
 
 	#endregion
 }
+*/
 
 #>

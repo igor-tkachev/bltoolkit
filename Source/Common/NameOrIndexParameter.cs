@@ -1,5 +1,5 @@
 using System;
-
+using System.Linq;
 using BLToolkit.Properties;
 
 namespace BLToolkit.Common
@@ -81,12 +81,12 @@ namespace BLToolkit.Common
 
 		public static NameOrIndexParameter[] FromStringArray(string[] names)
 		{
-			return Array.ConvertAll(names, name => new NameOrIndexParameter(name));
+			return names.Select(name => new NameOrIndexParameter(name)).ToArray();
 		}
 
 		public static NameOrIndexParameter[] FromIndexArray(int[] indices)
 		{
-			return Array.ConvertAll(indices, index => new NameOrIndexParameter(index));
+			return indices.Select(index => new NameOrIndexParameter(index)).ToArray();
 		}
 
 		#endregion

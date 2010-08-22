@@ -83,12 +83,17 @@ namespace BLToolkit.Reflection.Emit
 			if (version != null)
 				_assemblyName.Version = version;
 
+#if !SILVERLIGHT
+
 			if (!string.IsNullOrEmpty(keyFile))
 			{
 				_assemblyName.Flags        |= AssemblyNameFlags.PublicKey;
 				_assemblyName.KeyPair       = new StrongNameKeyPair(System.IO.File.OpenRead(keyFile));
 				_assemblyName.HashAlgorithm = AssemblyHashAlgorithm.SHA1;
 			}
+
+#endif
+
 #if DEBUG
 			_assemblyName.Flags |= AssemblyNameFlags.EnableJITcompileTracking;
 #else
@@ -97,17 +102,26 @@ namespace BLToolkit.Reflection.Emit
 
 			_createAssemblyBuilder = _ =>
 			{
+#if SILVERLIGHT
+				_assemblyBuilder = Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.Run);
+#else
 				_assemblyBuilder =
 					string.IsNullOrEmpty(assemblyDir)?
 					Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave):
 					Thread.GetDomain().DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave, assemblyDir);
+#endif
 
 				_assemblyBuilder.SetCustomAttribute(BLToolkitAttribute);
+
+#if !SILVERLIGHT
+
 				_assemblyBuilder.SetCustomAttribute(
 					new CustomAttributeBuilder(
 						typeof(AllowPartiallyTrustedCallersAttribute)
 							.GetConstructor(Type.EmptyTypes),
 						new object[0]));
+
+#endif
 			};
 		}
 
@@ -217,8 +231,12 @@ namespace BLToolkit.Reflection.Emit
 		/// </summary>
 		public void Save()
 		{
+#if !SILVERLIGHT
+
 			if (_assemblyBuilder != null)
 				_assemblyBuilder.Save(ModulePath);
+
+#endif
 		}
 
 		#region DefineType Overrides

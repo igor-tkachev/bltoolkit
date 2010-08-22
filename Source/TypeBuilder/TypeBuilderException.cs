@@ -64,6 +64,8 @@ namespace BLToolkit.TypeBuilder
 		{
 		}
 
+#if !SILVERLIGHT
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TypeBuilderException"/> class
 		/// with serialized data.
@@ -77,5 +79,7 @@ namespace BLToolkit.TypeBuilder
 			: base(info, context)
 		{
 		}
+
+#endif
 	}
 }

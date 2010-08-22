@@ -87,7 +87,7 @@ namespace BLToolkit.ServiceModel
 							cnt++;
 						}
 
-					Builder.Insert(len, cnt);
+					Builder.Insert(len, cnt.ToString(CultureInfo.CurrentCulture));
 				}
 			}
 
@@ -388,7 +388,11 @@ namespace BLToolkit.ServiceModel
 					if (str == "System.Data.Linq.Binary")
 						return typeof(System.Data.Linq.Binary);
 
+#if !SILVERLIGHT
+
 					type = LinqService.TypeResolver(str);
+
+#endif
 
 					if (type == null)
 					{

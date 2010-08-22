@@ -51,8 +51,9 @@ namespace BLToolkit.Mapping
 			}
 
 			if (mm == null) mm = GetSimpleMemberMapper(mi);
+#if !SILVERLIGHT
 			if (mm == null) mm = GetSqlTypeMemberMapper(mi);
-
+#endif
 			return mm ?? new DefaultMemberMapper();
 		}
 
@@ -168,6 +169,8 @@ namespace BLToolkit.Mapping
 		public virtual DateTime? GetNullableDateTime(object o) { return _memberAccessor.GetNullableDateTime(o); }
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o) { return _memberAccessor.GetNullableDateTimeOffset(o); }
 
+#if !SILVERLIGHT
+
 		// SQL type getters.
 		//
 		public virtual SqlByte     GetSqlByte    (object o) { return _memberAccessor.GetSqlByte    (o); }
@@ -182,6 +185,8 @@ namespace BLToolkit.Mapping
 		public virtual SqlMoney    GetSqlMoney   (object o) { return _memberAccessor.GetSqlMoney   (o); }
 		public virtual SqlGuid     GetSqlGuid    (object o) { return _memberAccessor.GetSqlGuid    (o); }
 		public virtual SqlString   GetSqlString  (object o) { return _memberAccessor.GetSqlString  (o); }
+
+#endif
 
 		public virtual void SetValue(object o, object value)
 		{
@@ -240,6 +245,8 @@ namespace BLToolkit.Mapping
 		public virtual void SetNullableDateTime(object o, DateTime? value) { _memberAccessor.SetNullableDateTime(o, value); }
 		public virtual void SetNullableDateTimeOffset(object o, DateTimeOffset? value) { _memberAccessor.SetNullableDateTimeOffset(o, value); }
 
+#if !SILVERLIGHT
+
 		// SQL type setters.
 		//
 		public virtual void SetSqlByte    (object o, SqlByte     value) { _memberAccessor.SetSqlByte    (o, value); }
@@ -254,6 +261,8 @@ namespace BLToolkit.Mapping
 		public virtual void SetSqlMoney   (object o, SqlMoney    value) { _memberAccessor.SetSqlMoney   (o, value); }
 		public virtual void SetSqlGuid    (object o, SqlGuid     value) { _memberAccessor.SetSqlGuid    (o, value); }
 		public virtual void SetSqlString  (object o, SqlString   value) { _memberAccessor.SetSqlString  (o, value); }
+
+#endif
 
 		public virtual void CloneValue    (object source, object dest)  { _memberAccessor.CloneValue(source, dest); }
 
@@ -354,6 +363,8 @@ namespace BLToolkit.Mapping
 			public override DateTime? GetNullableDateTime(object o) { var obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDateTime(obj); }
 			public override DateTimeOffset? GetNullableDateTimeOffset(object o) { var obj = _memberAccessor.GetValue(o); return obj == null? null: _mapper.GetNullableDateTimeOffset(obj); }
 
+#if !SILVERLIGHT
+
 			// SQL type getters.
 			//
 			public override SqlByte     GetSqlByte    (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? SqlByte.    Null: _mapper.GetSqlByte    (obj); }
@@ -368,6 +379,8 @@ namespace BLToolkit.Mapping
 			public override SqlMoney    GetSqlMoney   (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? SqlMoney.   Null: _mapper.GetSqlMoney   (obj); }
 			public override SqlGuid     GetSqlGuid    (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? SqlGuid.    Null: _mapper.GetSqlGuid    (obj); }
 			public override SqlString   GetSqlString  (object o) { var obj = _memberAccessor.GetValue(o); return obj == null? SqlString.  Null: _mapper.GetSqlString  (obj); }
+
+#endif
 
 			#endregion
 
@@ -421,6 +434,8 @@ namespace BLToolkit.Mapping
 			public override void SetNullableDateTime(object o, DateTime? value) { var obj = GetObject(o); if (obj != null) _mapper.SetNullableDateTime(obj, value); }
 			public override void SetNullableDateTimeOffset(object o, DateTimeOffset? value) { var obj = GetObject(o); if (obj != null) _mapper.SetNullableDateTimeOffset(obj, value); }
 
+#if !SILVERLIGHT
+
 			// SQL type setters.
 			//
 			public override void SetSqlByte    (object o, SqlByte     value) { var obj = GetObject(o); if (obj != null) _mapper.SetSqlByte    (obj, value); }
@@ -435,6 +450,8 @@ namespace BLToolkit.Mapping
 			public override void SetSqlMoney   (object o, SqlMoney    value) { var obj = GetObject(o); if (obj != null) _mapper.SetSqlMoney   (obj, value); }
 			public override void SetSqlGuid    (object o, SqlGuid     value) { var obj = GetObject(o); if (obj != null) _mapper.SetSqlGuid    (obj, value); }
 			public override void SetSqlString  (object o, SqlString   value) { var obj = GetObject(o); if (obj != null) _mapper.SetSqlString  (obj, value); }
+
+#endif
 
 			#endregion
 		}
@@ -920,9 +937,10 @@ namespace BLToolkit.Mapping
 			if (type == typeof(Decimal))     return n? new DecimalMapper.Nullable()    : new DecimalMapper();
 			if (type == typeof(Guid))        return n? new GuidMapper.Nullable()       : new GuidMapper();
 			if (type == typeof(Stream))      return n? new StreamMapper.Nullable()     : new StreamMapper();
+#if !SILVERLIGHT
 			if (type == typeof(XmlReader))   return n? new XmlReaderMapper.Nullable()  : new XmlReaderMapper();
 			if (type == typeof(XmlDocument)) return n? new XmlDocumentMapper.Nullable(): new XmlDocumentMapper();
-
+#endif
 			return null;
 		}
 
@@ -1156,6 +1174,8 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+#if !SILVERLIGHT
+
 		class XmlReaderMapper : MemberMapper
 		{
 			XmlReader _nullValue;
@@ -1219,6 +1239,8 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
+
+#endif
 
 		#endregion
 
@@ -1638,6 +1660,8 @@ namespace BLToolkit.Mapping
 		#endregion
 
 		#region SqlTypes
+
+#if !SILVERLIGHT
 
 		private static MemberMapper GetSqlTypeMemberMapper(MapMemberInfo mi)
 		{
@@ -2059,6 +2083,8 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
+
+#endif
 
 		#endregion
 

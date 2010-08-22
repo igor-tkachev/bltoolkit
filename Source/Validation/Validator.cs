@@ -81,6 +81,8 @@ namespace BLToolkit.Validation
 			ValidatorBaseAttribute[] attrs = null;
 			object                   value = null;
 
+#if !SILVERLIGHT
+
 			if (context.PropertyDescriptor != null)
 			{
 				value = context.PropertyDescriptor.GetValue(context.Object);
@@ -102,6 +104,9 @@ namespace BLToolkit.Validation
 					attrs = list.ToArray();
 			}
 			else
+
+#endif
+
 			{
 				context.MemberAccessor = context.TypeAccessor[fieldName];
 
@@ -131,19 +136,23 @@ namespace BLToolkit.Validation
 			return IsValid(InitContext(null, obj, null, isNull), fieldName);
 		}
 
+#if !SILVERLIGHT
+
 		public static bool IsValid(object obj, PropertyDescriptor pd, ValidationContext.IsNullHandler isNull)
 		{
 			return IsValid(InitContext(null, obj, pd, isNull), pd.Name);
 		}
 
-		public static bool IsValid(object obj, string fieldName)
-		{
-			return IsValid(obj, fieldName, null);
-		}
-
 		public static bool IsValid(object obj, PropertyDescriptor pd)
 		{
 			return IsValid(obj, pd, null);
+		}
+
+#endif
+
+		public static bool IsValid(object obj, string fieldName)
+		{
+			return IsValid(obj, fieldName, null);
 		}
 
 		#endregion
@@ -179,20 +188,23 @@ namespace BLToolkit.Validation
 			return GetErrorMessages(InitContext(null, obj, null, isNull), fieldName);
 		}
 
-		public static string[] GetErrorMessages(
-			object obj, PropertyDescriptor pd, ValidationContext.IsNullHandler isNull)
+#if !SILVERLIGHT
+
+		public static string[] GetErrorMessages(object obj, PropertyDescriptor pd, ValidationContext.IsNullHandler isNull)
 		{
 			return GetErrorMessages(InitContext(null, obj, pd, isNull), pd.Name);
-		}
-
-		public static string[] GetErrorMessages(object obj, string fieldName)
-		{
-			return GetErrorMessages(obj, fieldName, null);
 		}
 
 		public static string[] GetErrorMessages(object obj, PropertyDescriptor pd)
 		{
 			return GetErrorMessages(obj, pd, null);
+		}
+
+#endif
+
+		public static string[] GetErrorMessages(object obj, string fieldName)
+		{
+			return GetErrorMessages(obj, fieldName, null);
 		}
 
 		#endregion

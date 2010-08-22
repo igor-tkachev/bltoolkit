@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -400,13 +401,13 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		protected virtual Type GetFieldType()
 		{
-			PropertyInfo    pi    = Context.CurrentProperty;
-			ParameterInfo[] index = pi.GetIndexParameters();
+			var pi    = Context.CurrentProperty;
+			var index = pi.GetIndexParameters();
 
 			switch (index.Length)
 			{
 				case 0: return pi.PropertyType;
-				case 1: return typeof(Hashtable);
+				case 1: return typeof(Dictionary<object,object>);
 				default:
 					throw new InvalidOperationException();
 			}
