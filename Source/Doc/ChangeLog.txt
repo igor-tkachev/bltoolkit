@@ -9,6 +9,7 @@ Enhancement
 - No more .NET Framework 2.0 support.
 - T4 Templates for Sybase, MS SQL Server, and PostgreSQL.
 - Linq over WCF.
+- Silverlight support.
 
 
 v 3.2

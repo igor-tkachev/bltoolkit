@@ -52,6 +52,8 @@ namespace BLToolkit.Data.DataProvider
 			return base.ConvertToStream(value);
 		}
 
+#if !SILVERLIGHT
+
 		public System.Data.SqlTypes.SqlBinary ConvertToSqlBinary(string value)
 		{
 			return Common.Convert.ToSqlBinary(ConvertToByteArray(value));
@@ -77,18 +79,20 @@ namespace BLToolkit.Data.DataProvider
 			return base.ConvertToSqlBytes(value);
 		}
 
-		public override bool? ConvertToNullableBoolean(object value)
-		{
-			if (value is string)
-				return ConvertToBoolean((string)value);
-			return base.ConvertToNullableBoolean(value);
-		}
-
 		public override System.Data.SqlTypes.SqlGuid ConvertToSqlGuid(object value)
 		{
 			if (value is string)
 				return new System.Data.SqlTypes.SqlGuid(new Guid((string)value));
 			return base.ConvertToSqlGuid(value);
+		}
+
+#endif
+
+		public override bool? ConvertToNullableBoolean(object value)
+		{
+			if (value is string)
+				return ConvertToBoolean((string)value);
+			return base.ConvertToNullableBoolean(value);
 		}
 	}
 }

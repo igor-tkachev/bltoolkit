@@ -801,5 +801,40 @@ namespace Update
 				}
 			});
 		}
+
+		[Test]
+		public void InsertWithIdentity5()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					for (var i = 0; i < 2; i++)
+					{
+						db.Person.Delete(p => p.ID > 2);
+
+						var person = new Person
+						{
+							FirstName = "John" + i,
+							LastName  = "Shepard",
+							Gender    = Gender.Male
+						};
+
+						var id = db.InsertWithIdentity(person);
+
+						Assert.NotNull(id);
+
+						var john = db.Person.Single(p => p.FirstName == "John" + i && p.LastName == "Shepard");
+
+						Assert.NotNull (john);
+						Assert.AreEqual(id, john.ID);
+					}
+				}
+				finally
+				{
+					db.Person.Delete(p => p.ID > 2);
+				}
+			});
+		}
 	}
 }

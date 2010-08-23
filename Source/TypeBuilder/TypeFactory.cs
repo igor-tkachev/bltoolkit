@@ -136,10 +136,11 @@ namespace BLToolkit.TypeBuilder
 		{
 			var ab = GlobalAssemblyBuilder;
 
-#if !SILVERLIGHT
-
 			if (ab == null)
 			{
+#if SILVERLIGHT
+				var assemblyDir = ".";
+#else
 				var assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
 
 				// Dynamic modules are locationless, so ignore them.
@@ -148,6 +149,7 @@ namespace BLToolkit.TypeBuilder
 				//
 				if (!(type.Module is _ModuleBuilder))
 					assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
+#endif
 
 				var fullName = type.FullName;
 
@@ -156,8 +158,6 @@ namespace BLToolkit.TypeBuilder
 
 				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + fullName + "." + suffix + ".dll");
 			}
-
-#endif
 
 			return ab;
 		}
@@ -259,8 +259,7 @@ namespace BLToolkit.TypeBuilder
 			{
 				// Convert an Exception to TypeBuilderException.
 				//
-				throw new TypeBuilderException(
-					string.Format(Resources.TypeFactory_BuildFailed, sourceType.FullName), ex);
+				throw new TypeBuilderException(string.Format(Resources.TypeFactory_BuildFailed, sourceType.FullName), ex);
 			}
 		}
 

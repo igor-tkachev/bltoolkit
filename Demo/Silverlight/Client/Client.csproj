@@ -107,7 +107,9 @@
     </None>
     <None Include="Properties\AppManifest.xml" />
     <None Include="Properties\DataSources\BLToolkit.ServiceModel.LinqServiceResult.datasource" />
-    <None Include="Service References\ServiceReference1\TestLinqService.wsdl" />
+    <None Include="Service References\ServiceReference1\TestLinqService.wsdl">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\ServiceReference1\TestLinqService.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -135,7 +137,9 @@
     <WCFMetadataStorage Include="Service References\ServiceReference1\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Service References\ServiceReference1\TestLinqService.disco" />
+    <None Include="Service References\ServiceReference1\TestLinqService.disco">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Service References\ServiceReference1\configuration91.svcinfo" />

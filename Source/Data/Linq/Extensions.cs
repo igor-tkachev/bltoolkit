@@ -10,20 +10,11 @@ namespace BLToolkit.Data.Linq
 {
 	using DataAccess;
 
-	public static class Extensions1
-	{
-		static public Table<T> GetTable<T>(this IDataContext dataContext)
-			where T : class
-		{
-			return new Table<T>(dataContext);
-		}
-	}
-
 	public static class Extensions
 	{
 		#region Table Helpers
 
-		static public Table<T> GetTable1<T>(this IDataContext dataContext)
+		static public Table<T> GetTable<T>(this IDataContext dataContext)
 			where T : class
 		{
 			return new Table<T>(dataContext);

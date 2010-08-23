@@ -18,7 +18,7 @@
           </StartCmdLineArguments>
           <StartWorkingDirectory>
           </StartWorkingDirectory>
-          <ShowWebRefOnDebugPrompt>True</ShowWebRefOnDebugPrompt>
+          <ShowWebRefOnDebugPrompt>False</ShowWebRefOnDebugPrompt>
           <OutOfBrowserProjectToDebug>
           </OutOfBrowserProjectToDebug>
           <ShowRiaSvcsOnDebugPrompt>True</ShowRiaSvcsOnDebugPrompt>

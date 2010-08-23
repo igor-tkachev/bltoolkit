@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Windows;
+using System.Threading;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 
 namespace Client
 {
@@ -18,10 +11,20 @@ namespace Client
 		{
 			InitializeComponent();
 
-			using (var dm = new DataModel())
+			ThreadPool.QueueUserWorkItem(_ =>
 			{
-				dm.Parent.ToList();
-			}
+				using (var dm = new DataModel())
+				{
+					var q =
+						from p in dm.Parent
+						where p.ParentID <= 5
+						select p.ParentID.ToString();
+
+					var text = string.Join(", ", q.ToList().ToArray());
+
+					Dispatcher.BeginInvoke(() => OutputText.Text = text);
+				}
+			});
 		}
 	}
 }

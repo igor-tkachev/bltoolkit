@@ -71,7 +71,7 @@ namespace BLToolkit.ServiceModel
 
 		#endregion
 
-		LinqServiceClient GetClient()
+		ILinqService GetClient()
 		{
 			if (Binding != null)
 				return new LinqServiceClient(Binding, _endpointAddress);
@@ -114,8 +114,19 @@ namespace BLToolkit.ServiceModel
 			get
 			{
 				if (_sqlProviderType == null)
-					using (var client = GetClient())
-						_sqlProviderType = Type.GetType(client.GetSqlProviderType());
+				{
+					var client = GetClient();
+
+					try
+					{
+						var type = client.GetSqlProviderType();
+						_sqlProviderType = Type.GetType(type);
+					}
+					finally
+					{
+						((IDisposable)client).Dispose();
+					}
+				}
 
 				return _sqlProviderType;
 			}
@@ -147,8 +158,8 @@ namespace BLToolkit.ServiceModel
 
 		class QueryContext
 		{
-			public IQueryContext     Query;
-			public LinqServiceClient Client;
+			public IQueryContext Query;
+			public ILinqService  Client;
 		}
 
 		object IDataContext.SetQuery(IQueryContext queryContext)

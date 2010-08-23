@@ -17,6 +17,7 @@ Tools\SvnRevision\SvnRevision.exe . Source\Templates\BLToolkitConstants.Revision
 cd Source
 %windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLToolkit.3.csproj /property:Configuration=Release 
 %windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.4.csproj /property:Configuration=Release
+%windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.SL.4.csproj /property:Configuration=Release
 copy bin\Release\*.dll .
 md DataProviders
 

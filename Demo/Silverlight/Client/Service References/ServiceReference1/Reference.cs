@@ -220,7 +220,7 @@ namespace Client.ServiceReference1 {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        string Client.ServiceReference1.ILinqService.EndGetSqlProviderType(System.IAsyncResult result) {
+        public string EndGetSqlProviderType(System.IAsyncResult result) {
             return base.Channel.EndGetSqlProviderType(result);
         }
         
@@ -264,7 +264,7 @@ namespace Client.ServiceReference1 {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        int Client.ServiceReference1.ILinqService.EndExecuteNonQuery(System.IAsyncResult result) {
+        public int EndExecuteNonQuery(System.IAsyncResult result) {
             return base.Channel.EndExecuteNonQuery(result);
         }
         
@@ -274,7 +274,7 @@ namespace Client.ServiceReference1 {
         }
         
         private object[] OnEndExecuteNonQuery(System.IAsyncResult result) {
-            int retVal = ((Client.ServiceReference1.ILinqService)(this)).EndExecuteNonQuery(result);
+            int retVal = ((Client.ServiceReference1.LinqServiceClient)(this)).EndExecuteNonQuery(result);
             return new object[] {
                     retVal};
         }

@@ -161,7 +161,7 @@ namespace Client
 				ReceiveTimeout         = new TimeSpan(00, 10, 00),
 				SendTimeout            = new TimeSpan(00, 10, 00),
 			},
-			new EndpointAddress("net.tcp://localhost:31020/TestLinqService.svc"))
+			new EndpointAddress("http://localhost:31020/TestLinqService.svc"))
 		{
 		}
 	}

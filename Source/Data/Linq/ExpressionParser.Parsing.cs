@@ -1015,8 +1015,12 @@ namespace BLToolkit.Data.Linq
 		static void CheckExplicitCtor(Expression expr)
 		{
 			if (expr.NodeType == ExpressionType	.MemberInit)
-				throw new NotSupportedException(
-					string.Format("Explicit construction of entity type '{0}' in query is not allowed.", expr.Type));
+			{
+				var mi = (MemberInitExpression)expr;
+
+				if (mi.NewExpression.Arguments.Count > 0)
+					throw new NotSupportedException(string.Format("Explicit construction of entity type '{0}' in query is not allowed.", expr.Type));
+			}
 		}
 
 		#endregion

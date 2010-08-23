@@ -14,6 +14,9 @@ namespace BLToolkit.ServiceModel
 		string _queryData;
 
 		[DataMember]
+#if SILVERLIGHT
+		public
+#endif
 		string QueryData
 		{
 			get { return _queryData ?? (_queryData = Serialize()); }
