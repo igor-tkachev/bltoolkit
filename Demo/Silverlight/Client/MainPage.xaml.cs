@@ -16,11 +16,12 @@ namespace Client
 				using (var dm = new DataModel())
 				{
 					var q =
-						from p in dm.Parent
-						where p.ParentID <= 5
-						select p.ParentID.ToString();
+						from c in dm.Categories
+						where  !c.CategoryName.StartsWith("Con")
+						orderby c.CategoryName
+						select  c.CategoryName;
 
-					var text = string.Join(", ", q.ToList().ToArray());
+					var text = string.Join("\n", q.ToList().ToArray());
 
 					Dispatcher.BeginInvoke(() => OutputText.Text = text);
 				}

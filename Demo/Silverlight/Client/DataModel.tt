@@ -4,7 +4,7 @@
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLT4Toolkit.ttinclude" #>
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\MSSQL.ttinclude"       #>
 <#
-	ConnectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
+	ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 
 	BaseDataContextClass = "ServiceModelDataContext";
 	
@@ -22,14 +22,13 @@ namespace Client
 			new BasicHttpBinding(BasicHttpSecurityMode.None)
 			{
 				MaxReceivedMessageSize = 10000000,
-				//MaxBufferPoolSize      = 10000000,
 				MaxBufferSize          = 10000000,
 				CloseTimeout           = new TimeSpan(00, 01, 00),
 				OpenTimeout            = new TimeSpan(00, 01, 00),
 				ReceiveTimeout         = new TimeSpan(00, 10, 00),
 				SendTimeout            = new TimeSpan(00, 10, 00),
 			},
-			new EndpointAddress("net.tcp://localhost:31020/TestLinqService.svc"))
+			new EndpointAddress("http://localhost:31020/TestLinqService.svc"))
 		{
 		}
 	}

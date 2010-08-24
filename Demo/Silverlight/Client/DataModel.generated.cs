@@ -5,6 +5,7 @@
 // </auto-generated>
 //---------------------------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
 using System.ServiceModel;
 
 using BLToolkit.Data;
@@ -17,132 +18,474 @@ namespace Client
 {
 	public partial class DataModel : ServiceModelDataContext
 	{
-		public Table<BinaryData>    BinaryData    { get { return this.GetTable<BinaryData>();    } }
-		public Table<Child>         Child         { get { return this.GetTable<Child>();         } }
-		public Table<DataTypes>     DataTypes     { get { return this.GetTable<DataTypes>();     } }
-		public Table<DataTypeTest>  DataTypeTest  { get { return this.GetTable<DataTypeTest>();  } }
-		public Table<Doctor>        Doctor        { get { return this.GetTable<Doctor>();        } }
-		public Table<GrandChild>    GrandChild    { get { return this.GetTable<GrandChild>();    } }
-		public Table<LinqDataTypes> LinqDataTypes { get { return this.GetTable<LinqDataTypes>(); } }
-		public Table<Parent>        Parent        { get { return this.GetTable<Parent>();        } }
-		public Table<Patient>       Patient       { get { return this.GetTable<Patient>();       } }
-		public Table<Person>        Person        { get { return this.GetTable<Person>();        } }
+		public Table<AlphabeticalListOfProducts> AlphabeticalListOfProducts { get { return this.GetTable<AlphabeticalListOfProducts>(); } }
+		public Table<Categories>                 Categories                 { get { return this.GetTable<Categories>();                 } }
+		public Table<CategorySalesFor1997>       CategorySalesFor1997       { get { return this.GetTable<CategorySalesFor1997>();       } }
+		public Table<CurrentProductList>         CurrentProductList         { get { return this.GetTable<CurrentProductList>();         } }
+		public Table<CustomerAndSuppliersByCity> CustomerAndSuppliersByCity { get { return this.GetTable<CustomerAndSuppliersByCity>(); } }
+		public Table<CustomerCustomerDemo>       CustomerCustomerDemo       { get { return this.GetTable<CustomerCustomerDemo>();       } }
+		public Table<CustomerDemographics>       CustomerDemographics       { get { return this.GetTable<CustomerDemographics>();       } }
+		public Table<Customers>                  Customers                  { get { return this.GetTable<Customers>();                  } }
+		public Table<Employees>                  Employees                  { get { return this.GetTable<Employees>();                  } }
+		public Table<EmployeeTerritories>        EmployeeTerritories        { get { return this.GetTable<EmployeeTerritories>();        } }
+		public Table<Invoices>                   Invoices                   { get { return this.GetTable<Invoices>();                   } }
+		public Table<OrderDetails>               OrderDetails               { get { return this.GetTable<OrderDetails>();               } }
+		public Table<OrderDetailsExtended>       OrderDetailsExtended       { get { return this.GetTable<OrderDetailsExtended>();       } }
+		public Table<OrderSubtotals>             OrderSubtotals             { get { return this.GetTable<OrderSubtotals>();             } }
+		public Table<Orders>                     Orders                     { get { return this.GetTable<Orders>();                     } }
+		public Table<OrdersQry>                  OrdersQry                  { get { return this.GetTable<OrdersQry>();                  } }
+		public Table<ProductSalesFor1997>        ProductSalesFor1997        { get { return this.GetTable<ProductSalesFor1997>();        } }
+		public Table<Products>                   Products                   { get { return this.GetTable<Products>();                   } }
+		public Table<ProductsAboveAveragePrice>  ProductsAboveAveragePrice  { get { return this.GetTable<ProductsAboveAveragePrice>();  } }
+		public Table<ProductsByCategory>         ProductsByCategory         { get { return this.GetTable<ProductsByCategory>();         } }
+		public Table<QuarterlyOrders>            QuarterlyOrders            { get { return this.GetTable<QuarterlyOrders>();            } }
+		public Table<Region>                     Region                     { get { return this.GetTable<Region>();                     } }
+		public Table<SalesByCategory>            SalesByCategory            { get { return this.GetTable<SalesByCategory>();            } }
+		public Table<SalesTotalsByAmount>        SalesTotalsByAmount        { get { return this.GetTable<SalesTotalsByAmount>();        } }
+		public Table<Shippers>                   Shippers                   { get { return this.GetTable<Shippers>();                   } }
+		public Table<SummaryOfSalesByQuarter>    SummaryOfSalesByQuarter    { get { return this.GetTable<SummaryOfSalesByQuarter>();    } }
+		public Table<SummaryOfSalesByYear>       SummaryOfSalesByYear       { get { return this.GetTable<SummaryOfSalesByYear>();       } }
+		public Table<Suppliers>                  Suppliers                  { get { return this.GetTable<Suppliers>();                  } }
+		public Table<Territories>                Territories                { get { return this.GetTable<Territories>();                } }
 	}
 
-	[TableName(Name="BinaryData")]
-	public partial class BinaryData
+	[TableName(Name="Alphabetical list of products")]
+	public partial class AlphabeticalListOfProducts
 	{
-		[Identity, PrimaryKey(1)] public int    BinaryDataID { get; set; }
-		                          public byte[] Stamp        { get; set; }
-		                          public byte[] Data         { get; set; }
+		           public int      ProductID       { get; set; }
+		           public string   ProductName     { get; set; }
+		[Nullable] public int?     SupplierID      { get; set; }
+		[Nullable] public int?     CategoryID      { get; set; }
+		[Nullable] public string   QuantityPerUnit { get; set; }
+		[Nullable] public decimal? UnitPrice       { get; set; }
+		[Nullable] public short?   UnitsInStock    { get; set; }
+		[Nullable] public short?   UnitsOnOrder    { get; set; }
+		[Nullable] public short?   ReorderLevel    { get; set; }
+		           public bool     Discontinued    { get; set; }
+		           public string   CategoryName    { get; set; }
 	}
 
-	[TableName(Name="Child")]
-	public partial class Child
+	[TableName(Name="Categories")]
+	public partial class Categories
 	{
-		[Nullable] public int? ParentID { get; set; }
-		[Nullable] public int? ChildID  { get; set; }
+		[Identity, PrimaryKey(1)] public int    CategoryID   { get; set; }
+		                          public string CategoryName { get; set; }
+		[Nullable               ] public string Description  { get; set; }
+		[Nullable               ] public byte[] Picture      { get; set; }
+
+		// FK_Products_Categories_BackReference
+		[Association(ThisKey="CategoryID", OtherKey="CategoryID")]
+		public IEnumerable<Products> Productss { get; set; }
 	}
 
-	[TableName(Name="DataTypes")]
-	public partial class DataTypes
+	[TableName(Name="Category Sales for 1997")]
+	public partial class CategorySalesFor1997
 	{
-		[Nullable] public int?     ID         { get; set; }
-		[Nullable] public decimal? MoneyValue { get; set; }
+		           public string   CategoryName  { get; set; }
+		[Nullable] public decimal? CategorySales { get; set; }
 	}
 
-	[TableName(Name="DataTypeTest")]
-	public partial class DataTypeTest
+	[TableName(Name="Current Product List")]
+	public partial class CurrentProductList
 	{
-		[Identity, PrimaryKey(1)] public int       DataTypeID { get; set; }
-		[Nullable               ] public byte[]    Binary_    { get; set; }
-		[Nullable               ] public bool?     Boolean_   { get; set; }
-		[Nullable               ] public byte?     Byte_      { get; set; }
-		[Nullable               ] public byte[]    Bytes_     { get; set; }
-		[Nullable               ] public char?     Char_      { get; set; }
-		[Nullable               ] public DateTime? DateTime_  { get; set; }
-		[Nullable               ] public decimal?  Decimal_   { get; set; }
-		[Nullable               ] public double?   Double_    { get; set; }
-		[Nullable               ] public Guid?     Guid_      { get; set; }
-		[Nullable               ] public short?    Int16_     { get; set; }
-		[Nullable               ] public int?      Int32_     { get; set; }
-		[Nullable               ] public long?     Int64_     { get; set; }
-		[Nullable               ] public decimal?  Money_     { get; set; }
-		[Nullable               ] public byte?     SByte_     { get; set; }
-		[Nullable               ] public float?    Single_    { get; set; }
-		[Nullable               ] public byte[]    Stream_    { get; set; }
-		[Nullable               ] public string    String_    { get; set; }
-		[Nullable               ] public short?    UInt16_    { get; set; }
-		[Nullable               ] public int?      UInt32_    { get; set; }
-		[Nullable               ] public long?     UInt64_    { get; set; }
-		[Nullable               ] public string    Xml_       { get; set; }
+		[Identity] public int    ProductID   { get; set; }
+		           public string ProductName { get; set; }
 	}
 
-	[TableName(Name="Doctor")]
-	public partial class Doctor
+	[TableName(Name="Customer and Suppliers by City")]
+	public partial class CustomerAndSuppliersByCity
 	{
-		[PrimaryKey(1)] public int    PersonID { get; set; }
-		                public string Taxonomy { get; set; }
-
-		// FK_Doctor_Person
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Person Person { get; set; }
+		[Nullable] public string City         { get; set; }
+		           public string CompanyName  { get; set; }
+		[Nullable] public string ContactName  { get; set; }
+		           public string Relationship { get; set; }
 	}
 
-	[TableName(Name="GrandChild")]
-	public partial class GrandChild
+	[TableName(Name="CustomerCustomerDemo")]
+	public partial class CustomerCustomerDemo
 	{
-		[Nullable] public int? ParentID     { get; set; }
-		[Nullable] public int? ChildID      { get; set; }
-		[Nullable] public int? GrandChildID { get; set; }
+		[PrimaryKey(1)] public string CustomerID     { get; set; }
+		[PrimaryKey(2)] public string CustomerTypeID { get; set; }
+
+		// FK_CustomerCustomerDemo
+		[Association(ThisKey="CustomerTypeID", OtherKey="CustomerTypeID")]
+		public CustomerDemographics FK_CustomerCustomerDemo { get; set; }
+
+		// FK_CustomerCustomerDemo_Customers
+		[Association(ThisKey="CustomerID", OtherKey="CustomerID")]
+		public Customers Customers { get; set; }
 	}
 
-	[TableName(Name="LinqDataTypes")]
-	public partial class LinqDataTypes
+	[TableName(Name="CustomerDemographics")]
+	public partial class CustomerDemographics
 	{
-		[Nullable] public int?      ID            { get; set; }
-		[Nullable] public decimal?  MoneyValue    { get; set; }
-		[Nullable] public DateTime? DateTimeValue { get; set; }
-		[Nullable] public bool?     BoolValue     { get; set; }
-		[Nullable] public Guid?     GuidValue     { get; set; }
-		[Nullable] public byte[]    BinaryValue   { get; set; }
-		[Nullable] public short?    SmallIntValue { get; set; }
+		[          PrimaryKey(1)] public string CustomerTypeID { get; set; }
+		[Nullable               ] public string CustomerDesc   { get; set; }
+
+		// FK_CustomerCustomerDemo_BackReference
+		[Association(ThisKey="CustomerTypeID", OtherKey="CustomerTypeID")]
+		public IEnumerable<CustomerCustomerDemo> CustomerCustomerDemos { get; set; }
 	}
 
-	[TableName(Name="Parent")]
-	public partial class Parent
+	[TableName(Name="Customers")]
+	public partial class Customers
 	{
-		[Nullable] public int? ParentID { get; set; }
-		[Nullable] public int? Value1   { get; set; }
+		[          PrimaryKey(1)] public string CustomerID   { get; set; }
+		                          public string CompanyName  { get; set; }
+		[Nullable               ] public string ContactName  { get; set; }
+		[Nullable               ] public string ContactTitle { get; set; }
+		[Nullable               ] public string Address      { get; set; }
+		[Nullable               ] public string City         { get; set; }
+		[Nullable               ] public string Region       { get; set; }
+		[Nullable               ] public string PostalCode   { get; set; }
+		[Nullable               ] public string Country      { get; set; }
+		[Nullable               ] public string Phone        { get; set; }
+		[Nullable               ] public string Fax          { get; set; }
+
+		// FK_Orders_Customers_BackReference
+		[Association(ThisKey="CustomerID", OtherKey="CustomerID")]
+		public IEnumerable<Orders> Orderss { get; set; }
+
+		// FK_CustomerCustomerDemo_Customers_BackReference
+		[Association(ThisKey="CustomerID", OtherKey="CustomerID")]
+		public IEnumerable<CustomerCustomerDemo> CustomerCustomerDemos { get; set; }
 	}
 
-	[TableName(Name="Patient")]
-	public partial class Patient
+	[TableName(Name="Employees")]
+	public partial class Employees
 	{
-		[PrimaryKey(1)] public int    PersonID  { get; set; }
-		                public string Diagnosis { get; set; }
+		[Identity, PrimaryKey(1)] public int       EmployeeID      { get; set; }
+		                          public string    LastName        { get; set; }
+		                          public string    FirstName       { get; set; }
+		[Nullable               ] public string    Title           { get; set; }
+		[Nullable               ] public string    TitleOfCourtesy { get; set; }
+		[Nullable               ] public DateTime? BirthDate       { get; set; }
+		[Nullable               ] public DateTime? HireDate        { get; set; }
+		[Nullable               ] public string    Address         { get; set; }
+		[Nullable               ] public string    City            { get; set; }
+		[Nullable               ] public string    Region          { get; set; }
+		[Nullable               ] public string    PostalCode      { get; set; }
+		[Nullable               ] public string    Country         { get; set; }
+		[Nullable               ] public string    HomePhone       { get; set; }
+		[Nullable               ] public string    Extension       { get; set; }
+		[Nullable               ] public byte[]    Photo           { get; set; }
+		[Nullable               ] public string    Notes           { get; set; }
+		[Nullable               ] public int?      ReportsTo       { get; set; }
+		[Nullable               ] public string    PhotoPath       { get; set; }
 
-		// FK_Patient_Person
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Person Person { get; set; }
+		// FK_Employees_Employees
+		[Association(ThisKey="ReportsTo", OtherKey="EmployeeID")]
+		public Employees FK_Employees_Employees { get; set; }
+
+		// FK_Orders_Employees_BackReference
+		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]
+		public IEnumerable<Orders> Orderss { get; set; }
+
+		// FK_EmployeeTerritories_Employees_BackReference
+		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]
+		public IEnumerable<EmployeeTerritories> EmployeeTerritoriess { get; set; }
+
+		// FK_Employees_Employees_BackReference
+		[Association(ThisKey="EmployeeID", OtherKey="ReportsTo")]
+		public IEnumerable<Employees> s { get; set; }
 	}
 
-	[TableName(Name="Person")]
-	public partial class Person
+	[TableName(Name="EmployeeTerritories")]
+	public partial class EmployeeTerritories
 	{
-		[Identity, PrimaryKey(1)] public int    PersonID   { get; set; }
-		                          public string FirstName  { get; set; }
-		                          public string LastName   { get; set; }
-		[Nullable               ] public string MiddleName { get; set; }
-		                          public char   Gender     { get; set; }
+		[PrimaryKey(1)] public int    EmployeeID  { get; set; }
+		[PrimaryKey(2)] public string TerritoryID { get; set; }
 
-		// FK_Doctor_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Doctor Doctor { get; set; }
+		// FK_EmployeeTerritories_Employees
+		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]
+		public Employees Employees { get; set; }
 
-		// FK_Patient_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Patient Patient { get; set; }
+		// FK_EmployeeTerritories_Territories
+		[Association(ThisKey="TerritoryID", OtherKey="TerritoryID")]
+		public Territories Territories { get; set; }
+	}
+
+	[TableName(Name="Invoices")]
+	public partial class Invoices
+	{
+		[Nullable] public string    ShipName       { get; set; }
+		[Nullable] public string    ShipAddress    { get; set; }
+		[Nullable] public string    ShipCity       { get; set; }
+		[Nullable] public string    ShipRegion     { get; set; }
+		[Nullable] public string    ShipPostalCode { get; set; }
+		[Nullable] public string    ShipCountry    { get; set; }
+		[Nullable] public string    CustomerID     { get; set; }
+		           public string    CustomerName   { get; set; }
+		[Nullable] public string    Address        { get; set; }
+		[Nullable] public string    City           { get; set; }
+		[Nullable] public string    Region         { get; set; }
+		[Nullable] public string    PostalCode     { get; set; }
+		[Nullable] public string    Country        { get; set; }
+		           public string    Salesperson    { get; set; }
+		           public int       OrderID        { get; set; }
+		[Nullable] public DateTime? OrderDate      { get; set; }
+		[Nullable] public DateTime? RequiredDate   { get; set; }
+		[Nullable] public DateTime? ShippedDate    { get; set; }
+		           public string    ShipperName    { get; set; }
+		           public int       ProductID      { get; set; }
+		           public string    ProductName    { get; set; }
+		           public decimal   UnitPrice      { get; set; }
+		           public short     Quantity       { get; set; }
+		           public float     Discount       { get; set; }
+		[Nullable] public decimal?  ExtendedPrice  { get; set; }
+		[Nullable] public decimal?  Freight        { get; set; }
+	}
+
+	[TableName(Name="Order Details")]
+	public partial class OrderDetails
+	{
+		[PrimaryKey(1)] public int     OrderID   { get; set; }
+		[PrimaryKey(2)] public int     ProductID { get; set; }
+		                public decimal UnitPrice { get; set; }
+		                public short   Quantity  { get; set; }
+		                public float   Discount  { get; set; }
+
+		// FK_Order_Details_Orders
+		[Association(ThisKey="OrderID", OtherKey="OrderID")]
+		public Orders OrderDetailsOrders { get; set; }
+
+		// FK_Order_Details_Products
+		[Association(ThisKey="ProductID", OtherKey="ProductID")]
+		public Products OrderDetailsProducts { get; set; }
+	}
+
+	[TableName(Name="Order Details Extended")]
+	public partial class OrderDetailsExtended
+	{
+		           public int      OrderID       { get; set; }
+		           public int      ProductID     { get; set; }
+		           public string   ProductName   { get; set; }
+		           public decimal  UnitPrice     { get; set; }
+		           public short    Quantity      { get; set; }
+		           public float    Discount      { get; set; }
+		[Nullable] public decimal? ExtendedPrice { get; set; }
+	}
+
+	[TableName(Name="Order Subtotals")]
+	public partial class OrderSubtotals
+	{
+		           public int      OrderID  { get; set; }
+		[Nullable] public decimal? Subtotal { get; set; }
+	}
+
+	[TableName(Name="Orders")]
+	public partial class Orders
+	{
+		[Identity, PrimaryKey(1)] public int       OrderID        { get; set; }
+		[Nullable               ] public string    CustomerID     { get; set; }
+		[Nullable               ] public int?      EmployeeID     { get; set; }
+		[Nullable               ] public DateTime? OrderDate      { get; set; }
+		[Nullable               ] public DateTime? RequiredDate   { get; set; }
+		[Nullable               ] public DateTime? ShippedDate    { get; set; }
+		[Nullable               ] public int?      ShipVia        { get; set; }
+		[Nullable               ] public decimal?  Freight        { get; set; }
+		[Nullable               ] public string    ShipName       { get; set; }
+		[Nullable               ] public string    ShipAddress    { get; set; }
+		[Nullable               ] public string    ShipCity       { get; set; }
+		[Nullable               ] public string    ShipRegion     { get; set; }
+		[Nullable               ] public string    ShipPostalCode { get; set; }
+		[Nullable               ] public string    ShipCountry    { get; set; }
+
+		// FK_Orders_Customers
+		[Association(ThisKey="CustomerID", OtherKey="CustomerID")]
+		public Customers Customers { get; set; }
+
+		// FK_Orders_Employees
+		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID")]
+		public Employees Employees { get; set; }
+
+		// FK_Orders_Shippers
+		[Association(ThisKey="ShipVia", OtherKey="ShipperID")]
+		public Shippers Shippers { get; set; }
+
+		// FK_Order_Details_Orders_BackReference
+		[Association(ThisKey="OrderID", OtherKey="OrderID")]
+		public IEnumerable<OrderDetails> OrderDetailss { get; set; }
+	}
+
+	[TableName(Name="Orders Qry")]
+	public partial class OrdersQry
+	{
+		           public int       OrderID        { get; set; }
+		[Nullable] public string    CustomerID     { get; set; }
+		[Nullable] public int?      EmployeeID     { get; set; }
+		[Nullable] public DateTime? OrderDate      { get; set; }
+		[Nullable] public DateTime? RequiredDate   { get; set; }
+		[Nullable] public DateTime? ShippedDate    { get; set; }
+		[Nullable] public int?      ShipVia        { get; set; }
+		[Nullable] public decimal?  Freight        { get; set; }
+		[Nullable] public string    ShipName       { get; set; }
+		[Nullable] public string    ShipAddress    { get; set; }
+		[Nullable] public string    ShipCity       { get; set; }
+		[Nullable] public string    ShipRegion     { get; set; }
+		[Nullable] public string    ShipPostalCode { get; set; }
+		[Nullable] public string    ShipCountry    { get; set; }
+		           public string    CompanyName    { get; set; }
+		[Nullable] public string    Address        { get; set; }
+		[Nullable] public string    City           { get; set; }
+		[Nullable] public string    Region         { get; set; }
+		[Nullable] public string    PostalCode     { get; set; }
+		[Nullable] public string    Country        { get; set; }
+	}
+
+	[TableName(Name="Product Sales for 1997")]
+	public partial class ProductSalesFor1997
+	{
+		           public string   CategoryName { get; set; }
+		           public string   ProductName  { get; set; }
+		[Nullable] public decimal? ProductSales { get; set; }
+	}
+
+	[TableName(Name="Products")]
+	public partial class Products
+	{
+		[Identity, PrimaryKey(1)] public int      ProductID       { get; set; }
+		                          public string   ProductName     { get; set; }
+		[Nullable               ] public int?     SupplierID      { get; set; }
+		[Nullable               ] public int?     CategoryID      { get; set; }
+		[Nullable               ] public string   QuantityPerUnit { get; set; }
+		[Nullable               ] public decimal? UnitPrice       { get; set; }
+		[Nullable               ] public short?   UnitsInStock    { get; set; }
+		[Nullable               ] public short?   UnitsOnOrder    { get; set; }
+		[Nullable               ] public short?   ReorderLevel    { get; set; }
+		                          public bool     Discontinued    { get; set; }
+
+		// FK_Products_Categories
+		[Association(ThisKey="CategoryID", OtherKey="CategoryID")]
+		public Categories Categories { get; set; }
+
+		// FK_Products_Suppliers
+		[Association(ThisKey="SupplierID", OtherKey="SupplierID")]
+		public Suppliers Suppliers { get; set; }
+
+		// FK_Order_Details_Products_BackReference
+		[Association(ThisKey="ProductID", OtherKey="ProductID")]
+		public IEnumerable<OrderDetails> OrderDetailss { get; set; }
+	}
+
+	[TableName(Name="Products Above Average Price")]
+	public partial class ProductsAboveAveragePrice
+	{
+		           public string   ProductName { get; set; }
+		[Nullable] public decimal? UnitPrice   { get; set; }
+	}
+
+	[TableName(Name="Products by Category")]
+	public partial class ProductsByCategory
+	{
+		           public string CategoryName    { get; set; }
+		           public string ProductName     { get; set; }
+		[Nullable] public string QuantityPerUnit { get; set; }
+		[Nullable] public short? UnitsInStock    { get; set; }
+		           public bool   Discontinued    { get; set; }
+	}
+
+	[TableName(Name="Quarterly Orders")]
+	public partial class QuarterlyOrders
+	{
+		[Nullable] public string CustomerID  { get; set; }
+		[Nullable] public string CompanyName { get; set; }
+		[Nullable] public string City        { get; set; }
+		[Nullable] public string Country     { get; set; }
+	}
+
+	[TableName(Name="Region")]
+	public partial class Region
+	{
+		[PrimaryKey(1)] public int    RegionID          { get; set; }
+		                public string RegionDescription { get; set; }
+
+		// FK_Territories_Region_BackReference
+		[Association(ThisKey="RegionID", OtherKey="RegionID")]
+		public IEnumerable<Territories> Territoriess { get; set; }
+	}
+
+	[TableName(Name="Sales by Category")]
+	public partial class SalesByCategory
+	{
+		           public int      CategoryID   { get; set; }
+		           public string   CategoryName { get; set; }
+		           public string   ProductName  { get; set; }
+		[Nullable] public decimal? ProductSales { get; set; }
+	}
+
+	[TableName(Name="Sales Totals by Amount")]
+	public partial class SalesTotalsByAmount
+	{
+		[Nullable] public decimal?  SaleAmount  { get; set; }
+		           public int       OrderID     { get; set; }
+		           public string    CompanyName { get; set; }
+		[Nullable] public DateTime? ShippedDate { get; set; }
+	}
+
+	[TableName(Name="Shippers")]
+	public partial class Shippers
+	{
+		[Identity, PrimaryKey(1)] public int    ShipperID   { get; set; }
+		                          public string CompanyName { get; set; }
+		[Nullable               ] public string Phone       { get; set; }
+
+		// FK_Orders_Shippers_BackReference
+		[Association(ThisKey="ShipperID", OtherKey="ShipVia")]
+		public IEnumerable<Orders> Orderss { get; set; }
+	}
+
+	[TableName(Name="Summary of Sales by Quarter")]
+	public partial class SummaryOfSalesByQuarter
+	{
+		[Nullable] public DateTime? ShippedDate { get; set; }
+		           public int       OrderID     { get; set; }
+		[Nullable] public decimal?  Subtotal    { get; set; }
+	}
+
+	[TableName(Name="Summary of Sales by Year")]
+	public partial class SummaryOfSalesByYear
+	{
+		[Nullable] public DateTime? ShippedDate { get; set; }
+		           public int       OrderID     { get; set; }
+		[Nullable] public decimal?  Subtotal    { get; set; }
+	}
+
+	[TableName(Name="Suppliers")]
+	public partial class Suppliers
+	{
+		[Identity, PrimaryKey(1)] public int    SupplierID   { get; set; }
+		                          public string CompanyName  { get; set; }
+		[Nullable               ] public string ContactName  { get; set; }
+		[Nullable               ] public string ContactTitle { get; set; }
+		[Nullable               ] public string Address      { get; set; }
+		[Nullable               ] public string City         { get; set; }
+		[Nullable               ] public string Region       { get; set; }
+		[Nullable               ] public string PostalCode   { get; set; }
+		[Nullable               ] public string Country      { get; set; }
+		[Nullable               ] public string Phone        { get; set; }
+		[Nullable               ] public string Fax          { get; set; }
+		[Nullable               ] public string HomePage     { get; set; }
+
+		// FK_Products_Suppliers_BackReference
+		[Association(ThisKey="SupplierID", OtherKey="SupplierID")]
+		public IEnumerable<Products> Productss { get; set; }
+	}
+
+	[TableName(Name="Territories")]
+	public partial class Territories
+	{
+		[PrimaryKey(1)] public string TerritoryID          { get; set; }
+		                public string TerritoryDescription { get; set; }
+		                public int    RegionID             { get; set; }
+
+		// FK_Territories_Region
+		[Association(ThisKey="RegionID", OtherKey="RegionID")]
+		public Region Region { get; set; }
+
+		// FK_EmployeeTerritories_Territories_BackReference
+		[Association(ThisKey="TerritoryID", OtherKey="TerritoryID")]
+		public IEnumerable<EmployeeTerritories> EmployeeTerritoriess { get; set; }
 	}
 }
 
@@ -154,7 +497,6 @@ namespace Client
 			new BasicHttpBinding(BasicHttpSecurityMode.None)
 			{
 				MaxReceivedMessageSize = 10000000,
-				//MaxBufferPoolSize      = 10000000,
 				MaxBufferSize          = 10000000,
 				CloseTimeout           = new TimeSpan(00, 01, 00),
 				OpenTimeout            = new TimeSpan(00, 01, 00),
