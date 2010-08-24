@@ -50,6 +50,9 @@ namespace Data.Linq.Model
 		{
 			return ParentID - ((Parent)obj).ParentID;
 		}
+
+		[Association(ThisKey = "ParentID", OtherKey = "ID")]
+		public LinqDataTypes Types;
 	}
 
 	public class Child

@@ -276,7 +276,7 @@ namespace BLToolkit.Data.Linq
 
 					if (ma.Expression != null)
 					{
-						if (ma.Expression.Type == ObjectType || currentMember > 0)
+						if (ma.Expression.Type == ObjectType || currentMember > 0 || ma.Expression.Type.IsSubclassOf(ObjectType))
 						{
 							var list = GetMemberList(lambda, expr);
 
@@ -297,6 +297,11 @@ namespace BLToolkit.Data.Linq
 						//
 						var name = ma.Member.Name;
 						var e    = ma.Expression;
+
+						// Has to be fixed in a better way.
+						//
+						if (e != null && e.Type == typeof(DateTime))
+							return null;
 
 						while (e != null)
 						{

@@ -212,6 +212,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void GroupBy3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent group p by p.Types.DateTimeValue.Year into g select g.Key,
+				from p in db.Parent group p by p.Types.DateTimeValue.Year into g select g.Key));
+		}
+
+		[Test]
+		public void GroupBy4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Types group p by p.DateTimeValue.Year into g select g.Key,
+				from p in db.Types group p by p.DateTimeValue.Year into g select g.Key));
+		}
+
+		[Test]
 		public void Count1()
 		{
 			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(

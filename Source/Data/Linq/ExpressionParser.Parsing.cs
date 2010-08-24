@@ -992,6 +992,32 @@ namespace BLToolkit.Data.Linq
 							.Expr(ParseExpression(innerKeySelector, arg2, source2));
 				}
 			}
+			else if (outerKeySelector.Body.NodeType == ExpressionType.MemberInit)
+			{
+				var mi1 = (MemberInitExpression)outerKeySelector.Body;
+				var mi2 = (MemberInitExpression)innerKeySelector.Body;
+
+				for (var i = 0; i < mi1.Bindings.Count; i++)
+				{
+					if (mi1.Bindings[i].Member != mi2.Bindings[i].Member)
+						throw new LinqException(string.Format("List of member inits does not match for entity type '{0}'.", outerKeySelector.Body.Type));
+
+					var arg1 = ((MemberAssignment)mi1.Bindings[i]).Expression;
+					var arg2 = ((MemberAssignment)mi2.Bindings[i]).Expression;
+
+					var predicate = ParseObjectComparison(
+						ExpressionType.Equal,
+						outerKeySelector, arg1, new[] { source1 },
+						innerKeySelector, arg2, new[] { source2 });
+
+					if (predicate != null)
+						join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+					else
+						join
+							.Expr(ParseExpression(outerKeySelector, arg1, source1)).Equal
+							.Expr(ParseExpression(innerKeySelector, arg2, source2));
+				}
+			}
 			else
 			{
 				var predicate = ParseObjectComparison(
@@ -1016,9 +1042,15 @@ namespace BLToolkit.Data.Linq
 		{
 			if (expr.NodeType == ExpressionType	.MemberInit)
 			{
-				var mi = (MemberInitExpression)expr;
+				var mi        = (MemberInitExpression)expr;
+				var throwExpr = false;
 
-				if (mi.NewExpression.Arguments.Count > 0)
+				if (mi.NewExpression.Arguments.Count > 0 || mi.Bindings.Count == 0)
+					throwExpr = true;
+				else
+					throwExpr = mi.Bindings.Any(b => b.BindingType != MemberBindingType.Assignment);
+
+				if (throwExpr)
 					throw new NotSupportedException(string.Format("Explicit construction of entity type '{0}' in query is not allowed.", expr.Type));
 			}
 		}
