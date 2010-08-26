@@ -984,7 +984,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							}
 
 						if (firstValue)
-							BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(false)));
+							BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(p.IsNot)));
 						else
 							sb.Remove(sb.Length - 2, 2).Append(')');
 

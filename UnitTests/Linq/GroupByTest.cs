@@ -826,6 +826,20 @@ namespace Data.Linq
 				).ToList().First(g => !g.Key)));
 		}
 
+		[Test]
+		public void ByJoin()
+		{
+			ForEachProvider(db => AreEqual(
+				from c1 in Child
+				join c2 in Child on c1.ChildID equals c2.ChildID + 1
+				group c2 by c1.ParentID into g
+				select g.Sum(_ => _.ChildID),
+				from c1 in db.Child
+				join c2 in db.Child on c1.ChildID equals c2.ChildID + 1
+				group c2 by c1.ParentID into g
+				select g.Sum(_ => _.ChildID)));
+		}
+
 		//[Test]
 		public void SelectMany()
 		{

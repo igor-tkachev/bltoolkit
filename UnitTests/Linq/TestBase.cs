@@ -80,6 +80,8 @@ namespace Data.Linq
 
 		readonly List<ServiceHost> _hosts = new List<ServiceHost>();
 
+		const int StartIP = 12345;
+
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
@@ -93,7 +95,7 @@ namespace Data.Linq
 				}
 			};
 
-			var ip = 1234;
+			var ip = StartIP;
 
 			foreach (var info in _providers)
 			{
@@ -167,7 +169,7 @@ namespace Data.Linq
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			var ip = 1234;
+			var ip = StartIP;
 
 			foreach (var info in _providers)
 			{

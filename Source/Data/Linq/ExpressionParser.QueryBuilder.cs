@@ -1575,7 +1575,7 @@ namespace BLToolkit.Data.Linq
 
 		ISqlExpression ParseEnumerable(MethodCallExpression expr, QuerySource.GroupBy query)
 		{
-			var groupBy = query.OriginalQuery;
+			var groupBy = query.ElementSource ?? query.OriginalQuery;
 			var args    = new ISqlExpression[expr.Arguments.Count - 1];
 
 			if (expr.Method.Name == "Count")

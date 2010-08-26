@@ -749,6 +749,16 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains5()
+		{
+			IEnumerable<int> ids = new int[0];
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where !ids.Contains(p.ParentID) select p,
+				from p in db.Parent where !ids.Contains(p.ParentID) select p));
+		}
+
+		[Test]
 		public void AliasTest1()
 		{
 			int user = 3;
