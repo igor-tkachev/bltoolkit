@@ -628,12 +628,19 @@ namespace BLToolkit.Data.Linq
 
 			var objectType = table.ObjectType;
 
-			if (table.InheritanceMapping.Count > 0 && pi.Type.IsGenericType)
+			if (table.InheritanceMapping.Count > 0)
 			{
-				var types = pi.Type.GetGenericArguments();
+				if (pi.Type.IsGenericType)
+				{
+					var types = pi.Type.GetGenericArguments();
 
-				if (types.Length == 1 && TypeHelper.IsSameOrParent(objectType, types[0]))
-					objectType = types[0];
+					if (types.Length == 1 && TypeHelper.IsSameOrParent(objectType, types[0]))
+						objectType = types[0];
+				}
+				else if (TypeHelper.IsSameOrParent(objectType, table.OriginalType))
+				{
+					objectType = table.OriginalType;
+				}
 			}
 
 			var mapperMethod = _info.GetMapperMethodInfo();

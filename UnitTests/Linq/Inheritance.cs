@@ -115,6 +115,15 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void FirstOrDefault()
+		{
+			using (var db = new NorthwindDB())
+				Assert.AreEqual(
+					   DiscontinuedProduct.FirstOrDefault().ProductID,
+					db.DiscontinuedProduct.FirstOrDefault().ProductID);
+		}
+
+		[Test]
 		public void Cast()
 		{
 			ForEachProvider(db => AreEqual(
