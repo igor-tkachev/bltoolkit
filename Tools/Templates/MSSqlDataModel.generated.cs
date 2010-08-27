@@ -18,15 +18,15 @@ namespace Templates.MSSql
 	public partial class MSSqlDataModel : DbManager
 	{
 		public Table<BinaryData>    BinaryData    { get { return this.GetTable<BinaryData>();    } }
-		public Table<Child>         Child         { get { return this.GetTable<Child>();         } }
+		public Table<Children>      Children      { get { return this.GetTable<Children>();      } }
 		public Table<DataTypes>     DataTypes     { get { return this.GetTable<DataTypes>();     } }
-		public Table<DataTypeTest>  DataTypeTest  { get { return this.GetTable<DataTypeTest>();  } }
-		public Table<Doctor>        Doctor        { get { return this.GetTable<Doctor>();        } }
-		public Table<GrandChild>    GrandChild    { get { return this.GetTable<GrandChild>();    } }
+		public Table<DataTypeTests> DataTypeTests { get { return this.GetTable<DataTypeTests>(); } }
+		public Table<Doctors>       Doctors       { get { return this.GetTable<Doctors>();       } }
+		public Table<GrandChildren> GrandChildren { get { return this.GetTable<GrandChildren>(); } }
 		public Table<LinqDataTypes> LinqDataTypes { get { return this.GetTable<LinqDataTypes>(); } }
-		public Table<Parent>        Parent        { get { return this.GetTable<Parent>();        } }
-		public Table<Patient>       Patient       { get { return this.GetTable<Patient>();       } }
-		public Table<Person>        Person        { get { return this.GetTable<Person>();        } }
+		public Table<Parents>       Parents       { get { return this.GetTable<Parents>();       } }
+		public Table<Patients>      Patients      { get { return this.GetTable<Patients>();      } }
+		public Table<People>        People        { get { return this.GetTable<People>();        } }
 	}
 
 	[Serializable, DataContract]
@@ -40,7 +40,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Child")]
-	public partial class Child
+	public partial class Children
 	{
 		[Nullable, DataMember] public int? ParentID { get; set; }
 		[Nullable, DataMember] public int? ChildID  { get; set; }
@@ -56,7 +56,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="DataTypeTest")]
-	public partial class DataTypeTest
+	public partial class DataTypeTests
 	{
 		[Identity, PrimaryKey(1), DataMember] public int       DataTypeID { get; set; }
 		[Nullable,                DataMember] public byte[]    Binary_    { get; set; }
@@ -84,19 +84,19 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Doctor")]
-	public partial class Doctor
+	public partial class Doctors
 	{
 		[PrimaryKey(1), DataMember] public int    PersonID { get; set; }
 		[               DataMember] public string Taxonomy { get; set; }
 
 		// FK_Doctor_Person
 		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Person Person { get; set; }
+		public People Person { get; set; }
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="GrandChild")]
-	public partial class GrandChild
+	public partial class GrandChildren
 	{
 		[Nullable, DataMember] public int? ParentID     { get; set; }
 		[Nullable, DataMember] public int? ChildID      { get; set; }
@@ -118,7 +118,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Parent")]
-	public partial class Parent
+	public partial class Parents
 	{
 		[Nullable, DataMember] public int? ParentID { get; set; }
 		[Nullable, DataMember] public int? Value1   { get; set; }
@@ -126,19 +126,19 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Patient")]
-	public partial class Patient
+	public partial class Patients
 	{
 		[PrimaryKey(1), DataMember] public int    PersonID  { get; set; }
 		[               DataMember] public string Diagnosis { get; set; }
 
 		// FK_Patient_Person
 		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Person Person { get; set; }
+		public People Person { get; set; }
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Person")]
-	public partial class Person
+	public partial class People
 	{
 		[Identity, PrimaryKey(1), DataMember] public int    PersonID   { get; set; }
 		[                         DataMember] public string FirstName  { get; set; }
@@ -148,10 +148,10 @@ namespace Templates.MSSql
 
 		// FK_Doctor_Person_BackReference
 		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Doctor Doctor { get; set; }
+		public Doctors Doctor { get; set; }
 
 		// FK_Patient_Person_BackReference
 		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Patient Patient { get; set; }
+		public Patients Patient { get; set; }
 	}
 }

@@ -3,6 +3,8 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Data" #>
 <#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
 <#
 	AppDomain.CurrentDomain.AssemblyResolve += (_,args) =>
 	{
@@ -52,7 +54,9 @@ string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
 string OneToManyAssociationType = "IEnumerable<{0}>";
 
-bool   RenderField = false;
+bool   RenderField           = false;
+bool   PluralizeTableNames   = false;
+bool   SingularizeTableNames = false;
 
 bool   IsMetadataLoaded;
 
@@ -424,7 +428,72 @@ void LoadMetadata()
 	if (Tables.Values.SelectMany(_ => _.ForeignKeys.Values).Any(_ => _.AssociationType == AssociationType.OneToMany))
 		Usings.Add("System.Collections.Generic");
 
+	if (PluralizeTableNames || SingularizeTableNames)
+	{
+		foreach (var t in Tables.Values)
+		{
+			var name = PluralizeTableNames ? ToPlural(t.ClassName ?? t.TableName) : ToSingular(t.ClassName ?? t.TableName);
+
+			if (name != (t.ClassName ?? t.TableName))
+				t.ClassName = name;
+		}
+	}
+
 	AfterLoadMetadata(this);
+}
+
+string ToPlural(string str)
+{
+	var word    = GetLastWord(str);
+	var newWord = Plurals.ToPlural(word);
+
+	if (word != newWord)
+	{
+		if (char.IsUpper(word[0]))
+			newWord = char.ToUpper(newWord[0]) + newWord.Substring(1, newWord.Length - 1);
+
+		return word == str ? newWord : str.Substring(0, str.Length - word.Length) + newWord;
+	}
+	
+	return str;
+}
+
+string ToSingular(string str)
+{
+	var word    = GetLastWord(str);
+	var newWord = Plurals.ToSingular(word);
+
+	if (word != newWord)
+	{
+		if (char.IsUpper(word[0]))
+			newWord = char.ToUpper(newWord[0]) + newWord.Substring(1, newWord.Length - 1);
+
+		return word == str ? newWord : str.Substring(0, str.Length - word.Length) + newWord;
+	}
+	
+	return str;
+}
+
+string GetLastWord(string word)
+{
+	if (string.IsNullOrEmpty(word))
+		return word;
+
+	var len = word.Length;
+	var n   = len - 1;
+
+	if (char.IsLower(word[n]))
+	{
+		for (; n > 0 && char.IsLower(word[n]); n--);
+	}
+	else
+	{
+		for (; n > 0 && char.IsUpper(word[n]); n--);
+		if (char.IsLower(word[n]))
+			n++;
+	}
+
+	return n > 0 ? word.Substring(n) : word;
 }
 
 Action<GeneratedTextTransformation> BeforeLoadMetadata = _ => {};
@@ -501,14 +570,13 @@ partial class ForeignKey
 	}
 }
 
-/*
 // Shamelessly jacked from http://www.bennysutton.com/C-sharp/Plural-Singular-Words.aspx with little modifications.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+//using System;
+//using System.Collections.Generic;
+//using System.Text;
+//using System.Text.RegularExpressions;
 
 /// <summary>
 /// Convert words to and from singulars/plurals
@@ -788,7 +856,7 @@ public sealed class Plurals
 
 		if (word.Length >= 4)
 		{
-			//1. If the word ends in a consonant plus -y, change the -y into -ie and add an -s to form the plural – so reverse engineer it to get the singular
+			// 1. If the word ends in a consonant plus -y, change the -y into -ie and add an -s to form the plural – so reverse engineer it to get the singular
 			// e.g. enemy--enemies baby--babies family--families
 			switch (word.Substring(word.Length - 4))
 			{
@@ -847,7 +915,7 @@ public sealed class Plurals
 			{
 				case "es":
 					{
-						return word.Substring(0, word.Length - 1) + "is";
+						return word.Substring(0, word.Length - 1); // + "is";
 					}
 				//4. Assume add an -s to form the plural of most words.
 				default:
@@ -947,6 +1015,5 @@ public sealed class Plurals
 
 	#endregion
 }
-*/
 
 #>
