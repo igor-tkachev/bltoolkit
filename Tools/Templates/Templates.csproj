@@ -52,20 +52,17 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>MSSqlDataModel.tt</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="PostgreSQLDataModel.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PostgreSQLDataModel.tt</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SybaseDataModel.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SybaseDataModel.tt</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +74,9 @@
     </None>
     <None Include="..\..\Source\Templates\MSSQL.ttinclude">
       <Link>MSSQL.ttinclude</Link>
+    </None>
+    <None Include="..\..\Source\Templates\PluralSingular.ttinclude">
+      <Link>PluralSingular.ttinclude</Link>
     </None>
     <None Include="..\..\Source\Templates\PostgreSQL.ttinclude">
       <Link>PostgreSQL.ttinclude</Link>

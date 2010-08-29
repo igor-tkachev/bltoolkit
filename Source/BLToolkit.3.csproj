@@ -608,6 +608,7 @@
     </None>
     <None Include="Templates\BLT4Toolkit.ttinclude" />
     <None Include="Templates\BLToolkit.ttinclude" />
+    <None Include="Templates\PluralSingular.ttinclude" />
     <None Include="Templates\MSSQL.ttinclude" />
     <None Include="Templates\BLToolkitConstants.Revision.cs.template" />
     <None Include="Templates\PostgreSQL.ttinclude" />

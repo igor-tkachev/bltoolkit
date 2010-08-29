@@ -226,6 +226,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				sb.Append(" THEN 1 ELSE 0 END");
 		}
 
+		public static bool QuoteIdentifiers = true;
+
 		public override object Convert(object value, ConvertType convertType)
 		{
 			switch (convertType)
@@ -250,7 +252,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTable:
 				case ConvertType.NameToQueryTableAlias:
-					return "\"" + value + "\"";
+					if (QuoteIdentifiers)
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '"')
+							return value;
+
+						return '"' + name + '"';
+					}
+
+					break;
 			}
 
 			return value;

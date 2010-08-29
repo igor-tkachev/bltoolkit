@@ -11,6 +11,7 @@ using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
 using BLToolkit.ServiceModel;
 
@@ -41,6 +42,8 @@ namespace Data.Linq
 			};
 
 			DbManager.TurnTraceSwitchOn();
+
+			PostgreSQLSqlProvider.QuoteIdentifiers = true;
 
 			var path = Path.GetDirectoryName(typeof(DbManager).Assembly.CodeBase.Replace("file:///", ""));
 

@@ -1,4 +1,4 @@
-DROP TABLE Person
+DROP TABLE "Person"
 GO
 --DROP SEQUENCE Seq
 --GO
@@ -6,20 +6,20 @@ GO
 --CREATE SEQUENCE Seq INCREMENT 1 START 1
 --GO
 
-CREATE TABLE Person
+CREATE TABLE "Person"
 ( 
 	--PersonID   INTEGER PRIMARY KEY DEFAULT NEXTVAL('Seq'),
-	PersonID   SERIAL PRIMARY KEY,
-	FirstName  VARCHAR(50) NOT NULL,
-	LastName   VARCHAR(50) NOT NULL,
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)     NOT NULL
+	"PersonID"   SERIAL PRIMARY KEY,
+	"FirstName"  VARCHAR(50) NOT NULL,
+	"LastName"   VARCHAR(50) NOT NULL,
+	"MiddleName" VARCHAR(50),
+	"Gender"     CHAR(1)     NOT NULL
 )
 GO
 
-INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    'M')
+INSERT INTO "Person" ("FirstName", "LastName", "Gender") VALUES ('John',   'Pupkin',    'M')
 GO
-INSERT INTO Person (FirstName, LastName, Gender) VALUES ('Tester', 'Testerson', 'M')
+INSERT INTO "Person" ("FirstName", "LastName", "Gender") VALUES ('Tester', 'Testerson', 'M')
 GO
 
 DROP FUNCTION reverse(text)
@@ -43,32 +43,32 @@ GO
 
 
 
-DROP TABLE Parent
+DROP TABLE "Parent"
 GO
-DROP TABLE Child
+DROP TABLE "Child"
 GO
-DROP TABLE GrandChild
-GO
-
-CREATE TABLE Parent      (ParentID int, Value1 int)
-GO
-CREATE TABLE Child       (ParentID int, ChildID int)
-GO
-CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
+DROP TABLE "GrandChild"
 GO
 
-
-DROP TABLE LinqDataTypes
+CREATE TABLE "Parent"      ("ParentID" int, "Value1" int)
+GO
+CREATE TABLE "Child"       ("ParentID" int, "ChildID" int)
+GO
+CREATE TABLE "GrandChild"  ("ParentID" int, "ChildID" int, "GrandChildID" int)
 GO
 
-CREATE TABLE LinqDataTypes
+
+DROP TABLE "LinqDataTypes"
+GO
+
+CREATE TABLE "LinqDataTypes"
 (
-	ID            int,
-	MoneyValue    decimal(10,4),
-	DateTimeValue timestamp,
-	BoolValue     boolean,
-	GuidValue     uuid,
-	BinaryValue   bytea,
-	SmallIntValue smallint
+	"ID"            int,
+	"MoneyValue"    decimal(10,4),
+	"DateTimeValue" timestamp,
+	"BoolValue"     boolean,
+	"GuidValue"     uuid,
+	"BinaryValue"   bytea,
+	"SmallIntValue" smallint
 )
 GO

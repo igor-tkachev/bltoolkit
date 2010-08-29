@@ -141,10 +141,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildFromClause(sb);
 		}
 
+		public static bool QuoteIdentifiers = false;
+
 		public override object Convert(object value, ConvertType convertType)
 		{
 			switch (convertType)
 			{
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryTable:
+					if (QuoteIdentifiers)
+					{
+						string name = value.ToString();
+
+						if (name.Length > 0 && name[0] == '"')
+							return value;
+
+						return '"' + name + '"';
+					}
+
+					break;
+
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
