@@ -576,6 +576,7 @@
     <None Include="Templates\BLToolkit.ttinclude" />
     <None Include="Templates\BLToolkitConstants.Revision.cs.template" />
     <None Include="Templates\MSSQL.ttinclude" />
+    <None Include="Templates\PluralSingular.ttinclude" />
     <None Include="Templates\PostgreSQL.ttinclude" />
     <None Include="Templates\Sybase.ttinclude" />
     <None Include="Templates\VB.ttinclude" />

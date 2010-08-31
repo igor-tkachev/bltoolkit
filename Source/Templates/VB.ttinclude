@@ -14,10 +14,10 @@ WriteBeginClass     = (tt,cl,bc) =>
 };
 WriteEndClass       =  tt    => WriteLine("End Class");
 MakeGenericType     = (c,t)  => string.Format("{0}(Of {1})", c, t);
-WriteTableProperty  = (tt,name,maxlen) =>
+WriteTableProperty  = (tt,name,pname,maxlen,maxplen) =>
 {
 	WriteLine("");
-	WriteLine("Public ReadOnly Property {0}(){1} As Table(Of {0})", name, LenDiff(maxlen, name));
+	WriteLine("Public ReadOnly Property {0}(){1} As Table(Of {2})", pname, LenDiff(maxplen, pname), name);
 	WriteLine("\tGet");
 	WriteLine("\t\tReturn Me.GetTable(Of {0})()", name);
 	WriteLine("\tEnd Get");

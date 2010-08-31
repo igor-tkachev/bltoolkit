@@ -10,23 +10,41 @@
 		{
 			psPrevAfterLoadMetadata(_);
 
-			if (PluralizeTableNames || SingularizeTableNames)
+			if (PluralizeClassNames || SingularizeClassNames)
 			{
 				foreach (var t in Tables.Values)
 				{
-					var name = PluralizeTableNames ? ToPlural(t.ClassName ?? t.TableName) : ToSingular(t.ClassName ?? t.TableName);
+					var name = PluralizeClassNames ? ToPlural(t.ClassName ?? t.TableName) : ToSingular(t.ClassName ?? t.TableName);
 
 					if (name != (t.ClassName ?? t.TableName))
 						t.ClassName = name;
 				}
 			}
+
+			if (PluralizeDataContextPropertyNames || SingularizeDataContextPropertyNames)
+			{
+				foreach (var t in Tables.Values)
+				{
+					var name = t.DataContextPropertyName ?? t.ClassName ?? t.TableName;
+
+					name = PluralizeDataContextPropertyNames ? ToPlural(name) : ToSingular(name);
+
+					if (name != (t.DataContextPropertyName ?? t.ClassName ?? t.TableName))
+						t.DataContextPropertyName = name;
+				}
+			}
 		};
+
+		PluralizeAssociationName   = ToPlural;
+		SingularizeAssociationName = ToSingular;
 	}
 
 #><#+
 
-bool   PluralizeTableNames   = false;
-bool   SingularizeTableNames = false;
+bool PluralizeClassNames                 = false;
+bool SingularizeClassNames               = true;
+bool PluralizeDataContextPropertyNames   = true;
+bool SingularizeDataContextPropertyNames = false;
 
 string ToPlural(string str)
 {

@@ -34,9 +34,9 @@ static Action<GeneratedTextTransformation,string,string> WriteBeginClass = (tt,c
 static Action<GeneratedTextTransformation>        WriteEndClass       =  tt   => tt.WriteLine("}");
 static Func<string,string,string>                 MakeGenericType     = (c,t) => string.Format("{0}<{1}>", c, t);
 static Func<string,string>                        MakeType            = t     => t;
-static Action<GeneratedTextTransformation,string,int> WriteTableProperty = (tt,name,maxlen) =>
+static Action<GeneratedTextTransformation,string,string,int,int> WriteTableProperty = (tt,name,pname,maxlen,maxplen) =>
 {
-	tt.WriteLine("public Table<{0}>{1} {0}{1} {{ get {{ return this.GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name));
+	tt.WriteLine("public Table<{0}>{1} {2}{3} {{ get {{ return this.GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name), pname, tt.LenDiff(maxplen, pname));
 };
 static Action<GeneratedTextTransformation,string> WriteAttribute      = (tt,a) => tt.Write("[{0}]", a);
 static Action<GeneratedTextTransformation>        WriteAttributeLine  =  tt    => tt.WriteLine("");
@@ -107,9 +107,10 @@ static Action<GeneratedTextTransformation,Column,int[],string[]> RenderColumn = 
 static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key) =>
 {
 	WriteComment(tt, " " + key.KeyName);
-	tt.WriteLine("[Association(ThisKey=\"{0}\", OtherKey=\"{1}\")]",
+	tt.WriteLine("[Association(ThisKey=\"{0}\", OtherKey=\"{1}\", CanBeNull={2})]",
 		string.Join(", ", (from c in key.ThisColumns  select c.MemberName).ToArray()),
-		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()));
+		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()),
+		key.CanBeNull ? "true" : "false");
 
 	tt.Write("public ");
 
@@ -255,13 +256,14 @@ void GenerateModel()
 
 	WriteBeginClass(this, DataContextName, BaseDataContextClass);
 
-	var tlist  = (from t in Tables.Values orderby t.TableName select t).ToList();
-	var maxlen = tlist.Max(_ => _.ClassName.Length);
+	var tlist   = (from t in Tables.Values orderby t.TableName select t).ToList();
+	var maxlen  = tlist.Max(_ => _.ClassName.Length);
+	var maxplen = tlist.Max(_ => (_.DataContextPropertyName ?? _.ClassName).Length);
 
 	PushIndent("\t");
 
 	foreach (var t in tlist)
-		WriteTableProperty(this, t.ClassName, maxlen);
+		WriteTableProperty(this, t.ClassName, t.DataContextPropertyName ?? t.ClassName, maxlen, maxplen);
 
 	PopIndent();
 
@@ -356,7 +358,7 @@ void LoadMetadata()
 					AssociationType = AssociationType.Auto,
 					OtherTable      = t,
 					ThisColumns     = key.OtherColumns,
-					OtherColumns    = key.ThisColumns
+					OtherColumns    = key.ThisColumns,
 				});
 
 	foreach (var t in Tables.Values)
@@ -371,6 +373,8 @@ void LoadMetadata()
 						key.AssociationType = AssociationType.OneToOne;
 					else
 						key.AssociationType = AssociationType.ManyToOne;
+
+					key.CanBeNull = key.ThisColumns.All(_ => _.IsNullable);
 				}
 				else
 					key.AssociationType = AssociationType.ManyToOne;
@@ -407,8 +411,7 @@ void LoadMetadata()
 
 				name = string.Join("", name.Split('_').Where(_ => _.Length > 0 && _ != t.TableName).ToArray());
 
-				if (key.AssociationType == AssociationType.OneToMany)
-					name += "s";
+				name = key.AssociationType == AssociationType.OneToMany ? PluralizeAssociationName(name) : SingularizeAssociationName(name);
 			}
 
 			if (name.Length != 0 &&
@@ -427,6 +430,9 @@ void LoadMetadata()
 	AfterLoadMetadata(this);
 }
 
+Func<string,string> PluralizeAssociationName   = _ => _ + "s";
+Func<string,string> SingularizeAssociationName = _ => _;
+
 Action<GeneratedTextTransformation> BeforeLoadMetadata = _ => {};
 Action<GeneratedTextTransformation> AfterLoadMetadata  = _ => {};
 
@@ -437,6 +443,7 @@ partial class Table
 	public string       Owner;
 	public string       TableName;
 	public string       ClassName;
+	public string       DataContextPropertyName;
 	public string       BaseClassName;
 	public bool         IsView;
 	public List<string> Attributes = new List<string>();
@@ -477,6 +484,7 @@ partial class ForeignKey
 	public Table           OtherTable;
 	public List<Column>    ThisColumns  = new List<Column>();
 	public List<Column>    OtherColumns = new List<Column>();
+	public bool            CanBeNull    = true;
 	public ForeignKey      BackReference;
 
 	private AssociationType _associationType = AssociationType.Auto;
