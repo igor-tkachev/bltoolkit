@@ -34,7 +34,10 @@ static Action<GeneratedTextTransformation,string,string> WriteBeginClass = (tt,c
 static Action<GeneratedTextTransformation>        WriteEndClass       =  tt   => tt.WriteLine("}");
 static Func<string,string,string>                 MakeGenericType     = (c,t) => string.Format("{0}<{1}>", c, t);
 static Func<string,string>                        MakeType            = t     => t;
-static Action<GeneratedTextTransformation,string,string,int,int> WriteTableProperty = (tt,name,pname,maxlen,maxplen) =>
+
+delegate void WriteTablePropertyAction(GeneratedTextTransformation tt, string name, string pname, int maxlen, int maxplen);
+
+static WriteTablePropertyAction WriteTableProperty = (tt,name,pname,maxlen,maxplen) =>
 {
 	tt.WriteLine("public Table<{0}>{1} {2}{3} {{ get {{ return this.GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name), pname, tt.LenDiff(maxplen, pname));
 };

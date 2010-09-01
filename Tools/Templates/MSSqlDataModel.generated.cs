@@ -17,21 +17,21 @@ namespace Templates.MSSql
 {
 	public partial class MSSqlDataModel : DbManager
 	{
-		public Table<BinaryData>    BinaryData    { get { return this.GetTable<BinaryData>();    } }
-		public Table<Children>      Children      { get { return this.GetTable<Children>();      } }
-		public Table<DataTypes>     DataTypes     { get { return this.GetTable<DataTypes>();     } }
-		public Table<DataTypeTests> DataTypeTests { get { return this.GetTable<DataTypeTests>(); } }
-		public Table<Doctors>       Doctors       { get { return this.GetTable<Doctors>();       } }
-		public Table<GrandChildren> GrandChildren { get { return this.GetTable<GrandChildren>(); } }
-		public Table<LinqDataTypes> LinqDataTypes { get { return this.GetTable<LinqDataTypes>(); } }
-		public Table<Parents>       Parents       { get { return this.GetTable<Parents>();       } }
-		public Table<Patients>      Patients      { get { return this.GetTable<Patients>();      } }
-		public Table<People>        People        { get { return this.GetTable<People>();        } }
+		public Table<BinaryDatum>  BinaryData    { get { return this.GetTable<BinaryDatum>();  } }
+		public Table<Child>        Children      { get { return this.GetTable<Child>();        } }
+		public Table<DataType>     DataTypes     { get { return this.GetTable<DataType>();     } }
+		public Table<DataTypeTest> DataTypeTests { get { return this.GetTable<DataTypeTest>(); } }
+		public Table<Doctor>       Doctors       { get { return this.GetTable<Doctor>();       } }
+		public Table<GrandChild>   GrandChildren { get { return this.GetTable<GrandChild>();   } }
+		public Table<LinqDataType> LinqDataTypes { get { return this.GetTable<LinqDataType>(); } }
+		public Table<Parent>       Parents       { get { return this.GetTable<Parent>();       } }
+		public Table<Patient>      Patients      { get { return this.GetTable<Patient>();      } }
+		public Table<Person>       People        { get { return this.GetTable<Person>();       } }
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="BinaryData")]
-	public partial class BinaryData
+	public partial class BinaryDatum
 	{
 		[Identity, PrimaryKey(1), DataMember] public int    BinaryDataID { get; set; }
 		[                         DataMember] public byte[] Stamp        { get; set; }
@@ -40,7 +40,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Child")]
-	public partial class Children
+	public partial class Child
 	{
 		[Nullable, DataMember] public int? ParentID { get; set; }
 		[Nullable, DataMember] public int? ChildID  { get; set; }
@@ -48,7 +48,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="DataTypes")]
-	public partial class DataTypes
+	public partial class DataType
 	{
 		[Nullable, DataMember] public int?     ID         { get; set; }
 		[Nullable, DataMember] public decimal? MoneyValue { get; set; }
@@ -56,7 +56,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="DataTypeTest")]
-	public partial class DataTypeTests
+	public partial class DataTypeTest
 	{
 		[Identity, PrimaryKey(1), DataMember] public int       DataTypeID { get; set; }
 		[Nullable,                DataMember] public byte[]    Binary_    { get; set; }
@@ -84,19 +84,19 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Doctor")]
-	public partial class Doctors
+	public partial class Doctor
 	{
 		[PrimaryKey(1), DataMember] public int    PersonID { get; set; }
 		[               DataMember] public string Taxonomy { get; set; }
 
 		// FK_Doctor_Person
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public People Person { get; set; }
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=false)]
+		public Person Person { get; set; }
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="GrandChild")]
-	public partial class GrandChildren
+	public partial class GrandChild
 	{
 		[Nullable, DataMember] public int? ParentID     { get; set; }
 		[Nullable, DataMember] public int? ChildID      { get; set; }
@@ -105,7 +105,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="LinqDataTypes")]
-	public partial class LinqDataTypes
+	public partial class LinqDataType
 	{
 		[Nullable, DataMember] public int?      ID            { get; set; }
 		[Nullable, DataMember] public decimal?  MoneyValue    { get; set; }
@@ -118,7 +118,7 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Parent")]
-	public partial class Parents
+	public partial class Parent
 	{
 		[Nullable, DataMember] public int? ParentID { get; set; }
 		[Nullable, DataMember] public int? Value1   { get; set; }
@@ -126,19 +126,19 @@ namespace Templates.MSSql
 
 	[Serializable, DataContract]
 	[TableName(Name="Patient")]
-	public partial class Patients
+	public partial class Patient
 	{
 		[PrimaryKey(1), DataMember] public int    PersonID  { get; set; }
 		[               DataMember] public string Diagnosis { get; set; }
 
 		// FK_Patient_Person
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public People Person { get; set; }
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=false)]
+		public Person Person { get; set; }
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Person")]
-	public partial class People
+	public partial class Person
 	{
 		[Identity, PrimaryKey(1), DataMember] public int    PersonID   { get; set; }
 		[                         DataMember] public string FirstName  { get; set; }
@@ -147,11 +147,11 @@ namespace Templates.MSSql
 		[                         DataMember] public char   Gender     { get; set; }
 
 		// FK_Doctor_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Doctors Doctor { get; set; }
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
+		public Doctor Doctor { get; set; }
 
 		// FK_Patient_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
-		public Patients Patient { get; set; }
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
+		public Patient Patient { get; set; }
 	}
 }

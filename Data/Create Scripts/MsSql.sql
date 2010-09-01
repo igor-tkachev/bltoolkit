@@ -480,6 +480,9 @@ END
 GO
 -- SKIP Sql2005 END
 
+DROP FUNCTION GetParentByID
+GO
+
 DROP TABLE Parent
 GO
 DROP TABLE Child
@@ -492,6 +495,15 @@ GO
 CREATE TABLE Child       (ParentID int, ChildID int)
 GO
 CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
+GO
+
+CREATE FUNCTION GetParentByID(@id int)
+RETURNS TABLE 
+AS
+RETURN 
+(
+	SELECT * FROM Parent WHERE ParentID = @id
+)
 GO
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('LinqDataTypes') AND type in (N'U'))

@@ -4,14 +4,14 @@
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLT4Toolkit.ttinclude" #>
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\WCFAttributes.ttinclude" #>
 <#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\MSSql.ttinclude"  #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\PluralSingular.ttinclude"  #>
+<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\PluralSingular.ttinclude" #>
 <#
 	ConnectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
 	//ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
 
-	//SingularizeTableNames = true;
-	PluralizeTableNames = true;
+	SingularizeClassNames             = true;
+	PluralizeDataContextPropertyNames = true;
 
 	GenerateModel();
 #>
