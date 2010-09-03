@@ -10,17 +10,6 @@
 		{
 			psPrevAfterLoadMetadata(_);
 
-			if (PluralizeClassNames || SingularizeClassNames)
-			{
-				foreach (var t in Tables.Values)
-				{
-					var name = PluralizeClassNames ? ToPlural(t.ClassName ?? t.TableName) : ToSingular(t.ClassName ?? t.TableName);
-
-					if (name != (t.ClassName ?? t.TableName))
-						t.ClassName = name;
-				}
-			}
-
 			if (PluralizeDataContextPropertyNames || SingularizeDataContextPropertyNames)
 			{
 				foreach (var t in Tables.Values)
@@ -31,6 +20,17 @@
 
 					if (name != (t.DataContextPropertyName ?? t.ClassName ?? t.TableName))
 						t.DataContextPropertyName = name;
+				}
+			}
+			
+			if (PluralizeClassNames || SingularizeClassNames)
+			{
+				foreach (var t in Tables.Values)
+				{
+					var name = PluralizeClassNames ? ToPlural(t.ClassName ?? t.TableName) : ToSingular(t.ClassName ?? t.TableName);
+
+					if (name != (t.ClassName ?? t.TableName))
+						t.ClassName = name;
 				}
 			}
 		};
@@ -231,6 +231,7 @@ public sealed class Plurals
 		_dictionary.Add("phenomenon",   "phenomena");
 		_dictionary.Add("placenta",     "placentae");
 		_dictionary.Add("pocketknife",  "pocketknives");
+		_dictionary.Add("process",      "processes");
 		_dictionary.Add("pupa",         "pupae");
 		_dictionary.Add("radius",       "radii");
 		_dictionary.Add("reindeer",     "reindeer");
@@ -277,14 +278,17 @@ public sealed class Plurals
 	/// <returns>The pluralized word</returns>
 	static public string ToPlural(string word)
 	{
+		word = word.ToLower();
+	
+		if (_dictionary.ContainsKey(word)) 
+		//it's an irregular plural, use the word from the dictionary
+		{
+			return _dictionary[word];
+		}
+		
 		if (TestIsPlural(word) == true)
 		{
 			return word; //it's already a plural
-		}
-		else if (_dictionary.ContainsKey(word.ToLower())) 
-		//it's an irregular plural, use the word from the dictionary
-		{
-			return _dictionary[word.ToLower()];
 		}
 		
 		if (word.Length <= 2)
@@ -366,11 +370,14 @@ public sealed class Plurals
 	{
 		word = word.ToLower();
 
+		if (_dictionary.ContainsKey(word))
+			return word;
+
 		if (_dictionary.ContainsValue(word))
 		{
 			foreach (KeyValuePair<string, string> kvp in _dictionary)
 			{
-				if (kvp.Value.ToLower() == word) return kvp.Key;
+				if (kvp.Value == word) return kvp.Key;
 			}
 		}
 
@@ -472,7 +479,7 @@ public sealed class Plurals
 			return false; // not a word that can be made singular if only two letters!
 		}
 
-		if (_dictionary.ContainsValue(word.ToLower()))
+		if (_dictionary.ContainsValue(word))
 		{
 			return true; //it's definitely already a plural
 		}
