@@ -1,0 +1,290 @@
+﻿<#
+	ConnectionType = "MySql.Data.MySqlClient.MySqlConnection, MySql.Data";
+	
+#><#+
+
+bool TimestampsAreNonUpdatable = true;
+
+private void LoadServerMetadata()
+{
+	var tables  = CreateList(new { ID = "", Table  = new Table() });
+	var columns = CreateList(new { ID = "", Column = new Column() });
+
+	using (var conn = GetConnection())
+	using (var cmd  = conn.CreateCommand())
+	{
+		string schemasToSkip = "'information_schema', 'cr_debug', 'mysql'";
+		
+		// Load tables & vies.
+		//
+		
+		cmd.CommandText = "SELECT DATABASE()";
+		_databaseName = Convert.ToString(cmd.ExecuteScalar());
+		
+		cmd.CommandText = string.Format(@"
+			SELECT 
+				CONCAT(TABLE_SCHEMA, '.', TABLE_NAME),
+				TABLE_SCHEMA,
+				TABLE_NAME,
+				TABLE_TYPE 
+			FROM
+				INFORMATION_SCHEMA.tables
+			WHERE 
+				TABLE_SCHEMA NOT IN ({0}) AND 
+				TABLE_TYPE IN ('BASE TABLE', 'VIEW')
+				{1}",
+			schemasToSkip,
+			GetDatabaseSqlFilter(""));
+		
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var t = new
+				{
+					ID    = Convert.ToString(rd[0]),
+					Table = new Table
+					{
+						Owner         = "",
+						TableName     = rd[2].ToString(),
+						ClassName     = rd[2].ToString(),
+						IsView        = rd[3].ToString() == "VIEW",
+						BaseClassName = BaseEntityClass,
+					}
+				};
+
+				tables.Add(t);
+			}
+		}
+
+		cmd.CommandText = "SELECT @@session.sql_mode";
+		string sqlMode = Convert.ToString(cmd.ExecuteScalar());
+		
+		// Load columns.
+		//
+		cmd.CommandText = string.Format(@"
+			SELECT
+				CONCAT(TABLE_SCHEMA, '.', TABLE_NAME) as id,
+				CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END         as isNullable,
+				ORDINAL_POSITION         	as colid,
+				COLUMN_NAME              	as name,
+				c.DATA_TYPE              	as dataType,
+				CHARACTER_MAXIMUM_LENGTH 	as length, 
+				NUMERIC_PRECISION			AS prec,
+				NUMERIC_SCALE            	as scale,
+				EXTRA = 'auto_increment'	as isIdentity,
+ 				c.COLUMN_TYPE				as columnType
+			FROM
+				INFORMATION_SCHEMA.COLUMNS c
+			WHERE
+				TABLE_SCHEMA NOT IN ({0})
+				{1}",
+			schemasToSkip,
+			GetDatabaseSqlFilter(""));
+		
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var col = new
+				{
+					ID     = Convert.ToString(rd["id"]),
+					Column = new Column
+					{
+						ID         = Convert.ToInt16  (rd["colid"]),
+						ColumnName = Convert.ToString (rd["name"]),
+						MemberName = Convert.ToString (rd["name"]),
+						IsNullable = Convert.ToBoolean(rd["isNullable"]),
+						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
+					}
+				};
+
+				var c = col.Column;
+				string columnType = Convert.ToString(rd["columnType"]).ToLower();
+				bool unsigned = columnType.Contains("unsigned");
+				bool realAsFloat = sqlMode.ToLower().Contains("real_as_float");
+
+				switch (Convert.ToString(rd["dataType"]))
+				{
+					case "longtext":
+					case "mediumtext":
+					case "tinytext":
+					case "text"			: c.Type = "string";		c.DbType = DbType.String;		c.SqlDbType = SqlDbType.Text;			break;
+					case "binary"		: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.Binary;			break;
+					case "date"			: c.Type = "DateTime";		c.DbType = DbType.Date;			c.SqlDbType = SqlDbType.Date;			break;
+					case "time"			: c.Type = "DateTime";		c.DbType = DbType.Time;			c.SqlDbType = SqlDbType.Time;			break;
+					case "bit"			: c.Type = "bool";			c.DbType = DbType.Boolean;		c.SqlDbType = SqlDbType.Bit;			break;
+					case "numeric":
+					case "decimal":
+					case "dec":
+					case "fixed"			: c.Type = "decimal";	c.DbType = DbType.Decimal;		c.SqlDbType = SqlDbType.Decimal;		break;
+					case "datetime"		: c.Type = "DateTime";		c.DbType = DbType.DateTime;		c.SqlDbType = SqlDbType.DateTime;		break;
+					case "float"		: c.Type = "float";			c.DbType = DbType.Single;		c.SqlDbType = SqlDbType.Float;			break;
+					case "double"		: c.Type = "double";		c.DbType = DbType.Double;		c.SqlDbType = SqlDbType.Float;			break;
+					case "varbinary"	: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.VarBinary;		break;
+					case "varchar"		: c.Type = "string";		c.DbType = DbType.String;		c.SqlDbType = SqlDbType.VarChar;		break;
+					case "year"			: c.Type = "DateTime";		c.DbType = DbType.Date;			c.SqlDbType = SqlDbType.Date;			break;
+					case "enum":
+					case "set"			: c.Type = "string";		c.DbType = DbType.String;		c.SqlDbType = SqlDbType.VarChar;		break;
+					case "bool":
+					case "boolean"		: c.Type = "bool";			c.DbType = DbType.Boolean;		c.SqlDbType = SqlDbType.Bit;			break;
+					case "serial"		: c.Type = "ulong";			c.DbType = DbType.UInt64;		c.SqlDbType = SqlDbType.BigInt;			break;
+					case "mediumblob":
+					case "longblob"	:
+					case "blob"			: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.Image;			break;
+					case "tinyblob"		: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.Binary;			break;
+
+					case "smallint"		: c.Type = unsigned ? "ushort" : "short";		c.DbType = unsigned ? DbType.UInt16 : DbType.Int16;			c.SqlDbType = SqlDbType.SmallInt;		break;
+					case "mediumint":
+					case "int": 
+					case "integer"		: c.Type = unsigned ? "uint" : "int";			c.DbType = unsigned ? DbType.UInt32 : DbType.Int32;			c.SqlDbType = SqlDbType.Int;			break;
+					case "real"			: c.Type = realAsFloat ? "float" : "double";	c.DbType = realAsFloat ? DbType.Single : DbType.Double;		c.SqlDbType = SqlDbType.Real;			break;
+					case "bigint"		: c.Type = unsigned ? "ulong" : "long";			c.DbType = unsigned ? DbType.UInt64 : DbType.Int64;			c.SqlDbType = SqlDbType.BigInt;			break;
+					case "char"			: c.Type = "string";							c.DbType = DbType.StringFixedLength;						c.SqlDbType = SqlDbType.Char;			break;
+					case "timestamp"	:
+						c.Type = "DateTime";
+						c.DbType = DbType.DateTime;
+						c.SqlDbType = SqlDbType.Timestamp;
+						if(TimestampsAreNonUpdatable)
+							c.Attributes.Add("NonUpdatable");
+						break;
+					case "tinyint"		: 
+						if(columnType == "tinyint(1)")
+						{
+							c.Type = "bool";
+							c.DbType = DbType.Boolean;
+							c.SqlDbType = SqlDbType.Bit;
+						}
+						else
+						{
+							c.Type = unsigned ? "byte" : "sbyte";
+							c.DbType = unsigned ? DbType.Byte : DbType.SByte;
+							c.SqlDbType = SqlDbType.TinyInt;
+						}
+						break;
+					default:
+						throw new System.IO.InvalidDataException(string.Format("Unknown column type: {0}.", Convert.ToString(rd["dataType"])));
+				}
+
+				switch (c.Type)
+				{
+					case "string" :
+					case "byte[]" : c.IsClass = true; break;
+				}
+
+				if (c.IsNullable && !c.IsClass)
+					c.Type += "?";
+					
+				columns.Add(col);
+			}
+		}
+
+		// Load PKs.
+		//
+		cmd.CommandText = string.Format(@"
+			SELECT
+				CONCAT(k.TABLE_SCHEMA, '.', k.TABLE_NAME) as id,
+				k.CONSTRAINT_NAME                                             as name,
+				k.COLUMN_NAME                                                 as colname,
+				k.ORDINAL_POSITION                                            as colid
+			FROM
+				INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
+					JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS c ON k.CONSTRAINT_NAME = c.CONSTRAINT_NAME
+			WHERE
+				c.CONSTRAINT_TYPE='PRIMARY KEY' AND
+                k.TABLE_SCHEMA NOT IN ({0})
+                {1}
+			GROUP BY id",
+			schemasToSkip,
+			GetDatabaseSqlFilter("k"));
+			
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var id      = Convert.ToString(rd["id"]);
+				var colid   = Convert.ToInt32 (rd["colid"]);
+				var colname = Convert.ToString(rd["colname"]);
+
+				columns.Single(_ => _.ID == id && _.Column.ColumnName == colname).Column.PKIndex = colid;
+			}
+		}
+
+		// Load FKs.
+		//
+		cmd.CommandText = string.Format(@"
+			SELECT
+				CONSTRAINT_NAME  as Name, 
+				CONCAT(TABLE_SCHEMA, '.', TABLE_NAME) as ThisTable,
+				COLUMN_NAME      as ThisColumn,
+				CONCAT(REFERENCED_TABLE_SCHEMA, '.', REFERENCED_TABLE_NAME) as OtherTable,
+				REFERENCED_COLUMN_NAME      as OtherColumn,
+				ORDINAL_POSITION as Ordinal
+			FROM
+				INFORMATION_SCHEMA.key_column_usage
+			WHERE 
+				TABLE_SCHEMA NOT IN ({0}) AND
+				REFERENCED_TABLE_NAME IS NOT NULL AND
+    			REFERENCED_COLUMN_NAME IS NOT NULL
+    			{1}
+			ORDER BY
+				ThisTable,
+				Ordinal",
+			schemasToSkip,
+			GetDatabaseSqlFilter(""));
+
+		if(!string.IsNullOrEmpty(DatabaseName))
+			cmd.CommandText += string.Format(" AND TABLE_SCHEMA = '{0}' ", DatabaseName);
+
+		using (var rd = cmd.ExecuteReader())
+		{
+			while (rd.Read())
+			{
+				var name            = Convert.ToString(rd["Name"]);
+				var thisTableID     = Convert.ToString(rd["ThisTable"]);
+				var otherTableID    = Convert.ToString(rd["OtherTable"]);
+				var thisColumnName  = Convert.ToString(rd["ThisColumn"]);
+				var otherColumnName = Convert.ToString(rd["OtherColumn"]);
+
+				var thisTable   = (from t in tables  where t.ID == thisTableID  select t.Table).Single();
+				var otherTable  = (from t in tables  where t.ID == otherTableID select t.Table).Single();
+				var thisColumn  = (from c in columns where c.ID == thisTableID  && c.Column.ColumnName == thisColumnName  select c.Column).Single();
+				var otherColumn = (from c in columns where c.ID == otherTableID && c.Column.ColumnName == otherColumnName select c.Column).Single();
+
+				if (thisTable.ForeignKeys.ContainsKey(name) == false)
+					thisTable.ForeignKeys.Add(name, new ForeignKey { KeyName = name, MemberName = name, OtherTable = otherTable });
+
+				var key = thisTable.ForeignKeys[name];
+
+				key.ThisColumns. Add(thisColumn);
+				key.OtherColumns.Add(otherColumn);
+			}
+		}
+	}
+
+	var qc =
+		from c in columns
+		group c by c.ID into gr
+		join t in tables on gr.Key equals t.ID
+		select new { t.Table, gr };
+
+	foreach (var c in qc)
+	{
+		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
+			c.Table.Columns.Add(col.ColumnName, col);
+
+		if (c.Table.Owner == "dbo")
+			c.Table.Owner = null;
+
+		Tables.Add((c.Table.Owner ?? "") + c.Table.TableName, c.Table);
+	}
+}
+
+private string _databaseName;
+private string GetDatabaseSqlFilter(string optionalTablePrefix)
+{
+	if(string.IsNullOrEmpty(_databaseName)) return "";
+	string tablePrefix = string.IsNullOrEmpty(optionalTablePrefix) ? "" : optionalTablePrefix + ".";
+	return string.Format(" AND {0}TABLE_SCHEMA = '{1}' ", tablePrefix, _databaseName);
+}
+#>
