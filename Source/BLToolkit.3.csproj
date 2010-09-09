@@ -138,6 +138,11 @@
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
+    <Compile Include="Mapping\MemberMapper.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MemberMapper.tt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\BLToolkitConstants.cs" />
     <Compile Include="Common\ArrayT.cs" />
     <Compile Include="Common\Compatibility4.cs" />
@@ -601,6 +606,10 @@
       <SubType>
       </SubType>
     </EmbeddedResource>
+    <None Include="Mapping\MemberMapper.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MemberMapper.generated.cs</LastGenOutput>
+    </None>
     <None Include="Reflection\Extension\TypeExtension.xsx">
       <DependentUpon>TypeExtension.xsd</DependentUpon>
     </None>

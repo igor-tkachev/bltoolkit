@@ -128,7 +128,12 @@ namespace BLToolkit.Reflection
 			public BaseAccessor(TypeAccessor typeAccessor, ParameterExpression par, MemberExpression expr)
 				: base(typeAccessor, expr.Member)
 			{
-				Getter = Expression.Lambda<Func<object,T>>(expr, par).Compile();
+				Expression ex = expr;
+
+				if (ex.Type.IsEnum && ex.Type != typeof(T))
+					ex = Expression.Convert(ex, typeof(T));
+
+				Getter = Expression.Lambda<Func<object,T>>(ex, par).Compile();
 
 				var mi = expr.Member;
 

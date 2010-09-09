@@ -47,7 +47,7 @@ namespace BLToolkit.Mapping
 
 		public virtual void InitMapping(InitContext initContext)
 		{
-			ISupportMapping sm = _dic as ISupportMapping;
+			var sm = _dic as ISupportMapping;
 
 			if (sm != null)
 			{
@@ -69,7 +69,7 @@ namespace BLToolkit.Mapping
 						string.Format("Field '{0}' not found.", _keyField.Name):
 						string.Format("Index '{0}' is invalid.", _keyField.Index));
 
-				MemberMapper mm = _mapper[_index];
+				var mm = _mapper[_index];
 				_typeMismatch = !TypeHelper.IsSameOrParent(typeof(K), mm.Type);
 
 #if !SILVERLIGHT

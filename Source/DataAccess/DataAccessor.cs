@@ -68,7 +68,7 @@ namespace BLToolkit.DataAccess
 
 		public static DataAccessor CreateInstance(Type type, DbManager dbManager, bool dispose)
 		{
-			DataAccessor da = CreateInstance(type);
+			var da = CreateInstance(type);
 
 			da.SetDbManager(dbManager, dispose);
 
@@ -81,7 +81,7 @@ namespace BLToolkit.DataAccess
 			DbManager dbManager,
 			bool dispose)
 		{
-			DataAccessor da = CreateInstance(type, context);
+			var da = CreateInstance(type, context);
 
 			da.SetDbManager(dbManager, dispose);
 
@@ -102,7 +102,7 @@ namespace BLToolkit.DataAccess
 		public static T CreateInstance<T>(DbManager dbManager, bool dispose)
 			where T : DataAccessor
 		{
-			T da = TypeFactory.CreateInstance<T>();
+			var da = TypeFactory.CreateInstance<T>();
 
 			da.SetDbManager(dbManager, dispose);
 
@@ -136,7 +136,7 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected virtual IDbDataParameter GetParameter(DbManager db, string paramName)
 		{
-			IDbDataParameter p = db.Parameter(paramName);
+			var p = db.Parameter(paramName);
 
 			if (p == null)
 			{
@@ -198,8 +198,8 @@ namespace BLToolkit.DataAccess
 			Type                  keyType,
 			string                methodName)
 		{
-			bool       isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
-			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
+			var isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
+			var mms     = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
@@ -213,9 +213,9 @@ namespace BLToolkit.DataAccess
 
 			if (isIndex || mms.Length > 1)
 			{
-				string[] fields = new string[mms.Length];
+				var fields = new string[mms.Length];
 
-				for (int i = 0; i < mms.Length; i++)
+				for (var i = 0; i < mms.Length; i++)
 					fields[i] = mms[i].MemberName;
 
 				db.ExecuteDictionary(dictionary, new MapIndex(fields), objectType, null);
@@ -232,19 +232,19 @@ namespace BLToolkit.DataAccess
 			Type                               objectType,
 			string                             methodName)
 		{
-			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
+			var mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
 					Resources.DataAccessor_UnknownIndex,
 					GetType().Name, methodName));
 
-			string[] fields = new string[mms.Length];
+			var fields = new string[mms.Length];
 
-			for (int i = 0; i < mms.Length; i++)
+			for (var i = 0; i < mms.Length; i++)
 				fields[i] = mms[i].MemberName;
 
-			db.ExecuteDictionary<TValue>(dictionary, new MapIndex(fields), objectType, null);
+			db.ExecuteDictionary(dictionary, new MapIndex(fields), objectType, null);
 		}
 
 		protected void ExecuteDictionary<TKey, TValue>(
@@ -253,7 +253,7 @@ namespace BLToolkit.DataAccess
 			Type                      objectType,
 			string                    methodName)
 		{
-			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
+			var mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
@@ -265,7 +265,7 @@ namespace BLToolkit.DataAccess
 					Resources.DataAccessor_IndexIsComplex,
 					GetType().Name, methodName));
 
-			db.ExecuteDictionary<TKey, TValue>(dictionary, mms[0].MemberName, objectType, null);
+			db.ExecuteDictionary(dictionary, mms[0].MemberName, objectType, null);
 		}
 
 		protected void ExecuteScalarDictionary(
@@ -277,8 +277,8 @@ namespace BLToolkit.DataAccess
 			NameOrIndexParameter  scalarField,
 			Type                  elementType)
 		{
-			bool       isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
-			MemberMapper[] mms = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
+			var isIndex = TypeHelper.IsSameOrParent(typeof(CompoundValue), keyType);
+			var mms     = new SqlQuery(Extensions).GetKeyFieldList(db, objectType);
 
 			if (mms.Length == 0)
 				throw new DataAccessException(string.Format(
@@ -292,9 +292,9 @@ namespace BLToolkit.DataAccess
 
 			if (isIndex || mms.Length > 1)
 			{
-				string[] fields = new string[mms.Length];
+				var fields = new string[mms.Length];
 
-				for (int i = 0; i < mms.Length; i++)
+				for (var i = 0; i < mms.Length; i++)
 					fields[i] = mms[i].Name;
 
 				db.ExecuteScalarDictionary(dictionary, new MapIndex(fields), scalarField, elementType);
@@ -318,31 +318,32 @@ namespace BLToolkit.DataAccess
 		{
 			try
 			{
-				using (IDataReader rd = db.ExecuteReader())
+				using (var rd = db.ExecuteReader())
 				{
 					if (rd.Read())
 					{
-						ObjectMapper     dest   = MappingSchema.GetObjectMapper(objectType);
-						DataReaderMapper source = MappingSchema.CreateDataReaderMapper(rd);
+						var dest   = MappingSchema.GetObjectMapper(objectType);
+						var source = MappingSchema.CreateDataReaderMapper(rd);
 
-						InitContext ctx = new InitContext();
+						var ctx = new InitContext
+						{
+							MappingSchema = MappingSchema,
+							ObjectMapper  = dest,
+							DataSource    = source,
+							SourceObject  = rd
+						};
 
-						ctx.MappingSchema = MappingSchema;
-						ctx.ObjectMapper  = dest;
-						ctx.DataSource    = source;
-						ctx.SourceObject  = rd;
-
-						int[]          index   = MappingSchema.GetIndex(source, dest);
-						IValueMapper[] mappers = ctx.MappingSchema.GetValueMappers(source, dest, index);
+						var index   = MappingSchema.GetIndex(source, dest);
+						var mappers = ctx.MappingSchema.GetValueMappers(source, dest, index);
 
 						do
 						{
-							T destObject = (T)dest.CreateInstance(ctx);
+							var destObject = (T)dest.CreateInstance(ctx);
 
 							if (ctx.StopMapping)
 								yield return destObject;
 
-							ISupportMapping smDest = destObject as ISupportMapping;
+							var smDest = destObject as ISupportMapping;
 
 							if (smDest != null)
 							{
@@ -371,18 +372,18 @@ namespace BLToolkit.DataAccess
 
 		protected IEnumerable ExecuteEnumerable(DbManager db, Type objectType, bool disposeDbManager)
 		{
-			MappingSchema ms = db.MappingSchema;
+			var ms = db.MappingSchema;
 
 			if (disposeDbManager)
 			{
 				using (db)
-				using (IDataReader rd = db.ExecuteReader())
+				using (var rd = db.ExecuteReader())
 					while (rd.Read())
 						yield return ms.MapDataReaderToObject(rd, objectType);
 			}
 			else
 			{
-				using (IDataReader rd = db.ExecuteReader())
+				using (var rd = db.ExecuteReader())
 					while (rd.Read())
 						yield return ms.MapDataReaderToObject(rd, objectType);
 			}
@@ -672,7 +673,7 @@ namespace BLToolkit.DataAccess
 
 			// Speed up for SqlTypes.
 			//
-			INullable nullable = value as INullable;
+			var nullable = value as INullable;
 			if (nullable != null)
 				return nullable.IsNull;
 
@@ -681,8 +682,7 @@ namespace BLToolkit.DataAccess
 			//
 			// For types without 'IsNull' property the return value is always false.
 			//
-			INullableInternal nullableInternal = 
-				(INullableInternal)DuckTyping.Implement(typeof(INullableInternal), value);
+			var nullableInternal = (INullableInternal)DuckTyping.Implement(typeof(INullableInternal), value);
 
 			return nullableInternal.IsNull;
 		}
@@ -691,7 +691,7 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryAttribute GetSqlQueryAttribute(MethodInfo methodInfo)
 		{
-			object[] attrs = methodInfo.GetCustomAttributes(typeof(SqlQueryAttribute), true);
+			var attrs = methodInfo.GetCustomAttributes(typeof(SqlQueryAttribute), true);
 			return (SqlQueryAttribute)attrs[0];
 		}
 

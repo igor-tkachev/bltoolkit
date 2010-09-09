@@ -195,6 +195,11 @@
     <Compile Include="Mapping\MapValue.cs" />
     <Compile Include="Mapping\MapValueAttribute.cs" />
     <Compile Include="Mapping\MemberMapper.cs" />
+    <Compile Include="Mapping\MemberMapper.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MemberMapper.tt</DependentUpon>
+    </Compile>
     <Compile Include="Mapping\MemberMapperAttribute.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\NullableAttribute.cs" />
@@ -329,6 +334,10 @@
     <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Mapping\MemberMapper.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MemberMapper.generated.cs</LastGenOutput>
+    </None>
     <None Include="Reflection\Extension\TypeExtension.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -343,6 +352,9 @@
     <Folder Include="ComponentModel\" />
     <Folder Include="Configuration\" />
     <Folder Include="EditableObjects\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
   <ProjectExtensions>

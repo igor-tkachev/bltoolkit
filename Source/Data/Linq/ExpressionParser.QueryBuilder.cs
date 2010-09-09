@@ -138,7 +138,7 @@ namespace BLToolkit.Data.Linq
 				scalar =>                                           // QueryInfo.Scalar
 				{
 					var idx = subQuery.Fields[0].Select(this);
-					result = BuildField(scalar.Lambda.Body, idx.Select(i => converter(i).Index).ToArray());
+					result = BuildField(scalar.Lambda.Body, subQuery.Fields[0].GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
 				},
 				_      => { throw new NotImplementedException(); }, // QueryInfo.GroupBy
 				_      => { throw new NotImplementedException(); }  // QueryInfo.SubQuerySourceColumn
@@ -178,7 +178,7 @@ namespace BLToolkit.Data.Linq
 
 					var idx   = field.Select(this);
 
-					return BuildField(ex, idx.Select(i => converter(i).Index).ToArray());
+					return BuildField(ex, field.GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
 				}
 
 				return ex;
@@ -328,7 +328,7 @@ namespace BLToolkit.Data.Linq
 				if (idx.Length != 1)
 					throw new InvalidOperationException();
 
-				result = BuildField(expr, new[] { idx[0].Index });
+				result = BuildField(expr, null, new[] { idx[0].Index });
 			}
 			else
 				result = BuildNewExpression(lambda, query, expr, i => i);
@@ -485,7 +485,7 @@ namespace BLToolkit.Data.Linq
 								if (field != null)
 								{
 									var idx = field.Select(this);
-									return BuildField(pi, idx.Select(i => converter(i).Index).ToArray());
+									return BuildField(pi, field.GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
 								}
 							}
 
@@ -584,7 +584,7 @@ namespace BLToolkit.Data.Linq
 			query.Fields.Add(column);
 
 			var idx    = column.Select(this);
-			var result = BuildField(expr, idx.Select(i => converter(i).Index).ToArray());
+			var result = BuildField(expr, column.GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
 
 			CurrentSql = sql;
 			ParentQueries.RemoveAt(0);
@@ -825,7 +825,7 @@ namespace BLToolkit.Data.Linq
 				else if (baseQuery is QuerySource.Scalar)
 				{
 					var idx = baseQuery.Fields[0].Select(this);
-					result = BuildField(ma, idx.Select(i => conv(i).Index).ToArray());
+					result = BuildField(ma, baseQuery.Fields[0].GetExpressions(this)[0], idx.Select(i => conv(i).Index).ToArray());
 				}
 				else
 					result = BuildNewExpression(baseQuery.Lambda, baseQuery, baseQuery.Lambda.Body, conv);
@@ -1000,7 +1000,7 @@ namespace BLToolkit.Data.Linq
 								var col = fld.Sources[0].SqlQuery.Select.Columns[fld.Sources[0].SqlQuery.Select.Add(ex)];
 								var idx = CurrentSql.Select.Add(col);
 
-								return BuildField(e, new[] { idx });
+								return BuildField(e, null, new[] { idx });
 							}
 
 							return e;
@@ -1027,7 +1027,7 @@ namespace BLToolkit.Data.Linq
 
 			var sqlex = ParseExpression(lambda, expr, query);
 			var idx   = CurrentSql.Select.Add(sqlex);
-			var field = BuildField(expr, new[] { idx });
+			var field = BuildField(expr, sqlex, new[] { idx });
 
 			ParsingTracer.IncIndentLevel();
 			return field;
@@ -1059,20 +1059,30 @@ namespace BLToolkit.Data.Linq
 			if (result == null)
 			{
 				var idx = field.Select(this);
-				result = BuildField(ma, idx.Select(i => converter(i).Index).ToArray());
+				result = BuildField(ma, field.GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
 			}
 
 			ParsingTracer.DecIndentLevel();
 			return result;
 		}
 
-		Expression BuildField(Expression ma, int[] idx)
+		Expression BuildField(Expression ma, ISqlExpression expr, int[] idx)
 		{
 			ParsingTracer.WriteLine(ma);
 			ParsingTracer.IncIndentLevel();
 
 			if (idx.Length != 1)
 				throw new InvalidOperationException();
+
+			if (expr != null && expr.ElementType == QueryElementType.SqlField)
+			{
+				var field = (SqlField)expr;
+
+				if (field.MemberMapper != null && field.MemberMapper.IsExplicit)
+				{
+					//Expression.Invoke(Expression.Constant(field.MemberMapper.SetValue), source)
+				}
+			}
 
 			var type = ma.Type;
 
@@ -1142,7 +1152,7 @@ namespace BLToolkit.Data.Linq
 
 			CurrentSql.Select.Expr(expr);
 
-			var pi = BuildField(ex, new[] { 0 });
+			var pi = BuildField(ex, null, new[] { 0 });
 
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
 				pi, new [] { _infoParam, _contextParam, _dataContextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });

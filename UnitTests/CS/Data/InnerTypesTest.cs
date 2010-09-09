@@ -17,7 +17,7 @@ namespace Data
 		{
 			public override object GetValue(object o)
 			{
-				Type value = (Type)MemberAccessor.GetValue(o);
+				var value = (Type)MemberAccessor.GetValue(o);
 				return (null != value && MapMemberInfo.NullValue != value)? value.FullName: null;
 			}
 
@@ -81,7 +81,7 @@ namespace Data
 		[Test]
 		public void MapFieldTest()
 		{
-			Person p = (Person)TypeAccessor.CreateInstance(typeof(Person));
+			var p = (Person)TypeAccessor.CreateInstance(typeof(Person));
 
 			p.ID              = 12345;
 			p.First.Name      = "Crazy";
@@ -92,7 +92,7 @@ namespace Data
 			p.Name            = "Froggy";
 			p.Type            = typeof(DbManager);
 
-			Person2 p2 = (Person2)Map.ObjectToObject(p, typeof(Person2));
+			var p2 = (Person2)Map.ObjectToObject(p, typeof(Person2));
 
 			Assert.AreEqual(p.ID,              p2.ID);
 			Assert.AreEqual(p.First.Name,      p2.First.Name);
@@ -111,14 +111,14 @@ namespace Data
 		public void CreateParametersTest()
 		{
 			IDbDataParameter[] parameters;
-			Person p = (Person)TypeAccessor.CreateInstance(typeof(Person));
+			var p = (Person)TypeAccessor.CreateInstance(typeof(Person));
 			p.ID         = 12345;
 			p.First.Name = "Crazy";
 			p.Last.Name  = "Frog";
 			p.Name       = "Froggy";
 			p.Type       = typeof(DbManager);
 
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
 				parameters = db.CreateParameters(p);
 			}
@@ -126,7 +126,7 @@ namespace Data
 			Assert.IsNotNull(parameters);
 			Assert.AreEqual(7, parameters.Length);
 
-			foreach (IDbDataParameter parameter in parameters)
+			foreach (var parameter in parameters)
 				Console.WriteLine("{0}: {1}", parameter.ParameterName, parameter.Value);
 		}
 
@@ -149,18 +149,18 @@ namespace Data
 		[Test]
 		public void TemplateTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string cmd = @"
-						SELECT
-							1   as ID,
-							'2' as DisplayName,
-							3   as TPL_ID, 
-							'4' as TPL_DisplayName";
+				var cmd = @"
+					SELECT
+						1   as ID,
+						'2' as DisplayName,
+						3   as TPL_ID, 
+						'4' as TPL_DisplayName";
 #if ORACLE || FIREBIRD
 				cmd += " FROM dual";
 #endif
-				ArrayList list = db
+				var list = db
 					.SetCommand(cmd)
 					.ExecuteList(typeof(Template1));
 

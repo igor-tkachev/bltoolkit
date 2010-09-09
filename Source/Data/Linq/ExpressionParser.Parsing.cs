@@ -1682,7 +1682,7 @@ namespace BLToolkit.Data.Linq
 			if (!_isSubQueryParsing)
 				_buildSelect = () =>
 				{
-					var pi     = BuildField(expression, new[] { idx });
+					var pi     = BuildField(expression, null, new[] { idx });
 					var helper = (IAggregateHelper)Activator.CreateInstance(typeof(AggregateHelper<>).MakeGenericType(typeof(T), expression.Type));
 
 					helper.SetAggregate(this, pi);
@@ -1811,7 +1811,7 @@ namespace BLToolkit.Data.Linq
 
 				_buildSelect = () =>
 				{
-					var pi = BuildField(parentInfo, new[] { 0 });
+					var pi = BuildField(parentInfo, null, new[] { 0 });
 
 					var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<bool>>(
 						pi, new[]

@@ -21,7 +21,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			var name =
 				attr != null ?
 					attr.SequenceName :
-					string.Format("{0}_{1}_seq", SqlQuery.Set.Into.PhysicalName, SqlQuery.Set.Into.GetIdentityField().PhysicalName);
+					Convert(
+						string.Format("{0}_{1}_seq", SqlQuery.Set.Into.PhysicalName, SqlQuery.Set.Into.GetIdentityField().PhysicalName),
+						ConvertType.NameToQueryField);
 
 			AppendIndent(sb)
 				.Append("SELECT currval('")
@@ -87,7 +89,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					return Inc(new SqlExpression(expr.SystemType, e.Expr.Replace("Extract(DOW", "Extract(Dow"), e.Parameters));
 
 				if (e.Expr.StartsWith("Extract(Millisecond"))
-					return new SqlExpression(expr.SystemType, "Cast(To_Char(t.DateTimeValue, 'MS') as int)", e.Parameters);
+					return new SqlExpression(expr.SystemType, "Cast(To_Char({0}, 'MS') as int)", e.Parameters);
 			}
 
 			return expr;
@@ -141,17 +143,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildFromClause(sb);
 		}
 
-		public static bool QuoteIdentifiers = false;
+		public static bool QuoteIdentifiers;
 
 		public override object Convert(object value, ConvertType convertType)
 		{
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTable:
+				case ConvertType.NameToQueryTableAlias:
 					if (QuoteIdentifiers)
 					{
-						string name = value.ToString();
+						var name = value.ToString();
 
 						if (name.Length > 0 && name[0] == '"')
 							return value;

@@ -251,6 +251,11 @@
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\InheritanceMappingAttribute.cs" />
     <Compile Include="Mapping\MapRelationBase.cs" />
+    <Compile Include="Mapping\MemberMapper.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MemberMapper.tt</DependentUpon>
+    </Compile>
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
     <Compile Include="Properties\BLToolkitConstants.cs" />
@@ -569,6 +574,10 @@
     <Compile Include="Net\HttpReader.cs" />
     <Compile Include="Web\UI\Design\WebObjectBinderDesigner.cs" />
     <Compile Include="Web\UI\WebObjectBinder.cs" />
+    <None Include="Mapping\MemberMapper.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MemberMapper.generated.cs</LastGenOutput>
+    </None>
     <None Include="Properties\Revision.tt">
       <LastGenOutput>Revision1.generated.cs</LastGenOutput>
     </None>

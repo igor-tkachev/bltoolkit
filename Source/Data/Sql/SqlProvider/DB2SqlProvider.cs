@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				AppendIndent(sb).AppendLine("\t(");
 			}
 
-			int ret = base.BuildSql(commandNumber, sqlQuery, sb, indent, nesting, skipAlias);
+			var ret = base.BuildSql(commandNumber, sqlQuery, sb, indent, nesting, skipAlias);
 
 			if (_identityField != null)
 				sb.AppendLine("\t)");
@@ -87,13 +87,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
 					case "%":
 						{
-							ISqlExpression expr1 = !TypeHelper.IsIntegerType(be.Expr1.SystemType) ? new SqlFunction(typeof(int), "Int", be.Expr1) : be.Expr1;
+							var expr1 = !TypeHelper.IsIntegerType(be.Expr1.SystemType) ? new SqlFunction(typeof(int), "Int", be.Expr1) : be.Expr1;
 							return new SqlFunction(be.SystemType, "Mod", expr1, be.Expr2);
 						}
 					case "&": return new SqlFunction(be.SystemType, "BitAnd", be.Expr1, be.Expr2);
@@ -104,21 +104,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				var func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
 					case "Convert"    :
 						if (TypeHelper.GetUnderlyingType(func.SystemType) == typeof(bool))
 						{
-							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+							var ex = AlternativeConvertToBoolean(func, 1);
 							if (ex != null)
 								return ex;
 						}
 
 						if (func.Parameters[0] is SqlDataType)
 						{
-							SqlDataType type = (SqlDataType)func.Parameters[0];
+							var type = (SqlDataType)func.Parameters[0];
 
 							if (type.Type == typeof(string) && func.Parameters[1].SystemType != typeof(string))
 								return new SqlFunction(func.SystemType, "RTrim", new SqlFunction(typeof(string), "Char", func.Parameters[1]));
@@ -134,7 +134,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (func.Parameters[0] is SqlFunction)
 						{
-							SqlFunction f = (SqlFunction)func.Parameters[0];
+							var f = (SqlFunction)func.Parameters[0];
 
 							return
 								f.Name == "Char" ?
@@ -145,7 +145,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						{
-							SqlExpression e = (SqlExpression)func.Parameters[0];
+							var e = (SqlExpression)func.Parameters[0];
 							return new SqlFunction(func.SystemType, e.Expr, func.Parameters[1]);
 						}
 
@@ -196,7 +196,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (value is Guid)
 			{
-				string s = ((Guid)value).ToString("N");
+				var s = ((Guid)value).ToString("N");
 
 				sb
 					.Append("Cast(x'")
@@ -254,7 +254,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryTableAlias:
 					if (QuoteIdentifiers)
 					{
-						string name = value.ToString();
+						var name = value.ToString();
 
 						if (name.Length > 0 && name[0] == '"')
 							return value;

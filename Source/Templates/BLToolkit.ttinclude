@@ -139,30 +139,33 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 	
 	tt.PushIndent("\t");
 
-	tt.MaxColumnTypeLen   = t.Columns.Values.Max(_ => _.Type.Length);
-	tt.MaxColumnMemberLen = t.Columns.Values.Max(_ => _.MemberName.Length);
-
-	var maxLens = new int[]
+	if (t.Columns.Count > 0)
 	{
-		t.Columns.Values.Max(_ => _.MemberName == _.ColumnName ? 0 : "MapField('')".Length + _.ColumnName.Length),
-		t.Columns.Values.Max(_ => _.IsNullable                 ? "Nullable".Length : _.IsIdentity ? "Identity".Length : 0),
-		t.Columns.Values.Max(_ => _.IsIdentity && _.IsNullable ? "Identity".Length : 0),
-		t.Columns.Values.Max(_ => _.IsPrimaryKey               ? string.Format("PrimaryKey({0})", _.PKIndex).Length : 0),
-		t.Columns.Values.Max(_ => _.Attributes.Count == 0      ? 0 : string.Join(", ", _.Attributes.Distinct().ToArray()).Length),
-	};
+		tt.MaxColumnTypeLen   = t.Columns.Values.Max(_ => _.Type.Length);
+		tt.MaxColumnMemberLen = t.Columns.Values.Max(_ => _.MemberName.Length);
 
-	foreach (var c in from c in t.Columns.Values orderby c.ID select c)
-	{
-		var attrs = new string[]
+		var maxLens = new int[]
 		{
-			c.MemberName == c.ColumnName ? null : string.Format("MapField(\"{0}\")", c.ColumnName),
-			c.IsNullable                 ? "Nullable" : c.IsIdentity ? "Identity" : null,
-			c.IsIdentity && c.IsNullable ? "Identity" : null,
-			c.IsPrimaryKey               ? string.Format("PrimaryKey({0})", c.PKIndex) : null,
-			c.Attributes.Count == 0      ? null : string.Join(", ", c.Attributes.Distinct().ToArray()),
+			t.Columns.Values.Max(_ => _.MemberName == _.ColumnName ? 0 : "MapField('')".Length + _.ColumnName.Length),
+			t.Columns.Values.Max(_ => _.IsNullable                 ? "Nullable".Length : _.IsIdentity ? "Identity".Length : 0),
+			t.Columns.Values.Max(_ => _.IsIdentity && _.IsNullable ? "Identity".Length : 0),
+			t.Columns.Values.Max(_ => _.IsPrimaryKey               ? string.Format("PrimaryKey({0})", _.PKIndex).Length : 0),
+			t.Columns.Values.Max(_ => _.Attributes.Count == 0      ? 0 : string.Join(", ", _.Attributes.Distinct().ToArray()).Length),
 		};
 
-		RenderColumn(tt, c, maxLens, attrs);
+		foreach (var c in from c in t.Columns.Values orderby c.ID select c)
+		{
+			var attrs = new string[]
+			{
+				c.MemberName == c.ColumnName ? null : string.Format("MapField(\"{0}\")", c.ColumnName),
+				c.IsNullable                 ? "Nullable" : c.IsIdentity ? "Identity" : null,
+				c.IsIdentity && c.IsNullable ? "Identity" : null,
+				c.IsPrimaryKey               ? string.Format("PrimaryKey({0})", c.PKIndex) : null,
+				c.Attributes.Count == 0      ? null : string.Join(", ", c.Attributes.Distinct().ToArray()),
+			};
+
+			RenderColumn(tt, c, maxLens, attrs);
+		}
 	}
 
 	if (t.ForeignKeys.Count > 0)

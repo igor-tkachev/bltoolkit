@@ -37,11 +37,13 @@ namespace BLToolkit.Mapping
 		{
 			get
 			{
-				MemberMapper mm = Activator.CreateInstance(_memberMapperType) as MemberMapper;
+				var mm = Activator.CreateInstance(_memberMapperType) as MemberMapper;
 
 				if (mm == null)
 					throw new ArgumentException(
 						string.Format("Type '{0}' is not MemberMapper.", _memberMapperType));
+
+				mm.IsExplicit = true;
 
 				return mm;
 			}

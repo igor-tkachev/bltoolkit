@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.Mapping;
 using NUnit.Framework;
@@ -115,6 +116,50 @@ namespace Data.Linq
 				var e = db.GetTable<ParentObject>().First(p => p.ParentID == 1 && p.Value.Value1 == 1);
 				Assert.AreEqual(1, e.ParentID);
 				Assert.AreEqual(1, e.Value.Value1);
+			});
+		}
+
+		[TableName("Parent")]
+		public class ParentObject2
+		{
+			class IntToDateMemberMapper : MemberMapper
+			{
+				public override void SetValue(object o, object value)
+				{
+					((ParentObject2)o).Value1 = new DateTime(2010, 1, Convert.ToInt32(value));
+				}
+			}
+
+			public int      ParentID;
+			[MemberMapper(typeof(IntToDateMemberMapper))]
+			public DateTime Value1;
+		}
+
+		[Test]
+		public void MemberMapperTest1()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from p in db.GetTable<ParentObject2>()
+					where p.ParentID == 1
+					select p;
+
+				Assert.AreEqual(new DateTime(2010, 1, 1), q.First().Value1);
+			});
+		}
+
+		//[Test]
+		public void MemberMapperTest2()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from p in db.GetTable<ParentObject2>()
+					where p.ParentID == 1
+					select p.Value1;
+
+				Assert.AreEqual(new DateTime(2010, 1, 1), q.First());
 			});
 		}
 	}
