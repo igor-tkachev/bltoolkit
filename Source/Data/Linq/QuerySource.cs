@@ -228,7 +228,9 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
-				return GetField(mi.Name) ?? GetAssociation(mi);
+				return mi.DeclaringType.IsAssignableFrom(ObjectType) ?
+					GetField(mi.Name) ?? GetAssociation(mi) :
+					GetAssociation(mi);
 			}
 
 			List<QueryField> _keyFields;

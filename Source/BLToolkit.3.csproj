@@ -129,6 +129,11 @@
     <Compile Include="Aspects\ClearCacheAttribute.cs" />
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Common\Convert.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Convert.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
@@ -594,6 +599,10 @@
       </SubType>
     </EmbeddedResource>
     <None Include="BLToolkit.snk" />
+    <None Include="Common\Convert.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Convert.generated.cs</LastGenOutput>
+    </None>
     <None Include="DataAccess\DataAccess.xsx">
       <DependentUpon>DataAccess.xsd</DependentUpon>
     </None>

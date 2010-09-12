@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Data;
-using BLToolkit.Data.Linq;
-using BLToolkit.Mapping;
-using NUnit.Framework;
 
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {

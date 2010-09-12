@@ -104,6 +104,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Common\Convert.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Convert.generated.cs</LastGenOutput>
+    </None>
     <None Include="Data\DataProvider\FdpDataProvider.cs">
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
@@ -145,6 +149,11 @@
     <Compile Include="Aspects\InstanceCacheAttribute.cs" />
     <Compile Include="Aspects\OverloadAttribute.cs" />
     <Compile Include="Common\ArrayT.cs" />
+    <Compile Include="Common\Convert.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Convert.tt</DependentUpon>
+    </Compile>
     <Compile Include="Common\Tuple.cs" />
     <Compile Include="Configuration\ElementBase.cs" />
     <Compile Include="Configuration\ElementCollectionBase.cs" />

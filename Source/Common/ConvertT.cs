@@ -68,6 +68,8 @@ namespace BLToolkit.Common
 				methodName = "ToNullable" + to.GetGenericArguments()[0].Name;
 			else if (to.IsArray)
 				methodName = "To" + to.GetElementType().Name + "Array";
+			else if (to.Name == "Binary")
+				methodName = "ToLinq" + to.Name;
 			else
 				methodName = "To" + to.Name;
 

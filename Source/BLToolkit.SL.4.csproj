@@ -63,6 +63,11 @@
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Convert.cs" />
+    <Compile Include="Common\Convert.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Convert.tt</DependentUpon>
+    </Compile>
     <Compile Include="Common\ConvertT.cs" />
     <Compile Include="Common\NameOrIndexParameter.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
@@ -334,6 +339,10 @@
     <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Common\Convert.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Convert.generated.cs</LastGenOutput>
+    </None>
     <None Include="Mapping\MemberMapper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MemberMapper.generated.cs</LastGenOutput>

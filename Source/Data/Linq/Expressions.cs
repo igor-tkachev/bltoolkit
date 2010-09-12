@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -8,8 +7,6 @@ using System.Text;
 #if !SILVERLIGHT
 using Microsoft.VisualBasic.CompilerServices;
 #endif
-
-using JetBrains.Annotations;
 
 #region ReSharper C# 2.0 disable
 // ReSharper disable RedundantTypeArgumentsOfMethod

@@ -33,7 +33,7 @@ namespace BLToolkit.Data.Linq
 				foreach (var i in idx)
 					converter(i);
 
-				_info.SetQuery(null);
+				_info.SetQuery(null, null);
 			}
 			else
 			{
@@ -45,14 +45,14 @@ namespace BLToolkit.Data.Linq
 		{
 			if (expr == null)
 			{
-				_info.SetQuery(null);
+				_info.SetQuery(null, null);
 			}
 			else
 			{
 				var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
 					expr, new[] { _infoParam, _contextParam, _dataContextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });
 
-				_info.SetQuery(mapper.Compile());
+				_info.SetQuery(mapper.Compile(), mapper);
 			}
 		}
 
@@ -1157,7 +1157,7 @@ namespace BLToolkit.Data.Linq
 			var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<T>>(
 				pi, new [] { _infoParam, _contextParam, _dataContextParam, _dataReaderParam, _mapSchemaParam, ExpressionParam, ParametersParam });
 
-			_info.SetQuery(mapper.Compile());
+			_info.SetQuery(mapper.Compile(), mapper);
 		}
 
 		#endregion

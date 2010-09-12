@@ -285,5 +285,17 @@ namespace Data.Linq
 				let children2 = children1.Where(c => c.ParentID < 10)
 				select children2.Sum(c => c.ChildID)));
 		}
+
+		[Test]
+		public void Contains1()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase }, db => AreEqual(
+				from p in Parent
+				where (from p1 in Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
+				select p,
+				from p in db.Parent
+				where (from p1 in db.Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
+				select p));
+		}
 	}
 }

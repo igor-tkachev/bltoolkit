@@ -237,8 +237,12 @@ namespace BLToolkit.Data.Linq
 
 		#region Query
 
-		public void SetQuery(Mapper<T> mapper)
+		Expression _mapperExpression;
+
+		public void SetQuery(Mapper<T> mapper, Expression mapperExpression)
 		{
+			_mapperExpression = mapperExpression;
+
 			Queries[0].Mapper = mapper;
 
 			FinalizeQuery();

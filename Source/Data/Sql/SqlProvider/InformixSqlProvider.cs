@@ -65,7 +65,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
@@ -78,7 +78,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction)expr;
+				var func = (SqlFunction)expr;
 
 				switch (func.Name)
 				{
