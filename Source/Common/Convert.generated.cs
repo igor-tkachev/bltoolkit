@@ -8587,10 +8587,14 @@ namespace BLToolkit.Common
 		public static Byte[] ToByteArray(Byte            p) { return new[] { p };                                                      }
 		/// <summary>Converts the value from <c>Char</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Char            p) { return BitConverter.GetBytes(p);                                         }
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>DateTime</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTime        p) { return ToByteArray(p.ToBinary());                                        }
+#endif
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>DateTimeOffset</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTimeOffset  p) { return ToByteArray(p.LocalDateTime.ToBinary());                          }
+#endif
 		/// <summary>Converts the value from <c>Double</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Double          p) { return BitConverter.GetBytes(p);                                         }
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -8628,10 +8632,14 @@ namespace BLToolkit.Common
 		public static Byte[] ToByteArray(Byte?           p) { return p.HasValue ? ToByteArray(p.Value) : (Byte[])null;                 }
 		/// <summary>Converts the value from <c>Char?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Char?           p) { return p.HasValue ? ToByteArray(p.Value) : (Byte[])null;                 }
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>DateTime?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTime?       p) { return p.HasValue ? ToByteArray(p.Value) : (Byte[])null;                 }
+#endif
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>DateTimeOffset?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(DateTimeOffset? p) { return p.HasValue ? ToByteArray(p.Value) : (Byte[])null;                 }
+#endif
 		/// <summary>Converts the value from <c>Decimal?</c> to an equivalent <c>Byte[]</c> value.</summary>
 		public static Byte[] ToByteArray(Decimal?        p) { return p.HasValue ? ToByteArray(p.Value) : (Byte[])null;                 }
 		/// <summary>Converts the value from <c>Double?</c> to an equivalent <c>Byte[]</c> value.</summary>
@@ -8719,7 +8727,9 @@ namespace BLToolkit.Common
 				case TypeCode.String   : return ToByteArray((String)  p);
 				case TypeCode.Byte     : return ToByteArray((Byte)    p);
 				case TypeCode.SByte    : return ToByteArray((SByte)   p);
+#if !SILVERLIGHT
 				case TypeCode.DateTime : return ToByteArray((DateTime)p);
+#endif
 				case TypeCode.Int16    : return ToByteArray((Int16)   p);
 				case TypeCode.Int32    : return ToByteArray((Int32)   p);
 				case TypeCode.Int64    : return ToByteArray((Int64)   p);
@@ -8734,7 +8744,9 @@ namespace BLToolkit.Common
 
 			// Simple Types
 			//
+#if !SILVERLIGHT
 			if (p is DateTimeOffset)  return ToByteArray((DateTimeOffset) p);
+#endif
 			if (p is Guid)            return ToByteArray((Guid)           p);
 			if (p is TimeSpan)        return ToByteArray((TimeSpan)       p);
 
@@ -8745,8 +8757,12 @@ namespace BLToolkit.Common
 				if (p is Boolean?)        return ToByteArray((Boolean?)       p);
 				if (p is Byte?)           return ToByteArray((Byte?)          p);
 				if (p is Char?)           return ToByteArray((Char?)          p);
+#if !SILVERLIGHT
 				if (p is DateTime?)       return ToByteArray((DateTime?)      p);
+#endif
+#if !SILVERLIGHT
 				if (p is DateTimeOffset?) return ToByteArray((DateTimeOffset?)p);
+#endif
 				if (p is Decimal?)        return ToByteArray((Decimal?)       p);
 				if (p is Double?)         return ToByteArray((Double?)        p);
 				if (p is Guid?)           return ToByteArray((Guid?)          p);
@@ -8880,22 +8896,30 @@ namespace BLToolkit.Common
 
 		// Simple Types
 		//
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>Guid</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Guid      p) { return p == Guid.Empty ? (Type)null : Type.GetTypeFromCLSID(p);             }
+#endif
 		/// <summary>Converts the value from <c>String</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(String    p) { return p == null ? (Type)null : Type.GetType(p);                            }
 
 		// Nullable Types
 		//
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>Guid?</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Guid?     p) { return p.HasValue ? Type.GetTypeFromCLSID(p.Value) : (Type)null;            }
+#endif
 
 		// Other Types
 		//
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>Binary</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Binary    p) { return p == null ? (Type)null : Type.GetTypeFromCLSID(ToGuid(p.ToArray())); }
+#endif
+#if !SILVERLIGHT
 		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Byte[]    p) { return p == null ? (Type)null : Type.GetTypeFromCLSID(ToGuid(p));           }
+#endif
 		/// <summary>Converts the value from <c>Char[]</c> to an equivalent <c>Type</c> value.</summary>
 		public static Type ToType(Char[]    p) { return p == null ? (Type)null : Type.GetType(new string(p));                }
 
@@ -8933,19 +8957,27 @@ namespace BLToolkit.Common
 
 			// Simple Types
 			//
+#if !SILVERLIGHT
 			if (p is Guid)      return ToType((Guid)     p);
+#endif
 
 			// Nullable Types
 			//
 			if (type.IsGenericType)
 			{
+#if !SILVERLIGHT
 				if (p is Guid?)     return ToType((Guid?)    p);
+#endif
 			}
 
 			// Other Types
 			//
+#if !SILVERLIGHT
 			if (p is Binary)    return ToType((Binary)   p);
+#endif
+#if !SILVERLIGHT
 			if (p is Byte[])    return ToType((Byte[])   p);
+#endif
 			if (p is Char[])    return ToType((Char[])   p);
 
 #if !SILVERLIGHT

@@ -92,9 +92,9 @@ namespace BLToolkit.Common
 				}))
 			.Concat(Set(_ => { _.Group = "Other"; }, new[]
 				{
-					new ToType { Name = "Type",        Method = "ToType",                                  },
+					new ToType { Name = "Type",        Method = "ToType",        NonSLMethods = { "Guid", "Guid?", "Binary", "Byte[]" } },
 					new ToType { Name = "Stream",      Method = "ToStream",      NullValue = "Stream.Null" },
-					new ToType { Name = "Byte[]",      Method = "ToByteArray",   Froms = { { "Decimal", null }, { "Stream", null }, { "Char[]", null } } },
+					new ToType { Name = "Byte[]",      Method = "ToByteArray",   NonSLMethods = { "DateTime", "DateTime?", "DateTimeOffset", "DateTimeOffset?" }, Froms = { { "Decimal", null }, { "Stream", null }, { "Char[]", null } } },
 					new ToType { Name = "Char[]",      Method = "ToCharArray",                             },
 					new ToType { Name = "Binary",      Method = "ToLinqBinary",                            },
 					new ToType { Name = "XmlReader",   Method = "ToXmlReader",   NonSilverlightable = true },
@@ -486,8 +486,9 @@ class ToType
 	public bool   NonSilverlightable; // :)
 	public string NullValue;
 	public string FromObjectReturn;
-	
-	public Dictionary<string,string> Froms = new Dictionary<string,string>();
+
+	public Dictionary<string,string> Froms        = new Dictionary<string,string>();
+	public HashSet<string>           NonSLMethods = new HashSet<string>();
 }
 
 Dictionary<string,ToType> _types;
@@ -666,17 +667,6 @@ void Generate()
 			var len   = froms.Concat(new[] { "" }).Select(_ => _.Length).Max();
 			var lcode = to.Froms.Values.Concat(new[] { "" }).Select(_ => (_ ?? "").Length).Max();
 
-			/*
-			if (lcode > 50)
-			{
-				var q =
-					from c in to.Froms.Values
-					select (c ?? "").Length into l
-					orderby l descending
-					select l;
-			}
-			*/
-
 			foreach (var f in froms)
 			{
 				var code = to.Froms[f];
@@ -705,6 +695,13 @@ void Generate()
 					WriteLine("//");
 				}
 
+				if (to.NonSLMethods.Contains(fr.Name))
+				{
+					ClearIndent();
+					WriteLine("#if !SILVERLIGHT");
+					PushIndent("\t\t");
+				}
+
 				WriteLine("/// <summary>Converts the value from <c>{0}</c> to an equivalent <c>{1}</c> value.</summary>", fr.Name, to.Name);
 
 				if (to.NonCompliant || fr.NonCompliant)
@@ -712,6 +709,13 @@ void Generate()
 
 				WriteLine("public static {0} {1}({2}{3} p) {{ return {4};{5} }}",
 					to.Name, to.Method, fr.Name, LenDiff(len, fr.Name), code, LenDiff(lcode, code));
+
+				if (to.NonSLMethods.Contains(fr.Name))
+				{
+					ClearIndent();
+					WriteLine("#endif");
+					PushIndent("\t\t");
+				}
 			}
 
 			if (sl)
@@ -776,7 +780,27 @@ void Generate()
 						WriteLine("case TypeCode.{0}{1} : return ({0})p;", to.Name, LenDiff(len, to.Name));
 
 					foreach (var t in tc)
+					{
+						if (to.NonSLMethods.Contains(t))
+						{
+							ClearIndent();
+							WriteLine("#if !SILVERLIGHT");
+							PushIndent("\t\t");
+							PushIndent("\t");
+							PushIndent("\t");
+						}
+
 						WriteLine("case TypeCode.{0}{1} : return {2}(({0}){1}p);", t, LenDiff(len, t), to.Method);
+
+						if (to.NonSLMethods.Contains(t))
+						{
+							ClearIndent();
+							WriteLine("#endif");
+							PushIndent("\t\t");
+							PushIndent("\t");
+							PushIndent("\t");
+						}
+					}
 
 					PopIndent();
 					WriteLine("}");
@@ -871,7 +895,27 @@ void Generate()
 						}
 					}
 
+					if (to.NonSLMethods.Contains(fr.Name))
+					{
+						ClearIndent();
+						WriteLine("#if !SILVERLIGHT");
+						PushIndent("\t\t");
+						PushIndent("\t");
+						if (openGroupBlock)
+							PushIndent("\t");
+					}
+
 					WriteLine("if (p is {0}){1} return {2}(({0}){1}p);", fr.Name, LenDiff(len, fr.Name), to.Method);
+
+					if (to.NonSLMethods.Contains(fr.Name))
+					{
+						ClearIndent();
+						WriteLine("#endif");
+						PushIndent("\t\t");
+						PushIndent("\t");
+						if (openGroupBlock)
+							PushIndent("\t");
+					}
 				}
 
 				if (openGroupBlock)
