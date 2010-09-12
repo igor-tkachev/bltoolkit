@@ -1,4 +1,4 @@
-<#@ template language="C#v3.5" debug="True"        #>
+<#@ template language="C#v3.5" debug="True"       #>
 <#@ output extension="generated.cs"               #>
 <#@ assembly name="System.Core"                   #>
 <#@ import namespace="System.Collections.Generic" #>
