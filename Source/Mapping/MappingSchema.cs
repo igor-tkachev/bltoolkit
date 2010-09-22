@@ -3526,9 +3526,9 @@ namespace BLToolkit.Mapping
 							if (IsNull(key))
 								continue;
 
-							IList masterList = indexedLists[key];
+							IList masterList;
 
-							if (masterList == null)
+							if (!indexedLists.TryGetValue(key, out masterList))
 								continue;
 
 							foreach (object master in masterList)

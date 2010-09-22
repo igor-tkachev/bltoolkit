@@ -2514,6 +2514,9 @@ namespace BLToolkit.Data
 						}
 						else
 						{
+							if (value != null && value.GetType().IsEnum)
+								value = MappingSchema.MapEnumToValue(value, true);
+
 							p = Parameter(baseParameters[i].ParameterName + nRows, value);
 						}
 
@@ -2525,9 +2528,13 @@ namespace BLToolkit.Data
 					isSet = true;
 
 					var n = nRows * members.Length;
+
 					for (var i = 0; i < members.Length; i++)
 					{
 						var value = members[i].GetValue(obj);
+
+						if (value != null && value.GetType().IsEnum)
+							value = MappingSchema.MapEnumToValue(value, true);
 
 						_dataProvider.SetParameterValue(
 							parameters[n + i],

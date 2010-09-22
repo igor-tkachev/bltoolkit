@@ -27,18 +27,22 @@ namespace Data.Linq
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
 			{
-				if (args.Name.IndexOf("Sybase.AdoNet2.AseClient") >= 0)
-					return Assembly.LoadFrom(@"..\..\..\..\Redist\Sybase\Sybase.AdoNet2.AseClient.dll");
-				if (args.Name.IndexOf("Oracle.DataAccess") >= 0)
-					return Assembly.LoadFrom(@"..\..\..\..\Redist\Oracle\Oracle.DataAccess.dll");
-				if (args.Name.IndexOf("IBM.Data.DB2") >= 0)
-					return Assembly.LoadFrom(@"..\..\..\..\Redist\IBM\IBM.Data.DB2.dll");
-				if (args.Name.IndexOf("Npgsql") >= 0)
-					return Assembly.LoadFrom(@"..\..\..\..\Redist\PostgreSql\Npgsql.dll");
-				if (args.Name.IndexOf("Mono.Security") >= 0)
-					return Assembly.LoadFrom(@"..\..\..\..\Redist\PostgreSql\Mono.Security.dll");
+				string assembly;
 
-				return null;
+				     if (args.Name.IndexOf("Sybase.AdoNet2.AseClient") >= 0) assembly = @"Sybase\Sybase.AdoNet2.AseClient.dll";
+				else if (args.Name.IndexOf("Oracle.DataAccess")        >= 0) assembly = @"Oracle\Oracle.DataAccess.dll";
+				else if (args.Name.IndexOf("IBM.Data.DB2")             >= 0) assembly = @"IBM\IBM.Data.DB2.dll";
+				else if (args.Name.IndexOf("Npgsql")                   >= 0) assembly = @"PostgreSql\Npgsql.dll";
+				else if (args.Name.IndexOf("Mono.Security")            >= 0) assembly = @"PostgreSql\Mono.Security.dll";
+				else
+					return null;
+
+				assembly = @"..\..\..\..\Redist\" + assembly;
+
+				if (!File.Exists(assembly))
+					assembly = @"..\..\" + assembly;
+
+				return Assembly.LoadFrom(assembly);
 			};
 
 			DbManager.TurnTraceSwitchOn();
