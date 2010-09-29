@@ -420,6 +420,26 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<ParentInheritanceValue> _parentInheritanceValue;
+		protected List<ParentInheritanceValue>  ParentInheritanceValue
+		{
+			get
+			{
+				return _parentInheritanceValue ?? (_parentInheritanceValue =
+					ParentInheritance.Where(p => p is ParentInheritanceValue).Cast<ParentInheritanceValue>().ToList());
+			}
+		}
+
+		private   List<ParentInheritance1> _parentInheritance1;
+		protected List<ParentInheritance1>  ParentInheritance1
+		{
+			get
+			{
+				return _parentInheritance1 ?? (_parentInheritance1 =
+					ParentInheritance.Where(p => p is ParentInheritance1).Cast<ParentInheritance1>().ToList());
+			}
+		}
+
 		private   List<Child> _child;
 		protected List<Child>  Child
 		{

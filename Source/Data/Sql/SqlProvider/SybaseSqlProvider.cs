@@ -160,7 +160,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var name = value.ToString();
 
-						if (name.Length > 0 && name[0] == '[')
+						if (name.Length > 0 && (name[0] == '[' || name[0] == '#'))
 							return value;
 
 						if (name.IndexOf('.') > 0)

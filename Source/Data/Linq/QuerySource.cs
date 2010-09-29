@@ -228,9 +228,11 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(MemberInfo mi, Func<QueryField,bool> test)
 			{
-				return mi.DeclaringType.IsAssignableFrom(ObjectType) ?
-					GetField(mi.Name) ?? GetAssociation(mi) :
-					GetAssociation(mi);
+				return
+					mi.DeclaringType.IsAssignableFrom(ObjectType) ||
+					InheritanceMapping != null && InheritanceMapping.Count > 0 && ObjectType.IsAssignableFrom(mi.DeclaringType) && InheritanceMapping.Any(_ => _.Type == mi.DeclaringType)?
+						GetField(mi.Name) ?? GetAssociation(mi) :
+						GetAssociation(mi);
 			}
 
 			List<QueryField> _keyFields;
@@ -890,7 +892,7 @@ namespace BLToolkit.Data.Linq
 
 			public override QueryField GetField(LambdaInfo lambda, Expression expr, int currentMember)
 			{
-				if (expr == Lambda.Body)
+				if (Lambda != null && expr == Lambda.Body)
 					return null;
 
 				var field = SourceColumn.GetField(lambda, expr, currentMember);

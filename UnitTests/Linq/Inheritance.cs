@@ -72,12 +72,10 @@ namespace Data.Linq
 		[Test]
 		public void Test9()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				ParentInheritance
 					.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
-					.OfType<ParentInheritanceNull>();
-
-			ForEachProvider(db => AreEqual(expected,
+					.OfType<ParentInheritanceNull>(),
 				db.ParentInheritance
 					.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
 					.OfType<ParentInheritanceNull>()));
@@ -98,6 +96,14 @@ namespace Data.Linq
 				var q = from p in db.ParentInheritance3 where p is ParentInheritance13 select p;
 				q.ToList();
 			});
+		}
+
+		[Test]
+		public void Test12()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance1 where p.ParentID == 1 select p,
+				from p in db.ParentInheritance1 where p.ParentID == 1 select p));
 		}
 
 		[Test]

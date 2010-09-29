@@ -26,20 +26,22 @@ namespace Data.Linq
 			((NetTcpBinding)Binding).ReaderQuotas.MaxStringContentLength = 1000000;
 		}
 
-		public Table<Person>                 Person             { get { return this.GetTable<Person>();                 } }
-		public Table<Patient>                Patient            { get { return this.GetTable<Patient>();                } }
-		public Table<Parent>                 Parent             { get { return this.GetTable<Parent>();                 } }
-		public Table<Parent1>                Parent1            { get { return this.GetTable<Parent1>();                } }
-		public Table<IParent>                Parent2            { get { return this.GetTable<IParent>();                } }
-		public Table<Parent4>                Parent4            { get { return this.GetTable<Parent4>();                } }
-		public Table<Parent5>                Parent5            { get { return this.GetTable<Parent5>();                } }
-		public Table<ParentInheritanceBase>  ParentInheritance  { get { return this.GetTable<ParentInheritanceBase>();  } }
-		public Table<ParentInheritanceBase2> ParentInheritance2 { get { return this.GetTable<ParentInheritanceBase2>(); } }
-		public Table<ParentInheritanceBase3> ParentInheritance3 { get { return this.GetTable<ParentInheritanceBase3>(); } }
-		public Table<Child>                  Child              { get { return this.GetTable<Child>();                  } }
-		public Table<GrandChild>             GrandChild         { get { return this.GetTable<GrandChild>();             } }
-		public Table<GrandChild1>            GrandChild1        { get { return this.GetTable<GrandChild1>();            } }
-		public Table<LinqDataTypes>          Types              { get { return this.GetTable<LinqDataTypes>();          } }
-		public Table<LinqDataTypes2>         Types2             { get { return this.GetTable<LinqDataTypes2>();         } }
+		public Table<Person>                 Person                 { get { return this.GetTable<Person>();                 } }
+		public Table<Patient>                Patient                { get { return this.GetTable<Patient>();                } }
+		public Table<Parent>                 Parent                 { get { return this.GetTable<Parent>();                 } }
+		public Table<Parent1>                Parent1                { get { return this.GetTable<Parent1>();                } }
+		public Table<IParent>                Parent2                { get { return this.GetTable<IParent>();                } }
+		public Table<Parent4>                Parent4                { get { return this.GetTable<Parent4>();                } }
+		public Table<Parent5>                Parent5                { get { return this.GetTable<Parent5>();                } }
+		public Table<ParentInheritanceBase>  ParentInheritance      { get { return this.GetTable<ParentInheritanceBase>();  } }
+		public Table<ParentInheritanceBase2> ParentInheritance2     { get { return this.GetTable<ParentInheritanceBase2>(); } }
+		public Table<ParentInheritanceBase3> ParentInheritance3     { get { return this.GetTable<ParentInheritanceBase3>(); } }
+		public Table<ParentInheritance1>     ParentInheritance1     { get { return this.GetTable<ParentInheritance1>();     } }
+		public Table<ParentInheritanceValue> ParentInheritanceValue { get { return this.GetTable<ParentInheritanceValue>(); } }
+		public Table<Child>                  Child                  { get { return this.GetTable<Child>();                  } }
+		public Table<GrandChild>             GrandChild             { get { return this.GetTable<GrandChild>();             } }
+		public Table<GrandChild1>            GrandChild1            { get { return this.GetTable<GrandChild1>();            } }
+		public Table<LinqDataTypes>          Types                  { get { return this.GetTable<LinqDataTypes>();          } }
+		public Table<LinqDataTypes2>         Types2                 { get { return this.GetTable<LinqDataTypes2>();         } }
 	}
 }

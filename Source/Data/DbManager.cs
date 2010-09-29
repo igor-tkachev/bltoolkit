@@ -2353,9 +2353,8 @@ namespace BLToolkit.Data
 					}
 
 					AssignParameterValues(o);
-					var rows = ExecuteNonQueryInternal();
-					if (rows > 0)
-						rowsTotal += rows;
+					rowsTotal += ExecuteNonQueryInternal();
+					MapOutputParameters(o);
 				}
 			}
 		
@@ -2400,9 +2399,8 @@ namespace BLToolkit.Data
 					}
 
 					AssignParameterValues(o);
-					var rows = ExecuteNonQueryInternal();
-					if (rows > 0)
-						rowsTotal += rows;
+					rowsTotal += ExecuteNonQueryInternal();
+					MapOutputParameters(o);
 				}
 			}
 
@@ -2621,9 +2619,7 @@ namespace BLToolkit.Data
 				foreach (DataRow dr in table.Rows)
 				{
 					AssignParameterValues(dr);
-					var rows = ExecuteNonQueryInternal();
-					if (rows > 0)
-						rowsTotal += rows;
+					rowsTotal += ExecuteNonQueryInternal();
 				}
 			}
 		
