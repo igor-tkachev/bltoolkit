@@ -21,11 +21,13 @@ namespace Update
 		[TestFixtureTearDown]
 		public new void TearDown()
 		{
+			/*
 			ForEachProvider(db =>
 			{
 				if (db is TestDbManager)
 					db.Parent.Delete(p => p.ParentID >= 1000);
 			});
+			*/
 
 			base.TearDown();
 		}
@@ -317,6 +319,35 @@ namespace Update
 				finally
 				{
 					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void DistinctInsert()
+		{
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>
+			{
+				try
+				{
+					db.Types.Delete(c => c.ID > 1000);
+
+					Assert.AreEqual(
+						Types.Select(_ => _.ID / 3).Distinct().Count(),
+						db
+							.Types
+							.Select(_ => Math.Floor(_.ID / 3.0))
+							.Distinct()
+							.Insert(db.Types, _ => new LinqDataTypes()
+							{
+								ID        = (int)(_ + 1001),
+								GuidValue = Sql.NewGuid(),
+								BoolValue = true
+							}));
+				}
+				finally
+				{
+					db.Types.Delete(c => c.ID > 1000);
 				}
 			});
 		}

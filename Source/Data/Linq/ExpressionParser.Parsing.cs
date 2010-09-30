@@ -2070,6 +2070,11 @@ namespace BLToolkit.Data.Linq
 
 		void ParseInsert(bool withIdentity, Expression into, LambdaInfo setter, QuerySource select)
 		{
+			var isSubQuery = CurrentSql.Select.IsDistinct;
+
+			if (isSubQuery)
+				select = WrapInSubQuery(select);
+
 			if (into != null)
 			{
 				var sql = CurrentSql;
