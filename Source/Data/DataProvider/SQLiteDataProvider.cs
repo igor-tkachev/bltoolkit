@@ -1,19 +1,19 @@
 using System;
 using System.Data;
 using System.Data.Common;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.Text;
 using System.Xml;
 
+using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.Mapping;
 // System.Data.SQLite.dll must be referenced.
 // http://sqlite.phxsoftware.com/
 //
-using System.Data.SQLite;
 
 namespace BLToolkit.Data.DataProvider
 {
-	using Sql.SqlProvider;
-
 	/// <summary>
 	/// Implements access to the Data Provider for SQLite.
 	/// </summary>
@@ -21,8 +21,34 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-	public sealed class SQLiteDataProvider: DataProviderBase
+	public sealed class SQLiteDataProvider : DataProviderBase
 	{
+		/// <summary>
+		/// Returns connection type.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+		/// <value>An instance of the <see cref="Type"/> class.</value>
+		public override Type ConnectionType
+		{
+			get { return typeof (SQLiteConnection); }
+		}
+
+		/// <summary>
+		/// Returns the data provider name.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataProvider Method</seealso>
+		/// <value>Data provider name.</value>
+		public override string Name
+		{
+			get { return DataProvider.ProviderName.SQLite; }
+		}
+
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
@@ -73,7 +99,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorNumber:
 					{
 						if (value is SQLiteException)
-							return ((SQLiteException)value).ErrorCode;
+							return ((SQLiteException) value).ErrorCode;
 						break;
 					}
 			}
@@ -95,60 +121,12 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
-		/// <summary>
-		/// Returns connection type.
-		/// </summary>
-		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
-		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
-		/// <value>An instance of the <see cref="Type"/> class.</value>
-		public override Type ConnectionType
-		{
-			get { return typeof(SQLiteConnection); }
-		}
-
-		/// <summary>
-		/// Returns the data provider name.
-		/// </summary>
-		/// <remarks>
-		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
-		/// </remarks>
-		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataProvider Method</seealso>
-		/// <value>Data provider name.</value>
-		public override string Name
-		{
-			get { return DataProvider.ProviderName.SQLite; }
-		}
-
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new SQLiteSqlProvider();
 		}
 
-		public class SQLiteMappingSchema : Mapping.MappingSchema
-		{
-			#region Convert
-
-			public override XmlReader ConvertToXmlReader(object value)
-			{
-				if (value is byte[])
-					value = Encoding.UTF8.GetString((byte[])value);
-
-				return base.ConvertToXmlReader(value);
-			}
-
-			public override XmlDocument ConvertToXmlDocument(object value)
-			{
-				if (value is byte[])
-					value = Encoding.UTF8.GetString((byte[])value);
-
-				return base.ConvertToXmlDocument(value);
-			}
-
-			#endregion
-		}
-
+		#region Nested type: LoverFunction
 		/// <summary>
 		/// SQLite built-in text processor is ANSI-only  Just override it.
 		/// </summary>
@@ -158,16 +136,43 @@ namespace BLToolkit.Data.DataProvider
 			public override object Invoke(object[] args)
 			{
 				Debug.Assert(args != null && args.Length == 1);
-				object arg = args[0];
+				var arg = args[0];
 
 				Debug.Assert(arg is string || arg is DBNull || arg is byte[]);
 				return
-					arg is string? ((string)arg).ToLower():
-					arg is byte[]? Encoding.UTF8.GetString((byte[])arg).ToLower():
-					arg;
+					arg is string
+						? ((string) arg).ToLower()
+						: arg is byte[]
+						  	? Encoding.UTF8.GetString((byte[]) arg).ToLower()
+						  	: arg;
 			}
 		}
+		#endregion
 
+		#region Nested type: SQLiteMappingSchema
+		public class SQLiteMappingSchema : MappingSchema
+		{
+			#region Convert
+			public override XmlReader ConvertToXmlReader(object value)
+			{
+				if (value is byte[])
+					value = Encoding.UTF8.GetString((byte[]) value);
+
+				return base.ConvertToXmlReader(value);
+			}
+
+			public override XmlDocument ConvertToXmlDocument(object value)
+			{
+				if (value is byte[])
+					value = Encoding.UTF8.GetString((byte[]) value);
+
+				return base.ConvertToXmlDocument(value);
+			}
+			#endregion
+		}
+		#endregion
+
+		#region Nested type: UpperFunction
 		/// <summary>
 		/// SQLite built-in text processor is ANSI-only  Just override it.
 		/// </summary>
@@ -177,14 +182,17 @@ namespace BLToolkit.Data.DataProvider
 			public override object Invoke(object[] args)
 			{
 				Debug.Assert(args != null && args.Length == 1);
-				object arg = args[0];
+				var arg = args[0];
 
 				Debug.Assert(arg is string || arg is DBNull || arg is byte[]);
 				return
-					arg is string? ((string)arg).ToUpper():
-					arg is byte[]? Encoding.UTF8.GetString((byte[])arg).ToUpper():
-					arg;
+					arg is string
+						? ((string) arg).ToUpper()
+						: arg is byte[]
+						  	? Encoding.UTF8.GetString((byte[]) arg).ToUpper()
+						  	: arg;
 			}
 		}
+		#endregion
 	}
 }

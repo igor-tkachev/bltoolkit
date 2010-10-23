@@ -27,16 +27,20 @@ Known troubles:
  */
 
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
+
+using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 
 using FirebirdSql.Data.FirebirdClient;
 
 namespace BLToolkit.Data.DataProvider
 {
-	using Sql.SqlProvider;
-	using Mapping;
-
 	public class FdpDataProvider : DataProviderBase
 	{
 		public FdpDataProvider()
@@ -45,22 +49,34 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		#region InOut & ReturnValue emulation
-
 		public static string InOutInputParameterPrefix = "in_";
 		public static string ReturnParameterName = "RETURN_VALUE";
 
-		public static bool IsReturnValueEmulation    = true;
+		public static bool IsReturnValueEmulation = true;
 		public static bool IsInOutParameterEmulation = true;
 
 		public static bool QuoteIdentifiers
 		{
-			get { return FirebirdSqlProvider.QuoteIdentifiers;  }
+			get { return FirebirdSqlProvider.QuoteIdentifiers; }
 			set { FirebirdSqlProvider.QuoteIdentifiers = value; }
 		}
-
 		#endregion
 
 		#region Overloads
+		public override Type ConnectionType
+		{
+			get { return typeof (FbConnection); }
+		}
+
+		public override string Name
+		{
+			get { return DataProvider.ProviderName.Firebird; }
+		}
+
+		public override int MaxBatchSize
+		{
+			get { return 0; }
+		}
 
 		public override IDbConnection CreateConnectionObject()
 		{
@@ -76,7 +92,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			if (command is FbCommand)
 			{
-				FbCommandBuilder.DeriveParameters((FbCommand)command);
+				FbCommandBuilder.DeriveParameters((FbCommand) command);
 
 				if (IsReturnValueEmulation)
 					foreach (IDbDataParameter par in command.Parameters)
@@ -96,7 +112,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.ExceptionToErrorNumber:
 					if (value is FbException)
 					{
-						var ex = (FbException)value;
+						var ex = (FbException) value;
 						if (ex.Errors.Count > 0)
 							return ex.Errors[0].Number;
 					}
@@ -107,21 +123,6 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
-		public override Type ConnectionType
-		{
-			get { return typeof(FbConnection); }
-		}
-
-		public override string Name
-		{
-			get { return DataProvider.ProviderName.Firebird; }
-		}
-
-		public override int MaxBatchSize
-		{
-			get { return 0; }
-		}
-
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new FirebirdSqlProvider();
@@ -130,77 +131,74 @@ namespace BLToolkit.Data.DataProvider
 		public override bool IsValueParameter(IDbDataParameter parameter)
 		{
 			return parameter.Direction != ParameterDirection.ReturnValue
-				&& parameter.Direction != ParameterDirection.Output;
+			       && parameter.Direction != ParameterDirection.Output;
 		}
 
 		private string GetInputParameterName(string ioParameterName)
 		{
-			return (string)Convert(
-				InOutInputParameterPrefix + (string)Convert(ioParameterName, ConvertType.SprocParameterToName),
+			return (string) Convert(
+				InOutInputParameterPrefix + (string) Convert(ioParameterName, ConvertType.SprocParameterToName),
 				ConvertType.NameToSprocParameter);
 		}
 
-		private static IDbDataParameter GetParameter(string parameterName, IDbDataParameter[] commandParameters)
+		private static IDbDataParameter GetParameter(string parameterName, IEnumerable<IDbDataParameter> commandParameters)
 		{
-			foreach (var par in commandParameters)
-				if (string.Compare(parameterName, par.ParameterName, true) == 0)
-					return par;
-			return null;
+			return commandParameters.FirstOrDefault(par => string.Compare(parameterName, par.ParameterName, true) == 0);
 		}
 
 		private bool IsReturnValue(IDbDataParameter parameter)
 		{
 			if (string.Compare(parameter.ParameterName,
-					(string)Convert(ReturnParameterName, ConvertType.NameToSprocParameter), true) == 0
+			                   (string) Convert(ReturnParameterName, ConvertType.NameToSprocParameter), true) == 0
 				)
 				return true;
 
 			return false;
 		}
 
-		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
+		public override void PrepareCommand(ref CommandType commandType, ref string commandText,
+		                                    ref IDbDataParameter[] commandParameters)
 		{
-			if (commandParameters != null) foreach (var par in commandParameters)
-			{
-				if (par.Value is bool)
+			if (commandParameters != null)
+				foreach (var par in commandParameters)
 				{
-					var value = (bool)par.Value ? "1" : "0";
-
-					par.DbType = DbType.AnsiString;
-					par.Value  = value;
-					par.Size   = value.Length;
-				}
-				else if (par.Value is Guid)
-				{
-					var value = par.Value.ToString();
-
-					par.DbType = DbType.AnsiStringFixedLength;
-					par.Value  = value;
-					par.Size   = value.Length;
-				}
-
-				#region "smart" input-output parameter detection
-
-				if (commandType == CommandType.StoredProcedure && IsInOutParameterEmulation)
-				{
-					var iParameterName  = GetInputParameterName(par.ParameterName);
-					var fakeIOParameter = GetParameter(iParameterName, commandParameters);
-
-					if (fakeIOParameter != null)
+					if (par.Value is bool)
 					{
-						fakeIOParameter.Value = par.Value;
+						var value = (bool) par.Value ? "1" : "0";
 
-						// direction should be output, or parameter mistmath for procedure exception
-						// would be thrown
-						par.Direction = ParameterDirection.Output;
-
-						// direction should be Input
-						fakeIOParameter.Direction = ParameterDirection.Input;
+						par.DbType = DbType.AnsiString;
+						par.Value = value;
+						par.Size = value.Length;
 					}
-				}
+					else if (par.Value is Guid)
+					{
+						var value = par.Value.ToString();
 
-				#endregion
-			}
+						par.DbType = DbType.AnsiStringFixedLength;
+						par.Value = value;
+						par.Size = value.Length;
+					}
+
+					#region "smart" input-output parameter detection
+					if (commandType == CommandType.StoredProcedure && IsInOutParameterEmulation)
+					{
+						var iParameterName = GetInputParameterName(par.ParameterName);
+						var fakeIOParameter = GetParameter(iParameterName, commandParameters);
+
+						if (fakeIOParameter != null)
+						{
+							fakeIOParameter.Value = par.Value;
+
+							// direction should be output, or parameter mistmath for procedure exception
+							// would be thrown
+							par.Direction = ParameterDirection.Output;
+
+							// direction should be Input
+							fakeIOParameter.Direction = ParameterDirection.Input;
+						}
+					}
+					#endregion
+				}
 
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
 		}
@@ -209,25 +207,25 @@ namespace BLToolkit.Data.DataProvider
 		{
 			if (parameter.Value is bool)
 			{
-				var value = (bool)parameter.Value ? "1" : "0";
+				var value = (bool) parameter.Value ? "1" : "0";
 
 				parameter.DbType = DbType.AnsiString;
-				parameter.Value  = value;
-				parameter.Size   = value.Length;
+				parameter.Value = value;
+				parameter.Size = value.Length;
 			}
 			else if (parameter.Value is Guid)
 			{
 				var value = parameter.Value.ToString();
 
 				parameter.DbType = DbType.AnsiStringFixedLength;
-				parameter.Value  = value;
-				parameter.Size   = value.Length;
+				parameter.Value = value;
+				parameter.Size = value.Length;
 			}
 
 			return base.InitParameter(parameter);
 		}
 
-		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
+		public override void Configure(NameValueCollection attributes)
 		{
 			var inOutInputParameterPrefix = attributes["InOutInputParameterPrefix"];
 			if (inOutInputParameterPrefix != null)
@@ -251,31 +249,31 @@ namespace BLToolkit.Data.DataProvider
 
 			base.Configure(attributes);
 		}
-
 		#endregion
 
 		#region FbDataReaderEx
-
 		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{
-			return dataReader is FbDataReader?
-				new FbDataReaderEx((FbDataReader)dataReader):
-				base.GetDataReader(schema, dataReader);
+			return
+				dataReader is FbDataReader
+					? new FbDataReaderEx((FbDataReader) dataReader)
+					: base.GetDataReader(schema, dataReader);
 		}
 
-		class FbDataReaderEx : DataReaderBase<FbDataReader>, IDataReader
+		private class FbDataReaderEx : DataReaderBase<FbDataReader>, IDataReader
 		{
-			public FbDataReaderEx(FbDataReader rd): base(rd)
+			public FbDataReaderEx(FbDataReader rd) : base(rd)
 			{
 			}
 
+			#region IDataReader Members
 			public new object GetValue(int i)
 			{
 				var value = DataReader.GetValue(i);
 
 				if (value is DateTime)
 				{
-					var dt = (DateTime)value;
+					var dt = (DateTime) value;
 
 					if (dt.Year == 1970 && dt.Month == 1 && dt.Day == 1)
 						return new DateTime(1, 1, 1, dt.Hour, dt.Minute, dt.Second, dt.Millisecond);
@@ -293,15 +291,14 @@ namespace BLToolkit.Data.DataProvider
 
 				return dt;
 			}
+			#endregion
 		}
-
 		#endregion
 
 		#region FbMappingSchema
-
 		public class FbMappingSchema : FirebirdMappingSchema
 		{
-			protected override object MapInternal(Reflection.InitContext initContext)
+			protected override object MapInternal(InitContext initContext)
 			{
 				var dr = initContext.SourceObject as FbDataReader;
 
@@ -323,7 +320,6 @@ namespace BLToolkit.Data.DataProvider
 				return base.MapInternal(initContext);
 			}
 		}
-
 		#endregion
 	}
 }
