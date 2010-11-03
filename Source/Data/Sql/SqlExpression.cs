@@ -151,8 +151,17 @@ namespace BLToolkit.Data.Sql
 			{
 				case QueryElementType.SqlParameter:
 				case QueryElementType.SqlField    :
-				case QueryElementType.Column      :
-				case QueryElementType.SqlFunction : return true;
+				case QueryElementType.Column      : return true;
+				case QueryElementType.SqlFunction :
+
+					var f = (SqlFunction)ex;
+
+					switch (f.Name)
+					{
+						case "EXISTS" : return false;
+					}
+
+					return true;
 			}
 
 			return false;

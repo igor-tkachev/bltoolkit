@@ -605,6 +605,32 @@ namespace BLToolkit.Data.Linq
 			throw new InvalidOperationException();
 		}
 
+		[CLSCompliant(false)]
+		[SqlFunction]
+		//[DatePart("Informix",   "{0}",                                      0, 1)]
+		//[DatePart("MySql",      "Extract({0} from {{0}})",           true,  0, 1)]
+		//[DatePart("PostgreSQL", "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "DOY",     null,   null,   "DOW",       null,   null,   null,   null   }, 0, 1)]
+		//[DatePart("Firebird",   "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "YearDay", null,   null,   null,        null,   null,   null,   null   }, 0, 1)]
+		//[DatePart("Oracle",     "To_Number(To_Char({{0}}, {0}))",    true,  new[] { "'YYYY'", "'Q'", "'MM'", "'DDD'",   "'DD'", "'WW'", "'D'",       "'HH'", "'MI'", "'SS'", "'FF'" }, 0, 1)]
+		//[DatePart("SQLite",     "Cast(StrFTime({0}, {{0}}) as int)", true,  new[] { "'%Y'",   null,  "'%m'", "'%j'",    "'%d'", "'%W'", "'%w'",      "'%H'", "'%M'", "'%S'", "'%f'" }, 0, 1)]
+		//[DatePart("Access",     "DatePart({0}, {{0}})",              true,  new[] { "'yyyy'", "'q'", "'m'",  "'y'",     "'d'",  "'ww'", "'w'",       "'h'",  "'n'",  "'s'",  null   }, 0, 1)]
+		public static int? DateDiff(DateParts part, DateTime? startDate, DateTime? endDate)
+		{
+			if (startDate == null || endDate == null)
+				return null;
+
+			switch (part)
+			{
+				case DateParts.Day         : return (int)(endDate - startDate).Value.TotalDays;
+				case DateParts.Hour        : return (int)(endDate - startDate).Value.TotalHours;
+				case DateParts.Minute      : return (int)(endDate - startDate).Value.TotalMinutes;
+				case DateParts.Second      : return (int)(endDate - startDate).Value.TotalSeconds;
+				case DateParts.Millisecond : return (int)(endDate - startDate).Value.TotalMilliseconds;
+			}
+
+			throw new InvalidOperationException();
+		}
+
 		[SqlProperty("@@DATEFIRST")]
 		public static int DateFirst
 		{

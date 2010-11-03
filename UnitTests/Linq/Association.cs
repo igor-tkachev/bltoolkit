@@ -294,5 +294,13 @@ namespace Data.Linq
 				from p in    Parent5 select new { p.Children.Count },
 				from p in db.Parent5 select new { p.Children.Count }));
 		}
+
+		[Test]
+		public void DoulbeJoin()
+		{
+			ForEachProvider(db => AreEqual(
+				from g in    GrandChild where g.Child.Parent.Value1 == 1 select g,
+				from g in db.GrandChild where g.Child.Parent.Value1 == 1 select g));
+		}
 	}
 }

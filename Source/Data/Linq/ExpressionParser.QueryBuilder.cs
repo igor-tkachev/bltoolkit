@@ -1444,6 +1444,11 @@ namespace BLToolkit.Data.Linq
 									return SqlFunction.CreateCount(expression.Type, src.SqlQuery);
 							}
 
+							var de = ParseTimeSpanMember(lambda, ma, queries);
+
+							if (de != null)
+								return de;
+
 							goto case ExpressionType.Parameter;
 						}
 
@@ -1736,6 +1741,14 @@ namespace BLToolkit.Data.Linq
 			ParentQueries.RemoveRange(0, parentQueries.Count);
 
 			ParsingTracer.DecIndentLevel();
+
+			if (expr.NodeType == ExpressionType.Call)
+			{
+				var call = (MethodCallExpression)expr;
+
+				if (call.Method.Name == "Any" && (call.Method.DeclaringType == typeof(Queryable) || call.Method.DeclaringType == typeof(Enumerable)))
+					return ((SqlQuery.Predicate.FuncLike) result.Where.SearchCondition.Conditions[0].Predicate).Function;
+			}
 
 			return result;
 		}
@@ -3405,6 +3418,42 @@ namespace BLToolkit.Data.Linq
 			}
 
 			return false;
+		}
+
+		public ISqlExpression ParseTimeSpanMember(LambdaInfo lambda, MemberExpression expression, params QuerySource[] queries)
+		{
+			if (expression.Member.DeclaringType == typeof(TimeSpan))
+			{
+				switch (expression.Expression.NodeType)
+				{
+					case ExpressionType.Subtract       :
+					case ExpressionType.SubtractChecked:
+
+						Sql.DateParts datePart;
+
+						switch (expression.Member.Name)
+						{
+							case "TotalMilliseconds" : datePart = Sql.DateParts.Millisecond; break;
+							case "TotalSeconds"      : datePart = Sql.DateParts.Second;      break;
+							case "TotalMinutes"      : datePart = Sql.DateParts.Minute;      break;
+							case "TotalHours"        : datePart = Sql.DateParts.Hour;        break;
+							case "TotalDays"         : datePart = Sql.DateParts.Day;         break;
+							default                  : return null;
+						}
+
+						var e = (BinaryExpression)expression.Expression;
+
+						return new SqlFunction(
+							typeof(int),
+							"DateDiff",
+							new SqlValue(datePart),
+							ParseExpression(lambda, e.Right, queries),
+							ParseExpression(lambda, e.Left,  queries));
+				}
+
+			}
+
+			return null;
 		}
 
 		Expression ConvertNew(NewExpression pi)

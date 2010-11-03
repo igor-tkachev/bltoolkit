@@ -387,6 +387,92 @@ namespace Data.Linq
 
 		#endregion
 
+		#region DateDiff
+
+		//[Test]
+		public void SubDateDay()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           (int)(t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalDays,
+				from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalDays)));
+		}
+
+		//[Test]
+		public void DateDiffDay()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           Sql.DateDiff(Sql.DateParts.Day, t.DateTimeValue, t.DateTimeValue.AddHours(100)),
+				from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Day, t.DateTimeValue, t.DateTimeValue.AddHours(100)))));
+		}
+
+		//[Test]
+		public void SubDateHour()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           (int)(t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalHours,
+				from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalHours)));
+		}
+
+		//[Test]
+		public void DateDiffHour()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           Sql.DateDiff(Sql.DateParts.Hour, t.DateTimeValue, t.DateTimeValue.AddHours(100)),
+				from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Hour, t.DateTimeValue, t.DateTimeValue.AddHours(100)))));
+		}
+
+		//[Test]
+		public void SubDateMinute()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           (int)(t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalMinutes,
+				from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalMinutes)));
+		}
+
+		//[Test]
+		public void DateDiffMinute()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           Sql.DateDiff(Sql.DateParts.Minute, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)),
+				from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Minute, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)))));
+		}
+
+		//[Test]
+		public void SubDateSecond()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           (int)(t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalSeconds,
+				from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalSeconds)));
+		}
+
+		//[Test]
+		public void DateDiffSecond()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           Sql.DateDiff(Sql.DateParts.Second, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)),
+				from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Second, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)))));
+		}
+
+		//[Test]
+		public void SubDateMillisecond()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           (int)(t.DateTimeValue.AddSeconds(1) - t.DateTimeValue).TotalMilliseconds,
+				from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddSeconds(1) - t.DateTimeValue).TotalMilliseconds)));
+		}
+
+		//[Test]
+		public void DateDiffMillisecond()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types select           Sql.DateDiff(Sql.DateParts.Millisecond, t.DateTimeValue, t.DateTimeValue.AddSeconds(1)),
+				from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Millisecond, t.DateTimeValue, t.DateTimeValue.AddSeconds(1)))));
+		}
+
+		#endregion
+
+		#region MakeDateTime
+
 		[Test]
 		public void MakeDateTime()
 		{
@@ -442,5 +528,7 @@ namespace Data.Linq
 				from t in from p in    Types select new DateTime(p.DateTimeValue.Year + 1, 10, 1) where t.Month == 10 select t,
 				from t in from p in db.Types select new DateTime(p.DateTimeValue.Year + 1, 10, 1) where t.Month == 10 select t));
 		}
+
+		#endregion
 	}
 }

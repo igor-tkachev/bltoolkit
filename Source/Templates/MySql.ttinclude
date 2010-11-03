@@ -64,16 +64,16 @@ private void LoadServerMetadata()
 		//
 		cmd.CommandText = string.Format(@"
 			SELECT
-				CONCAT(TABLE_SCHEMA, '.', TABLE_NAME) as id,
-				CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END         as isNullable,
-				ORDINAL_POSITION         	as colid,
-				COLUMN_NAME              	as name,
-				c.DATA_TYPE              	as dataType,
-				CHARACTER_MAXIMUM_LENGTH 	as length, 
-				NUMERIC_PRECISION			AS prec,
-				NUMERIC_SCALE            	as scale,
-				EXTRA = 'auto_increment'	as isIdentity,
- 				c.COLUMN_TYPE				as columnType
+				CONCAT(TABLE_SCHEMA, '.', TABLE_NAME)           as id,
+				CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END as isNullable,
+				ORDINAL_POSITION         as colid,
+				COLUMN_NAME              as name,
+				c.DATA_TYPE              as dataType,
+				CHARACTER_MAXIMUM_LENGTH as length, 
+				NUMERIC_PRECISION        as prec,
+				NUMERIC_SCALE            as scale,
+				EXTRA = 'auto_increment' as isIdentity,
+ 				c.COLUMN_TYPE            as columnType
 			FROM
 				INFORMATION_SCHEMA.COLUMNS c
 			WHERE
@@ -96,7 +96,10 @@ private void LoadServerMetadata()
 						MemberName = Convert.ToString (rd["name"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
-					}
+						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt32(rd["length"]),
+						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
+						Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
+		}
 				};
 
 				var c = col.Column;

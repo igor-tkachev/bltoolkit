@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (predicate.IsNot)
 				sb.Append("NOT ");
 
-			int precedence = GetPrecedence(predicate);
+			var precedence = GetPrecedence(predicate);
 
 			BuildExpression(sb, precedence, predicate.Expr1);
 			sb.Append(" LIKE ");
@@ -85,15 +85,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					case "Coalesce" : return new SqlFunction(func.SystemType, "Nvl", func.Parameters);
 					case "Convert"  :
 						{
-							ISqlExpression par0 = func.Parameters[0];
-							ISqlExpression par1 = func.Parameters[1];
+							var par0 = func.Parameters[0];
+							var par1 = func.Parameters[1];
 
 							switch (Type.GetTypeCode(TypeHelper.GetUnderlyingType(func.SystemType)))
 							{
 								case TypeCode.String   : return new SqlFunction(func.SystemType, "To_Char", func.Parameters[1]);
 								case TypeCode.Boolean  :
 									{
-										ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+										var ex = AlternativeConvertToBoolean(func, 1);
 										if (ex != null)
 											return ex;
 										break;

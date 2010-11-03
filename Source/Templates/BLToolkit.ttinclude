@@ -417,7 +417,8 @@ void LoadMetadata()
 
 				name = string.Join("", name.Split('_').Where(_ => _.Length > 0 && _ != t.TableName).ToArray());
 
-				name = key.AssociationType == AssociationType.OneToMany ? PluralizeAssociationName(name) : SingularizeAssociationName(name);
+				if (name.Length > 0)
+					name = key.AssociationType == AssociationType.OneToMany ? PluralizeAssociationName(name) : SingularizeAssociationName(name);
 			}
 
 			if (name.Length != 0 &&
@@ -469,6 +470,10 @@ partial class Column
 	public bool         IsClass;
 	public DbType       DbType;
 	public SqlDbType    SqlDbType;
+	public int          Length;
+	public int          Precision;
+	public int          Scale;
+
 	public int          PKIndex = -1;
 	public List<string> Attributes = new List<string>();
 

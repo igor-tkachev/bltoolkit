@@ -626,6 +626,7 @@
     </None>
     <None Include="Templates\BLT4Toolkit.ttinclude" />
     <None Include="Templates\BLToolkit.ttinclude" />
+    <None Include="Templates\ValidationAttributes.ttinclude" />
     <None Include="Templates\MySql.ttinclude" />
     <None Include="Templates\PluralSingular.ttinclude" />
     <None Include="Templates\MSSQL.ttinclude" />

@@ -86,36 +86,36 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		protected internal virtual MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
-			string         key    = type.FullName + "$" + db.DataProvider.UniqueName;
-			MemberMapper[] mmList = (MemberMapper[])_keyList[key];
+			var key    = type.FullName + "$" + db.DataProvider.UniqueName;
+			var mmList = (MemberMapper[])_keyList[key];
 
 			if (mmList == null)
 			{
-				TypeExtension     typeExt = TypeExtension.GetTypeExtension(type, Extensions);
-				List<MemberOrder> list    = new List<MemberOrder>();
+				var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
+				var list    = new List<MemberOrder>();
 
 				foreach (MemberMapper mm in db.MappingSchema.GetObjectMapper(type))
 				{
 					if (mm.MapMemberInfo.SqlIgnore)
 						continue;
 
-					MemberAccessor ma = mm.MapMemberInfo.MemberAccessor;
+					var ma = mm.MapMemberInfo.MemberAccessor;
 
 					if (TypeHelper.IsScalar(ma.Type))
 					{
 						bool isSet;
-						int order = MappingSchema.MetadataProvider.GetPrimaryKeyOrder(type, typeExt, ma, out isSet);
+						var order = MappingSchema.MetadataProvider.GetPrimaryKeyOrder(type, typeExt, ma, out isSet);
 
 						if (isSet)
 							list.Add(new MemberOrder(mm, order));
 					}
 				}
 
-				list.Sort(delegate(MemberOrder x, MemberOrder y) { return x.Order - y.Order; });
+				list.Sort((x, y) => x.Order - y.Order);
 
 				_keyList[key] = mmList = new MemberMapper[list.Count];
 
-				for (int i = 0; i < list.Count; i++)
+				for (var i = 0; i < list.Count; i++)
 					mmList[i] = list[i].MemberMapper;
 			}
 
@@ -127,15 +127,15 @@ namespace BLToolkit.DataAccess
 		{
 			sb.Append("WHERE\n");
 
-			MemberMapper[] memberMappers = GetKeyFieldList(db, query.ObjectType);
+			var memberMappers = GetKeyFieldList(db, query.ObjectType);
 
 			if (memberMappers.Length == 0)
 				throw new DataAccessException(
 						string.Format("No primary key field(s) in the type '{0}'.", query.ObjectType.FullName));
 
-			foreach (MemberMapper mm in memberMappers)
+			foreach (var mm in memberMappers)
 			{
-				SqlQueryParameterInfo p = query.AddParameter(
+				var p = query.AddParameter(
 					db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
 					mm.Name);
 
@@ -144,7 +144,7 @@ namespace BLToolkit.DataAccess
 				if (nParameter < 0)
 					sb.AppendFormat("{0} AND\n", p.ParameterName);
 				else
-					sb.AppendFormat("{{{0}}} AND\n", nParameter);
+					sb.AppendFormat("{{{0}}} AND\n", nParameter++);
 			}
 
 			sb.Remove(sb.Length - 5, 5);
@@ -152,13 +152,13 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateSelectByKeySqlText(DbManager db, Type type)
 		{
-			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb    = new StringBuilder();
-			SqlQueryInfo  query = new SqlQueryInfo(om);
+			var om    = db.MappingSchema.GetObjectMapper(type);
+			var sb    = new StringBuilder();
+			var query = new SqlQueryInfo(om);
 
 			sb.Append("SELECT\n");
 
-			foreach (MemberMapper mm in GetFieldList(om))
+			foreach (var mm in GetFieldList(om))
 				sb.AppendFormat("\t{0},\n",
 					db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
 
@@ -324,9 +324,9 @@ namespace BLToolkit.DataAccess
 
 		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type, int nParameter)
 		{
-			ObjectMapper  om    = db.MappingSchema.GetObjectMapper(type);
-			StringBuilder sb    = new StringBuilder();
-			SqlQueryInfo  query = new SqlQueryInfo(om);
+			var om    = db.MappingSchema.GetObjectMapper(type);
+			var sb    = new StringBuilder();
+			var query = new SqlQueryInfo(om);
 
 			sb.Append("DELETE FROM\n\t");
 			AppendTableName(sb, db, type);
@@ -363,8 +363,8 @@ namespace BLToolkit.DataAccess
 		[NoInterception]
 		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
-			string       key   = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
-			SqlQueryInfo query = (SqlQueryInfo)_actionSqlQueryInfo[key];
+			var key   = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
+			var query = (SqlQueryInfo)_actionSqlQueryInfo[key];
 
 			if (query == null)
 			{

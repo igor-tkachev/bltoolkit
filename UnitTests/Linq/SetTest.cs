@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
 using Data.Linq.Model;
 using NUnit.Framework;
 
@@ -134,6 +136,33 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				   Parent.Where(p => p.Children.Any(c => c.ParentID > 3)),
 				db.Parent.Where(p => p.Children.Any(c => c.ParentID > 3))));
+		}
+
+		[Test]
+		public void Any31()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.ParentID > 0 && p.Children.Any(c => c.ParentID > 0 && c.ParentID > 3)),
+				db.Parent.Where(p => p.ParentID > 0 && p.Children.Any(c => c.ParentID > 0 && c.ParentID > 3))));
+		}
+
+		[MethodExpression("SelectAnyExpression")]
+		static bool SelectAny(Parent p)
+		{
+			return p.Children.Any(c => c.ParentID > 0 && c.ParentID > 3);
+		}
+
+		static Expression<Func<Parent,bool>> SelectAnyExpression()
+		{
+			return p => p.Children.Any(c => c.ParentID > 0 && c.ParentID > 3);
+		}
+
+		[Test]
+		public void Any32()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Where(p => p.ParentID > 0 && SelectAny(p)),
+				db.Parent.Where(p => p.ParentID > 0 && SelectAny(p))));
 		}
 
 		[Test]

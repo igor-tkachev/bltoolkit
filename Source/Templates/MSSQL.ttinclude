@@ -86,7 +86,10 @@ private void LoadServerMetadata()
 						MemberName = Convert.ToString (rd["name"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
-					}
+						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt32(rd["length"]),
+						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
+						Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
+			}
 				};
 
 				var c = col.Column;
@@ -143,6 +146,7 @@ private void LoadServerMetadata()
 				switch (c.Type)
 				{
 					case "string" :
+					case "object" :
 					case "byte[]" : c.IsClass = true; break;
 				}
 

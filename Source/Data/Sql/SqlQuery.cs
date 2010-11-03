@@ -3401,6 +3401,9 @@ namespace BLToolkit.Data.Sql
 							visitor.VisitAll(GroupBy, tableCollector);
 							visitor.VisitAll(Having,  tableCollector);
 							visitor.VisitAll(OrderBy, tableCollector);
+
+							if (_set != null)
+								visitor.VisitAll(Set, tableCollector);
 						}
 
 						if (findTable(join.Table))

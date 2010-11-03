@@ -1,0 +1,22 @@
+﻿<#
+	{
+		var validationPrevBeforeGenerateModel = BeforeGenerateModel;
+
+		BeforeGenerateModel = tt =>
+		{
+			validationPrevBeforeGenerateModel(tt);
+
+			Usings.Add("BLToolkit.Validation");
+
+			foreach (var t in Tables.Values)
+				foreach (var c in t.Columns.Values)
+				{
+					if (c.Type == "string" && c.Length > 0)
+						c.Attributes.Add(string.Format("MaxLength({0})", c.Length));
+
+					if (!c.IsNullable)
+						c.Attributes.Add("Required");
+				}
+		};
+	}
+#>
