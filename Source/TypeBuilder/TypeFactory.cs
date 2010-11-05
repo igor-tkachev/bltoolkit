@@ -147,7 +147,7 @@ namespace BLToolkit.TypeBuilder
 				// _ModuleBuilder is the base type for both
 				// ModuleBuilder and InternalModuleBuilder classes.
 				//
-				if (!(type.Module is _ModuleBuilder))
+				if (!(type.Module is _ModuleBuilder) && type.Module.FullyQualifiedName != null && type.Module.FullyQualifiedName.IndexOf('<') < 0)
 					assemblyDir = Path.GetDirectoryName(type.Module.FullyQualifiedName);
 #endif
 
