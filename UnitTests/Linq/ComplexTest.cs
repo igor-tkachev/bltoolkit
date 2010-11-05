@@ -250,10 +250,11 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ExpressionTest()
+		public void ExpressionTest1()
 		{
-			Expression<Func<Northwind.Customer, bool>> pred1 = cust=>cust.Country=="UK"; 
-			Expression<Func<Northwind.Customer, bool>> pred2 = cust=>cust.Country=="France"; 
+			Expression<Func<Northwind.Customer,bool>> pred1 = cust=>cust.Country=="UK";
+			Expression<Func<Northwind.Customer,bool>> pred2 = cust=>cust.Country=="France";
+
 			var param = Expression.Parameter(typeof(Northwind.Customer), "x"); 
 			var final = Expression.Lambda<Func<Northwind.Customer, bool>>( 
 				Expression.OrElse( 
@@ -264,6 +265,25 @@ namespace Data.Linq
 			using (var db = new NorthwindDB()) 
 			{ 
 				var count = db.Customer.Count(final); 
+			} 
+		}
+
+		[Test]
+		public void ExpressionTest2()
+		{
+			Expression<Func<Parent,bool>> pred1 = _=>_.ParentID == 1;
+			Expression<Func<Parent,bool>> pred2 = _=>_.Value1   == 1 || _.Value1 == null;
+
+			var param = Expression.Parameter(typeof(Parent), "x"); 
+			var final = Expression.Lambda<Func<Parent, bool>>( 
+				Expression.AndAlso( 
+					Expression.Invoke(pred1, param), 
+					Expression.Invoke(pred2, param) 
+				), param); 
+
+			using (var db = new TestDbManager()) 
+			{ 
+				Assert.AreEqual(1, db.Parent.Count(final));
 			} 
 		}
 

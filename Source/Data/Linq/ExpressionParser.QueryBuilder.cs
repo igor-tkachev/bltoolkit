@@ -3041,7 +3041,25 @@ namespace BLToolkit.Data.Linq
 
 				default:
 					var predicate = ParsePredicate(lambda, expression, queries);
+
+					if (predicate is SqlQuery.Predicate.Expr)
+					{
+						var expr = ((SqlQuery.Predicate.Expr)predicate).Expr1;
+
+						if (expr.ElementType == QueryElementType.SearchCondition)
+						{
+							var sc = (SqlQuery.SearchCondition)expr;
+
+							if (sc.Conditions.Count == 1)
+							{
+								conditions.Add(sc.Conditions[0]);
+								break;
+							}
+						}
+					}
+
 					conditions.Add(new SqlQuery.Condition(false, predicate));
+
 					break;
 			}
 
