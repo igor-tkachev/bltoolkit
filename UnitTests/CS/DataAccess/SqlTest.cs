@@ -6,6 +6,7 @@ using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+using System.Linq;
 
 namespace DataAccess
 {
@@ -33,9 +34,8 @@ namespace DataAccess
 		[Test]
 		public void Test()
 		{
-			SqlQuery da = new SqlQuery();
-
-			Person p = (Person)da.SelectByKey(typeof(Person), 1);
+			var da = new SqlQuery();
+			var p  = (Person)da.SelectByKey(typeof(Person), 1);
 
 			Assert.AreEqual("Pupkin", p.Name.LastName);
 		}
@@ -46,7 +46,7 @@ namespace DataAccess
 			SqlQuery     da = new SqlQuery();
 			SqlQueryInfo info;
 
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
 				info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
 
@@ -67,8 +67,8 @@ namespace DataAccess
 		[Test]
 		public void RecursiveTest()
 		{
-			SqlQuery<TestObject> query = new SqlQuery<TestObject>();
-			SqlQueryInfo         info  = query.GetSqlQueryInfo(new DbManager(), "SelectAll");
+			var query = new SqlQuery<TestObject>();
+			var info  = query.GetSqlQueryInfo(new DbManager(), "SelectAll");
 
 			Console.WriteLine(info.QueryText);
 			Assert.That(info.QueryText.Contains("InnerId"));
@@ -78,9 +78,8 @@ namespace DataAccess
 		[Test]
 		public void SqlIgnoreAttributeTest()
 		{
-			SqlQuery da = new SqlQuery();
-
-			Person p = (Person)da.SelectByKey(typeof(Person), 1);
+			var da = new SqlQuery();
+			var p  = (Person)da.SelectByKey(typeof(Person), 1);
 
 			Assert.IsNull(p.Gender);
 		}
@@ -103,12 +102,12 @@ namespace DataAccess
 		[Test]
 		public void NonUpdatableTest()
 		{
-			SqlQuery da = new SqlQuery();
+			var da = new SqlQuery();
 
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				SqlQueryInfo update = da.GetSqlQueryInfo<TestCategory>(db, "Update");
-				SqlQueryInfo insert = da.GetSqlQueryInfo<TestCategory>(db, "Insert");
+				var update = da.GetSqlQueryInfo<TestCategory>(db, "Update");
+				var insert = da.GetSqlQueryInfo<TestCategory>(db, "Insert");
 
 				Assert.That(update.QueryText, Is.Not.Contains(
 					"\t" + db.DataProvider.Convert("Id", ConvertType.NameToQueryField) + " = " + db.DataProvider.Convert("Id", db.GetConvertTypeToParameter()) + "\n"),
@@ -120,12 +119,12 @@ namespace DataAccess
 		[Test]
 		public void ComplexMapperNonUpdatableTest()
 		{
-			SqlQuery da = new SqlQuery();
+			var da = new SqlQuery();
 
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				SqlQueryInfo update = da.GetSqlQueryInfo<TestObject2>(db, "Update");
-				SqlQueryInfo insert = da.GetSqlQueryInfo<TestObject2>(db, "Insert");
+				var update = da.GetSqlQueryInfo<TestObject2>(db, "Update");
+				var insert = da.GetSqlQueryInfo<TestObject2>(db, "Insert");
 
 				Assert.That(update.QueryText.Contains("CategoryId"), "Update");
 				Assert.That(insert.QueryText.Contains("CategoryId"), "Insert");
@@ -138,16 +137,49 @@ namespace DataAccess
 		{
 			[PrimaryKey] public Guid Guid_;
 
-		    public UpdateTest(Guid guid)
-		    {
-		        Guid_ = guid;
-		    }
+			public UpdateTest(Guid guid)
+			{
+				Guid_ = guid;
+			}
 		}
 
 		[Test, ExpectedException(typeof(DataAccessException))]
 		public void UpdateGuid()
 		{
-			new SqlQuery<UpdateTest>().Update(new UpdateTest (Guid.NewGuid()));
+			new SqlQuery<UpdateTest>().Update(new UpdateTest(Guid.NewGuid()));
+		}
+
+		[TableName("Person")]
+		public class Person1
+		{
+			[Identity]                     public int    PersonID;
+			                               public string FirstName;
+			                               public string LastName;
+			[NonUpdatable(OnInsert=false)] public string MiddleName;
+			                               public char   Gender;
+		}
+
+		[Test]
+		public void NonUpdatableOnInsert()
+		{
+			using (var db = new DbManager())
+			{
+				db.BeginTransaction();
+
+				new SqlQuery<Person1>().Insert(db, new Person1
+				{
+					FirstName  = "TestOnInsert",
+					LastName   = "",
+					MiddleName = "1",
+					Gender     = 'M'
+				});
+
+				var p = db.GetTable<Person1>().Single(_ => _.FirstName == "TestOnInsert");
+
+				Assert.AreNotEqual("1", p.MiddleName);
+
+				db.RollbackTransaction();
+			}
 		}
 	}
 }

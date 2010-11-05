@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
-	public class SqlFunction : ISqlTableSource
+	public class SqlFunction : ISqlExpression//ISqlTableSource
 	{
 		[Obsolete]
 		public SqlFunction(string name, params ISqlExpression[] parameters)
@@ -27,7 +27,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlFunction(Type systemType, string name, int precedence, params ISqlExpression[] parameters)
 		{
-			_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
+			//_sourceID = Interlocked.Increment(ref SqlQuery.SourceIDCounter);
 
 			if (parameters == null) throw new ArgumentNullException("parameters");
 
@@ -101,6 +101,7 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlTableSource Members
 
+		/*
 		readonly int _sourceID;
 		public   int  SourceID { get { return _sourceID; } }
 
@@ -123,6 +124,7 @@ namespace BLToolkit.Data.Sql
 		{
 			return null;
 		}
+		*/
 
 		#endregion
 

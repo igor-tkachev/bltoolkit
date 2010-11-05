@@ -44,7 +44,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual object SelectByKey(DbManager db, Type type, params object[] keys)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectByKey");
+			var query = GetSqlQueryInfo(db, type, "SelectByKey");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, keys))
@@ -53,7 +53,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual object SelectByKey(Type type, params object[] keys)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -68,7 +68,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual T SelectByKey<T>(DbManager db, params object[] keys)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
+			var query = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, keys))
@@ -77,7 +77,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual T SelectByKey<T>(params object[] keys)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -96,7 +96,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual ArrayList SelectAll(DbManager db, Type type)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
+			var query = GetSqlQueryInfo(db, type, "SelectAll");
 
 			return db
 				.SetCommand(query.QueryText)
@@ -105,7 +105,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual IList SelectAll(DbManager db, IList list, Type type)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "SelectAll");
+			var query = GetSqlQueryInfo(db, type, "SelectAll");
 
 			return db
 				.SetCommand(query.QueryText)
@@ -114,7 +114,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual ArrayList SelectAll(Type type)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -128,7 +128,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual IList SelectAll(IList list, Type type)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -142,32 +142,32 @@ namespace BLToolkit.DataAccess
 
 		public virtual System.Collections.Generic.List<T> SelectAll<T>(DbManager db)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
+			var query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
 
 			return db
 				.SetCommand(query.QueryText)
 				.ExecuteList<T>();
 		}
 
-		public virtual L SelectAll<L,T>(DbManager db, L list)
-			where L : System.Collections.Generic.IList<T>
+		public virtual TL SelectAll<TL,T>(DbManager db, TL list)
+			where TL : System.Collections.Generic.IList<T>
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
+			var query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
 
 			return db
 				.SetCommand(query.QueryText)
-				.ExecuteList<L,T>(list);
+				.ExecuteList<TL,T>(list);
 		}
 
-		public virtual L SelectAll<L,T>(DbManager db)
-			where L : System.Collections.Generic.IList<T>, new()
+		public virtual TL SelectAll<TL,T>(DbManager db)
+			where TL : System.Collections.Generic.IList<T>, new()
 		{
-			return SelectAll<L,T>(db, new L());
+			return SelectAll<TL,T>(db, new TL());
 		}
 
 		public virtual System.Collections.Generic.List<T> SelectAll<T>()
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -179,14 +179,14 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		public virtual L SelectAll<L,T>(L list)
-			where L : System.Collections.Generic.IList<T>
+		public virtual TL SelectAll<TL,T>(TL list)
+			where TL : System.Collections.Generic.IList<T>
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
-				return SelectAll<L,T>(db, list);
+				return SelectAll<TL,T>(db, list);
 			}
 			finally
 			{
@@ -194,10 +194,10 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		public virtual L SelectAll<L,T>()
-			where L : System.Collections.Generic.IList<T>, new()
+		public virtual TL SelectAll<TL,T>()
+			where TL : System.Collections.Generic.IList<T>, new()
 		{
-			return SelectAll<L,T>(new L());
+			return SelectAll<TL,T>(new TL());
 		}
 
 		#endregion
@@ -206,7 +206,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Insert(DbManager db, object obj)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
+			var query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
@@ -215,7 +215,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Insert(object obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -233,7 +233,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Update(DbManager db, object obj)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Update");
+			var query = GetSqlQueryInfo(db, obj.GetType(), "Update");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
@@ -242,7 +242,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Update(object obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -260,7 +260,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int DeleteByKey(DbManager db, Type type, params object[] key)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, type, "Delete");
+			var query = GetSqlQueryInfo(db, type, "Delete");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, key))
@@ -269,7 +269,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int DeleteByKey(Type type, params object[] key)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -283,7 +283,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int DeleteByKey<T>(DbManager db, params object[] key)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "Delete");
+			var query = GetSqlQueryInfo(db, typeof(T), "Delete");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, key))
@@ -292,7 +292,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int DeleteByKey<T>(params object[] key)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -310,7 +310,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Delete(DbManager db, object obj)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
+			var query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
@@ -319,7 +319,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Delete(object obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{

@@ -43,9 +43,8 @@ namespace DataAccess
 		[Test]
 		public void Test1()
 		{
-			PersonAccessor da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
-
-			ArrayList list = da.SelectByLastName("Pupkin");
+			var da   = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
+			var list = da.SelectByLastName("Pupkin");
 
 			Assert.AreNotEqual(0, list.Count);
 		}
@@ -53,9 +52,8 @@ namespace DataAccess
 		[Test]
 		public void Test2()
 		{
-			PersonAccessor da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
-
-			ArrayList list = da.SelectBy("FirstName", "John");
+			var da   = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
+			var list = da.SelectBy("FirstName", "John");
 
 			Assert.AreNotEqual(0, list.Count);
 		}
@@ -63,9 +61,8 @@ namespace DataAccess
 		[Test]
 		public void Test3()
 		{
-			PersonAccessor da = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
-
-			ArrayList list = da.SelectByLastName("Pupkin", 1);
+			var da   = (PersonAccessor)DataAccessor.CreateInstance(typeof(PersonAccessor));
+			var list = da.SelectByLastName("Pupkin", 1);
 
 			Assert.AreNotEqual(0, list.Count);
 		}

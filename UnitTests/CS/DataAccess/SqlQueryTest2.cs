@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
+
 using NUnit.Framework;
 
 using BLToolkit.DataAccess;
@@ -48,9 +48,8 @@ namespace DataAccess
 		[Test]
 		public void Test1()
 		{
-			PersonAccessor da = DataAccessor.CreateInstance<PersonAccessor>();
-
-			List<Person> list = da.SelectByLastName("Pupkin");
+			var da   = DataAccessor.CreateInstance<PersonAccessor>();
+			var list = da.SelectByLastName("Pupkin");
 
 			Assert.AreNotEqual(0, list.Count);
 		}
@@ -58,9 +57,8 @@ namespace DataAccess
 		[Test]
 		public void Test2()
 		{
-			PersonAccessor da = DataAccessor.CreateInstance<PersonAccessor>();
-
-			List<Person> list = da.SelectBy("FirstName", "John");
+			var da   = DataAccessor.CreateInstance<PersonAccessor>();
+			var list = da.SelectBy("FirstName", "John");
 
 			Assert.AreNotEqual(0, list.Count);
 		}
@@ -68,9 +66,8 @@ namespace DataAccess
 		[Test]
 		public void Test3()
 		{
-			PersonAccessor da = DataAccessor.CreateInstance<PersonAccessor>();
-
-			List<Person> list = da.SelectByLastName("Pupkin", 1);
+			var da   = DataAccessor.CreateInstance<PersonAccessor>();
+			var list = da.SelectByLastName("Pupkin", 1);
 
 			Assert.AreNotEqual(0, list.Count);
 		}
@@ -80,9 +77,8 @@ namespace DataAccess
 #endif
 		public void Test4()
 		{
-			PersonAccessor da = DataAccessor.CreateInstance<PersonAccessor>();
-
-			List<Person> list = da.SelectID(42);
+			var da   = DataAccessor.CreateInstance<PersonAccessor>();
+			var list = da.SelectID(42);
 
 			Assert.AreEqual(42, list[0].ID);
 		}

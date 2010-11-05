@@ -892,7 +892,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							var keys  = table.GetKeys(true);
 
 							if (keys == null || keys.Count == 0)
-								throw new SqlException("Cant create IN expression.");
+								throw new SqlException("Cannot create IN expression.");
 
 							if (keys.Count == 1)
 							{

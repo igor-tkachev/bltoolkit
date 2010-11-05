@@ -45,7 +45,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual T SelectByKey(DbManager db, params object[] keys)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
+			var query = GetSqlQueryInfo(db, typeof(T), "SelectByKey");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, keys))
@@ -54,7 +54,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual T SelectByKey(params object[] keys)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -83,25 +83,25 @@ namespace BLToolkit.DataAccess
 				.ExecuteList<T>();
 		}
 
-		public virtual L SelectAll<L>(DbManager db, L list)
-			where L : IList<T>
+		public virtual TL SelectAll<TL>(DbManager db, TL list)
+			where TL : IList<T>
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
+			var query = GetSqlQueryInfo(db, typeof(T), "SelectAll");
 
 			return db
 				.SetCommand(query.QueryText)
-				.ExecuteList<L,T>(list);
+				.ExecuteList<TL,T>(list);
 		}
 
-		public virtual L SelectAll<L>(DbManager db)
-			where L : IList<T>, new()
+		public virtual TL SelectAll<TL>(DbManager db)
+			where TL : IList<T>, new()
 		{
-			return SelectAll<L>(db, new L());
+			return SelectAll(db, new TL());
 		}
 
 		public virtual List<T> SelectAll()
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -114,10 +114,10 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		public virtual L SelectAll<L>(L list)
-			where L : IList<T>
+		public virtual TL SelectAll<TL>(TL list)
+			where TL : IList<T>
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -130,10 +130,10 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
-		public virtual L SelectAll<L>()
-			where L : IList<T>, new()
+		public virtual TL SelectAll<TL>()
+			where TL : IList<T>, new()
 		{
-			return SelectAll<L>(new L());
+			return SelectAll(new TL());
 		}
 
 		#endregion
@@ -142,7 +142,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Insert(DbManager db, T obj)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
+			var query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
@@ -151,7 +151,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Insert(T obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -166,7 +166,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Insert(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
+			var query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
 
 			db.SetCommand(query.QueryText);
 
@@ -175,12 +175,12 @@ namespace BLToolkit.DataAccess
 				list,
 				query.GetMemberMappers(),
 				maxBatchSize,
-				delegate(T obj) { return query.GetParameters(db, obj); });
+				obj => query.GetParameters(db, obj));
 		}
 
 		public virtual int Insert(int maxBatchSize, IEnumerable<T> list)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -209,7 +209,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Update(DbManager db, T obj)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Update");
+			var query = GetSqlQueryInfo(db, obj.GetType(), "Update");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
@@ -218,7 +218,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Update(T obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -233,7 +233,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Update(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "UpdateBatch");
+			var query = GetSqlQueryInfo(db, typeof(T), "UpdateBatch");
 
 			db.SetCommand(query.QueryText);
 
@@ -242,12 +242,12 @@ namespace BLToolkit.DataAccess
 				list,
 				query.GetMemberMappers(),
 				maxBatchSize,
-				delegate(T obj) { return query.GetParameters(db, obj); });
+				obj => query.GetParameters(db, obj));
 		}
 
 		public virtual int Update(int maxBatchSize, IEnumerable<T> list)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -276,7 +276,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int DeleteByKey(DbManager db, params object[] key)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "Delete");
+			var query = GetSqlQueryInfo(db, typeof(T), "Delete");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, key))
@@ -285,7 +285,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int DeleteByKey(params object[] key)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -304,7 +304,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Delete(DbManager db, T obj)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
+			var query = GetSqlQueryInfo(db, obj.GetType(), "Delete");
 
 			return db
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
@@ -313,7 +313,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Delete(T obj)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
@@ -328,7 +328,7 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Delete(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			SqlQueryInfo query = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
+			var query = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
 
 			db.SetCommand(query.QueryText);
 
@@ -337,12 +337,12 @@ namespace BLToolkit.DataAccess
 				list,
 				query.GetMemberMappers(),
 				maxBatchSize,
-				delegate(T obj) { return query.GetParameters(db, obj); });
+				obj => query.GetParameters(db, obj));
 		}
 
 		public virtual int Delete(int maxBatchSize, IEnumerable<T> list)
 		{
-			DbManager db = GetDbManager();
+			var db = GetDbManager();
 
 			try
 			{
