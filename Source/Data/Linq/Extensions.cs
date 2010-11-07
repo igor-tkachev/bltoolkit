@@ -107,6 +107,22 @@ namespace BLToolkit.Data.Linq
 
 		#region Update
 
+		public static int Update<TSource,TTarget>(
+			[NotNull] this IQueryable<TSource>          source,
+			[NotNull] Table<TTarget>                    target,
+			[NotNull] Expression<Func<TSource,TTarget>> setter)
+		{
+			if (source == null) throw new ArgumentNullException("source");
+			if (target == null) throw new ArgumentNullException("target");
+			if (setter == null) throw new ArgumentNullException("setter");
+
+			return source.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),
+					new[] { source.Expression, ((IQueryable<TTarget>)target).Expression, Expression.Quote(setter) }));
+		}
+
 		public static int Update<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,T>> setter)
 		{
 			if (source == null) throw new ArgumentNullException("source");

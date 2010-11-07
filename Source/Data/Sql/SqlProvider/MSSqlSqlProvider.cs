@@ -109,7 +109,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
+			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
+				BuildPhysicalTable(sb, SqlQuery.Set.Into);
+			else
+				sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
 		}
 
 		protected override void BuildUnicodeString(StringBuilder sb, string value)

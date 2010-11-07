@@ -3987,6 +3987,9 @@ namespace BLToolkit.Data.Sql
 		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
+			if (_set != null)
+				((ISqlExpressionWalkable)_set).Walk(skipColumns, func);
+
 			((ISqlExpressionWalkable)Select) .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)From)   .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)Where)  .Walk(skipColumns, func);

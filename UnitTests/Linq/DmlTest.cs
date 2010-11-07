@@ -324,6 +324,64 @@ namespace Update
 		}
 
 		[Test]
+		public void Update9()
+		{
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+					db.Child.Insert(() => new Child { ParentID = 1, ChildID = id});
+
+					var q =
+						from c in db.Child
+						join p in db.Parent on c.ParentID equals p.ParentID
+						where c.ChildID == id && c.Parent.Value1 == 1
+						select new { c, p };
+
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+					Assert.AreEqual(1, q.Update(db.Child, _ => new Child { ChildID = _.c.ChildID + 1, ParentID = _.p.ParentID }));
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void Update10()
+		{
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			{
+				try
+				{
+					var id = 1001;
+
+					db.Child.Delete(c => c.ChildID > 1000);
+					db.Child.Insert(() => new Child { ParentID = 1, ChildID = id});
+
+					var q =
+						from p in db.Parent
+						join c in db.Child on p.ParentID equals c.ParentID
+						where c.ChildID == id && c.Parent.Value1 == 1
+						select new { c, p };
+
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id));
+					Assert.AreEqual(1, q.Update(db.Child, _ => new Child { ChildID = _.c.ChildID + 1, ParentID = _.p.ParentID }));
+					Assert.AreEqual(1, db.Child.Count(c => c.ChildID == id + 1));
+				}
+				finally
+				{
+					db.Child.Delete(c => c.ChildID > 1000);
+				}
+			});
+		}
+
+		[Test]
 		public void DistinctInsert()
 		{
 			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>

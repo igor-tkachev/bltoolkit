@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -264,7 +265,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildUpdateTableName(StringBuilder sb)
 		{
-			BuildTableName(sb, SqlQuery.From.Tables[0], true, true);
+			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
+				BuildPhysicalTable(sb, SqlQuery.Set.Into);
+			else
+				BuildTableName(sb, SqlQuery.From.Tables[0], true, true);
 		}
 
 		protected virtual void BuildUpdateSet(StringBuilder sb)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using BLToolkit.DataAccess;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -135,6 +137,18 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				   ParentInheritance.OfType<ParentInheritance1>().Cast<ParentInheritanceBase>(),
 				db.ParentInheritance.OfType<ParentInheritance1>().Cast<ParentInheritanceBase>()));
+		}
+
+		[TableName("Person")]
+		class PersonEx : Person
+		{
+		}
+
+		[Test]
+		public void SimplTest()
+		{
+			using (var db = new TestDbManager())
+				Assert.AreEqual(1, db.GetTable<PersonEx>().Where(_ => _.FirstName == "John").Select(_ => _.ID).Single());
 		}
 	}
 }

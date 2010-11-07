@@ -398,7 +398,7 @@ namespace BLToolkit.Data.Linq
 						case "Cast"               :
 						case "AsQueryable"        : sequence = ParseSequence(seq);                                        break;
 						case "Delete"             : sequence = ParseSequence(seq); ParseDelete(       null,       sequence[0]); break;
-						case "Update"             : sequence = ParseSequence(seq); ParseUpdate(       null, null, sequence[0]); break;
+						case "Update"             : sequence = ParseSequence(seq); ParseUpdate(null,  null, null, sequence[0]); break;
 						case "Insert"             : sequence = ParseSequence(seq); ParseInsert(false, null, null, sequence[0]); break;
 						case "InsertWithIdentity" : sequence = ParseSequence(seq); ParseInsert(true,  null, null, sequence[0]); break;
 						default                   :
@@ -432,11 +432,11 @@ namespace BLToolkit.Data.Linq
 						case "Min"               :
 						case "Max"               :
 						case "Sum"               :
-						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi, l, sequence[0]); break;
+						case "Average"           : sequence = ParseSequence(seq); ParseAggregate(pi,      l, sequence[0]); break;
 						case "Any"               : sequence = ParseAny(SetType.Any, seq, l, pi);                      break;
 						case "All"               : sequence = ParseAny(SetType.All, seq, l, pi);                      break;
-						case "Delete"            : sequence = ParseSequence(seq); ParseDelete(      l, sequence[0]);  break;
-						case "Update"            : sequence = ParseSequence(seq); ParseUpdate(null, l, sequence[0]);  break;
+						case "Delete"            : sequence = ParseSequence(seq); ParseDelete(            l, sequence[0]);  break;
+						case "Update"            : sequence = ParseSequence(seq); ParseUpdate(null, null, l, sequence[0]);  break;
 						default                  : return false;
 					}
 					return true;
@@ -451,13 +451,13 @@ namespace BLToolkit.Data.Linq
 				pi => pi.IsQueryableMethod("GroupBy",         1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, l2,   null, sequence[0], pi.Type.GetGenericArguments()[0])),
 				pi => pi.IsQueryableMethod("GroupBy",         1, 2, seq => sequence = ParseSequence(seq), (l1, l2)        => select   = ParseGroupBy   (l1, null, l2,   sequence[0], null)),
 				pi => pi.IsQueryableMethod("GroupBy",      1, 1, 2, seq => sequence = ParseSequence(seq), (l1, l2, l3)    => select   = ParseGroupBy   (l1, l2,   l3,   sequence[0], null)),
-				pi => pi.IsQueryableMethod("Update",          1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate   (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Set",             1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet      (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Set",             1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet      (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Set",                   seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet      (l,  ex, sequence[0])),
-				pi => pi.IsQueryableMethod("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue    (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue    (l1, l2, sequence[0])),
-				pi => pi.IsQueryableMethod("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseValue    (l,  ex, sequence[0])),
+				pi => pi.IsQueryableMethod("Update",          1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseUpdate   (l1, null, l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Set",             1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet      (l1,       l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Set",             1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseSet      (l1,       l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Set",                   seq => sequence = ParseSequence(seq), (l,  ex)        => ParseSet      (l,        ex, sequence[0])),
+				pi => pi.IsQueryableMethod("Value",           1, 1, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue    (l1,       l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Value",           1, 0, seq => sequence = ParseSequence(seq), (l1, l2)        => ParseValue    (l1,       l2, sequence[0])),
+				pi => pi.IsQueryableMethod("Value",                 seq => sequence = ParseSequence(seq), (l,  ex)        => ParseValue    (l,        ex, sequence[0])),
 				pi => pi.IsQueryableMethod("Take",               0, seq => sequence = ParseSequence(seq), l               => ParseTake     (sequence[0], l)),
 				pi => pi.IsQueryableMethod("Take",                  seq => sequence = ParseSequence(seq), ex              => ParseTake     (sequence[0], ex)),
 				pi => pi.IsQueryableMethod("Skip",               0, seq => sequence = ParseSequence(seq), l               => ParseSkip     (sequence[0], l)),
@@ -481,6 +481,13 @@ namespace BLToolkit.Data.Linq
 					Expression into = null;
 
 					return
+						pi.IsMethod(null, "Update", new Func<Expression,bool>[]
+						{
+							p => { sequence = ParseSequence(p); return true; },
+							p => { into = p; return true; },
+							p => { p.IsLambda(1, l => ParseUpdate(null, into, l, sequence[0]) ); return true; }
+						}, _ => true)
+						||
 						pi.IsMethod(null, "Insert", new Func<Expression,bool>[]
 						{
 							p => { sequence = ParseSequence(p); return true; },
@@ -1962,12 +1969,28 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Update
 
-		void ParseUpdate(LambdaInfo predicate, LambdaInfo setter, QuerySource select)
+		void ParseUpdate(LambdaInfo predicate, Expression into, LambdaInfo setter, QuerySource select)
 		{
 			if (predicate != null)
 				select = ParseWhere(predicate, select);
 
-			if (setter != null)
+			if (into != null)
+			{
+				var sql = CurrentSql;
+				CurrentSql = new SqlQuery();
+				var source = ParseTable(into);
+				CurrentSql = sql;
+
+				ParseSetter(setter, source, select);
+
+				CurrentSql.Select.Columns.Clear();
+
+				foreach (var item in CurrentSql.Set.Items)
+					CurrentSql.Select.Columns.Add(new SqlQuery.Column(CurrentSql, item.Expression));
+
+				CurrentSql.Set.Into = ((QuerySource.Table)source).SqlTable;
+			}
+			else if (setter != null)
 				ParseSetter(setter, select, select);
 
 			CurrentSql.QueryType = QueryType.Update;
