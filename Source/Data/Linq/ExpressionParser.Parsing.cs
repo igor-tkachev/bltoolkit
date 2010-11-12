@@ -2034,7 +2034,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var pi = extract.Body;
 
-			while (pi.NodeType == ExpressionType.Convert)
+			while (pi.NodeType == ExpressionType.Convert || pi.NodeType == ExpressionType.ConvertChecked)
 				pi = ((UnaryExpression)pi).Operand;
 
 			if (pi.NodeType != ExpressionType.MemberAccess)
@@ -2062,7 +2062,7 @@ namespace BLToolkit.Data.Linq
 			if (!ExpressionHelper.IsConstant(update.Type) && !_asParameters.Contains(update))
 				_asParameters.Add(update);
 
-			while (pi.NodeType == ExpressionType.Convert)
+			while (pi.NodeType == ExpressionType.Convert || pi.NodeType == ExpressionType.ConvertChecked)
 				pi = ((UnaryExpression)pi).Operand;
 
 			if (pi.NodeType != ExpressionType.MemberAccess)

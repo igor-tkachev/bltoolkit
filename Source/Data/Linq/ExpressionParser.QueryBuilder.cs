@@ -1377,6 +1377,7 @@ namespace BLToolkit.Data.Linq
 						}
 
 					case ExpressionType.Convert:
+					case ExpressionType.ConvertChecked:
 						{
 							var e = expression as UnaryExpression;
 							var o = ParseExpression(lambda, e.Operand, queries);
