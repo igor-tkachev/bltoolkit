@@ -141,6 +141,7 @@
     </Compile>
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
+    <Compile Include="Data\Linq\LinqExtensions.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\MemberMapper.generated.cs">
       <AutoGen>True</AutoGen>
@@ -179,7 +180,6 @@
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
-    <Compile Include="Data\Linq\Extensions.cs" />
     <Compile Include="Data\Linq\IUpdateable.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />

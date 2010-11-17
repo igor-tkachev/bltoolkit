@@ -10,7 +10,7 @@ namespace BLToolkit.Data.Linq
 {
 	using DataAccess;
 
-	public static class Extensions
+	public static class LinqExtensions
 	{
 		#region Table Helpers
 

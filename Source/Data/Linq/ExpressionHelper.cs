@@ -83,7 +83,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var dtype  = expr.Method.DeclaringType;
 
-			if ((declaringType == null && (dtype == typeof(Queryable) || dtype == typeof(Enumerable) || dtype == typeof(Extensions)) || declaringType == dtype) &&
+			if ((declaringType == null && (dtype == typeof(Queryable) || dtype == typeof(Enumerable) || dtype == typeof(LinqExtensions)) || declaringType == dtype) &&
 				(methodName == null || expr.Method.Name == methodName) &&
 				expr.Arguments.Count == args.Length)
 			{

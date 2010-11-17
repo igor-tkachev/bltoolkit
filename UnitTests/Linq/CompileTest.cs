@@ -96,7 +96,7 @@ namespace Data.Linq
 
 				threads[i] = new Thread(() =>
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						var id = (n % 6) + 1;
 						results[n,0] = id;
@@ -128,6 +128,22 @@ namespace Data.Linq
 				});
 
 			ForEachProvider(db => Assert.AreEqual(2, query(db, 2).ToList().Count()));
+		}
+
+		private static readonly Func<TestDbManager,int,string,int> _updateQuery =
+			CompiledQuery.Compile   <TestDbManager,int,string,int>((ctx,key,value) =>
+				ctx.Person
+					.Where(_ => _.ID == key)
+					.Set(_ => _.FirstName, value)
+					.Update());
+
+		[Test]
+		public void UpdateTest()
+		{
+			using (var ctx = new TestDbManager())
+			{
+				_updateQuery(ctx, 12345, "54321");
+			}
 		}
 	}
 }

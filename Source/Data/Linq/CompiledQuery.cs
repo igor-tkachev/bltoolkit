@@ -59,18 +59,20 @@ namespace BLToolkit.Data.Linq
 				switch (pi.NodeType)
 				{
 					case ExpressionType.Parameter:
-						return 
-							Expression.Convert(
-								Expression.ArrayIndex(
-									ps,
-									Expression.Constant(query.Parameters.IndexOf((ParameterExpression)pi))),
-								pi.Type);
+						{
+							var idx = query.Parameters.IndexOf((ParameterExpression)pi);
+
+							if (idx >= 0)
+								return Expression.Convert(Expression.ArrayIndex(ps, Expression.Constant(idx)), pi.Type);
+
+							break;
+						}
 
 					case ExpressionType.Call:
 						{
 							var expr = (MethodCallExpression)pi;
 
-							if (expr.Method.DeclaringType == typeof(Queryable))
+							if (expr.Method.DeclaringType == typeof(Queryable) || expr.Method.DeclaringType == typeof(LinqExtensions))
 							{
 								var qtype  = TypeHelper.GetGenericType(typeof (IQueryable<>), expr.Type);
 								var helper = (ITableHelper)Activator.CreateInstance(
