@@ -187,6 +187,7 @@
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\Expressions.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
+    <Compile Include="Data\Linq\LinqExtensions.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\Extensions.cs" />

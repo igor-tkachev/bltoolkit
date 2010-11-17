@@ -140,6 +140,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
+    <Compile Include="Data\Linq\Extensions.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
