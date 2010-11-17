@@ -102,9 +102,31 @@ static Action<GeneratedTextTransformation,Column,int[],string[]> RenderColumn = 
 	tt.Write("public {0}{1} {2}", c.Type, tt.LenDiff(tt.MaxColumnTypeLen, c.Type), c.MemberName);
 
 	if (tt.RenderField)
-		tt.WriteLine(";");
+	{
+		tt.Write(";");
+		if (c.ColumnType != null)
+			tt.Write(tt.LenDiff(tt.MaxColumnMemberLen, c.MemberName));
+	}
 	else
-		tt.WriteLine("{0} {{ get; set; }}", tt.LenDiff(tt.MaxColumnMemberLen, c.MemberName));
+		tt.Write("{0} {{ get; set; }}", tt.LenDiff(tt.MaxColumnMemberLen, c.MemberName));
+
+	if (c.ColumnType != null)
+	{
+		tt.Write(" // {0}", c.ColumnType);
+		
+		if (c.Length != 0)
+			tt.Write("({0})", c.Length);
+
+		if (c.Precision != 0)
+		{
+			if (c.Scale == 0)
+				tt.Write("({0})", c.Precision);
+			else
+				tt.Write("({0},{1})", c.Precision, c.Scale);
+		}
+	}
+
+	tt.WriteLine("");
 };
 
 static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key) =>
@@ -462,11 +484,12 @@ partial class Table
 partial class Column
 {
 	public int          ID;
-	public string       ColumnName;
-	public string       MemberName;
+	public string       ColumnName; // Column name in database
+	public string       MemberName; // Member name of the generated class
 	public bool         IsNullable;
 	public bool         IsIdentity;
-	public string       Type;
+	public string       Type;       // Type of the generated member
+	public string       ColumnType; // Type of the column in database
 	public bool         IsClass;
 	public DbType       DbType;
 	public SqlDbType    SqlDbType;

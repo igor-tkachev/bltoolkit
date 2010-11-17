@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-#if !SILVERLIGHT
-using Microsoft.VisualBasic.CompilerServices;
-#endif
+//#if !SILVERLIGHT
+//using Microsoft.VisualBasic.CompilerServices;
+//#endif
 
 #region ReSharper C# 2.0 disable
 // ReSharper disable RedundantTypeArgumentsOfMethod
@@ -76,6 +76,38 @@ namespace BLToolkit.Data.Linq
 		public static void MapMember<T1,T2,T3,T4,TR>   (                     Expression<Func<T1,T2,T3,T4,TR>>    memberInfo, Expression<Func<T1,T2,T3,T4,TR>>   expression) { MapMember("",           ReflectionHelper.MemeberInfo(memberInfo), expression); }
 		public static void MapMember<T1,T2,T3,T4,T5,TR>(string providerName, Expression<Func<T1,T2,T3,T4,T5,TR>> memberInfo, Expression<Func<T1,T2,T3,T4,T5,TR>> expression) { MapMember(providerName, ReflectionHelper.MemeberInfo(memberInfo), expression); }
 		public static void MapMember<T1,T2,T3,T4,T5,TR>(                     Expression<Func<T1,T2,T3,T4,T5,TR>> memberInfo, Expression<Func<T1,T2,T3,T4,T5,TR>> expression) { MapMember("",           ReflectionHelper.MemeberInfo(memberInfo), expression); }
+
+		#endregion
+
+		#region Public Members
+
+		public static LambdaExpression ConvertMember(string providerName, MemberInfo mi)
+		{
+			Dictionary<MemberInfo,LambdaExpression> dic;
+			LambdaExpression                        expr;
+
+			if (Members.TryGetValue(providerName, out dic))
+				if (dic.TryGetValue(mi, out expr))
+					return expr;
+
+			if (!Members[""].TryGetValue(mi, out expr))
+			{
+				if (mi is MethodInfo && mi.Name == "CompareString" && mi.DeclaringType.FullName == "Microsoft.VisualBasic.CompilerServices.Operators")
+				{
+					lock (_members)
+					{
+						if (!Members[""].TryGetValue(mi, out expr))
+						{
+							expr = L<S,S,B,I>((s1,s2,b) => b ? string.CompareOrdinal(s1.ToUpper(), s2.ToUpper()) : string.CompareOrdinal(s1, s2));
+
+							_members[""].Add(mi, expr);
+						}
+					}
+				}
+			}
+
+			return expr;
+		}
 
 		#endregion
 
@@ -672,9 +704,9 @@ namespace BLToolkit.Data.Linq
 
 				#region Visual Basic Compiler Services
 
-#if !SILVERLIGHT
-				{ M(() => Operators.CompareString("","",false)), L<S,S,B,I>((s1,s2,b) => b ? string.CompareOrdinal(s1.ToUpper(), s2.ToUpper()) : string.CompareOrdinal(s1, s2)) },
-#endif
+//#if !SILVERLIGHT
+//				{ M(() => Operators.CompareString("","",false)), L<S,S,B,I>((s1,s2,b) => b ? string.CompareOrdinal(s1.ToUpper(), s2.ToUpper()) : string.CompareOrdinal(s1, s2)) },
+//#endif
 
 				#endregion
 

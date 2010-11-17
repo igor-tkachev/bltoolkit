@@ -22,7 +22,14 @@
           <Item>volatile</Item>
         </MODIFIERS_ORDER>
       </FormatSettings>
-      <UsingsSettings />
+      <UsingsSettings>
+        <KeepImports IsNull="False">
+          <Item>System</Item>
+        </KeepImports>
+        <MandatoryImports IsNull="False">
+          <Item>System</Item>
+        </MandatoryImports>
+      </UsingsSettings>
       <Naming2>
         <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
         <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>

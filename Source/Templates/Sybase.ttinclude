@@ -78,6 +78,7 @@ private void LoadServerMetadata()
 						ID         = Convert.ToInt16(rd["colid"]),
 						ColumnName = Convert.ToString (rd["name"]),
 						MemberName = Convert.ToString (rd["name"]),
+						ColumnType = Convert.ToString(rd["typename"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
 						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt32(rd["length"]),
@@ -173,8 +174,7 @@ private void LoadServerMetadata()
 					case 123 /* daten         */ : 
 					case 147 /* timen         */ : 
 					case 187 /* bigdatetimen  */ : 
-					case 188 /* bigtimen      */ : 
-						break;
+					case 188 /* bigtimen      */ : c.Type = "byte[]";   c.DbType = DbType.Binary;    c.SqlDbType = SqlDbType.Binary;        break;
 				}
 
 				switch (c.Type)
@@ -314,9 +314,14 @@ private void LoadServerMetadata()
 			c.Table.Columns.Add(col.ColumnName, col);
 
 		if (c.Table.Owner == "dbo")
+		{
 			c.Table.Owner = null;
-
-		Tables.Add(c.Table.TableName, c.Table);
+			Tables.Add(c.Table.TableName, c.Table);
+		}
+		else
+		{
+			Tables.Add(c.Table.Owner + "." + c.Table.TableName, c.Table);
+		}
 	}
 }
 #>

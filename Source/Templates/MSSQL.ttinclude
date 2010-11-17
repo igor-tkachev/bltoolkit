@@ -84,17 +84,18 @@ private void LoadServerMetadata()
 						ID         = Convert.ToInt16  (rd["colid"]),
 						ColumnName = Convert.ToString (rd["name"]),
 						MemberName = Convert.ToString (rd["name"]),
+						ColumnType = Convert.ToString (rd["dataType"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
 						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt32(rd["length"]),
 						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
 						Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
-			}
+					}
 				};
 
 				var c = col.Column;
 
-				switch (Convert.ToString(rd["dataType"]))
+				switch (c.ColumnType)
 				{
 					case "image"            : c.Type = "byte[]";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Image;            break;
 					case "text"             : c.Type = "string";         c.DbType = DbType.String;         c.SqlDbType = SqlDbType.Text;             break;
@@ -126,21 +127,22 @@ private void LoadServerMetadata()
 					case "sql_variant"      : c.Type = "object";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Variant;          break;
 					case "xml"              : c.Type = "string";         c.DbType = DbType.Xml;            c.SqlDbType = SqlDbType.Xml;              break;
 
-//hierarchyid
-//geometry
-//geography
-
-					case "char"          :
+					case "char" :
 						c.Type      = Convert.ToInt32 (rd["length"]) == 1 ? "char" : "string";
 						c.DbType    = DbType.AnsiStringFixedLength;
 						c.SqlDbType = SqlDbType.Char;
 						break;
 
-					case "nchar"         :
+					case "nchar" :
 						c.Type      = Convert.ToInt32 (rd["length"]) == 1 ? "char" : "string";
 						c.DbType    = DbType.StringFixedLength;
 						c.SqlDbType = SqlDbType.NChar;
 						break;
+
+					//hierarchyid
+					//geometry
+					//geography
+					default                 : c.Type = "byte[]";         c.DbType = DbType.Binary;         c.SqlDbType = SqlDbType.Binary;           break;
 				}
 
 				switch (c.Type)
@@ -248,9 +250,14 @@ private void LoadServerMetadata()
 			c.Table.Columns.Add(col.ColumnName, col);
 
 		if (c.Table.Owner == "dbo")
+		{
 			c.Table.Owner = null;
-
-		Tables.Add(c.Table.TableName, c.Table);
+			Tables.Add(c.Table.TableName, c.Table);
+		}
+		else
+		{
+			Tables.Add(c.Table.Owner + "." + c.Table.TableName, c.Table);
+		}
 	}
 }
 #>

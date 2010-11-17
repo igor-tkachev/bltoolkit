@@ -32,50 +32,50 @@ namespace Templates.Sybase
 	[TableName(Name="BinaryData")]
 	public partial class BinaryData
 	{
-		[Identity, PrimaryKey(1), Required] public int    BinaryDataID { get; set; }
-		[                         Required] public byte[] Stamp        { get; set; }
-		[                         Required] public byte[] Data         { get; set; }
+		[Identity, PrimaryKey(1), Required] public int    BinaryDataID { get; set; } // int(4)
+		[                         Required] public byte[] Stamp        { get; set; } // timestamp(8)
+		[                         Required] public byte[] Data         { get; set; } // varbinary(1024)
 	}
 
 	[TableName(Name="Child")]
 	public partial class Child
 	{
-		[Required] public int ParentID { get; set; }
-		[Required] public int ChildID  { get; set; }
+		[Required] public int ParentID { get; set; } // int(4)
+		[Required] public int ChildID  { get; set; } // int(4)
 	}
 
 	[TableName(Name="DataTypeTest")]
 	public partial class DataTypeTest
 	{
-		[Identity, PrimaryKey(1), Required       ] public int       DataTypeID { get; set; }
-		[Nullable                                ] public byte[]    Binary_    { get; set; }
-		[                         Required       ] public bool      Boolean_   { get; set; }
-		[Nullable                                ] public byte?     Byte_      { get; set; }
-		[Nullable                                ] public byte[]    Bytes_     { get; set; }
-		[Nullable                                ] public char?     Char_      { get; set; }
-		[Nullable                                ] public DateTime? DateTime_  { get; set; }
-		[Nullable                                ] public decimal?  Decimal_   { get; set; }
-		[Nullable                                ] public double?   Double_    { get; set; }
-		[Nullable                                ] public byte[]    Guid_      { get; set; }
-		[Nullable                                ] public short?    Int16_     { get; set; }
-		[Nullable                                ] public int?      Int32_     { get; set; }
-		[Nullable                                ] public long?     Int64_     { get; set; }
-		[Nullable                                ] public decimal?  Money_     { get; set; }
-		[Nullable                                ] public byte?     SByte_     { get; set; }
-		[Nullable                                ] public float?    Single_    { get; set; }
-		[Nullable                                ] public byte[]    Stream_    { get; set; }
-		[Nullable,                MaxLength(50)  ] public string    String_    { get; set; }
-		[Nullable                                ] public short?    UInt16_    { get; set; }
-		[Nullable                                ] public int?      UInt32_    { get; set; }
-		[Nullable                                ] public long?     UInt64_    { get; set; }
-		[Nullable,                MaxLength(1000)] public string    Xml_       { get; set; }
+		[Identity, PrimaryKey(1), Required       ] public int       DataTypeID { get; set; } // int(4)
+		[Nullable                                ] public byte[]    Binary_    { get; set; } // binary(50)
+		[                         Required       ] public bool      Boolean_   { get; set; } // bit(1)
+		[Nullable                                ] public byte?     Byte_      { get; set; } // tinyint(1)
+		[Nullable                                ] public byte[]    Bytes_     { get; set; } // varbinary(50)
+		[Nullable                                ] public char?     Char_      { get; set; } // char(1)
+		[Nullable                                ] public DateTime? DateTime_  { get; set; } // datetime(8)
+		[Nullable                                ] public decimal?  Decimal_   { get; set; } // decimal(10)(20,2)
+		[Nullable                                ] public double?   Double_    { get; set; } // float(8)
+		[Nullable                                ] public byte[]    Guid_      { get; set; } // varbinary(16)
+		[Nullable                                ] public short?    Int16_     { get; set; } // smallint(2)
+		[Nullable                                ] public int?      Int32_     { get; set; } // int(4)
+		[Nullable                                ] public long?     Int64_     { get; set; } // bigint(8)
+		[Nullable                                ] public decimal?  Money_     { get; set; } // money(8)
+		[Nullable                                ] public byte?     SByte_     { get; set; } // tinyint(1)
+		[Nullable                                ] public float?    Single_    { get; set; } // real(4)
+		[Nullable                                ] public byte[]    Stream_    { get; set; } // varbinary(50)
+		[Nullable,                MaxLength(50)  ] public string    String_    { get; set; } // nvarchar(50)
+		[Nullable                                ] public short?    UInt16_    { get; set; } // smallint(2)
+		[Nullable                                ] public int?      UInt32_    { get; set; } // int(4)
+		[Nullable                                ] public long?     UInt64_    { get; set; } // bigint(8)
+		[Nullable,                MaxLength(1000)] public string    Xml_       { get; set; } // nvarchar(1000)
 	}
 
 	[TableName(Name="Doctor")]
 	public partial class Doctor
 	{
-		[PrimaryKey(1), Required               ] public int    PersonID { get; set; }
-		[               MaxLength(50), Required] public string Taxonomy { get; set; }
+		[PrimaryKey(1), Required               ] public int    PersonID { get; set; } // int(4)
+		[               MaxLength(50), Required] public string Taxonomy { get; set; } // nvarchar(50)
 
 		// FK_Doctor_Person
 		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=false)]
@@ -85,41 +85,41 @@ namespace Templates.Sybase
 	[TableName(Name="GrandChild")]
 	public partial class GrandChild
 	{
-		[Required] public int ParentID     { get; set; }
-		[Required] public int ChildID      { get; set; }
-		[Required] public int GrandChildID { get; set; }
+		[Required] public int ParentID     { get; set; } // int(4)
+		[Required] public int ChildID      { get; set; } // int(4)
+		[Required] public int GrandChildID { get; set; } // int(4)
 	}
 
 	[TableName(Name="LinqDataTypes")]
 	public partial class LinqDataTypes
 	{
-		[          Required     ] public int       ID            { get; set; }
-		[Nullable               ] public decimal?  MoneyValue    { get; set; }
-		[Nullable               ] public DateTime? DateTimeValue { get; set; }
-		[          Required     ] public bool      BoolValue     { get; set; }
-		[Nullable, MaxLength(36)] public string    GuidValue     { get; set; }
-		[Nullable               ] public byte[]    BinaryValue   { get; set; }
-		[Nullable               ] public short?    SmallIntValue { get; set; }
+		[          Required     ] public int       ID            { get; set; } // int(4)
+		[Nullable               ] public decimal?  MoneyValue    { get; set; } // decimal(6)(10,4)
+		[Nullable               ] public DateTime? DateTimeValue { get; set; } // datetime(8)
+		[          Required     ] public bool      BoolValue     { get; set; } // bit(1)
+		[Nullable, MaxLength(36)] public string    GuidValue     { get; set; } // char(36)
+		[Nullable               ] public byte[]    BinaryValue   { get; set; } // binary(500)
+		[Nullable               ] public short?    SmallIntValue { get; set; } // smallint(2)
 	}
 
 	[TableName(Name="MyTable")]
 	public partial class MyTable
 	{
-		[Nullable] public int? MyID { get; set; }
+		[Nullable] public int? MyID { get; set; } // my_int_type(4)
 	}
 
 	[TableName(Name="Parent")]
 	public partial class Parent
 	{
-		[          Required] public int  ParentID { get; set; }
-		[Nullable          ] public int? Value1   { get; set; }
+		[          Required] public int  ParentID { get; set; } // int(4)
+		[Nullable          ] public int? Value1   { get; set; } // int(4)
 	}
 
 	[TableName(Name="Patient")]
 	public partial class Patient
 	{
-		[PrimaryKey(1), Required                ] public int    PersonID  { get; set; }
-		[               MaxLength(256), Required] public string Diagnosis { get; set; }
+		[PrimaryKey(1), Required                ] public int    PersonID  { get; set; } // int(4)
+		[               MaxLength(256), Required] public string Diagnosis { get; set; } // nvarchar(256)
 
 		// FK_Patient_Person
 		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=false)]
@@ -129,11 +129,11 @@ namespace Templates.Sybase
 	[TableName(Name="Person")]
 	public partial class Person
 	{
-		[Identity, PrimaryKey(1), Required               ] public int    PersonID   { get; set; }
-		[                         MaxLength(50), Required] public string FirstName  { get; set; }
-		[                         MaxLength(50), Required] public string LastName   { get; set; }
-		[Nullable,                MaxLength(50)          ] public string MiddleName { get; set; }
-		[                         Required               ] public char   Gender     { get; set; }
+		[Identity, PrimaryKey(1), Required               ] public int    PersonID   { get; set; } // int(4)
+		[                         MaxLength(50), Required] public string FirstName  { get; set; } // nvarchar(50)
+		[                         MaxLength(50), Required] public string LastName   { get; set; } // nvarchar(50)
+		[Nullable,                MaxLength(50)          ] public string MiddleName { get; set; } // nvarchar(50)
+		[                         Required               ] public char   Gender     { get; set; } // char(1)
 
 		// FK_Doctor_Person_BackReference
 		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]

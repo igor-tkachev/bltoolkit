@@ -55,27 +55,27 @@ namespace Templates.MSSql
 	[TableName(Name="Alphabetical list of products")]
 	public partial class AlphabeticalListOfProduct
 	{
-		[          DataMember, Required               ] public int      ProductID       { get; set; }
-		[          DataMember, MaxLength(40), Required] public string   ProductName     { get; set; }
-		[Nullable, DataMember                         ] public int?     SupplierID      { get; set; }
-		[Nullable, DataMember                         ] public int?     CategoryID      { get; set; }
-		[Nullable, DataMember, MaxLength(20)          ] public string   QuantityPerUnit { get; set; }
-		[Nullable, DataMember                         ] public decimal? UnitPrice       { get; set; }
-		[Nullable, DataMember                         ] public short?   UnitsInStock    { get; set; }
-		[Nullable, DataMember                         ] public short?   UnitsOnOrder    { get; set; }
-		[Nullable, DataMember                         ] public short?   ReorderLevel    { get; set; }
-		[          DataMember, Required               ] public bool     Discontinued    { get; set; }
-		[          DataMember, MaxLength(15), Required] public string   CategoryName    { get; set; }
+		[          DataMember, Required               ] public int      ProductID       { get; set; } // int(10)
+		[          DataMember, MaxLength(40), Required] public string   ProductName     { get; set; } // nvarchar(40)
+		[Nullable, DataMember                         ] public int?     SupplierID      { get; set; } // int(10)
+		[Nullable, DataMember                         ] public int?     CategoryID      { get; set; } // int(10)
+		[Nullable, DataMember, MaxLength(20)          ] public string   QuantityPerUnit { get; set; } // nvarchar(20)
+		[Nullable, DataMember                         ] public decimal? UnitPrice       { get; set; } // money(19,4)
+		[Nullable, DataMember                         ] public short?   UnitsInStock    { get; set; } // smallint(5)
+		[Nullable, DataMember                         ] public short?   UnitsOnOrder    { get; set; } // smallint(5)
+		[Nullable, DataMember                         ] public short?   ReorderLevel    { get; set; } // smallint(5)
+		[          DataMember, Required               ] public bool     Discontinued    { get; set; } // bit
+		[          DataMember, MaxLength(15), Required] public string   CategoryName    { get; set; } // nvarchar(15)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Categories")]
 	public partial class Category
 	{
-		[Identity, PrimaryKey(1), DataMember, Required               ] public int    CategoryID   { get; set; }
-		[                         DataMember, MaxLength(15), Required] public string CategoryName { get; set; }
-		[Nullable,                DataMember, MaxLength(1073741823)  ] public string Description  { get; set; }
-		[Nullable,                DataMember                         ] public byte[] Picture      { get; set; }
+		[Identity, PrimaryKey(1), DataMember, Required               ] public int    CategoryID   { get; set; } // int(10)
+		[                         DataMember, MaxLength(15), Required] public string CategoryName { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(1073741823)  ] public string Description  { get; set; } // ntext(1073741823)
+		[Nullable,                DataMember                         ] public byte[] Picture      { get; set; } // image(2147483647)
 
 		// FK_Products_Categories_BackReference
 		[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=true)]
@@ -86,34 +86,34 @@ namespace Templates.MSSql
 	[TableName(Name="Category Sales for 1997")]
 	public partial class CategorySalesFor1997
 	{
-		[          DataMember, MaxLength(15), Required] public string   CategoryName  { get; set; }
-		[Nullable, DataMember                         ] public decimal? CategorySales { get; set; }
+		[          DataMember, MaxLength(15), Required] public string   CategoryName  { get; set; } // nvarchar(15)
+		[Nullable, DataMember                         ] public decimal? CategorySales { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Current Product List")]
 	public partial class CurrentProductList
 	{
-		[Identity, DataMember, Required               ] public int    ProductID   { get; set; }
-		[          DataMember, MaxLength(40), Required] public string ProductName { get; set; }
+		[Identity, DataMember, Required               ] public int    ProductID   { get; set; } // int(10)
+		[          DataMember, MaxLength(40), Required] public string ProductName { get; set; } // nvarchar(40)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Customer and Suppliers by City")]
 	public partial class CustomerAndSuppliersByCity
 	{
-		[Nullable, DataMember, MaxLength(15)          ] public string City         { get; set; }
-		[          DataMember, MaxLength(40), Required] public string CompanyName  { get; set; }
-		[Nullable, DataMember, MaxLength(30)          ] public string ContactName  { get; set; }
-		[          DataMember, MaxLength(9), Required ] public string Relationship { get; set; }
+		[Nullable, DataMember, MaxLength(15)          ] public string City         { get; set; } // nvarchar(15)
+		[          DataMember, MaxLength(40), Required] public string CompanyName  { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(30)          ] public string ContactName  { get; set; } // nvarchar(30)
+		[          DataMember, MaxLength(9), Required ] public string Relationship { get; set; } // varchar(9)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="CustomerCustomerDemo")]
 	public partial class CustomerCustomerDemo
 	{
-		[PrimaryKey(1), DataMember, MaxLength(5), Required ] public string CustomerID     { get; set; }
-		[PrimaryKey(2), DataMember, MaxLength(10), Required] public string CustomerTypeID { get; set; }
+		[PrimaryKey(1), DataMember, MaxLength(5), Required ] public string CustomerID     { get; set; } // nchar(5)
+		[PrimaryKey(2), DataMember, MaxLength(10), Required] public string CustomerTypeID { get; set; } // nchar(10)
 
 		// FK_CustomerCustomerDemo
 		[Association(ThisKey="CustomerTypeID", OtherKey="CustomerTypeID", CanBeNull=false)]
@@ -128,8 +128,8 @@ namespace Templates.MSSql
 	[TableName(Name="CustomerDemographics")]
 	public partial class CustomerDemographic
 	{
-		[          PrimaryKey(1), DataMember, MaxLength(10), Required] public string CustomerTypeID { get; set; }
-		[Nullable,                DataMember, MaxLength(1073741823)  ] public string CustomerDesc   { get; set; }
+		[          PrimaryKey(1), DataMember, MaxLength(10), Required] public string CustomerTypeID { get; set; } // nchar(10)
+		[Nullable,                DataMember, MaxLength(1073741823)  ] public string CustomerDesc   { get; set; } // ntext(1073741823)
 
 		// FK_CustomerCustomerDemo_BackReference
 		[Association(ThisKey="CustomerTypeID", OtherKey="CustomerTypeID", CanBeNull=true)]
@@ -140,17 +140,17 @@ namespace Templates.MSSql
 	[TableName(Name="Customers")]
 	public partial class Customer
 	{
-		[          PrimaryKey(1), DataMember, MaxLength(5), Required ] public string CustomerID   { get; set; }
-		[                         DataMember, MaxLength(40), Required] public string CompanyName  { get; set; }
-		[Nullable,                DataMember, MaxLength(30)          ] public string ContactName  { get; set; }
-		[Nullable,                DataMember, MaxLength(30)          ] public string ContactTitle { get; set; }
-		[Nullable,                DataMember, MaxLength(60)          ] public string Address      { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string City         { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string Region       { get; set; }
-		[Nullable,                DataMember, MaxLength(10)          ] public string PostalCode   { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string Country      { get; set; }
-		[Nullable,                DataMember, MaxLength(24)          ] public string Phone        { get; set; }
-		[Nullable,                DataMember, MaxLength(24)          ] public string Fax          { get; set; }
+		[          PrimaryKey(1), DataMember, MaxLength(5), Required ] public string CustomerID   { get; set; } // nchar(5)
+		[                         DataMember, MaxLength(40), Required] public string CompanyName  { get; set; } // nvarchar(40)
+		[Nullable,                DataMember, MaxLength(30)          ] public string ContactName  { get; set; } // nvarchar(30)
+		[Nullable,                DataMember, MaxLength(30)          ] public string ContactTitle { get; set; } // nvarchar(30)
+		[Nullable,                DataMember, MaxLength(60)          ] public string Address      { get; set; } // nvarchar(60)
+		[Nullable,                DataMember, MaxLength(15)          ] public string City         { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(15)          ] public string Region       { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(10)          ] public string PostalCode   { get; set; } // nvarchar(10)
+		[Nullable,                DataMember, MaxLength(15)          ] public string Country      { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(24)          ] public string Phone        { get; set; } // nvarchar(24)
+		[Nullable,                DataMember, MaxLength(24)          ] public string Fax          { get; set; } // nvarchar(24)
 
 		// FK_Orders_Customers_BackReference
 		[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=true)]
@@ -165,24 +165,24 @@ namespace Templates.MSSql
 	[TableName(Name="Employees")]
 	public partial class Employee
 	{
-		[Identity, PrimaryKey(1), DataMember, Required               ] public int       EmployeeID      { get; set; }
-		[                         DataMember, MaxLength(20), Required] public string    LastName        { get; set; }
-		[                         DataMember, MaxLength(10), Required] public string    FirstName       { get; set; }
-		[Nullable,                DataMember, MaxLength(30)          ] public string    Title           { get; set; }
-		[Nullable,                DataMember, MaxLength(25)          ] public string    TitleOfCourtesy { get; set; }
-		[Nullable,                DataMember                         ] public DateTime? BirthDate       { get; set; }
-		[Nullable,                DataMember                         ] public DateTime? HireDate        { get; set; }
-		[Nullable,                DataMember, MaxLength(60)          ] public string    Address         { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string    City            { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string    Region          { get; set; }
-		[Nullable,                DataMember, MaxLength(10)          ] public string    PostalCode      { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string    Country         { get; set; }
-		[Nullable,                DataMember, MaxLength(24)          ] public string    HomePhone       { get; set; }
-		[Nullable,                DataMember, MaxLength(4)           ] public string    Extension       { get; set; }
-		[Nullable,                DataMember                         ] public byte[]    Photo           { get; set; }
-		[Nullable,                DataMember, MaxLength(1073741823)  ] public string    Notes           { get; set; }
-		[Nullable,                DataMember                         ] public int?      ReportsTo       { get; set; }
-		[Nullable,                DataMember, MaxLength(255)         ] public string    PhotoPath       { get; set; }
+		[Identity, PrimaryKey(1), DataMember, Required               ] public int       EmployeeID      { get; set; } // int(10)
+		[                         DataMember, MaxLength(20), Required] public string    LastName        { get; set; } // nvarchar(20)
+		[                         DataMember, MaxLength(10), Required] public string    FirstName       { get; set; } // nvarchar(10)
+		[Nullable,                DataMember, MaxLength(30)          ] public string    Title           { get; set; } // nvarchar(30)
+		[Nullable,                DataMember, MaxLength(25)          ] public string    TitleOfCourtesy { get; set; } // nvarchar(25)
+		[Nullable,                DataMember                         ] public DateTime? BirthDate       { get; set; } // datetime(3)
+		[Nullable,                DataMember                         ] public DateTime? HireDate        { get; set; } // datetime(3)
+		[Nullable,                DataMember, MaxLength(60)          ] public string    Address         { get; set; } // nvarchar(60)
+		[Nullable,                DataMember, MaxLength(15)          ] public string    City            { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(15)          ] public string    Region          { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(10)          ] public string    PostalCode      { get; set; } // nvarchar(10)
+		[Nullable,                DataMember, MaxLength(15)          ] public string    Country         { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(24)          ] public string    HomePhone       { get; set; } // nvarchar(24)
+		[Nullable,                DataMember, MaxLength(4)           ] public string    Extension       { get; set; } // nvarchar(4)
+		[Nullable,                DataMember                         ] public byte[]    Photo           { get; set; } // image(2147483647)
+		[Nullable,                DataMember, MaxLength(1073741823)  ] public string    Notes           { get; set; } // ntext(1073741823)
+		[Nullable,                DataMember                         ] public int?      ReportsTo       { get; set; } // int(10)
+		[Nullable,                DataMember, MaxLength(255)         ] public string    PhotoPath       { get; set; } // nvarchar(255)
 
 		// FK_Employees_Employees
 		[Association(ThisKey="ReportsTo", OtherKey="EmployeeID", CanBeNull=true)]
@@ -205,8 +205,8 @@ namespace Templates.MSSql
 	[TableName(Name="EmployeeTerritories")]
 	public partial class EmployeeTerritory
 	{
-		[PrimaryKey(1), DataMember, Required               ] public int    EmployeeID  { get; set; }
-		[PrimaryKey(2), DataMember, MaxLength(20), Required] public string TerritoryID { get; set; }
+		[PrimaryKey(1), DataMember, Required               ] public int    EmployeeID  { get; set; } // int(10)
+		[PrimaryKey(2), DataMember, MaxLength(20), Required] public string TerritoryID { get; set; } // nvarchar(20)
 
 		// FK_EmployeeTerritories_Employees
 		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID", CanBeNull=false)]
@@ -221,43 +221,43 @@ namespace Templates.MSSql
 	[TableName(Name="Invoices")]
 	public partial class Invoice
 	{
-		[Nullable, DataMember, MaxLength(40)          ] public string    ShipName       { get; set; }
-		[Nullable, DataMember, MaxLength(60)          ] public string    ShipAddress    { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCity       { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    ShipRegion     { get; set; }
-		[Nullable, DataMember, MaxLength(10)          ] public string    ShipPostalCode { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCountry    { get; set; }
-		[Nullable, DataMember, MaxLength(5)           ] public string    CustomerID     { get; set; }
-		[          DataMember, MaxLength(40), Required] public string    CustomerName   { get; set; }
-		[Nullable, DataMember, MaxLength(60)          ] public string    Address        { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    City           { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    Region         { get; set; }
-		[Nullable, DataMember, MaxLength(10)          ] public string    PostalCode     { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    Country        { get; set; }
-		[          DataMember, MaxLength(31), Required] public string    Salesperson    { get; set; }
-		[          DataMember, Required               ] public int       OrderID        { get; set; }
-		[Nullable, DataMember                         ] public DateTime? OrderDate      { get; set; }
-		[Nullable, DataMember                         ] public DateTime? RequiredDate   { get; set; }
-		[Nullable, DataMember                         ] public DateTime? ShippedDate    { get; set; }
-		[          DataMember, MaxLength(40), Required] public string    ShipperName    { get; set; }
-		[          DataMember, Required               ] public int       ProductID      { get; set; }
-		[          DataMember, MaxLength(40), Required] public string    ProductName    { get; set; }
-		[          DataMember, Required               ] public decimal   UnitPrice      { get; set; }
-		[          DataMember, Required               ] public short     Quantity       { get; set; }
-		[          DataMember, Required               ] public float     Discount       { get; set; }
-		[Nullable, DataMember                         ] public decimal?  ExtendedPrice  { get; set; }
-		[Nullable, DataMember                         ] public decimal?  Freight        { get; set; }
+		[Nullable, DataMember, MaxLength(40)          ] public string    ShipName       { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(60)          ] public string    ShipAddress    { get; set; } // nvarchar(60)
+		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCity       { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(15)          ] public string    ShipRegion     { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(10)          ] public string    ShipPostalCode { get; set; } // nvarchar(10)
+		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCountry    { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(5)           ] public string    CustomerID     { get; set; } // nchar(5)
+		[          DataMember, MaxLength(40), Required] public string    CustomerName   { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(60)          ] public string    Address        { get; set; } // nvarchar(60)
+		[Nullable, DataMember, MaxLength(15)          ] public string    City           { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(15)          ] public string    Region         { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(10)          ] public string    PostalCode     { get; set; } // nvarchar(10)
+		[Nullable, DataMember, MaxLength(15)          ] public string    Country        { get; set; } // nvarchar(15)
+		[          DataMember, MaxLength(31), Required] public string    Salesperson    { get; set; } // nvarchar(31)
+		[          DataMember, Required               ] public int       OrderID        { get; set; } // int(10)
+		[Nullable, DataMember                         ] public DateTime? OrderDate      { get; set; } // datetime(3)
+		[Nullable, DataMember                         ] public DateTime? RequiredDate   { get; set; } // datetime(3)
+		[Nullable, DataMember                         ] public DateTime? ShippedDate    { get; set; } // datetime(3)
+		[          DataMember, MaxLength(40), Required] public string    ShipperName    { get; set; } // nvarchar(40)
+		[          DataMember, Required               ] public int       ProductID      { get; set; } // int(10)
+		[          DataMember, MaxLength(40), Required] public string    ProductName    { get; set; } // nvarchar(40)
+		[          DataMember, Required               ] public decimal   UnitPrice      { get; set; } // money(19,4)
+		[          DataMember, Required               ] public short     Quantity       { get; set; } // smallint(5)
+		[          DataMember, Required               ] public float     Discount       { get; set; } // real(24)
+		[Nullable, DataMember                         ] public decimal?  ExtendedPrice  { get; set; } // money(19,4)
+		[Nullable, DataMember                         ] public decimal?  Freight        { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Order Details")]
 	public partial class OrderDetail
 	{
-		[PrimaryKey(1), DataMember, Required] public int     OrderID   { get; set; }
-		[PrimaryKey(2), DataMember, Required] public int     ProductID { get; set; }
-		[               DataMember, Required] public decimal UnitPrice { get; set; }
-		[               DataMember, Required] public short   Quantity  { get; set; }
-		[               DataMember, Required] public float   Discount  { get; set; }
+		[PrimaryKey(1), DataMember, Required] public int     OrderID   { get; set; } // int(10)
+		[PrimaryKey(2), DataMember, Required] public int     ProductID { get; set; } // int(10)
+		[               DataMember, Required] public decimal UnitPrice { get; set; } // money(19,4)
+		[               DataMember, Required] public short   Quantity  { get; set; } // smallint(5)
+		[               DataMember, Required] public float   Discount  { get; set; } // real(24)
 
 		// FK_Order_Details_Orders
 		[Association(ThisKey="OrderID", OtherKey="OrderID", CanBeNull=false)]
@@ -272,41 +272,41 @@ namespace Templates.MSSql
 	[TableName(Name="Order Details Extended")]
 	public partial class OrderDetailsExtended
 	{
-		[          DataMember, Required               ] public int      OrderID       { get; set; }
-		[          DataMember, Required               ] public int      ProductID     { get; set; }
-		[          DataMember, MaxLength(40), Required] public string   ProductName   { get; set; }
-		[          DataMember, Required               ] public decimal  UnitPrice     { get; set; }
-		[          DataMember, Required               ] public short    Quantity      { get; set; }
-		[          DataMember, Required               ] public float    Discount      { get; set; }
-		[Nullable, DataMember                         ] public decimal? ExtendedPrice { get; set; }
+		[          DataMember, Required               ] public int      OrderID       { get; set; } // int(10)
+		[          DataMember, Required               ] public int      ProductID     { get; set; } // int(10)
+		[          DataMember, MaxLength(40), Required] public string   ProductName   { get; set; } // nvarchar(40)
+		[          DataMember, Required               ] public decimal  UnitPrice     { get; set; } // money(19,4)
+		[          DataMember, Required               ] public short    Quantity      { get; set; } // smallint(5)
+		[          DataMember, Required               ] public float    Discount      { get; set; } // real(24)
+		[Nullable, DataMember                         ] public decimal? ExtendedPrice { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Order Subtotals")]
 	public partial class OrderSubtotal
 	{
-		[          DataMember, Required] public int      OrderID  { get; set; }
-		[Nullable, DataMember          ] public decimal? Subtotal { get; set; }
+		[          DataMember, Required] public int      OrderID  { get; set; } // int(10)
+		[Nullable, DataMember          ] public decimal? Subtotal { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Orders")]
 	public partial class Order
 	{
-		[Identity, PrimaryKey(1), DataMember, Required     ] public int       OrderID        { get; set; }
-		[Nullable,                DataMember, MaxLength(5) ] public string    CustomerID     { get; set; }
-		[Nullable,                DataMember               ] public int?      EmployeeID     { get; set; }
-		[Nullable,                DataMember               ] public DateTime? OrderDate      { get; set; }
-		[Nullable,                DataMember               ] public DateTime? RequiredDate   { get; set; }
-		[Nullable,                DataMember               ] public DateTime? ShippedDate    { get; set; }
-		[Nullable,                DataMember               ] public int?      ShipVia        { get; set; }
-		[Nullable,                DataMember               ] public decimal?  Freight        { get; set; }
-		[Nullable,                DataMember, MaxLength(40)] public string    ShipName       { get; set; }
-		[Nullable,                DataMember, MaxLength(60)] public string    ShipAddress    { get; set; }
-		[Nullable,                DataMember, MaxLength(15)] public string    ShipCity       { get; set; }
-		[Nullable,                DataMember, MaxLength(15)] public string    ShipRegion     { get; set; }
-		[Nullable,                DataMember, MaxLength(10)] public string    ShipPostalCode { get; set; }
-		[Nullable,                DataMember, MaxLength(15)] public string    ShipCountry    { get; set; }
+		[Identity, PrimaryKey(1), DataMember, Required     ] public int       OrderID        { get; set; } // int(10)
+		[Nullable,                DataMember, MaxLength(5) ] public string    CustomerID     { get; set; } // nchar(5)
+		[Nullable,                DataMember               ] public int?      EmployeeID     { get; set; } // int(10)
+		[Nullable,                DataMember               ] public DateTime? OrderDate      { get; set; } // datetime(3)
+		[Nullable,                DataMember               ] public DateTime? RequiredDate   { get; set; } // datetime(3)
+		[Nullable,                DataMember               ] public DateTime? ShippedDate    { get; set; } // datetime(3)
+		[Nullable,                DataMember               ] public int?      ShipVia        { get; set; } // int(10)
+		[Nullable,                DataMember               ] public decimal?  Freight        { get; set; } // money(19,4)
+		[Nullable,                DataMember, MaxLength(40)] public string    ShipName       { get; set; } // nvarchar(40)
+		[Nullable,                DataMember, MaxLength(60)] public string    ShipAddress    { get; set; } // nvarchar(60)
+		[Nullable,                DataMember, MaxLength(15)] public string    ShipCity       { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(15)] public string    ShipRegion     { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(10)] public string    ShipPostalCode { get; set; } // nvarchar(10)
+		[Nullable,                DataMember, MaxLength(15)] public string    ShipCountry    { get; set; } // nvarchar(15)
 
 		// FK_Orders_Customers
 		[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=true)]
@@ -329,51 +329,51 @@ namespace Templates.MSSql
 	[TableName(Name="Orders Qry")]
 	public partial class OrdersQry
 	{
-		[          DataMember, Required               ] public int       OrderID        { get; set; }
-		[Nullable, DataMember, MaxLength(5)           ] public string    CustomerID     { get; set; }
-		[Nullable, DataMember                         ] public int?      EmployeeID     { get; set; }
-		[Nullable, DataMember                         ] public DateTime? OrderDate      { get; set; }
-		[Nullable, DataMember                         ] public DateTime? RequiredDate   { get; set; }
-		[Nullable, DataMember                         ] public DateTime? ShippedDate    { get; set; }
-		[Nullable, DataMember                         ] public int?      ShipVia        { get; set; }
-		[Nullable, DataMember                         ] public decimal?  Freight        { get; set; }
-		[Nullable, DataMember, MaxLength(40)          ] public string    ShipName       { get; set; }
-		[Nullable, DataMember, MaxLength(60)          ] public string    ShipAddress    { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCity       { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    ShipRegion     { get; set; }
-		[Nullable, DataMember, MaxLength(10)          ] public string    ShipPostalCode { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCountry    { get; set; }
-		[          DataMember, MaxLength(40), Required] public string    CompanyName    { get; set; }
-		[Nullable, DataMember, MaxLength(60)          ] public string    Address        { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    City           { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    Region         { get; set; }
-		[Nullable, DataMember, MaxLength(10)          ] public string    PostalCode     { get; set; }
-		[Nullable, DataMember, MaxLength(15)          ] public string    Country        { get; set; }
+		[          DataMember, Required               ] public int       OrderID        { get; set; } // int(10)
+		[Nullable, DataMember, MaxLength(5)           ] public string    CustomerID     { get; set; } // nchar(5)
+		[Nullable, DataMember                         ] public int?      EmployeeID     { get; set; } // int(10)
+		[Nullable, DataMember                         ] public DateTime? OrderDate      { get; set; } // datetime(3)
+		[Nullable, DataMember                         ] public DateTime? RequiredDate   { get; set; } // datetime(3)
+		[Nullable, DataMember                         ] public DateTime? ShippedDate    { get; set; } // datetime(3)
+		[Nullable, DataMember                         ] public int?      ShipVia        { get; set; } // int(10)
+		[Nullable, DataMember                         ] public decimal?  Freight        { get; set; } // money(19,4)
+		[Nullable, DataMember, MaxLength(40)          ] public string    ShipName       { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(60)          ] public string    ShipAddress    { get; set; } // nvarchar(60)
+		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCity       { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(15)          ] public string    ShipRegion     { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(10)          ] public string    ShipPostalCode { get; set; } // nvarchar(10)
+		[Nullable, DataMember, MaxLength(15)          ] public string    ShipCountry    { get; set; } // nvarchar(15)
+		[          DataMember, MaxLength(40), Required] public string    CompanyName    { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(60)          ] public string    Address        { get; set; } // nvarchar(60)
+		[Nullable, DataMember, MaxLength(15)          ] public string    City           { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(15)          ] public string    Region         { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(10)          ] public string    PostalCode     { get; set; } // nvarchar(10)
+		[Nullable, DataMember, MaxLength(15)          ] public string    Country        { get; set; } // nvarchar(15)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Product Sales for 1997")]
 	public partial class ProductSalesFor1997
 	{
-		[          DataMember, MaxLength(15), Required] public string   CategoryName { get; set; }
-		[          DataMember, MaxLength(40), Required] public string   ProductName  { get; set; }
-		[Nullable, DataMember                         ] public decimal? ProductSales { get; set; }
+		[          DataMember, MaxLength(15), Required] public string   CategoryName { get; set; } // nvarchar(15)
+		[          DataMember, MaxLength(40), Required] public string   ProductName  { get; set; } // nvarchar(40)
+		[Nullable, DataMember                         ] public decimal? ProductSales { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Products")]
 	public partial class Product
 	{
-		[Identity, PrimaryKey(1), DataMember, Required               ] public int      ProductID       { get; set; }
-		[                         DataMember, MaxLength(40), Required] public string   ProductName     { get; set; }
-		[Nullable,                DataMember                         ] public int?     SupplierID      { get; set; }
-		[Nullable,                DataMember                         ] public int?     CategoryID      { get; set; }
-		[Nullable,                DataMember, MaxLength(20)          ] public string   QuantityPerUnit { get; set; }
-		[Nullable,                DataMember                         ] public decimal? UnitPrice       { get; set; }
-		[Nullable,                DataMember                         ] public short?   UnitsInStock    { get; set; }
-		[Nullable,                DataMember                         ] public short?   UnitsOnOrder    { get; set; }
-		[Nullable,                DataMember                         ] public short?   ReorderLevel    { get; set; }
-		[                         DataMember, Required               ] public bool     Discontinued    { get; set; }
+		[Identity, PrimaryKey(1), DataMember, Required               ] public int      ProductID       { get; set; } // int(10)
+		[                         DataMember, MaxLength(40), Required] public string   ProductName     { get; set; } // nvarchar(40)
+		[Nullable,                DataMember                         ] public int?     SupplierID      { get; set; } // int(10)
+		[Nullable,                DataMember                         ] public int?     CategoryID      { get; set; } // int(10)
+		[Nullable,                DataMember, MaxLength(20)          ] public string   QuantityPerUnit { get; set; } // nvarchar(20)
+		[Nullable,                DataMember                         ] public decimal? UnitPrice       { get; set; } // money(19,4)
+		[Nullable,                DataMember                         ] public short?   UnitsInStock    { get; set; } // smallint(5)
+		[Nullable,                DataMember                         ] public short?   UnitsOnOrder    { get; set; } // smallint(5)
+		[Nullable,                DataMember                         ] public short?   ReorderLevel    { get; set; } // smallint(5)
+		[                         DataMember, Required               ] public bool     Discontinued    { get; set; } // bit
 
 		// FK_Products_Categories
 		[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=true)]
@@ -392,37 +392,37 @@ namespace Templates.MSSql
 	[TableName(Name="Products Above Average Price")]
 	public partial class ProductsAboveAveragePrice
 	{
-		[          DataMember, MaxLength(40), Required] public string   ProductName { get; set; }
-		[Nullable, DataMember                         ] public decimal? UnitPrice   { get; set; }
+		[          DataMember, MaxLength(40), Required] public string   ProductName { get; set; } // nvarchar(40)
+		[Nullable, DataMember                         ] public decimal? UnitPrice   { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Products by Category")]
 	public partial class ProductsByCategory
 	{
-		[          DataMember, MaxLength(15), Required] public string CategoryName    { get; set; }
-		[          DataMember, MaxLength(40), Required] public string ProductName     { get; set; }
-		[Nullable, DataMember, MaxLength(20)          ] public string QuantityPerUnit { get; set; }
-		[Nullable, DataMember                         ] public short? UnitsInStock    { get; set; }
-		[          DataMember, Required               ] public bool   Discontinued    { get; set; }
+		[          DataMember, MaxLength(15), Required] public string CategoryName    { get; set; } // nvarchar(15)
+		[          DataMember, MaxLength(40), Required] public string ProductName     { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(20)          ] public string QuantityPerUnit { get; set; } // nvarchar(20)
+		[Nullable, DataMember                         ] public short? UnitsInStock    { get; set; } // smallint(5)
+		[          DataMember, Required               ] public bool   Discontinued    { get; set; } // bit
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Quarterly Orders")]
 	public partial class QuarterlyOrder
 	{
-		[Nullable, DataMember, MaxLength(5) ] public string CustomerID  { get; set; }
-		[Nullable, DataMember, MaxLength(40)] public string CompanyName { get; set; }
-		[Nullable, DataMember, MaxLength(15)] public string City        { get; set; }
-		[Nullable, DataMember, MaxLength(15)] public string Country     { get; set; }
+		[Nullable, DataMember, MaxLength(5) ] public string CustomerID  { get; set; } // nchar(5)
+		[Nullable, DataMember, MaxLength(40)] public string CompanyName { get; set; } // nvarchar(40)
+		[Nullable, DataMember, MaxLength(15)] public string City        { get; set; } // nvarchar(15)
+		[Nullable, DataMember, MaxLength(15)] public string Country     { get; set; } // nvarchar(15)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Region")]
 	public partial class Region
 	{
-		[PrimaryKey(1), DataMember, Required               ] public int    RegionID          { get; set; }
-		[               DataMember, MaxLength(50), Required] public string RegionDescription { get; set; }
+		[PrimaryKey(1), DataMember, Required               ] public int    RegionID          { get; set; } // int(10)
+		[               DataMember, MaxLength(50), Required] public string RegionDescription { get; set; } // nchar(50)
 
 		// FK_Territories_Region_BackReference
 		[Association(ThisKey="RegionID", OtherKey="RegionID", CanBeNull=true)]
@@ -433,29 +433,29 @@ namespace Templates.MSSql
 	[TableName(Name="Sales by Category")]
 	public partial class SalesByCategory
 	{
-		[          DataMember, Required               ] public int      CategoryID   { get; set; }
-		[          DataMember, MaxLength(15), Required] public string   CategoryName { get; set; }
-		[          DataMember, MaxLength(40), Required] public string   ProductName  { get; set; }
-		[Nullable, DataMember                         ] public decimal? ProductSales { get; set; }
+		[          DataMember, Required               ] public int      CategoryID   { get; set; } // int(10)
+		[          DataMember, MaxLength(15), Required] public string   CategoryName { get; set; } // nvarchar(15)
+		[          DataMember, MaxLength(40), Required] public string   ProductName  { get; set; } // nvarchar(40)
+		[Nullable, DataMember                         ] public decimal? ProductSales { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Sales Totals by Amount")]
 	public partial class SalesTotalsByAmount
 	{
-		[Nullable, DataMember                         ] public decimal?  SaleAmount  { get; set; }
-		[          DataMember, Required               ] public int       OrderID     { get; set; }
-		[          DataMember, MaxLength(40), Required] public string    CompanyName { get; set; }
-		[Nullable, DataMember                         ] public DateTime? ShippedDate { get; set; }
+		[Nullable, DataMember                         ] public decimal?  SaleAmount  { get; set; } // money(19,4)
+		[          DataMember, Required               ] public int       OrderID     { get; set; } // int(10)
+		[          DataMember, MaxLength(40), Required] public string    CompanyName { get; set; } // nvarchar(40)
+		[Nullable, DataMember                         ] public DateTime? ShippedDate { get; set; } // datetime(3)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Shippers")]
 	public partial class Shipper
 	{
-		[Identity, PrimaryKey(1), DataMember, Required               ] public int    ShipperID   { get; set; }
-		[                         DataMember, MaxLength(40), Required] public string CompanyName { get; set; }
-		[Nullable,                DataMember, MaxLength(24)          ] public string Phone       { get; set; }
+		[Identity, PrimaryKey(1), DataMember, Required               ] public int    ShipperID   { get; set; } // int(10)
+		[                         DataMember, MaxLength(40), Required] public string CompanyName { get; set; } // nvarchar(40)
+		[Nullable,                DataMember, MaxLength(24)          ] public string Phone       { get; set; } // nvarchar(24)
 
 		// FK_Orders_Shippers_BackReference
 		[Association(ThisKey="ShipperID", OtherKey="ShipVia", CanBeNull=true)]
@@ -466,36 +466,36 @@ namespace Templates.MSSql
 	[TableName(Name="Summary of Sales by Quarter")]
 	public partial class SummaryOfSalesByQuarter
 	{
-		[Nullable, DataMember          ] public DateTime? ShippedDate { get; set; }
-		[          DataMember, Required] public int       OrderID     { get; set; }
-		[Nullable, DataMember          ] public decimal?  Subtotal    { get; set; }
+		[Nullable, DataMember          ] public DateTime? ShippedDate { get; set; } // datetime(3)
+		[          DataMember, Required] public int       OrderID     { get; set; } // int(10)
+		[Nullable, DataMember          ] public decimal?  Subtotal    { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Summary of Sales by Year")]
 	public partial class SummaryOfSalesByYear
 	{
-		[Nullable, DataMember          ] public DateTime? ShippedDate { get; set; }
-		[          DataMember, Required] public int       OrderID     { get; set; }
-		[Nullable, DataMember          ] public decimal?  Subtotal    { get; set; }
+		[Nullable, DataMember          ] public DateTime? ShippedDate { get; set; } // datetime(3)
+		[          DataMember, Required] public int       OrderID     { get; set; } // int(10)
+		[Nullable, DataMember          ] public decimal?  Subtotal    { get; set; } // money(19,4)
 	}
 
 	[Serializable, DataContract]
 	[TableName(Name="Suppliers")]
 	public partial class Supplier
 	{
-		[Identity, PrimaryKey(1), DataMember, Required               ] public int    SupplierID   { get; set; }
-		[                         DataMember, MaxLength(40), Required] public string CompanyName  { get; set; }
-		[Nullable,                DataMember, MaxLength(30)          ] public string ContactName  { get; set; }
-		[Nullable,                DataMember, MaxLength(30)          ] public string ContactTitle { get; set; }
-		[Nullable,                DataMember, MaxLength(60)          ] public string Address      { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string City         { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string Region       { get; set; }
-		[Nullable,                DataMember, MaxLength(10)          ] public string PostalCode   { get; set; }
-		[Nullable,                DataMember, MaxLength(15)          ] public string Country      { get; set; }
-		[Nullable,                DataMember, MaxLength(24)          ] public string Phone        { get; set; }
-		[Nullable,                DataMember, MaxLength(24)          ] public string Fax          { get; set; }
-		[Nullable,                DataMember, MaxLength(1073741823)  ] public string HomePage     { get; set; }
+		[Identity, PrimaryKey(1), DataMember, Required               ] public int    SupplierID   { get; set; } // int(10)
+		[                         DataMember, MaxLength(40), Required] public string CompanyName  { get; set; } // nvarchar(40)
+		[Nullable,                DataMember, MaxLength(30)          ] public string ContactName  { get; set; } // nvarchar(30)
+		[Nullable,                DataMember, MaxLength(30)          ] public string ContactTitle { get; set; } // nvarchar(30)
+		[Nullable,                DataMember, MaxLength(60)          ] public string Address      { get; set; } // nvarchar(60)
+		[Nullable,                DataMember, MaxLength(15)          ] public string City         { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(15)          ] public string Region       { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(10)          ] public string PostalCode   { get; set; } // nvarchar(10)
+		[Nullable,                DataMember, MaxLength(15)          ] public string Country      { get; set; } // nvarchar(15)
+		[Nullable,                DataMember, MaxLength(24)          ] public string Phone        { get; set; } // nvarchar(24)
+		[Nullable,                DataMember, MaxLength(24)          ] public string Fax          { get; set; } // nvarchar(24)
+		[Nullable,                DataMember, MaxLength(1073741823)  ] public string HomePage     { get; set; } // ntext(1073741823)
 
 		// FK_Products_Suppliers_BackReference
 		[Association(ThisKey="SupplierID", OtherKey="SupplierID", CanBeNull=true)]
@@ -506,9 +506,9 @@ namespace Templates.MSSql
 	[TableName(Name="Territories")]
 	public partial class Territory
 	{
-		[PrimaryKey(1), DataMember, MaxLength(20), Required] public string TerritoryID          { get; set; }
-		[               DataMember, MaxLength(50), Required] public string TerritoryDescription { get; set; }
-		[               DataMember, Required               ] public int    RegionID             { get; set; }
+		[PrimaryKey(1), DataMember, MaxLength(20), Required] public string TerritoryID          { get; set; } // nvarchar(20)
+		[               DataMember, MaxLength(50), Required] public string TerritoryDescription { get; set; } // nchar(50)
+		[               DataMember, Required               ] public int    RegionID             { get; set; } // int(10)
 
 		// FK_Territories_Region
 		[Association(ThisKey="RegionID", OtherKey="RegionID", CanBeNull=true)]

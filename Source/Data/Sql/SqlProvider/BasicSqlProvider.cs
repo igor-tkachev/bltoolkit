@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Linq;
+using BLToolkit.Data.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -2749,14 +2750,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual LambdaExpression ConvertMember(MemberInfo mi)
 		{
-			Dictionary<MemberInfo,LambdaExpression> dic;
-			LambdaExpression expr;
-
-			if (Linq.Expressions.Members.TryGetValue(Name, out dic))
-				if (dic.TryGetValue(mi, out expr))
-					return expr;
-
-			return Linq.Expressions.Members[""].TryGetValue(mi, out expr) ? expr : null;
+			return Expressions.ConvertMember(Name, mi);
 		}
 
 		#endregion

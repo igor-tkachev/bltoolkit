@@ -156,7 +156,9 @@ namespace BLToolkit.TypeBuilder
 				if (type.IsGenericType)
 					fullName = AbstractClassBuilder.GetTypeFullName(type);
 
-				ab = new AssemblyBuilderHelper(assemblyDir + "\\" + fullName + "." + suffix + ".dll");
+				fullName = fullName.Replace('<', '_').Replace('>', '_');
+
+				ab = new AssemblyBuilderHelper(Path.Combine(assemblyDir, fullName + "." + suffix + ".dll"));
 			}
 
 			return ab;

@@ -1,6 +1,5 @@
 ﻿<#
 	ConnectionType = "MySql.Data.MySqlClient.MySqlConnection, MySql.Data";
-	
 #><#+
 
 bool TimestampsAreNonUpdatable = true;
@@ -94,6 +93,7 @@ private void LoadServerMetadata()
 						ID         = Convert.ToInt16  (rd["colid"]),
 						ColumnName = Convert.ToString (rd["name"]),
 						MemberName = Convert.ToString (rd["name"]),
+						ColumnType = Convert.ToString (rd["dataType"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
 						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt32(rd["length"]),
@@ -102,56 +102,56 @@ private void LoadServerMetadata()
 		}
 				};
 
-				var c = col.Column;
-				string columnType = Convert.ToString(rd["columnType"]).ToLower();
-				bool unsigned = columnType.Contains("unsigned");
-				bool realAsFloat = sqlMode.ToLower().Contains("real_as_float");
+				var c           = col.Column;
+				var columnType  = Convert.ToString(rd["columnType"]).ToLower();
+				var unsigned    = columnType.Contains("unsigned");
+				var realAsFloat = sqlMode.ToLower().Contains("real_as_float");
 
-				switch (Convert.ToString(rd["dataType"]))
+				switch (c.ColumnType)
 				{
-					case "longtext":
-					case "mediumtext":
-					case "tinytext":
-					case "text"			: c.Type = "string";		c.DbType = DbType.String;		c.SqlDbType = SqlDbType.Text;			break;
-					case "binary"		: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.Binary;			break;
-					case "date"			: c.Type = "DateTime";		c.DbType = DbType.Date;			c.SqlDbType = SqlDbType.Date;			break;
-					case "time"			: c.Type = "DateTime";		c.DbType = DbType.Time;			c.SqlDbType = SqlDbType.Time;			break;
-					case "bit"			: c.Type = "bool";			c.DbType = DbType.Boolean;		c.SqlDbType = SqlDbType.Bit;			break;
-					case "numeric":
-					case "decimal":
-					case "dec":
-					case "fixed"			: c.Type = "decimal";	c.DbType = DbType.Decimal;		c.SqlDbType = SqlDbType.Decimal;		break;
-					case "datetime"		: c.Type = "DateTime";		c.DbType = DbType.DateTime;		c.SqlDbType = SqlDbType.DateTime;		break;
-					case "float"		: c.Type = "float";			c.DbType = DbType.Single;		c.SqlDbType = SqlDbType.Float;			break;
-					case "double"		: c.Type = "double";		c.DbType = DbType.Double;		c.SqlDbType = SqlDbType.Float;			break;
-					case "varbinary"	: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.VarBinary;		break;
-					case "varchar"		: c.Type = "string";		c.DbType = DbType.String;		c.SqlDbType = SqlDbType.VarChar;		break;
-					case "year"			: c.Type = "DateTime";		c.DbType = DbType.Date;			c.SqlDbType = SqlDbType.Date;			break;
-					case "enum":
-					case "set"			: c.Type = "string";		c.DbType = DbType.String;		c.SqlDbType = SqlDbType.VarChar;		break;
-					case "bool":
-					case "boolean"		: c.Type = "bool";			c.DbType = DbType.Boolean;		c.SqlDbType = SqlDbType.Bit;			break;
-					case "serial"		: c.Type = "ulong";			c.DbType = DbType.UInt64;		c.SqlDbType = SqlDbType.BigInt;			break;
-					case "mediumblob":
-					case "longblob"	:
-					case "blob"			: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.Image;			break;
-					case "tinyblob"		: c.Type = "byte[]";		c.DbType = DbType.Binary;		c.SqlDbType = SqlDbType.Binary;			break;
+					case "longtext"   :
+					case "mediumtext" :
+					case "tinytext"   :
+					case "text"       : c.Type = "string";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.Text;      break;
+					case "binary"     : c.Type = "byte[]";   c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.Binary;    break;
+					case "date"       : c.Type = "DateTime"; c.DbType = DbType.Date;     c.SqlDbType = SqlDbType.Date;      break;
+					case "time"       : c.Type = "DateTime"; c.DbType = DbType.Time;     c.SqlDbType = SqlDbType.Time;      break;
+					case "bit"        : c.Type = "bool";     c.DbType = DbType.Boolean;  c.SqlDbType = SqlDbType.Bit;       break;
+					case "numeric"    :
+					case "decimal"    :
+					case "dec"        :
+					case "fixed"      : c.Type = "decimal";  c.DbType = DbType.Decimal;  c.SqlDbType = SqlDbType.Decimal;   break;
+					case "datetime"   : c.Type = "DateTime"; c.DbType = DbType.DateTime; c.SqlDbType = SqlDbType.DateTime;  break;
+					case "float"      : c.Type = "float";    c.DbType = DbType.Single;   c.SqlDbType = SqlDbType.Float;     break;
+					case "double"     : c.Type = "double";   c.DbType = DbType.Double;   c.SqlDbType = SqlDbType.Float;     break;
+					case "varbinary"  : c.Type = "byte[]";   c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.VarBinary; break;
+					case "varchar"    : c.Type = "string";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.VarChar;   break;
+					case "year"       : c.Type = "DateTime"; c.DbType = DbType.Date;     c.SqlDbType = SqlDbType.Date;      break;
+					case "enum"       :
+					case "set"        : c.Type = "string";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.VarChar;   break;
+					case "bool"       :
+					case "boolean"    : c.Type = "bool";     c.DbType = DbType.Boolean;  c.SqlDbType = SqlDbType.Bit;       break;
+					case "serial"     : c.Type = "ulong";    c.DbType = DbType.UInt64;   c.SqlDbType = SqlDbType.BigInt;    break;
+					case "mediumblob" :
+					case "longblob"   :
+					case "blob"       : c.Type = "byte[]";   c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.Image;     break;
+					case "tinyblob"   : c.Type = "byte[]";   c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.Binary;    break;
 
-					case "smallint"		: c.Type = unsigned ? "ushort" : "short";		c.DbType = unsigned ? DbType.UInt16 : DbType.Int16;			c.SqlDbType = SqlDbType.SmallInt;		break;
-					case "mediumint":
-					case "int": 
-					case "integer"		: c.Type = unsigned ? "uint" : "int";			c.DbType = unsigned ? DbType.UInt32 : DbType.Int32;			c.SqlDbType = SqlDbType.Int;			break;
-					case "real"			: c.Type = realAsFloat ? "float" : "double";	c.DbType = realAsFloat ? DbType.Single : DbType.Double;		c.SqlDbType = SqlDbType.Real;			break;
-					case "bigint"		: c.Type = unsigned ? "ulong" : "long";			c.DbType = unsigned ? DbType.UInt64 : DbType.Int64;			c.SqlDbType = SqlDbType.BigInt;			break;
-					case "char"			: c.Type = "string";							c.DbType = DbType.StringFixedLength;						c.SqlDbType = SqlDbType.Char;			break;
-					case "timestamp"	:
+					case "smallint"   : c.Type = unsigned    ? "ushort" : "short"; c.DbType = unsigned ?    DbType.UInt16 : DbType.Int16;  c.SqlDbType = SqlDbType.SmallInt; break;
+					case "mediumint"  :
+					case "int"        :
+					case "integer"    : c.Type = unsigned    ? "uint"  : "int";    c.DbType = unsigned    ? DbType.UInt32 : DbType.Int32;  c.SqlDbType = SqlDbType.Int;      break;
+					case "real"       : c.Type = realAsFloat ? "float" : "double"; c.DbType = realAsFloat ? DbType.Single : DbType.Double; c.SqlDbType = SqlDbType.Real;     break;
+					case "bigint"     : c.Type = unsigned    ? "ulong" : "long";   c.DbType = unsigned    ? DbType.UInt64 : DbType.Int64;  c.SqlDbType = SqlDbType.BigInt;   break;
+					case "char"       : c.Type = "string";   c.DbType = DbType.StringFixedLength; c.SqlDbType = SqlDbType.Char; break;
+					case "timestamp"  :
 						c.Type = "DateTime";
 						c.DbType = DbType.DateTime;
 						c.SqlDbType = SqlDbType.Timestamp;
 						if(TimestampsAreNonUpdatable)
 							c.Attributes.Add("NonUpdatable");
 						break;
-					case "tinyint"		: 
+					case "tinyint"    :
 						if(columnType == "tinyint(1)")
 						{
 							c.Type = "bool";
@@ -165,8 +165,8 @@ private void LoadServerMetadata()
 							c.SqlDbType = SqlDbType.TinyInt;
 						}
 						break;
-					default:
-						throw new System.IO.InvalidDataException(string.Format("Unknown column type: {0}.", Convert.ToString(rd["dataType"])));
+					default           :
+						throw new System.IO.InvalidDataException(string.Format("Unknown column type: {0}.", c.ColumnType));
 				}
 
 				switch (c.Type)
@@ -187,17 +187,17 @@ private void LoadServerMetadata()
 		cmd.CommandText = string.Format(@"
 			SELECT
 				CONCAT(k.TABLE_SCHEMA, '.', k.TABLE_NAME) as id,
-				k.CONSTRAINT_NAME                                             as name,
-				k.COLUMN_NAME                                                 as colname,
-				k.ORDINAL_POSITION                                            as colid
+				k.CONSTRAINT_NAME                         as name,
+				k.COLUMN_NAME                             as colname,
+				k.ORDINAL_POSITION                        as colid
 			FROM
 				INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
 					JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS c ON k.CONSTRAINT_NAME = c.CONSTRAINT_NAME
 			WHERE
 				c.CONSTRAINT_TYPE='PRIMARY KEY' AND
-                k.TABLE_SCHEMA NOT IN ({0})
-                {1}
-			GROUP BY id",
+				k.TABLE_SCHEMA NOT IN ({0})
+				{1}
+			GROUP BY id, colid",
 			schemasToSkip,
 			GetDatabaseSqlFilter("k"));
 			
@@ -277,9 +277,14 @@ private void LoadServerMetadata()
 			c.Table.Columns.Add(col.ColumnName, col);
 
 		if (c.Table.Owner == "dbo")
+		{
 			c.Table.Owner = null;
-
-		Tables.Add((c.Table.Owner ?? "") + c.Table.TableName, c.Table);
+			Tables.Add(c.Table.TableName, c.Table);
+		}
+		else
+		{
+			Tables.Add(c.Table.Owner + "." + c.Table.TableName, c.Table);
+		}
 	}
 }
 
