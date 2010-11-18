@@ -382,6 +382,32 @@ namespace Update
 		}
 
 		[Test]
+		public void Update11()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					db.Types2.Delete(_ => _.ID > 1000);
+					db.Insert(new LinqDataTypes2 { ID = 1001 });
+
+					var a = 1001;
+
+					var q =
+						from t in db.Types2
+						where t.ID == a && (t.GuidValue == null || t.DateTimeValue < DateTime.Now) && t.DateTimeValue < DateTime.Now
+						select t;
+
+					Assert.AreEqual(1, q.Update(_ => new LinqDataTypes2 { GuidValue = Guid.NewGuid(), DateTimeValue = DateTime.Now }));
+				}
+				finally
+				{
+					db.Types2.Delete(_ => _.ID > 1000);
+				}
+			});
+		}
+
+		[Test]
 		public void DistinctInsert()
 		{
 			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>

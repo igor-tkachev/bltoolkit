@@ -1267,7 +1267,7 @@ namespace BLToolkit.ServiceModel
 
 					case (int)QueryElementType.Column :
 						{
-							var sid         = ReadInt();
+							var sid        = ReadInt();
 							var expression = Read<ISqlExpression>();
 							var alias      = ReadString();
 

@@ -8,7 +8,7 @@ namespace BLToolkit.Data.DataProvider
 	using Mapping;
 	using Sql.SqlProvider;
 
-	public sealed class AccessDataProvider : OleDbDataProvider
+	public class AccessDataProvider : OleDbDataProvider
 	{
 		private static Regex _paramsExp;
 

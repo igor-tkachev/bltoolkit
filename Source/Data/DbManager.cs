@@ -669,8 +669,7 @@ namespace BLToolkit.Data
 						{
 							Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
 								"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
-								spName, spParamName, spParam.Direction, paramWithValue.Direction),
-							                  TraceSwitch.DisplayName);
+								spName, spParamName, spParam.Direction, paramWithValue.Direction), TraceSwitch.DisplayName);
 
 							spParam.Direction = paramWithValue.Direction;
 						}
@@ -684,12 +683,11 @@ namespace BLToolkit.Data
 					}
 
 					if (found == false && (
-					                      	spParam.Direction == ParameterDirection.Input || 
-					                      	spParam.Direction == ParameterDirection.InputOutput))
+					                       spParam.Direction == ParameterDirection.Input || 
+					                       spParam.Direction == ParameterDirection.InputOutput))
 					{
 						Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
-							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, spParamName),
-						                  TraceSwitch.DisplayName);
+							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, spParamName), TraceSwitch.DisplayName);
 
 						spParam.SourceColumn = _dataProvider.Convert(spParamName, ConvertType.SprocParameterToName).ToString();
 					}

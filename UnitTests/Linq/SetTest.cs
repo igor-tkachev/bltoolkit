@@ -382,5 +382,21 @@ namespace Data.Linq
 				(from g  in db.GrandChild join ch in db.Child  on g.ChildID   equals ch.ChildID select ch).Union(
 				(from ch in db.Child      join p  in db.Parent on ch.ParentID equals p.ParentID select ch))));
 		}
+
+		[Test]
+		public void Union2()
+		{
+			ForEachProvider(db => AreEqual(
+				from r  in
+					(from g  in GrandChild join ch in Child  on g.ChildID   equals ch.ChildID select ch.ChildID).Union(
+					(from ch in Child      join p  in Parent on ch.ParentID equals p.ParentID select ch.ChildID))
+				join child in Child on r equals child.ChildID
+				select child,
+				from r in
+					(from g  in db.GrandChild join ch in db.Child  on g.ChildID   equals ch.ChildID select ch.ChildID).Union(
+					(from ch in db.Child      join p  in db.Parent on ch.ParentID equals p.ParentID select ch.ChildID))
+				join child in db.Child on r equals child.ChildID
+				select child));
+		}
 	}
 }

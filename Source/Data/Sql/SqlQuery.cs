@@ -3141,7 +3141,7 @@ namespace BLToolkit.Data.Sql
 				if (!union.HasUnion)
 					return;
 
-				exprs.Add(sql, union);
+				exprs.Add(union, sql);
 
 				for (var i = 0; i < sql.Select.Columns.Count; i++)
 				{
@@ -3167,7 +3167,11 @@ namespace BLToolkit.Data.Sql
 			((ISqlExpressionWalkable)this).Walk(false, expr =>
 			{
 				ISqlExpression e;
-				return exprs.TryGetValue(expr, out e)? e: expr;
+
+				if (exprs.TryGetValue(expr, out e))
+					return e;
+
+				return expr;
 			});
 		}
 
