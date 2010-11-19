@@ -287,7 +287,9 @@ namespace BLToolkit.Data
 
 			if (dataProviders != null)
 			{
-				Debug.WriteLineIf(TraceSwitch.TraceWarning, "Using appSettings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TraceSwitch.DisplayName);
+				if (TraceSwitch.TraceWarning)
+					WriteTraceLine("Using appSettings\\BLToolkit.DataProviders is obsolete. Consider using bltoolkit configuration section instead.", TraceSwitch.DisplayName);
+
 				foreach (var dataProviderTypeName in dataProviders.Split(';'))
 					AddDataProvider(Type.GetType(dataProviderTypeName, true));
 			}

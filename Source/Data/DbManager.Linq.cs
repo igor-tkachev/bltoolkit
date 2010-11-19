@@ -44,9 +44,8 @@ namespace BLToolkit.Data
 
 			GetParameters(queryContext, query);
 
-#if DEBUG
-			Debug.WriteLineIf(TraceSwitch.TraceInfo, ((IDataContext)this).GetSqlText(query), TraceSwitch.DisplayName);
-#endif
+			if (TraceSwitch.TraceInfo)
+				WriteTraceLine(((IDataContext)this).GetSqlText(query), TraceSwitch.DisplayName);
 
 			return query;
 		}

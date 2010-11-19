@@ -134,7 +134,13 @@ namespace BLToolkit.Data
 		private static TraceSwitch _traceSwitch;
 		public  static TraceSwitch  TraceSwitch
 		{
-			get { return _traceSwitch ?? (_traceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Warning")); }
+			get { return _traceSwitch ?? (_traceSwitch = new TraceSwitch("DbManager", "DbManager trace switch",
+#if DEBUG
+				"Warning"
+#else
+				"Off"
+#endif
+				)); }
 			set { _traceSwitch = value; }
 		}
 
@@ -142,6 +148,8 @@ namespace BLToolkit.Data
 		{
 			TraceSwitch = new TraceSwitch("DbManager", "DbManager trace switch", "Info");
 		}
+
+		public static Action<string,string> WriteTraceLine = (message, displayName) => Debug.WriteLine(message, displayName);
 
 		private    bool _canRaiseEvents = true;
 		public new bool  CanRaiseEvents
@@ -667,9 +675,12 @@ namespace BLToolkit.Data
 
 						if (spParam.Direction != paramWithValue.Direction)
 						{
-							Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
-								"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
-								spName, spParamName, spParam.Direction, paramWithValue.Direction), TraceSwitch.DisplayName);
+							if (TraceSwitch.TraceWarning)
+								WriteTraceLine(
+									string.Format(
+										"Stored Procedure '{0}'. Parameter '{1}' has different direction '{2}'. Should be '{3}'.",
+										spName, spParamName, spParam.Direction, paramWithValue.Direction),
+									TraceSwitch.DisplayName);
 
 							spParam.Direction = paramWithValue.Direction;
 						}
@@ -686,8 +697,10 @@ namespace BLToolkit.Data
 					                       spParam.Direction == ParameterDirection.Input || 
 					                       spParam.Direction == ParameterDirection.InputOutput))
 					{
-						Debug.WriteLineIf(TraceSwitch.TraceWarning, string.Format(
-							"Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, spParamName), TraceSwitch.DisplayName);
+						if (TraceSwitch.TraceWarning)
+							WriteTraceLine(
+								string.Format("Stored Procedure '{0}'. Parameter '{1}' not assigned.", spName, spParamName),
+								TraceSwitch.DisplayName);
 
 						spParam.SourceColumn = _dataProvider.Convert(spParamName, ConvertType.SprocParameterToName).ToString();
 					}
@@ -1994,15 +2007,16 @@ namespace BLToolkit.Data
 
 			var command = sb.ToString();
 
-#if DEBUG
-			var info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);
+			if (TraceSwitch.TraceInfo)
+			{
+				var info = string.Format("{0} {1}\n{2}", DataProvider.Name, ConfigurationString, command);
 
-			if (commandParameters != null && commandParameters.Length > 0)
-				foreach (var p in commandParameters)
-					info += string.Format("\n{0}\t{1}", p.ParameterName, p.Value);
+				if (commandParameters != null && commandParameters.Length > 0)
+					foreach (var p in commandParameters)
+						info += string.Format("\n{0}\t{1}", p.ParameterName, p.Value);
 
-			Debug.WriteLineIf(TraceSwitch.TraceInfo, info, TraceSwitch.DisplayName);
-#endif
+				WriteTraceLine(info, TraceSwitch.DisplayName);
+			}
 
 			return SetCommand(command, commandParameters);
 		}
@@ -4296,8 +4310,8 @@ namespace BLToolkit.Data
 		{
 			var dex = new DataException(this, ex);
 
-			Debug.WriteLineIf(TraceSwitch.TraceError, string.Format(
-				"Operation '{0}' throws exception '{1}'", op, dex), TraceSwitch.DisplayName);
+			if (TraceSwitch.TraceError)
+				WriteTraceLine(string.Format("Operation '{0}' throws exception '{1}'", op, dex), TraceSwitch.DisplayName);
 
 			OnOperationException(op, dex);
 		}
