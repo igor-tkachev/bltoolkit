@@ -27,8 +27,9 @@ namespace Data.Linq
 		[Test]
 		public void Test3()
 		{
-			var expected = from p in ParentInheritance where p is ParentInheritance1 select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.ParentInheritance where p is ParentInheritance1 select p));
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance where p is ParentInheritance1 select p,
+				from p in db.ParentInheritance where p is ParentInheritance1 select p));
 		}
 
 		[Test]
@@ -106,6 +107,18 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in    ParentInheritance1 where p.ParentID == 1 select p,
 				from p in db.ParentInheritance1 where p.ParentID == 1 select p));
+		}
+
+		//[Test]
+		public void Test13()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance4
+				join c in    Child on p.ParentID equals c.ParentID
+				select p,
+				from p in db.ParentInheritance4
+				join c in db.Child on p.ParentID equals c.ParentID
+				select p));
 		}
 
 		[Test]

@@ -16,6 +16,11 @@ namespace BLToolkit.Data.Linq
 
 	class ExpressionInfo<T> : ReflectionHelper
 	{
+		public ExpressionInfo()
+		{
+			GetIEnumerable = MakeEnumerable;
+		}
+
 		#region Properties & Fields
 
 		public ExpressionInfo<T>     Next;
@@ -26,13 +31,18 @@ namespace BLToolkit.Data.Linq
 		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
 		public Func<ISqlProvider>    CreateSqlProvider;
 
-		public Func<QueryContext,IDataContextInfo,Expression,object[],IEnumerable<T>> GetIEnumerable;
-		public Func<QueryContext,IDataContextInfo,Expression,object[],object>         GetElement;
-
 		private ISqlProvider _sqlProvider; 
 		public  ISqlProvider  SqlProvider
 		{
 			get { return _sqlProvider ?? (_sqlProvider = CreateSqlProvider()); }
+		}
+
+		public Func<QueryContext,IDataContextInfo,Expression,object[],object>         GetElement;
+		public Func<QueryContext,IDataContextInfo,Expression,object[],IEnumerable<T>> GetIEnumerable;
+
+		IEnumerable<T> MakeEnumerable(QueryContext qc, IDataContextInfo dci, Expression expr, object[] ps)
+		{
+			yield return ConvertTo<T>.From(GetElement(qc, dci, expr, ps));
 		}
 
 		#endregion

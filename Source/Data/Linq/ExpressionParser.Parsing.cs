@@ -1092,7 +1092,7 @@ namespace BLToolkit.Data.Linq
 
 			var seq     = ParseSequence(inner)[0];
 			var source2 = new QuerySource.GroupJoin(current, CurrentSql, seq);
-			var join    = source2.SubSql.WeakLeftJoin();
+			var join    = source2.SubSql.WeakInnerJoin();
 
 			CurrentSql = current;
 
@@ -1164,7 +1164,10 @@ namespace BLToolkit.Data.Linq
 				var groupJoin = ParentQueries[0].Parent.Sources.Where(s => s is QuerySource.GroupJoin).FirstOrDefault();
 
 				if (groupJoin != null)
-					groupJoin.SqlQuery.From.Tables[0].Joins[0].IsWeak = false;
+				{
+					groupJoin.SqlQuery.From.Tables[0].Joins[0].JoinType = SqlQuery.JoinType.Left;
+					groupJoin.SqlQuery.From.Tables[0].Joins[0].IsWeak   = false;
+				}
 			}
 
 			var field = GetField(null, seq);

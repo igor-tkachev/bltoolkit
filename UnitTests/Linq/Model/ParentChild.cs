@@ -445,4 +445,37 @@ namespace Data.Linq.Model
 	}
 
 	#endregion
+
+	#region Inheritance4
+
+	public enum Parent4Type
+	{
+		Value1 = 1,
+		Value2 = 2
+	}
+
+	[TableName("Parent")]
+	[InheritanceMapping(Code = (int)Parent4Type.Value1, Type = typeof(ParentInheritance14))]
+	[InheritanceMapping(Code = (int)Parent4Type.Value2, Type = typeof(ParentInheritance24))]
+	public abstract class ParentInheritanceBase4
+	{
+		[PrimaryKey]
+		public int ParentID;
+
+		public abstract Parent4Type Value1 { get; }
+	}
+
+	public class ParentInheritance14 : ParentInheritanceBase4
+	{
+		[MapField(IsInheritanceDiscriminator = true)]
+		public override Parent4Type Value1 { get { return Parent4Type.Value1; } }
+	}
+
+	public class ParentInheritance24 : ParentInheritanceBase4
+	{
+		[MapField(IsInheritanceDiscriminator = true)]
+		public override Parent4Type Value1 { get { return Parent4Type.Value2; } }
+	}
+
+	#endregion
 }

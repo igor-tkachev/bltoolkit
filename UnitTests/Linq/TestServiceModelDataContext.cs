@@ -36,6 +36,7 @@ namespace Data.Linq
 		public Table<ParentInheritanceBase>  ParentInheritance      { get { return this.GetTable<ParentInheritanceBase>();  } }
 		public Table<ParentInheritanceBase2> ParentInheritance2     { get { return this.GetTable<ParentInheritanceBase2>(); } }
 		public Table<ParentInheritanceBase3> ParentInheritance3     { get { return this.GetTable<ParentInheritanceBase3>(); } }
+		public Table<ParentInheritanceBase4> ParentInheritance4     { get { return this.GetTable<ParentInheritanceBase4>(); } }
 		public Table<ParentInheritance1>     ParentInheritance1     { get { return this.GetTable<ParentInheritance1>();     } }
 		public Table<ParentInheritanceValue> ParentInheritanceValue { get { return this.GetTable<ParentInheritanceValue>(); } }
 		public Table<Child>                  Child                  { get { return this.GetTable<Child>();                  } }

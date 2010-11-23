@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Linq.Expressions;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -138,6 +138,21 @@ namespace Data.Linq
 			ForEachProvider(db => Assert.AreNotEqual(
 				new Test().TestClosure(db),
 				new Test().TestClosure(db)));
+		}
+
+		[Test]
+		public void ExecuteTest()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var emp = db.Employee;
+
+				Expression<Func<int>> m = () => emp.Count();
+
+				var exp = Expression.Call(((MethodCallExpression)m.Body).Method, emp.Expression);
+
+				var results = (int)((IQueryable)emp).Provider.Execute(exp);
+			}
 		}
 	}
 }

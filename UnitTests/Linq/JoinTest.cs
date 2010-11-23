@@ -131,6 +131,20 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void InnerJoin10()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent
+				join g in    GrandChild on p.ParentID equals g.ParentID into q
+				from q1 in q
+				select new { p.ParentID, q1.GrandChildID },
+				from p in db.Parent
+				join g in db.GrandChild on p.ParentID equals g.ParentID into q
+				from q1 in q
+				select new { p.ParentID, q1.GrandChildID }));
+		}
+
+		[Test]
 		public void LeftJoin1()
 		{
 			ForEachProvider(db => AreEqual(

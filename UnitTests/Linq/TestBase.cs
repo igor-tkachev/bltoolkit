@@ -440,6 +440,20 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<ParentInheritanceBase4> _parentInheritance4;
+		protected List<ParentInheritanceBase4>  ParentInheritance4
+		{
+			get
+			{
+				return _parentInheritance4 ?? (_parentInheritance4 = Parent
+					.Where(p => p.Value1.HasValue && (new[] { 1, 2 }.Contains(p.Value1.Value)))
+					.Select(p => p.Value1 == 1 ?
+						(ParentInheritanceBase4)new ParentInheritance14 { ParentID = p.ParentID } :
+						(ParentInheritanceBase4)new ParentInheritance24 { ParentID = p.ParentID }
+				).ToList());
+			}
+		}
+
 		private   List<Child> _child;
 		protected List<Child>  Child
 		{

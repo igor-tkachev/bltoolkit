@@ -181,7 +181,7 @@ namespace BLToolkit.Data.Linq
 
 		object IQueryProvider.Execute(Expression expression)
 		{
-			return Execute(DataContextInfo, expression);
+			return GetExpressionInfo(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
 		}
 
 		#endregion

@@ -17,6 +17,7 @@ namespace Data.Linq
 		Table<ParentInheritanceBase>  ParentInheritance      { get; }
 		Table<ParentInheritanceBase2> ParentInheritance2     { get; }
 		Table<ParentInheritanceBase3> ParentInheritance3     { get; }
+		Table<ParentInheritanceBase4> ParentInheritance4     { get; }
 		Table<ParentInheritance1>     ParentInheritance1     { get; }
 		Table<ParentInheritanceValue> ParentInheritanceValue { get; }
 		Table<Child>                  Child                  { get; }

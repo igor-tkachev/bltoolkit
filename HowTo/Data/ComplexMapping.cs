@@ -176,14 +176,14 @@ namespace HowTo.Data
 		[Test]
 		public void Test3()
 		{
-			List<ParentEx> parents = new List<ParentEx>();
-			/*[a]*/MapResultSet/*[/a]*/[] sets = new MapResultSet[3];
+			var parents = new List<ParentEx>();
+			var sets    = new /*[a]*/MapResultSet/*[/a]*/[3];
 
 			sets[0] = new MapResultSet(typeof(ParentEx), parents);
 			sets[1] = new MapResultSet(typeof(ChildEx));
 			sets[2] = new MapResultSet(typeof(GrandchildEx));
 
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
 				db.MappingSchema = _mappingSchema;
 
