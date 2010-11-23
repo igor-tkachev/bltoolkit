@@ -181,6 +181,7 @@
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Parsing.cs" />
     <Compile Include="Data\Linq\ExpressionParser.QueryBuilder.cs" />
+    <Compile Include="Data\Linq\ExpressionQuery.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\IQueryContext.cs" />
@@ -188,6 +189,14 @@
     <Compile Include="Data\Linq\Expressions.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
+    <Compile Include="Data\Linq\Parser\ExpressionParser.cs" />
+    <Compile Include="Data\Linq\Parser\ISequenceParser.cs" />
+    <Compile Include="Data\Linq\Parser\MethodCallParser.cs" />
+    <Compile Include="Data\Linq\Parser\ParseInfo.cs" />
+    <Compile Include="Data\Linq\Parser\SelectParser.cs" />
+    <Compile Include="Data\Linq\Parser\SubQueryInfo.cs" />
+    <Compile Include="Data\Linq\Parser\TableParser.cs" />
+    <Compile Include="Data\Linq\Query.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\Extensions.cs" />
@@ -197,13 +206,11 @@
     <Compile Include="Data\Linq\ElementMethod.cs" />
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />
-    <Compile Include="Data\Linq\QueryT.cs" />
     <Compile Include="Data\Linq\LambdaInfo.cs" />
     <Compile Include="Data\Linq\ParsingTracer.cs" />
     <Compile Include="Data\Linq\QueryContext.cs" />
     <Compile Include="Data\Linq\SqlPropertyAttribute.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
-    <Compile Include="Data\Linq\ExpressionInfo.cs" />
     <Compile Include="Data\Linq\QueryField.cs" />
     <Compile Include="Data\Linq\QuerySource.cs" />
     <Compile Include="Data\Linq\ReflectionHelper.cs" />

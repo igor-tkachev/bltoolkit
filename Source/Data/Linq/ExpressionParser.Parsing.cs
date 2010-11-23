@@ -13,21 +13,21 @@ namespace BLToolkit.Data.Linq
 	using Mapping;
 	using Reflection;
 
-	partial class ExpressionParser<T> : ExpressionParser
+	partial class ExpressionParserOld<T> : ExpressionParserOld
 	{
 		#region Init
 
-		public ExpressionParser()
+		public ExpressionParserOld()
 		{
-			_info.Queries.Add(new ExpressionInfo<T>.QueryInfo());
+			_info.Queries.Add(new Query<T>.QueryInfo());
 		}
 
-		readonly ExpressionInfo<T>   _info             = new ExpressionInfo<T>();
+		readonly Query<T>   _info             = new Query<T>();
 		readonly ParameterExpression _contextParam     = Expression.Parameter(typeof(QueryContext),      "context");
 		readonly ParameterExpression _dataContextParam = Expression.Parameter(typeof(IDataContext),      "dctx");
 		readonly ParameterExpression _dataReaderParam  = Expression.Parameter(typeof(IDataReader),       "rd");
 		readonly ParameterExpression _mapSchemaParam   = Expression.Parameter(typeof(MappingSchema),     "ms");
-		readonly ParameterExpression _infoParam        = Expression.Parameter(typeof(ExpressionInfo<T>), "info");
+		readonly ParameterExpression _infoParam        = Expression.Parameter(typeof(Query<T>), "info");
 
 		bool   _isSubQueryParsing;
 		int    _currentSql = 0;
@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Linq
 			set { _info.Queries[_currentSql].SqlQuery = value; }
 		}
 
-		List<ExpressionInfo<T>.Parameter> CurrentSqlParameters
+		List<Query<T>.Parameter> CurrentSqlParameters
 		{
 			get { return _info.Queries[_currentSql].Parameters; }
 		}
@@ -62,25 +62,25 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse
 
-		public ExpressionInfo<T> Parse(
+		public Query<T> Parse(
 			string                contextID,
 			MappingSchema         mappingSchema,
 			Func<ISqlProvider>    createSqlProvider,
 			Expression            expression,
-			ParameterExpression[] parameters)
+			ParameterExpression[] compiledParameters)
 		{
 			ParsingTracer.WriteLine(expression);
 			ParsingTracer.IncIndentLevel();
 
 			ExpressionAccessors = expression.GetExpressionAccessors(ExpressionParam);
 
-			expression = ConvertExpression(expression, parameters);
+			expression = ConvertExpression(expression, compiledParameters);
 
 			_info.ContextID         = contextID;
 			_info.MappingSchema     = mappingSchema;
 			_info.CreateSqlProvider = createSqlProvider;
 			_info.Expression        = expression;
-			_info.Parameters        = parameters;
+			_info.CompiledParameters        = compiledParameters;
 
 			expression.Match(
 				//
@@ -537,22 +537,22 @@ namespace BLToolkit.Data.Linq
 		{
 			if (expression.NodeType == ExpressionType.MemberAccess)
 			{
-				if (_info.Parameters != null)
+				if (_info.CompiledParameters != null)
 				{
 					var me = (MemberExpression)expression;
 
-					if (me.Expression == _info.Parameters[0])
+					if (me.Expression == _info.CompiledParameters[0])
 						return CreateTable(CurrentSql, new LambdaInfo(expression));
 				}
 			}
 
 			if (expression.NodeType == ExpressionType.Call)
 			{
-				if (_info.Parameters != null)
+				if (_info.CompiledParameters != null)
 				{
 					var mc = (MethodCallExpression)expression;
 
-					if (mc.Object == _info.Parameters[0] || mc.Arguments.Count > 0 && mc.Arguments[0] == _info.Parameters[0])
+					if (mc.Object == _info.CompiledParameters[0] || mc.Arguments.Count > 0 && mc.Arguments[0] == _info.CompiledParameters[0])
 						return CreateTable(CurrentSql, new LambdaInfo(expression));
 				}
 			}
@@ -587,7 +587,7 @@ namespace BLToolkit.Data.Linq
 				var path =
 					Expression.Call(
 						_infoParam,
-						Expressor<ExpressionInfo<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
+						Expressor<Query<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
 						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
 
 				var qex  = qe(expression).Expression;
@@ -1487,7 +1487,7 @@ namespace BLToolkit.Data.Linq
 
 					var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
 
-					ep = new ExpressionInfo<T>.Parameter
+					ep = new Query<T>.Parameter
 					{
 						Expression   = ep.Expression,
 						Accessor     = ep.Accessor,
@@ -1625,14 +1625,14 @@ namespace BLToolkit.Data.Linq
 
 		interface IAggregateHelper
 		{
-			void SetAggregate(ExpressionParser<T> parser, Expression pi);
+			void SetAggregate(ExpressionParserOld<T> parser, Expression pi);
 		}
 
 		class AggregateHelper<TE> : IAggregateHelper
 		{
-			public void SetAggregate(ExpressionParser<T> parser, Expression pi)
+			public void SetAggregate(ExpressionParserOld<T> parser, Expression pi)
 			{
-				var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<TE>>(
+				var mapper = Expression.Lambda<Query<T>.Mapper<TE>>(
 					pi, new[]
 					{
 						parser._infoParam,
@@ -1823,7 +1823,7 @@ namespace BLToolkit.Data.Linq
 				{
 					var pi = BuildField(parentInfo, null, new[] { 0 });
 
-					var mapper = Expression.Lambda<ExpressionInfo<T>.Mapper<bool>>(
+					var mapper = Expression.Lambda<Query<T>.Mapper<bool>>(
 						pi, new[]
 						{
 							_infoParam,

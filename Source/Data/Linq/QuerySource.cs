@@ -367,7 +367,7 @@ namespace BLToolkit.Data.Linq
 				return objectMapper[((Column)field).Field.Name, true].MemberAccessor.MemberInfo;
 			}
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				return new ISqlExpression[] { SqlTable };
 			}
@@ -670,7 +670,7 @@ namespace BLToolkit.Data.Linq
 				return sub;
 			}
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				var expr = base.GetExpressions(parser);
 
@@ -915,7 +915,7 @@ namespace BLToolkit.Data.Linq
 				throw new NotImplementedException();
 			}
 
-			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			public override FieldIndex[] Select<T>(ExpressionParserOld<T> parser)
 			{
 				if (_indexes == null)
 				{
@@ -972,7 +972,7 @@ namespace BLToolkit.Data.Linq
 			}
 			*/
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				throw new NotImplementedException();
 				/*
@@ -1221,7 +1221,7 @@ namespace BLToolkit.Data.Linq
 
 		FieldIndex[] _indexes;
 
-		public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+		public override FieldIndex[] Select<T>(ExpressionParserOld<T> parser)
 		{
 			ParsingTracer.WriteLine(this);
 			ParsingTracer.IncIndentLevel();
@@ -1241,7 +1241,7 @@ namespace BLToolkit.Data.Linq
 			return _indexes;
 		}
 
-		public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+		public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 		{
 			if (Fields.Count == 1)
 				return Fields[0].GetExpressions(parser);

@@ -28,7 +28,7 @@ namespace BLToolkit.Data.Linq
 
 			public override QuerySource[] Sources { get { return new[] { Table }; } }
 
-			public override FieldIndex[] Select<T>(ExpressionParser<T> _)
+			public override FieldIndex[] Select<T>(ExpressionParserOld<T> _)
 			{
 				ParsingTracer.WriteLine(this);
 				ParsingTracer.WriteLine("table", Table);
@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Linq
 				return index;
 			}
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				return new [] { Field };
 			}
@@ -111,7 +111,7 @@ namespace BLToolkit.Data.Linq
 			public          ISqlExpression SqlExpression { get { return _sqlExpression;        } }
 			public override QuerySource[]  Sources       { get { return new[] { QuerySource }; } }
 
-			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			public override FieldIndex[] Select<T>(ExpressionParserOld<T> parser)
 			{
 				ParsingTracer.WriteLine(this);
 				ParsingTracer.WriteLine(QuerySource);
@@ -133,7 +133,7 @@ namespace BLToolkit.Data.Linq
 
 			bool _inParsing;
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				if (_sqlExpression == null)
 				{
@@ -148,7 +148,7 @@ namespace BLToolkit.Data.Linq
 				return new [] { _sqlExpression };
 			}
 
-			ISqlExpression Parse<T>(ExpressionParser<T> parser, params QuerySource[] sources)
+			ISqlExpression Parse<T>(ExpressionParserOld<T> parser, params QuerySource[] sources)
 			{
 				var expr = parser.ParseExpression(Expr, sources);
 
@@ -227,7 +227,7 @@ namespace BLToolkit.Data.Linq
 
 			public override QuerySource[] Sources { get { return new[] { QuerySource }; } }
 
-			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			public override FieldIndex[] Select<T>(ExpressionParserOld<T> parser)
 			{
 				ParsingTracer.WriteLine(this);
 				ParsingTracer.WriteLine(QuerySource);
@@ -251,7 +251,7 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
-			void SetSubIndex<T>(ExpressionParser<T> parser)
+			void SetSubIndex<T>(ExpressionParserOld<T> parser)
 			{
 				if (_subIndex == null)
 				{
@@ -288,7 +288,7 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				SetSubIndex(parser);
 
@@ -347,7 +347,7 @@ namespace BLToolkit.Data.Linq
 
 			public override QuerySource[] Sources { get { return new[] { GroupBySource }; } }
 
-			public override FieldIndex[] Select<T>(ExpressionParser<T> parser)
+			public override FieldIndex[] Select<T>(ExpressionParserOld<T> parser)
 			{
 				ParsingTracer.WriteLine(this);
 				ParsingTracer.WriteLine(GroupBySource.BaseQuery);
@@ -361,7 +361,7 @@ namespace BLToolkit.Data.Linq
 				return _index;
 			}
 
-			public override ISqlExpression[] GetExpressions<T>(ExpressionParser<T> parser)
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				return GroupBySource.BaseQuery.GetExpressions(parser);
 			}
@@ -406,8 +406,8 @@ namespace BLToolkit.Data.Linq
 		public abstract QuerySource[]    Sources { get; }
 
 		public abstract ICloneableElement     Clone              (Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone);
-		public abstract FieldIndex[]          Select          <T>(ExpressionParser<T> parser);
-		public abstract ISqlExpression[]      GetExpressions  <T>(ExpressionParser<T> parser);
+		public abstract FieldIndex[]          Select          <T>(ExpressionParserOld<T> parser);
+		public abstract ISqlExpression[]      GetExpressions  <T>(ExpressionParserOld<T> parser);
 		public abstract bool                  CanBeNull          ();
 
 		#endregion

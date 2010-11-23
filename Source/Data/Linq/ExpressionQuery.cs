@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
-	class Query<T> : Table<T>
+	class ExpressionQuery<T> : Table<T>
 	{
-		public Query(IDataContextInfo dataContext, Expression expression)
+		public ExpressionQuery(IDataContextInfo dataContext, Expression expression)
 			: base(dataContext, expression)
 		{
 		}

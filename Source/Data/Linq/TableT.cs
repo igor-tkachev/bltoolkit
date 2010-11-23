@@ -60,7 +60,7 @@ namespace BLToolkit.Data.Linq
 		[NotNull] public Expression       Expression      { get; set; }
 		[NotNull] public IDataContextInfo DataContextInfo { get; set; }
 
-		internal  ExpressionInfo<T> Info;
+		internal  Query<T> Info;
 		internal  object[]          Parameters;
 
 		#endregion
@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq
 			{
 				if (_sqlTextHolder == null)
 				{
-					var info = GetExpressionInfo(Expression, true);
+					var info = GetQuery(Expression, true);
 					_sqlTextHolder = info.GetSqlText(DataContextInfo.DataContext, Expression, Parameters, 0);
 				}
 
@@ -95,15 +95,15 @@ namespace BLToolkit.Data.Linq
 
 		IEnumerable<T> Execute(IDataContextInfo dataContextInfo, Expression expression)
 		{
-			return GetExpressionInfo(expression, true).GetIEnumerable(null, dataContextInfo, expression, Parameters);
+			return GetQuery(expression, true).GetIEnumerable(null, dataContextInfo, expression, Parameters);
 		}
 
-		private ExpressionInfo<T> GetExpressionInfo(Expression expression, bool cache)
+		Query<T> GetQuery(Expression expression, bool cache)
 		{
 			if (cache && Info != null)
 				return Info;
 
-			var info = ExpressionInfo<T>.GetExpressionInfo(DataContextInfo, expression);
+			var info = Query<T>.GetQuery(DataContextInfo, expression);
 
 			if (cache)
 				Info = info;
@@ -154,7 +154,7 @@ namespace BLToolkit.Data.Linq
 			if (expression == null)
 				throw new ArgumentNullException("expression");
 
-			return new Query<TElement>(DataContextInfo, expression);
+			return new ExpressionQuery<TElement>(DataContextInfo, expression);
 		}
 
 		IQueryable IQueryProvider.CreateQuery(Expression expression)
@@ -166,7 +166,7 @@ namespace BLToolkit.Data.Linq
 
 			try
 			{
-				return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { DataContextInfo, expression });
+				return (IQueryable)Activator.CreateInstance(typeof(ExpressionQuery<>).MakeGenericType(elementType), new object[] { DataContextInfo, expression });
 			}
 			catch (TargetInvocationException ex)
 			{
@@ -176,12 +176,12 @@ namespace BLToolkit.Data.Linq
 
 		TResult IQueryProvider.Execute<TResult>(Expression expression)
 		{
-			return (TResult)GetExpressionInfo(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
+			return (TResult)GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
 		}
 
 		object IQueryProvider.Execute(Expression expression)
 		{
-			return GetExpressionInfo(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
+			return GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
 		}
 
 		#endregion

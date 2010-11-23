@@ -50,6 +50,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CompiledTable1()
+		{
+			var query = CompiledQuery.Compile((ITestDataContext db) => db.Child);
+
+			ForEachProvider(db => query(db).ToList().Count());
+		}
+
+		[Test]
+		public void CompiledTable2()
+		{
+			var query = CompiledQuery.Compile((ITestDataContext db) => db.GetTable<Child>());
+
+			ForEachProvider(db => query(db).ToList().Count());
+		}
+
+		[Test]
 		public void ConcurentTest1()
 		{
 			var query = CompiledQuery.Compile((ITestDataContext db, int n) => db.GetTable<Parent>().Where(p => p.ParentID == n).First().ParentID);

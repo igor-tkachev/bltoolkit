@@ -58,7 +58,7 @@ namespace BLToolkit.Data.Linq
 			{
 				switch (pi.NodeType)
 				{
-					case ExpressionType.Parameter:
+					case ExpressionType.Parameter :
 						{
 							var idx = query.Parameters.IndexOf((ParameterExpression)pi);
 
@@ -68,18 +68,31 @@ namespace BLToolkit.Data.Linq
 							break;
 						}
 
-					case ExpressionType.Call:
+					case ExpressionType.Call :
 						{
 							var expr = (MethodCallExpression)pi;
 
 							if (expr.Method.DeclaringType == typeof(Queryable) || expr.Method.DeclaringType == typeof(LinqExtensions))
 							{
-								var qtype  = TypeHelper.GetGenericType(typeof (IQueryable<>), expr.Type);
+								var qtype = TypeHelper.GetGenericType(typeof(IQueryable<>), expr.Type);
 								var helper = (ITableHelper)Activator.CreateInstance(
-									typeof (TableHelper<>).MakeGenericType(qtype == null ? expr.Type : qtype.GetGenericArguments()[0]));
+									typeof(TableHelper<>).MakeGenericType(qtype == null ? expr.Type : qtype.GetGenericArguments()[0]));
 
 								return helper.CallTable(query, expr, ps, qtype != null);
 							}
+
+							if (expr.Method.Name == "GetTable" && expr.Method.DeclaringType == typeof(Extensions))
+								goto case ExpressionType.MemberAccess;
+						}
+
+						break;
+
+					case ExpressionType.MemberAccess :
+						if (pi.Type.IsGenericType && pi.Type.GetGenericTypeDefinition() == typeof(Table<>))
+						{
+							var helper =
+								(ITableHelper)Activator.CreateInstance(typeof(TableHelper<>).MakeGenericType(pi.Type.GetGenericArguments()[0]));
+							return helper.CallTable(query, pi, ps, true);
 						}
 
 						break;

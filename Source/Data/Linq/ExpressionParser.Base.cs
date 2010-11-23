@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
-	class ExpressionParser : ReflectionHelper
+	class ExpressionParserOld : ReflectionHelper
 	{
 		static protected readonly ParameterExpression ParametersParam = Expression.Parameter(typeof(object[]),   "ps");
 		       protected readonly ParameterExpression ExpressionParam = Expression.Parameter(typeof(Expression), "expr");

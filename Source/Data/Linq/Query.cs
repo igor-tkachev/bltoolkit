@@ -6,26 +6,40 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+using JetBrains.Annotations;
+
 namespace BLToolkit.Data.Linq
 {
 	using Common;
 	using Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;
+	using Parser;
 	using Reflection;
 
-	class ExpressionInfo<T> : ReflectionHelper
+	class Query<T> : ReflectionHelper
 	{
-		public ExpressionInfo()
+		public Query()
 		{
 			GetIEnumerable = MakeEnumerable;
 		}
 
+		public Query(ExpressionParser parser)
+		{
+			Queries.Add(new QueryInfo { SqlQuery = parser.SqlQuery });
+
+			ContextID         = parser.DataContextInfo.ContextID;
+			MappingSchema     = parser.MappingSchema;
+			CreateSqlProvider = parser.DataContextInfo.CreateSqlProvider;
+			Expression        = parser.Expression;
+			//Parameters        = parameters;
+		}
+
 		#region Properties & Fields
 
-		public ExpressionInfo<T>     Next;
+		public Query<T>              Next;
 		public Expression            Expression;
-		public ParameterExpression[] Parameters;
+		public ParameterExpression[] CompiledParameters;
 		public string                ContextID;
 		public MappingSchema         MappingSchema;
 		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
@@ -49,66 +63,73 @@ namespace BLToolkit.Data.Linq
 
 		#region GetInfo
 
-		static          ExpressionInfo<T> _first;
-		static readonly object            _sync      = new object();
-		const           int               _cacheSize = 100;
+		static          Query<T> _first;
+		static readonly object   _sync = new object();
 
-		public static ExpressionInfo<T> GetExpressionInfo(IDataContextInfo dataContextInfo, Expression expr)
+		const int CacheSize = 100;
+
+		public static Query<T> GetQuery(IDataContextInfo dataContextInfo, Expression expr)
 		{
-			var info = FindInfo(dataContextInfo, expr);
+			var query = FindQuery(dataContextInfo, expr);
 
-			if (info == null)
+			if (query == null)
 			{
 				lock (_sync)
 				{
-					info = FindInfo(dataContextInfo, expr);
+					query = FindQuery(dataContextInfo, expr);
 
-					if (info == null)
+					if (query == null)
 					{
-						info = new ExpressionParser<T>().Parse(
+
+#if NEW_PARSER
+						query = new ExpressionParser(dataContextInfo, expr, null).Parse<T>();
+#else
+						query = new ExpressionParserOld<T>().Parse(
 							dataContextInfo.ContextID,
 							dataContextInfo.MappingSchema,
 							dataContextInfo.CreateSqlProvider,
 							expr,
 							null);
-						info.Next = _first;
-						_first = info;
+#endif
+
+						query.Next = _first;
+						_first = query;
 					}
 				}
 			}
 
-			return info;
+			return query;
 		}
 
-		static ExpressionInfo<T> FindInfo(IDataContextInfo dataContextInfo, Expression expr)
+		static Query<T> FindQuery(IDataContextInfo dataContextInfo, Expression expr)
 		{
-			ExpressionInfo<T> prev = null;
-			var n = 0;
+			Query<T> prev = null;
+			var      n    = 0;
 
-			for (var info = _first; info != null; info = info.Next)
+			for (var query = _first; query != null; query = query.Next)
 			{
-				if (info.Compare(dataContextInfo.ContextID, dataContextInfo.MappingSchema, expr))
+				if (query.Compare(dataContextInfo.ContextID, dataContextInfo.MappingSchema, expr))
 				{
 					if (prev != null)
 					{
 						lock (_sync)
 						{
-							prev.Next = info.Next;
-							info.Next = _first;
-							_first    = info;
+							prev.Next  = query.Next;
+							query.Next = _first;
+							_first     = query;
 						}
 					}
 
-					return info;
+					return query;
 				}
 
-				if (n++ >= _cacheSize)
+				if (n++ >= CacheSize)
 				{
-					info.Next = null;
+					query.Next = null;
 					return null;
 				}
 
-				prev = info;
+				prev = query;
 			}
 
 			return null;
@@ -140,7 +161,7 @@ namespace BLToolkit.Data.Linq
 
 			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
-			GetElement = (ctx, db, expr, ps) => NonQueryQuery(db, expr, ps);
+			GetElement = (ctx,db,expr,ps) => NonQueryQuery(db, expr, ps);
 		}
 
 		int NonQueryQuery(IDataContextInfo dataContextInfo, Expression expr, object[] parameters)
@@ -177,7 +198,7 @@ namespace BLToolkit.Data.Linq
 
 			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
-			GetElement = (ctx, db, expr, ps) => ScalarQuery<TS>(db, expr, ps);
+			GetElement = (ctx,db,expr,ps) => ScalarQuery<TS>(db, expr, ps);
 		}
 
 		TS ScalarQuery<TS>(IDataContextInfo dataContextInfo, Expression expr, object[] parameters)
@@ -214,10 +235,10 @@ namespace BLToolkit.Data.Linq
 
 			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
-			GetElement = (ctx, db, expr, ps) => Query(ctx, db, expr, ps, mapper);
+			GetElement = (ctx,db,expr,ps) => RunQuery(ctx, db, expr, ps, mapper);
 		}
 
-		TE Query<TE>(QueryContext ctx, IDataContextInfo dataContextInfo, Expression expr, object[] parameters, Mapper<TE> mapper)
+		TE RunQuery<TE>(QueryContext ctx, IDataContextInfo dataContextInfo, Expression expr, object[] parameters, Mapper<TE> mapper)
 		{
 			var dataContext = dataContextInfo.DataContext;
 
@@ -247,6 +268,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Query
 
+		[UsedImplicitly]
 		Expression _mapperExpression;
 
 		public void SetQuery(Mapper<T> mapper, Expression mapperExpression)
@@ -260,7 +282,7 @@ namespace BLToolkit.Data.Linq
 			if (Queries.Count != 1)
 				throw new InvalidOperationException();
 
-			Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> query = Query;
+			Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> query = RunQuery;
 
 			SqlProvider.SqlQuery = Queries[0].SqlQuery;
 
@@ -332,7 +354,7 @@ namespace BLToolkit.Data.Linq
 			throw new InvalidOperationException();
 		}
 
-		IEnumerable<IDataReader> Query(IDataContextInfo dataContextInfo, Expression expr, object[] parameters, int queryNumber)
+		IEnumerable<IDataReader> RunQuery(IDataContextInfo dataContextInfo, Expression expr, object[] parameters, int queryNumber)
 		{
 			var dataContext = dataContextInfo.DataContext;
 
@@ -516,7 +538,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetMapperMethodInfo()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, null, 0));
+			return Expressor<Query<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, null, 0));
 		}
 
 		#endregion
@@ -544,7 +566,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, null, 0, null));
+			return Expressor<Query<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, null, 0, null));
 		}
 
 		#endregion
@@ -561,7 +583,7 @@ namespace BLToolkit.Data.Linq
 
 			readonly IEnumerable<TElement> _items;
 
-			public TKey Key { get; set; }
+			public TKey Key { get; private set; }
 
 			public IEnumerator<TElement> GetEnumerator()
 			{
@@ -581,7 +603,7 @@ namespace BLToolkit.Data.Linq
 			Expression               expr,
 			object[]                 ps,
 			Mapper<TKey>             keyReader,
-			ExpressionInfo<TElement> valueReader)
+			Query<TElement> valueReader)
 		{
 			var db = context.GetDataContext();
 
@@ -604,7 +626,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
-			return Expressor<ExpressionInfo<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
+			return Expressor<Query<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
 		}
 
 		#endregion
@@ -665,13 +687,20 @@ namespace BLToolkit.Data.Linq
 
 		#region Inner Types
 
-		public delegate TE Mapper<TE>(ExpressionInfo<T> info, QueryContext qc, IDataContext dc, IDataReader rd, MappingSchema ms, Expression expr, object[] ps);
+		public delegate TElement Mapper<TElement>(
+			Query<T>      query,
+			QueryContext  qc,
+			IDataContext  dc,
+			IDataReader   rd,
+			MappingSchema ms,
+			Expression    expr,
+			object[]      ps);
 
 		public class Parameter
 		{
-			public Expression                                         Expression;
-			public Func<ExpressionInfo<T>,Expression,object[],object> Accessor;
-			public SqlParameter                                       SqlParameter;
+			public Expression                                Expression;
+			public Func<Query<T>,Expression,object[],object> Accessor;
+			public SqlParameter                              SqlParameter;
 		}
 
 		public class QueryInfo : IQueryContext
@@ -704,16 +733,16 @@ namespace BLToolkit.Data.Linq
 
 		static class ObjectOperation<T1>
 		{
-			public static readonly Dictionary<object,ExpressionInfo<int>>    Insert             = new Dictionary<object,ExpressionInfo<int>>();
-			public static readonly Dictionary<object,ExpressionInfo<object>> InsertWithIdentity = new Dictionary<object,ExpressionInfo<object>>();
-			public static readonly Dictionary<object,ExpressionInfo<int>>    Update             = new Dictionary<object,ExpressionInfo<int>>();
-			public static readonly Dictionary<object,ExpressionInfo<int>>    Delete             = new Dictionary<object,ExpressionInfo<int>>();
+			public static readonly Dictionary<object,Query<int>>    Insert             = new Dictionary<object,Query<int>>();
+			public static readonly Dictionary<object,Query<object>> InsertWithIdentity = new Dictionary<object,Query<object>>();
+			public static readonly Dictionary<object,Query<int>>    Update             = new Dictionary<object,Query<int>>();
+			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
 		}
 
-		static ExpressionInfo<TR>.Parameter GetParameter<TR>(IDataContext dataContext, SqlField field)
+		static Query<TR>.Parameter GetParameter<TR>(IDataContext dataContext, SqlField field)
 		{
 			var exprParam = Expression.Parameter(typeof(Expression), "expr");
-			var mapper    = Expression.Lambda<Func<ExpressionInfo<TR>,Expression,object[],object>>(
+			var mapper    = Expression.Lambda<Func<Query<TR>,Expression,object[],object>>(
 				Expression.Convert(
 					Expression.PropertyOrField(
 						Expression.Convert(
@@ -725,12 +754,12 @@ namespace BLToolkit.Data.Linq
 					typeof(object)),
 				new []
 					{
-						Expression.Parameter(typeof(ExpressionInfo<TR>), "info"),
+						Expression.Parameter(typeof(Query<TR>), "info"),
 						exprParam,
 						Expression.Parameter(typeof(object[]), "ps")
 					});
 
-			var param = new ExpressionInfo<TR>.Parameter
+			var param = new Query<TR>.Parameter
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
@@ -750,7 +779,7 @@ namespace BLToolkit.Data.Linq
 			if (Equals(default(T), obj))
 				return 0;
 
-			ExpressionInfo<int> ei;
+			Query<int> ei;
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
@@ -763,12 +792,12 @@ namespace BLToolkit.Data.Linq
 
 						sqlQuery.Set.Into = sqlTable;
 
-						ei = new ExpressionInfo<int>
+						ei = new Query<int>
 						{
 							MappingSchema     = dataContextInfo.MappingSchema,
 							ContextID         = dataContextInfo.ContextID,
 							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
-							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+							Queries           = { new Query<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						foreach (var field in sqlTable.Fields)
@@ -800,7 +829,7 @@ namespace BLToolkit.Data.Linq
 			if (Equals(default(T), obj))
 				return 0;
 
-			ExpressionInfo<object> ei;
+			Query<object> ei;
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
@@ -814,12 +843,12 @@ namespace BLToolkit.Data.Linq
 						sqlQuery.Set.Into         = sqlTable;
 						sqlQuery.Set.WithIdentity = true;
 
-						ei = new ExpressionInfo<object>
+						ei = new Query<object>
 						{
 							MappingSchema     = dataContextInfo.MappingSchema,
 							ContextID         = dataContextInfo.ContextID,
 							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
-							Queries           = { new ExpressionInfo<object>.QueryInfo { SqlQuery = sqlQuery, } }
+							Queries           = { new Query<object>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						foreach (var field in sqlTable.Fields)
@@ -851,7 +880,7 @@ namespace BLToolkit.Data.Linq
 			if (Equals(default(T), obj))
 				return 0;
 
-			ExpressionInfo<int> ei;
+			Query<int> ei;
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
@@ -864,12 +893,12 @@ namespace BLToolkit.Data.Linq
 
 						sqlQuery.From.Table(sqlTable);
 
-						ei = new ExpressionInfo<int>
+						ei = new Query<int>
 						{
 							MappingSchema     = dataContextInfo.MappingSchema,
 							ContextID         = dataContextInfo.ContextID,
 							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
-							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+							Queries           = { new Query<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						var keys   = sqlTable.GetKeys(true).Cast<SqlField>();
@@ -914,7 +943,7 @@ namespace BLToolkit.Data.Linq
 			if (Equals(default(T), obj))
 				return 0;
 
-			ExpressionInfo<int> ei;
+			Query<int> ei;
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
@@ -927,12 +956,12 @@ namespace BLToolkit.Data.Linq
 
 						sqlQuery.From.Table(sqlTable);
 
-						ei = new ExpressionInfo<int>
+						ei = new Query<int>
 						{
 							MappingSchema     = dataContextInfo.MappingSchema,
 							ContextID         = dataContextInfo.ContextID,
 							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
-							Queries           = { new ExpressionInfo<int>.QueryInfo { SqlQuery = sqlQuery, } }
+							Queries           = { new Query<int>.QueryInfo { SqlQuery = sqlQuery, } }
 						};
 
 						var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();

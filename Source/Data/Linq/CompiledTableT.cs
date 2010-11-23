@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 namespace BLToolkit.Data.Linq
 {
 	using Mapping;
+	using Parser;
 
 	class CompiledTable<T>
 	{
@@ -19,66 +20,70 @@ namespace BLToolkit.Data.Linq
 		readonly Expression       _expression;
 		readonly object           _sync = new object();
 
-		string            _lastContextID;
-		MappingSchema     _lastMappingSchema;
-		ExpressionInfo<T> _lastInfo;
+		string        _lastContextID;
+		MappingSchema _lastMappingSchema;
+		Query<T>      _lastQuery;
 
-		readonly Dictionary<object,ExpressionInfo<T>> _infos = new Dictionary<object, ExpressionInfo<T>>();
+		readonly Dictionary<object,Query<T>> _infos = new Dictionary<object, Query<T>>();
 
-		ExpressionInfo<T> GetInfo(IDataContext dataContext)
+		Query<T> GetInfo(IDataContext dataContext)
 		{
 			var dataContextInfo = DataContextInfo.Create(dataContext);
 
-			string            lastContextID;
-			MappingSchema     lastMappingSchema;
-			ExpressionInfo<T> info;
+			string        lastContextID;
+			MappingSchema lastMappingSchema;
+			Query<T>      query;
 
 			lock (_sync)
 			{
 				lastContextID     = _lastContextID;
 				lastMappingSchema = _lastMappingSchema;
-				info              = _lastInfo;
+				query             = _lastQuery;
 			}
 
 			var contextID     = dataContextInfo.ContextID;
 			var mappingSchema = dataContextInfo.MappingSchema;
 
 			if (lastContextID != contextID || lastMappingSchema != mappingSchema)
-				info = null;
+				query = null;
 
-			if (info == null)
+			if (query == null)
 			{
 				var key = new { contextID, mappingSchema };
 
 				lock (_sync)
-					_infos.TryGetValue(key, out info);
+					_infos.TryGetValue(key, out query);
 
-				if (info == null)
+				if (query == null)
 				{
 					lock (_sync)
 					{
-						_infos.TryGetValue(key, out info);
+						_infos.TryGetValue(key, out query);
 
-						if (info == null)
+						if (query == null)
 						{
-							info = new ExpressionParser<T>().Parse(
+#if NEW_PARSER
+							query = new ExpressionParser(dataContextInfo, _expression, _lambda.Parameters.ToArray()).Parse<T>();
+#else
+							query = new ExpressionParserOld<T>().Parse(
 								contextID,
 								mappingSchema,
 								dataContextInfo.CreateSqlProvider,
 								_expression,
 								_lambda.Parameters.ToArray());
+#endif
 
-							_infos.Add(key, info);
+							_infos.Add(key, query);
 
 							_lastContextID     = contextID;
 							_lastMappingSchema = mappingSchema;
-							_lastInfo          = info;
+							_lastQuery         = query;
 						}
 					}
 				}
 			}
 
-			return info;
+			return query;
 		}
 
 		public IQueryable<T> Create(object[] parameters)

@@ -1577,15 +1577,16 @@ namespace BLToolkit.Data.Linq
 
 		#region Helpers
 
-		static public Expression UnwrapLambda(this Expression ex)
+		static public Expression Unwrap(this Expression ex)
 		{
 			if (ex == null)
 				return null;
 
 			switch (ex.NodeType)
 			{
+				case ExpressionType.Quote          :
 				case ExpressionType.Convert        :
-				case ExpressionType.ConvertChecked : return ((UnaryExpression)ex).Operand;
+				case ExpressionType.ConvertChecked : return ((UnaryExpression)ex).Operand.Unwrap();
 			}
 
 			return ex;

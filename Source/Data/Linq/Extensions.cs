@@ -145,12 +145,12 @@ namespace BLToolkit.Data.Linq
 		public static int Insert<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return ExpressionInfo<T>.Insert(dataContextInfo, obj);
+			return Query<T>.Insert(dataContextInfo, obj);
 		}
 
 		public static int Insert<T>(this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.Insert(DataContextInfo.Create(dataContext), obj);
+			return Query<T>.Insert(DataContextInfo.Create(dataContext), obj);
 		}
 
 		#endregion
@@ -201,12 +201,12 @@ namespace BLToolkit.Data.Linq
 		public static object InsertWithIdentity<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return ExpressionInfo<T>.InsertWithIdentity(dataContextInfo, obj);
+			return Query<T>.InsertWithIdentity(dataContextInfo, obj);
 		}
 
 		public static object InsertWithIdentity<T>(this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
+			return Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
 		}
 
 		#endregion
@@ -216,12 +216,12 @@ namespace BLToolkit.Data.Linq
 		public static int Update<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return ExpressionInfo<T>.Update(dataContextInfo, obj);
+			return Query<T>.Update(dataContextInfo, obj);
 		}
 
 		public static int Update<T>(this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.Update(DataContextInfo.Create(dataContext), obj);
+			return Query<T>.Update(DataContextInfo.Create(dataContext), obj);
 		}
 
 #if !SILVERLIGHT
@@ -245,12 +245,12 @@ namespace BLToolkit.Data.Linq
 		public static int Delete<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return ExpressionInfo<T>.Delete(dataContextInfo, obj);
+			return Query<T>.Delete(dataContextInfo, obj);
 		}
 
 		public static int Delete<T>([NotNull] this IDataContext dataContext, T obj)
 		{
-			return ExpressionInfo<T>.Delete(DataContextInfo.Create(dataContext), obj);
+			return Query<T>.Delete(DataContextInfo.Create(dataContext), obj);
 		}
 
 #if !SILVERLIGHT
