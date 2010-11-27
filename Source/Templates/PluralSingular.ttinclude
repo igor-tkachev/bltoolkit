@@ -14,23 +14,21 @@
 			{
 				foreach (var t in Tables.Values)
 				{
-					var name = t.DataContextPropertyName ?? t.ClassName ?? t.TableName;
+					var propName = t.DataContextPropertyName ?? t.ClassName ?? t.TableName;
+					var newName  = PluralizeDataContextPropertyNames ? ToPlural(propName) : ToSingular(propName);
 
-					name = PluralizeDataContextPropertyNames ? ToPlural(name) : ToSingular(name);
-
-					if (name != (t.DataContextPropertyName ?? t.ClassName ?? t.TableName))
-						t.DataContextPropertyName = name;
+					t.DataContextPropertyName = newName;
 				}
 			}
-			
+
 			if (PluralizeClassNames || SingularizeClassNames)
 			{
 				foreach (var t in Tables.Values)
 				{
-					var name = PluralizeClassNames ? ToPlural(t.ClassName ?? t.TableName) : ToSingular(t.ClassName ?? t.TableName);
+					var className = t.ClassName ?? t.TableName;
+					var newName   = PluralizeClassNames ? ToPlural(className) : ToSingular(className);
 
-					if (name != (t.ClassName ?? t.TableName))
-						t.ClassName = name;
+					t.ClassName = newName;
 				}
 			}
 		};
@@ -171,7 +169,7 @@ public sealed class Plurals
 		_dictionary.Add("cookie",       "cookies");
 		_dictionary.Add("criterion",    "criteria");
 		_dictionary.Add("curriculum",   "curricula");
-		_dictionary.Add("datum",        "data");
+		_dictionary.Add("data",         "data");
 		_dictionary.Add("deer",         "deer");
 		_dictionary.Add("diagnosis",    "diagnoses");
 		_dictionary.Add("die",          "dice");
@@ -248,6 +246,7 @@ public sealed class Plurals
 		_dictionary.Add("shelf",        "shelves");
 		_dictionary.Add("species",      "species");
 		_dictionary.Add("spectrum",     "spectra");
+		_dictionary.Add("status",       "status");
 		_dictionary.Add("stimulus",     "stimuli");
 		_dictionary.Add("stratum",      "strata");
 		_dictionary.Add("supernova",    "supernovas");

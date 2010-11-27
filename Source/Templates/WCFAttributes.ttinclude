@@ -9,11 +9,17 @@
 			Usings.Add("System.Runtime.Serialization");
 
 			foreach (var t in Tables.Values)
-				t.Attributes.AddRange(new[] { "Serializable", "DataContract" });
+				t.Attributes.AddRange(new[]
+				{
+					"Serializable",
+					"DataContract" + (DataContractNamespace == null ? "" : "(Namespace=\"" + DataContractNamespace + "\")")
+				});
 
 			foreach (var t in Tables.Values)
 				foreach (var c in t.Columns.Values)
 					c.Attributes.Add("DataMember");
 		};
 	}
+#><#+
+string DataContractNamespace = null;
 #>

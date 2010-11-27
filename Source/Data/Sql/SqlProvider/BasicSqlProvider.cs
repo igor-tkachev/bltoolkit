@@ -1104,7 +1104,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						//}
 #endif
 
-						var table  = _sqlQuery.GetTableSource(column.Parent);
+						var table = _sqlQuery.GetTableSource(column.Parent);
 
 						if (table == null)
 							throw new SqlException(string.Format("Table not found for '{0}'.", column));

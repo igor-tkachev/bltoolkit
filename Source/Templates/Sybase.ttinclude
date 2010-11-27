@@ -34,7 +34,7 @@ private void LoadServerMetadata()
 						Owner         = rd[1].ToString(),
 						TableName     = rd[2].ToString(),
 						ClassName     = rd[2].ToString(),
-						IsView        = rd[3].ToString() == "V",
+						IsView        = rd[3].ToString()[0] == 'V',
 						BaseClassName = BaseEntityClass,
 					}
 				};

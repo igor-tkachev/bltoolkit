@@ -386,24 +386,11 @@ namespace Update
 		{
 			ForEachProvider(db =>
 			{
-				try
-				{
-					db.Types2.Delete(_ => _.ID > 1000);
-					db.Insert(new LinqDataTypes2 { ID = 1001 });
+				var q = db.GetTable<LinqDataTypes2>().Union(db.GetTable<LinqDataTypes2>());
 
-					var a = 1001;
+				//db.GetTable<LinqDataTypes2>().Update(_ => q.Contains(_), _ => new LinqDataTypes2 { GuidValue = _.GuidValue });
 
-					var q =
-						from t in db.Types2
-						where t.ID == a && (t.GuidValue == null || t.DateTimeValue < DateTime.Now) && t.DateTimeValue < DateTime.Now
-						select t;
-
-					Assert.AreEqual(1, q.Update(_ => new LinqDataTypes2 { GuidValue = Guid.NewGuid(), DateTimeValue = DateTime.Now }));
-				}
-				finally
-				{
-					db.Types2.Delete(_ => _.ID > 1000);
-				}
+				q.Update(_ => new LinqDataTypes2 { GuidValue = _.GuidValue });
 			});
 		}
 

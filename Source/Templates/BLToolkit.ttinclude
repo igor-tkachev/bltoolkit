@@ -155,6 +155,11 @@ static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key
 
 static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 {
+	if (t.IsView)
+	{
+		tt.WriteLine("// View");
+	}
+
 	RenderTableAttributes(tt, t);
 
 	WriteBeginClass(tt, t.ClassName, t.BaseClassName);
@@ -401,11 +406,11 @@ void LoadMetadata()
 						key.AssociationType = AssociationType.OneToOne;
 					else
 						key.AssociationType = AssociationType.ManyToOne;
-
-					key.CanBeNull = key.ThisColumns.All(_ => _.IsNullable);
 				}
 				else
 					key.AssociationType = AssociationType.ManyToOne;
+
+				key.CanBeNull = key.ThisColumns.All(_ => _.IsNullable);
 			}
 		}
 	}
