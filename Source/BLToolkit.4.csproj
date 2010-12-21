@@ -588,7 +588,6 @@
     <Compile Include="Validation\Validator.cs" />
     <Compile Include="Validation\ValidatorBaseAttribute.cs" />
     <Compile Include="Net\HttpReader.cs" />
-    <Compile Include="Web\UI\Design\WebObjectBinderDesigner.cs" />
     <Compile Include="Web\UI\WebObjectBinder.cs" />
     <None Include="Mapping\MemberMapper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

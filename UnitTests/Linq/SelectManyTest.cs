@@ -237,6 +237,28 @@ namespace Data.Linq
 				select new { p.Value1, n = c.ChildID + 1, o = c }).Count()));
 		}
 
+		[Test]
+		public void TestJoin1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in 
+					from p in Parent
+					from g in p.GrandChildren
+					join c in Child on g.ChildID equals c.ChildID
+					join t in Types on c.ParentID equals t.ID
+					select c
+				join t in Person on p.ParentID equals t.ID
+				select p,
+				from p in 
+					from p in db.Parent
+					from g in p.GrandChildren
+					join c in db.Child on g.ChildID equals c.ChildID
+					join t in db.Types on c.ParentID equals t.ID
+					select c
+				join t in db.Person on p.ParentID equals t.ID
+				select p));
+		}
+
 		void Foo(Expression<Func<object[],object>> func)
 		{
 			/*

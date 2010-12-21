@@ -53,7 +53,8 @@ namespace BLToolkit.Data.Linq
 		enum ParsingMethod
 		{
 			Select,
-			Where
+			Where,
+			OrderBy
 		}
 
 		readonly List<ParsingMethod> _parsingMethod = new List<ParsingMethod> { ParsingMethod.Select };
@@ -606,7 +607,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Parse Select
 
-		QuerySource[] ParseSelect(LambdaInfo l, params QuerySource[] sources)
+		QuerySource[] ParseSelect(ParsingMethod parsingMethod, LambdaInfo l, params QuerySource[] sources)
 		{
 #if DEBUG && TRACE_PARSING
 			foreach (var source in sources)
@@ -615,7 +616,7 @@ namespace BLToolkit.Data.Linq
 
 			ParsingTracer.IncIndentLevel();
 
-			_parsingMethod.Insert(0, ParsingMethod.Select);
+			_parsingMethod.Insert(0, parsingMethod);
 
 			var select = ParseSelectInternal(l, sources);
 
@@ -627,6 +628,11 @@ namespace BLToolkit.Data.Linq
 				return sources;
 
 			return new[] { select }.Concat(sources).ToArray();
+		}
+
+		QuerySource[] ParseSelect(LambdaInfo l, params QuerySource[] sources)
+		{
+			return ParseSelect(ParsingMethod.Select, l, sources);
 		}
 
 		QuerySource ParseSelectInternal(LambdaInfo l, QuerySource[] sources)
@@ -709,7 +715,7 @@ namespace BLToolkit.Data.Linq
 
 		void CheckSubQueryForSelect(QuerySource[] sources)
 		{
-			if (CurrentSql.Select.IsDistinct)
+			if (_parsingMethod[0] != ParsingMethod.OrderBy && CurrentSql.Select.IsDistinct)
 				sources[0] = WrapInSubQuery(sources[0]);
 		}
 
@@ -1393,7 +1399,7 @@ namespace BLToolkit.Data.Linq
 			if (CurrentSql.Select.TakeValue != null || CurrentSql.Select.SkipValue != null)
 				source = WrapInSubQuery(source);
 
-			var order  = ParseSelect(lambda, source)[0];
+			var order  = ParseSelect(ParsingMethod.OrderBy, lambda, source)[0];
 			var fields = new List<QueryField>(order is QuerySource.Table ? order.GetKeyFields(true).Select(f => f) : order.Fields);
 
 			if (!isThen)
@@ -1809,7 +1815,7 @@ namespace BLToolkit.Data.Linq
 		{
 			var cond = ParseAnyCondition(setType, expr, lambda, null);
 
-			if (_parsingMethod[0] == ParsingMethod.Select)
+			if (_parsingMethod[0] == ParsingMethod.Select || _parsingMethod[0] == ParsingMethod.OrderBy)
 			{
 				var sc = new SqlQuery.SearchCondition();
 				sc.Conditions.Add(cond);

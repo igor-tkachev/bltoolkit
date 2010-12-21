@@ -363,8 +363,9 @@ namespace Data.Linq
 
 						foreach (var p in _parent)
 						{
-							p.Children = Child.Where(c => c.ParentID == p.ParentID).ToList();
-							p.Types    = Types.FirstOrDefault(t => t.ID == p.ParentID);
+							p.Children      = Child.     Where(c => c.ParentID == p.ParentID).ToList();
+							p.GrandChildren = GrandChild.Where(c => c.ParentID == p.ParentID).ToList();
+							p.Types         = Types.FirstOrDefault(t => t.ID == p.ParentID);
 						}
 					}
 

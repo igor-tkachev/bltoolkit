@@ -9,13 +9,14 @@ using System.Web.UI;
 using BLToolkit.ComponentModel;
 using BLToolkit.ComponentModel.Design;
 using BLToolkit.EditableObjects;
-using BLToolkit.Web.UI.Design;
 
 namespace BLToolkit.Web.UI
 {
 	[DefaultProperty("TypeName")]
 	[ToolboxBitmap(typeof(WebObjectBinder))]
-	[Designer(typeof(WebObjectBinderDesigner))]
+#if !FW4
+	[Designer(typeof(BLToolkit.Web.UI.Design.WebObjectBinderDesigner))]
+#endif
 	[PersistChildren(false)]
 	[ParseChildren(true)]
 	[Description("BLToolkit Web Object Binder")]

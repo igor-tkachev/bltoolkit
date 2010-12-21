@@ -274,5 +274,33 @@ namespace Data.Linq
 				   Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID),
 				db.Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID)));
 		}
+
+		[Test]
+		public void Distinct()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p in Parent
+				join c in Child on p.ParentID equals c.ParentID
+				join g in GrandChild on c.ChildID equals  g.ChildID
+				select p).Distinct().OrderBy(p => p.ParentID),
+				(from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID
+				join g in db.GrandChild on c.ChildID equals  g.ChildID
+				select p).Distinct().OrderBy(p => p.ParentID)));
+		}
+
+		[Test]
+		public void Take()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p in Parent
+				join c in Child on p.ParentID equals c.ParentID
+				join g in GrandChild on c.ChildID equals  g.ChildID
+				select p).Take(3).OrderBy(p => p.ParentID),
+				(from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID
+				join g in db.GrandChild on c.ChildID equals  g.ChildID
+				select p).Take(3).OrderBy(p => p.ParentID)));
+		}
 	}
 }

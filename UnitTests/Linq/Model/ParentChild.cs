@@ -23,6 +23,9 @@ namespace Data.Linq.Model
 		public List<Child> Children;
 
 		[Association(ThisKey = "ParentID", OtherKey = "ParentID")]
+		public List<GrandChild> GrandChildren;
+
+		[Association(ThisKey = "ParentID", OtherKey = "ParentID")]
 		public IEnumerable<Child> Children2
 		{
 			get { return Children; }

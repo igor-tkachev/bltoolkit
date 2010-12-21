@@ -11,37 +11,24 @@ namespace BLToolkit.DataAccess
 	{
 		public SqlQueryInfo(ObjectMapper objectMapper)
 		{
-			_objectMapper = objectMapper;
+			ObjectMapper = objectMapper;
 		}
 
-		private string _queryText;
-		public  string  QueryText
-		{
-			get { return _queryText;  }
-			set { _queryText = value; }
-		}
-
-		private readonly ObjectMapper _objectMapper;
-		public           ObjectMapper  ObjectMapper
-		{
-			get { return _objectMapper; }
-		}
+		public string       QueryText    { get; set; }
+		public ObjectMapper ObjectMapper { get; private set; }
 
 		public Type ObjectType
 		{
-			get { return _objectMapper.TypeAccessor.OriginalType; }
+			get { return ObjectMapper.TypeAccessor.OriginalType; }
 		}
 
 		private readonly List<SqlQueryParameterInfo> _parameters = new List<SqlQueryParameterInfo>();
 
 		public SqlQueryParameterInfo AddParameter(string parameterName, string fieldName)
 		{
-			SqlQueryParameterInfo parameter = new SqlQueryParameterInfo();
+			var parameter = new SqlQueryParameterInfo { ParameterName = parameterName, FieldName = fieldName };
 
-			parameter.ParameterName = parameterName;
-			parameter.FieldName     = fieldName;
-
-			parameter.SetMemberMapper(_objectMapper);
+			parameter.SetMemberMapper(ObjectMapper);
 
 			_parameters.Add(parameter);
 
@@ -53,11 +40,11 @@ namespace BLToolkit.DataAccess
 			if (_parameters.Count != key.Length)
 				throw new DataAccessException("Parameter list does match key list.");
 
-			IDbDataParameter[] parameters = new IDbDataParameter[_parameters.Count];
+			var parameters = new IDbDataParameter[_parameters.Count];
 
-			for (int i = 0; i < _parameters.Count; i++)
+			for (var i = 0; i < _parameters.Count; i++)
 			{
-				SqlQueryParameterInfo info = _parameters[i];
+				var info = _parameters[i];
 
 				parameters[i] = db.Parameter(info.ParameterName, key[i]);
 			}
@@ -67,16 +54,16 @@ namespace BLToolkit.DataAccess
 
 		public IDbDataParameter[] GetParameters(DbManager db, object obj)
 		{
-			IDbDataParameter[] parameters = new IDbDataParameter[_parameters.Count];
+			var parameters = new IDbDataParameter[_parameters.Count];
 
-			for (int i = 0; i < _parameters.Count; i++)
+			for (var i = 0; i < _parameters.Count; i++)
 			{
-				SqlQueryParameterInfo info = _parameters[i];
+				var info = _parameters[i];
 
 				//parameters[i] = db.Parameter(info.ParameterName, info.MemberMapper.GetValue(obj));
 
-				MapMemberInfo mmi = info.MemberMapper.MapMemberInfo;
-				object        val = info.MemberMapper.GetValue(obj);
+				var mmi = info.MemberMapper.MapMemberInfo;
+				var val = info.MemberMapper.GetValue(obj);
 
 				if (val == null && mmi.Nullable && mmi.NullValue == null)
 				{
@@ -101,9 +88,9 @@ namespace BLToolkit.DataAccess
 
 		public MemberMapper[] GetMemberMappers()
 		{
-			MemberMapper[] memberss = new MemberMapper[_parameters.Count];
+			var memberss = new MemberMapper[_parameters.Count];
 
-			for (int i = 0; i < _parameters.Count; i++)
+			for (var i = 0; i < _parameters.Count; i++)
 				memberss[i] = _parameters[i].MemberMapper;
 
 			return memberss;

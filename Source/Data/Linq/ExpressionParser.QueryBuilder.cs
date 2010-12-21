@@ -13,7 +13,6 @@ namespace BLToolkit.Data.Linq
 	using Common;
 	using Data.Sql;
 	using Mapping;
-	using Parser;
 	using Reflection;
 
 	partial class ExpressionParserOld<T>
@@ -133,16 +132,20 @@ namespace BLToolkit.Data.Linq
 						throw new NotImplementedException();
 				}, 
 				sub    =>                                           // QueryInfo.SubQuery
-					{
-						result = BuildSubQuery(sub, ex, i => converter(subQuery.EnsureField(i.Field).Select(this)[0]));
-					},
+				{
+					result = BuildSubQuery(sub, ex, i => converter(subQuery.EnsureField(i.Field).Select(this)[0]));
+				},
 				scalar =>                                           // QueryInfo.Scalar
 				{
 					var idx = subQuery.Fields[0].Select(this);
 					result = BuildField(scalar.Lambda.Body, subQuery.Fields[0].GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
 				},
 				_      => { throw new NotImplementedException(); }, // QueryInfo.GroupBy
-				_      => { throw new NotImplementedException(); }  // QueryInfo.SubQuerySourceColumn
+				col    =>                                           // QueryInfo.SubQuerySourceColumn
+				{
+					result = BuildSelect(col, ex, converter);
+					//result = BuildSelect(col.SourceColumn, ex, converter);
+				}
 			);
 
 			ParsingTracer.DecIndentLevel();
