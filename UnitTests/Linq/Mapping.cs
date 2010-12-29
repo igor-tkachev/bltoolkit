@@ -119,6 +119,26 @@ namespace Data.Linq
 			});
 		}
 
+		[TableName("Child")]
+		public class ChildObject
+		{
+			public int ParentID;
+			public int ChildID;
+
+			[Association(ThisKey="ParentID", OtherKey="ParentID")]
+			public ParentObject Parent;
+		}
+
+		[Test]
+		public void Inner3()
+		{
+			ForEachProvider(db =>
+			{
+				var e = db.GetTable<ChildObject>().First(c => c.Parent.Value.Value1 == 1);
+				Assert.AreEqual(1, e.ParentID);
+			});
+		}
+
 		[TableName("Parent")]
 		public class ParentObject2
 		{

@@ -294,7 +294,18 @@ namespace BLToolkit.Data.Linq
 									return field;
 							}
 
-							return GetField(ma.Member);
+							var f = GetField(ma.Member);
+
+							if (f == null && list.Count - currentMember > 1)
+							{
+								var nm = string.Join(".", list.Skip(currentMember).Select(_ => _.Name).ToArray());
+
+								Column col;
+								if (_columns.TryGetValue(nm, out col))
+									return col;
+							}
+
+							return f;
 						}
 
 						// Check for associations and 'InnerObject.Field' case.

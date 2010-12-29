@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
@@ -74,7 +75,28 @@ namespace BLToolkit.TypeBuilder
 
 		static void SubscribeAssemblyResolver()
 		{
-			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+#if FW4
+			// This hack allows skipping FW 4.0 security check for partial trusted assemblies.
+			//
+
+			var dm   = new DynamicMethod("SubscribeAssemblyResolverEx", typeof(void), null);
+			var emit = new EmitHelper(dm.GetILGenerator());
+
+			emit
+				.call     (typeof(AppDomain).GetProperty("CurrentDomain").GetGetMethod())
+				.ldnull
+				.ldftn    (typeof(TypeFactory).GetMethod("AssemblyResolver"))
+				.newobj   (typeof(ResolveEventHandler).GetConstructor(new[] { typeof(object), typeof(IntPtr) }))
+				.callvirt (typeof(AppDomain).GetEvent("AssemblyResolve").GetAddMethod())
+				.ret()
+				;
+
+			var setter = (Action)dm.CreateDelegate(typeof(Action));
+
+			setter();
+#else
+			AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
+#endif
 		}
 
 		#region Create Assembly
@@ -359,7 +381,7 @@ namespace BLToolkit.TypeBuilder
 			//
 		}
 
-		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		public static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
 		{
 			var name      = args.Name;
 			var nameParts = name.Split(',');
