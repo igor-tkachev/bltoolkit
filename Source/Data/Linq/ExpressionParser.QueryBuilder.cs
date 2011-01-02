@@ -1318,6 +1318,7 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.ExclusiveOr:
 					case ExpressionType.Modulo:
 					case ExpressionType.Multiply:
+					case ExpressionType.MultiplyChecked:
 					case ExpressionType.Or:
 					case ExpressionType.Power:
 					case ExpressionType.Subtract:
@@ -1337,7 +1338,8 @@ namespace BLToolkit.Data.Linq
 								case ExpressionType.Divide         : return Convert(new SqlBinaryExpression(t, l, "/", r, Precedence.Multiplicative));
 								case ExpressionType.ExclusiveOr    : return Convert(new SqlBinaryExpression(t, l, "^", r, Precedence.Bitwise));
 								case ExpressionType.Modulo         : return Convert(new SqlBinaryExpression(t, l, "%", r, Precedence.Multiplicative));
-								case ExpressionType.Multiply       : return Convert(new SqlBinaryExpression(t, l, "*", r, Precedence.Multiplicative));
+								case ExpressionType.Multiply:
+								case ExpressionType.MultiplyChecked : return Convert(new SqlBinaryExpression(t, l, "*", r, Precedence.Multiplicative));
 								case ExpressionType.Or             : return Convert(new SqlBinaryExpression(t, l, "|", r, Precedence.Bitwise));
 								case ExpressionType.Power          : return Convert(new SqlFunction(t, "Power", l, r));
 								case ExpressionType.Subtract       :
