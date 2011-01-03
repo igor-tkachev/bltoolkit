@@ -290,6 +290,10 @@ namespace BLToolkit.Data.Linq
 
 						var association = GetSource(null, info);
 
+						////////////////
+						while (association is QuerySource.SubQuerySourceColumn)
+							association = ((QuerySource.SubQuerySourceColumn)association).SourceColumn;
+
 						if (association != null)
 						{
 							association = _convertSource(association, new LambdaInfo(info));
@@ -678,6 +682,9 @@ namespace BLToolkit.Data.Linq
 								}
 							}
 
+							if (src.Lambda == null && src is QuerySource.SubQuerySourceColumn)
+								src = new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
+
 							return src;
 						}
 					}
@@ -936,8 +943,8 @@ namespace BLToolkit.Data.Linq
 
 			{
 				var current = new SqlQuery();
-				var source1 = new QuerySource.SubQuery(current, sql,        source);
-				var source2 = new QuerySource.SubQuery(current, CurrentSql, seq2[0]);
+				var source1 = new QuerySource.SubQuery(current, sql,        resultSelector, source,  true);
+				var source2 = new QuerySource.SubQuery(current, CurrentSql, resultSelector, seq2[0], true);
 
 				//current.From.Table(source1.SubSql);
 				//current.From.Table(source2.SubSql);
@@ -1454,6 +1461,8 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.WriteLine();
 			ParsingTracer.IncIndentLevel();
 
+			CurrentSql = select.SqlQuery;
+
 			ParseTake(ParseExpression(value, select));
 
 			ParsingTracer.DecIndentLevel();
@@ -1815,36 +1824,40 @@ namespace BLToolkit.Data.Linq
 		{
 			var cond = ParseAnyCondition(setType, expr, lambda, null);
 
-			if (_parsingMethod[0] == ParsingMethod.Select || _parsingMethod[0] == ParsingMethod.OrderBy)
+			switch (_parsingMethod[0])
 			{
-				var sc = new SqlQuery.SearchCondition();
-				sc.Conditions.Add(cond);
+				case ParsingMethod.Select  :
+				case ParsingMethod.OrderBy :
+					{
+						var sc = new SqlQuery.SearchCondition();
+						sc.Conditions.Add(cond);
 
-				var func   = Convert(new SqlFunction(typeof(bool), "CASE", sc, new SqlValue(true), new SqlValue(false)));
-				var scalar = new QuerySource.Scalar(CurrentSql, new LambdaInfo(parentInfo), func, null);
+						var func   = Convert(new SqlFunction(typeof(bool), "CASE", sc, new SqlValue(true), new SqlValue(false)));
+						var scalar = new QuerySource.Scalar(CurrentSql, new LambdaInfo(parentInfo), func, null);
 
-				scalar.Select(this);
+						scalar.Select(this);
 
-				_buildSelect = () =>
-				{
-					var pi = BuildField(parentInfo, null, new[] { 0 });
-
-					var mapper = Expression.Lambda<Query<T>.Mapper<bool>>(
-						pi, new[]
+						_buildSelect = () =>
 						{
-							_infoParam,
-							_contextParam,
-							_dataContextParam,
-							_dataReaderParam,
-							_mapSchemaParam,
-							ExpressionParam,
-							ParametersParam
-						});
+							var pi = BuildField(parentInfo, null, new[] { 0 });
 
-						_info.SetElementQuery(mapper.Compile());
-				};
+							var mapper = Expression.Lambda<Query<T>.Mapper<bool>>(
+								pi, new[]
+								{
+									_infoParam,
+									_contextParam,
+									_dataContextParam,
+									_dataReaderParam,
+									_mapSchemaParam,
+									ExpressionParam,
+									ParametersParam
+								});
 
-				return new[] { scalar };
+								_info.SetElementQuery(mapper.Compile());
+						};
+
+						return new[] { scalar };
+					}
 			}
 
 			CurrentSql.Where.SearchCondition.Conditions.Add(cond);

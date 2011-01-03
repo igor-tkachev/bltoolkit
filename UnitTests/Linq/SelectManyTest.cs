@@ -259,6 +259,22 @@ namespace Data.Linq
 				select p));
 		}
 
+		[Test]
+		public void Test3()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				from p in Parent
+				from g in p.GrandChildren
+				from t in Person
+				let c = g.Child
+				select c,
+				from p in db.Parent
+				from g in p.GrandChildren
+				from t in db.Person
+				let c = g.Child
+				select c));
+		}
+
 		void Foo(Expression<Func<object[],object>> func)
 		{
 			/*

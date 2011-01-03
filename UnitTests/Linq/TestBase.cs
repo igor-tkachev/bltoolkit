@@ -697,8 +697,8 @@ namespace Data.Linq
 
 		protected void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)
 		{
-			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
+			var expectedList = expected.ToList();
 
 			Assert.AreNotEqual(0, expectedList.Count);
 			Assert.AreEqual(expectedList.Count, resultList.Count);
@@ -716,8 +716,8 @@ namespace Data.Linq
 
 		protected void AreSame<T>(IEnumerable<T> expected, IEnumerable<T> result)
 		{
-			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
+			var expectedList = expected.ToList();
 
 			Assert.AreNotEqual(0, expectedList.Count);
 			Assert.AreEqual(expectedList.Count, resultList.Count);

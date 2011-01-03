@@ -143,8 +143,7 @@ namespace BLToolkit.Data.Linq
 				_      => { throw new NotImplementedException(); }, // QueryInfo.GroupBy
 				col    =>                                           // QueryInfo.SubQuerySourceColumn
 				{
-					result = BuildSelect(col, ex, converter);
-					//result = BuildSelect(col.SourceColumn, ex, converter);
+					result = BuildSelect(col, ex, i => converter(subQuery.EnsureField(i.Field).Select(this)[0]));
 				}
 			);
 
@@ -434,7 +433,8 @@ namespace BLToolkit.Data.Linq
 
 					case ExpressionType.Parameter:
 						{
-							if (query.Lambda.MethodInfo         != null     &&
+							if (query.Lambda                    != null &&
+							    query.Lambda.MethodInfo         != null     &&
 							    query.Lambda.MethodInfo.Name    == "Select" &&
 							    query.Lambda.Parameters.Length  == 2        &&
 							    query.Lambda.Parameters[1]      == pi)
@@ -477,6 +477,11 @@ namespace BLToolkit.Data.Linq
 
 								throw new InvalidOperationException();
 							}
+
+							//if (query.Lambda == null && query is QuerySource.SubQuerySourceColumn)
+							//{
+							//	return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)query, converter);
+							//}
 
 							break;
 						}
@@ -1775,7 +1780,9 @@ namespace BLToolkit.Data.Linq
 
 		bool IsSubQuery(Expression expression, bool ignoreMembers, params QuerySource[] queries)
 		{
-			if (queries.Length > 0 && queries[0] is QuerySource.SubQuerySourceColumn)
+			if (queries.Length > 0 &&
+				queries[0] is QuerySource.SubQuerySourceColumn &&
+				((QuerySource.SubQuerySourceColumn)queries[0]).SourceColumn is QuerySource.GroupBy)
 				return false;
 
 			switch (expression.NodeType)

@@ -204,6 +204,68 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Any9()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in 
+					from p in Parent
+					from g in p.GrandChildren
+					join c in Child on g.ChildID equals c.ChildID
+					select c
+				where !p.GrandChildren.Any(x => x.ParentID < 0)
+				select p,
+				from p in 
+					from p in db.Parent
+					from g in p.GrandChildren
+					join c in db.Child on g.ChildID equals c.ChildID
+					select c
+				where !p.GrandChildren.Any(x => x.ParentID < 0)
+				select p));
+		}
+
+		[Test]
+		public void Any10()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in 
+					from p in Parent
+					from g in p.GrandChildren
+					//join c in Child on g.ChildID equals c.ChildID
+					select p
+				where !p.GrandChildren.Any(x => x.ParentID < 0)
+				select p,
+				from p in 
+					from p in db.Parent
+					from g in p.GrandChildren
+					//join c in db.Child on g.ChildID equals c.ChildID
+					select p
+				where !p.GrandChildren.Any(x => x.ParentID < 0)
+				select p));
+		}
+
+		[Test]
+		public void Any11()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in 
+					from p in Parent
+					from g in p.GrandChildren
+					join c in Child on g.ChildID equals c.ChildID
+					join t in Types on c.ParentID equals t.ID
+					select c
+				where !p.GrandChildren.Any(x => x.ParentID < 0)
+				select p,
+				from p in 
+					from p in db.Parent
+					from g in p.GrandChildren
+					join c in db.Child on g.ChildID equals c.ChildID
+					join t in db.Types on c.ParentID equals t.ID
+					select c
+				where !p.GrandChildren.Any(x => x.ParentID < 0)
+				select p));
+		}
+
+		[Test]
 		public void All1()
 		{
 			ForEachProvider(db => AreEqual(

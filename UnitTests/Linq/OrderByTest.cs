@@ -292,15 +292,16 @@ namespace Data.Linq
 		[Test]
 		public void Take()
 		{
-			ForEachProvider(db => AreEqual(
-				(from p in Parent
-				join c in Child on p.ParentID equals c.ParentID
-				join g in GrandChild on c.ChildID equals  g.ChildID
-				select p).Take(3).OrderBy(p => p.ParentID),
-				(from p in db.Parent
-				join c in db.Child on p.ParentID equals c.ParentID
-				join g in db.GrandChild on c.ChildID equals  g.ChildID
-				select p).Take(3).OrderBy(p => p.ParentID)));
+			ForEachProvider(new[] { ProviderName.SqlCe }, db =>
+			{
+				var q =
+					(from p in db.Parent
+					 join c in db.Child on p.ParentID equals c.ParentID
+					 join g in db.GrandChild on c.ChildID equals g.ChildID
+					 select p).Take(3).OrderBy(p => p.ParentID);
+
+				Assert.AreEqual(3, q.AsEnumerable().Count());
+			});
 		}
 	}
 }

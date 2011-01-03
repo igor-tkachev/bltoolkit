@@ -561,10 +561,12 @@ namespace BLToolkit.Data.Linq
 
 		public class SubQuery : QuerySource
 		{
-			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery, bool addToSource)
+			public SubQuery(SqlQuery currentSql, SqlQuery subSql, LambdaInfo parentLambda, QuerySource baseQuery, bool addToSource)
 				: base(currentSql, baseQuery.Lambda, baseQuery)
 			{
 				ParsingTracer.WriteLine(subSql);
+
+				_parentLambda = parentLambda;
 
 				SubSql = subSql;
 
@@ -577,10 +579,17 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 
+			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery, bool addToSource)
+				: this(currentSql, subSql, null, baseQuery, addToSource)
+			{
+			}
+
 			public SubQuery(SqlQuery currentSql, SqlQuery subSql, QuerySource baseQuery)
 				: this(currentSql, subSql, baseQuery, true)
 			{
 			}
+
+			LambdaInfo _parentLambda;
 
 			public   SqlQuery                          SubSql;
 			public   QueryField                        CheckNullField;
@@ -597,7 +606,7 @@ namespace BLToolkit.Data.Linq
 				if (!_columns.TryGetValue(field, out col))
 				{
 					col = field is QuerySource ?
-						(QueryField)new SubQuerySourceColumn(this, (QuerySource)field) :
+						(QueryField)new SubQuerySourceColumn(this, _parentLambda, (QuerySource)field) :
 						new SubQueryColumn(this, field);
 
 					Fields.Add(col);
@@ -889,14 +898,18 @@ namespace BLToolkit.Data.Linq
 
 		public class SubQuerySourceColumn : QuerySource
 		{
-			public SubQuerySourceColumn(SubQuery querySource, QuerySource sourceColumn)
-				: base(sourceColumn.SqlQuery, sourceColumn.Lambda, sourceColumn.Sources)
+			public SubQuerySourceColumn(SubQuery querySource, LambdaInfo parentLambda, QuerySource sourceColumn)
+				: base(sourceColumn.SqlQuery, sourceColumn.Lambda/* ?? querySource.Lambda*/, sourceColumn.Sources)
 			{
+				_parentLambda = parentLambda;
+
 				QuerySource  = querySource;
 				SourceColumn = sourceColumn;
 
 				ParsingTracer.WriteLine(sourceColumn);
 			}
+
+			LambdaInfo _parentLambda;
 
 			public SubQuery    QuerySource;
 			public QuerySource SourceColumn;
@@ -914,6 +927,16 @@ namespace BLToolkit.Data.Linq
 			{
 				var field = SourceColumn.GetField(mi);
 				return field == null ? null : QuerySource.EnsureField(field);
+			}
+
+			public override QueryField GetBaseField(LambdaInfo lambda, Expression expr)
+			{
+				var field = base.GetBaseField(lambda, expr);
+
+				if (field == null && /*lambda == null &&*/ expr.NodeType == ExpressionType.Parameter)
+					return SourceColumn;
+
+				return field;
 			}
 
 			public override List<QueryField> GetKeyFields(bool allIfEmpty)

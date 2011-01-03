@@ -1102,6 +1102,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						//{
 						//    column.ToString();
 						//}
+
+						var sql = _sqlQuery.SqlText;
 #endif
 
 						var table = _sqlQuery.GetTableSource(column.Parent);

@@ -3128,7 +3128,7 @@ namespace BLToolkit.Data.Sql
 			{
 				var sql = e as SqlQuery;
 
-				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple)
+				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._set != null)
 					return;
 
 				var table = sql.From.Tables[0];
