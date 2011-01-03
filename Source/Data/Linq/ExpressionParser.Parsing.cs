@@ -1888,7 +1888,12 @@ namespace BLToolkit.Data.Linq
 					{
 						foreach (var parentQuery in ParentQueries)
 						{
-							if (parentQuery.Parent.Find(t.ParentAssociation))
+							var parent = parentQuery.Parent;
+
+							while (parent is QuerySource.SubQuerySourceColumn)
+								parent = ((QuerySource.SubQuerySourceColumn)parent).SourceColumn;
+
+							if (parent.Find(t.ParentAssociation))
 							{
 								var orig = t;
 								t = CreateTable(new SqlQuery(), l);
