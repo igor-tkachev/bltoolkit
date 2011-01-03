@@ -262,17 +262,33 @@ namespace Data.Linq
 		[Test]
 		public void Test3()
 		{
-			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
-				from p in Parent
+			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
+				(from p in Parent
 				from g in p.GrandChildren
 				from t in Person
 				let c = g.Child
-				select c,
-				from p in db.Parent
+				select c).Count(),
+				(from p in db.Parent
 				from g in p.GrandChildren
 				from t in db.Person
 				let c = g.Child
-				select c));
+				select c).Count()));
+		}
+
+		[Test]
+		public void Test4()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in Parent
+				from g in p.GrandChildren
+				join c in db.Child on g.ChildID equals c.ChildID
+				join t in db.Types on c.ParentID equals t.ID
+				select c).Count(),
+				(from p in db.Parent
+				from g in p.GrandChildren
+				join c in db.Child on g.ChildID equals c.ChildID
+				join t in db.Types on c.ParentID equals t.ID
+				select c).Count()));
 		}
 
 		void Foo(Expression<Func<object[],object>> func)

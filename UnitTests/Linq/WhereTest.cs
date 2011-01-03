@@ -694,6 +694,34 @@ namespace Data.Linq
 				select c));
 		}
 
+		//[Test]
+		public void AndOr()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				from g in p.GrandChildren
+				join c in Child on g.ChildID equals c.ChildID
+				join t in Types on c.ParentID equals t.ID
+				join r in Person on p.ParentID equals r.ID into gr
+				from r in gr.DefaultIfEmpty()
+				where t.ID == 1 &&
+					!t.BoolValue && t.BoolValue &&
+					t.DateTimeValue < DateTime.Now && DateTime.Now < t.DateTimeValue &&
+					(r == null || r.ID != 1 || (r.ID < 1 && r.ID > 1))
+				select p,
+				from p in db.Parent
+				from g in p.GrandChildren
+				join c in db.Child on g.ChildID equals c.ChildID
+				join t in db.Types on c.ParentID equals t.ID
+				join r in db.Person on p.ParentID equals r.ID into gr
+				from r in gr.DefaultIfEmpty()
+				where t.ID == 1 &&
+					!t.BoolValue && t.BoolValue &&
+					t.DateTimeValue < DateTime.Now && DateTime.Now < t.DateTimeValue &&
+					(r == null || r.ID != 1 || (r.ID < 1 && r.ID > 1))
+				select p));
+		}
+
 		[Test]
 		public void Contains1()
 		{

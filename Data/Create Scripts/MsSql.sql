@@ -498,7 +498,7 @@ CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
 GO
 
 CREATE FUNCTION GetParentByID(@id int)
-RETURNS TABLE 
+RETURNS TABLE
 AS
 RETURN 
 (

@@ -1696,7 +1696,7 @@ namespace BLToolkit.Data.Linq
 					query = WrapInSubQuery(query);
 			}
 
-			var sql = query.SqlQuery;
+			var sql = CurrentSql; // query.SqlQuery;
 			var idx =
 				name == "Count" ?
 					sql.Select.Add(SqlFunction.CreateCount(expression.Type, sql), "cnt") :
