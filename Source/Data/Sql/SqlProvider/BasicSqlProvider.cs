@@ -670,10 +670,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			var isOr = (bool?)null;
 			var len  = sb.Length;
-			var prevPrecedence = condition.Conditions.Count > 1 && !condition.Conditions[0].IsOr ? Precedence.LogicalConjunction : Precedence.LogicalDisjunction;
+			var prevPrecedence = condition.Precedence + 1;
 
-			foreach (var cond in condition.Conditions)
+			for (var i = 0; i < condition.Conditions.Count; i++)
 			{
+				var cond = condition.Conditions[i];
+
 				if (isOr != null)
 				{
 					sb.Append(isOr.Value ? " OR" : " AND");
@@ -693,11 +695,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (cond.IsNot)
 					sb.Append("NOT ");
 
-				BuildPredicate(sb, cond.IsNot ? Precedence.LogicalNegation : prevPrecedence, cond.Predicate);
+				//var precedence = Math.Max(GetPrecedence(cond.Predicate), i + 1 < condition.Conditions.Count && !cond.IsOr ? Precedence.LogicalConjunction : GetPrecedence(cond.Predicate));
+				var precedence = GetPrecedence(cond.Predicate);
+
+				BuildPredicate(sb, cond.IsNot ? Precedence.LogicalNegation : prevPrecedence, precedence, cond.Predicate);
 
 				isOr = cond.IsOr;
 
-				prevPrecedence = cond.Precedence;
+				//prevPrecedence = precedence;
 			}
 		}
 
@@ -1016,7 +1021,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, ISqlPredicate predicate)
 		{
-			var wrap = Wrap(GetPrecedence(predicate), parentPrecedence);
+			BuildPredicate(sb, parentPrecedence, GetPrecedence(predicate), predicate);
+		}
+
+		protected void BuildPredicate(StringBuilder sb, int parentPrecedence, int precedence, ISqlPredicate predicate)
+		{
+			var wrap = Wrap(precedence, parentPrecedence);
 
 			if (wrap) sb.Append('(');
 			BuildPredicate(sb, predicate);

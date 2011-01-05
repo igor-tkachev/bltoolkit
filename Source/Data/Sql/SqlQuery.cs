@@ -1346,12 +1346,10 @@ namespace BLToolkit.Data.Sql
 					if (_conditions.Count == 0) return Sql.Precedence.Unknown;
 					if (_conditions.Count == 1) return _conditions[0].Precedence;
 
-					var precedence = Sql.Precedence.Primary;
-
-					foreach (var condition in _conditions)
-						precedence = Math.Min(precedence, condition.Precedence);
-
-					return precedence;
+					return _conditions.Select(_ =>
+						_.IsNot ? Sql.Precedence.LogicalNegation :
+						_.IsOr  ? Sql.Precedence.LogicalDisjunction :
+						          Sql.Precedence.LogicalConjunction).Min();
 				}
 			}
 
