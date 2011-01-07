@@ -6,13 +6,12 @@ using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using System.Linq;
-using BLToolkit.Data.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
 	using Mapping;
+	using Linq;
 	using Reflection;
 
 	public abstract class BasicSqlProvider : ISqlProvider
@@ -670,12 +669,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			var isOr = (bool?)null;
 			var len  = sb.Length;
-			var prevPrecedence = condition.Precedence + 1;
+			var parentPrecedence = condition.Precedence + 1;
 
-			for (var i = 0; i < condition.Conditions.Count; i++)
+			foreach (var cond in condition.Conditions)
 			{
-				var cond = condition.Conditions[i];
-
 				if (isOr != null)
 				{
 					sb.Append(isOr.Value ? " OR" : " AND");
@@ -695,14 +692,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (cond.IsNot)
 					sb.Append("NOT ");
 
-				//var precedence = Math.Max(GetPrecedence(cond.Predicate), i + 1 < condition.Conditions.Count && !cond.IsOr ? Precedence.LogicalConjunction : GetPrecedence(cond.Predicate));
 				var precedence = GetPrecedence(cond.Predicate);
 
-				BuildPredicate(sb, cond.IsNot ? Precedence.LogicalNegation : prevPrecedence, precedence, cond.Predicate);
+				BuildPredicate(sb, cond.IsNot ? Precedence.LogicalNegation : parentPrecedence, precedence, cond.Predicate);
 
 				isOr = cond.IsOr;
-
-				//prevPrecedence = precedence;
 			}
 		}
 

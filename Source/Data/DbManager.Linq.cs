@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+
+using BLToolkit.Aspects;
 
 namespace BLToolkit.Data
 {
@@ -25,6 +27,12 @@ namespace BLToolkit.Data
 			where T : class
 		{
 			return new Table<T>(new DataContextInfo(this, dispose));
+		}
+
+		public Table<T> GetTable<T>(object instance, [NotNull]MethodInfo methodInfo, [NotNull] params object[] parameters)
+			where T : class
+		{
+			return Linq.Extensions.GetTable<T>(this, instance, methodInfo, parameters);
 		}
 
 		class PreparedQuery

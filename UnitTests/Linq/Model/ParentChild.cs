@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Reflection;
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
@@ -481,4 +482,20 @@ namespace Data.Linq.Model
 	}
 
 	#endregion
+
+	public class Functions
+	{
+		private readonly IDataContext _ctx;
+
+		public Functions(IDataContext ctx)
+		{
+			_ctx = ctx;
+		}
+
+		[TableFunction(Name="GetParentByID")]
+		public Table<Parent> GetParentByID(int? id)
+		{
+			return _ctx.GetTable<Parent>(this, (MethodInfo)(MethodBase.GetCurrentMethod()), id);
+		}
+	}
 }

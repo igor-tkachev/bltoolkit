@@ -61,7 +61,7 @@ namespace BLToolkit.Data.Linq
 		[NotNull] public IDataContextInfo DataContextInfo { get; set; }
 
 		internal  Query<T> Info;
-		internal  object[]          Parameters;
+		internal  object[] Parameters;
 
 		#endregion
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using JetBrains.Annotations;
 
@@ -16,6 +18,42 @@ namespace BLToolkit.Data.Linq
 			where T : class
 		{
 			return new Table<T>(dataContext);
+		}
+
+		static public Table<T> GetTable<T>(
+			this IDataContext dataContext,
+			object instance,
+			[NotNull] MethodInfo methodInfo,
+			[NotNull] params object[] parameters)
+			where T : class
+		{
+			if (methodInfo == null) throw new ArgumentNullException("methodInfo");
+			if (parameters == null) throw new ArgumentNullException("parameters");
+
+			if (!typeof(Table<T>).IsAssignableFrom(methodInfo.ReturnType))
+				throw new LinqException(
+					"Method '{0}.{1}' must return type 'Table<{2}>'",
+					methodInfo.Name, methodInfo.DeclaringType.FullName, typeof(T).FullName);
+
+			Expression expr;
+
+			if (parameters.Length > 0)
+			{
+				var pis  = methodInfo.GetParameters(); 
+				var args = new List<Expression>(parameters.Length);
+
+				for (var i = 0; i < parameters.Length; i++)
+				{
+					var type = pis[i].ParameterType;
+					args.Add(Expression.Constant(parameters[i], type.IsByRef ? type.GetElementType() : type));
+				}
+
+				expr = Expression.Call(Expression.Constant(instance), methodInfo, args); 
+			}
+			else
+				expr = Expression.Call(Expression.Constant(instance), methodInfo); 
+
+			return new Table<T>(dataContext, expr);
 		}
 
 		#endregion

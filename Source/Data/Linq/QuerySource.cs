@@ -34,6 +34,17 @@ namespace BLToolkit.Data.Linq
 				ParsingTracer.DecIndentLevel();
 			}
 
+			public Table(
+				MappingSchema               mappingSchema,
+				SqlQuery                    sqlQuery,
+				LambdaInfo                  lambda,
+				TableFunctionAttribute      attr,
+				IEnumerable<ISqlExpression> arguments)
+				: this(mappingSchema, sqlQuery, lambda)
+			{
+				arguments.ToList();
+			}
+
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Type type)
 				: base(sqlQuery, null)
 			{

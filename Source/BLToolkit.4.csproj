@@ -216,6 +216,8 @@
     <Compile Include="Data\Linq\ReflectionHelper.cs" />
     <Compile Include="Data\Linq\Sql.cs" />
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
+    <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
+    <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
     <Compile Include="Data\Sql\ICloneableElement.cs" />

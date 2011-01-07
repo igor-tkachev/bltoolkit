@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -3152,7 +3153,21 @@ namespace BLToolkit.Data.Linq
 
 		QuerySource.Table CreateTable(SqlQuery sqlQuery, LambdaInfo lambda)
 		{
-			var table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda);
+			return CreateTable(sqlQuery, lambda, null, null);
+		}
+
+		QuerySource.Table CreateTable(SqlQuery sqlQuery, LambdaInfo lambda, TableFunctionAttribute attr, IEnumerable<Expression> arguments)
+		{
+			QuerySource.Table table;
+
+			if (attr != null)
+			{
+				var args = arguments.Select(a => ParseExpression(lambda, a, ParentQueries.Select(q => q.Parent).ToArray()));
+
+				table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda, attr, args);
+			}
+			else
+				table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda);
 
 			if (table.ObjectType != table.OriginalType)
 			{
@@ -3370,6 +3385,30 @@ namespace BLToolkit.Data.Linq
 			SqlFunctionAttribute attr = null;
 
 			foreach (SqlFunctionAttribute a in attrs)
+			{
+				if (a.SqlProvider == _info.SqlProvider.Name)
+				{
+					attr = a;
+					break;
+				}
+
+				if (a.SqlProvider == null)
+					attr = a;
+			}
+
+			return attr;
+		}
+
+		TableFunctionAttribute GetTableFunctionAttribute(ICustomAttributeProvider member)
+		{
+			var attrs = member.GetCustomAttributes(typeof(TableFunctionAttribute), true);
+
+			if (attrs.Length == 0)
+				return null;
+
+			TableFunctionAttribute attr = null;
+
+			foreach (TableFunctionAttribute a in attrs)
 			{
 				if (a.SqlProvider == _info.SqlProvider.Name)
 				{

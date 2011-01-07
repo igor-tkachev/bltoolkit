@@ -134,6 +134,8 @@
       <DependentUpon>Convert.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
+    <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
+    <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs">

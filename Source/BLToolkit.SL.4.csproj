@@ -121,6 +121,8 @@
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
     <Compile Include="Data\Linq\SqlPropertyAttribute.cs" />
+    <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
+    <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
     <Compile Include="Data\Sql\Extensions.cs" />
