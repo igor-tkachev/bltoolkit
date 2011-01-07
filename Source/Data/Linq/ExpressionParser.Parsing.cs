@@ -555,18 +555,18 @@ namespace BLToolkit.Data.Linq
 			{
 				var mc = (MethodCallExpression)expression;
 
-				if (_info.CompiledParameters != null)
-				{
-					if (mc.Object == _info.CompiledParameters[0] || mc.Arguments.Count > 0 && mc.Arguments[0] == _info.CompiledParameters[0])
-						return CreateTable(CurrentSql, new LambdaInfo(expression));
-				}
-
 				if (mc.Method.ReturnType.IsGenericType && mc.Method.ReturnType.GetGenericTypeDefinition() == typeof(Table<>))
 				{
 					var attr = GetTableFunctionAttribute(mc.Method);
 
 					if (attr != null)
 						return CreateTable(CurrentSql, new LambdaInfo(expression), attr, mc.Arguments);
+				}
+
+				if (_info.CompiledParameters != null)
+				{
+					if (mc.Object == _info.CompiledParameters[0] || mc.Arguments.Count > 0 && mc.Arguments[0] == _info.CompiledParameters[0])
+						return CreateTable(CurrentSql, new LambdaInfo(expression));
 				}
 			}
 

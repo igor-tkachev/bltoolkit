@@ -42,7 +42,7 @@ namespace BLToolkit.Data.Linq
 				IEnumerable<ISqlExpression> arguments)
 				: this(mappingSchema, sqlQuery, lambda)
 			{
-				arguments.ToList();
+				attr.SetTable(SqlTable, ((MethodCallExpression)lambda.Body).Method, arguments);
 			}
 
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Type type)

@@ -652,6 +652,21 @@ namespace BLToolkit.ServiceModel
 							foreach (var field in elem.Fields)
 								Append(Dic[field.Value]);
 
+							Append((int)elem.SqlTableType);
+
+							if (elem.SqlTableType != SqlTableType.Table)
+							{
+								if (elem.TableArguments == null)
+									Append(0);
+								else
+								{
+									Append(elem.TableArguments.Length);
+
+									foreach (var expr in elem.TableArguments)
+										Append(Dic[expr]);
+								}
+							}
+
 							break;
 						}
 
@@ -1121,7 +1136,12 @@ namespace BLToolkit.ServiceModel
 							flds[0] = all;
 							Array.Copy(fields, 0, flds, 1, fields.Length);
 
-							obj = new SqlTable(sourceID, name, alias, database, owner, physicalName, objectType, sequenceAttributes, flds);
+							var sqlTableType = (SqlTableType)ReadInt();
+							var tableArgs    = sqlTableType == SqlTableType.Table ? null : ReadArray<ISqlExpression>();
+
+							obj = new SqlTable(
+								sourceID, name, alias, database, owner, physicalName, objectType, sequenceAttributes, flds,
+								sqlTableType, tableArgs);
 
 							break;
 						}

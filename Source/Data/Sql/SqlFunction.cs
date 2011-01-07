@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace BLToolkit.Data.Sql
 {
@@ -34,16 +33,16 @@ namespace BLToolkit.Data.Sql
 			foreach (var p in parameters)
 				if (p == null) throw new ArgumentNullException("parameters");
 
-			_systemType = systemType;
-			_name       = name;
-			_precedence = precedence;
-			_parameters = parameters;
+			SystemType = systemType;
+			Name       = name;
+			Precedence = precedence;
+			Parameters = parameters;
 		}
 
-		readonly Type             _systemType; public Type             SystemType { get { return _systemType; } }
-		readonly string           _name;       public string           Name       { get { return _name;       } }
-		readonly int              _precedence; public int              Precedence { get { return _precedence; } }
-		readonly ISqlExpression[] _parameters; public ISqlExpression[] Parameters { get { return _parameters; } }
+		public Type             SystemType { get; private set; }
+		public string           Name       { get; private set; }
+		public int              Precedence { get; private set; }
+		public ISqlExpression[] Parameters { get; private set; }
 
 		public static SqlFunction CreateCount (Type type, ISqlTableSource table) { return new SqlFunction(type, "Count",  table.All); }
 
@@ -70,8 +69,8 @@ namespace BLToolkit.Data.Sql
 		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 		{
-			for (var i = 0; i < _parameters.Length; i++)
-				_parameters[i] = _parameters[i].Walk(skipColumns, action);
+			for (var i = 0; i < Parameters.Length; i++)
+				Parameters[i] = Parameters[i].Walk(skipColumns, action);
 
 			return action(this);
 		}
@@ -87,11 +86,11 @@ namespace BLToolkit.Data.Sql
 
 			var func = other as SqlFunction;
 
-			if (func == null || _name != func._name || _parameters.Length != func._parameters.Length && _systemType != func._systemType)
+			if (func == null || Name != func.Name || Parameters.Length != func.Parameters.Length && SystemType != func.SystemType)
 				return false;
 
-			for (var i = 0; i < _parameters.Length; i++)
-				if (!_parameters[i].Equals(func._parameters[i]))
+			for (var i = 0; i < Parameters.Length; i++)
+				if (!Parameters[i].Equals(func.Parameters[i]))
 					return false;
 
 			return true;
@@ -149,10 +148,10 @@ namespace BLToolkit.Data.Sql
 			if (!objectTree.TryGetValue(this, out clone))
 			{
 				objectTree.Add(this, clone = new SqlFunction(
-					_systemType,
-					_name,
-					_precedence,
-					_parameters.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
+					SystemType,
+					Name,
+					Precedence,
+					Parameters.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
 			}
 
 			return clone;

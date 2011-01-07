@@ -431,13 +431,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (buildAlias)
 			{
-				var alias = GetTableAlias(ts);
-
-				if (!string.IsNullOrEmpty(alias))
+				if (ts.SqlTableType != SqlTableType.Expression)
 				{
-					if (buildName)
-						sb.Append(" ");
-					sb.Append(Convert(alias, ConvertType.NameToQueryTableAlias));
+					var alias = GetTableAlias(ts);
+
+					if (!string.IsNullOrEmpty(alias))
+					{
+						if (buildName)
+							sb.Append(" ");
+						sb.Append(Convert(alias, ConvertType.NameToQueryTableAlias));
+					}
+					
 				}
 			}
 		}
@@ -1980,10 +1984,63 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var tbl = (SqlTable)table;
 
-						return BuildTableName(new StringBuilder(), 
-							tbl.Database     == null ? null : Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString(),
-							tbl.Owner        == null ? null : Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString(),
-							tbl.PhysicalName == null ? null : Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString()).ToString();
+						var database     = tbl.Database     == null ? null : Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString();
+						var owner        = tbl.Owner        == null ? null : Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString();
+						var physicalName = tbl.PhysicalName == null ? null : Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString();
+
+						var sb = new StringBuilder();
+
+						if (tbl.SqlTableType == SqlTableType.Expression)
+						{
+							if (tbl.TableArguments == null)
+								physicalName = tbl.PhysicalName;
+							else
+							{
+								var values = new object[tbl.TableArguments.Length + 2];
+
+								values[0] = physicalName;
+								values[1] = Convert(tbl.Alias, ConvertType.NameToQueryTableAlias);
+
+								for (var i = 2; i < values.Length; i++)
+								{
+									var value = tbl.TableArguments[i - 2];
+
+									sb.Length = 0;
+									BuildExpression(sb, Precedence.Primary, value);
+									values[i] = sb.ToString();
+								}
+
+								physicalName = string.Format(tbl.Name, values);
+
+								sb.Length = 0;
+							}
+						}
+
+						BuildTableName(sb, database, owner, physicalName);
+
+						if (tbl.SqlTableType == SqlTableType.Function)
+						{
+							sb.Append('(');
+
+							if (tbl.TableArguments != null && tbl.TableArguments.Length > 0)
+							{
+								bool first = true;
+
+								foreach (var arg in tbl.TableArguments)
+								{
+									if (!first)
+										sb.Append(", ");
+
+									BuildExpression(sb, arg, true, !first);
+
+									first = false;
+								}
+							}
+
+							sb.Append(')');
+						}
+
+						return sb.ToString();
 					}
 
 				case QueryElementType.TableSource :

@@ -24,15 +24,16 @@ namespace BLToolkit.Data.Sql
 		internal SqlTable(
 			int id, string name, string alias, string database, string owner, string physicalName, Type objectType,
 			SequenceNameAttribute[] sequenceAttributes,
-			SqlField[] fields)
+			SqlField[] fields,
+			SqlTableType sqlTableType, ISqlExpression[] tableArguments)
 		{
 			_sourceID           = id;
-			_name               = name;
-			_alias              = alias;
-			_database           = database;
-			_owner              = owner;
-			_physicalName       = physicalName;
-			_objectType         = objectType;
+			Name                = name;
+			Alias               = alias;
+			Database            = database;
+			Owner               = owner;
+			PhysicalName        = physicalName;
+			ObjectType          = objectType;
 			_sequenceAttributes = sequenceAttributes;
 
 			_fields  = new ChildContainer<ISqlTableSource,SqlField>(this);
@@ -48,6 +49,9 @@ namespace BLToolkit.Data.Sql
 					break;
 				}
 			}
+
+			SqlTableType   = sqlTableType;
+			TableArguments = tableArguments;
 		}
 
 		#endregion
@@ -59,10 +63,11 @@ namespace BLToolkit.Data.Sql
 			if (mappingSchema == null) throw new ArgumentNullException("mappingSchema");
 
 			bool isSet;
-			_database   = mappingSchema.MetadataProvider.GetDatabaseName(objectType, mappingSchema.Extensions, out isSet);
-			_owner      = mappingSchema.MetadataProvider.GetOwnerName   (objectType, mappingSchema.Extensions, out isSet);
-			_name       = mappingSchema.MetadataProvider.GetTableName   (objectType, mappingSchema.Extensions, out isSet);
-			_objectType = objectType;
+			Database     = mappingSchema.MetadataProvider.GetDatabaseName(objectType, mappingSchema.Extensions, out isSet);
+			Owner        = mappingSchema.MetadataProvider.GetOwnerName   (objectType, mappingSchema.Extensions, out isSet);
+			Name         = mappingSchema.MetadataProvider.GetTableName   (objectType, mappingSchema.Extensions, out isSet);
+			ObjectType   = objectType;
+			PhysicalName = Name;
 
 			var typeExt = TypeExtension.GetTypeExtension(objectType, mappingSchema.Extensions);
 
@@ -88,7 +93,7 @@ namespace BLToolkit.Data.Sql
 
 			if (identityField != null)
 			{
-				var om = mappingSchema.GetObjectMapper(_objectType);
+				var om = mappingSchema.GetObjectMapper(ObjectType);
 				var mm = om[identityField.Name, true];
 
 				_sequenceAttributes = mm.MapMemberInfo.MemberAccessor.GetAttributes<SequenceNameAttribute>();
@@ -106,12 +111,12 @@ namespace BLToolkit.Data.Sql
 
 		public SqlTable(SqlTable table) : this()
 		{
-			_alias              = table._alias;
-			_database           = table._database;
-			_owner              = table._owner;
-			_name               = table._name;
-			_physicalName       = table._physicalName;
-			_objectType         = table._objectType;
+			Alias               = table.Alias;
+			Database            = table.Database;
+			Owner               = table.Owner;
+			Name                = table.Name;
+			PhysicalName        = table.PhysicalName;
+			ObjectType          = table.ObjectType;
 			_sequenceAttributes = table._sequenceAttributes;
 
 			foreach (var field in table.Fields.Values)
@@ -119,20 +124,26 @@ namespace BLToolkit.Data.Sql
 
 			foreach (var join in table.Joins)
 				Joins.Add(join.Clone());
+
+			SqlTableType   = table.SqlTableType;
+			TableArguments = table.TableArguments;
 		}
 
-		public SqlTable(SqlTable table, IEnumerable<SqlField> fields, IEnumerable<Join> joins) : this()
+		public SqlTable(SqlTable table, IEnumerable<SqlField> fields, IEnumerable<Join> joins, ISqlExpression[] tableArguments) : this()
 		{
-			_alias              = table._alias;
-			_database           = table._database;
-			_owner              = table._owner;
-			_name               = table._name;
-			_physicalName       = table._physicalName;
-			_objectType         = table._objectType;
+			Alias               = table.Alias;
+			Database            = table.Database;
+			Owner               = table.Owner;
+			Name                = table.Name;
+			PhysicalName        = table.PhysicalName;
+			ObjectType          = table.ObjectType;
 			_sequenceAttributes = table._sequenceAttributes;
 
 			Fields.AddRange(fields);
 			Joins. AddRange(joins);
+
+			SqlTableType   = table.SqlTableType;
+			TableArguments = tableArguments;
 		}
 
 		#endregion
@@ -155,11 +166,11 @@ namespace BLToolkit.Data.Sql
 			if (te == TypeExtension.Null)
 				throw new ArgumentException(string.Format("Table '{0}' not found.", name));
 
-			_name         = te.Name;
-			_alias        = (string)te.Attributes["Alias"].       Value;
-			_database     = (string)te.Attributes["Database"].    Value;
-			_owner        = (string)te.Attributes["Owner"].       Value;
-			_physicalName = (string)te.Attributes["PhysicalName"].Value;
+			Name         = te.Name;
+			Alias        = (string)te.Attributes["Alias"].       Value;
+			Database     = (string)te.Attributes["Database"].    Value;
+			Owner        = (string)te.Attributes["Owner"].       Value;
+			PhysicalName = (string)te.Attributes["PhysicalName"].Value ?? te.Name;
 
 			foreach (var me in te.Members.Values)
 				Fields.Add(new SqlField(
@@ -187,10 +198,10 @@ namespace BLToolkit.Data.Sql
 
 		void InitFromBase(SqlTable baseTable)
 		{
-			if (_alias        == null) _alias        = baseTable._alias;
-			if (_database     == null) _database     = baseTable._database;
-			if (_owner        == null) _owner        = baseTable._owner;
-			if (_physicalName == null) _physicalName = baseTable._physicalName;
+			if (Alias        == null) Alias        = baseTable.Alias;
+			if (Database     == null) Database     = baseTable.Database;
+			if (Owner        == null) Owner        = baseTable.Owner;
+			if (PhysicalName == null) PhysicalName = baseTable.PhysicalName;
 
 			foreach (var field in baseTable.Fields.Values)
 				if (!Fields.ContainsKey(field.Name))
@@ -228,23 +239,17 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		private string _name;
-		public  string  Name { get { return _name; } set { _name = value; } }
+		public string Name         { get; set; }
+		public string Alias        { get; set; }
+		public string Database     { get; set; }
+		public string Owner        { get; set; }
+		public Type   ObjectType   { get; set; }
+		public string PhysicalName { get; set; }
 
-		private string _alias;
-		public  string  Alias { get { return _alias; } set { _alias = value; } }
+		private SqlTableType _sqlTableType = SqlTableType.Table;
+		public  SqlTableType  SqlTableType { get { return _sqlTableType; } set { _sqlTableType = value; } }
 
-		private string _database;
-		public  string  Database { get { return _database; } set { _database = value; } }
-
-		private string _owner;
-		public  string  Owner { get { return _owner; } set { _owner = value; } }
-
-		private string _physicalName;
-		public  string  PhysicalName { get { return _physicalName ?? _name; } set { _physicalName = value; } }
-
-		private Type    _objectType;
-		public  Type     ObjectType { get { return _objectType; } set { _objectType = value; } }
+		public ISqlExpression[] TableArguments { get; set; }
 
 		readonly ChildContainer<ISqlTableSource,SqlField> _fields;
 		public   ChildContainer<ISqlTableSource,SqlField>  Fields { get { return _fields; } }
@@ -329,12 +334,13 @@ namespace BLToolkit.Data.Sql
 			{
 				var table = new SqlTable
 				{
-					_name               = _name,
-					_alias              = _alias,
-					_database           = _database,
-					_owner              = _owner,
-					_physicalName       = _physicalName,
-					_objectType         = _objectType,
+					Name                = Name,
+					Alias               = Alias,
+					Database            = Database,
+					Owner               = Owner,
+					PhysicalName        = PhysicalName,
+					ObjectType          = ObjectType,
+					SqlTableType        = SqlTableType,
 					_sequenceAttributes = _sequenceAttributes,
 				};
 
@@ -349,6 +355,9 @@ namespace BLToolkit.Data.Sql
 				}
 
 				table._joins.AddRange(_joins.ConvertAll(j => j.Clone()));
+
+				if (TableArguments != null)
+					TableArguments = TableArguments.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray();
 
 				objectTree.Add(this, clone = table);
 				objectTree.Add(All,  table.All);
@@ -402,6 +411,10 @@ namespace BLToolkit.Data.Sql
 
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
+			if (TableArguments != null)
+				for (var i = 0; i < TableArguments.Length; i++)
+					TableArguments[i] = TableArguments[i].Walk(skipColumns, func);
+
 			return func(this);
 		}
 

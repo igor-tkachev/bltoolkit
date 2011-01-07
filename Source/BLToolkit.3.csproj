@@ -152,6 +152,7 @@
     <Compile Include="Data\Linq\Parser\SelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SubQueryInfo.cs" />
     <Compile Include="Data\Linq\Parser\TableParser.cs" />
+    <Compile Include="Data\Sql\SqlTableType.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\MemberMapper.generated.cs">
       <AutoGen>True</AutoGen>

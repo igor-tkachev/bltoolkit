@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.Linq
 {
 	[SerializableAttribute]
-	[AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[AttributeUsageAttribute(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 	public class TableExpressionAttribute : TableFunctionAttribute
 	{
 		public TableExpressionAttribute(string expression)
@@ -11,8 +16,18 @@ namespace BLToolkit.Data.Linq
 		{
 		}
 
+		public TableExpressionAttribute(string expression, params int[] argIndices)
+			: base(expression, argIndices)
+		{
+		}
+
 		public TableExpressionAttribute(string sqlProvider, string expression)
 			: base(sqlProvider, expression)
+		{
+		}
+
+		public TableExpressionAttribute(string sqlProvider, string expression, params int[] argIndices)
+			: base(sqlProvider, expression, argIndices)
 		{
 		}
 
@@ -25,6 +40,13 @@ namespace BLToolkit.Data.Linq
 		{
 			get { return base.Name;  }
 			set { base.Name = value; }
+		}
+
+		public override void SetTable(SqlTable table, MemberInfo member, IEnumerable<ISqlExpression> args)
+		{
+			table.SqlTableType   = SqlTableType.Expression;
+			table.Name           = Expression ?? member.Name;
+			table.TableArguments = ConvertArgs(member, args.ToArray());
 		}
 	}
 }

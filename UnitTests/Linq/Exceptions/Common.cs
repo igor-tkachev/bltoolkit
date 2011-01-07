@@ -53,7 +53,7 @@ namespace Data.Exceptions
 
 									if (oldTable.Name == "Parent")
 									{
-										var newTable = new SqlTable(oldTable) {Name = tableName};
+										var newTable = new SqlTable(oldTable) { Name = tableName, PhysicalName = tableName };
 
 										foreach (var field in oldTable.Fields.Values)
 											dic.Add(field, newTable.Fields[field.Name]);
@@ -85,6 +85,8 @@ namespace Data.Exceptions
 					ParentID = n,
 					Value1   = n
 				});
+
+				db.Parent.Delete(p => p.ParentID == n);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Reflection;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 
@@ -37,5 +37,11 @@ namespace Data.Linq
 		public Table<GrandChild1>            GrandChild1            { get { return GetTable<GrandChild1>();            } }
 		public Table<LinqDataTypes>          Types                  { get { return GetTable<LinqDataTypes>();          } }
 		public Table<LinqDataTypes2>         Types2                 { get { return GetTable<LinqDataTypes2>();         } }
+
+		[TableFunction(Name="GetParentByID")]
+		public Table<Parent> GetParentByID(int? id)
+		{
+			return GetTable<Parent>(this, (MethodInfo)(MethodBase.GetCurrentMethod()), id);
+		}
 	}
 }

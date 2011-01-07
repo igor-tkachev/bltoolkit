@@ -325,7 +325,8 @@ namespace BLToolkit.Data.Sql
 					_joins.AddRange(joins);
 			}
 
-			public ISqlTableSource Source { get; set; }
+			public ISqlTableSource Source       { get; set; }
+			public SqlTableType    SqlTableType { get { return Source.SqlTableType; } }
 
 			internal string _alias;
 			public   string  Alias
@@ -4021,7 +4022,8 @@ namespace BLToolkit.Data.Sql
 
 		public static int SourceIDCounter;
 
-		public int SourceID { get; private set; }
+		public int           SourceID     { get; private set; }
+		public SqlTableType  SqlTableType { get { return SqlTableType.Table; } }
 
 		private SqlField _all;
 		public  SqlField  All

@@ -497,5 +497,12 @@ namespace Data.Linq.Model
 		{
 			return _ctx.GetTable<Parent>(this, (MethodInfo)(MethodBase.GetCurrentMethod()), id);
 		}
+
+		[TableExpression("{0} {1} WITH (TABLOCK)")]
+		public Table<T> WithTabLock<T>()
+			where T : class 
+		{
+			return _ctx.GetTable<T>(this, ((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(T)));
+		}
 	}
 }

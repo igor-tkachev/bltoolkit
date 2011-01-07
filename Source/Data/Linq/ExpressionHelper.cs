@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -38,8 +39,12 @@ namespace BLToolkit.Data.Linq
 				case TypeCode.Boolean :
 				case TypeCode.String  :
 				case TypeCode.Char    : return true;
-				default               : return false;
 			}
+
+			if (TypeHelper.IsNullableType(type))
+				return IsConstant(type.GetGenericArguments()[0]);
+
+			return false;
 		}
 
 		public static bool IsConstant(this Expression expr, Action<ConstantExpression> func)
@@ -1418,7 +1423,7 @@ namespace BLToolkit.Data.Linq
 						var b = Convert(e.Body,       func);
 						var p = Convert(e.Parameters, func);
 
-						return b != e.Body || p != e.Parameters ? Expression.Lambda(b, p.ToArray()) : expr;
+						return b != e.Body || p != e.Parameters ? Expression.Lambda(ex.Type, b, p.ToArray()) : expr;
 					}
 
 				case ExpressionType.ListInit:

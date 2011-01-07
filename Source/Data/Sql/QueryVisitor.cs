@@ -80,6 +80,10 @@ namespace BLToolkit.Data.Sql
 						Visit(table.All, all, parentFirst, action);
 						foreach (var field in table.Fields.Values) Visit(field, all, parentFirst, action);
 						foreach (var join  in table.Joins)         Visit(join,  all, parentFirst, action);
+
+						if (table.TableArguments != null)
+							foreach (var a in table.TableArguments) Visit(a, all, parentFirst, action);
+
 						break;
 					}
 
@@ -321,6 +325,9 @@ namespace BLToolkit.Data.Sql
 		IQueryElement Find<T>(IEnumerable<T> arr, FindFunc find)
 			where T : class, IQueryElement
 		{
+			if (arr == null)
+				return null;
+
 			foreach (var item in arr)
 			{
 				var e = Find(item, find);
@@ -367,9 +374,10 @@ namespace BLToolkit.Data.Sql
 					{
 						var table = (SqlTable)element;
 						return
-							Find(table.All,           find) ?? 
-							Find(table.Fields.Values, find) ?? 
-							Find(table.Joins,         find);
+							Find(table.All,            find) ??
+							Find(table.Fields.Values,  find) ??
+							Find(table.Joins,          find) ??
+							Find(table.TableArguments, find);
 					}
 
 				case QueryElementType.TableSource:
@@ -537,10 +545,13 @@ namespace BLToolkit.Data.Sql
 						var fields1 = ToArray(table.Fields);
 						var fields2 = Convert(fields1,     action, f => new SqlField(f));
 						var joins   = Convert(table.Joins, action, j => j.Clone());
-						var fe      = fields2 == null || ReferenceEquals(fields1,     fields2);
-						var je      = joins   == null || ReferenceEquals(table.Joins, joins);
+						var targs   = table.TableArguments == null ? null : Convert(table.TableArguments, action);
 
-						if (!fe || !je)
+						var fe = fields2 == null || ReferenceEquals(fields1,     fields2);
+						var je = joins   == null || ReferenceEquals(table.Joins, joins);
+						var ta = ReferenceEquals(table.TableArguments, targs);
+
+						if (!fe || !je || !ta)
 						{
 							if (fe)
 							{
@@ -556,7 +567,7 @@ namespace BLToolkit.Data.Sql
 								}
 							}
 
-							newElement = new SqlTable(table, fields2, joins ?? table.Joins);
+							newElement = new SqlTable(table, fields2, joins ?? table.Joins, targs ?? table.TableArguments);
 
 							_visitedElements[((SqlTable)newElement).All] = table.All;
 						}
