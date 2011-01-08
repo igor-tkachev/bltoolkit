@@ -472,7 +472,7 @@ Action<GeneratedTextTransformation> AfterLoadMetadata  = _ => {};
 
 Dictionary<string,Table> Tables = new Dictionary<string,Table>();
 
-partial class Table
+public partial class Table
 {
 	public string       Owner;
 	public string       TableName;
@@ -486,7 +486,7 @@ partial class Table
 	public Dictionary<string,ForeignKey> ForeignKeys = new Dictionary<string,ForeignKey>();
 }
 
-partial class Column
+public partial class Column
 {
 	public int          ID;
 	public string       ColumnName; // Column name in database
@@ -508,7 +508,7 @@ partial class Column
 	public bool IsPrimaryKey { get { return PKIndex >= 0; } }
 }
 
-enum AssociationType
+public enum AssociationType
 {
 	Auto,
 	OneToOne,
@@ -516,7 +516,7 @@ enum AssociationType
 	ManyToOne,
 }
 
-partial class ForeignKey
+public partial class ForeignKey
 {
 	public string          KeyName;
 	public string          MemberName;
