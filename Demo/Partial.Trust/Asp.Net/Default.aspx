@@ -28,7 +28,7 @@ To use BLToolkit in Partial Trust Environment you should perform the following s
 		<li>
 			Use BLTgen.exe to generate BLToolkit extensions at the post-build step. For example:<br/><br/>
 
-			$(ProjectDir)..\..\..\Tools\BLTgen\bin\$(ConfigurationName)\BLTgen.exe $(TargetPath) /O:$(ProjectDir)..\Asp.Net\bin /K:$(ProjectDir)Partial.Trust.snk /D<br/><br/>
+			$(ProjectDir)..\..\..\Tools\BLTgen\bin\$(ConfigurationName)\BLTgen.4.exe $(TargetPath) /O:$(ProjectDir)..\Asp.Net\bin /K:$(ProjectDir)Partial.Trust.snk /D<br/><br/>
 
 			Extension assembly must be signed as well (use /K flag).
 		</li>
@@ -42,7 +42,7 @@ To use BLToolkit in Partial Trust Environment you should perform the following s
 
 <pre style="font-size: small; padding-left: 20px;">
 &lt;configSections&gt;
-	&lt;section name="bltoolkit" type="BLToolkit.Configuration.BLToolkitSection, BLToolkit.3" requirePermission="false"/&gt;
+	&lt;section name="bltoolkit" type="BLToolkit.Configuration.BLToolkitSection, BLToolkit.4" requirePermission="false"/&gt;
 &lt;/configSections&gt;
 &lt;bltoolkit&gt;
 	&lt;typeFactory loadTypes="true" /&gt;
