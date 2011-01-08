@@ -79,31 +79,26 @@ namespace BLToolkit.Data.Linq
 
 		object IDataContext.SetQuery(IQueryContext queryContext)
 		{
-			return queryContext;
+			var ctx = GetDBManager() as IDataContext;
+			return ctx.SetQuery(queryContext);
 		}
 
 		int IDataContext.ExecuteNonQuery(object query)
 		{
 			var ctx = GetDBManager() as IDataContext;
-			var obj = ctx.SetQuery((IQueryContext)query);
-
-			return ctx.ExecuteNonQuery(obj);
+			return ctx.ExecuteNonQuery(query);
 		}
 
 		object IDataContext.ExecuteScalar(object query)
 		{
 			var ctx = GetDBManager() as IDataContext;
-			var obj = ctx.SetQuery((IQueryContext)query);
-
-			return ctx.ExecuteScalar(obj);
+			return ctx.ExecuteScalar(query);
 		}
 
 		IDataReader IDataContext.ExecuteReader(object query)
 		{
 			var ctx = GetDBManager() as IDataContext;
-			var obj = ctx.SetQuery((IQueryContext)query);
-
-			return ctx.ExecuteReader(obj);
+			return ctx.ExecuteReader(query);
 		}
 
 		void IDataContext.ReleaseQuery(object query)

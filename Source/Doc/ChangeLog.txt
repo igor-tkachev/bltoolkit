@@ -7,9 +7,11 @@ Bug fixes
 Enhancement
 
 - No more .NET Framework 2.0 support.
-- T4 Templates for Sybase, MS SQL Server, and PostgreSQL.
+- T4 Templates for Sybase, MS SQL Server, MySql, and PostgreSQL.
 - Linq over WCF.
 - Silverlight support.
+- New attributes TableFunction & TableExpression to support table-valued UDF, hints,
+  and other around table decorations.
 
 
 v 3.2

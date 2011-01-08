@@ -120,6 +120,7 @@ namespace BLToolkit.Data.Linq
 						SetQuery(info);
 					}
 
+					ParsingTracer.DecIndentLevel();
 					return true;
 				}
 			);
