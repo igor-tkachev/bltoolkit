@@ -22,7 +22,8 @@ copy bin\Release\*.dll .
 md DataProviders
 
 cd ..\Tools\BLTgen
-%windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLTgen.csproj /property:Configuration=Release 
+%windir%\Microsoft.NET\Framework\v3.5\MSBuild.exe BLTgen.2008.csproj /property:Configuration=Release 
+%windir%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLTgen.2010.csproj /property:Configuration=Release 
 copy bin\Release\*.exe ..\..\Source
 
 cd ..\..\DataProviders
