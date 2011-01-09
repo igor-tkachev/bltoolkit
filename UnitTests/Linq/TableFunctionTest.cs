@@ -76,5 +76,50 @@ namespace Data.Linq
 				q.ToList();
 			}
 		}
+
+		[Test]
+		public void FreeText1()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from c in db.Category
+					join t in db.FreeTextTable<Northwind.Category,int>("[Description]", "sweetest candy bread and dry meat")
+					on c.CategoryID equals t.Key
+					select c;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void FreeText2()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from c in db.Category
+					join t in db.FreeTextTable<Northwind.Category,int>(c => c.Description, "sweetest candy bread and dry meat")
+					on c.CategoryID equals t.Key
+					select c;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void FreeText3()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from t in db.FreeTextTable<Northwind.Category,int>(c => c.Description, "sweetest candy bread and dry meat")
+					join c in db.Category
+					on t.Key equals c.CategoryID
+					select c;
+
+				q.ToList();
+			}
+		}
 	}
 }

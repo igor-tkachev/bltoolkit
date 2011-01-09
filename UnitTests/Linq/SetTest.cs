@@ -99,11 +99,21 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Except()
+		public void Except1()
 		{
 			ForEachProvider(db => AreEqual(
 				   Child.Except(   Child.Where(p => p.ParentID == 3)),
 				db.Child.Except(db.Child.Where(p => p.ParentID == 3))));
+		}
+
+		//[Test]
+		public void Except2()
+		{
+			var ids = new[] { 1, 2 };
+
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Where(c => c.GrandChildren.Select(_ => _.ParentID ?? 0).Except(ids).Count() == 0),
+				db.Child.Where(c => c.GrandChildren.Select(_ => _.ParentID ?? 0).Except(ids).Count() == 0)));
 		}
 
 		[Test]

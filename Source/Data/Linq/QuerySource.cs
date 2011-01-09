@@ -39,10 +39,11 @@ namespace BLToolkit.Data.Linq
 				SqlQuery                    sqlQuery,
 				LambdaInfo                  lambda,
 				TableFunctionAttribute      attr,
-				IEnumerable<ISqlExpression> arguments)
+				IEnumerable<Expression>     arguments,
+				IEnumerable<ISqlExpression> sqlArguments)
 				: this(mappingSchema, sqlQuery, lambda)
 			{
-				attr.SetTable(SqlTable, ((MethodCallExpression)lambda.Body).Method, arguments);
+				attr.SetTable(SqlTable, ((MethodCallExpression)lambda.Body).Method, arguments, sqlArguments);
 			}
 
 			public Table(MappingSchema mappingSchema, SqlQuery sqlQuery, Type type)

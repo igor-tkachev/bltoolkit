@@ -261,6 +261,9 @@ static Action<GeneratedTextTransformation> RenderUsing = tt =>
 Action<GeneratedTextTransformation> BeforeGenerateModel = _ => {};
 Action<GeneratedTextTransformation> AfterGenerateModel  = _ => {};
 
+Action<GeneratedTextTransformation> BeforeWriteTableProperty = _ => {};
+Action<GeneratedTextTransformation> AfterWriteTableProperty  = _ => {};
+
 void GenerateModel()
 {
 	if (ConnectionString != null) ConnectionString = ConnectionString.Trim();
@@ -295,8 +298,12 @@ void GenerateModel()
 
 	PushIndent("\t");
 
+	BeforeWriteTableProperty(this);
+
 	foreach (var t in tlist)
 		WriteTableProperty(this, t.ClassName, t.DataContextPropertyName ?? t.ClassName, maxlen, maxplen);
+
+	AfterWriteTableProperty(this);
 
 	PopIndent();
 

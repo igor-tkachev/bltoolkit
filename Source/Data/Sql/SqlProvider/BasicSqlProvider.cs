@@ -266,7 +266,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildUpdateTableName(StringBuilder sb)
 		{
 			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Set.Into);
+				BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
 			else
 				BuildTableName(sb, SqlQuery.From.Tables[0], true, true);
 		}
@@ -304,7 +304,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildInsertClause(StringBuilder sb)
 		{
 			AppendIndent(sb).Append("INSERT INTO ");
-			BuildPhysicalTable(sb, SqlQuery.Set.Into);
+			BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
 			sb.AppendLine(" ");
 
 			AppendIndent(sb).AppendLine("(");
@@ -403,13 +403,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine();
 		}
 
-		protected void BuildPhysicalTable(StringBuilder sb, ISqlTableSource table)
+		protected void BuildPhysicalTable(StringBuilder sb, ISqlTableSource table, string alias)
 		{
 			switch (table.ElementType)
 			{
 				case QueryElementType.SqlTable    :
 				case QueryElementType.TableSource :
-					sb.Append(GetTablePhysicalName(table));
+					sb.Append(GetTablePhysicalName(table, alias));
 					break;
 
 				case QueryElementType.SqlQuery    :
@@ -427,7 +427,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected void BuildTableName(StringBuilder sb, SqlQuery.TableSource ts, bool buildName, bool buildAlias)
 		{
 			if (buildName)
-				BuildPhysicalTable(sb, ts.Source);
+			{
+				var alias = GetTableAlias(ts);
+				BuildPhysicalTable(sb, ts.Source, alias);
+			}
 
 			if (buildAlias)
 			{
@@ -1082,7 +1085,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								var table = GetTableAlias(ts);
 
 								table = table == null ?
-									GetTablePhysicalName(field.Table) :
+									GetTablePhysicalName(field.Table, null) :
 									Convert(table, ConvertType.NameToQueryTableAlias).ToString();
 
 								if (string.IsNullOrEmpty(table))
@@ -1119,7 +1122,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (table == null)
 							throw new SqlException(string.Format("Table not found for '{0}'.", column));
 
-						var tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent);
+						var tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent, null);
 
 						if (string.IsNullOrEmpty(tableAlias))
 							throw new SqlException(string.Format("Table {0} should have an alias.", column.Parent));
@@ -1976,7 +1979,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 		}
 
-		string GetTablePhysicalName(ISqlTableSource table)
+		string GetTablePhysicalName(ISqlTableSource table, string alias)
 		{
 			switch (table.ElementType)
 			{
@@ -1999,7 +2002,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								var values = new object[tbl.TableArguments.Length + 2];
 
 								values[0] = physicalName;
-								values[1] = Convert(tbl.Alias, ConvertType.NameToQueryTableAlias);
+								values[1] = Convert(alias, ConvertType.NameToQueryTableAlias);
 
 								for (var i = 2; i < values.Length; i++)
 								{
@@ -2044,7 +2047,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					}
 
 				case QueryElementType.TableSource :
-					return GetTablePhysicalName(((SqlQuery.TableSource)table).Source);
+					return GetTablePhysicalName(((SqlQuery.TableSource)table).Source, alias);
 
 				default :
 					throw new InvalidOperationException();

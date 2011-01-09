@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 using BLToolkit.Data.Sql;
@@ -69,12 +70,12 @@ namespace BLToolkit.Data.Linq
 			return args;
 		}
 
-		public virtual void SetTable(SqlTable table, MemberInfo member, IEnumerable<ISqlExpression> args)
+		public virtual void SetTable(SqlTable table, MemberInfo member, IEnumerable<Expression> arguments, IEnumerable<ISqlExpression> sqlArgs)
 		{
 			table.SqlTableType   = SqlTableType.Function;
 			table.Name           = Name ?? member.Name;
 			table.PhysicalName   = Name ?? member.Name;
-			table.TableArguments = ConvertArgs(member, args.ToArray());
+			table.TableArguments = ConvertArgs(member, sqlArgs.ToArray());
 		}
 	}
 }

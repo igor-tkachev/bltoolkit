@@ -3164,7 +3164,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var args = arguments.Select(a => ParseExpression(lambda, a, ParentQueries.Select(q => q.Parent).ToArray()));
 
-				table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda, attr, args);
+				table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda, attr, arguments, args);
 			}
 			else
 				table = new QuerySource.Table(_info.MappingSchema, sqlQuery, lambda);

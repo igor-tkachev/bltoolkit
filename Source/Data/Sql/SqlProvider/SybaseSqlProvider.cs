@@ -123,7 +123,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
 			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Set.Into);
+				BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
 			else
 				BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 		}
