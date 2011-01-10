@@ -20,7 +20,7 @@ private void LoadServerMetadata()
 			FROM
 				sysobjects
 			WHERE
-				type IN ('U','V') AND sysstat2 > 0";
+				type IN ('U','V')";
 
 		using (var rd = cmd.ExecuteReader())
 		{
@@ -64,7 +64,7 @@ private void LoadServerMetadata()
 					JOIN sysobjects o ON c.id       = o.id
 					JOIN systypes   t ON c.usertype = t.usertype
 			WHERE
-				o.type IN ('U','V') AND o.sysstat2 > 0";
+				o.type IN ('U','V')";
 
 		using (var rd = cmd.ExecuteReader())
 		{
