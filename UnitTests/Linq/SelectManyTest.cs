@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -289,6 +290,128 @@ namespace Data.Linq
 				join c in db.Child on g.ChildID equals c.ChildID
 				join t in db.Types on c.ParentID equals t.ID
 				select c).Count()));
+		}
+
+		[Test]
+		public void Test5()
+		{
+			ForEachProvider(db =>
+			{
+				var q3 =
+					from p in db.Parent
+					from g in db.GrandChild
+					from c in db.Parent2
+					select g.Child;
+
+				q3.ToList();
+			});
+		}
+
+		[Test]
+		public void Test6()
+		{
+			ForEachProvider(db =>
+			{
+				var q3 =
+					from p in db.Parent
+					from g in db.GrandChild
+					from c in db.Parent2
+					let r = g.Child
+					select g.Child;
+
+				q3.ToList();
+			});
+		}
+
+		[Test]
+		public void Test7()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				from p in db.Parent
+				from g in p.GrandChildren
+				from c in db.Parent2
+				let r = g.Child
+				where p.ParentID == g.ParentID
+				select r,
+				from p in db.Parent
+				from g in p.GrandChildren
+				from c in db.Parent2
+				let r = g.Child
+				where p.ParentID == g.ParentID
+				select r));
+		}
+
+		[Test]
+		public void Test8()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db =>
+			{
+				var q2 =
+					from p in
+						from p in db.Parent
+						join c in db.GrandChild on p.ParentID equals c.ParentID
+						select p
+					from g in p.GrandChildren
+					from c in db.Parent2
+					let r = g.Child
+					where
+						p.ParentID == g.ParentID
+					select r;
+
+				q2.ToList();
+			});
+		}
+
+		[Test]
+		public void Test81()
+		{
+			ForEachProvider(db =>
+			{
+				var q2 =
+					from p in
+						from p in db.Parent
+						join c in db.GrandChild on p.ParentID equals c.ParentID
+						select p
+					from g in p.GrandChildren
+					//from c in db.Parent2
+					let r = g.Child
+					where
+						p.ParentID == g.ParentID
+					select r;
+
+				q2.ToList();
+			});
+		}
+
+		[Test]
+		public void Test9()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db =>
+			{
+				var q1 = db.Types.Where(_ => _.ID > 1).Where(_ => _.ID > 2);
+
+				var q2 =
+					from p in db.Parent
+					join c in db.GrandChild on p.ParentID equals c.ParentID
+					join t in q1            on c.ParentID equals t.ID
+					where p.ParentID == 1
+					select p;
+
+				q2 = q2.Distinct().OrderBy(_ => _.ParentID);
+
+				var q3 =
+					from p in q2
+					from g in p.GrandChildren
+					from c in db.Parent2
+					let r = g.Child
+					where
+						p.ParentID == g.ParentID && g.ParentID == c.ParentID
+					select r;
+
+				q3 = q3.Where(_ => _.ChildID == 1);
+
+				q3.ToList();
+			});
 		}
 
 		void Foo(Expression<Func<object[],object>> func)

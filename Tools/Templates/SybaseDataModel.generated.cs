@@ -16,16 +16,17 @@ namespace Templates.Sybase
 {
 	public partial class SybaseDataModel : DbManager
 	{
-		public Table<BinaryData>    BinaryData    { get { return this.GetTable<BinaryData>();    } }
-		public Table<Child>         Child         { get { return this.GetTable<Child>();         } }
-		public Table<DataTypeTest>  DataTypeTest  { get { return this.GetTable<DataTypeTest>();  } }
-		public Table<Doctor>        Doctor        { get { return this.GetTable<Doctor>();        } }
-		public Table<GrandChild>    GrandChild    { get { return this.GetTable<GrandChild>();    } }
-		public Table<LinqDataTypes> LinqDataTypes { get { return this.GetTable<LinqDataTypes>(); } }
-		public Table<MyTable>       MyTable       { get { return this.GetTable<MyTable>();       } }
-		public Table<Parent>        Parent        { get { return this.GetTable<Parent>();        } }
-		public Table<Patient>       Patient       { get { return this.GetTable<Patient>();       } }
-		public Table<Person>        Person        { get { return this.GetTable<Person>();        } }
+		public Table<BinaryData>      BinaryData      { get { return this.GetTable<BinaryData>();      } }
+		public Table<Child>           Child           { get { return this.GetTable<Child>();           } }
+		public Table<DataTypeTest>    DataTypeTest    { get { return this.GetTable<DataTypeTest>();    } }
+		public Table<Doctor>          Doctor          { get { return this.GetTable<Doctor>();          } }
+		public Table<GrandChild>      GrandChild      { get { return this.GetTable<GrandChild>();      } }
+		public Table<LinqDataTypes>   LinqDataTypes   { get { return this.GetTable<LinqDataTypes>();   } }
+		public Table<MyTable>         MyTable         { get { return this.GetTable<MyTable>();         } }
+		public Table<Parent>          Parent          { get { return this.GetTable<Parent>();          } }
+		public Table<Patient>         Patient         { get { return this.GetTable<Patient>();         } }
+		public Table<Person>          Person          { get { return this.GetTable<Person>();          } }
+		public Table<sysquerymetrics> sysquerymetrics { get { return this.GetTable<sysquerymetrics>(); } }
 	}
 
 	[TableName(Name="BinaryData")]
@@ -134,12 +135,38 @@ namespace Templates.Sybase
 		[Nullable,                MaxLength(50)          ] public string MiddleName { get; set; } // nvarchar(50)
 		[                         Required               ] public char   Gender     { get; set; } // char(1)
 
-		// FK_Doctor_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
-		public Doctor Doctor { get; set; }
-
 		// FK_Patient_Person_BackReference
 		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
 		public Patient Patient { get; set; }
+
+		// FK_Doctor_Person_BackReference
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
+		public Doctor Doctor { get; set; }
+	}
+
+	// View
+	[TableName(Name="sysquerymetrics")]
+	public partial class sysquerymetrics
+	{
+		[          Required      ] public int    uid       { get; set; } // int(4)
+		[          Required      ] public int    gid       { get; set; } // int(4)
+		[          Required      ] public int    hashkey   { get; set; } // int(4)
+		[          Required      ] public int    id        { get; set; } // int(4)
+		[          Required      ] public short  sequence  { get; set; } // smallint(2)
+		[Nullable                ] public int?   exec_min  { get; set; } // int(4)
+		[Nullable                ] public int?   exec_max  { get; set; } // int(4)
+		[Nullable                ] public int?   exec_avg  { get; set; } // int(4)
+		[Nullable                ] public int?   elap_min  { get; set; } // int(4)
+		[Nullable                ] public int?   elap_max  { get; set; } // int(4)
+		[Nullable                ] public int?   elap_avg  { get; set; } // int(4)
+		[Nullable                ] public int?   lio_min   { get; set; } // int(4)
+		[Nullable                ] public int?   lio_max   { get; set; } // int(4)
+		[Nullable                ] public int?   lio_avg   { get; set; } // int(4)
+		[Nullable                ] public int?   pio_min   { get; set; } // int(4)
+		[Nullable                ] public int?   pio_max   { get; set; } // int(4)
+		[Nullable                ] public int?   pio_avg   { get; set; } // int(4)
+		[Nullable                ] public int?   cnt       { get; set; } // int(4)
+		[Nullable                ] public int?   abort_cnt { get; set; } // int(4)
+		[Nullable, MaxLength(255)] public string qtext     { get; set; } // varchar(255)
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -718,7 +717,8 @@ namespace BLToolkit.Data.Linq
 
 						var field2  = (SqlField)ee.Expr2;
 						var column2 = (QueryField.Column)table.ParentAssociation.GetField(field2);
-						var index2  = column2.Select(this)[0].Index;
+						var index2  = converter(column2.Select(this)[0]).Index;
+						//converter(table.Columns[mm.MemberName].Select(this)[0]).Index
 
 						Expression e;
 
@@ -730,7 +730,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var field1  = (SqlField)ee.Expr1;
 							var column1 = (QueryField.Column)table.ParentAssociation.GetField(field1);
-							var index1  = column1.Select(this)[0].Index;
+							var index1  = converter(column1.Select(this)[0]).Index;
 
 							e =
 								Expression.AndAlso(
@@ -1054,6 +1054,9 @@ namespace BLToolkit.Data.Linq
 			ParsingTracer.IncIndentLevel();
 
 			Expression result = null;
+
+			while (field is QuerySource.SubQuerySourceColumn)
+				field = ((QuerySource.SubQuerySourceColumn)field).SourceColumn;
 
 			if (field is QuerySource.SubQuery)
 			{

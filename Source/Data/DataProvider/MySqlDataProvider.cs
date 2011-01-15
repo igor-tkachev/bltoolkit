@@ -11,7 +11,7 @@ using MySql.Data.MySqlClient;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
-	using BLToolkit.Common;
+	using Common;
 
 	public class MySqlDataProvider :  DataProviderBase
 	{
@@ -57,7 +57,7 @@ namespace BLToolkit.Data.DataProvider
 		public static void ConfigureOldStyle()
 		{
 			ParameterSymbol           = '?';
-			ConvertParameterSymbols   = new List<char>(new char[] { '@' });
+			ConvertParameterSymbols   = new List<char>(new[] { '@' });
 			TryConvertParameterSymbol = true;
 		}
 

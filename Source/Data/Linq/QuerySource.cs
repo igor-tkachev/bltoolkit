@@ -390,6 +390,34 @@ namespace BLToolkit.Data.Linq
 				return objectMapper[((Column)field).Field.Name, true].MemberAccessor.MemberInfo;
 			}
 
+			public override QueryField GetField(QueryField field)
+			{
+				if (field is Column)
+				{
+					var col = (Column)field;
+
+					if (col.Table == this)
+					{
+						foreach (Column c in Fields)
+							if (c.Field == col.Field)
+								return c;
+					}
+					else
+					{
+						foreach (var table in AssociatedTables.Values)
+						{
+							var f = table.GetField(col);
+
+							if (f != null)
+								return col;
+						}
+					}
+				}
+
+				return null;
+			}
+
+
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
 				return new ISqlExpression[] { SqlTable };
@@ -467,6 +495,22 @@ namespace BLToolkit.Data.Linq
 							throw new InvalidOperationException();
 					}
 				}
+				else if (lambda.Body is MemberExpression && GetType() == typeof(Expr))
+				{
+					var ex = (MemberExpression)lambda.Body;
+
+					var member = ex.Member;
+
+					if (member is MethodInfo)
+						member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
+
+					var field = 
+						GetBaseField(lambda, ex) ??
+						new ExprColumn(this, ex, member.Name);
+
+					Fields.Add(field);
+					Members.Add(member, field);
+				}
 
 				ParsingTracer.DecIndentLevel();
 			}
@@ -480,6 +524,12 @@ namespace BLToolkit.Data.Linq
 					return fld;
 
 				fld = BaseQuery.GetField(mi);
+
+				if (fld == null && Lambda != null && Lambda.Body is MemberExpression && Fields[0] is QuerySource)
+				{
+					var qs = (QuerySource)Fields[0];
+					fld = qs.GetField(mi, test);
+				}
 
 				if (fld != null && test(fld))
 				{
@@ -547,6 +597,35 @@ namespace BLToolkit.Data.Linq
 						return field;
 
 				return null;
+			}
+
+			public override QueryField GetField(QueryField field)
+			{
+				var f = base.GetField(field);
+
+				if (f == null)
+				{
+					foreach (var fld in Fields.ToList())
+					{
+						if (fld is QuerySource)
+						{
+							var qs  = (QuerySource)fld;
+							var qsf = qs.GetField(field);
+
+							if (qsf != null)
+							{
+								//if (qs is SubQuery)
+								{
+									f = new QueryColumn(this, qsf);
+									Fields.Add(f);
+									return f;
+								}
+							}
+						}
+					}
+				}
+
+				return f;
 			}
 
 			protected Expr() {}
@@ -617,6 +696,11 @@ namespace BLToolkit.Data.Linq
 
 				if (!_columns.TryGetValue(field, out col))
 				{
+					col = Fields.FirstOrDefault(_ => _ == field);
+
+					if (col != null)
+						return col;
+
 					col = field is QuerySource ?
 						(QueryField)new SubQuerySourceColumn(this, _parentLambda, (QuerySource)field) :
 						new SubQueryColumn(this, field);
@@ -659,10 +743,13 @@ namespace BLToolkit.Data.Linq
 				if (field == null || currentMember + 1 == members.Count)
 					 return field;
 
-				if (!(field is SubQueryColumn))
-					return ((QuerySource)field).GetField(members, currentMember + 1);
+				if (field is SubQueryColumn)
+				{
+					field = BaseQuery.GetField(members, currentMember);
+					return EnsureField(field);
+				}
 
-				field = BaseQuery.GetField(members, currentMember);
+				field = ((QuerySource)field).GetField(members, currentMember + 1);
 
 				return EnsureField(field);
 			}
@@ -670,6 +757,23 @@ namespace BLToolkit.Data.Linq
 			public override QueryField GetField(SqlField field)
 			{
 				return EnsureField(base.GetField(field));
+			}
+
+			public override QueryField GetField(QueryField field)
+			{
+				var f = base.GetField(field);
+
+				if (f == null)
+				{
+					foreach (var source in Sources)
+					{
+						f = source.GetField(field);
+						if (f != null)
+							return EnsureField(f);
+					}
+				}
+
+				return f;
 			}
 
 			public override MemberInfo GetMember(QueryField field)
@@ -965,8 +1069,7 @@ namespace BLToolkit.Data.Linq
 			{
 				if (_indexes == null)
 				{
-					var idx = SourceColumn.Select(parser);
-
+					var idx  = SourceColumn.Select(parser);
 					var list = new List<FieldIndex>(idx.Length);
 
 					for (var i = 0; i < idx.Length; i++)
@@ -1020,7 +1123,8 @@ namespace BLToolkit.Data.Linq
 
 			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
 			{
-				throw new NotImplementedException();
+				return SourceColumn.GetExpressions<T>(parser);
+				//throw new NotImplementedException();
 				/*
 				SetSubIndex(parser);
 
@@ -1029,6 +1133,16 @@ namespace BLToolkit.Data.Linq
 
 				return new [] { QuerySource.SubSql.Select.Columns[_subIndex[0].Index] };
 				*/
+			}
+
+			public override QueryField GetField(QueryField field)
+			{
+				var f = base.GetField(field);
+
+				if (f == null)
+					f = QuerySource.GetField(field);
+
+				return f;
 			}
 
 			public override bool CanBeNull()
@@ -1051,7 +1165,13 @@ namespace BLToolkit.Data.Linq
 
 			public override string ToString()
 			{
-				return SourceColumn.ToString();
+				if (SourceColumn != null)
+					return SourceColumn.ToString();
+
+				if (Sources.Length > 0)
+					Sources[0].ToString();
+
+				return "";
 			}
 
 #endif
@@ -1184,6 +1304,15 @@ namespace BLToolkit.Data.Linq
 					return field;
 
 			throw new InvalidOperationException();
+		}
+
+		public virtual QueryField GetField(QueryField field)
+		{
+			foreach (var f in Fields)
+				if (field == f)
+					return f;
+
+			return null;
 		}
 
 		public virtual QueryField GetBaseField(LambdaInfo lambda, Expression expr)

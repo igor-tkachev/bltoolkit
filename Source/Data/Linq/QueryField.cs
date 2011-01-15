@@ -257,6 +257,21 @@ namespace BLToolkit.Data.Linq
 				{
 					_subIndex = Field.Select(parser);
 
+					for (var i = 0; i < _subIndex.Length; i++)
+					{
+						var idx = _subIndex[i];
+
+						var f = QuerySource.BaseQuery.GetField(idx.Field);
+
+						if (f != null && f != idx.Field)
+						{
+							var idxs = f.Select(parser);
+
+							if (idxs.Length == 1)
+								_subIndex[i] = idxs[0];
+						}
+					}
+
 					if (QuerySource.SubSql.HasUnion)
 					{
 						var sub = QuerySource.BaseQuery;
@@ -392,6 +407,66 @@ namespace BLToolkit.Data.Linq
 			}
 
 #endif
+		}
+
+		#endregion
+
+		#region QueryColumn
+
+		public class QueryColumn : QueryField
+		{
+			public QueryColumn(QuerySource querySource, QueryField queryField)
+			{
+				_querySource = querySource;
+				_queryField  = queryField;
+			}
+
+			readonly QuerySource _querySource;
+			readonly QueryField  _queryField;
+
+			public override QuerySource[] Sources { get { return new[] { _querySource }; } }
+
+			public override ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				if (!doClone(this))
+					return this;
+
+				ICloneableElement clone;
+
+				if (!objectTree.TryGetValue(this, out clone))
+					objectTree.Add(this, clone = new QueryColumn(
+						(QuerySource)_querySource.Clone(objectTree, doClone),
+						(QueryField) _queryField. Clone(objectTree, doClone)));
+
+				return clone;
+			}
+
+			FieldIndex[]    _index;
+			//ISqlExpression  _sqlExpression;
+
+			public override FieldIndex[] Select<T>(ExpressionParserOld<T> parser)
+			{
+				if (_index == null)
+				{
+					var idx = _queryField.Select(parser);
+
+					var expr = idx[0].Field.GetExpressions(parser);
+
+					_index = new[] { new FieldIndex { Index = _querySource.SqlQuery.Select.Add(expr[0]), Field = this } };
+				}
+
+				return _index;
+			}
+
+			public override ISqlExpression[] GetExpressions<T>(ExpressionParserOld<T> parser)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override bool CanBeNull()
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		#endregion
