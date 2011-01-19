@@ -174,8 +174,15 @@ namespace BLToolkit.Data.Linq
 				{ M(() => "".CompareTo  ("")      ), L<S,S,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0).Value ) },
 				{ M(() => "".CompareTo  (1)       ), L<S,O,I>    ((obj,p0)       => ConvertToCaseCompareTo(obj, p0.ToString()).Value ) },
 
-				{ M(() => string.IsNullOrEmpty("")    ), L<S,B>  ( p0     => p0 == null || p0.Length == 0) },
-				{ M(() => string.CompareOrdinal("","")), L<S,S,I>((s1,s2) => s1.CompareTo(s2)) },
+				{ M(() => string.IsNullOrEmpty ("")    ),           L<S,B>          ( p0               => p0 == null || p0.Length == 0) },
+				{ M(() => string.CompareOrdinal("","")),            L<S,S,I>        ((s1,s2)           => s1.CompareTo(s2)) },
+				{ M(() => string.CompareOrdinal("",0,"",0,0)),      L<S,I,S,I,I,I>  ((s1,i1,s2,i2,l)   => s1.Substring(i1, l).CompareTo(s2.Substring(i2, l))) },
+				{ M(() => string.Compare       ("","")),            L<S,S,I>        ((s1,s2)           => s1.CompareTo(s2)) },
+				{ M(() => string.Compare       ("",0,"",0,0)),      L<S,I,S,I,I,I>  ((s1,i1,s2,i2,l)   => s1.Substring(i1,l).CompareTo(s2.Substring(i2,l))) },
+#if !SILVERLIGHT
+				{ M(() => string.Compare       ("","",true)),       L<S,S,B,I>      ((s1,s2,b)         => b ? s1.ToLower().CompareTo(s2.ToLower()) : s1.CompareTo(s2)) },
+				{ M(() => string.Compare       ("",0,"",0,0,true)), L<S,I,S,I,I,B,I>((s1,i1,s2,i2,l,b) => b ? s1.Substring(i1,l).ToLower().CompareTo(s2.Substring(i2, l).ToLower()) : s1.Substring(i1, l).CompareTo(s2.Substring(i2, l))) },
+#endif
 
 				{ M(() => AltStuff("",0,0,"")), L<S,I?,I?,S,S>((p0, p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
 

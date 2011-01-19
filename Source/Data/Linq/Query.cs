@@ -24,14 +24,14 @@ namespace BLToolkit.Data.Linq
 			GetIEnumerable = MakeEnumerable;
 		}
 
-		public Query(ExpressionParser parser)
+		public Query(IParseInfo parseInfo)
 		{
-			Queries.Add(new QueryInfo { SqlQuery = parser.SqlQuery });
+			Queries.Add(new QueryInfo { SqlQuery = parseInfo.SqlQuery });
 
-			ContextID         = parser.DataContextInfo.ContextID;
-			MappingSchema     = parser.MappingSchema;
-			CreateSqlProvider = parser.DataContextInfo.CreateSqlProvider;
-			Expression        = parser.Expression;
+			ContextID         = parseInfo.Parser.DataContextInfo.ContextID;
+			MappingSchema     = parseInfo.Parser.MappingSchema;
+			CreateSqlProvider = parseInfo.Parser.DataContextInfo.CreateSqlProvider;
+			Expression        = parseInfo.Parser.Expression;
 			//Parameters        = parameters;
 		}
 

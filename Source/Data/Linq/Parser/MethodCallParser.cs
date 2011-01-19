@@ -9,15 +9,15 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		public int ParsingCounter { get; set; }
 
-		public virtual ParseInfo ParseSequence(ExpressionParser parser, Expression expression)
+		public virtual IParseInfo ParseSequence(IParseInfo parseInfo, Expression expression)
 		{
 			if (expression.NodeType == ExpressionType.Call)
-				return ParseMethodCall(parser, (MethodCallExpression)expression);
+				return ParseMethodCall(parseInfo, (MethodCallExpression)expression);
 
 			return null;
 		}
 
-		protected abstract ParseInfo ParseMethodCall(ExpressionParser parser, MethodCallExpression expression);
+		protected abstract IParseInfo ParseMethodCall(IParseInfo parseInfo, MethodCallExpression expression);
 
 		protected bool IsQueryable(string name, MethodInfo methodInfo)
 		{

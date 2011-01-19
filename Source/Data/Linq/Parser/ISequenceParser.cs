@@ -5,7 +5,7 @@ namespace BLToolkit.Data.Linq.Parser
 {
 	interface ISequenceParser
 	{
-		int       ParsingCounter { get; set; }
-		ParseInfo ParseSequence(ExpressionParser parser, Expression expression);
+		int        ParsingCounter { get; set; }
+		IParseInfo ParseSequence(IParseInfo parseInfo, Expression expression);
 	}
 }

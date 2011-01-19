@@ -134,6 +134,8 @@
       <DependentUpon>Convert.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
+    <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
+    <Compile Include="Data\Linq\Parser\IParseInfo.cs" />
     <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
     <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
@@ -148,7 +150,7 @@
     <Compile Include="Data\Linq\Parser\ExpressionParser.cs" />
     <Compile Include="Data\Linq\Parser\ISequenceParser.cs" />
     <Compile Include="Data\Linq\Parser\MethodCallParser.cs" />
-    <Compile Include="Data\Linq\Parser\ParseInfo.cs" />
+    <Compile Include="Data\Linq\Parser\ParseInfoBase.cs" />
     <Compile Include="Data\Linq\Parser\SelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SubQueryInfo.cs" />
     <Compile Include="Data\Linq\Parser\TableParser.cs" />

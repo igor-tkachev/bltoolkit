@@ -498,6 +498,66 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CompareOrdinal1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where string.CompareOrdinal(p.FirstName, "Joh") > 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareOrdinal2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where string.CompareOrdinal(p.FirstName, 1, "Joh", 1, 2) == 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Compare1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where string.Compare(p.FirstName, "Joh") > 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Compare2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where string.Compare(p.FirstName, "joh", true) > 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Compare3()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where string.Compare(p.FirstName, 1, "Joh", 1, 2) == 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void Compare4()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where string.Compare(p.FirstName, 1, "Joh", 1, 2, true) == 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void IsNullOrEmpty1()
 		{
 			ForEachProvider(db =>
