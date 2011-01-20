@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
-
+using System.Linq;
 using BLToolkit.Configuration;
 
 namespace BLToolkit.Data
@@ -713,26 +713,24 @@ namespace BLToolkit.Data
 				{
 					// Grab first registered configuration.
 					//
-					foreach (var de in _connectionStringList)
-					{
-						_defaultConfiguration = de.Key;
-						break;
-					}
+					var defaultConfiguration = _connectionStringList.Select(de => de.Key).FirstOrDefault();
 
-					if (_defaultConfiguration == null)
+					if (defaultConfiguration == null)
 					{
-						_defaultConfiguration = string.Empty;
+						defaultConfiguration = string.Empty;
 
 						foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
 						{
 							if (css.ElementInformation.Source != null &&
 								!css.ElementInformation.Source.EndsWith("machine.config", StringComparison.OrdinalIgnoreCase))
 							{
-								_defaultConfiguration = css.Name;
+								defaultConfiguration = css.Name;
 								break;
 							}
 						}
 					}
+
+					_defaultConfiguration = defaultConfiguration;
 				}
 
 				return _defaultConfiguration;
