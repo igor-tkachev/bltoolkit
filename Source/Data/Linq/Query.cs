@@ -24,14 +24,18 @@ namespace BLToolkit.Data.Linq
 			GetIEnumerable = MakeEnumerable;
 		}
 
-		public Query(IParseInfo parseInfo)
+		public Query(IParseContext parseContext, List<ParameterAccessor> sqlParameters)
 		{
-			Queries.Add(new QueryInfo { SqlQuery = parseInfo.SqlQuery });
+			Queries.Add(new QueryInfo
+			{
+				SqlQuery   = parseContext.SqlQuery,
+				Parameters = sqlParameters,
+			});
 
-			ContextID         = parseInfo.Parser.DataContextInfo.ContextID;
-			MappingSchema     = parseInfo.Parser.MappingSchema;
-			CreateSqlProvider = parseInfo.Parser.DataContextInfo.CreateSqlProvider;
-			Expression        = parseInfo.Parser.Expression;
+			ContextID         = parseContext.Parser.DataContextInfo.ContextID;
+			MappingSchema     = parseContext.Parser.MappingSchema;
+			CreateSqlProvider = parseContext.Parser.DataContextInfo.CreateSqlProvider;
+			Expression        = parseContext.Parser.Expression;
 			//Parameters        = parameters;
 		}
 
@@ -302,7 +306,7 @@ namespace BLToolkit.Data.Linq
 				else if (select.SkipValue is SqlParameter)
 				{
 					var i = GetParameterIndex(select.SkipValue);
-					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Skip((int)Queries[0].Parameters[i].Accessor(this, expr, ps));
+					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Skip((int)Queries[0].Parameters[i].Accessor(expr, ps));
 				}
 			}
 
@@ -320,7 +324,7 @@ namespace BLToolkit.Data.Linq
 				else if (select.TakeValue is SqlParameter)
 				{
 					var i = GetParameterIndex(select.TakeValue);
-					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Take((int)Queries[0].Parameters[i].Accessor(this, expr, ps));
+					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Take((int)Queries[0].Parameters[i].Accessor(expr, ps));
 				}
 			}
 
@@ -408,7 +412,7 @@ namespace BLToolkit.Data.Linq
 		void SetParameters(Expression expr, object[] parameters, int idx)
 		{
 			foreach (var p in Queries[idx].Parameters)
-				p.SqlParameter.Value = p.Accessor(this, expr, parameters);
+				p.SqlParameter.Value = p.Accessor(expr, parameters);
 		}
 
 		#endregion
@@ -696,13 +700,6 @@ namespace BLToolkit.Data.Linq
 			Expression    expr,
 			object[]      ps);
 
-		public class Parameter
-		{
-			public Expression                                Expression;
-			public Func<Query<T>,Expression,object[],object> Accessor;
-			public SqlParameter                              SqlParameter;
-		}
-
 		public class QueryInfo : IQueryContext
 		{
 			public QueryInfo()
@@ -723,8 +720,8 @@ namespace BLToolkit.Data.Linq
 				return ps;
 			}
 
-			public List<Parameter> Parameters = new List<Parameter>();
-			public Mapper<T>       Mapper;
+			public List<ParameterAccessor> Parameters = new List<ParameterAccessor>();
+			public Mapper<T>               Mapper;
 		}
 
 		#endregion
@@ -739,10 +736,10 @@ namespace BLToolkit.Data.Linq
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
 		}
 
-		static Query<TR>.Parameter GetParameter<TR>(IDataContext dataContext, SqlField field)
+		static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
 		{
 			var exprParam = Expression.Parameter(typeof(Expression), "expr");
-			var mapper    = Expression.Lambda<Func<Query<TR>,Expression,object[],object>>(
+			var mapper    = Expression.Lambda<Func<Expression,object[],object>>(
 				Expression.Convert(
 					Expression.PropertyOrField(
 						Expression.Convert(
@@ -754,12 +751,11 @@ namespace BLToolkit.Data.Linq
 					typeof(object)),
 				new []
 					{
-						Expression.Parameter(typeof(Query<TR>), "info"),
 						exprParam,
 						Expression.Parameter(typeof(object[]), "ps")
 					});
 
-			var param = new Query<TR>.Parameter
+			var param = new ParameterAccessor
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
@@ -990,5 +986,12 @@ namespace BLToolkit.Data.Linq
 		#endregion
 
 		#endregion
+	}
+
+	public class ParameterAccessor
+	{
+		public Expression                       Expression;
+		public Func<Expression,object[],object> Accessor;
+		public SqlParameter                     SqlParameter;
 	}
 }

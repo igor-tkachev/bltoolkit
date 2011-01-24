@@ -135,7 +135,14 @@
     </Compile>
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
-    <Compile Include="Data\Linq\Parser\IParseInfo.cs" />
+    <Compile Include="Data\Linq\Parser\AggregationParser.cs" />
+    <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
+    <Compile Include="Data\Linq\Parser\ExpressionParser.QueryBuilding.cs" />
+    <Compile Include="Data\Linq\Parser\RequestFor.cs" />
+    <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
+    <Compile Include="Data\Linq\Parser\WhereParser.cs" />
+    <Compile Include="Data\Linq\Parser\DistinctParser.cs" />
+    <Compile Include="Data\Linq\Parser\IParseContext.cs" />
     <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
     <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
@@ -150,9 +157,9 @@
     <Compile Include="Data\Linq\Parser\ExpressionParser.cs" />
     <Compile Include="Data\Linq\Parser\ISequenceParser.cs" />
     <Compile Include="Data\Linq\Parser\MethodCallParser.cs" />
-    <Compile Include="Data\Linq\Parser\ParseInfoBase.cs" />
+    <Compile Include="Data\Linq\Parser\SequenceContextBase.cs" />
     <Compile Include="Data\Linq\Parser\SelectParser.cs" />
-    <Compile Include="Data\Linq\Parser\SubQueryInfo.cs" />
+    <Compile Include="Data\Linq\Parser\SubQueryContext.cs" />
     <Compile Include="Data\Linq\Parser\TableParser.cs" />
     <Compile Include="Data\Sql\SqlTableType.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />

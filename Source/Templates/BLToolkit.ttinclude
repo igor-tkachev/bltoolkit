@@ -10,7 +10,7 @@
 			if (args.Name.ToLower().IndexOf(a.Key.ToLower()) >= 0)
 				return System.Reflection.Assembly.LoadFile(a.Value);
 	
-		if (DataProviderAssembly != null)
+		if (DataProviderAssembly != null && args.Name.Split(',')[0] == System.IO.Path.GetFileNameWithoutExtension(DataProviderAssembly))
 			return System.Reflection.Assembly.LoadFile(DataProviderAssembly);
 
 		return null;
@@ -525,13 +525,13 @@ public enum AssociationType
 
 public partial class ForeignKey
 {
-	public string          KeyName;
-	public string          MemberName;
-	public Table           OtherTable;
-	public List<Column>    ThisColumns  = new List<Column>();
-	public List<Column>    OtherColumns = new List<Column>();
-	public bool            CanBeNull    = true;
-	public ForeignKey      BackReference;
+	public string       KeyName;
+	public string       MemberName;
+	public Table        OtherTable;
+	public List<Column> ThisColumns  = new List<Column>();
+	public List<Column> OtherColumns = new List<Column>();
+	public bool         CanBeNull    = true;
+	public ForeignKey   BackReference;
 
 	private AssociationType _associationType = AssociationType.Auto;
 	public  AssociationType  AssociationType

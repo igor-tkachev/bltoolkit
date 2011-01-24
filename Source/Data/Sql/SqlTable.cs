@@ -280,9 +280,9 @@ namespace BLToolkit.Data.Sql
 
 		public SqlField GetIdentityField()
 		{
-			foreach (var field in Fields.Values)
-				if (field.IsIdentity)
-					return field;
+			foreach (var field in Fields)
+				if (field.Value.IsIdentity)
+					return field.Value;
 
 			var keys = GetKeys(true);
 

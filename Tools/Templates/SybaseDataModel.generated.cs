@@ -135,13 +135,13 @@ namespace Templates.Sybase
 		[Nullable,                MaxLength(50)          ] public string MiddleName { get; set; } // nvarchar(50)
 		[                         Required               ] public char   Gender     { get; set; } // char(1)
 
-		// FK_Patient_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
-		public Patient Patient { get; set; }
-
 		// FK_Doctor_Person_BackReference
 		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
 		public Doctor Doctor { get; set; }
+
+		// FK_Patient_Person_BackReference
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
+		public Patient Patient { get; set; }
 	}
 
 	// View

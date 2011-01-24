@@ -1492,5 +1492,13 @@ namespace BLToolkit.Reflection
 		}
 
 		#endregion
+
+		public static bool IsNullableValueMember(MemberInfo member)
+		{
+			return
+				member.Name == "Value" &&
+				member.DeclaringType.IsGenericType &&
+				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
+		}
 	}
 }

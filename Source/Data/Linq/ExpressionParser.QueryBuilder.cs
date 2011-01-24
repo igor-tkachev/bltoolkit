@@ -1212,12 +1212,12 @@ namespace BLToolkit.Data.Linq
 
 		#region Build Parameter
 
-		readonly Dictionary<Expression,Query<T>.Parameter> _parameters   = new Dictionary<Expression, Query<T>.Parameter>();
-		readonly HashSet<Expression>                                _asParameters = new HashSet<Expression>();
+		readonly Dictionary<Expression,ParameterAccessor> _parameters   = new Dictionary<Expression, ParameterAccessor>();
+		readonly HashSet<Expression>                      _asParameters = new HashSet<Expression>();
 
-		Query<T>.Parameter BuildParameter(Expression expr)
+		ParameterAccessor BuildParameter(Expression expr)
 		{
-			Query<T>.Parameter p;
+			ParameterAccessor p;
 
 			if (_parameters.TryGetValue(expr, out p))
 				return p;
@@ -1225,11 +1225,11 @@ namespace BLToolkit.Data.Linq
 			string name = null;
 
 			var newExpr = ReplaceParameter(ExpressionAccessors, expr, nm => name = nm);
-			var mapper  = Expression.Lambda<Func<Query<T>,Expression,object[],object>>(
+			var mapper  = Expression.Lambda<Func<Expression,object[],object>>(
 				Expression.Convert(newExpr, typeof(object)),
-				new [] { _infoParam, ExpressionParam, ParametersParam });
+				new [] { ExpressionParam, ParametersParam });
 
-			p = new Query<T>.Parameter
+			p = new ParameterAccessor
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
@@ -2767,11 +2767,11 @@ namespace BLToolkit.Data.Linq
 
 			var par    = ReplaceParameter(ExpressionAccessors, ex, _ => {});
 			var expr   = Expression.MakeMemberAccess(par, member);
-			var mapper = Expression.Lambda<Func<Query<T>,Expression,object[],object>>(
+			var mapper = Expression.Lambda<Func<Expression,object[],object>>(
 				Expression.Convert(expr, typeof(object)),
-				new [] { _infoParam, ExpressionParam, ParametersParam });
+				new [] { ExpressionParam, ParametersParam });
 
-			var p = new Query<T>.Parameter
+			var p = new ParameterAccessor
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
@@ -2874,7 +2874,7 @@ namespace BLToolkit.Data.Linq
 				var p  = (SqlParameter)a;
 				var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
 
-				ep = new Query<T>.Parameter
+				ep = new ParameterAccessor
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,

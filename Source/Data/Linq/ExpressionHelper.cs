@@ -1655,6 +1655,71 @@ namespace BLToolkit.Data.Linq
 			return expr;
 		}
 
+		static public bool IsQueryable(this MethodCallExpression method)
+		{
+			var type = method.Method.DeclaringType;
+
+			return type == typeof(Queryable) || type == typeof(Enumerable) || type == typeof(LinqExtensions);
+		}
+
+		static public bool IsQueryable(this MethodCallExpression method, string name)
+		{
+			return method.Method.Name == name && method.IsQueryable();
+		}
+
+		static Expression FindLevel(Expression expression, int level, ref int current)
+		{
+			switch (expression.NodeType)
+			{
+				case ExpressionType.Call :
+					{
+						var e = (MethodCallExpression)expression;
+
+						if (e.Object != null)
+						{
+							var expr = FindLevel(e.Object, level, ref current);
+
+							if (level == current)
+								return expr;
+
+							current++;
+						}
+
+						break;
+					}
+
+				case ExpressionType.MemberAccess:
+					{
+						var e = ((MemberExpression)expression);
+
+						if (e.Expression != null)
+						{
+							var expr = FindLevel(e.Expression, level, ref current);
+
+							if (level == current)
+								return expr;
+
+							current++;
+						}
+
+						break;
+					}
+			}
+
+			return expression;
+		}
+
+		static public Expression GetLevelExpression(this Expression expression, int level)
+		{
+			var current = 0;
+			var expr = FindLevel(expression, level, ref current);
+
+			if (expr == null || current != level)
+				throw new InvalidOperationException();
+
+			return expr;
+		}
+
 		#endregion
 	}
 }

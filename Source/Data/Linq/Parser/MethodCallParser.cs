@@ -1,32 +1,29 @@
 ﻿using System;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using Data.Sql;
+
 	abstract class MethodCallParser : ISequenceParser
 	{
 		public int ParsingCounter { get; set; }
 
-		public virtual IParseInfo ParseSequence(IParseInfo parseInfo, Expression expression)
+		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
 		{
 			if (expression.NodeType == ExpressionType.Call)
-				return ParseMethodCall(parseInfo, (MethodCallExpression)expression);
+				return CanParseMethodCall(parser, (MethodCallExpression)expression, sqlQuery);
+			return false;
+		}
 
+		public IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		{
+			if (expression.NodeType == ExpressionType.Call)
+				return ParseMethodCall(parser, (MethodCallExpression)expression, sqlQuery);
 			return null;
 		}
 
-		protected abstract IParseInfo ParseMethodCall(IParseInfo parseInfo, MethodCallExpression expression);
-
-		protected bool IsQueryable(string name, MethodInfo methodInfo)
-		{
-			if (methodInfo.Name != name)
-				return false;
-
-			var type = methodInfo.DeclaringType;
-
-			return type == typeof(Queryable) || type == typeof(Enumerable) || type == typeof(LinqExtensions);
-		}
+		protected abstract bool          CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery);
+		protected abstract IParseContext ParseMethodCall   (ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery);
 	}
 }

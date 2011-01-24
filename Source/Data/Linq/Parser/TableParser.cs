@@ -1,31 +1,31 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Parser
 {
 	using Data.Sql;
+	using Mapping;
+	using Reflection;
 	using Reflection.Extension;
 
 	class TableParser : ISequenceParser
 	{
 		int ISequenceParser.ParsingCounter { get; set; }
 
-		public IParseInfo ParseSequence(IParseInfo parseInfo, Expression expression)
+		public T Parse<T>(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Func<int,IParseContext,T> action)
 		{
 			switch (expression.NodeType)
 			{
 				case ExpressionType.Constant:
 					{
 						var c = (ConstantExpression)expression;
-
 						if (c.Value is IQueryable)
-							return new TableInfo(parseInfo, expression, ((IQueryable)c.Value).ElementType);
+							return action(1, null);
 					}
 
 					break;
@@ -35,39 +35,100 @@ namespace BLToolkit.Data.Linq.Parser
 						var mc = (MethodCallExpression)expression;
 
 						if (mc.Method.Name == "GetTable")
-							goto case ExpressionType.MemberAccess;
+							if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
+								return action(2, null);
 					}
 
 					break;
 
 				case ExpressionType.MemberAccess:
 					if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
-						return new TableInfo(parseInfo, expression, expression.Type.GetGenericArguments()[0]);
+						return action(3, null);
+
+					// Looking for association.
+					//
+					if (parser.IsSubQueryParsing && sqlQuery.From.Tables.Count == 0)
+					{
+						var ctx = parser.GetContext(null, expression);
+
+						if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Association))
+							return action(4, ctx);
+					}
 
 					break;
 			}
 
-			return null;
+			return action(0, null);
 		}
 
-		class TableInfo : ParseInfoBase
+		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
 		{
-			readonly Type     _originalType;
-			readonly Type     _objectType;
-			readonly SqlTable _sqlTable;
+			return Parse(parser, expression, sqlQuery, (n,_) => n > 0);
+		}
 
-			public TableInfo(IParseInfo parseInfo, Expression expression, Type originalType) : base(parseInfo, expression)
+		public IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		{
+			return Parse(parser, expression, sqlQuery, (n,ctx) =>
 			{
-				_originalType = originalType;
-				_objectType   = GetObjectType();
-				_sqlTable     = new SqlTable(parseInfo.Parser.MappingSchema, _objectType);
+				switch (n)
+				{
+					case 0 : return null;
+					case 1 : return new TableContext(parser, expression, sqlQuery, ((IQueryable)((ConstantExpression)expression).Value).ElementType);
+					case 2 :
+					case 3 : return new TableContext(parser, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
+					case 4 : return ctx.GetContext(expression, 0, sqlQuery);
+				}
 
-				SqlQuery.From.Table(_sqlTable);
+				throw new InvalidOperationException();
+			});
+		}
+
+		class TableContext : IParseContext
+		{
+			protected Type         OriginalType;
+			public    Type         ObjectType;
+			protected ObjectMapper ObjectMapper;
+			public    SqlTable     SqlTable;
+
+			public ExpressionParser Parser     { get; private set; }
+			public Expression       Expression { get; private set; }
+			public SqlQuery         SqlQuery   { get; private set; }
+
+			private IParseContext _root;
+			public  IParseContext  Root
+			{
+				get { return _root;  }
+				set
+				{
+					foreach (var association in _associations.Values)
+						association.Root = value;
+					_root = value;
+				}
 			}
 
-			Type GetObjectType()
+			public TableContext(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Type originalType)
 			{
-				for (var type = _originalType.BaseType; type != null && type != typeof(object); type = type.BaseType)
+				Parser     = parser;
+				Expression = expression;
+				SqlQuery   = sqlQuery;
+
+				OriginalType = originalType;
+				ObjectType   = GetObjectType();
+				SqlTable     = new SqlTable(parser.MappingSchema, ObjectType);
+				ObjectMapper = Parser.MappingSchema.GetObjectMapper(ObjectType);
+
+				SqlQuery.From.Table(SqlTable);
+			}
+
+			protected TableContext(ExpressionParser parser, SqlQuery sqlQuery)
+			{
+				Parser   = parser;
+				SqlQuery = sqlQuery;
+			}
+
+			protected Type GetObjectType()
+			{
+				for (var type = OriginalType.BaseType; type != null && type != typeof(object); type = type.BaseType)
 				{
 					var extension = TypeExtension.GetTypeExtension(type, Parser.MappingSchema.Extensions);
 					var mapping   = Parser.MappingSchema.MetadataProvider.GetInheritanceMapping(type, extension);
@@ -76,7 +137,7 @@ namespace BLToolkit.Data.Linq.Parser
 						return type;
 				}
 
-				return _originalType;
+				return OriginalType;
 			}
 
 			class MappingData
@@ -185,7 +246,7 @@ namespace BLToolkit.Data.Linq.Parser
 				var data = new MappingData
 				{
 					MappingSchema = Parser.MappingSchema,
-					ObjectMapper  = Parser.MappingSchema.GetObjectMapper(_objectType),
+					ObjectMapper  = ObjectMapper,
 					Index         = index
 				};
 
@@ -194,62 +255,283 @@ namespace BLToolkit.Data.Linq.Parser
 						ExpressionParser.DataContextParam,
 						ExpressionParser.DataReaderParam,
 						Expression.Constant(data)),
-					_objectType);
+					ObjectType);
 			}
 
-			public override Expression BuildExpression(IParseInfo rootParse, Expression expression, int level)
+			public Expression BuildQuery()
 			{
-				if (expression == null)
+				var index = ConvertToIndex(null, 0, ConvertFlags.All);
+				return GetTableExpression(index.ToArray());
+			}
+
+			public Expression BuildExpression(Expression expression, int level)
+			{
+				if (IsExpression(expression, level, RequestFor.Field))
 				{
-					var index = rootParse.ConvertToIndex(expression, 0, ConvertFlags.None);
-					return GetTableExpression(index.ToArray());
+					var idx = Root.ConvertToIndex(expression, 0, ConvertFlags.Field).First();
+					return Parser.BuildSql(expression.Type, idx);
+				}
+
+				var levelExpression = expression.GetLevelExpression(level);
+
+				if (levelExpression == expression)
+					return BuildQuery();
+
+				var association = GetAssociation(levelExpression);
+
+				if (association != null)
+					return association.BuildExpression(expression, level + 1);
+
+				throw new NotImplementedException();
+			}
+
+			public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				switch (flags)
+				{
+					case ConvertFlags.All   :
+
+						if (expression == null)
+							return SqlTable.Fields.Values.ToArray();
+
+						break;
+
+					case ConvertFlags.Field :
+
+						var field = GetField(expression, level);
+
+						if (field != null)
+							return new[] { field };
+
+						var levelExpression = expression.GetLevelExpression(level);
+						var association     = GetAssociation(levelExpression);
+
+						if (association != null)
+							return association.ConvertToSql(expression, level + 1, flags);
+
+						break;
 				}
 
 				throw new NotImplementedException();
 			}
 
-			public override IEnumerable<ISqlExpression> ConvertToSql(Expression expression, int level, ConvertFlags flags)
-			{
-				if (expression == null)
-				{
-					foreach (var field in _sqlTable.Fields.Values)
-						yield return field;
-				}
-				else
-					throw new NotImplementedException();
-			}
-
 			readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
 
-			public override IEnumerable<int> ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				foreach (var expr in ConvertToSql(expression, level, flags))
+				switch (flags)
 				{
-					int n;
+					case ConvertFlags.Field :
+					case ConvertFlags.All   :
 
-					if (!_indexes.TryGetValue(expr, out n))
-					{
-						if (expr is SqlField)
-						{
-							var field = (SqlField)expr;
-							n = SqlQuery.Select.Add(field, field.Alias);
-						}
-						else
-						{
-							n = SqlQuery.Select.Add(expr);
-						}
+						return ConvertToSql(expression, level, flags)
+							.Select(expr =>
+							{
+								int n;
 
-						_indexes.Add(expr, n);
-					}
+								if (!_indexes.TryGetValue(expr, out n))
+								{
+									if (expr is SqlField)
+									{
+										var field = (SqlField)expr;
+										n = SqlQuery.Select.Add(field, field.Alias);
+									}
+									else
+									{
+										n = SqlQuery.Select.Add(expr);
+									}
 
-					yield return n;
+									_indexes.Add(expr, n);
+								}
+
+								return n;
+							})
+							.ToArray();
 				}
+
+				throw new NotImplementedException();
 			}
 
-			public override void SetAlias(string alias)
+			public bool IsExpression(Expression expression, int level, RequestFor requestFor)
 			{
-				if (_sqlTable.Alias == null)
-					_sqlTable.Alias = alias;
+				switch (requestFor)
+				{
+					case RequestFor.ScalarExpression :
+					case RequestFor.Root             : return false;
+					case RequestFor.Field            :
+						{
+							var field = GetField(expression, level);
+							return field != null;
+						}
+
+					case RequestFor.Association      :
+						{
+							if (ObjectMapper.Associations.Count > 0)
+							{
+								var levelExpression = expression.GetLevelExpression(level);
+
+								if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
+								{
+									var member = ((MemberExpression)expression).Member;
+
+									if (_associations.ContainsKey(member))
+										return true;
+
+									return ObjectMapper.Associations.Exists(_ => _.MemberAccessor.MemberInfo == member);
+								}
+							}
+
+							return false;
+						}
+				}
+
+				throw new NotImplementedException();
+			}
+
+			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			{
+				if (ObjectMapper.Associations.Count > 0)
+				{
+					var levelExpression = expression.GetLevelExpression(level);
+
+					if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
+					{
+						if (Parser.IsSubQueryParsing)
+						{
+							var association = GetAssociation(expression);
+							var table       = new TableContext(Parser, Expression, currentSql, association.ObjectType) { Root = Root };
+
+							foreach (var cond in association.ParentAssociationJoin.Condition.Conditions)
+							{
+								var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
+								currentSql.Where
+									.Expr(predicate.Expr1)
+									.Equal
+									.Field(table.SqlTable.Fields[((SqlField)predicate.Expr2).Name]);
+							}
+
+							return table;
+						}
+
+						throw new NotImplementedException();
+					}
+				}
+
+				throw new InvalidOperationException();
+			}
+
+			public void SetAlias(string alias)
+			{
+				if (SqlTable.Alias == null)
+					SqlTable.Alias = alias;
+			}
+
+			#region Helpers
+
+			SqlField GetField(Expression expression, int level)
+			{
+				if (expression.NodeType == ExpressionType.MemberAccess)
+				{
+					var member          = (MemberExpression)expression;
+					var levelExpression = expression.GetLevelExpression(level);
+
+					if (levelExpression.NodeType == ExpressionType.MemberAccess)
+					{
+						if (levelExpression != expression)
+							if (TypeHelper.IsNullableValueMember(member.Member) && member.Expression == levelExpression)
+								member = (MemberExpression)levelExpression;
+
+						if (levelExpression == member)
+							foreach (var field in SqlTable.Fields.Values)
+								if (field.MemberMapper.MemberAccessor.MemberInfo == member.Member)
+									return field;
+					}
+				}
+
+				return null;
+			}
+
+			[JetBrains.Annotations.NotNull]
+			readonly Dictionary<MemberInfo,AssociatedTableContext> _associations = new Dictionary<MemberInfo,AssociatedTableContext>();
+
+			AssociatedTableContext GetAssociation(Expression expression)
+			{
+				if (ObjectMapper.Associations.Count > 0 && expression.NodeType == ExpressionType.MemberAccess)
+				{
+					var memberExpression = (MemberExpression)expression;
+
+					AssociatedTableContext tableAssociation;
+
+					if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
+					{
+						var q =
+							from a in ObjectMapper.Associations
+							where a.MemberAccessor.MemberInfo == memberExpression.Member
+							select new AssociatedTableContext(Parser, this, a) { Root = Root };
+
+						tableAssociation = q.FirstOrDefault();
+
+						_associations.Add(memberExpression.Member, tableAssociation);
+					}
+
+					return tableAssociation;
+				}
+
+				return null;
+			}
+
+			#endregion
+		}
+
+		class AssociatedTableContext : TableContext
+		{
+			private         TableContext         _parentAssociation;
+			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
+
+			public AssociatedTableContext(ExpressionParser parser, TableContext parent, Association association)
+				: base(parser, parent.SqlQuery)
+			{
+				var type = TypeHelper.GetMemberType(association.MemberAccessor.MemberInfo);
+
+				var left   = association.CanBeNull;
+				var isList = false;
+
+				if (TypeHelper.IsSameOrParent(typeof(IEnumerable), type))
+				{
+					var etypes = TypeHelper.GetGenericArguments(type, typeof(IEnumerable));
+					type       = etypes != null && etypes.Length > 0 ? etypes[0] : TypeHelper.GetListItemType(type);
+					isList     = true;
+				}
+
+				OriginalType = type;
+				ObjectType   = GetObjectType();
+				ObjectMapper = Parser.MappingSchema.GetObjectMapper(ObjectType);
+				SqlTable     = new SqlTable(parser.MappingSchema, ObjectType);
+
+				var psrc = parent.SqlQuery.From[parent.SqlTable];
+				var join = left ? SqlTable.WeakLeftJoin() : isList ? SqlTable.InnerJoin() : SqlTable.WeakInnerJoin();
+
+				_parentAssociation    = parent;
+				ParentAssociationJoin = join.JoinedTable;
+
+				psrc.Joins.Add(join.JoinedTable);
+
+				//Init(mappingSchema);
+
+				for (var i = 0; i < association.ThisKey.Length; i++)
+				{
+					SqlField field1;
+
+					SqlField field2;
+
+					if (!parent.SqlTable.Fields.TryGetValue(association.ThisKey[i], out field1))
+						throw new LinqException("Association key '{0}' not found for type '{1}.", association.ThisKey[i], parent.ObjectType);
+
+					if (!SqlTable.Fields.TryGetValue(association.OtherKey[i], out field2))
+						throw new LinqException("Association key '{0}' not found for type '{1}.", association.OtherKey[i], ObjectType);
+
+					join.Field(field1).Equal.Field(field2);
+				}
 			}
 		}
 	}

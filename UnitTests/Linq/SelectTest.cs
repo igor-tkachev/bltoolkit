@@ -317,8 +317,8 @@ namespace Data.Linq
 		public void SelectEnumerable()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in    Parent select new {  Max = GetList(p.ParentID).Max() },
-				from p in db.Parent select new {  Max = GetList(p.ParentID).Max() }));
+				from p in    Parent select new { Max = GetList(p.ParentID).Max() },
+				from p in db.Parent select new { Max = GetList(p.ParentID).Max() }));
 		}
 
 		[Test]

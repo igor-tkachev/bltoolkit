@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Linq
 			set { _info.Queries[_currentSql].SqlQuery = value; }
 		}
 
-		List<Query<T>.Parameter> CurrentSqlParameters
+		List<ParameterAccessor> CurrentSqlParameters
 		{
 			get { return _info.Queries[_currentSql].Parameters; }
 		}
@@ -600,7 +600,7 @@ namespace BLToolkit.Data.Linq
 
 				var path =
 					Expression.Call(
-						_infoParam,
+						Expression.Constant(_info),
 						Expressor<Query<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
 						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
 
@@ -1511,7 +1511,7 @@ namespace BLToolkit.Data.Linq
 
 					var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
 
-					ep = new Query<T>.Parameter
+					ep = new ParameterAccessor
 					{
 						Expression   = ep.Expression,
 						Accessor     = ep.Accessor,
