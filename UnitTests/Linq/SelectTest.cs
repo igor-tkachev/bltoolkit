@@ -334,9 +334,9 @@ namespace Data.Linq
 					}).ToList());
 		}
 
-		static string ConvertString(string s, int? i, bool b)
+		static string ConvertString(string s, int? i, bool b, int n)
 		{
-			return s + "." + i + "." + b;
+			return s + "." + i + "." + b + "." + n;
 		}
 
 		[Test]
@@ -352,8 +352,9 @@ namespace Data.Linq
 				var lines =
 					q.Select(
 						(m, i) =>
-							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0)).ToArray();
-				lines.ToString();
+							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0, i)).ToArray();
+
+				Assert.AreEqual("6.66.True.0", lines[0]);
 			});
 		}
 

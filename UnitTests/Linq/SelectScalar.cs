@@ -144,7 +144,7 @@ namespace Data.Linq
 				select p.ID
 				into p1
 					where p1 == 1
-					select new {p1};
+					select new { p1 };
 
 			ForEachProvider(db =>
 			{
@@ -153,7 +153,7 @@ namespace Data.Linq
 					select p.ID
 					into p1
 						where p1 == 1
-						select new {p1};
+						select new { p1 };
 
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});

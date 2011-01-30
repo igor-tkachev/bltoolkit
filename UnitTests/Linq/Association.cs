@@ -142,15 +142,11 @@ namespace Data.Linq
 		//[Test]
 		public void SelectMany3()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				Child
 					.GroupBy(ch => ch.Parent)
 					.Where(g => g.Count() > 2)
-					.SelectMany(
-					g => 
-						g.Select(ch => ch.Parent));
-
-			ForEachProvider(db => AreEqual(expected,
+					.SelectMany(g => g.Select(ch => ch.Parent)),
 				db.Child
 					.GroupBy(ch => ch.Parent)
 					.Where(g => g.Count() > 2)

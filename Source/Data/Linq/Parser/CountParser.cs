@@ -6,7 +6,7 @@ namespace BLToolkit.Data.Linq.Parser
 {
 	using Data.Sql;
 
-	class AggregationParser : MethodCallParser
+	class CountParser : MethodCallParser
 	{
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
@@ -15,11 +15,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			switch (methodCall.Method.Name)
 			{
-				case "Average" :
-				case "Min"     :
-				case "Max"     :
-				case "Sum"     : return true;
-				default        : return false;
+				case "Count"     :
+				case "LongCount" : return true;
+				default          : return false;
 			}
 		}
 
@@ -29,7 +27,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 			{
-				//sequence.ConvertToIndex(null, 0, ConvertFlags.All);
+				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
 				sequence = new SubQueryContext(sequence);
 			}
 
@@ -41,27 +39,31 @@ namespace BLToolkit.Data.Linq.Parser
 					sequence = new SubQueryContext(sequence);
 			}
 
-			var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var context = new AggregationContext(sequence, lambda, methodCall.Method.ReturnType);
+			if (methodCall.Arguments.Count == 2)
+			{
+				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-			context.FieldIndex = context.SqlQuery.Select.Add(
-				new SqlFunction(
-					methodCall.Type,
-					methodCall.Method.Name,
-					parser.ParseExpression(context, context.Lambda.Body.Unwrap())));
+				sequence = parser.ParseWhere(sequence, condition);
+				sequence.SetAlias(condition.Parameters[0].Name);
+			}
+
+			var context = new CountConext(sequence, methodCall.Method.ReturnType);
+
+			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, context.SqlQuery), "cnt");
 
 			return context;
 		}
 
-		class AggregationContext : SequenceContextBase
+		class CountConext : SequenceContextBase
 		{
-			public AggregationContext(IParseContext sequence, LambdaExpression lambda, Type returnType)
-				: base(sequence, lambda)
+			public CountConext(IParseContext sequence, Type returnType)
+				: base(sequence, null)
 			{
 				_returnType = returnType;
 			}
 
-			readonly Type _returnType;
+			private  int[] _index;
+			readonly Type  _returnType;
 
 			public int FieldIndex;
 
@@ -83,16 +85,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				return Parser.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0]);
 			}
 
 			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
-					case ConvertFlags.All   :
-					case ConvertFlags.Key   :
-					case ConvertFlags.Field : return Sequence.ConvertToSql(expression, level + 1, flags);
+					case ConvertFlags.Field : return new[] { SqlQuery };
 				}
 
 				throw new NotImplementedException();
@@ -100,6 +100,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
+				switch (flags)
+				{
+					case ConvertFlags.Field : return _index ?? (_index = new[] { Parent.SqlQuery.Select.Add(SqlQuery) });
+				}
+
 				throw new NotImplementedException();
 			}
 
@@ -107,15 +112,15 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Root : return expression == Lambda.Parameters[0];
+					case RequestFor.Expression : return true;
 				}
 
-				throw new NotImplementedException();
+				return false;
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 			{
-				throw new NotImplementedException();
+				return Sequence.GetContext(expression, level, currentSql);
 			}
 		}
 	}

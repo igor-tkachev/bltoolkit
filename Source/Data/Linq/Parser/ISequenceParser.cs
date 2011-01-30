@@ -5,7 +5,7 @@ namespace BLToolkit.Data.Linq.Parser
 {
 	using Data.Sql;
 
-	interface ISequenceParser
+	public interface ISequenceParser
 	{
 		int           ParsingCounter { get; set; }
 		bool          CanParse     (ExpressionParser parser, Expression expression, SqlQuery sqlQuery);

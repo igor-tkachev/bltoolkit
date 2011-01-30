@@ -17,7 +17,7 @@ namespace BLToolkit.Data.Linq
 	using Parser;
 	using Reflection;
 
-	class Query<T> : ReflectionHelper
+	public class Query<T>
 	{
 		public Query()
 		{
@@ -37,6 +37,9 @@ namespace BLToolkit.Data.Linq
 			CreateSqlProvider = parseContext.Parser.DataContextInfo.CreateSqlProvider;
 			Expression        = parseContext.Parser.Expression;
 			//Parameters        = parameters;
+
+			GetElement     = (_,ctx,expr,ps) => GetElementNew    (ctx, expr, ps);
+			GetIEnumerable = (_,ctx,expr,ps) => GetIEnumerableNew(ctx, expr, ps);
 		}
 
 		#region Properties & Fields
@@ -55,8 +58,11 @@ namespace BLToolkit.Data.Linq
 			get { return _sqlProvider ?? (_sqlProvider = CreateSqlProvider()); }
 		}
 
-		public Func<QueryContext,IDataContextInfo,Expression,object[],object>         GetElement;
-		public Func<QueryContext,IDataContextInfo,Expression,object[],IEnumerable<T>> GetIEnumerable;
+		public   Func<IDataContextInfo,Expression,object[],object>         GetElementNew;
+		internal Func<IDataContextInfo,Expression,object[],IEnumerable<T>> GetIEnumerableNew;
+
+		internal Func<QueryContext,IDataContextInfo,Expression,object[],object>         GetElement;
+		internal Func<QueryContext,IDataContextInfo,Expression,object[],IEnumerable<T>> GetIEnumerable;
 
 		IEnumerable<T> MakeEnumerable(QueryContext qc, IDataContextInfo dci, Expression expr, object[] ps)
 		{
@@ -230,7 +236,7 @@ namespace BLToolkit.Data.Linq
 
 		#region ElementQuery
 
-		public void SetElementQuery<TE>(Mapper<TE> mapper)
+		internal void SetElementQuery<TE>(Mapper<TE> mapper)
 		{
 			FinalizeQuery();
 
@@ -275,7 +281,7 @@ namespace BLToolkit.Data.Linq
 		[UsedImplicitly]
 		Expression _mapperExpression;
 
-		public void SetQuery(Mapper<T> mapper, Expression mapperExpression)
+		internal void SetQuery(Mapper<T> mapper, Expression mapperExpression)
 		{
 			_mapperExpression = mapperExpression;
 
@@ -542,7 +548,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetMapperMethodInfo()
 		{
-			return Expressor<Query<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, null, 0));
+			return ReflectionHelper.Expressor<Query<T>>.MethodExpressor(e => e.MapDataReaderToObject(null, null, null, 0));
 		}
 
 		#endregion
@@ -555,7 +561,7 @@ namespace BLToolkit.Data.Linq
 				yield return item;
 		}
 
-		public IEnumerable<TElement> GetGroupJoinEnumerator<TElement>(
+		internal IEnumerable<TElement> GetGroupJoinEnumerator<TElement>(
 			QueryContext     qc,
 			IDataContext     dataContext,
 			IDataReader      dataReader,
@@ -570,7 +576,7 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupJoinEnumeratorMethodInfo<TElement>()
 		{
-			return Expressor<Query<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, null, 0, null));
+			return ReflectionHelper.Expressor<Query<T>>.MethodExpressor(e => e.GetGroupJoinEnumerator<TElement>(null, null, null, null, null, 0, null));
 		}
 
 		#endregion
@@ -600,7 +606,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		public IGrouping<TKey,TElement> GetGrouping<TKey,TElement>(
+		internal IGrouping<TKey,TElement> GetGrouping<TKey,TElement>(
 			QueryContext             context,
 			IDataContext             dataContext,
 			IDataReader              dataReader,
@@ -630,14 +636,14 @@ namespace BLToolkit.Data.Linq
 
 		public MethodInfo GetGroupingMethodInfo<TKey,TElement>()
 		{
-			return Expressor<Query<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
+			return ReflectionHelper.Expressor<Query<T>>.MethodExpressor(e => e.GetGrouping<TKey,TElement>(null, null, null, null, null, null, null));
 		}
 
 		#endregion
 
 		#region Element Operations
 
-		public void MakeElementOperator(ElementMethod em)
+		internal void MakeElementOperator(ElementMethod em)
 		{
 			switch (em)
 			{
@@ -691,7 +697,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Inner Types
 
-		public delegate TElement Mapper<TElement>(
+		internal delegate TElement Mapper<TElement>(
 			Query<T>      query,
 			QueryContext  qc,
 			IDataContext  dc,
@@ -720,8 +726,8 @@ namespace BLToolkit.Data.Linq
 				return ps;
 			}
 
-			public List<ParameterAccessor> Parameters = new List<ParameterAccessor>();
-			public Mapper<T>               Mapper;
+			public   List<ParameterAccessor> Parameters = new List<ParameterAccessor>();
+			internal Mapper<T>               Mapper;
 		}
 
 		#endregion
@@ -745,7 +751,7 @@ namespace BLToolkit.Data.Linq
 						Expression.Convert(
 							Expression.Property(
 								Expression.Convert(exprParam, typeof(ConstantExpression)),
-								Constant.Value),
+								ReflectionHelper.Constant.Value),
 							typeof(T)),
 						field.Name),
 					typeof(object)),
@@ -984,6 +990,111 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		#endregion
+
+		#region New Parser Support
+
+		public void SetElementQuery(Func<IDataContext,IDataReader,Expression,object[],object> mapper)
+		{
+			FinalizeQuery();
+
+			if (Queries.Count != 1)
+				throw new InvalidOperationException();
+
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
+
+			GetElementNew = (ctx,expr,ps) => RunQuery(ctx, expr, ps, mapper);
+		}
+
+		TE RunQuery<TE>(IDataContextInfo dataContextInfo, Expression expr, object[] parameters, Func<IDataContext,IDataReader,Expression,object[],TE> mapper)
+		{
+			var dataContext = dataContextInfo.DataContext;
+
+			object query = null;
+
+			try
+			{
+				query = SetCommand(dataContext, expr, parameters, 0);
+
+				using (var dr = dataContext.ExecuteReader(query))
+					while (dr.Read())
+						return mapper(dataContext, dr, expr, parameters);
+
+				return Array<TE>.Empty.First();
+			}
+			finally
+			{
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
+			}
+		}
+
+		internal void SetQuery(Func<IDataContext,IDataReader,Expression,object[],T> mapper)
+		{
+			FinalizeQuery();
+
+			if (Queries.Count != 1)
+				throw new InvalidOperationException();
+
+			Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> query = RunQuery;
+
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
+
+			var select = Queries[0].SqlQuery.Select;
+
+			if (select.SkipValue != null && !SqlProvider.IsSkipSupported)
+			{
+				var q = query;
+
+				if (select.SkipValue is SqlValue)
+				{
+					var n = (int)((IValueContainer)select.SkipValue).Value;
+
+					if (n > 0)
+						query = (db, expr, ps, qn) => q(db, expr, ps, qn).Skip(n);
+				}
+				else if (select.SkipValue is SqlParameter)
+				{
+					var i = GetParameterIndex(select.SkipValue);
+					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Skip((int)Queries[0].Parameters[i].Accessor(expr, ps));
+				}
+			}
+
+			if (select.TakeValue != null && !SqlProvider.IsTakeSupported)
+			{
+				var q = query;
+
+				if (select.TakeValue is SqlValue)
+				{
+					var n = (int)((IValueContainer)select.TakeValue).Value;
+
+					if (n > 0)
+						query = (db, expr, ps, qn) => q(db, expr, ps, qn).Take(n);
+				}
+				else if (select.TakeValue is SqlParameter)
+				{
+					var i = GetParameterIndex(select.TakeValue);
+					query = (db, expr, ps, qn) => q(db, expr, ps, qn).Take((int)Queries[0].Parameters[i].Accessor(expr, ps));
+				}
+			}
+
+			GetIEnumerableNew = (ctx,expr,ps) => Map(query(ctx, expr, ps, 0), ctx, expr, ps, mapper);
+		}
+
+		static IEnumerable<T> Map(
+			IEnumerable<IDataReader> data,
+			IDataContextInfo         dataContextInfo,
+			Expression               expr,
+			object[]                 ps,
+			Func<IDataContext,IDataReader,Expression,object[],T> mapper)
+		{
+			foreach (var dr in data)
+				yield return mapper(dataContextInfo.DataContext, dr, expr, ps);
+		}
 
 		#endregion
 	}

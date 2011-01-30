@@ -26,9 +26,9 @@ namespace BLToolkit.Data.Linq.Parser
 						var c = (ConstantExpression)expression;
 						if (c.Value is IQueryable)
 							return action(1, null);
-					}
 
-					break;
+						break;
+					}
 
 				case ExpressionType.Call:
 					{
@@ -37,9 +37,9 @@ namespace BLToolkit.Data.Linq.Parser
 						if (mc.Method.Name == "GetTable")
 							if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
 								return action(2, null);
-					}
 
-					break;
+						break;
+					}
 
 				case ExpressionType.MemberAccess:
 					if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
@@ -50,12 +50,16 @@ namespace BLToolkit.Data.Linq.Parser
 					if (parser.IsSubQueryParsing && sqlQuery.From.Tables.Count == 0)
 					{
 						var ctx = parser.GetContext(null, expression);
-
 						if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Association))
 							return action(4, ctx);
 					}
 
 					break;
+
+				case ExpressionType.Parameter:
+					{
+						break;
+					}
 			}
 
 			return action(0, null);
@@ -93,18 +97,7 @@ namespace BLToolkit.Data.Linq.Parser
 			public ExpressionParser Parser     { get; private set; }
 			public Expression       Expression { get; private set; }
 			public SqlQuery         SqlQuery   { get; private set; }
-
-			private IParseContext _root;
-			public  IParseContext  Root
-			{
-				get { return _root;  }
-				set
-				{
-					foreach (var association in _associations.Values)
-						association.Root = value;
-					_root = value;
-				}
-			}
+			public IParseContext    Parent     { get; set; }
 
 			public TableContext(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Type originalType)
 			{
@@ -258,31 +251,53 @@ namespace BLToolkit.Data.Linq.Parser
 					ObjectType);
 			}
 
-			public Expression BuildQuery()
+			Expression BuildQuery()
 			{
+				// Get indexes for all fields.
+				//
 				var index = ConvertToIndex(null, 0, ConvertFlags.All);
-				return GetTableExpression(index.ToArray());
+
+				// Convert to parent indexes.
+				//
+				index = index.Select(idx => ConvertToParentIndex(idx, null)).ToArray();
+
+				// Build an expression.
+				//
+				return GetTableExpression(index);
+			}
+
+			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			{
+				var expr = BuildExpression(null, 0);
+
+				var mapper = Expression.Lambda<Func<IDataContext,IDataReader,Expression,object[],T>>(
+					expr, new []
+					{
+						ExpressionParser.DataContextParam,
+						ExpressionParser.DataReaderParam,
+						ExpressionParser.ExpressionParam,
+						ExpressionParser.ParametersParam,
+					});
+
+				query.SetQuery(mapper.Compile());
 			}
 
 			public Expression BuildExpression(Expression expression, int level)
 			{
-				if (IsExpression(expression, level, RequestFor.Field))
-				{
-					var idx = Root.ConvertToIndex(expression, 0, ConvertFlags.Field).First();
-					return Parser.BuildSql(expression.Type, idx);
-				}
+				// Build table.
+				//
+				var table = FindTable(expression, level);
 
-				var levelExpression = expression.GetLevelExpression(level);
+				if (table.Field == null)
+					return table.Table.BuildQuery();
 
-				if (levelExpression == expression)
-					return BuildQuery();
+				// Build field.
+				//
+				var idx = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 
-				var association = GetAssociation(levelExpression);
+				idx = ConvertToParentIndex(idx, null);
 
-				if (association != null)
-					return association.BuildExpression(expression, level + 1);
-
-				throw new NotImplementedException();
+				return Parser.BuildSql(expression.Type, idx);
 			}
 
 			public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -290,26 +305,34 @@ namespace BLToolkit.Data.Linq.Parser
 				switch (flags)
 				{
 					case ConvertFlags.All   :
+						{
+							var table = FindTable(expression, level);
 
-						if (expression == null)
-							return SqlTable.Fields.Values.ToArray();
+							if (table.Field == null)
+								return table.Table.SqlTable.Fields.Values.ToArray();
 
-						break;
+							break;
+						}
+
+					case ConvertFlags.Key   :
+						{
+							var table = FindTable(expression, level);
+
+							if (table.Field == null)
+								return table.Table.SqlTable.GetKeys(true).ToArray();
+
+							break;
+						}
 
 					case ConvertFlags.Field :
+						{
+							var table = FindTable(expression, level);
 
-						var field = GetField(expression, level);
+							if (table.Field != null)
+								return new[] { table.Field };
 
-						if (field != null)
-							return new[] { field };
-
-						var levelExpression = expression.GetLevelExpression(level);
-						var association     = GetAssociation(levelExpression);
-
-						if (association != null)
-							return association.ConvertToSql(expression, level + 1, flags);
-
-						break;
+							break;
+						}
 				}
 
 				throw new NotImplementedException();
@@ -322,6 +345,7 @@ namespace BLToolkit.Data.Linq.Parser
 				switch (flags)
 				{
 					case ConvertFlags.Field :
+					case ConvertFlags.Key   :
 					case ConvertFlags.All   :
 
 						return ConvertToSql(expression, level, flags)
@@ -356,29 +380,54 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (requestFor)
 				{
-					case RequestFor.ScalarExpression :
-					case RequestFor.Root             : return false;
-					case RequestFor.Field            :
+					case RequestFor.SubQuery   :
+					case RequestFor.Root       : return false;
+
+					case RequestFor.Field      :
 						{
-							var field = GetField(expression, level);
-							return field != null;
+							var table = FindTable(expression, level);
+							return table != null && table.Field != null;
+						}
+
+					case RequestFor.Query      :
+						{
+							var table = FindTable(expression, level);
+							return
+								table       != null &&
+								table.Field == null &&
+								(expression == null || expression.GetLevelExpression(table.Level) == expression);
+						}
+
+					case RequestFor.Expression :
+						{
+							if (expression == null)
+								return false;
+
+							var levelExpression = expression.GetLevelExpression(level);
+
+							switch (levelExpression.NodeType)
+							{
+								case ExpressionType.MemberAccess :
+								case ExpressionType.Parameter    :
+								case ExpressionType.Call         :
+
+									var table = FindTable(expression, level);
+									return table == null;
+							}
+
+							return true;
 						}
 
 					case RequestFor.Association      :
 						{
 							if (ObjectMapper.Associations.Count > 0)
 							{
-								var levelExpression = expression.GetLevelExpression(level);
-
-								if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
-								{
-									var member = ((MemberExpression)expression).Member;
-
-									if (_associations.ContainsKey(member))
-										return true;
-
-									return ObjectMapper.Associations.Exists(_ => _.MemberAccessor.MemberInfo == member);
-								}
+								var table = FindTable(expression, level);
+								return
+									table       != null &&
+									table.Table is AssociatedTableContext &&
+									table.Field == null &&
+									(expression == null || expression.GetLevelExpression(table.Level) == expression);
 							}
 
 							return false;
@@ -398,10 +447,10 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						if (Parser.IsSubQueryParsing)
 						{
-							var association = GetAssociation(expression);
-							var table       = new TableContext(Parser, Expression, currentSql, association.ObjectType) { Root = Root };
+							var association = GetAssociation(expression, level);
+							var table       = new TableContext(Parser, Expression, currentSql, association.Table.ObjectType) { Parent = Parent };
 
-							foreach (var cond in association.ParentAssociationJoin.Condition.Conditions)
+							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
 							{
 								var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
 								currentSql.Where
@@ -420,6 +469,11 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new InvalidOperationException();
 			}
 
+			public int ConvertToParentIndex(int index, IParseContext context)
+			{
+				return Parent == null ? index : Parent.ConvertToParentIndex(index, this);
+			}
+
 			public void SetAlias(string alias)
 			{
 				if (SqlTable.Alias == null)
@@ -432,18 +486,18 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				if (expression.NodeType == ExpressionType.MemberAccess)
 				{
-					var member          = (MemberExpression)expression;
-					var levelExpression = expression.GetLevelExpression(level);
+					var memberExpression = (MemberExpression)expression;
+					var levelExpression  = expression.GetLevelExpression(level);
 
 					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
 						if (levelExpression != expression)
-							if (TypeHelper.IsNullableValueMember(member.Member) && member.Expression == levelExpression)
-								member = (MemberExpression)levelExpression;
+							if (TypeHelper.IsNullableValueMember(memberExpression.Member) && memberExpression.Expression == levelExpression)
+								memberExpression = (MemberExpression)levelExpression;
 
-						if (levelExpression == member)
+						if (levelExpression == memberExpression)
 							foreach (var field in SqlTable.Fields.Values)
-								if (field.MemberMapper.MemberAccessor.MemberInfo == member.Member)
+								if (field.MemberMapper.MemberAccessor.MemberInfo == memberExpression.Member)
 									return field;
 					}
 				}
@@ -454,27 +508,76 @@ namespace BLToolkit.Data.Linq.Parser
 			[JetBrains.Annotations.NotNull]
 			readonly Dictionary<MemberInfo,AssociatedTableContext> _associations = new Dictionary<MemberInfo,AssociatedTableContext>();
 
-			AssociatedTableContext GetAssociation(Expression expression)
+			class TableLevel
 			{
-				if (ObjectMapper.Associations.Count > 0 && expression.NodeType == ExpressionType.MemberAccess)
+				public TableContext Table;
+				public SqlField     Field;
+				public int          Level;
+			}
+
+			TableLevel FindTable(Expression expression, int level)
+			{
+				if (expression == null)
+					return new TableLevel { Table = this };
+
+				var levelExpression = expression.GetLevelExpression(level);
+
+				switch (levelExpression.NodeType)
 				{
-					var memberExpression = (MemberExpression)expression;
+					case ExpressionType.MemberAccess :
+					case ExpressionType.Parameter    :
+						{
+							var field = GetField(expression, level);
 
-					AssociatedTableContext tableAssociation;
+							if (field != null || (level == 0 && levelExpression == expression))
+								return new TableLevel { Table = this, Field = field, Level = level };
 
-					if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
+							return GetAssociation(expression, level);
+						}
+				}
+
+				return null;
+			}
+
+			TableLevel GetAssociation(Expression expression, int level)
+			{
+				if (ObjectMapper.Associations.Count > 0)
+				{
+					var levelExpression = expression.GetLevelExpression(level);
+
+					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
-						var q =
-							from a in ObjectMapper.Associations
-							where a.MemberAccessor.MemberInfo == memberExpression.Member
-							select new AssociatedTableContext(Parser, this, a) { Root = Root };
+						var memberExpression = (MemberExpression)levelExpression;
 
-						tableAssociation = q.FirstOrDefault();
+						AssociatedTableContext tableAssociation;
 
-						_associations.Add(memberExpression.Member, tableAssociation);
+						if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
+						{
+							var q =
+								from a in ObjectMapper.Associations
+								where a.MemberAccessor.MemberInfo == memberExpression.Member
+								select new AssociatedTableContext(Parser, this, a) { Parent = Parent };
+
+							tableAssociation = q.FirstOrDefault();
+
+							_associations.Add(memberExpression.Member, tableAssociation);
+						}
+
+						if (tableAssociation != null)
+						{
+							if (levelExpression == expression)
+								return new TableLevel { Table = tableAssociation, Level = level };
+
+							var al = tableAssociation.GetAssociation(expression, level + 1);
+
+							if (al != null)
+								return al;
+
+							var field = tableAssociation.GetField(expression, level + 1);
+
+							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1 };
+						}
 					}
-
-					return tableAssociation;
 				}
 
 				return null;

@@ -104,6 +104,7 @@
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\Parser\AggregationParser.cs" />
     <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
+    <Compile Include="Data\Linq\Parser\CountParser.cs" />
     <Compile Include="Data\Linq\Parser\DistinctParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
@@ -111,8 +112,13 @@
     <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
     <Compile Include="Data\Linq\Parser\IParseContext.cs" />
     <Compile Include="Data\Linq\Parser\ISequenceParser.cs" />
+    <Compile Include="Data\Linq\Parser\JoinParser.cs" />
     <Compile Include="Data\Linq\Parser\MethodCallParser.cs" />
+    <Compile Include="Data\Linq\Parser\OrderByParser.cs" />
+    <Compile Include="Data\Linq\Parser\PathThroughContext.cs" />
     <Compile Include="Data\Linq\Parser\RequestFor.cs" />
+    <Compile Include="Data\Linq\Parser\ScalarSelectParser.cs" />
+    <Compile Include="Data\Linq\Parser\SelectContext.cs" />
     <Compile Include="Data\Linq\Parser\SelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SequenceContextBase.cs" />
     <Compile Include="Data\Linq\Parser\SubQueryContext.cs" />

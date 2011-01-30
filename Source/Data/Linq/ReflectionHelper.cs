@@ -12,7 +12,7 @@ using LinqBinary = System.Data.Linq.Binary;
 
 namespace BLToolkit.Data.Linq
 {
-	class ReflectionHelper
+	public class ReflectionHelper
 	{
 		public class Expressor<T>
 		{
@@ -167,7 +167,7 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo IsDBNull = MethodExpressor(rd => rd.IsDBNull(0));
 		}
 
-		public class QueryCtx : Expressor<QueryContext>
+		internal class QueryCtx : Expressor<QueryContext>
 		{
 			public static FieldInfo Counter = FieldExpressor(ctx => ctx.Counter);
 		}

@@ -820,5 +820,75 @@ namespace Data.Linq
 					from r in from o in    Order select o.Freight * 1000 where r > 100000 select r / 1000,
 					from r in from o in db.Order select o.Freight * 1000 where r > 100000 select r / 1000);
 		}
+
+		[Test]
+		public void CheckField1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				select new { p } into p
+				where p.p.ParentID == 1
+				select p.p,
+				from p in db.Parent
+				select new { p } into p
+				where p.p.ParentID == 1
+				select p.p));
+		}
+
+		[Test]
+		public void CheckField2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				select new { p } into p
+				where p.p.ParentID == 1
+				select new { p.p.Value1, p },
+				from p in db.Parent
+				select new { p } into p
+				where p.p.ParentID == 1
+				select new { p.p.Value1, p }));
+		}
+
+		[Test]
+		public void CheckField3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				select new { p } into p
+				where p.p.ParentID == 1
+				select new { p.p.Value1, p.p },
+				from p in db.Parent
+				select new { p } into p
+				where p.p.ParentID == 1
+				select new { p.p.Value1, p.p }));
+		}
+
+		[Test]
+		public void CheckField4()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Select(p => new { p }).Where(p => p.p.ParentID == 1),
+				db.Parent.Select(p => new { p }).Where(p => p.p.ParentID == 1)));
+		}
+
+		[Test]
+		public void CheckField5()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Select(p => new { Value = p.Value1 + 1, p }).Where(p => p.Value == 2 && p.p.ParentID == 1),
+				db.Parent.Select(p => new { Value = p.Value1 + 1, p }).Where(p => p.Value == 2 && p.p.ParentID == 1)));
+		}
+
+		[Test]
+		public void CheckField6()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent
+				select new { p, Value = p.Value1 * 100 } into p
+				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p },
+				from p in db.Parent
+				select new { p, Value = p.Value1 * 100 } into p
+				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p }));
+		}
 	}
 }

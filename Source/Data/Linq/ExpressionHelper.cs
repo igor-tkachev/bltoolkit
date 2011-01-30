@@ -1673,14 +1673,18 @@ namespace BLToolkit.Data.Linq
 			{
 				case ExpressionType.Call :
 					{
-						var e = (MethodCallExpression)expression;
+						var call = (MethodCallExpression)expression;
+						var expr = call.Object;
 
-						if (e.Object != null)
+						if (expr == null && call.IsQueryable() && call.Arguments.Count > 0)
+							expr = call.Arguments[0];
+
+						if (expr != null)
 						{
-							var expr = FindLevel(e.Object, level, ref current);
+							var ex = FindLevel(expr, level, ref current);
 
 							if (level == current)
-								return expr;
+								return ex;
 
 							current++;
 						}

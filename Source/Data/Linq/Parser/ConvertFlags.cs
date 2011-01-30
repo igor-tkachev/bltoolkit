@@ -2,9 +2,10 @@
 
 namespace BLToolkit.Data.Linq.Parser
 {
-	enum ConvertFlags
+	public enum ConvertFlags
 	{
 		Field,
+		Key,
 		All,
 	}
 }

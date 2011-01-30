@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -9,22 +10,32 @@ namespace BLToolkit.Data.Linq.Parser
 	using Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;
+	using Reflection;
 
-	partial class ExpressionParser
+	public partial class ExpressionParser
 	{
-		#region Static Members
+		#region Sequence
+
+		static readonly object _sync = new object();
 
 		static List<ISequenceParser> _sequenceParsers = new List<ISequenceParser>
 		{
-			new TableParser      (),
-			new SelectParser     (),
-			new WhereParser      (),
-			new DistinctParser   (),
-			new FirstSingleParser(),
-			new AggregationParser(),
+			new TableParser       (),
+			new SelectParser      (),
+			new WhereParser       (),
+			new OrderByParser     (),
+			new JoinParser        (),
+			new DistinctParser    (),
+			new FirstSingleParser (),
+			new AggregationParser (),
+			new ScalarSelectParser(),
+			new CountParser       (),
 		};
 
-		static readonly object _sync = new object();
+		public static void AddParser(ISequenceParser parser)
+		{
+			_sequenceParsers.Add(parser);
+		}
 
 		#endregion
 
@@ -37,11 +48,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public ExpressionParser(IDataContextInfo dataContext, Expression expression, ParameterExpression[] compiledParameters)
 		{
-			DataContextInfo    = dataContext;
-			Expression         = expression;
-			CompiledParameters = compiledParameters;
-
 			_expressionAccessors = expression.GetExpressionAccessors(ExpressionParam);
+
+			DataContextInfo    = dataContext;
+			Expression         = Prepare(expression);
+			CompiledParameters = compiledParameters;
 		}
 
 		#endregion
@@ -64,7 +75,7 @@ namespace BLToolkit.Data.Linq.Parser
 		public static readonly ParameterExpression ContextParam     = Expression.Parameter(typeof(QueryContext),  "context");
 		public static readonly ParameterExpression DataContextParam = Expression.Parameter(typeof(IDataContext),  "dctx");
 		public static readonly ParameterExpression DataReaderParam  = Expression.Parameter(typeof(IDataReader),   "rd");
-		public static readonly ParameterExpression MapSchemaParam   = Expression.Parameter(typeof(MappingSchema), "ms");
+		//public static readonly ParameterExpression MapSchemaParam   = Expression.Parameter(typeof(MappingSchema), "ms");
 		public static readonly ParameterExpression ParametersParam  = Expression.Parameter(typeof(object[]),      "ps");
 		public static readonly ParameterExpression ExpressionParam  = Expression.Parameter(typeof(Expression),    "expr");
 
@@ -77,7 +88,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region Parse
 
-		public Query<T> Parse<T>()
+		internal Query<T> Parse<T>()
 		{
 			var sequence = ParseSequence(Expression, new SqlQuery());
 
@@ -88,17 +99,10 @@ namespace BLToolkit.Data.Linq.Parser
 					_sequenceParsers = _sequenceParsers.OrderByDescending(_ => _.ParsingCounter).ToList();
 				}
 
-			sequence.Root = sequence;
-
-			var expr = sequence.BuildQuery();
-
-			var infoParam = Expression.Parameter(typeof(Query<T>), "info");
-
-			var mapper = Expression.Lambda<Query<T>.Mapper<T>>(
-				expr, new [] { infoParam, ContextParam, DataContextParam, DataReaderParam, MapSchemaParam, ExpressionParam, ParametersParam });
-
 			var query = new Query<T>(sequence, _currentSqlParameters);
-			query.SetQuery(mapper.Compile(), mapper);
+			var param = Expression.Parameter(typeof(Query<T>), "info");
+
+			sequence.BuildQuery(query, param);
 
 			return query;
 		}
@@ -126,6 +130,135 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", expression);
+		}
+
+		#endregion
+
+		#region Prepare
+
+		Expression Prepare(Expression expression)
+		{
+			return expression.Convert(expr =>
+			{
+				switch (expr.NodeType)
+				{
+					case ExpressionType.MemberAccess :
+						{
+							var ma = (MemberExpression)expr;
+
+							// Replace Count with Count()
+							//
+							if (ma.Member.Name == "Count")
+							{
+								var isList = typeof(ICollection).IsAssignableFrom(ma.Member.DeclaringType);
+
+								if (!isList)
+									foreach (var t in ma.Member.DeclaringType.GetInterfaces())
+										if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>))
+										{
+											isList = true;
+											break;
+										}
+
+								if (isList)
+								{
+									var mi = typeof(Enumerable)
+										.GetMethods()
+										.First(m => m.Name == "Count" && m.GetParameters().Length == 1)
+										.MakeGenericMethod(TypeHelper.GetElementType(ma.Expression.Type));
+
+									return Expression.Call(null, mi, ma.Expression);
+								}
+							}
+
+							/*
+							// Convert members.
+							//
+							var lambda = ConvertMember1(ma.Member);
+
+							if (lambda != null)
+							{
+								var ef  = lambda.Body.Unwrap();
+								var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+
+								return Prepare(pie);
+							}
+							 */
+
+							break;
+						}
+
+					case ExpressionType.Call:
+						{
+							/*
+							var mc = (MethodCallExpression)expr;
+
+							// Convert methods.
+							//
+							var lambda = ConvertMember1(mc.Method);
+
+							if (lambda != null)
+							{
+								var ef    = lambda.Body.Unwrap();
+								var parms = new Dictionary<string,int>(lambda.Parameters.Count);
+								var pn    = mc.Method.IsStatic ? 0 : -1;
+
+								foreach (var p in lambda.Parameters)
+									parms.Add(p.Name, pn++);
+
+								return ef.Convert(wpi =>
+								{
+									if (wpi.NodeType == ExpressionType.Parameter)
+									{
+										int n;
+										if (parms.TryGetValue(((ParameterExpression)wpi).Name, out n))
+											return n < 0 ? mc.Object : mc.Arguments[n];
+									}
+
+									return wpi;
+								});
+							}
+							 */
+
+							break;
+						}
+
+					case ExpressionType.New:
+						{
+							/*
+							var ne = (NewExpression)expr;
+
+							var lambda = ConvertMember1(ne.Constructor);
+
+							if (lambda != null)
+							{
+								var ef    = lambda.Body.Unwrap();
+								var parms = new Dictionary<string,int>(lambda.Parameters.Count);
+								var pn    = 0;
+
+								foreach (var p in lambda.Parameters)
+									parms.Add(p.Name, pn++);
+
+								return ef.Convert(wpi =>
+								{
+									if (wpi.NodeType == ExpressionType.Parameter)
+									{
+										var pe   = (ParameterExpression)wpi;
+										var n    = parms[pe.Name];
+										return ne.Arguments[n];
+									}
+
+									return wpi;
+								});
+							}
+							 */
+
+							break;
+						}
+				}
+
+				return expr;
+			});
 		}
 
 		#endregion

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Parser
@@ -25,31 +25,28 @@ namespace BLToolkit.Data.Linq.Parser
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			MethodType methodType;
-
-			switch (methodCall.Method.Name)
-			{
-				case "First"           : methodType = MethodType.First;           break;
-				case "FirstOrDefault"  : methodType = MethodType.FirstOrDefault;  break;
-				case "Single"          : methodType = MethodType.Single;          break;
-				case "SingleOrDefault" : methodType = MethodType.SingleOrDefault; break;
-				default                : return null;
-			}
-
 			var sequence = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+
+			if (methodCall.Arguments.Count == 2)
+			{
+				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+
+				sequence = parser.ParseWhere(sequence, condition);
+				sequence.SetAlias(condition.Parameters[0].Name);
+			}
 
 			var take = 0;
 
 			if (!parser.IsSubQueryParsing || parser.SqlProvider.IsSubQueryTakeSupported)
-				switch (methodType)
+				switch (methodCall.Method.Name)
 				{
-					case MethodType.First           :
-					case MethodType.FirstOrDefault  :
+					case "First"           :
+					case "FirstOrDefault"  :
 						take = 1;
 						break;
 
-					case MethodType.Single          :
-					case MethodType.SingleOrDefault :
+					case "Single"          :
+					case "SingleOrDefault" :
 						if (!parser.IsSubQueryParsing)
 							take = 2;
 							break;
@@ -58,43 +55,43 @@ namespace BLToolkit.Data.Linq.Parser
 			if (take != 0)
 				parser.ParseTake(sequence, new SqlValue(take));
 
-			sequence.Root = sequence;
-			sequence.BuildQuery();
+			//sequence.BuildExpression(null, 0);
 
-			return new FirstSingleContext(sequence, methodType);
-		}
-
-		enum MethodType
-		{
-			First,
-			FirstOrDefault,
-			Single,
-			SingleOrDefault,
+			return new FirstSingleContext(sequence, methodCall.Method.Name);
 		}
 
 		class FirstSingleContext : SequenceContextBase
 		{
-			public FirstSingleContext(IParseContext sequence, MethodType methodType)
+			public FirstSingleContext(IParseContext sequence, string methodName)
 				: base(sequence, null)
 			{
-				_methodType = methodType;
+				_methodName = methodName;
 			}
 
-			readonly MethodType _methodType;
+			readonly string _methodName;
 
-			public override Expression BuildQuery()
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				throw new NotImplementedException();
+				Sequence.BuildQuery(query, queryParameter);
+
+				switch (_methodName)
+				{
+					case "First"           : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).First();           break;
+					case "FirstOrDefault"  : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).FirstOrDefault();  break;
+					case "Single"          : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).Single();          break;
+					case "SingleOrDefault" : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).SingleOrDefault(); break;
+				}
 			}
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
 				throw new NotImplementedException();
+				//return Sequence.BuildExpression(expression, level + 1);
 			}
 
 			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				return Sequence.ConvertToSql(expression, level + 1, flags);
 			}
 
 			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
@@ -102,8 +99,13 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
+				switch (requestFlag)
+				{
+					case RequestFor.SubQuery : return false;
+				}
+
 				throw new NotImplementedException();
 			}
 

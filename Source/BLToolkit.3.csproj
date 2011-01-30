@@ -38,7 +38,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;TRACE_PARSING1;OVERRIDETOSTRING;NEW_PARSER1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;TRACE_PARSING1;OVERRIDETOSTRING1;NEW_PARSER1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>-Microsoft.Globalization#CA1303;-Microsoft.Design#CA1020;-Microsoft.Design#CA1019;-Microsoft.Design#CA1000;-Microsoft.Design#CA1002;-Microsoft.Design#CA1004;-Microsoft.Design#CA1035;-Microsoft.Design#CA1039;-Microsoft.Design#CA1024;-Microsoft.Globalization#CA1304;-Microsoft.Globalization#CA1305;-Microsoft.Maintainability#CA1502;-Microsoft.Naming#CA1709;-Microsoft.Naming#CA1704;-Microsoft.Naming#CA1710;-Microsoft.Naming#CA1720;-Microsoft.Naming#CA1707;-Microsoft.Performance#CA1800;-Microsoft.Performance#CA1819;-Microsoft.Usage#CA2223;-Microsoft.Usage#CA2225</CodeAnalysisRules>
@@ -136,10 +136,16 @@
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
     <Compile Include="Data\Linq\Parser\AggregationParser.cs" />
+    <Compile Include="Data\Linq\Parser\CountParser.cs" />
     <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.QueryBuilding.cs" />
+    <Compile Include="Data\Linq\Parser\JoinParser.cs" />
+    <Compile Include="Data\Linq\Parser\OrderByParser.cs" />
+    <Compile Include="Data\Linq\Parser\PathThroughContext.cs" />
     <Compile Include="Data\Linq\Parser\RequestFor.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
+    <Compile Include="Data\Linq\Parser\ScalarSelectParser.cs" />
+    <Compile Include="Data\Linq\Parser\SelectContext.cs" />
     <Compile Include="Data\Linq\Parser\WhereParser.cs" />
     <Compile Include="Data\Linq\Parser\DistinctParser.cs" />
     <Compile Include="Data\Linq\Parser\IParseContext.cs" />

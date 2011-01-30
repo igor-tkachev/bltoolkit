@@ -22,12 +22,12 @@ namespace BLToolkit.Data.Linq
 			_info.Queries.Add(new Query<T>.QueryInfo());
 		}
 
-		readonly Query<T>   _info             = new Query<T>();
-		readonly ParameterExpression _contextParam     = Expression.Parameter(typeof(QueryContext),      "context");
-		readonly ParameterExpression _dataContextParam = Expression.Parameter(typeof(IDataContext),      "dctx");
-		readonly ParameterExpression _dataReaderParam  = Expression.Parameter(typeof(IDataReader),       "rd");
-		readonly ParameterExpression _mapSchemaParam   = Expression.Parameter(typeof(MappingSchema),     "ms");
-		readonly ParameterExpression _infoParam        = Expression.Parameter(typeof(Query<T>), "info");
+		readonly Query<T>            _info             = new Query<T>();
+		readonly ParameterExpression _contextParam     = Expression.Parameter(typeof(QueryContext),  "context");
+		readonly ParameterExpression _dataContextParam = Expression.Parameter(typeof(IDataContext),  "dctx");
+		readonly ParameterExpression _dataReaderParam  = Expression.Parameter(typeof(IDataReader),   "rd");
+		readonly ParameterExpression _mapSchemaParam   = Expression.Parameter(typeof(MappingSchema), "ms");
+		readonly ParameterExpression _infoParam        = Expression.Parameter(typeof(Query<T>),      "info");
 
 		bool   _isSubQueryParsing;
 		int    _currentSql = 0;
@@ -1862,7 +1862,7 @@ namespace BLToolkit.Data.Linq
 									ParametersParam
 								});
 
-								_info.SetElementQuery(mapper.Compile());
+							_info.SetElementQuery(mapper.Compile());
 						};
 
 						return new[] { scalar };

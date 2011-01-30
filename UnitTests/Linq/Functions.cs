@@ -178,6 +178,22 @@ namespace Data.Linq
 				from p in    Person where p.FullName() == "Pupkin, John" select p.FullName(),
 				from p in db.Person where p.FullName() == "Pupkin, John" select p.FullName()));
 		}
+
+		[Test]
+		public void Count1()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Count(c => c.ParentID == 1),
+				db.Child.Count(c => c.ParentID == 1)));
+		}
+
+		[Test]
+		public void Sum1()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Sum(c => c.ParentID),
+				db.Child.Sum(c => c.ParentID)));
+		}
 	}
 
 	public static class PersonExtension
