@@ -69,9 +69,10 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var expr = Expression.Convert(Parser.BuildSql(_returnType, FieldIndex), typeof(object));
 
-				var mapper = Expression.Lambda<Func<IDataContext,IDataReader,Expression,object[],object>>(
+				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
 					expr, new []
 					{
+						ExpressionParser.ContextParam,
 						ExpressionParser.DataContextParam,
 						ExpressionParser.DataReaderParam,
 						ExpressionParser.ExpressionParam,

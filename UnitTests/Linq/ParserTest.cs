@@ -705,7 +705,7 @@ namespace Data.Linq
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				query.GetElementNew = (ctx,expr,ps) => this;
+				query.GetElement = (ctx,db,expr,ps) => this;
 			}
 
 			public Expression BuildExpression(Expression expression, int level)

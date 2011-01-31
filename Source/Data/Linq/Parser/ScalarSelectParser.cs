@@ -31,9 +31,10 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var expr = BuildExpression(null, 0);
 
-				var mapper = Expression.Lambda<Func<IDataContext,IDataReader,Expression,object[],T>>(
+				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
 					{
+						ExpressionParser.ContextParam,
 						ExpressionParser.DataContextParam,
 						ExpressionParser.DataReaderParam,
 						ExpressionParser.ExpressionParam,

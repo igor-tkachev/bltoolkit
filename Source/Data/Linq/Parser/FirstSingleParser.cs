@@ -76,10 +76,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 				switch (_methodName)
 				{
-					case "First"           : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).First();           break;
-					case "FirstOrDefault"  : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).FirstOrDefault();  break;
-					case "Single"          : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).Single();          break;
-					case "SingleOrDefault" : query.GetElementNew = (ctx, expr, ps) => query.GetIEnumerableNew(ctx, expr, ps).SingleOrDefault(); break;
+					case "First"           : query.GetElement = (ctx, db, expr, ps) => query.GetIEnumerable(ctx, db, expr, ps).First();           break;
+					case "FirstOrDefault"  : query.GetElement = (ctx, db, expr, ps) => query.GetIEnumerable(ctx, db, expr, ps).FirstOrDefault();  break;
+					case "Single"          : query.GetElement = (ctx, db, expr, ps) => query.GetIEnumerable(ctx, db, expr, ps).Single();          break;
+					case "SingleOrDefault" : query.GetElement = (ctx, db, expr, ps) => query.GetIEnumerable(ctx, db, expr, ps).SingleOrDefault(); break;
 				}
 			}
 

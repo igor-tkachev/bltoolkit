@@ -171,6 +171,7 @@ namespace Data.Linq
 
 				AreEqual(expected[0], result[0]);
 				AreEqual(expected.Select(p => p.Key), result.Select(p => p.Key));
+				AreEqual(expected[0].ToList(), result[0].ToList());
 			});
 		}
 
@@ -194,12 +195,16 @@ namespace Data.Linq
 			var expected =
 				from ch in
 					from ch in Child select ch.ParentID + 1
-				where ch + 1 > n group ch by ch into g select g.Key;
+				where ch + 1 > n
+				group ch by ch into g
+				select g.Key;
 
 			ForEachProvider(db => AreEqual(expected,
 				from ch in
 					from ch in db.Child select ch.ParentID + 1
-				where ch > n group ch by ch into g select g.Key));
+				where ch > n
+				group ch by ch into g
+				select g.Key));
 		}
 
 		[Test]
@@ -210,12 +215,14 @@ namespace Data.Linq
 			var expected =
 				from ch in Child select new { ParentID = ch.ParentID + 1 } into ch
 				where ch.ParentID > n
-				group ch by ch into g select g.Key;
+				group ch by ch into g
+				select g.Key;
 
 			ForEachProvider(db => AreEqual(expected,
 				from ch in db.Child select new { ParentID = ch.ParentID + 1 } into ch
 				where ch.ParentID > n
-				group ch by ch into g select g.Key));
+				group ch by ch into g
+				select g.Key));
 		}
 
 		[Test]
@@ -239,6 +246,54 @@ namespace Data.Linq
 				{
 					g.Key,
 					Sum = g.Sum(_ => _.ch.ParentID)
+				}));
+		}
+
+		[Test]
+		public void SubQuery31()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in
+					from ch in Child
+					select new { ch, n = ch.ChildID + 1 }
+				group ch.ch by ch.n into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _.ParentID)
+				},
+				from ch in
+					from ch in db.Child
+					select new { ch, n = ch.ChildID + 1 }
+				group ch.ch by ch.n into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _.ParentID)
+				}));
+		}
+
+		[Test]
+		public void SubQuery32()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in
+					from ch in Child
+					select new { ch, n = ch.ChildID + 1 }
+				group ch.ch.ParentID by ch.n into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _)
+				},
+				from ch in
+					from ch in db.Child
+					select new { ch, n = ch.ChildID + 1 }
+				group ch.ch.ParentID by ch.n into g
+				select new
+				{
+					g.Key,
+					Sum = g.Sum(_ => _)
 				}));
 		}
 

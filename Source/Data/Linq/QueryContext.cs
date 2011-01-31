@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BLToolkit.Data.Linq
 {
-	class QueryContext
+	public class QueryContext
 	{
 		public class DataContextContext
 		{

@@ -139,6 +139,7 @@
     <Compile Include="Data\Linq\Parser\CountParser.cs" />
     <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.QueryBuilding.cs" />
+    <Compile Include="Data\Linq\Parser\GroupByParser.cs" />
     <Compile Include="Data\Linq\Parser\JoinParser.cs" />
     <Compile Include="Data\Linq\Parser\OrderByParser.cs" />
     <Compile Include="Data\Linq\Parser\PathThroughContext.cs" />

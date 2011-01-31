@@ -197,6 +197,7 @@
     <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.QueryBuilding.cs" />
     <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
+    <Compile Include="Data\Linq\Parser\GroupByParser.cs" />
     <Compile Include="Data\Linq\Parser\IParseContext.cs" />
     <Compile Include="Data\Linq\Parser\ISequenceParser.cs" />
     <Compile Include="Data\Linq\Parser\JoinParser.cs" />

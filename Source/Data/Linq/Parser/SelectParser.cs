@@ -62,10 +62,11 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var expr = BuildExpression(null, 0);
 
-				var mapper = Expression.Lambda<Func<int,IDataContext,IDataReader,Expression,object[],T>>(
+				var mapper = Expression.Lambda<Func<int,QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
 					{
 						_counterParam,
+						ExpressionParser.ContextParam,
 						ExpressionParser.DataContextParam,
 						ExpressionParser.DataReaderParam,
 						ExpressionParser.ExpressionParam,
@@ -75,7 +76,7 @@ namespace BLToolkit.Data.Linq.Parser
 				var func    = mapper.Compile();
 				var counter = 0;
 
-				Func<IDataContext,IDataReader,Expression,object[],T> map = (ctx,rd,e,ps) => func(counter++, ctx, rd, e, ps);
+				Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> map = (ctx,db,rd,e,ps) => func(counter++, ctx, db, rd, e, ps);
 
 				query.SetQuery(map);
 			}

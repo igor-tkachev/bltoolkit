@@ -196,15 +196,17 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy1()
 		{
-			var expected = from ch in Child group ch by ch.Parent into g select g.Key;
-			ForEachProvider(db => AreEqual(expected, from ch in db.Child group ch by ch.Parent into g select g.Key));
+			ForEachProvider(db => AreEqual(
+				from ch in    Child group ch by ch.Parent into g select g.Key,
+				from ch in db.Child group ch by ch.Parent into g select g.Key));
 		}
 
 		[Test]
 		public void GroupBy2()
 		{
-			var expected = (from ch in Child group ch by ch.Parent1).ToList().Select(g => g.Key);
-			ForEachProvider(db => AreEqual(expected, (from ch in db.Child group ch by ch.Parent1).ToList().Select(g => g.Key)));
+			ForEachProvider(db => AreEqual(
+				(from ch in    Child group ch by ch.Parent1).ToList().Select(g => g.Key),
+				(from ch in db.Child group ch by ch.Parent1).ToList().Select(g => g.Key)));
 		}
 
 		[Test]

@@ -110,9 +110,10 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			var expr = BuildExpression(null, 0);
 
-			var mapper = Expression.Lambda<Func<IDataContext,IDataReader,Expression,object[],T>>(
+			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 				expr, new []
 				{
+					ExpressionParser.ContextParam,
 					ExpressionParser.DataContextParam,
 					ExpressionParser.DataReaderParam,
 					ExpressionParser.ExpressionParam,
@@ -373,16 +374,37 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (level == 0)
 							{
-								if (expression.NodeType == ExpressionType.Parameter)
+								if (expression == null)
 								{
-									var levelExpression = expression.GetLevelExpression(level);
+									if (flags != ConvertFlags.Field)
+									{
+										Func<Expression,ISqlExpression[]> func = e => ConvertToSql(e, 0, flags);
 
-									if (levelExpression == expression)
-										return GetSequence(expression, level).ConvertToSql(null, 0, flags);
+										if (flags != ConvertFlags.Field)
+											func = e => ConvertToSql(e, 0, IsExpression(e, 0, RequestFor.Field) ? ConvertFlags.Field : flags);
+
+										var q =
+											from m in _members.Values.Distinct()
+											select func(m) into mm
+											from m in mm
+											select m;
+
+										return q.ToArray();
+									}
 								}
 								else
 								{
-									return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
+									if (expression.NodeType == ExpressionType.Parameter)
+									{
+										var levelExpression = expression.GetLevelExpression(level);
+
+										if (levelExpression == expression)
+											return GetSequence(expression, level).ConvertToSql(null, 0, flags);
+									}
+									else
+									{
+										return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
+									}
 								}
 							}
 
@@ -398,7 +420,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToIndex
 
-		readonly Dictionary<MemberInfo,int> _memberIndex = new Dictionary<MemberInfo,int>();
+		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]>();
 
 		public virtual int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
@@ -417,8 +439,15 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (flags)
 				{
+					case ConvertFlags.All   :
+					case ConvertFlags.Key   :
 					case ConvertFlags.Field :
 						{
+							if (expression == null)
+							{
+								throw new NotImplementedException();
+							}
+
 							if (level == 0)
 							{
 								throw new NotImplementedException();
@@ -433,20 +462,23 @@ namespace BLToolkit.Data.Linq.Parser
 									{
 										if (levelExpression == expression)
 										{
-											var member = ((MemberExpression)levelExpression).Member;
+											var member = Tuple.Create(((MemberExpression)levelExpression).Member, flags);
 
-											int idx;
+											int[] idx;
 
 											if (!_memberIndex.TryGetValue(member, out idx))
 											{
-												var sql = ConvertToSql(expression, level, flags).Single();
+												var sql = ConvertToSql(expression, level, flags);
 
-												idx = SqlQuery.Select.Add(sql);
+												if (flags == ConvertFlags.Field && sql.Length != 1)
+													throw new InvalidOperationException();
+
+												idx = sql.Select(s => SqlQuery.Select.Add(s)).ToArray();
 
 												_memberIndex.Add(member, idx);
 											}
 
-											return new[] { idx };
+											return idx;
 										}
 
 										return GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags);
@@ -457,15 +489,6 @@ namespace BLToolkit.Data.Linq.Parser
 									if (levelExpression == expression)
 										break;
 									return GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags);
-							}
-
-							break;
-						}
-
-					case ConvertFlags.All   :
-						{
-							if (expression == null)
-							{
 							}
 
 							break;
