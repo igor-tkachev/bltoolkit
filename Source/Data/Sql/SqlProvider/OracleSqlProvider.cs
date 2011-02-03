@@ -37,6 +37,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine(" INTO :IDENTITY_PARAMETER");
 		}
 
+		public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
+		{
+			if (table.SequenceAttributes != null)
+				return new SqlExpression(table.SequenceAttributes[0].SequenceName + ".nextval", Precedence.Primary);
+
+			return base.GetIdentityExpression(table, identityField, forReturning);
+		}
+
 		protected override bool BuildWhere()
 		{
 			return base.BuildWhere() || !NeedSkip && NeedTake && SqlQuery.OrderBy.IsEmpty && SqlQuery.Having.IsEmpty;

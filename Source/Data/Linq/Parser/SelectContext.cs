@@ -276,7 +276,14 @@ namespace BLToolkit.Data.Linq.Parser
 								var levelExpression = expression.GetLevelExpression(level);
 
 								if (levelExpression != expression)
-									return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
+								{
+									var flag = flags;
+
+									if (flags != ConvertFlags.Field && IsExpression(expression, level, RequestFor.Field))
+										flag = ConvertFlags.Field;
+
+									return GetSequence(expression, level).ConvertToSql(expression, level + 1, flag);
+								}
 
 								switch (Body.NodeType)
 								{
@@ -518,6 +525,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (requestFlag)
 				{
+					default                     : return false;
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
@@ -553,9 +561,7 @@ namespace BLToolkit.Data.Linq.Parser
 								switch (Body.NodeType)
 								{
 									case ExpressionType.MemberAccess :
-									case ExpressionType.Call         :
-										break;
-										//return GetSequence(expression, level).IsExpression(Body, 1, requestFlag);
+									case ExpressionType.Call         : return GetSequence(expression, level).IsExpression(null, 0, requestFlag);
 									default                          : return requestFlag == RequestFor.Expression;
 								}
 							}
@@ -580,6 +586,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (requestFlag)
 				{
+					default                     : return false;
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :

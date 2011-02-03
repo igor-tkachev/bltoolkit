@@ -26,7 +26,14 @@ namespace BLToolkit.Data.Linq.Parser
 		/// </summary>
 		SubQuery,
 
-		//Table,
+		/// <summary>
+		/// Checks the sequence if the expression can be parsed.
+		/// </summary>
+		//CanBeParsed,
+
+		/// <summary>
+		/// Checks the context if it's a root of the expression.
+		/// </summary>
 		Root,
 	}
 }

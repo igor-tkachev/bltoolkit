@@ -12,6 +12,12 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 		}
 
+		public PathThroughContext(IParseContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
+			: base(sequence, lambda)
+		{
+			SqlQuery = sqlQuery;
+		}
+
 		public override Expression BuildExpression(Expression expression, int level)
 		{
 			throw new InvalidOperationException();
@@ -65,7 +71,6 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.SubQuery    : return false;
 				case RequestFor.Root        : return expression == Lambda.Parameters[0];
 
 				case RequestFor.Association :
@@ -81,7 +86,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 			}
 
-			throw new NotImplementedException();
+			return false;
 		}
 
 		public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)

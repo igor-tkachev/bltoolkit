@@ -637,7 +637,21 @@ namespace BLToolkit.Data.Linq.Parser
 						var e = (MethodCallExpression)expression;
 
 						if (e.Method.DeclaringType == typeof(Enumerable))
+						{
+							var ctx = GetContext(context, expression);
+
+							if (ctx != null)
+							{
+								var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
+
+								if (sql.Length != 1)
+									throw new InvalidOperationException();
+
+								return sql[0];
+							}
+
 							return ParseEnumerable(context, e);
+						}
 
 						var cm = ConvertMethod(e);
 						if (cm != null)
@@ -1011,120 +1025,6 @@ namespace BLToolkit.Data.Linq.Parser
 			return expr;
 			*/
 		}
-
-		ISqlExpression ParseEnumerable(MethodCallExpression expr, QuerySource.GroupBy query)
-		{
-			throw new NotImplementedException();
-
-			/*
-			var groupBy = query.ElementSource ?? query.OriginalQuery;
-			var args    = new ISqlExpression[expr.Arguments.Count - 1];
-
-			if (expr.Method.Name == "Count")
-			{
-				if (args.Length > 0)
-				{
-					var predicate = ParsePredicate(null, ParseLambdaArgument(expr, 1), groupBy);
-
-					groupBy.SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
-
-					var sql = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
-
-					groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
-
-					sql.Select.Columns.Clear();
-
-					if (_info.SqlProvider.IsSubQueryColumnSupported && _info.SqlProvider.IsCountSubQuerySupported)
-					{
-						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-						{
-							var item1 = sql.GroupBy.Items[i];
-							var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-							var pr    = Convert(new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
-
-							sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
-						}
-
-						sql.GroupBy.Items.Clear();
-						sql.Select.Expr(SqlFunction.CreateCount(expr.Type, sql));
-						sql.ParentSql = groupBy.SqlQuery;
-
-						return sql;
-					}
-
-					var join = sql.WeakLeftJoin();
-
-					groupBy.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
-
-					for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-					{
-						var item1 = sql.GroupBy.Items[i];
-						var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-						var col   = sql.Select.Columns[sql.Select.Add(item1)];
-						var pr    = Convert(new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
-
-						join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
-					}
-
-					sql.ParentSql = groupBy.SqlQuery;
-
-					return new SqlFunction(expr.Type, "Count", sql.Select.Columns[0]);
-				}
-
-				return SqlFunction.CreateCount(expr.Type, groupBy.SqlQuery);
-			}
-
-			if (expr.Arguments.Count > 1)
-				for (var i = 1; i < expr.Arguments.Count; i++)
-					args[i - 1] = ParseExpression(ParseLambdaArgument(expr, i), groupBy);
-			else
-			{
-				if (expr.Arguments[0].NodeType == ExpressionType.Call)
-				{
-					var arg = expr.Arguments[0];
-
-					if (arg.NodeType == ExpressionType.Call)
-					{
-						var call = (MethodCallExpression)arg;
-
-						if (call.Method.Name == "Select" && call.IsQueryableMethod((seq,l) =>
-						{
-							if (seq.NodeType == ExpressionType.Parameter)
-							{
-								args = new ISqlExpression[1];
-								args[0] = ParseExpression(l.Body, groupBy);
-							}
-
-							return false;
-						}))
-						{}
-					}
-				}
-				else if (query.ElementSource is QuerySource.Scalar)
-				{
-					var scalar = (QuerySource.Scalar)query.ElementSource;
-					args = new[] { scalar.GetExpressions(this)[0] };
-				}
-			}
-
-			return new SqlFunction(expr.Type, expr.Method.Name, args);
-			*/
-		}
-
-		/*
-		static Expression ParseLambdaArgument(Expression pi, int idx)
-		{
-			var expr = (MethodCallExpression)pi;
-			var arg  = expr.Arguments[idx];
-			
-			arg.IsLambda(new Func<ParameterExpression,bool>[]
-				{ _ => true },
-				body => { arg = body; return true; },
-				_ => true);
-
-			return arg;
-		}
-		*/
 
 		#endregion
 

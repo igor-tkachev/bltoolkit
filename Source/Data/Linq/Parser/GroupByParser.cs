@@ -116,7 +116,6 @@ namespace BLToolkit.Data.Linq.Parser
 				: base(sequence, null)
 			{
 				_methodCall = methodCall;
-				_sequence   = sequence;
 				_key        = key;
 				_element    = element;
 
@@ -124,7 +123,6 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			readonly MethodCallExpression _methodCall;
-			readonly IParseContext        _sequence;
 			readonly KeyContext           _key;
 			readonly SelectContext        _element;
 			readonly Type                 _groupingType;
@@ -134,7 +132,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 				public Grouping(TKey key, QueryContext queryContext, Func<IDataContext,TKey,IQueryable<TElement>> itemReader)
 				{
-					_queryContext = queryContext;
 					Key = key;
 
 					if (Common.Configuration.Linq.PreloadGroups)
@@ -294,8 +291,148 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
+			ISqlExpression ParseEnumerable(MethodCallExpression expr)
+			{
+				var args = new ISqlExpression[expr.Arguments.Count - 1];
+
+				if (expr.Method.Name == "Count")
+				{
+					if (args.Length > 0)
+					{
+						var ctx = _element ?? Sequence;
+						var l   = (LambdaExpression)expr.Arguments[1].Unwrap();
+						var cnt = Parser.ParseWhere(ctx, l);
+						var sql = cnt.SqlQuery.Clone((_ => !(_ is SqlParameter)));
+
+						sql.ParentSql = SqlQuery;
+						sql.Select.Columns.Clear();
+
+						if (ctx == cnt)
+							ctx.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(ctx.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
+
+						if (Parser.SqlProvider.IsSubQueryColumnSupported && Parser.SqlProvider.IsCountSubQuerySupported)
+						{
+							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+							{
+								var item1 = sql.GroupBy.Items[i];
+								var item2 = SqlQuery.GroupBy.Items[i];
+								var pr    = Parser.Convert(this, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
+
+								sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
+							}
+
+							sql.GroupBy.Items.Clear();
+							sql.Select.Expr(SqlFunction.CreateCount(expr.Type, sql));
+
+							return sql;
+						}
+
+						var join = sql.WeakLeftJoin();
+
+						SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+
+						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+						{
+							var item1 = sql.GroupBy.Items[i];
+							var item2 = SqlQuery.GroupBy.Items[i];
+							var col   = sql.Select.Columns[sql.Select.Add(item1)];
+							var pr    = Parser.Convert(this, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
+
+							join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
+						}
+
+						return new SqlFunction(expr.Type, "Count", sql.Select.Columns[0]);
+					}
+
+					return SqlFunction.CreateCount(expr.Type, SqlQuery);
+				}
+
+				if (expr.Arguments.Count > 1)
+				{
+					for (var i = 1; i < expr.Arguments.Count; i++)
+					{
+						var ex = expr.Arguments[i].Unwrap();
+
+						if (ex is LambdaExpression)
+						{
+							var l   = (LambdaExpression)ex;
+							var ctx = new PathThroughContext(_element ?? Sequence, l);
+
+							args[i - 1] = Parser.ParseExpression(ctx, l.Body.Unwrap());
+						}
+						else
+						{
+							throw new NotImplementedException();
+						}
+					}
+				}
+				else
+				{
+					throw new NotImplementedException();
+
+					/*
+					if (expr.Arguments[0].NodeType == ExpressionType.Call)
+					{
+						var arg = expr.Arguments[0];
+
+						if (arg.NodeType == ExpressionType.Call)
+						{
+							var call = (MethodCallExpression)arg;
+
+							if (call.Method.Name == "Select" && call.IsQueryableMethod((seq,l) =>
+							{
+								if (seq.NodeType == ExpressionType.Parameter)
+								{
+									args = new ISqlExpression[1];
+									args[0] = ParseExpression(l.Body, groupBy);
+								}
+
+								return false;
+							}))
+							{}
+						}
+					}
+					else if (query.ElementSource is QuerySource.Scalar)
+					{
+						var scalar = (QuerySource.Scalar)query.ElementSource;
+						args = new[] { scalar.GetExpressions(this)[0] };
+					}
+					*/
+				}
+
+				return new SqlFunction(expr.Type, expr.Method.Name, args);
+			}
+
+			static Expression ParseLambdaArgument(Expression expr)
+			{
+				expr = expr.Unwrap();
+
+				if (expr is LambdaExpression)
+					expr = ((LambdaExpression)expr).Body.Unwrap();
+
+				return expr;
+			}
+
 			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
+				if (level > 0)
+				{
+					switch (expression.NodeType)
+					{
+						case ExpressionType.Call:
+							{
+								var e = (MethodCallExpression)expression;
+
+								if (e.Method.DeclaringType == typeof(Enumerable))
+								{
+									return new[] { ParseEnumerable(e) };
+								}
+
+								break;
+							}
+					}
+				}
+
 				throw new NotImplementedException();
 			}
 
@@ -306,7 +443,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				throw new NotImplementedException();
+				return false;
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)

@@ -2807,6 +2807,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sqlQuery;
 		}
 
+		public virtual ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
+		{
+			return null;
+		}
+
 		private        string _name;
 		public virtual string  Name
 		{

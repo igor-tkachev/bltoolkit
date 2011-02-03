@@ -101,12 +101,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				switch (requestFlag)
-				{
-					case RequestFor.SubQuery : return false;
-				}
-
-				throw new NotImplementedException();
+				return false;
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)

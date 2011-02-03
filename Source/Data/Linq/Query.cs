@@ -806,6 +806,13 @@ namespace BLToolkit.Data.Linq
 
 								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
 							}
+							else if (field.Value.IsIdentity)
+							{
+								var expr = ei.SqlProvider.GetIdentityExpression(sqlTable, field.Value, false);
+
+								if (expr != null)
+									sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
+							}
 						}
 
 						ei.SetNonQueryQuery();
@@ -856,6 +863,13 @@ namespace BLToolkit.Data.Linq
 								ei.Queries[0].Parameters.Add(param);
 
 								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+							}
+							else if (field.Value.IsIdentity)
+							{
+								var expr = ei.SqlProvider.GetIdentityExpression(sqlTable, field.Value, true);
+
+								if (expr != null)
+									sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
 							}
 						}
 
@@ -1018,7 +1032,7 @@ namespace BLToolkit.Data.Linq
 
 				using (var dr = dataContext.ExecuteReader(query))
 					while (dr.Read())
-						return mapper(ctx,dataContext, dr, expr, parameters);
+						return mapper(ctx, dataContext, dr, expr, parameters);
 
 				return Array<TE>.Empty.First();
 			}
@@ -1092,6 +1106,9 @@ namespace BLToolkit.Data.Linq
 			object[]                 ps,
 			Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
 		{
+			if (queryContext == null)
+				queryContext = new QueryContext { RootDataContext = dataContextInfo };
+
 			foreach (var dr in data)
 				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
 		}

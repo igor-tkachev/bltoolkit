@@ -65,6 +65,7 @@
     <Compile Include="Model\NorthwindDB.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Model\OracleSpecific.cs" />
     <Compile Include="Model\ParentChild.cs" />
     <Compile Include="Model\Patient.cs" />
     <Compile Include="Model\Person.cs" />

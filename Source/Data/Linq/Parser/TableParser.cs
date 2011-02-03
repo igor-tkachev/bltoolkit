@@ -381,9 +381,6 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (requestFor)
 				{
-					case RequestFor.SubQuery   :
-					case RequestFor.Root       : return false;
-
 					case RequestFor.Field      :
 						{
 							var table = FindTable(expression, level);
@@ -435,7 +432,7 @@ namespace BLToolkit.Data.Linq.Parser
 						}
 				}
 
-				throw new NotImplementedException();
+				return false;
 			}
 
 			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)

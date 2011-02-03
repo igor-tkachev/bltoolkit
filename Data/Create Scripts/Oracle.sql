@@ -596,3 +596,18 @@ CREATE TABLE LinqDataTypes
 	SmallIntValue smallint
 )
 /
+
+CREATE SEQUENCE SequenceTestSeq
+	MINVALUE 1
+	START WITH 1
+	INCREMENT BY 1
+	CACHE 10
+/
+
+CREATE TABLE SequenceTest
+(
+	ID                 int NOT NULL PRIMARY KEY,
+	Value VARCHAR2(50) NOT NULL
+)
+/
+

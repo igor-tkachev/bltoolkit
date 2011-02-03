@@ -41,16 +41,31 @@ namespace BLToolkit.Data.Linq.Parser
 					sequence = new SubQueryContext(sequence);
 			}
 
-			var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var context = new AggregationContext(sequence, lambda, methodCall.Method.ReturnType);
+			if (methodCall.Arguments.Count == 2)
+			{
+				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				var context = new AggregationContext(sequence, lambda, methodCall.Method.ReturnType);
 
-			context.FieldIndex = context.SqlQuery.Select.Add(
-				new SqlFunction(
-					methodCall.Type,
-					methodCall.Method.Name,
-					parser.ParseExpression(context, context.Lambda.Body.Unwrap())));
+				context.FieldIndex = context.SqlQuery.Select.Add(
+					new SqlFunction(
+						methodCall.Type,
+						methodCall.Method.Name,
+						parser.ParseExpression(context, context.Lambda.Body.Unwrap())));
 
-			return context;
+				return context;
+			}
+			else
+			{
+				var context = new AggregationContext(sequence, null, methodCall.Method.ReturnType);
+
+				context.FieldIndex = context.SqlQuery.Select.Add(
+					new SqlFunction(
+						methodCall.Type,
+						methodCall.Method.Name,
+						sequence.ConvertToSql(null, 0, ConvertFlags.Field)));
+
+				return context;
+			}
 		}
 
 		class AggregationContext : SequenceContextBase
@@ -111,7 +126,7 @@ namespace BLToolkit.Data.Linq.Parser
 					case RequestFor.Root : return expression == Lambda.Parameters[0];
 				}
 
-				throw new NotImplementedException();
+				return false;
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
