@@ -77,7 +77,7 @@ private void LoadServerMetadata()
 				INNER JOIN pg_namespace ON (pg_class.relnamespace = pg_namespace.oid)
 			WHERE
 				pg_class.relkind IN ('r','v') AND
-				pg_namespace.nspname NOT IN ('pg_catalog','information_schema') AND 
+				pg_namespace.nspname NOT IN ('pg_catalog','information_schema') AND
 				pg_attribute.attnum > 0 AND
 				NOT pg_attribute.attisdropped";
 
