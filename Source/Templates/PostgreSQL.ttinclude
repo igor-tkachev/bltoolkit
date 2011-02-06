@@ -94,9 +94,9 @@ private void LoadServerMetadata()
 						ColumnName = Convert.ToString (rd["name"]),
 						MemberName = Convert.ToString (rd["name"]),
 						ColumnType = Convert.ToString (rd["typename"]),
-						//IsNullable = Convert.ToBoolean(rd["isnullable"]),
-						//IsIdentity = Convert.ToBoolean(rd["isidentity"]),
-						//Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
+						IsNullable = Convert.ToBoolean(rd["isnullable"]),
+						IsIdentity = Convert.ToBoolean(rd["isidentity"]),
+						Length     = rd.IsDBNull(rd.GetOrdinal("lenght")) ? 0 : Convert.ToInt64(rd["lenght"]),
 						//Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
 						//Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
 					}

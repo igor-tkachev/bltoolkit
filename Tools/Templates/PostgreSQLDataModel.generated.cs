@@ -26,44 +26,44 @@ namespace PostgreSQLDataModel
 	[TableName(Name="Child")]
 	public partial class Child
 	{
-		[Required] public Int32 ParentID { get; set; } // integer
-		[Required] public Int32 ChildID  { get; set; } // integer
+		[Nullable] public Int32? ParentID { get; set; } // integer
+		[Nullable] public Int32? ChildID  { get; set; } // integer
 	}
 
 	[TableName(Name="GrandChild")]
 	public partial class GrandChild
 	{
-		[Required] public Int32 ParentID     { get; set; } // integer
-		[Required] public Int32 ChildID      { get; set; } // integer
-		[Required] public Int32 GrandChildID { get; set; } // integer
+		[Nullable] public Int32? ParentID     { get; set; } // integer
+		[Nullable] public Int32? ChildID      { get; set; } // integer
+		[Nullable] public Int32? GrandChildID { get; set; } // integer
 	}
 
 	[TableName(Name="LinqDataTypes")]
 	public partial class LinqDataTypes
 	{
-		[Required] public Int32    ID            { get; set; } // integer
-		[Required] public Decimal  MoneyValue    { get; set; } // numeric(10,4)
-		[Required] public DateTime DateTimeValue { get; set; } // timestamp without time zone
-		[Required] public Boolean  BoolValue     { get; set; } // boolean
-		[Required] public Guid     GuidValue     { get; set; } // uuid
-		[Required] public Byte[]   BinaryValue   { get; set; } // bytea
-		[Required] public Int16    SmallIntValue { get; set; } // smallint
+		[Nullable          ] public Int32?    ID            { get; set; } // integer
+		[Nullable          ] public Decimal?  MoneyValue    { get; set; } // numeric(10,4)(10)
+		[Nullable          ] public DateTime? DateTimeValue { get; set; } // timestamp without time zone
+		[Nullable          ] public Boolean?  BoolValue     { get; set; } // boolean
+		[Nullable          ] public Guid?     GuidValue     { get; set; } // uuid
+		[          Required] public Byte[]    BinaryValue   { get; set; } // bytea
+		[Nullable          ] public Int16?    SmallIntValue { get; set; } // smallint
 	}
 
 	[TableName(Name="Parent")]
 	public partial class Parent
 	{
-		[Required] public Int32 ParentID { get; set; } // integer
-		[Required] public Int32 Value1   { get; set; } // integer
+		[Nullable] public Int32? ParentID { get; set; } // integer
+		[Nullable] public Int32? Value1   { get; set; } // integer
 	}
 
 	[TableName(Name="Person")]
 	public partial class Person
 	{
-		[PrimaryKey(1), Required] public Int32  PersonID   { get; set; } // integer
-		[               Required] public String FirstName  { get; set; } // character varying(50)
-		[               Required] public String LastName   { get; set; } // character varying(50)
-		[               Required] public String MiddleName { get; set; } // character varying(50)
-		[               Required] public String Gender     { get; set; } // character(1)
+		[Identity, PrimaryKey(1), Required] public Int32  PersonID   { get; set; } // integer
+		[                         Required] public String FirstName  { get; set; } // character varying(50)(50)
+		[                         Required] public String LastName   { get; set; } // character varying(50)(50)
+		[                         Required] public String MiddleName { get; set; } // character varying(50)(50)
+		[                         Required] public String Gender     { get; set; } // character(1)(1)
 	}
 }
