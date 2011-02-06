@@ -505,7 +505,7 @@ public partial class Column
 	public bool         IsClass;
 	public DbType       DbType;
 	public SqlDbType    SqlDbType;
-	public int          Length;
+	public long         Length;
 	public int          Precision;
 	public int          Scale;
 
