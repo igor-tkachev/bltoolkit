@@ -5,10 +5,10 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Linq;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;

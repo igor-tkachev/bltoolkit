@@ -8,6 +8,7 @@ using System.Reflection;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 
 	class GroupByParser : MethodCallParser

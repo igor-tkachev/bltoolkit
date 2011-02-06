@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
+	using BLToolkit.Linq;
 	using Common;
 	using Data.Sql;
 	using Data.Sql.SqlProvider;

@@ -4,10 +4,11 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using BLToolkit.Linq;
+	using BLToolkit.Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;
 

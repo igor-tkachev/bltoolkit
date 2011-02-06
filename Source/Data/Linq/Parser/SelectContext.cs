@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 	using Reflection;
 

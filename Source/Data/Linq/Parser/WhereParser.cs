@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 
 	class WhereParser : MethodCallParser

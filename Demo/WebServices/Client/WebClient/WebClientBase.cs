@@ -33,7 +33,7 @@ namespace Demo.WebServices.Client.WebClient
 
 			// Setup appropriate user agent string.
 			//
-			Assembly asm = Assembly.GetEntryAssembly();
+			var asm = Assembly.GetEntryAssembly();
 			if (asm != null)
 				UserAgent = asm.FullName;
 
@@ -48,13 +48,12 @@ namespace Demo.WebServices.Client.WebClient
 			if (string.IsNullOrEmpty(BaseUrl))
 				return;
 
-			WebServiceBindingAttribute attr = (WebServiceBindingAttribute)
-				Attribute.GetCustomAttribute(GetType(), typeof(WebServiceBindingAttribute));
+			var attr = (WebServiceBindingAttribute)Attribute.GetCustomAttribute(GetType(), typeof(WebServiceBindingAttribute));
 
 			if (attr == null)
 				throw new InvalidOperationException("Please specify relative url or mark the avatar with WebServiceBindingAttribute");
 
-			string ns = attr.Namespace;
+			var ns = attr.Namespace;
 
 			if (string.IsNullOrEmpty(ns))
 				throw new InvalidOperationException("Please specify namespace in WebServiceBindingAttribute");
@@ -62,8 +61,7 @@ namespace Demo.WebServices.Client.WebClient
 			if (ns.EndsWith("/"))
 				ns = ns.Substring(0, ns.Length - 1);
 
-			UriBuilder builder = new UriBuilder(BaseUrl);
-			builder.Path = new UriBuilder(ns).Path;
+			var builder = new UriBuilder(BaseUrl) { Path = new UriBuilder(ns).Path };
 
 			Url = builder.Uri.AbsoluteUri;
 		}
@@ -78,22 +76,12 @@ namespace Demo.WebServices.Client.WebClient
 			Url = BaseUrl + relativeUrl;
 		}
 
-		private static ICredentials _defaultCredentials;
-		public  static ICredentials  DefaultCredentials
-		{
-			get { return _defaultCredentials; }
-			set { _defaultCredentials = value; }
-		}
+		public static ICredentials DefaultCredentials { get; set; }
 
-		private static string _baseUrl;
 		/// <summary>
 		/// Customizable url path.
 		/// </summary>
-		public  static string  BaseUrl
-		{
-			get { return _baseUrl; }
-			set { _baseUrl = value; }
-		}
+		public static string BaseUrl { get; set; }
 
 		/// <summary>
 		/// Returns <see langword="true"/>, program runs in offline mode.
@@ -114,7 +102,7 @@ namespace Demo.WebServices.Client.WebClient
 				try
 				{
 #if DEBUG
-					Stopwatch sw = Stopwatch.StartNew();
+					var sw = Stopwatch.StartNew();
 #endif
 					ret = base.Invoke(methodName, parameters);
 #if DEBUG
@@ -127,7 +115,8 @@ namespace Demo.WebServices.Client.WebClient
 				{
 					if (ex is WebException)
 					{
-						WebException webException = (WebException) ex;
+						var webException = (WebException) ex;
+
 						if (webException.Status == WebExceptionStatus.RequestCanceled)
 						{
 							OnWebOperationCancelled(methodName, parameters);
@@ -170,7 +159,7 @@ namespace Demo.WebServices.Client.WebClient
 		/// <returns>Web method return value or default(T) if the call fails.</returns>
 		public T Invoke<T>(string methodName, params object[] parameters)
 		{
-			object[] ret = InvokeInternal(methodName, parameters);
+			var ret = InvokeInternal(methodName, parameters);
 
 			return ret != null && ret.Length != 0? (T)ret[0]: default(T);
 		}
@@ -193,7 +182,7 @@ namespace Demo.WebServices.Client.WebClient
 			params object[]   parameters)
 		{
 #if DEBUG
-			Stopwatch sw = Stopwatch.StartNew();
+			var sw = Stopwatch.StartNew();
 #endif
 
 			if (asyncCallState != null)
@@ -206,11 +195,11 @@ namespace Demo.WebServices.Client.WebClient
 				CancelAsync(asyncCallState);
 			}
 
-			Action<Exception> exceptionCallback = exceptionHandler ?? delegate(Exception ex)
+			var exceptionCallback = exceptionHandler ?? delegate(Exception ex)
 			{
 				if (ex is WebException)
 				{
-					WebException webException = (WebException)ex;
+					var webException = (WebException)ex;
 
 					// Request cancelled.
 					//
@@ -237,7 +226,7 @@ namespace Demo.WebServices.Client.WebClient
 						Url, methodName, sw.ElapsedMilliseconds), TS.DisplayName);
 #endif
 
-				InvokeCompletedEventArgs ea = (InvokeCompletedEventArgs)obj;
+				var ea = (InvokeCompletedEventArgs)obj;
 
 				if (ea.Error != null)
 				{
@@ -311,7 +300,7 @@ namespace Demo.WebServices.Client.WebClient
 			}
 			else if (obj is System.Collections.IEnumerable)
 			{
-				foreach (object elm in (System.Collections.IEnumerable)obj)
+				foreach (var elm in (System.Collections.IEnumerable)obj)
 					AcceptChanges(elm);
 			}
 		}
@@ -353,11 +342,10 @@ namespace Demo.WebServices.Client.WebClient
 		protected virtual void OnWebOperationCancelled(string methodName, params object[] parameters)
 		{
 			Debug.WriteLineIf(TS.TraceInfo, string.Format("OnWebOperationCancelled; op={0}/{1}", Url, methodName));
-			EventHandler<WebOperationCancelledEventArgs> handler =
-				(EventHandler<WebOperationCancelledEventArgs>)Events[EventWebOperationCancelled] ?? WebOperationCancelledDefaultHandler;
+			var handler = (EventHandler<WebOperationCancelledEventArgs>)Events[EventWebOperationCancelled] ?? WebOperationCancelledDefaultHandler;
 			if (handler != null)
 			{
-				WebOperationCancelledEventArgs ea = new WebOperationCancelledEventArgs(Url, methodName, parameters);
+				var ea = new WebOperationCancelledEventArgs(Url, methodName, parameters);
 				handler(this, ea);
 			}
 		}
@@ -373,12 +361,11 @@ namespace Demo.WebServices.Client.WebClient
 		protected virtual bool OnWebOperationException(string methodName, object[] parameters, Exception ex)
 		{
 			Debug.WriteLineIf(TS.TraceError, string.Format("OnWebOperationException; op={0}/{1}; ex={2}", Url, methodName, ex));
-			EventHandler<WebOperationExceptionEventArgs> handler =
-				(EventHandler<WebOperationExceptionEventArgs>)Events[EventWebOperationException] ?? WebOperationExceptionDefaultHandler;
+			var handler = (EventHandler<WebOperationExceptionEventArgs>)Events[EventWebOperationException] ?? WebOperationExceptionDefaultHandler;
 
 			if (handler != null)
 			{
-				WebOperationExceptionEventArgs ea = new WebOperationExceptionEventArgs(Url, methodName, parameters, ex);
+				var ea = new WebOperationExceptionEventArgs(Url, methodName, parameters, ex);
 				handler(this, ea);
 				return ea.Retry;
 			}
@@ -400,7 +387,7 @@ namespace Demo.WebServices.Client.WebClient
 		/// <exception cref="T:System.InvalidOperationException">The uri parameter is null. </exception>
 		protected override WebRequest GetWebRequest(Uri uri)
 		{
-			WebRequest webRequest = base.GetWebRequest(uri);
+			var webRequest = base.GetWebRequest(uri);
 			PrepareRequest(webRequest);
 			return webRequest;
 		}
@@ -413,7 +400,7 @@ namespace Demo.WebServices.Client.WebClient
 		/// from which to get the response. </param>
 		protected override WebResponse GetWebResponse(WebRequest request)
 		{
-			HttpWebResponse response = (HttpWebResponse)base.GetWebResponse(request);
+			var response = (HttpWebResponse)base.GetWebResponse(request);
 			ProcessResponse(response);
 			return response;
 		}
@@ -421,14 +408,13 @@ namespace Demo.WebServices.Client.WebClient
 		/// <summary>
 		/// Returns a response from an asynchronous request to an XML Web service method.
 		/// </summary>
-		/// <returns> The <see cref="T:System.Net.WebResponse"/>.
-		///
+		/// <returns> The <see cref="T:System.Net.WebResponse"/>.</returns>
 		/// <param name="result">The <see cref="T:System.IAsyncResult"/> to pass to
 		/// <see cref="M:System.Net.HttpWebRequest.EndGetResponse(System.IAsyncResult)"/> when the response has completed. </param>
 		/// <param name="request">The <see cref="T:System.Net.WebRequest"/> from which to get the response. </param>
 		protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
 		{
-			HttpWebResponse response = (HttpWebResponse)base.GetWebResponse(request, result);
+			var response = (HttpWebResponse)base.GetWebResponse(request, result);
 			ProcessResponse(response);
 			return response;
 		}
@@ -437,16 +423,17 @@ namespace Demo.WebServices.Client.WebClient
 		{
 			if (response.StatusCode == HttpStatusCode.MovedPermanently)
 			{
-				string redirectedLocation = response.Headers["Location"];
+				var redirectedLocation = response.Headers["Location"];
 				Url = new Uri(new Uri(Url), redirectedLocation).AbsoluteUri;
 				throw new WebException(redirectedLocation, WebExceptionStatus.ReceiveFailure);
 			}
 
-			string[] cookies = response.Headers.GetValues("Set-Cookie");
+			var cookies = response.Headers.GetValues("Set-Cookie");
+
 			if (cookies == null)
 				return;
 
-			foreach (string cookie in cookies)
+			foreach (var cookie in cookies)
 			{
 				if (cookie.StartsWith("ASP.NET_SessionId=", StringComparison.Ordinal))
 				{

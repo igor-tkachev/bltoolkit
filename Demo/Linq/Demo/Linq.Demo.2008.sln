@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq.Demo", "Linq.Demo.csproj", "{57CE5505-44CB-42E4-A346-3471F68A5B60}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq.Demo.2008", "Linq.Demo.2008.csproj", "{57CE5505-44CB-42E4-A346-3471F68A5B60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

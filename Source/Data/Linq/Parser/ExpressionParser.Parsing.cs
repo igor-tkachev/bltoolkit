@@ -8,6 +8,7 @@ using System.Text;
 
 namespace BLToolkit.Data.Linq.Parser
 {
+	using BLToolkit.Linq;
 	using Common;
 	using Data.Sql;
 	using Mapping;
