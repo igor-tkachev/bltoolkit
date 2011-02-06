@@ -5,10 +5,18 @@
 // </auto-generated>
 //---------------------------------------------------------------------------------------------------
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.ServiceModel;
+using System.Text;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql;
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.ServiceModel;
@@ -27,121 +35,206 @@ namespace Linq.OverWCF
 		public Table<Parent>        Parent        { get { return this.GetTable<Parent>();        } }
 		public Table<Patient>       Patient       { get { return this.GetTable<Patient>();       } }
 		public Table<Person>        Person        { get { return this.GetTable<Person>();        } }
+		
+		#region FreeTextTable
+		
+		public class FreeTextKey<T>
+		{
+			public T   Key;
+			public int Rank;
+		}
+		
+		class FreeTextTableExpressionAttribute : TableExpressionAttribute
+		{
+			public FreeTextTableExpressionAttribute()
+				: base("")
+			{
+			}
+		
+			public override void SetTable(SqlTable table, MemberInfo member, IEnumerable<Expression> expArgs, IEnumerable<ISqlExpression> sqlArgs)
+			{
+				var aargs  = sqlArgs.ToArray();
+				var arr    = ConvertArgs(member, aargs).ToList();
+				var method = (MethodInfo)member;
+				var sp     = new MsSql2008SqlProvider();
+		
+				{
+					var ttype  = method.GetGenericArguments()[0];
+					var tbl    = new SqlTable(ttype);
+		
+					var database     = tbl.Database     == null ? null : sp.Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString();
+					var owner        = tbl.Owner        == null ? null : sp.Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString();
+					var physicalName = tbl.PhysicalName == null ? null : sp.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString();
+		
+					var name   = sp.BuildTableName(new StringBuilder(), database, owner, physicalName);
+		
+					arr.Add(new SqlExpression(name.ToString(), Precedence.Primary));
+				}
+		
+				{
+					var field = ((ConstantExpression)expArgs.First()).Value;
+		
+					if (field is string)
+					{
+						arr[0] = new SqlExpression(field.ToString(), Precedence.Primary);
+					}
+					else if (field is LambdaExpression)
+					{
+						var body = ((LambdaExpression)field).Body;
+		
+						if (body is MemberExpression)
+						{
+							var name = ((MemberExpression)body).Member.Name;
+		
+							name = sp.Convert(name, ConvertType.NameToQueryField).ToString();
+		
+							arr[0] = new SqlExpression(name, Precedence.Primary);
+						}
+					}
+				}
+		
+				table.SqlTableType   = SqlTableType.Expression;
+				table.Name           = "FREETEXTTABLE({6}, {2}, {3}) {1}";
+				table.TableArguments = arr.ToArray();
+			}
+		}
+		
+		[FreeTextTableExpressionAttribute]
+		public Table<FreeTextKey<TKey>> FreeTextTable<TTable,TKey>(string field, string text)
+		{
+			return this.GetTable<FreeTextKey<TKey>>(
+				this,
+				((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(TTable), typeof(TKey)),
+				field,
+				text);
+		}
+		
+		[FreeTextTableExpressionAttribute]
+		public Table<FreeTextKey<TKey>> FreeTextTable<TTable,TKey>(Expression<Func<TTable,string>> fieldSelector, string text)
+		{
+			return this.GetTable<FreeTextKey<TKey>>(
+				this,
+				((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(TTable), typeof(TKey)),
+				fieldSelector,
+				text);
+		}
+		
+		#endregion
 	}
 
 	[TableName(Name="BinaryData")]
 	public partial class BinaryData
 	{
-		[Identity, PrimaryKey(1)] public int    BinaryDataID { get; set; }
-		                          public byte[] Stamp        { get; set; }
-		                          public byte[] Data         { get; set; }
+		[Identity, PrimaryKey(1)] public int    BinaryDataID { get; set; } // int(10)
+		                          public byte[] Stamp        { get; set; } // timestamp
+		                          public byte[] Data         { get; set; } // varbinary(1024)
 	}
 
 	[TableName(Name="Child")]
 	public partial class Child
 	{
-		[Nullable] public int? ParentID { get; set; }
-		[Nullable] public int? ChildID  { get; set; }
+		[Nullable] public int? ParentID { get; set; } // int(10)
+		[Nullable] public int? ChildID  { get; set; } // int(10)
 	}
 
 	[TableName(Name="DataTypes")]
 	public partial class DataTypes
 	{
-		[Nullable] public int?     ID         { get; set; }
-		[Nullable] public decimal? MoneyValue { get; set; }
+		[Nullable] public int?     ID         { get; set; } // int(10)
+		[Nullable] public decimal? MoneyValue { get; set; } // decimal(10,4)
 	}
 
 	[TableName(Name="DataTypeTest")]
 	public partial class DataTypeTest
 	{
-		[Identity, PrimaryKey(1)] public int       DataTypeID { get; set; }
-		[Nullable               ] public byte[]    Binary_    { get; set; }
-		[Nullable               ] public bool?     Boolean_   { get; set; }
-		[Nullable               ] public byte?     Byte_      { get; set; }
-		[Nullable               ] public byte[]    Bytes_     { get; set; }
-		[Nullable               ] public char?     Char_      { get; set; }
-		[Nullable               ] public DateTime? DateTime_  { get; set; }
-		[Nullable               ] public decimal?  Decimal_   { get; set; }
-		[Nullable               ] public double?   Double_    { get; set; }
-		[Nullable               ] public Guid?     Guid_      { get; set; }
-		[Nullable               ] public short?    Int16_     { get; set; }
-		[Nullable               ] public int?      Int32_     { get; set; }
-		[Nullable               ] public long?     Int64_     { get; set; }
-		[Nullable               ] public decimal?  Money_     { get; set; }
-		[Nullable               ] public byte?     SByte_     { get; set; }
-		[Nullable               ] public float?    Single_    { get; set; }
-		[Nullable               ] public byte[]    Stream_    { get; set; }
-		[Nullable               ] public string    String_    { get; set; }
-		[Nullable               ] public short?    UInt16_    { get; set; }
-		[Nullable               ] public int?      UInt32_    { get; set; }
-		[Nullable               ] public long?     UInt64_    { get; set; }
-		[Nullable               ] public string    Xml_       { get; set; }
+		[Identity, PrimaryKey(1)] public int       DataTypeID { get; set; } // int(10)
+		[Nullable               ] public byte[]    Binary_    { get; set; } // binary(50)
+		[Nullable               ] public bool?     Boolean_   { get; set; } // bit
+		[Nullable               ] public byte?     Byte_      { get; set; } // tinyint(3)
+		[Nullable               ] public byte[]    Bytes_     { get; set; } // varbinary(50)
+		[Nullable               ] public char?     Char_      { get; set; } // char(1)
+		[Nullable               ] public DateTime? DateTime_  { get; set; } // datetime(3)
+		[Nullable               ] public decimal?  Decimal_   { get; set; } // decimal(20,2)
+		[Nullable               ] public double?   Double_    { get; set; } // float(53)
+		[Nullable               ] public Guid?     Guid_      { get; set; } // uniqueidentifier
+		[Nullable               ] public short?    Int16_     { get; set; } // smallint(5)
+		[Nullable               ] public int?      Int32_     { get; set; } // int(10)
+		[Nullable               ] public long?     Int64_     { get; set; } // bigint(19)
+		[Nullable               ] public decimal?  Money_     { get; set; } // money(19,4)
+		[Nullable               ] public byte?     SByte_     { get; set; } // tinyint(3)
+		[Nullable               ] public float?    Single_    { get; set; } // real(24)
+		[Nullable               ] public byte[]    Stream_    { get; set; } // varbinary(50)
+		[Nullable               ] public string    String_    { get; set; } // nvarchar(50)
+		[Nullable               ] public short?    UInt16_    { get; set; } // smallint(5)
+		[Nullable               ] public int?      UInt32_    { get; set; } // int(10)
+		[Nullable               ] public long?     UInt64_    { get; set; } // bigint(19)
+		[Nullable               ] public string    Xml_       { get; set; } // xml(-1)
 	}
 
 	[TableName(Name="Doctor")]
 	public partial class Doctor
 	{
-		[PrimaryKey(1)] public int    PersonID { get; set; }
-		                public string Taxonomy { get; set; }
+		[PrimaryKey(1)] public int    PersonID { get; set; } // int(10)
+		                public string Taxonomy { get; set; } // nvarchar(50)
 
 		// FK_Doctor_Person
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=false)]
 		public Person Person { get; set; }
 	}
 
 	[TableName(Name="GrandChild")]
 	public partial class GrandChild
 	{
-		[Nullable] public int? ParentID     { get; set; }
-		[Nullable] public int? ChildID      { get; set; }
-		[Nullable] public int? GrandChildID { get; set; }
+		[Nullable] public int? ParentID     { get; set; } // int(10)
+		[Nullable] public int? ChildID      { get; set; } // int(10)
+		[Nullable] public int? GrandChildID { get; set; } // int(10)
 	}
 
 	[TableName(Name="LinqDataTypes")]
 	public partial class LinqDataTypes
 	{
-		[Nullable] public int?      ID            { get; set; }
-		[Nullable] public decimal?  MoneyValue    { get; set; }
-		[Nullable] public DateTime? DateTimeValue { get; set; }
-		[Nullable] public bool?     BoolValue     { get; set; }
-		[Nullable] public Guid?     GuidValue     { get; set; }
-		[Nullable] public byte[]    BinaryValue   { get; set; }
-		[Nullable] public short?    SmallIntValue { get; set; }
+		[Nullable] public int?      ID            { get; set; } // int(10)
+		[Nullable] public decimal?  MoneyValue    { get; set; } // decimal(10,4)
+		[Nullable] public DateTime? DateTimeValue { get; set; } // datetime(3)
+		[Nullable] public bool?     BoolValue     { get; set; } // bit
+		[Nullable] public Guid?     GuidValue     { get; set; } // uniqueidentifier
+		[Nullable] public byte[]    BinaryValue   { get; set; } // varbinary(5000)
+		[Nullable] public short?    SmallIntValue { get; set; } // smallint(5)
 	}
 
 	[TableName(Name="Parent")]
 	public partial class Parent
 	{
-		[Nullable] public int? ParentID { get; set; }
-		[Nullable] public int? Value1   { get; set; }
+		[Nullable] public int? ParentID { get; set; } // int(10)
+		[Nullable] public int? Value1   { get; set; } // int(10)
 	}
 
 	[TableName(Name="Patient")]
 	public partial class Patient
 	{
-		[PrimaryKey(1)] public int    PersonID  { get; set; }
-		                public string Diagnosis { get; set; }
+		[PrimaryKey(1)] public int    PersonID  { get; set; } // int(10)
+		                public string Diagnosis { get; set; } // nvarchar(256)
 
 		// FK_Patient_Person
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=false)]
 		public Person Person { get; set; }
 	}
 
 	[TableName(Name="Person")]
 	public partial class Person
 	{
-		[Identity, PrimaryKey(1)] public int    PersonID   { get; set; }
-		                          public string FirstName  { get; set; }
-		                          public string LastName   { get; set; }
-		[Nullable               ] public string MiddleName { get; set; }
-		                          public char   Gender     { get; set; }
+		[Identity, PrimaryKey(1)] public int    PersonID   { get; set; } // int(10)
+		                          public string FirstName  { get; set; } // nvarchar(50)
+		                          public string LastName   { get; set; } // nvarchar(50)
+		[Nullable               ] public string MiddleName { get; set; } // nvarchar(50)
+		                          public char   Gender     { get; set; } // char(1)
 
 		// FK_Doctor_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
 		public Doctor Doctor { get; set; }
 
 		// FK_Patient_Person_BackReference
-		[Association(ThisKey="PersonID", OtherKey="PersonID")]
+		[Association(ThisKey="PersonID", OtherKey="PersonID", CanBeNull=true)]
 		public Patient Patient { get; set; }
 	}
 }

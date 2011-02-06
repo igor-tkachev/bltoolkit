@@ -4,15 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection;
 
-namespace BLToolkit.Data.Linq
+namespace BLToolkit.Linq
 {
 	using Common;
-
-	using FExpr = Func<Expression>;
-	using FParm = Func<ParameterExpression,bool>;
-	using FTest = Func<Expression,bool>;
+	using Data.Linq;
+	using Reflection;
 
 	static class ExpressionHelper
 	{
@@ -83,7 +80,7 @@ namespace BLToolkit.Data.Linq
 			this MethodCallExpression       expr,
 			Type                            declaringType,
 			string                          methodName,
-			FTest[]                         args,
+			Func<Expression, bool>[]                         args,
 			Func<MethodCallExpression,bool> func)
 		{
 			var dtype  = expr.Method.DeclaringType;
@@ -102,7 +99,7 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
-		public static bool IsMethod(this Expression expr, Type declaringType, string methodName, FTest[] args, Func<MethodCallExpression,bool> func)
+		public static bool IsMethod(this Expression expr, Type declaringType, string methodName, Func<Expression, bool>[] args, Func<MethodCallExpression,bool> func)
 		{
 			return
 				expr.NodeType == ExpressionType.Call?
@@ -110,7 +107,7 @@ namespace BLToolkit.Data.Linq
 					false;
 		}
 
-		public static bool IsMethod(this Expression expr, Type declaringType, string methodName, params FTest[] args)
+		public static bool IsMethod(this Expression expr, Type declaringType, string methodName, params Func<Expression, bool>[] args)
 		{
 			return IsMethod(expr, declaringType, methodName, args, p => true);
 		}
@@ -126,7 +123,7 @@ namespace BLToolkit.Data.Linq
 			Func<Expression,LambdaInfo,bool> lambda)
 		{
 			Expression seq = null;
-			return IsMethod(pi, null, null, new FTest[]
+			return IsMethod(pi, null, null, new Func<Expression, bool>[]
 			{
 				p => { seq = p; return true; },
 				l => l.CheckIfLambda(1, p => lambda(seq, p))
@@ -144,7 +141,7 @@ namespace BLToolkit.Data.Linq
 			Expression seqInfo = null;
 			LambdaInfo lambda  = null;
 
-			if (IsMethod(pi, null, methodName, new FTest[]
+			if (IsMethod(pi, null, methodName, new Func<Expression, bool>[]
 				{
 					p => { seqInfo = p; return true; },
 					l => l.IsLambda(nparams1, lm => lambda = lm),
@@ -172,7 +169,7 @@ namespace BLToolkit.Data.Linq
 			LambdaInfo lambda1 = null;
 			LambdaInfo lambda2 = null;
 
-			if (IsMethod(pi, null, methodName, new FTest[]
+			if (IsMethod(pi, null, methodName, new Func<Expression, bool>[]
 				{
 					p => { seqInfo = p; return true; },
 					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
@@ -202,7 +199,7 @@ namespace BLToolkit.Data.Linq
 			LambdaInfo lambda2 = null;
 			LambdaInfo lambda3 = null;
 
-			if (IsMethod(pi, null, methodName, new FTest[]
+			if (IsMethod(pi, null, methodName, new Func<Expression, bool>[]
 				{
 					p => { seqInfo = p; return true; },
 					l => l.IsLambda(nparams1, l1 => lambda1 = l1),
@@ -231,7 +228,7 @@ namespace BLToolkit.Data.Linq
 			LambdaInfo lambda2 = null;
 			LambdaInfo lambda3 = null;
 
-			if (IsMethod(pi, null, methodName, new FTest[]
+			if (IsMethod(pi, null, methodName, new Func<Expression, bool>[]
 				{
 					p => { seqInfo = p;return true; },
 					p => { inner   = p; return true; },
@@ -288,7 +285,7 @@ namespace BLToolkit.Data.Linq
 			LambdaInfo lambda  = null;
 			Expression expr    = null;
 
-			if (IsMethod(pi, null, methodName, new FTest[]
+			if (IsMethod(pi, null, methodName, new Func<Expression, bool>[]
 			{
 				p  => { seqInfo = p; return true; },
 				l  => l.IsLambda(1, l1 => lambda = l1),
@@ -315,7 +312,7 @@ namespace BLToolkit.Data.Linq
 
 		#region IsLambda
 
-		public static bool IsLambda(this Expression expr, FParm[] parameters, FTest body, Func<LambdaExpression,bool> func)
+		public static bool IsLambda(this Expression expr, Func<ParameterExpression, bool>[] parameters, Func<Expression, bool> body, Func<LambdaExpression,bool> func)
 		{
 			if (expr.NodeType == ExpressionType.Quote)
 				expr = ((UnaryExpression)expr).Operand;
@@ -337,16 +334,16 @@ namespace BLToolkit.Data.Linq
 			return false;
 		}
 
-		public static bool IsLambda<T>(this Expression expr, FTest body, Func<LambdaExpression,bool> func)
+		public static bool IsLambda<T>(this Expression expr, Func<Expression, bool> body, Func<LambdaExpression,bool> func)
 		{
-			return IsLambda(expr, new FParm[] { e => e.Type == typeof(T) }, body, func);
+			return IsLambda(expr, new Func<ParameterExpression, bool>[] { e => e.Type == typeof(T) }, body, func);
 		}
 
-		static readonly FParm[] _singleParam = new FParm[] { p => true };
+		static readonly Func<ParameterExpression, bool>[] _singleParam = new Func<ParameterExpression, bool>[] { p => true };
 
 		public static bool IsLambda(this Expression expr, int parameters, Func<Expression,bool> func)
 		{
-			var parms = parameters == 0? Array<FParm>.Empty : parameters == 1? _singleParam : new FParm[parameters];
+			var parms = parameters == 0? Array<Func<ParameterExpression, bool>>.Empty : parameters == 1? _singleParam : new Func<ParameterExpression, bool>[parameters];
 
 			if (parameters > 1)
 				for (var i = 0; i < parms.Length; i++)
@@ -355,7 +352,7 @@ namespace BLToolkit.Data.Linq
 			return IsLambda(expr, parms, func, p => true);
 		}
 
-		static FParm GetFParm(ParameterExpression[] parms, int n)
+		static Func<ParameterExpression, bool> GetFParm(ParameterExpression[] parms, int n)
 		{
 			return p => { parms[n] = p; return true; };
 		}

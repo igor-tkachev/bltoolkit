@@ -177,7 +177,7 @@
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs" />
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
-    <Compile Include="Data\Linq\ExpressionHelper.cs" />
+    <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Parsing.cs" />
     <Compile Include="Data\Linq\ExpressionParser.QueryBuilder.cs" />
@@ -279,7 +279,6 @@
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlTableType.cs" />
     <Compile Include="Data\Sql\SqlValue.cs" />
-    <Compile Include="Linq\Extensions.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />
     <Compile Include="Mapping\Association.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />

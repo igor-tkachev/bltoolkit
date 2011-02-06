@@ -70,7 +70,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataModel\NorthwindDB.cs" />
+    <Compile Include="DataModel\NorthwindDB.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DataModel\NorthwindDB.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

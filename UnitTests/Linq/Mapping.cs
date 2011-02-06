@@ -16,19 +16,6 @@ namespace Data.Linq
 	public class Mapping : TestBase
 	{
 		[Test]
-		public void NewTest()
-		{
-			var ass = GetType().Assembly;
-
-			var s = Path.GetDirectoryName(new Uri(ass.CodeBase).AbsolutePath);
-			s = Path.GetFullPath(Path.Combine(s, @"..\..\..\..\Redist\IBM\IBM.Data.DB2.dll"));
-
-			Assembly.LoadFile(s);
-
-			Assert.That(s, Is.EqualTo(@"E:\Projects\Git\BLToolkit2\trunk\Redist\IBM\IBM.Data.DB2.dll"));
-		}
-
-		[Test]
 		public void Enum1()
 		{
 			var expected = from p in Person where new[] { Gender.Male }.Contains(p.Gender) select p;

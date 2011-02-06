@@ -2,10 +2,11 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-using BLToolkit.Reflection;
-
 namespace BLToolkit.Data.Linq
 {
+	using BLToolkit.Linq;
+	using Reflection;
+
 	/// <summary>
 	/// Provides for compilation and caching of queries for reuse.
 	/// </summary>

@@ -10,6 +10,7 @@ namespace BLToolkit.Data.Linq
 {
 	using IndexConverter = Func<FieldIndex,FieldIndex>;
 
+	using BLToolkit.Linq;
 	using Common;
 	using Data.Sql;
 	using Mapping;
