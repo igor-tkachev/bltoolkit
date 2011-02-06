@@ -1,0 +1,357 @@
+
+# /
+/*.suo
+/*.ncb
+/debug
+/release
+/_ReSharper.BLToolkit.2
+/BLToolkit.2.resharper.user
+/*.resharperoptions
+/Debug
+/Release
+/_ReSharper.BLToolkit.2008
+/*.resharper
+/*.user
+/BLToolkit.2008.sln.cache
+/_UpgradeReport_Files
+/_ReSharper.BLToolkit.2010
+
+# /DataProviders/
+/DataProviders/bin
+/DataProviders/obj
+/DataProviders/*.user
+
+# /Demo/
+/Demo/bin
+/Demo/obj
+
+# /Demo/Asp.Net/BusinessLogic/
+/Demo/Asp.Net/BusinessLogic/bin
+/Demo/Asp.Net/BusinessLogic/obj
+/Demo/Asp.Net/BusinessLogic/*.user
+
+# /Demo/Asp.Net/ObjectModel/
+/Demo/Asp.Net/ObjectModel/bin
+/Demo/Asp.Net/ObjectModel/obj
+/Demo/Asp.Net/ObjectModel/*.user
+
+# /Demo/Asp.Net/Web/
+/Demo/Asp.Net/Web/Bin
+/Demo/Asp.Net/Web/*.webinfo
+
+# /Demo/Linq/Demo/
+/Demo/Linq/Demo/_ReSharper.Linq.Demo
+/Demo/Linq/Demo/_ReSharper.Linq.Demo.2010
+/Demo/Linq/Demo/bin
+/Demo/Linq/Demo/*.user
+/Demo/Linq/Demo/*.suo
+/Demo/Linq/Demo/obj
+
+# /Demo/Linq/OverWCF/
+/Demo/Linq/OverWCF/bin
+/Demo/Linq/OverWCF/obj
+
+# /Demo/Partial.Trust/Asp.Net/
+/Demo/Partial.Trust/Asp.Net/bin
+/Demo/Partial.Trust/Asp.Net/obj
+/Demo/Partial.Trust/Asp.Net/*.user
+
+# /Demo/Partial.Trust/Components/
+/Demo/Partial.Trust/Components/bin
+/Demo/Partial.Trust/Components/obj
+/Demo/Partial.Trust/Components/*.user
+
+# /Demo/Silverlight/Client/
+/Demo/Silverlight/Client/Bin
+/Demo/Silverlight/Client/obj
+
+# /Demo/Silverlight/Client.Web/
+/Demo/Silverlight/Client.Web/bin
+/Demo/Silverlight/Client.Web/obj
+
+# /Demo/WebServices/Client/
+/Demo/WebServices/Client/[Bb]in
+/Demo/WebServices/Client/obj
+/Demo/WebServices/Client/[Dd]ebug
+/Demo/WebServices/Client/[Rr]elease
+/Demo/WebServices/Client/*.user
+/Demo/WebServices/Client/*.aps
+/Demo/WebServices/Client/*.eto
+
+# /Demo/WebServices/ObjectModel/
+/Demo/WebServices/ObjectModel/[Bb]in
+/Demo/WebServices/ObjectModel/obj
+/Demo/WebServices/ObjectModel/[Dd]ebug
+/Demo/WebServices/ObjectModel/[Rr]elease
+/Demo/WebServices/ObjectModel/*.user
+/Demo/WebServices/ObjectModel/*.aps
+/Demo/WebServices/ObjectModel/*.eto
+
+# /Demo/WebServices/Server/
+/Demo/WebServices/Server/[Bb]in
+/Demo/WebServices/Server/obj
+/Demo/WebServices/Server/[Dd]ebug
+/Demo/WebServices/Server/[Rr]elease
+/Demo/WebServices/Server/*.user
+/Demo/WebServices/Server/*.aps
+/Demo/WebServices/Server/*.eto
+
+# /Demo/WinForms/
+/Demo/WinForms/bin
+/Demo/WinForms/obj
+/Demo/WinForms/*.user
+/Demo/WinForms/[Bb]in
+/Demo/WinForms/[Dd]ebug
+/Demo/WinForms/[Rr]elease
+/Demo/WinForms/*.aps
+/Demo/WinForms/*.eto
+
+# /Documentation/doc/
+/Documentation/doc/BLToolkit.chm
+
+# /Examples/CS/
+/Examples/CS/bin
+/Examples/CS/obj
+/Examples/CS/*.user
+
+# /Examples/Cpp/
+/Examples/Cpp/Debug
+/Examples/Cpp/Examples.Cpp.2.vcproj.IT-BOOK.IT.user
+/Examples/Cpp/*.user
+/Examples/Cpp/Release
+/Examples/Cpp/nunit.framework.dll
+/Examples/Cpp/x64
+
+# /Examples/VB/
+/Examples/VB/bin
+/Examples/VB/obj
+/Examples/VB/*.user
+
+# /HowTo/
+/HowTo/bin
+/HowTo/obj
+/HowTo/*.user
+/HowTo/[Bb]in
+/HowTo/[Dd]ebug
+/HowTo/[Rr]elease
+/HowTo/*.aps
+/HowTo/*.eto
+
+# /Source/
+/Source/bin
+/Source/obj
+/Source/*.user
+/Source/[Bb]in
+/Source/[Dd]ebug
+/Source/[Rr]elease
+/Source/*.aps
+/Source/*.eto
+/Source/*.SourceAnalysis
+/Source/*.Cache
+/Source/_ReSharper.BLToolkit.3
+/Source/_ReSharper.BLToolkit.2
+/Source/CopyDebug.bat
+/Source/Copy.bat
+/Source/*.suo
+
+# /Source/Data/Linq/
+/Source/Data/Linq/ExpressionInfo - Copy.cs
+
+# /Source/Doc/
+/Source/Doc/*.chw
+
+# /Source/Properties/
+/Source/Properties/BLToolkitConstants.Revision.cs
+
+# /Tools/BLTgen/
+/Tools/BLTgen/bin
+/Tools/BLTgen/obj
+/Tools/BLTgen/*.user
+/Tools/BLTgen/*.ReSharper
+
+# /Tools/CodeGenerator/
+/Tools/CodeGenerator/bin
+/Tools/CodeGenerator/obj
+/Tools/CodeGenerator/*.suo
+/Tools/CodeGenerator/_ReSharper.CodeGenerator.2008
+/Tools/CodeGenerator/_UpgradeReport_Files
+/Tools/CodeGenerator/Backup
+/Tools/CodeGenerator/*.user
+
+# /Tools/DocGen/
+/Tools/DocGen/bin
+/Tools/DocGen/obj
+/Tools/DocGen/*.suo
+/Tools/DocGen/*.user
+/Tools/DocGen/*.bak
+/Tools/DocGen/_ReSharper.DocGen
+
+# /Tools/ExampleGenerator/
+/Tools/ExampleGenerator/bin
+/Tools/ExampleGenerator/obj
+/Tools/ExampleGenerator/*.user
+
+# /Tools/NUnit/
+/Tools/NUnit/addins
+
+# /Tools/NUnitAddin/
+/Tools/NUnitAddin/bin
+/Tools/NUnitAddin/obj
+
+# /Tools/SvnRevision/
+
+# /Tools/Templates/
+/Tools/Templates/bin
+/Tools/Templates/obj
+/Tools/Templates/*.user
+/Tools/Templates/[Bb]in
+/Tools/Templates/[Dd]ebug
+/Tools/Templates/[Rr]elease
+/Tools/Templates/*.aps
+/Tools/Templates/*.eto
+/Tools/Templates/*.suo
+
+# /Tools/Templates.VB/
+/Tools/Templates.VB/bin
+/Tools/Templates.VB/obj
+/Tools/Templates.VB/*.user
+
+# /UnitTests/
+/UnitTests/*.dll
+/UnitTests/BLToolkit.VisualState.xml
+/UnitTests/TestResult.xml
+/UnitTests/BLToolkit.2005.VisualState.xml
+/UnitTests/*.xml
+
+# /UnitTests/All/
+/UnitTests/All/bin
+/UnitTests/All/obj
+/UnitTests/All/*.user
+
+# /UnitTests/CS/
+/UnitTests/CS/bin
+/UnitTests/CS/obj
+/UnitTests/CS/*.user
+/UnitTests/CS/*.ReSharper
+
+# /UnitTests/DataProvider/
+/UnitTests/DataProvider/bin
+/UnitTests/DataProvider/*.suo
+/UnitTests/DataProvider/_ReSharper.UnitTests.DataProviders
+/UnitTests/DataProvider/UnitTests.DataProviders.4.5.resharper.user
+
+# /UnitTests/DataProvider/Access/
+/UnitTests/DataProvider/Access/Validation
+/UnitTests/DataProvider/Access/Aspects
+/UnitTests/DataProvider/Access/Common
+/UnitTests/DataProvider/Access/Data
+/UnitTests/DataProvider/Access/DataAccess
+/UnitTests/DataProvider/Access/EditableObjects
+/UnitTests/DataProvider/Access/Mapping
+/UnitTests/DataProvider/Access/Patterns
+/UnitTests/DataProvider/Access/Properties
+/UnitTests/DataProvider/Access/Reflection
+/UnitTests/DataProvider/Access/TypeBuilder
+/UnitTests/DataProvider/Access/[Bb]in
+/UnitTests/DataProvider/Access/obj
+/UnitTests/DataProvider/Access/[Dd]ebug
+/UnitTests/DataProvider/Access/[Rr]elease
+/UnitTests/DataProvider/Access/*.user
+/UnitTests/DataProvider/Access/*.aps
+/UnitTests/DataProvider/Access/*.eto
+
+# /UnitTests/DataProvider/FireBird/
+/UnitTests/DataProvider/FireBird/Aspects
+/UnitTests/DataProvider/FireBird/Common
+/UnitTests/DataProvider/FireBird/Data
+/UnitTests/DataProvider/FireBird/DataAccess
+/UnitTests/DataProvider/FireBird/EditableObjects
+/UnitTests/DataProvider/FireBird/Mapping
+/UnitTests/DataProvider/FireBird/Patterns
+/UnitTests/DataProvider/FireBird/Properties
+/UnitTests/DataProvider/FireBird/Reflection
+/UnitTests/DataProvider/FireBird/TypeBuilder
+/UnitTests/DataProvider/FireBird/Validation
+/UnitTests/DataProvider/FireBird/[Bb]in
+/UnitTests/DataProvider/FireBird/obj
+/UnitTests/DataProvider/FireBird/[Dd]ebug
+/UnitTests/DataProvider/FireBird/[Rr]elease
+/UnitTests/DataProvider/FireBird/*.user
+/UnitTests/DataProvider/FireBird/*.aps
+/UnitTests/DataProvider/FireBird/*.eto
+
+# /UnitTests/DataProvider/Oracle/
+/UnitTests/DataProvider/Oracle/Aspects
+/UnitTests/DataProvider/Oracle/Common
+/UnitTests/DataProvider/Oracle/Data
+/UnitTests/DataProvider/Oracle/DataAccess
+/UnitTests/DataProvider/Oracle/EditableObjects
+/UnitTests/DataProvider/Oracle/Mapping
+/UnitTests/DataProvider/Oracle/Patterns
+/UnitTests/DataProvider/Oracle/Properties
+/UnitTests/DataProvider/Oracle/Reflection
+/UnitTests/DataProvider/Oracle/TypeBuilder
+/UnitTests/DataProvider/Oracle/Validation
+/UnitTests/DataProvider/Oracle/[Bb]in
+/UnitTests/DataProvider/Oracle/obj
+/UnitTests/DataProvider/Oracle/[Dd]ebug
+/UnitTests/DataProvider/Oracle/[Rr]elease
+/UnitTests/DataProvider/Oracle/*.user
+/UnitTests/DataProvider/Oracle/*.aps
+/UnitTests/DataProvider/Oracle/*.eto
+
+# /UnitTests/DataProvider/SQLite/
+/UnitTests/DataProvider/SQLite/[Bb]in
+/UnitTests/DataProvider/SQLite/obj
+/UnitTests/DataProvider/SQLite/[Dd]ebug
+/UnitTests/DataProvider/SQLite/[Rr]elease
+/UnitTests/DataProvider/SQLite/*.user
+/UnitTests/DataProvider/SQLite/*.aps
+/UnitTests/DataProvider/SQLite/*.eto
+/UnitTests/DataProvider/SQLite/Aspects
+/UnitTests/DataProvider/SQLite/Common
+/UnitTests/DataProvider/SQLite/Data
+/UnitTests/DataProvider/SQLite/DataAccess
+/UnitTests/DataProvider/SQLite/EditableObjects
+/UnitTests/DataProvider/SQLite/Mapping
+/UnitTests/DataProvider/SQLite/Patterns
+/UnitTests/DataProvider/SQLite/Properties
+/UnitTests/DataProvider/SQLite/Reflection
+/UnitTests/DataProvider/SQLite/TypeBuilder
+/UnitTests/DataProvider/SQLite/Validation
+
+# /UnitTests/DataProvider/SqlCe/
+/UnitTests/DataProvider/SqlCe/[Bb]in
+/UnitTests/DataProvider/SqlCe/obj
+/UnitTests/DataProvider/SqlCe/[Dd]ebug
+/UnitTests/DataProvider/SqlCe/[Rr]elease
+/UnitTests/DataProvider/SqlCe/*.user
+/UnitTests/DataProvider/SqlCe/*.aps
+/UnitTests/DataProvider/SqlCe/*.eto
+/UnitTests/DataProvider/SqlCe/Aspects
+/UnitTests/DataProvider/SqlCe/Common
+/UnitTests/DataProvider/SqlCe/Data
+/UnitTests/DataProvider/SqlCe/DataAccess
+/UnitTests/DataProvider/SqlCe/EditableObjects
+/UnitTests/DataProvider/SqlCe/Mapping
+/UnitTests/DataProvider/SqlCe/Patterns
+/UnitTests/DataProvider/SqlCe/Properties
+/UnitTests/DataProvider/SqlCe/Reflection
+/UnitTests/DataProvider/SqlCe/TypeBuilder
+/UnitTests/DataProvider/SqlCe/Validation
+
+# /UnitTests/Linq/
+/UnitTests/Linq/*.aps
+/UnitTests/Linq/*.eto
+/UnitTests/Linq/*.user
+/UnitTests/Linq/UnitTests.Linq.idc
+/UnitTests/Linq/[Bb]in
+/UnitTests/Linq/[Dd]ebug
+/UnitTests/Linq/[Rr]elease
+/UnitTests/Linq/bin
+/UnitTests/Linq/messages.svclog
+/UnitTests/Linq/obj
+
+# /UnitTests/Linq/Model/
+
+# /UnitTests/Linq/Properties/
