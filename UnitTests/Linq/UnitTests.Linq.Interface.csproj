@@ -64,6 +64,7 @@
     <Compile Include="Model\LinqDataTypes.cs" />
     <Compile Include="Model\Northwind.cs" />
     <Compile Include="Model\NorthwindDB.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Model\OracleSpecific.cs" />
     <Compile Include="Model\ParentChild.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Model\TypeValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDbManager.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="TestServiceModelDataContext.cs" />
   </ItemGroup>

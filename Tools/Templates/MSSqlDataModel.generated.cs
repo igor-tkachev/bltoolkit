@@ -21,7 +21,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Validation;
 
-namespace Templates.MSSql
+namespace MSSQLDataModel
 {
 	public partial class MSSqlDataModel : DbManager
 	{
@@ -121,7 +121,7 @@ namespace Templates.MSSql
 		[FreeTextTableExpressionAttribute]
 		public Table<FreeTextKey<TKey>> FreeTextTable<TTable,TKey>(string field, string text)
 		{
-			return GetTable<FreeTextKey<TKey>>(
+			return this.GetTable<FreeTextKey<TKey>>(
 				this,
 				((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(TTable), typeof(TKey)),
 				field,
@@ -131,7 +131,7 @@ namespace Templates.MSSql
 		[FreeTextTableExpressionAttribute]
 		public Table<FreeTextKey<TKey>> FreeTextTable<TTable,TKey>(Expression<Func<TTable,string>> fieldSelector, string text)
 		{
-			return GetTable<FreeTextKey<TKey>>(
+			return this.GetTable<FreeTextKey<TKey>>(
 				this,
 				((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(TTable), typeof(TKey)),
 				fieldSelector,
@@ -146,17 +146,17 @@ namespace Templates.MSSql
 	[TableName(Name="Alphabetical list of products")]
 	public partial class AlphabeticalListOfProduct
 	{
-		[MapField("ProductID"),           DataMember, Required               ] public int      MyProductID     { get; set; } // int(10)
-		[                                 DataMember, MaxLength(40), Required] public string   ProductName     { get; set; } // nvarchar(40)
-		[                       Nullable, DataMember                         ] public int?     SupplierID      { get; set; } // int(10)
-		[                       Nullable, DataMember                         ] public int?     CategoryID      { get; set; } // int(10)
-		[                       Nullable, DataMember, MaxLength(20)          ] public string   QuantityPerUnit { get; set; } // nvarchar(20)
-		[                       Nullable, DataMember                         ] public decimal? UnitPrice       { get; set; } // money(19,4)
-		[                       Nullable, DataMember                         ] public short?   UnitsInStock    { get; set; } // smallint(5)
-		[                       Nullable, DataMember                         ] public short?   UnitsOnOrder    { get; set; } // smallint(5)
-		[                       Nullable, DataMember                         ] public short?   ReorderLevel    { get; set; } // smallint(5)
-		[                                 DataMember, Required               ] public bool     Discontinued    { get; set; } // bit
-		[                                 DataMember, MaxLength(15), Required] public string   CategoryName    { get; set; } // nvarchar(15)
+		[          DataMember, Required               ] public int      ProductID       { get; set; } // int(10)
+		[          DataMember, MaxLength(40), Required] public string   ProductName     { get; set; } // nvarchar(40)
+		[Nullable, DataMember                         ] public int?     SupplierID      { get; set; } // int(10)
+		[Nullable, DataMember                         ] public int?     CategoryID      { get; set; } // int(10)
+		[Nullable, DataMember, MaxLength(20)          ] public string   QuantityPerUnit { get; set; } // nvarchar(20)
+		[Nullable, DataMember                         ] public decimal? UnitPrice       { get; set; } // money(19,4)
+		[Nullable, DataMember                         ] public short?   UnitsInStock    { get; set; } // smallint(5)
+		[Nullable, DataMember                         ] public short?   UnitsOnOrder    { get; set; } // smallint(5)
+		[Nullable, DataMember                         ] public short?   ReorderLevel    { get; set; } // smallint(5)
+		[          DataMember, Required               ] public bool     Discontinued    { get; set; } // bit
+		[          DataMember, MaxLength(15), Required] public string   CategoryName    { get; set; } // nvarchar(15)
 	}
 
 	[Serializable, DataContract]

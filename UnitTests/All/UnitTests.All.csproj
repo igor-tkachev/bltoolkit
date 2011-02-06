@@ -63,22 +63,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Examples\Cpp\Examples.Cpp.vcproj">
-      <Project>{1710C5C2-0416-4981-81FC-BBBDFDA0B24D}</Project>
-      <Name>Examples.Cpp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Examples\CS\Examples.CS.csproj">
-      <Project>{34989C73-F82A-4905-9349-D0CF1419CD1C}</Project>
-      <Name>Examples.CS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Examples\VB\Examples.VB.vbproj">
-      <Project>{308A4189-53AB-460D-B2B1-0EB4B9219654}</Project>
-      <Name>Examples.VB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\HowTo\HowTo.csproj">
-      <Project>{8DA66999-005A-49AB-86A9-2C1F62905B50}</Project>
-      <Name>HowTo</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.3</Name>

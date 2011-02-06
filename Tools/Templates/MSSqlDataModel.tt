@@ -1,19 +1,19 @@
-﻿<#@ template language="C#v3.5" debug="True" hostspecific="True" #>
+﻿<#@ template language="C#" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs" #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLToolkit.ttinclude"   #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\BLT4Toolkit.ttinclude" #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\WCFAttributes.ttinclude" #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\MSSql.ttinclude"  #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\PluralSingular.ttinclude" #>
-<#@ include file="E:\Projects\SVN\BLToolkit\trunk\Source\Templates\ValidationAttributes.ttinclude" #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"            #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLT4Toolkit.ttinclude"          #>
+<#@ include file="$(SolutionDir)\Source\Templates\WCFAttributes.ttinclude"        #>
+<#@ include file="$(SolutionDir)\Source\Templates\MSSql.ttinclude"                #>
+<#@ include file="$(SolutionDir)\Source\Templates\PluralSingular.ttinclude"       #>
+<#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>
 <#
 	ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
 
-	LoadMetadata();
+	Namespace = "MSSQLDataModel";
 
-	Tables["Alphabetical list of products"].Columns["ProductID"].MemberName = "MyProductID";
+	LoadMetadata();
 
 	GenerateModel();
 #>
