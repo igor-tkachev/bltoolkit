@@ -110,7 +110,7 @@
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.4</Name>
     </ProjectReference>
-    <ProjectReference Include="UnitTests.Linq.2010.Interface.csproj">
+    <ProjectReference Include="UnitTests.Linq.Interface.csproj">
       <Project>{D527524F-EC92-465E-9CAE-86278121675A}</Project>
       <Name>UnitTests.Linq.2010.Interface</Name>
     </ProjectReference>
