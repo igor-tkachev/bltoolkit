@@ -96,7 +96,7 @@ private void LoadServerMetadata()
 						ColumnType = Convert.ToString (rd["dataType"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
-						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt32(rd["length"]),
+						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
 						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
 						Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
 		}

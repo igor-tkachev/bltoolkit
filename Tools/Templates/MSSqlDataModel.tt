@@ -11,5 +11,9 @@
 	//ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
 
+	LoadMetadata();
+
+	Tables["Alphabetical list of products"].Columns["ProductID"].MemberName = "MyProductID";
+
 	GenerateModel();
 #>
