@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,8 +10,28 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Data.Linq</RootNamespace>
     <AssemblyName>UnitTests.Linq</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,6 +42,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,12 +51,58 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug FW 3.5|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug FW 3.5\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\UnitTests.Linq.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
+    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=2.1.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\Firebird\FirebirdSql.Data.FirebirdClient.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.Data.DB2, Version=9.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\IBM\IBM.Data.DB2.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.Data.Informix, Version=3.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\IBM\IBM.Data.Informix.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=5.2.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\MySql\MySql.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Npgsql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\PostgreSql\Npgsql.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.DataAccess, Version=2.102.4.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\Oracle\Oracle.DataAccess.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sybase.AdoNet2.AseClient, Version=1.15.192.0, Culture=neutral, PublicKeyToken=95d94fac46c88e1e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Redist\Sybase\Sybase.AdoNet2.AseClient.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -49,9 +116,11 @@
       <HintPath>..\..\Redist\SQLite\System.Data.SQLite.DLL</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.ServiceModel">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\..\Redist\SqlCe\System.Data.SqlServerCe.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
@@ -69,15 +138,15 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
-    <Compile Include="ParserTest.cs" />
-    <Compile Include="ProviderSpecific\Firebird.cs" />
-    <Compile Include="ProviderSpecific\Oracle.cs" />
-    <Compile Include="TableFunctionTest.cs" />
     <Compile Include="DataContextTest.cs" />
     <Compile Include="Exceptions\Common.cs" />
     <Compile Include="ExtensionTests.cs" />
     <Compile Include="L2SAttributes.cs" />
+    <Compile Include="ParserTest.cs" />
+    <Compile Include="ProviderSpecific\Firebird.cs" />
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
+    <Compile Include="ProviderSpecific\Oracle.cs" />
+    <Compile Include="TableFunctionTest.cs" />
     <Compile Include="VisualBasicTest.cs" />
     <Compile Include="DmlTest.cs" />
     <Compile Include="ExpressionsTest.cs" />
@@ -112,48 +181,50 @@
     <Compile Include="WhereTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.DB2.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.DB2.4.csproj">
       <Project>{86BF4F10-3606-4016-9919-84C3335813B6}</Project>
-      <Name>BLToolkit.Data.DataProvider.DB2.3</Name>
+      <Name>BLToolkit.Data.DataProvider.DB2.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Firebird.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Firebird.4.csproj">
       <Project>{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}</Project>
-      <Name>BLToolkit.Data.DataProvider.Firebird.3</Name>
+      <Name>BLToolkit.Data.DataProvider.Firebird.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Informix.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Informix.4.csproj">
       <Project>{B1DEA25C-7667-471B-BBAD-64D017FDD104}</Project>
-      <Name>BLToolkit.Data.DataProvider.Informix.3</Name>
+      <Name>BLToolkit.Data.DataProvider.Informix.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
-      <Name>BLToolkit.Data.DataProvider.MySql.3</Name>
+      <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
-      <Name>BLToolkit.Data.DataProvider.Oracle.3</Name>
+      <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj">
       <Project>{5A556D57-0D68-433B-AD78-02849583582B}</Project>
-      <Name>BLToolkit.Data.DataProvider.PostgreSQL.3</Name>
+      <Name>BLToolkit.Data.DataProvider.PostgreSQL.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SqlCe.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SqlCe.4.csproj">
       <Project>{85E90F57-8DE1-4912-8414-28578F4D71CD}</Project>
-      <Name>BLToolkit.Data.DataProvider.SqlCe.3</Name>
+      <Name>BLToolkit.Data.DataProvider.SqlCe.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj">
       <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
-      <Name>BLToolkit.Data.DataProvider.SQLite.3</Name>
+      <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Sybase.3.csproj">
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Sybase.4.csproj">
       <Project>{6CD8CC3D-643D-4D09-8660-A26085C44FBC}</Project>
-      <Name>BLToolkit.Data.DataProvider.Sybase.3</Name>
+      <Name>BLToolkit.Data.DataProvider.Sybase.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\BLToolkit.3.csproj">
+    <ProjectReference Include="..\..\Source\BLToolkit.4.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
-      <Name>BLToolkit.3</Name>
+      <Name>BLToolkit.4</Name>
     </ProjectReference>
     <ProjectReference Include="UnitTests.Linq.Interface.csproj">
       <Project>{D527524F-EC92-465E-9CAE-86278121675A}</Project>
@@ -163,6 +234,23 @@
       <Project>{D11617AB-9F88-4C74-8ABD-F8580DB4B01B}</Project>
       <Name>UnitTests.Linq.VisualBasic</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
