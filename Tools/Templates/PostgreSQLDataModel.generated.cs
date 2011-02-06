@@ -42,7 +42,7 @@ namespace PostgreSQLDataModel
 	public partial class LinqDataTypes
 	{
 		[Nullable          ] public Int32?    ID            { get; set; } // integer
-		[Nullable          ] public Decimal?  MoneyValue    { get; set; } // numeric(10,4)(10)
+		[Nullable          ] public Decimal?  MoneyValue    { get; set; } // numeric(10,4)(10)(4)
 		[Nullable          ] public DateTime? DateTimeValue { get; set; } // timestamp without time zone
 		[Nullable          ] public Boolean?  BoolValue     { get; set; } // boolean
 		[Nullable          ] public Guid?     GuidValue     { get; set; } // uuid

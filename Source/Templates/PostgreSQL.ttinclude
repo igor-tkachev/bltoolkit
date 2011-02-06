@@ -97,7 +97,7 @@ private void LoadServerMetadata()
 						IsNullable = Convert.ToBoolean(rd["isnullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isidentity"]),
 						Length     = rd.IsDBNull(rd.GetOrdinal("lenght")) ? 0 : Convert.ToInt64(rd["lenght"]),
-						//Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
+						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
 						//Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
 					}
 				};
