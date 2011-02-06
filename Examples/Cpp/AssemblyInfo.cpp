@@ -14,9 +14,9 @@ using namespace System::Security::Permissions;
 [assembly:AssemblyTitleAttribute("ExamplesCpp")];
 [assembly:AssemblyDescriptionAttribute("")];
 [assembly:AssemblyConfigurationAttribute("")];
-[assembly:AssemblyCompanyAttribute("")];
+[assembly:AssemblyCompanyAttribute("Microsoft")];
 [assembly:AssemblyProductAttribute("ExamplesCpp")];
-[assembly:AssemblyCopyrightAttribute("Copyright (c)  2005")];
+[assembly:AssemblyCopyrightAttribute("Copyright (c) Microsoft 2011")];
 [assembly:AssemblyTrademarkAttribute("")];
 [assembly:AssemblyCultureAttribute("")];
 

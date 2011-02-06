@@ -12,7 +12,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Validation;
 
-namespace Templates.Sybase
+namespace SybaseDataModel
 {
 	public partial class SybaseDataModel : DbManager
 	{
@@ -144,7 +144,7 @@ namespace Templates.Sybase
 		public Patient Patient { get; set; }
 	}
 
-	// View
+	//View
 	[TableName(Name="sysquerymetrics")]
 	public partial class sysquerymetrics
 	{

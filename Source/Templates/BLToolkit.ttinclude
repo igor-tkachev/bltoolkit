@@ -157,7 +157,7 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 {
 	if (t.IsView)
 	{
-		tt.WriteLine("// View");
+		WriteComment(tt, " View");
 	}
 
 	RenderTableAttributes(tt, t);

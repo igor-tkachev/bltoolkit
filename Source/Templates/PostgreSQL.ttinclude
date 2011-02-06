@@ -67,17 +67,17 @@ private void LoadServerMetadata()
 					false
 				ELSE
 					NOT pg_attribute.attnotnull
-				END as ""isNullable"",
-				COALESCE(pg_attrdef.adsrc ~* 'nextval',FALSE) as ""isIdentity""
+				END as isnullable,
+				COALESCE(pg_attrdef.adsrc ~* 'nextval',FALSE) as isidentity
 			FROM 
 				pg_attribute
 				LEFT JOIN pg_attrdef ON (pg_attribute.attrelid = pg_attrdef.adrelid AND 
-    				pg_attribute.attnum = pg_attrdef.adnum)
+				pg_attribute.attnum = pg_attrdef.adnum)
 				INNER JOIN pg_class ON (pg_attribute.attrelid = pg_class.oid)
 				INNER JOIN pg_namespace ON (pg_class.relnamespace = pg_namespace.oid)
-			WHERE    
+			WHERE
 				pg_class.relkind IN ('r','v') AND
-				pg_namespace.nspname NOT IN ('pg_catalog','information_schema') AND   
+				pg_namespace.nspname NOT IN ('pg_catalog','information_schema') AND
 				pg_attribute.attnum > 0 AND
 				NOT pg_attribute.attisdropped";
 
@@ -94,10 +94,10 @@ private void LoadServerMetadata()
 						ColumnName = Convert.ToString (rd["name"]),
 						MemberName = Convert.ToString (rd["name"]),
 						ColumnType = Convert.ToString (rd["typename"]),
-						IsNullable = Convert.ToBoolean(rd["isNullable"]),
-						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
-						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
-						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
+						//IsNullable = Convert.ToBoolean(rd["isnullable"]),
+						//IsIdentity = Convert.ToBoolean(rd["isidentity"]),
+						//Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
+						//Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
 						//Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
 					}
 				};
