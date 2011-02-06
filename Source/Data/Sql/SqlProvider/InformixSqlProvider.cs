@@ -180,7 +180,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			CheckAliases(sqlQuery);
+			CheckAliases(sqlQuery, int.MaxValue);
 
 			new QueryVisitor().Visit(sqlQuery.Select, element =>
 			{

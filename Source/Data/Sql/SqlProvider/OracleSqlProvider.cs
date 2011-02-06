@@ -40,7 +40,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
 		{
 			if (table.SequenceAttributes != null)
-				return new SqlExpression(table.SequenceAttributes[0].SequenceName + ".nextval", Precedence.Primary);
+			{
+				SequenceNameAttribute attr = GetSequenceNameAttribute(table, false);
+
+				if (attr != null)
+					return new SqlExpression(attr.SequenceName + ".nextval", Precedence.Primary);
+			}
 
 			return base.GetIdentityExpression(table, identityField, forReturning);
 		}
@@ -257,7 +262,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			CheckAliases(sqlQuery);
+			CheckAliases(sqlQuery, 30);
 
 			sqlQuery = base.Finalize(sqlQuery);
 

@@ -553,7 +553,9 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var q =
 								from a in ObjectMapper.Associations
-								where a.MemberAccessor.MemberInfo == memberExpression.Member
+								where 
+									a.MemberAccessor.MemberInfo.DeclaringType == memberExpression.Member.DeclaringType &&
+									a.MemberAccessor.MemberInfo.Name          == memberExpression.Member.Name
 								select new AssociatedTableContext(Parser, this, a) { Parent = Parent };
 
 							tableAssociation = q.FirstOrDefault();

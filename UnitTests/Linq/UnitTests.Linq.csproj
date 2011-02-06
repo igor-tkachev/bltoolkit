@@ -70,6 +70,7 @@
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
     <Compile Include="ParserTest.cs" />
+    <Compile Include="ProviderSpecific\Firebird.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />
     <Compile Include="TableFunctionTest.cs" />
     <Compile Include="DataContextTest.cs" />

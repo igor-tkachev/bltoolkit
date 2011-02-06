@@ -176,6 +176,45 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Simple11()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.GrandChild
+					.GroupBy(ch => new { ParentID = ch.ParentID + 1, ch.ChildID }, ch => ch.ChildID);
+
+				var list = q.ToList();
+				Assert.AreEqual(8, list.Count);
+			});
+		}
+
+		[Test]
+		public void Simple12()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.GrandChild
+					.GroupBy(ch => new { ParentID = ch.ParentID + 1, ch.ChildID }, (g,ch) => g.ChildID);
+
+				var list = q.ToList();
+				Assert.AreEqual(8, list.Count);
+			});
+		}
+
+		[Test]
+		public void Simple13()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.GrandChild
+					.GroupBy(ch => new { ParentID = ch.ParentID + 1, ch.ChildID }, ch => ch.ChildID, (g,ch) => g.ChildID);
+
+				var list = q.ToList();
+				Assert.AreEqual(8, list.Count);
+			});
+		}
+
+		[Test]
 		public void MemberInit()
 		{
 			ForEachProvider(db => AreEqual(
@@ -331,6 +370,20 @@ namespace Data.Linq
 				from p in pg.DefaultIfEmpty()
 				group ch by ch.ChildID into g
 				select g.Sum(_ => _.ParentID)));
+		}
+
+		[Test]
+		public void SubQuery6()
+		{
+			var expected =
+				from ch in Child select new { ParentID = ch.ParentID + 1 } into ch
+				group ch.ParentID by ch into g
+				select g.Key;
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child select new { ParentID = ch.ParentID + 1 } into ch
+				group ch.ParentID by ch into g
+				select g.Key));
 		}
 
 		[Test]
@@ -800,6 +853,22 @@ namespace Data.Linq
 					group p by p.Category into g
 					where g.Count() == 12
 					select g.Key.CategoryName;
+
+				var list = result.ToList();
+				Assert.AreEqual(3, list.Count);
+			}
+		}
+
+		[Test]
+		public void GrooupByAssociation4()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result = 
+					from p in db.Product
+					group p by p.Category into g
+					where g.Count() == 12
+					select g.Key.CategoryID;
 
 				var list = result.ToList();
 				Assert.AreEqual(3, list.Count);

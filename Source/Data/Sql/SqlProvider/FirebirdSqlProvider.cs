@@ -21,20 +21,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 		}
 
-		public override int CommandCount(SqlQuery sqlQuery)
-		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
-		}
+//		public override int CommandCount(SqlQuery sqlQuery)
+//		{
+//		    return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+//        }
 
-		protected override void BuildCommand(int commandNumber, StringBuilder sb)
-		{
-			SequenceNameAttribute attr = GetSequenceNameAttribute(true);
-
-			AppendIndent(sb)
-				.Append("SELECT gen_id(")
-				.Append(attr.SequenceName)
-				.AppendLine(", 0) FROM rdb$database");
-		}
+//        protected override void BuildCommand(int commandNumber, StringBuilder sb)
+//		{
+//			SequenceNameAttribute attr = GetSequenceNameAttribute(true);
+//
+//            AppendIndent(sb)
+//				.Append("SELECT gen_id(")
+//				.Append(attr.SequenceName)
+//				.AppendLine(", 0) FROM rdb$database");
+//		}
 
 		protected override ISqlProvider CreateSqlProvider()
 		{
@@ -58,8 +58,29 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override bool   SkipFirst   { get { return false;       } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
+        public override bool IsIdentityParameterRequired { get { return true; } }
 
-		public override ISqlExpression ConvertExpression(ISqlExpression expr)
+        protected override void BuildGetIdentity(StringBuilder sb)
+        {
+            var identityField = SqlQuery.Set.Into.GetIdentityField();
+
+            if (identityField == null)
+                throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
+
+            AppendIndent(sb).AppendLine("RETURNING");
+            AppendIndent(sb).Append("\t");
+            BuildExpression(sb, identityField, false, true);
+        }
+
+        public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
+        {
+            if (table.SequenceAttributes != null)
+                return new SqlExpression("GEN_ID(" + table.SequenceAttributes[0].SequenceName + ", 1)", Precedence.Primary);
+
+            return base.GetIdentityExpression(table, identityField, forReturning);
+        }
+
+        public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
 
@@ -154,7 +175,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			CheckAliases(sqlQuery);
+			CheckAliases(sqlQuery, int.MaxValue);
 
 			new QueryVisitor().Visit(sqlQuery.Select, SetNonQueryParameter);
 

@@ -1,6 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
-
+using System.Reflection;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -14,6 +15,19 @@ namespace Data.Linq
 	[TestFixture]
 	public class Mapping : TestBase
 	{
+		[Test]
+		public void NewTest()
+		{
+			var ass = GetType().Assembly;
+
+			var s = Path.GetDirectoryName(new Uri(ass.CodeBase).AbsolutePath);
+			s = Path.GetFullPath(Path.Combine(s, @"..\..\..\..\Redist\IBM\IBM.Data.DB2.dll"));
+
+			Assembly.LoadFile(s);
+
+			Assert.That(s, Is.EqualTo(@"E:\Projects\Git\BLToolkit2\trunk\Redist\IBM\IBM.Data.DB2.dll"));
+		}
+
 		[Test]
 		public void Enum1()
 		{

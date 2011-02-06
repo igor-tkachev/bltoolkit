@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace BLToolkit.Data.Linq.Parser
 {
@@ -37,67 +38,63 @@ namespace BLToolkit.Data.Linq.Parser
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			var sequence = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			var sequence        = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			var sequenceExpr    = methodCall.Arguments[0];
+			var groupingType    = methodCall.Type.GetGenericArguments()[0];
+			var keySelector     = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+			var elementSelector = (LambdaExpression)methodCall.Arguments[2].Unwrap();
+			var isSubQuery      = false;
 
-			var keySelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-
-			LambdaExpression elementSelector = null;
-			LambdaExpression resultSelector  = null;
-
-			if (methodCall.Arguments.Count > 2)
+			if (methodCall.Arguments[0].NodeType == ExpressionType.Call)
 			{
-				elementSelector = (LambdaExpression)methodCall.Arguments[2].Unwrap();
+				var call = (MethodCallExpression)methodCall.Arguments[0];
 
-				if (elementSelector.Parameters.Count == 2)
+				if (call.Method.Name == "Select")
 				{
-					resultSelector  = elementSelector;
-					elementSelector = null;
-				}
-				else if (methodCall.Arguments.Count > 3)
-				{
-					resultSelector = (LambdaExpression)methodCall.Arguments[3].Unwrap();
-				}
-			}
+					var type = ((LambdaExpression)call.Arguments[1].Unwrap()).Body.Type;
 
-			var key = new KeyContext(keySelector, sequence);
-
-			var groupSql = key.ConvertToSql(null, 0, ConvertFlags.All);
-
-			if (groupSql.Any(s => !(s is SqlField || s is SqlQuery.Column)))
-			{
-				sequence = new SubQueryContext(sequence);
-				key    = new KeyContext(keySelector, sequence);
-				groupSql = key.ConvertToSql(null, 0, ConvertFlags.All);
-			}
-			else
-			{
-				// Can be used instead of GroupBy.Items.Clear().
-				//
-				//if (!wrap)
-				//	wrap = CurrentSql.GroupBy.Items.Count > 0;
-
-				sequence.SqlQuery.GroupBy.Items.Clear();
-
-				new QueryVisitor().Visit(sequence.SqlQuery.From, e =>
-				{
-					if (e.ElementType == QueryElementType.JoinedTable)
+					if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ExpressionParser.GroupSubQuery<,>))
 					{
-						var jt = (SqlQuery.JoinedTable)e;
-						if (jt.JoinType == SqlQuery.JoinType.Inner)
-							jt.IsWeak = false;
+						isSubQuery = true;
+						sequence   = new SubQueryContext(sequence);
 					}
-				});
+				}
 			}
+
+			var key      = new KeyContext(keySelector, sequence);
+			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
+
+			if (groupSql.Any(_ => !(_ is SqlField || _ is SqlQuery.Column)))
+			{
+				isSubQuery = true;
+				sequence   = new SubQueryContext(sequence);
+
+				key      = new KeyContext(keySelector, sequence);
+				groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
+			}
+
+			// Can be used instead of GroupBy.Items.Clear().
+			//
+			//if (!wrap)
+			//	wrap = CurrentSql.GroupBy.Items.Count > 0;
+
+			sequence.SqlQuery.GroupBy.Items.Clear();
 
 			foreach (var sql in groupSql)
 				sequence.SqlQuery.GroupBy.Expr(sql);
 
-			var element = elementSelector != null ? new SelectContext(elementSelector, sequence) : null;
-			var groupBy = new GroupByContext(methodCall, sequence, key, element);
+			new QueryVisitor().Visit(sequence.SqlQuery.From, e =>
+			{
+				if (e.ElementType == QueryElementType.JoinedTable)
+				{
+					var jt = (SqlQuery.JoinedTable)e;
+					if (jt.JoinType == SqlQuery.JoinType.Inner)
+						jt.IsWeak = false;
+				}
+			});
 
-			if (resultSelector != null)
-				throw new NotImplementedException();
-			//IParseContext result  = resultSelector  != null ? new SelectContext(resultSelector,  sequence) : null;)
+			var element = new SelectContext (elementSelector, sequence);
+			var groupBy = new GroupByContext(sequenceExpr, groupingType, sequence, key, element, isSubQuery);
 
 			return groupBy;
 		}
@@ -112,20 +109,22 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class GroupByContext : SequenceContextBase
 		{
-			public GroupByContext(MethodCallExpression methodCall, IParseContext sequence, KeyContext key, SelectContext element)
+			public GroupByContext(Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element, bool isSubQuery)
 				: base(sequence, null)
 			{
-				_methodCall = methodCall;
-				_key        = key;
-				_element    = element;
+				_sequenceExpr = sequenceExpr;
+				_key          = key;
+				_element      = element;
+				_isSubQuery   = isSubQuery;
 
-				_groupingType = methodCall.Type.GetGenericArguments()[0];
+				_groupingType = groupingType;
 			}
 
-			readonly MethodCallExpression _methodCall;
-			readonly KeyContext           _key;
-			readonly SelectContext        _element;
-			readonly Type                 _groupingType;
+			readonly Expression    _sequenceExpr;
+			readonly KeyContext    _key;
+			readonly SelectContext _element;
+			readonly bool          _isSubQuery;
+			readonly Type          _groupingType;
 
 			class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
 			{
@@ -193,19 +192,16 @@ namespace BLToolkit.Data.Linq.Parser
 					var expr = Expression.Call(
 						null,
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
-						context._methodCall.Arguments[0],
+						context._sequenceExpr,
 						Expression.Lambda<Func<TSource,bool>>(
 							Expression.Equal(context._key.Lambda.Body, keyParam),
 							new[] { context._key.Lambda.Parameters[0] }));
 
-					if (context._element != null)
-					{
-						expr = Expression.Call(
-							null,
-							ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Select(null, (Expression<Func<TSource,TElement>>)null)),
-							expr,
-							context._element.Lambda);
-					}
+					expr = Expression.Call(
+						null,
+						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Select(null, (Expression<Func<TSource,TElement>>)null)),
+						expr,
+						context._element.Lambda);
 
 					var lambda = Expression.Lambda<Func<IDataContext,TKey,IQueryable<TElement>>>(
 						Expression.Convert(expr, typeof(IQueryable<TElement>)),
@@ -258,7 +254,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var gtype  = typeof(GroupByHelper<,,>).MakeGenericType(
 					_key.Lambda.Body.Type,
-					_element != null ? _element.Lambda.Body.Type : _key.Lambda.Parameters[0].Type,
+					_element.Lambda.Body.Type,
 					_key.Lambda.Parameters[0].Type);
 
 				var helper = (IGroupByHelper)Activator.CreateInstance(gtype);
@@ -299,9 +295,9 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					if (args.Length > 0)
 					{
-						var ctx = _element ?? Sequence;
+						var ctx = _element;
 						var l   = (LambdaExpression)expr.Arguments[1].Unwrap();
-						var cnt = Parser.ParseWhere(ctx, l);
+						var cnt = Parser.ParseWhere(ctx, l, false);
 						var sql = cnt.SqlQuery.Clone((_ => !(_ is SqlParameter)));
 
 						sql.ParentSql = SqlQuery;
@@ -356,7 +352,7 @@ namespace BLToolkit.Data.Linq.Parser
 						if (ex is LambdaExpression)
 						{
 							var l   = (LambdaExpression)ex;
-							var ctx = new PathThroughContext(_element ?? Sequence, l);
+							var ctx = new PathThroughContext(_element, l);
 
 							args[i - 1] = Parser.ParseExpression(ctx, l.Body.Unwrap());
 						}
@@ -368,9 +364,6 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 				else
 				{
-					throw new NotImplementedException();
-
-					/*
 					if (expr.Arguments[0].NodeType == ExpressionType.Call)
 					{
 						var arg = expr.Arguments[0];
@@ -383,8 +376,7 @@ namespace BLToolkit.Data.Linq.Parser
 							{
 								if (seq.NodeType == ExpressionType.Parameter)
 								{
-									args = new ISqlExpression[1];
-									args[0] = ParseExpression(l.Body, groupBy);
+									args = new[] { Parser.ParseExpression(this, l.Body) };
 								}
 
 								return false;
@@ -392,12 +384,13 @@ namespace BLToolkit.Data.Linq.Parser
 							{}
 						}
 					}
-					else if (query.ElementSource is QuerySource.Scalar)
+					else //if (query.ElementSource is QuerySource.Scalar)
 					{
-						var scalar = (QuerySource.Scalar)query.ElementSource;
-						args = new[] { scalar.GetExpressions(this)[0] };
+						args = _element.ConvertToSql(null, 0, ConvertFlags.Field);
+
+						//var scalar = (QuerySource.Scalar)query.ElementSource;
+						//args = new[] { scalar.GetExpressions(this)[0] };
 					}
-					*/
 				}
 
 				return new SqlFunction(expr.Type, expr.Method.Name, args);
@@ -413,19 +406,50 @@ namespace BLToolkit.Data.Linq.Parser
 				return expr;
 			}
 
+			PropertyInfo _keyProperty;
+
 			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				if (level > 0)
 				{
 					switch (expression.NodeType)
 					{
-						case ExpressionType.Call:
+						case ExpressionType.Call         :
 							{
 								var e = (MethodCallExpression)expression;
 
 								if (e.Method.DeclaringType == typeof(Enumerable))
 								{
 									return new[] { ParseEnumerable(e) };
+								}
+
+								break;
+							}
+
+						case ExpressionType.MemberAccess :
+							{
+								if (level != 0)
+								{
+									var levelExpression = expression.GetLevelExpression(level);
+
+									if (levelExpression.NodeType == ExpressionType.MemberAccess)
+									{
+										var e = (MemberExpression)levelExpression;
+
+										if (e.Member.Name == "Key")
+										{
+											if (_keyProperty == null)
+												_keyProperty = _groupingType.GetProperty("Key");
+
+											if (e.Member == _keyProperty)
+											{
+												if (levelExpression == expression)
+													return _key.ConvertToSql(null, 0, flags);
+
+												return _key.ConvertToSql(expression, level + 1, flags);
+											}
+										}
+									}
 								}
 
 								break;
@@ -444,6 +468,16 @@ namespace BLToolkit.Data.Linq.Parser
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				return false;
+			}
+
+			public override int ConvertToParentIndex(int index, IParseContext context)
+			{
+				var expr = SqlQuery.Select.Columns[index].Expression;
+
+				if (!SqlQuery.GroupBy.Items.Exists(_ => _ == expr))
+					SqlQuery.GroupBy.Items.Add(expr);
+
+				return base.ConvertToParentIndex(index, context);
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)

@@ -187,8 +187,14 @@ namespace BLToolkit.Data
 
 			if (pq.Commands.Length == 1)
 			{
-				var ret = ExecuteScalar();
-				return idparam != null ? idparam.Value : ret;
+				if (idparam != null)
+				{
+					ExecuteNonQuery(); // так сделано потому, что фаерберд провайдер не возвращает никаких параметров через ExecuteReader
+					                   // остальные провайдеры должны поддерживать такой режим
+					return idparam.Value;
+				}
+
+				return ExecuteScalar();
 			}
 
 			ExecuteNonQuery();

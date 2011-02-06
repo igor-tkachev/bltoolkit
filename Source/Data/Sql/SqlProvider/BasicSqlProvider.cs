@@ -1865,13 +1865,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Helpers
 
-		protected SequenceNameAttribute GetSequenceNameAttribute(bool throwException)
+		protected SequenceNameAttribute GetSequenceNameAttribute(SqlTable table, bool throwException)
 		{
-			var table         = SqlQuery.Set.Into;
 			var identityField = table.GetIdentityField();
 
 			if (identityField == null)
-				throw new SqlException("Identity field must be defined for '{0}'.", table.Name);
+				if (throwException)
+					throw new SqlException("Identity field must be defined for '{0}'.", table.Name);
+				else
+					return null;
 
 			if (table.ObjectType == null)
 				if (throwException)
@@ -1907,7 +1909,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return defaultAttr;
 		}
 
-		static string SetAlias(string alias)
+		static string SetAlias(string alias, int maxLen)
 		{
 			if (alias == null)
 				return null;
@@ -1931,21 +1933,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (replace)
 				alias = new string(cs).Replace(" ", "");
 
-			return alias.Length == 0 ? null : alias;
+			return alias.Length == 0 || alias.Length > maxLen ? null : alias;
 		}
 
-		protected void CheckAliases(SqlQuery sqlQuery)
+		protected void CheckAliases(SqlQuery sqlQuery, int maxLen)
 		{
 			new QueryVisitor().Visit(sqlQuery, e =>
 			{
 				switch (e.ElementType)
 				{
-					case QueryElementType.SqlField     : ((SqlField)            e).Alias = SetAlias(((SqlField)            e).Alias); break;
-					case QueryElementType.SqlParameter : ((SqlParameter)        e).Name  = SetAlias(((SqlParameter)        e).Name);  break;
-					case QueryElementType.SqlTable     : ((SqlTable)            e).Alias = SetAlias(((SqlTable)            e).Alias); break;
-					case QueryElementType.Join         : ((Join)                e).Alias = SetAlias(((Join)                e).Alias); break;
-					case QueryElementType.Column       : ((SqlQuery.Column)     e).Alias = SetAlias(((SqlQuery.Column)     e).Alias); break;
-					case QueryElementType.TableSource  : ((SqlQuery.TableSource)e).Alias = SetAlias(((SqlQuery.TableSource)e).Alias); break;
+					case QueryElementType.SqlField     : ((SqlField)            e).Alias = SetAlias(((SqlField)            e).Alias, maxLen); break;
+					case QueryElementType.SqlParameter : ((SqlParameter)        e).Name  = SetAlias(((SqlParameter)        e).Name,  maxLen); break;
+					case QueryElementType.SqlTable     : ((SqlTable)            e).Alias = SetAlias(((SqlTable)            e).Alias, maxLen); break;
+					case QueryElementType.Join         : ((Join)                e).Alias = SetAlias(((Join)                e).Alias, maxLen); break;
+					case QueryElementType.Column       : ((SqlQuery.Column)     e).Alias = SetAlias(((SqlQuery.Column)     e).Alias, maxLen); break;
+					case QueryElementType.TableSource  : ((SqlQuery.TableSource)e).Alias = SetAlias(((SqlQuery.TableSource)e).Alias, maxLen); break;
 				}
 			});
 		}

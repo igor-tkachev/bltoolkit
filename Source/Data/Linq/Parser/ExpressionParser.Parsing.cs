@@ -17,14 +17,14 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		#region Parse Where
 
-		public IParseContext ParseWhere(IParseContext sequence, LambdaExpression condition)
+		public IParseContext ParseWhere(IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
-			bool makeHaving;
+			bool makeHaving = false;
 
 			var  ctx  = new PathThroughContext(sequence, condition);
 			var  expr = condition.Body.Unwrap();
 
-			if (CheckSubQueryForWhere(ctx, expr, out makeHaving))
+			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
 			{
 				sequence = new SubQueryContext(sequence);
 				ctx      = new PathThroughContext(sequence, condition);
@@ -375,7 +375,7 @@ namespace BLToolkit.Data.Linq.Parser
 							return Array<ISqlExpression>.Empty;
 
 						return expr.Arguments
-							.Select(arg =>  ParseExpression(context, arg))
+							.Select(arg => ParseExpression(context, arg))
 							.ToArray();
 					}
 
@@ -393,8 +393,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var ctx = GetContext(context, expression);
 
-			if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Query))
-				return ctx.ConvertToSql(expression, 0, queryConvertFlag);
+			if (ctx != null)
+			{
+				if (ctx.IsExpression(expression, 0, RequestFor.Query))
+					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
+			}
 
 			return new[] { ParseExpression(context, expression) };
 		}
@@ -513,8 +516,8 @@ namespace BLToolkit.Data.Linq.Parser
 						break;
 					}
 
-				case ExpressionType.Convert:
-				case ExpressionType.ConvertChecked:
+				case ExpressionType.Convert        :
+				case ExpressionType.ConvertChecked :
 					{
 						var e = (UnaryExpression)expression;
 						var o = ParseExpression(context, e.Operand);
@@ -530,7 +533,7 @@ namespace BLToolkit.Data.Linq.Parser
 							new SqlFunction(e.Type, "$Convert$", SqlDataType.GetDataType(e.Type), SqlDataType.GetDataType(e.Operand.Type), o));
 					}
 
-				case ExpressionType.Conditional:
+				case ExpressionType.Conditional   :
 					{
 						var e = (ConditionalExpression)expression;
 						var s = ParseExpression(context, e.Test);
@@ -1535,8 +1538,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		ISqlPredicate ParseNewObjectComparison(IParseContext context, ExpressionType nodeType, Expression left, Expression right)
 		{
-			left  = ConvertExpression(left);
-			right = ConvertExpression(right);
+			left  = FindExpression(left);
+			right = FindExpression(right);
 
 			var condition = new SqlQuery.SearchCondition();
 
@@ -1580,12 +1583,12 @@ namespace BLToolkit.Data.Linq.Parser
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
 			var par    = ReplaceParameter(_expressionAccessors, ex, _ => {});
-			var expr   = Expression.MakeMemberAccess(par, member);
+			var expr   = Expression.MakeMemberAccess(par.Type == typeof(object) ? Expression.Convert(par, member.DeclaringType) : par, member);
 			var mapper = Expression.Lambda<Func<Expression,object[],object>>(
 				Expression.Convert(expr, typeof(object)),
 				new [] { ExpressionParam, ParametersParam });
 
-			var p = new ParameterAccessor()
+			var p = new ParameterAccessor
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
@@ -1598,14 +1601,23 @@ namespace BLToolkit.Data.Linq.Parser
 			return p.SqlParameter;
 		}
 
-		static Expression ConvertExpression(Expression expr)
+		static Expression FindExpression(Expression expr)
 		{
 			var ret = expr.Find(pi =>
 			{
 				switch (pi.NodeType)
 				{
-					case ExpressionType.MemberAccess:
-					case ExpressionType.New:
+					case ExpressionType.Convert      :
+						{
+							var e = (UnaryExpression)expr;
+
+							return
+								e.Operand.NodeType == ExpressionType.ArrayIndex &&
+								((BinaryExpression)e.Operand).Left == ParametersParam;
+						}
+
+					case ExpressionType.MemberAccess :
+					case ExpressionType.New          :
 						return true;
 				}
 

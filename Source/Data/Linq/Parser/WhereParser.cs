@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			var sequence  = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
 			var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var result    = parser.ParseWhere(sequence, condition);
+			var result    = parser.ParseWhere(sequence, condition, true);
 
 			result.SetAlias(condition.Parameters[0].Name);
 

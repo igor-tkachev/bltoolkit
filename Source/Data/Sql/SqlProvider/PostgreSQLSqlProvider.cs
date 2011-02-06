@@ -17,7 +17,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			var attr = GetSequenceNameAttribute(false);
+			var attr = GetSequenceNameAttribute(SqlQuery.Set.Into, false);
 			var name =
 				attr != null ?
 					attr.SequenceName :
@@ -125,7 +125,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			CheckAliases(sqlQuery);
+			CheckAliases(sqlQuery, int.MaxValue);
 
 			sqlQuery = base.Finalize(sqlQuery);
 

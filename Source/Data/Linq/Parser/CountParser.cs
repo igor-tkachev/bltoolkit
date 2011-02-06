@@ -43,7 +43,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-				sequence = parser.ParseWhere(sequence, condition);
+				sequence = parser.ParseWhere(sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 

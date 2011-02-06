@@ -39,12 +39,100 @@ namespace BLToolkit.Data.Linq.Parser
 			//if (body == selector.Parameters[0])
 			//	return sequence;
 
-			if (sequence.SqlQuery.Select.IsDistinct)
-				sequence = new SubQueryContext(sequence);
+			switch (body.NodeType)
+			{
+				case ExpressionType.Parameter  :
+					// .Select(p => p)
+					//
+					//if (body == selector.Parameters[0])
+					//	return sequence;
+
+					//foreach (var parent in parser.ParentContext)
+					//	if (parent.IsExpression(body, 0, RequestFor.Root))
+					//		return parent;
+
+					break;
+					//throw new InvalidOperationException();
+
+				case ExpressionType.MemberAccess:
+					{
+						sequence = CheckSubQueryForSelect(sequence);
+
+						/*
+						var src = GetSource(l, l.Body, sources);
+
+						if (src != null)
+						{
+							src = _convertSource(src, l);
+
+							if (CurrentSql.From.Tables.Count == 0)
+							{
+								var table = src as QuerySource.Table;
+
+								if (table != null)
+								{
+									while (table.ParentAssociation != null)
+										table = table.ParentAssociation;
+
+									CurrentSql = table.SqlQuery;
+								}
+							}
+
+							if (src.Lambda == null && src is QuerySource.SubQuerySourceColumn)
+								src = new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
+
+							return src;
+						}
+						*/
+					}
+
+					goto default;
+
+				case ExpressionType.New        :
+					{
+						sequence = CheckSubQueryForSelect(sequence);
+
+						/*
+						if (_sequenceNumber > 1)
+						{
+							var pie = ConvertNew((NewExpression)l.Body);
+							if (pie != null)
+								return ParseSelect(new LambdaInfo(pie, l.Parameters), sources)[0];
+						}
+
+						return new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
+						*/
+
+						break;
+					}
+
+				case ExpressionType.MemberInit :
+					{
+						sequence = CheckSubQueryForSelect(sequence);
+						//return new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
+						break;
+					}
+
+				default                        :
+					{
+						sequence = CheckSubQueryForSelect(sequence);
+						//var scalar = new QuerySource.Scalar(CurrentSql, l, Concat(sources, ParentQueries));
+						//return scalar.Fields[0] is QuerySource ? (QuerySource)scalar.Fields[0] : scalar;
+						break;
+					}
+			}
 
 			return selector.Parameters.Count == 1 ? new SelectContext (selector, sequence) : new SelectContext2(selector, sequence);
 		}
-		
+
+		static IParseContext CheckSubQueryForSelect(IParseContext context)
+		{
+			if (/*_parsingMethod[0] != ParsingMethod.OrderBy &&*/ context.SqlQuery.Select.IsDistinct)
+				return new SubQueryContext(context);
+
+			return context;
+		}
+
 		#endregion
 
 		#region SelectContext2
