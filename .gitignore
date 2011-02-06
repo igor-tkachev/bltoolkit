@@ -355,3 +355,6 @@
 # /UnitTests/Linq/Model/
 
 # /UnitTests/Linq/Properties/
+
+Demo/WebServices/Client/Client.csproj.ReSharper
+BLToolkit.2010.sdf
