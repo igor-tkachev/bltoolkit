@@ -10,6 +10,7 @@ using System.ServiceModel.Description;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
+using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
 using BLToolkit.ServiceModel;
@@ -163,14 +164,14 @@ namespace Data.Linq
 			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
 			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",      "BLToolkit.Data.DataProvider.SqlCeDataProvider"),
 			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",        "BLToolkit.Data.DataProvider.DB2DataProvider"),
-			///////new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
+			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
 			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",   "BLToolkit.Data.DataProvider.FdpDataProvider"),
-			///////new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
+			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
 			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL", "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
 			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",      "BLToolkit.Data.DataProvider.MySqlDataProvider"),
-			///////new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
-			///////new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
-			///////new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
+			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
+			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
+			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
 		};
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
@@ -191,11 +192,11 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
-				///////var dx = new TestServiceModelDataContext(ip);
+				var dx = new TestServiceModelDataContext(ip);
 
-				///////Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
-				///////yield return dx;
+				yield return dx;
 			}
 		}
 
