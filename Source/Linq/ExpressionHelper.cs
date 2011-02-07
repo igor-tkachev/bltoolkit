@@ -1632,7 +1632,7 @@ namespace BLToolkit.Linq
 						if (e.Object != null)
 							return GetRootObject(e.Object);
 
-						if (e.Arguments != null && e.Arguments.Count > 0)
+						if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
 							return GetRootObject(e.Arguments[0]);
 
 						break;

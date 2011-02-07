@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace UnitTests.All
 {
-	[TestFixture]
+	//[TestFixture]
 	public class GetValueTest
 	{
 		[ExpectedException(typeof(ApplicationException))]

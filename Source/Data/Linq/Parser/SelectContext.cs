@@ -299,7 +299,7 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.All   :
 						{
 							if (expression == null)
-								return ConvertToSql(Body, 0, flags);
+								return Parser.ParseExpressions(this, Body, flags);
 
 							if (Body.NodeType == ExpressionType.Parameter)
 							{
@@ -657,8 +657,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								switch (Body.NodeType)
 								{
-									case ExpressionType.MemberAccess :
-									case ExpressionType.Call         : return GetSequence(expression, level).IsExpression(null, 0, requestFlag);
+									case ExpressionType.MemberAccess : return GetSequence(expression, level).IsExpression(null, 0, requestFlag);
 									default                          : return requestFlag == RequestFor.Expression;
 								}
 							}
