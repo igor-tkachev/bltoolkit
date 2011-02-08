@@ -117,8 +117,9 @@ namespace BLToolkit.Data.Linq.Parser
 				_key          = key;
 				_element      = element;
 				_isSubQuery   = isSubQuery;
-
 				_groupingType = groupingType;
+
+				key.Parent = this;
 			}
 
 			readonly Expression    _sequenceExpr;
