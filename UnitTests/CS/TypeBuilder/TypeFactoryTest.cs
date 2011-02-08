@@ -34,26 +34,25 @@ namespace TypeBuilder
 		[Test]
 		public void AssemblyResolver()
 		{
-			AppDomainSetup setup = new AppDomainSetup();
-			string         basePath = GetType().Assembly.GetName(false).CodeBase;
+			var setup = new AppDomainSetup();
+			var basePath = GetType().Assembly.GetName(false).CodeBase;
 
 			basePath = basePath.Replace("file:///", "");
 			basePath = Path.GetDirectoryName(basePath);
 
 			setup.ApplicationBase = "file:///" + basePath;
 
-			AppDomain appDomain = AppDomain.CreateDomain("NewDomain", null, setup);
+			var appDomain = AppDomain.CreateDomain("NewDomain", null, setup);
 
 			basePath = GetType().Assembly.GetName(false).CodeBase;
 			basePath = Path.GetFileName(basePath).ToLower().Replace(".dll", "");
 
-			TypeFactoryTest test = (TypeFactoryTest)appDomain.CreateInstanceAndUnwrap(basePath, GetType().FullName);
-
-			TestObject o = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
+			var test = (TypeFactoryTest)appDomain.CreateInstanceAndUnwrap(basePath, GetType().FullName);
+			var o    = (TestObject)TypeAccessor.CreateInstance(typeof(TestObject));
 
 			o.Number = 23;
 
-			int n = test.GetNumber(o);
+			var n = test.GetNumber(o);
 
 			AppDomain.Unload(appDomain);
 
