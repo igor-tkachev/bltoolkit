@@ -43,10 +43,10 @@ namespace BLToolkit.Data.Linq.Parser
 								if (ctx != null)
 								{
 									if (ctx != this)
-										return ctx.ConvertToSql(expression, 0, flags);
+										return ctx.ConvertToSql(expression, flags);
 
 									return root == expression ?
-										Sequence.ConvertToSql(null, 0, flags) :
+										Sequence.ConvertToSql(flags) :
 										Sequence.ConvertToSql(expression, level + 1, flags);
 								}
 							}
@@ -75,7 +75,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case RequestFor.Root        : return expression == Lambda.Parameters[0];
 
 				case RequestFor.Association :
-				case RequestFor.Query       :
+				case RequestFor.Object       :
 				case RequestFor.Field       :
 				case RequestFor.Expression  :
 					{

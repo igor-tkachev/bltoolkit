@@ -256,7 +256,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				// Get indexes for all fields.
 				//
-				var index = ConvertToIndex(null, 0, ConvertFlags.All);
+				var index = this.ConvertToIndex(ConvertFlags.All);
 
 				// Convert to parent indexes.
 				//
@@ -269,7 +269,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				var expr = this.BuildExpression();
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
@@ -388,7 +388,7 @@ namespace BLToolkit.Data.Linq.Parser
 							return table != null && table.Field != null;
 						}
 
-					case RequestFor.Query      :
+					case RequestFor.Object      :
 						{
 							var table = FindTable(expression, level);
 							return

@@ -57,7 +57,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
-			return ConvertToSql(expression, level, flags).Select(_ => GetIndex(_)).ToArray();
+			return ConvertToSql(expression, level, flags).Select(GetIndex).ToArray();
 		}
 
 		public bool IsExpression(Expression expression, int level, RequestFor testFlag)

@@ -147,7 +147,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				return ConvertToSql(expression, level, flags).Select(_ => GetIndex(_)).ToArray();
+				return ConvertToSql(expression, level, flags).Select(GetIndex).ToArray();
 			}
 
 			public override int ConvertToParentIndex(int index, IParseContext context)

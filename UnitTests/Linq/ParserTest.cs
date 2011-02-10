@@ -31,7 +31,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -48,7 +48,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -65,7 +65,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -87,7 +87,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -105,7 +105,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -123,7 +123,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -142,7 +142,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 				//Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -160,7 +160,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -178,7 +178,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -197,7 +197,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
@@ -219,7 +219,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -236,7 +236,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -253,7 +253,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -271,7 +271,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -289,7 +289,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -306,7 +306,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -323,7 +323,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -341,7 +341,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -359,7 +359,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -377,7 +377,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -394,7 +394,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -611,7 +611,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -628,7 +628,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -647,7 +647,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse (ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
@@ -665,7 +665,7 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Query));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}

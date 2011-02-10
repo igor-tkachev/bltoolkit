@@ -31,7 +31,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var ctx = GetContext(context, pi);
 
 							if (ctx != null)
-								return ctx.BuildExpression(pi, 0);
+								return ctx.BuildExpression(pi);
 
 							var ma = (MemberExpression)pi;
 							var ex = ma.Expression;
@@ -98,7 +98,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var ctx = GetContext(context, pi);
 
 							if (ctx != null)
-								return ctx.BuildExpression(pi, 0);
+								return ctx.BuildExpression(pi);
 
 							throw new NotImplementedException();
 
@@ -268,7 +268,7 @@ namespace BLToolkit.Data.Linq.Parser
 							{
 								var ctx = GetSubQuery(context, ma.Expression);
 								var ex  = expression.Convert(e => e == ma.Expression ? Expression.Constant(null, ma.Expression.Type) : e);
-								var sql = ctx.ConvertToSql(ex, 0, ConvertFlags.Field);
+								var sql = ctx.ConvertToSql(ex, ConvertFlags.Field);
 
 								if (sql.Length != 1)
 									throw new NotImplementedException();
@@ -286,7 +286,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var sequence = GetSubQuery(context, expression);
 
-			return sequence.BuildExpression(null, 0);
+			return sequence.BuildExpression();
 
 
 			throw new NotImplementedException();

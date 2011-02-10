@@ -12,9 +12,9 @@ namespace BLToolkit.Data.Linq.Parser
 		Field,
 
 		/// <summary>
-		/// Checks the sequence if the expression is a table, subquery, etc.
+		/// Checks the sequence if the expression is a table, association, new {}, or new MyClass {}.
 		/// </summary>
-		Query,
+		Object,
 
 		/// <summary>
 		/// Checks the sequence if the expression is a not a field, but scalar value.
