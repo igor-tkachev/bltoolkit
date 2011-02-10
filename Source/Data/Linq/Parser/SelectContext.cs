@@ -292,15 +292,15 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			if (IsScalar)
 			{
+				if (expression == null)
+					return Parser.ParseExpressions(this, Body, flags);
+
 				switch (flags)
 				{
 					case ConvertFlags.Field :
 					case ConvertFlags.Key   :
 					case ConvertFlags.All   :
 						{
-							if (expression == null)
-								return Parser.ParseExpressions(this, Body, flags);
-
 							if (Body.NodeType == ExpressionType.Parameter)
 							{
 								if (level == 0)
@@ -389,7 +389,37 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.Key   :
 					case ConvertFlags.Field :
 						{
-							if (level != 0)
+							if (level == 0)
+							{
+								if (expression == null)
+								{
+									if (flags != ConvertFlags.Field)
+									{
+										var q =
+											from m in Members.Values.Distinct()
+											select ConvertMember(m, flags) into mm
+											from m in mm
+											select m;
+
+										return q.ToArray();
+									}
+								}
+								else
+								{
+									if (expression.NodeType == ExpressionType.Parameter)
+									{
+										var levelExpression = expression.GetLevelExpression(level);
+
+										if (levelExpression == expression)
+											return GetSequence(expression, level).ConvertToSql(flags);
+									}
+									else
+									{
+										return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
+									}
+								}
+							}
+							else
 							{
 								var levelExpression = expression.GetLevelExpression(level);
 
@@ -426,36 +456,6 @@ namespace BLToolkit.Data.Linq.Parser
 								}
 							}
 
-							if (level == 0)
-							{
-								if (expression == null)
-								{
-									if (flags != ConvertFlags.Field)
-									{
-										var q =
-											from m in Members.Values.Distinct()
-											select ConvertMember(m, flags) into mm
-											from m in mm
-											select m;
-
-										return q.ToArray();
-									}
-								}
-								else
-								{
-									if (expression.NodeType == ExpressionType.Parameter)
-									{
-										var levelExpression = expression.GetLevelExpression(level);
-
-										if (levelExpression == expression)
-											return GetSequence(expression, level).ConvertToSql(flags);
-									}
-									else
-									{
-										return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
-									}
-								}
-							}
 
 							break;
 						}
@@ -502,17 +502,23 @@ namespace BLToolkit.Data.Linq.Parser
 
 		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]>();
 
-		int[] _scalarIndex;
-
 		public virtual int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			if (IsScalar)
 			{
 				if (expression == null)
 				{
-					if (_scalarIndex == null)
-						_scalarIndex = this.ConvertToSql(expression, flags).Select(GetIndex).ToArray();
-					return _scalarIndex;
+					var member = Tuple.Create((MemberInfo)null, flags);
+
+					int[] idx;
+
+					if (!_memberIndex.TryGetValue(member, out idx))
+					{
+						idx = this.ConvertToSql(expression, flags).Select(GetIndex).ToArray();
+						_memberIndex.Add(member, idx);
+					}
+
+					return idx;
 				}
 
 				switch (flags)

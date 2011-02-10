@@ -20,7 +20,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public IParseContext ParseWhere(IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
-			bool makeHaving = false;
+			var makeHaving = false;
 
 			var  ctx  = new PathThroughContext(sequence, condition);
 			var  expr = condition.Body.Unwrap();
@@ -70,7 +70,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								if (ctx != null)
 								{
-									if (ctx.IsExpression(expr, 0, RequestFor.Expression))
+									if (ctx.IsExpression(expr, RequestFor.Expression))
 										makeSubQuery = true;
 									stopWalking = true;
 								}
@@ -99,7 +99,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (ctx != null)
 							{
-								if (ctx.IsExpression(expr, 0, RequestFor.Expression))
+								if (ctx.IsExpression(expr, RequestFor.Expression))
 									makeSubQuery = true;
 								stopWalking = true;
 							}
@@ -396,7 +396,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (ctx != null)
 			{
-				if (ctx.IsExpression(expression, 0, RequestFor.Object))
+				if (ctx.IsExpression(expression, RequestFor.Object))
 					return ctx.ConvertToSql(expression, queryConvertFlag);
 			}
 
