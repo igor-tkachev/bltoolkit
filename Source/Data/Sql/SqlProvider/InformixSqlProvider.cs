@@ -160,10 +160,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		public virtual object ConvertBooleanValue(bool value)
+		{
+			return value ? 't' : 'f';
+		}
+
 		protected override void BuildValue(StringBuilder sb, object value)
 		{
 			if (value is bool || value is bool?)
-				sb.Append((bool)value ? "'t'" : "'f'");
+				sb.Append("'").Append(ConvertBooleanValue((bool)value)).Append("'");
 			else
 				base.BuildValue(sb, value);
 		}
