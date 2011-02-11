@@ -203,7 +203,9 @@
     <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="DataAccess\PersonDataSet2.xsc">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </None>
