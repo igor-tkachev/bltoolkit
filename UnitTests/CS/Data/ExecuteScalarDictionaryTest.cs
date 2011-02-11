@@ -25,7 +25,7 @@ namespace Data
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
-			SqlQuery da = new SqlQuery();
+			var da = new SqlQuery();
 
 			foreach (Person p in da.SelectAll(typeof(Person)))
 				if (p.ID > 10 || p.FirstName == "Crazy")
@@ -35,9 +35,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = db
+				var table = db
 #if SQLITE || SQLCE
 					.SetCommand("SELECT * FROM Person")
 #else
@@ -54,9 +54,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryTest2()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 					db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(table,
@@ -70,9 +70,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryTest3()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = db
+				var table = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(0, typeof(int), 1, typeof(string));
 
@@ -84,9 +84,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryTest4()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 					db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(table,0, typeof(int), 1, typeof(string));
@@ -99,9 +99,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = db
+				var table = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(new MapIndex("PersonID"),
 						"FirstName", typeof(string));
@@ -114,9 +114,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest2()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 				db
 					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
@@ -130,9 +130,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest3()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = db
+				var table = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(new MapIndex(0),
 						"FirstName", typeof(string));
@@ -145,9 +145,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest4()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 				db
 					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
@@ -161,9 +161,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest5()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 				db
 					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
@@ -177,9 +177,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest6()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 				db
 					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
@@ -193,9 +193,9 @@ namespace Data
 		[Test]
 		public void ScalarDictionaryMapIndexTest7()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Hashtable table = new Hashtable();
+				var table = new Hashtable();
 				db
 					.SetCommand("SELECT * FROM Person")
 				.ExecuteScalarDictionary(table,
@@ -209,9 +209,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<int, string> dic = db
+				var dic = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<int, string>("PersonID", "FirstName");
 
@@ -223,9 +223,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryTest2()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<int, string> dic = new Dictionary<int, string>();
+				var dic = new Dictionary<int, string>();
 				db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, "PersonID", "FirstName");
@@ -238,9 +238,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryTest3()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<int, string> dic = db
+				var dic = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<int, string>(0, 1);
 
@@ -252,9 +252,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryTest4()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<int, string> dic = new Dictionary<int, string>();
+				var dic = new Dictionary<int, string>();
 					db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, 0, 1);
@@ -267,9 +267,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = db
+				var dic = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<string>(new MapIndex("LastName"), "FirstName");
 
@@ -281,9 +281,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest2()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
+				var dic = new Dictionary<CompoundValue, string>();
 					db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, new MapIndex("LastName"), 1);
@@ -296,9 +296,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest3()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = db
+				var dic = db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary<string>(new MapIndex(2), "FirstName");
 
@@ -310,9 +310,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest4()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
+				var dic = new Dictionary<CompoundValue, string>();
 				db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, new MapIndex(0), 2);
@@ -325,9 +325,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest5()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
+				var dic = new Dictionary<CompoundValue, string>();
 				db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, new MapIndex(0, 1, 2), 2);
@@ -340,9 +340,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest6()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
+				var dic = new Dictionary<CompoundValue, string>();
 				db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, new MapIndex("PersonID", "FirstName", "LastName"), 2);
@@ -355,9 +355,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarDictionaryMapIndexTest7()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				Dictionary<CompoundValue, string> dic = new Dictionary<CompoundValue, string>();
+				var dic = new Dictionary<CompoundValue, string>();
 				db
 					.SetCommand("SELECT * FROM Person")
 					.ExecuteScalarDictionary(dic, new MapIndex("PersonID", 2, 3), "LastName");

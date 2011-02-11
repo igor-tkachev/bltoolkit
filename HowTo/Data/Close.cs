@@ -10,7 +10,7 @@ namespace HowTo.Data
 		[Test]
 		public void Test1()
 		{
-			DbManager db = new DbManager();
+			var db = new DbManager();
 
 			/*[a]*/try/*[/a]*/
 			{
@@ -28,7 +28,7 @@ namespace HowTo.Data
 		[Test]
 		public void Test2()
 		{
-			/*[a]*/using (DbManager db = new DbManager())/*[/a]*/
+			/*[a]*/using (var db = new DbManager())/*[/a]*/
 			{
 				// ...
 			}

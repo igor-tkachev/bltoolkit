@@ -11,7 +11,7 @@ public class TestFixtureBase
 {
 	public static DataTable GetDataTable()
 	{
-		DataTable table = new DataTable();
+		var table = new DataTable();
 
 		table.Columns.Add("ID",   typeof(int));
 		table.Columns.Add("Name", typeof(string));
@@ -27,21 +27,21 @@ public class TestFixtureBase
 
 	public static void CompareLists(object obj1, object obj2)
 	{
-		IList list1 = obj1 is IListSource? ((IListSource)obj1).GetList(): (IList)obj1;
-		IList list2 = obj2 is IListSource? ((IListSource)obj2).GetList(): (IList)obj2;
+		var list1 = obj1 is IListSource? ((IListSource)obj1).GetList(): (IList)obj1;
+		var list2 = obj2 is IListSource? ((IListSource)obj2).GetList(): (IList)obj2;
 
 		Assert.AreEqual(list1.Count, list2.Count);
 
-		for (int i = 0; i < list1.Count; i++)
+		for (var i = 0; i < list1.Count; i++)
 		{
-			IMapDataSource o1 = Map.DefaultSchema.GetDataSource(list1[i]);
-			IMapDataSource o2 = Map.DefaultSchema.GetDataSource(list2[i]);
+			var o1 = Map.DefaultSchema.GetDataSource(list1[i]);
+			var o2 = Map.DefaultSchema.GetDataSource(list2[i]);
 
-			for (int j = 0; j < o1.Count; j++)
+			for (var j = 0; j < o1.Count; j++)
 			{
-				string name = o1.GetName(j);
+				var name = o1.GetName(j);
 
-				for (int k = 0; k < o1.Count; k++)
+				for (var k = 0; k < o1.Count; k++)
 				{
 					if (name == o2.GetName(k))
 					{
