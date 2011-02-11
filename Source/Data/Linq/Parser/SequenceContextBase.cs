@@ -28,7 +28,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
-			var expr = this.BuildExpression();
+			var expr = BuildExpression(null, 0);
 
 			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 				expr, new []

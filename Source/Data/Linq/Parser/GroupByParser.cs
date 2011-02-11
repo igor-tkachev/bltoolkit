@@ -212,7 +212,7 @@ namespace BLToolkit.Data.Linq.Parser
 						keyParam);
 
 					var itemReader = CompiledQuery.Compile(lambda);
-					var keyExpr    = context._key.BuildExpression();
+					var keyExpr    = context._key.BuildExpression(null, 0);
 					var keyReader  = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],TKey>>(
 						keyExpr,
 						new []
@@ -281,7 +281,7 @@ namespace BLToolkit.Data.Linq.Parser
 						if (ma.Member.Name == "Key" && ma.Member.DeclaringType == _groupingType)
 						{
 							return levelExpression == expression ?
-								_key.BuildExpression() :
+								_key.BuildExpression(null,       0) :
 								_key.BuildExpression(expression, level + 1);
 						}
 					}
@@ -389,7 +389,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 					else //if (query.ElementSource is QuerySource.Scalar)
 					{
-						args = _element.ConvertToSql(ConvertFlags.Field);
+						args = _element.ConvertToSql(null, 0, ConvertFlags.Field);
 
 						//var scalar = (QuerySource.Scalar)query.ElementSource;
 						//args = new[] { scalar.GetExpressions(this)[0] };
@@ -437,7 +437,7 @@ namespace BLToolkit.Data.Linq.Parser
 											if (e.Member == _keyProperty)
 											{
 												if (levelExpression == expression)
-													return _key.ConvertToSql(flags);
+													return _key.ConvertToSql(null, 0, flags);
 
 												return _key.ConvertToSql(expression, level + 1, flags);
 											}

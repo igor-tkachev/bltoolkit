@@ -43,10 +43,10 @@ namespace BLToolkit.Data.Linq.Parser
 								if (ctx != null)
 								{
 									if (ctx != this)
-										return ctx.ConvertToSql(expression, flags);
+										return ctx.ConvertToSql(expression, 0, flags);
 
 									return root == expression ?
-										Sequence.ConvertToSql(flags) :
+										Sequence.ConvertToSql(null,       0,         flags) :
 										Sequence.ConvertToSql(expression, level + 1, flags);
 								}
 							}

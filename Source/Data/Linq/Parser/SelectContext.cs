@@ -115,7 +115,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
-			var expr = this.BuildExpression();
+			var expr = this.BuildExpression(null, 0);
 
 			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 				expr, new []
@@ -150,7 +150,7 @@ namespace BLToolkit.Data.Linq.Parser
 						var sequence = GetSequence(Body, 0);
 
 						return expression == Body ?
-							sequence.BuildExpression() :
+							sequence.BuildExpression(null,       0) :
 							sequence.BuildExpression(expression, 1);
 					}
 
@@ -158,7 +158,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-					return this.BuildExpression(parseExpression);
+					return this.BuildExpression(parseExpression, 0);
 				}
 
 				if (level == 0)
@@ -175,7 +175,7 @@ namespace BLToolkit.Data.Linq.Parser
 						return Parser.BuildSql(expression.Type, idx);
 					}
 
-					return GetSequence(expression, level).BuildExpression();
+					return GetSequence(expression, level).BuildExpression(null, 0);
 				}
 
 				var root = Body.GetRootObject();
@@ -185,7 +185,7 @@ namespace BLToolkit.Data.Linq.Parser
 					levelExpression = expression.GetLevelExpression(level - 1);
 					var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-					return this.BuildExpression(parseExpression);
+					return this.BuildExpression(parseExpression, 0);
 				}
 
 				//if (levelExpression != expression)
@@ -198,7 +198,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				if (level == 0)
 					return levelExpression == expression ?
-						sequence.BuildExpression() :
+						sequence.BuildExpression(null,       0) :
 						sequence.BuildExpression(expression, level + 1);
 
 				switch (levelExpression.NodeType)
@@ -222,7 +222,7 @@ namespace BLToolkit.Data.Linq.Parser
 													if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
 													    !sequence.IsExpression(e, 0, RequestFor.Field))
 													{
-														var idx = this.ConvertToIndex(e, ConvertFlags.Field).Single();
+														var idx = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
 
 														idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
 
@@ -308,14 +308,14 @@ namespace BLToolkit.Data.Linq.Parser
 									var sequence = GetSequence(Body, 0);
 
 									return expression == Body ?
-										sequence.ConvertToSql(flags) :
+										sequence.ConvertToSql(null,       0, flags) :
 										sequence.ConvertToSql(expression, 1, flags);
 								}
 
 								var levelExpression = expression.GetLevelExpression(level - 1);
 								var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-								return this.ConvertToSql(parseExpression, flags);
+								return this.ConvertToSql(parseExpression, 0, flags);
 							}
 
 							if (level == 0)
@@ -350,7 +350,7 @@ namespace BLToolkit.Data.Linq.Parser
 									var levelExpression = expression.GetLevelExpression(level - 1);
 									var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-									return this.ConvertToSql(parseExpression, flags);
+									return this.ConvertToSql(parseExpression, 0, flags);
 								}
 							}
 
@@ -411,7 +411,7 @@ namespace BLToolkit.Data.Linq.Parser
 										var levelExpression = expression.GetLevelExpression(level);
 
 										if (levelExpression == expression)
-											return GetSequence(expression, level).ConvertToSql(flags);
+											return GetSequence(expression, level).ConvertToSql(null, 0, flags);
 									}
 									else
 									{
@@ -473,7 +473,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Parameter :
 					if (IsExpression(expression, 0, RequestFor.Field))
 						flags = ConvertFlags.Field;
-					return this.ConvertToSql(expression, flags);
+					return ConvertToSql(expression, 0, flags);
 			}
 
 			return ParseExpressions(expression, flags);
@@ -482,7 +482,7 @@ namespace BLToolkit.Data.Linq.Parser
 		ISqlExpression[] ParseExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Parser.ParseExpressions(this, expression, flags)
-				.Select(_ => CheckExpression(_))
+				.Select(CheckExpression)
 				.ToArray();
 		}
 
@@ -514,7 +514,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (!_memberIndex.TryGetValue(member, out idx))
 					{
-						idx = this.ConvertToSql(expression, flags).Select(GetIndex).ToArray();
+						idx = ConvertToSql(expression, 0, flags).Select(GetIndex).ToArray();
 						_memberIndex.Add(member, idx);
 					}
 

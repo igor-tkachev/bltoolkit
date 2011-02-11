@@ -509,16 +509,9 @@ namespace BLToolkit.Data.Linq.Parser
 			helper.Set(needSubQuery, sourceExpression, keySelector, elementSelector, resultSelector);
 
 			if (!needSubQuery)
-			{
-				if (resultSelector == null)
-					return helper.AddElementSelector();
-				return helper.AddResult();
-			}
+				return resultSelector == null ? helper.AddElementSelector() : helper.AddResult();
 
-			if (resultSelector == null)
-				return helper.WrapInSubQuery();
-
-			return helper.WrapInSubQueryResult();
+			return resultSelector == null ? helper.WrapInSubQuery() : helper.WrapInSubQueryResult();
 		}
 
 		bool IsExpression(Expression ex)

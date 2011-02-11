@@ -63,7 +63,7 @@ namespace BLToolkit.Data.Linq.Parser
 					new SqlFunction(
 						methodCall.Type,
 						methodCall.Method.Name,
-						sequence.ConvertToSql(ConvertFlags.Field)));
+						sequence.ConvertToSql(null, 0, ConvertFlags.Field)));
 
 				return context;
 			}

@@ -70,7 +70,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								if (ctx != null)
 								{
-									if (ctx.IsExpression(expr, RequestFor.Expression))
+									if (ctx.IsExpression(expr, 0, RequestFor.Expression))
 										makeSubQuery = true;
 									stopWalking = true;
 								}
@@ -99,7 +99,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (ctx != null)
 							{
-								if (ctx.IsExpression(expr, RequestFor.Expression))
+								if (ctx.IsExpression(expr, 0, RequestFor.Expression))
 									makeSubQuery = true;
 								stopWalking = true;
 							}
@@ -200,7 +200,7 @@ namespace BLToolkit.Data.Linq.Parser
 								var ctx = GetSubQuery(context, ma.Expression);
 
 								var ex  = expression.Convert(e => e == ma.Expression ? Expression.Constant(null, ma.Expression.Type) : e);
-								var sql = ctx.ConvertToSql(ex, ConvertFlags.Field);
+								var sql = ctx.ConvertToSql(ex, 0, ConvertFlags.Field);
 
 								if (sql.Length != 1)
 									throw new NotImplementedException();
@@ -396,8 +396,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (ctx != null)
 			{
-				if (ctx.IsExpression(expression, RequestFor.Object))
-					return ctx.ConvertToSql(expression, queryConvertFlag);
+				if (ctx.IsExpression(expression, 0, RequestFor.Object))
+					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 			}
 
 			return new[] { ParseExpression(context, expression) };
@@ -590,7 +590,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 						if (ctx != null)
 						{
-							var sql = ctx.ConvertToSql(expression, ConvertFlags.Field);
+							var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
 
 							switch (sql.Length)
 							{
@@ -609,7 +609,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 						if (ctx != null)
 						{
-							var sql = ctx.ConvertToSql(expression, ConvertFlags.Field);
+							var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
 
 							switch (sql.Length)
 							{
@@ -646,7 +646,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (ctx != null)
 							{
-								var sql = ctx.ConvertToSql(expression, ConvertFlags.Field);
+								var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
 
 								if (sql.Length != 1)
 									throw new InvalidOperationException();
@@ -1411,7 +1411,7 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			var isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
-			var lcols  = qsl.ConvertToSql(left, ConvertFlags.Key);
+			var lcols  = qsl.ConvertToSql(left, 0, ConvertFlags.Key);
 
 			if (lcols.Length == 0)
 				return null;
@@ -1436,7 +1436,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				if (sr)
 				{
-					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, mi), ConvertFlags.Field).Single();
+					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, mi), 0, ConvertFlags.Field).Single();
 
 					/*
 					var column = rcol as QueryField.Column;
