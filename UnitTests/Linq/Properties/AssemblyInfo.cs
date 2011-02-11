@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("UnitTests.Linq")]
 [assembly: AssemblyProduct("UnitTests.Linq")]
-[assembly: AssemblyCopyright("\xA9 2002-2010 www.bltoolkit.net")]
+[assembly: AssemblyCopyright("\xA9 2002-2011 www.bltoolkit.net")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
