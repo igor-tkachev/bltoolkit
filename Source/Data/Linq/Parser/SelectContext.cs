@@ -115,7 +115,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
-			var expr = this.BuildExpression(null, 0);
+			var expr = BuildExpression(null, 0);
 
 			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 				expr, new []
@@ -158,7 +158,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-					return this.BuildExpression(parseExpression, 0);
+					return BuildExpression(parseExpression, 0);
 				}
 
 				if (level == 0)
@@ -185,7 +185,7 @@ namespace BLToolkit.Data.Linq.Parser
 					levelExpression = expression.GetLevelExpression(level - 1);
 					var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-					return this.BuildExpression(parseExpression, 0);
+					return BuildExpression(parseExpression, 0);
 				}
 
 				//if (levelExpression != expression)
@@ -260,9 +260,8 @@ namespace BLToolkit.Data.Linq.Parser
 								case ExpressionType.New        :
 								case ExpressionType.MemberInit :
 									{
-										var memberMemberExpresion = expression.GetLevelExpression(level + 1);
-
-										break;
+										var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+										return BuildExpression(mmExpresion, 0);
 									}
 							}
 
@@ -315,7 +314,7 @@ namespace BLToolkit.Data.Linq.Parser
 								var levelExpression = expression.GetLevelExpression(level - 1);
 								var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-								return this.ConvertToSql(parseExpression, 0, flags);
+								return ConvertToSql(parseExpression, 0, flags);
 							}
 
 							if (level == 0)
@@ -350,35 +349,12 @@ namespace BLToolkit.Data.Linq.Parser
 									var levelExpression = expression.GetLevelExpression(level - 1);
 									var parseExpression = GetParseExpression(expression, levelExpression, Body);
 
-									return this.ConvertToSql(parseExpression, 0, flags);
+									return ConvertToSql(parseExpression, 0, flags);
 								}
 							}
 
 							break;
 						}
-
-						/*
-						if (Body.NodeType == ExpressionType.Parameter)
-						{
-							if (expression == null)
-								return GetSequence(Body, 0).ConvertToSql(null, 0, flags);
-
-							var levelExpression = expression.GetLevelExpression(level);
-
-							if (levelExpression == expression)
-								return GetSequence(expression, level).ConvertToSql(null, 0, flags);
-						}
-						else
-						{
-							if (expression == null)
-								return new[] { Parser.ParseExpression(this, Body) };
-
-							if (level == 0)
-								return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
-						}
-
-						break;
-						*/
 				}
 			}
 			else
@@ -443,7 +419,18 @@ namespace BLToolkit.Data.Linq.Parser
 											}
 
 											var memberExpression = Members[member];
-											var parseExpression  = GetParseExpression(expression, levelExpression, memberExpression);
+
+											switch (memberExpression.NodeType)
+											{
+												case ExpressionType.New          :
+												case ExpressionType.MemberInit   :
+													{
+														var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+														return ConvertToSql(mmExpresion, 0, flags);
+													}
+											}
+
+											var parseExpression = GetParseExpression(expression, levelExpression, memberExpression);
 
 											return ParseExpressions(parseExpression, flags);
 										}
@@ -482,7 +469,7 @@ namespace BLToolkit.Data.Linq.Parser
 		ISqlExpression[] ParseExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Parser.ParseExpressions(this, expression, flags)
-				.Select(CheckExpression)
+				.Select(_ => CheckExpression(_))
 				.ToArray();
 		}
 
@@ -514,7 +501,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (!_memberIndex.TryGetValue(member, out idx))
 					{
-						idx = ConvertToSql(expression, 0, flags).Select(GetIndex).ToArray();
+						idx = ConvertToSql(expression, 0, flags).Select(_ => GetIndex(_)).ToArray();
 						_memberIndex.Add(member, idx);
 					}
 
@@ -578,7 +565,7 @@ namespace BLToolkit.Data.Linq.Parser
 												if (flags == ConvertFlags.Field && sql.Length != 1)
 													throw new InvalidOperationException();
 
-												idx = sql.Select(GetIndex).ToArray();
+												idx = sql.Select(_ => GetIndex(_)).ToArray();
 
 												_memberIndex.Add(member, idx);
 											}
@@ -626,6 +613,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (IsScalar)
 			{
+				if (expression == null)
+					return IsExpression(Body, 0, requestFlag);
+
 				switch (requestFlag)
 				{
 					default                     : return false;
@@ -634,9 +624,6 @@ namespace BLToolkit.Data.Linq.Parser
 					case RequestFor.Expression  :
 					case RequestFor.Object       :
 						{
-							if (expression == null)
-								return IsExpression(Body, 0, requestFlag);
-
 							if (Body.NodeType == ExpressionType.Parameter)
 							{
 								if (level == 0)
@@ -719,12 +706,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 										switch (memberExpression.NodeType)
 										{
+											default                          : return requestFlag == RequestFor.Expression;
 											case ExpressionType.MemberAccess :
 											case ExpressionType.Parameter    :
 											case ExpressionType.Call         : return sequence.IsExpression(parseExpression, 1, requestFlag);
 											case ExpressionType.New          :
-											case ExpressionType.MemberInit   : return requestFlag == RequestFor.Object;
-											default                          : return requestFlag == RequestFor.Expression;
+											case ExpressionType.MemberInit   :
+												{
+													if (levelExpression == expression)
+														return requestFlag == RequestFor.Object;
+
+													var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+
+													return IsExpression(mmExpresion, 0, requestFlag);
+												}
 										}
 									}
 
@@ -807,7 +802,7 @@ namespace BLToolkit.Data.Linq.Parser
 				var root =  Body.GetRootObject();
 
 				if (root.NodeType == ExpressionType.Parameter)
-					for (int i = 0; i < Lambda.Parameters.Count; i++)
+					for (var i = 0; i < Lambda.Parameters.Count; i++)
 						if (root == Lambda.Parameters[i])
 							return Sequence[i];
 			}
@@ -820,7 +815,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var memberExpression = Members[((MemberExpression)levelExpression).Member];
 							var root             =  memberExpression.GetRootObject();
 
-							for (int i = 0; i < Lambda.Parameters.Count; i++)
+							for (var i = 0; i < Lambda.Parameters.Count; i++)
 								if (root == Lambda.Parameters[i])
 									return Sequence[i];
 
@@ -833,7 +828,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (levelExpression == root)
 							{
-								for (int i = 0; i < Lambda.Parameters.Count; i++)
+								for (var i = 0; i < Lambda.Parameters.Count; i++)
 									if (levelExpression == Lambda.Parameters[i])
 										return Sequence[i];
 							}
@@ -851,6 +846,76 @@ namespace BLToolkit.Data.Linq.Parser
 			return levelExpression != expression ?
 				expression.Convert(ex => ex == levelExpression ? memberExpression : ex) :
 				memberExpression;
+		}
+
+		static Expression GetMemberExpression(Expression newExpression, Expression expression, int level)
+		{
+			var levelExpresion = expression.GetLevelExpression(level);
+
+			switch (newExpression.NodeType)
+			{
+				case ExpressionType.New        :
+				case ExpressionType.MemberInit : break;
+				default                        :
+					//if (levelExpresion == expression)
+					//	return newExpression;
+
+					var le = expression.GetLevelExpression(level - 1);
+
+					return GetParseExpression(expression, le, newExpression);
+			}
+
+			if (levelExpresion.NodeType != ExpressionType.MemberAccess)
+				throw new LinqException("Invalid expression {0}", levelExpresion);
+
+			var me = (MemberExpression)levelExpresion;
+
+			switch (newExpression.NodeType)
+			{
+				case ExpressionType.New:
+					{
+						var expr = (NewExpression)newExpression;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+						if (expr.Members == null)
+							throw new LinqException("Invalid expression {0}", expression);
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+
+						for (var i = 0; i < expr.Members.Count; i++)
+							if (me.Member == expr.Members[i])
+								return levelExpresion == expression ?
+									expr.Arguments[i].Unwrap() :
+									GetMemberExpression(expr.Arguments[i].Unwrap(), expression, level + 1);
+
+						throw new LinqException("Invalid expression {0}", expression);
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						var expr = (MemberInitExpression)newExpression;
+
+						foreach (var binding in expr.Bindings)
+						{
+							if (binding is MemberAssignment)
+							{
+								var ma = (MemberAssignment)binding;
+
+								if (me.Member == binding.Member)
+									return levelExpresion == expression ?
+										ma.Expression.Unwrap() :
+										GetMemberExpression(ma.Expression.Unwrap(), expression, level + 1);
+							}
+							else
+								throw new InvalidOperationException();
+						}
+
+						throw new LinqException("Invalid expression {0}", expression);
+					}
+			}
+
+			return expression;
 		}
 
 		#endregion

@@ -185,6 +185,7 @@ namespace Data.Linq
 
 				var list = q.ToList();
 				Assert.AreEqual(8, list.Count);
+				Assert.AreEqual(8, list[0].ToList());
 			});
 		}
 

@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("")> 
 <Assembly: AssemblyCompany("Microsoft")> 
 <Assembly: AssemblyProduct("Templates.VB")> 
-<Assembly: AssemblyCopyright("Copyright © Microsoft 2010")> 
+<Assembly: AssemblyCopyright("\xA9 2002-2011 www.bltoolkit.net")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>

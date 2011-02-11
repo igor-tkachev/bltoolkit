@@ -6,7 +6,7 @@ using System.Reflection;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Linq.Parser;
 using BLToolkit.Data.Sql;
-
+using Data.Linq.Model;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -197,6 +197,83 @@ namespace Data.Linq
 					.GetContext();
 
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Association));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
+			}
+		}
+
+		[Test]
+		public void IsExpressionScalar8()
+		{
+			using (var db = new TestDbManager())
+			{
+				var ctx = db.Child
+					.Select    (p  => p)
+					.Select    (p3 => new { p1 = new { p2 = new { p = p3 } } })
+					.Select    (p  => p.p1.p2.p.Parent)
+					.GetContext();
+
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Association));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
+			}
+		}
+
+		[Test]
+		public void IsExpressionScalar9()
+		{
+			using (var db = new TestDbManager())
+			{
+				var ctx = db.Child
+					.Select    (p  => p)
+					.Select    (p3 => new { p1 = new { p2 = new { p = p3.Parent } } })
+					.Select    (p  => p.p1.p2.p)
+					.GetContext();
+
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Association));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
+			}
+		}
+
+
+		[Test]
+		public void IsExpressionScalar10()
+		{
+			using (var db = new TestDbManager())
+			{
+				var ctx = db.Child
+					.Select    (p => p)
+					.Select    (p => new { p = new { p } })
+					.Select    (p => p.p)
+					.GetContext();
+
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
+				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.SubQuery));
+			}
+		}
+
+		[Test]
+		public void IsExpressionScalar11()
+		{
+			using (var db = new TestDbManager())
+			{
+				var ctx = db.Child
+					.Select    (p => p)
+					.Select    (p => new { p = new Child { ChildID = p.ChildID } })
+					.Select    (p => p.p)
+					.GetContext();
+
+				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
 				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Object));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
 				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
@@ -458,6 +535,21 @@ namespace Data.Linq
 			}
 		}
 
+		[Test]
+		public void ConvertToIndexTable5()
+		{
+			using (var db = new TestDbManager())
+			{
+				var ctx = db.Parent
+					.Select    (t => new { t = new { t } })
+					.Select    (t => t.t.t.ParentID)
+					.Select    (t => t)
+					.GetContext();
+
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+			}
+		}
+
 		#endregion
 
 		#region ConvertToIndexScalar
@@ -505,9 +597,23 @@ namespace Data.Linq
 			}
 		}
 
+		[Test]
+		public void ConvertToIndexScalar4()
+		{
+			using (var db = new TestDbManager())
+			{
+				var ctx = db.Parent
+					.Select    (p1 => new { p = new { p = p1.ParentID } })
+					.Select    (p2 => p2.p.p)
+					.GetContext();
+
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+			}
+		}
+
 		#endregion
 
-		#region IsExpressionSelect
+		#region ConvertToIndexSelect
 
 		[Test]
 		public void ConvertToIndexSelect1()
