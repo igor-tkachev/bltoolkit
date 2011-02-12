@@ -139,7 +139,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertExpression
 
-		static Expression ConvertExpression(Expression expression, ParameterExpression[] parameters)
+		Expression ConvertExpression(Expression expression, ParameterExpression[] parameters)
 		{
 			expression = ConvertParameters  (expression, parameters);
 			expression = ConverLetSubqueries(expression);
@@ -267,7 +267,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return expression;
 		}
 
-		static Expression OptimizeExpression(Expression expression)
+		Expression OptimizeExpression(Expression expression)
 		{
 			return expression.Convert(expr =>
 			{
@@ -479,7 +479,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return (LambdaExpression)expression;
 		}
 
-		static Expression ConvertGroupBy(MethodCallExpression method)
+		Expression ConvertGroupBy(MethodCallExpression method)
 		{
 			if (method.Arguments[method.Arguments.Count - 1].Unwrap().NodeType != ExpressionType.Lambda)
 				return method;
@@ -494,22 +494,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var resultSelector   = types.ContainsKey("TResult")  ?
 				(LambdaExpression)OptimizeExpression(method.Arguments[types.ContainsKey("TElement") ? 3 : 2].Unwrap()) : null;
 
-			var needSubQuery = null != keySelector.Body.Unwrap().Find(ex =>
-			{
-				switch (ex.NodeType)
-				{
-					case ExpressionType.Convert        :
-					case ExpressionType.ConvertChecked :
-					case ExpressionType.MemberInit     :
-					case ExpressionType.New            :
-					case ExpressionType.NewArrayBounds :
-					case ExpressionType.NewArrayInit   :
-					case ExpressionType.MemberAccess   :
-					case ExpressionType.Parameter      : return false;
-				}
-
-				return true;
-			});
+			var needSubQuery = null != keySelector.Body.Unwrap().Find(IsExpression);
 
 			if (!needSubQuery && resultSelector == null && elementSelector != null)
 				return method;
@@ -524,16 +509,54 @@ namespace BLToolkit.Data.Linq.Parser
 			helper.Set(needSubQuery, sourceExpression, keySelector, elementSelector, resultSelector);
 
 			if (!needSubQuery)
+				return resultSelector == null ? helper.AddElementSelector() : helper.AddResult();
+
+			return resultSelector == null ? helper.WrapInSubQuery() : helper.WrapInSubQueryResult();
+		}
+
+		bool IsExpression(Expression ex)
+		{
+			switch (ex.NodeType)
 			{
-				if (resultSelector == null)
-					return helper.AddElementSelector();
-				return helper.AddResult();
+				case ExpressionType.Convert        :
+				case ExpressionType.ConvertChecked :
+				case ExpressionType.MemberInit     :
+				case ExpressionType.New            :
+				case ExpressionType.NewArrayBounds :
+				case ExpressionType.NewArrayInit   :
+				case ExpressionType.Parameter      : return false;
+				case ExpressionType.MemberAccess   :
+					{
+						var ma = (MemberExpression)ex;
+						var l  = ConvertMember(ma.Member);
+
+						if (l != null)
+						{
+							var ef  = l.Body.Unwrap();
+							var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+
+							return pie.Find(IsExpression) != null;
+						}
+
+						var attr = GetFunctionAttribute(ma.Member);
+
+						if (attr != null)
+							return true;
+
+						if (ma.Member.DeclaringType == typeof(TimeSpan))
+						{
+							switch (ma.Expression.NodeType)
+							{
+								case ExpressionType.Subtract        :
+								case ExpressionType.SubtractChecked : return true;
+							}
+						}
+
+						return false;
+					}
 			}
 
-			if (resultSelector == null)
-				return helper.WrapInSubQuery();
-
-			return helper.WrapInSubQueryResult();
+			return true;
 		}
 
 		#endregion

@@ -20,7 +20,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public IParseContext ParseWhere(IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
-			bool makeHaving = false;
+			var makeHaving = false;
 
 			var  ctx  = new PathThroughContext(sequence, condition);
 			var  expr = condition.Body.Unwrap();
@@ -321,7 +321,7 @@ namespace BLToolkit.Data.Linq.Parser
 				//while (source is QuerySource.SubQuerySourceColumn)
 				//	source = ((QuerySource.SubQuerySourceColumn)source).SourceColumn;
 
-				if (ctx.IsExpression(expr, 0, RequestFor.Query))
+				if (ctx.IsExpression(expr, 0, RequestFor.Object))
 					return true;
 			}
 
@@ -396,7 +396,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (ctx != null)
 			{
-				if (ctx.IsExpression(expression, 0, RequestFor.Query))
+				if (ctx.IsExpression(expression, 0, RequestFor.Object))
 					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 			}
 
@@ -1346,7 +1346,7 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var ctx = GetContext(context, left);
 
-					if (ctx.IsExpression(left, 0, RequestFor.Query) ||
+					if (ctx.IsExpression(left, 0, RequestFor.Object) ||
 						left.NodeType == ExpressionType.Parameter && ctx.IsExpression(left, 0, RequestFor.Field))
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
@@ -1386,8 +1386,8 @@ namespace BLToolkit.Data.Linq.Parser
 			var qsl = GetContext(leftContext,  left);
 			var qsr = GetContext(rightContext, right);
 
-			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Query);
-			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Query);
+			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Object);
+			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Object);
 
 			if (sl == false && sr == false)
 				return null;

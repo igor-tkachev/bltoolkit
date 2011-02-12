@@ -388,7 +388,7 @@ namespace BLToolkit.Data.Linq.Parser
 							return table != null && table.Field != null;
 						}
 
-					case RequestFor.Query      :
+					case RequestFor.Object      :
 						{
 							var table = FindTable(expression, level);
 							return
