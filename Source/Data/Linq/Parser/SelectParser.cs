@@ -123,7 +123,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 			}
 
-			return selector.Parameters.Count == 1 ? new SelectContext (selector, sequence) : new SelectContext2(selector, sequence);
+			return selector.Parameters.Count == 1 ? new SelectContext(selector, sequence) : new SelectContext2(selector, sequence);
 		}
 
 		static IParseContext CheckSubQueryForSelect(IParseContext context)

@@ -24,6 +24,7 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			new TableParser       (),
 			new SelectParser      (),
+			new SelectManyParser  (),
 			new WhereParser       (),
 			new OrderByParser     (),
 			new GroupByParser     (),

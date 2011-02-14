@@ -21,10 +21,19 @@ namespace Data.Linq
 				var q = db.Person.Select(p => p);
 
 				return db.Person
-					.SelectMany(p1 => q/*db.Person.Select(p => p)*/, (p1, p2) => new { p1, p2 })
-					.Where(t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
-					.Select(t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName });
+					.SelectMany(p1 => q, (p1, p2) => new { p1, p2 })
+					.Where     (t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
+					.Select    (t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName });
 			});
+		}
+
+		[Test]
+		public void Test11()
+		{
+			TestJohn(db => db.Person
+				.SelectMany(p1 => db.Person.Select(p => p), (p1, p2) => new { p1, p2 })
+				.Where     (t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
+				.Select    (t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName }));
 		}
 
 		[Test]
@@ -156,9 +165,17 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void OneParam()
+		public void OneParam1()
 		{
 			TestJohn(db => db.Person.SelectMany(p => db.Person).Where(t => t.ID == 1).Select(t => t));
+		}
+
+		[Test]
+		public void OneParam2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children).Where(t => t.ParentID == 1).Select(t => t),
+				db.Parent.SelectMany(p => p.Children).Where(t => t.ParentID == 1).Select(t => t)));
 		}
 
 		[Test]
