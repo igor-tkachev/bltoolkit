@@ -90,12 +90,12 @@ namespace BLToolkit.Data.Linq.Parser
 				//return Sequence.BuildExpression(expression, level + 1);
 			}
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				return Sequence.ConvertToSql(expression, level + 1, flags);
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}

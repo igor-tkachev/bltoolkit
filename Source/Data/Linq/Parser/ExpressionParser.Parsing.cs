@@ -205,7 +205,7 @@ namespace BLToolkit.Data.Linq.Parser
 								if (sql.Length != 1)
 									throw new NotImplementedException();
 
-								ctx.SqlQuery.Select.Add(sql[0]);
+								ctx.SqlQuery.Select.Add(sql[0].Sql);
 
 								var idx = context.SqlQuery.Select.Add(ctx.SqlQuery);
 
@@ -364,7 +364,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ParseExpression
 
-		public ISqlExpression[] ParseExpressions(IParseContext context, Expression expression, ConvertFlags queryConvertFlag)
+		public SqlInfo[] ParseExpressions(IParseContext context, Expression expression, ConvertFlags queryConvertFlag)
 		{
 			switch (expression.NodeType)
 			{
@@ -372,11 +372,24 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var expr = (NewExpression)expression;
 
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
 						if (expr.Members == null)
-							return Array<ISqlExpression>.Empty;
+							return Array<SqlInfo>.Empty;
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
 
 						return expr.Arguments
-							.Select(arg => ParseExpression(context, arg))
+							.Select((arg,i) =>
+							{
+								var sql = ParseExpression(context, arg);
+								var mi  = expr.Members[i];
+
+								if (mi is MethodInfo)
+									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
+
+								return new SqlInfo { Sql = sql, Member = mi };
+							})
 							.ToArray();
 					}
 
@@ -387,7 +400,16 @@ namespace BLToolkit.Data.Linq.Parser
 						return expr.Bindings
 							.Where(b => b is MemberAssignment)
 							.Cast<MemberAssignment>()
-							.Select(a => ParseExpression(context, a.Expression))
+							.Select(a =>
+							{
+								var sql = ParseExpression(context, a.Expression);
+								var mi  = a.Member;
+
+								if (mi is MethodInfo)
+									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
+
+								return new SqlInfo { Sql = sql, Member = mi };
+							})
 							.ToArray();
 					}
 			}
@@ -400,7 +422,7 @@ namespace BLToolkit.Data.Linq.Parser
 					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 			}
 
-			return new[] { ParseExpression(context, expression) };
+			return new[] { new SqlInfo { Sql = ParseExpression(context, expression) } };
 		}
 
 		public ISqlExpression ParseExpression(IParseContext context, Expression expression)
@@ -595,7 +617,7 @@ namespace BLToolkit.Data.Linq.Parser
 							switch (sql.Length)
 							{
 								case 0  : break;
-								case 1  : return sql[0];
+								case 1  : return sql[0].Sql;
 								default : throw new InvalidOperationException();
 							}
 						}
@@ -614,7 +636,7 @@ namespace BLToolkit.Data.Linq.Parser
 							switch (sql.Length)
 							{
 								case 0  : break;
-								case 1  : return sql[0];
+								case 1  : return sql[0].Sql;
 								default : throw new InvalidOperationException();
 							}
 						}
@@ -651,7 +673,7 @@ namespace BLToolkit.Data.Linq.Parser
 								if (sql.Length != 1)
 									throw new InvalidOperationException();
 
-								return sql[0];
+								return sql[0].Sql;
 							}
 
 							return ParseEnumerable(context, e);
@@ -670,8 +692,7 @@ namespace BLToolkit.Data.Linq.Parser
 							if (e.Object != null)
 								parms.Add(ParseExpression(context, e.Object));
 
-							for (var i = 0; i < e.Arguments.Count; i++)
-								parms.Add(ParseExpression(context, e.Arguments[i]));
+							parms.AddRange(e.Arguments.Select(t => ParseExpression(context, t)));
 
 							return Convert(context, attr.GetExpression(e.Method, parms.ToArray()));
 						}
@@ -1416,114 +1437,27 @@ namespace BLToolkit.Data.Linq.Parser
 			if (lcols.Length == 0)
 				return null;
 
-			//var rcols = qsr != null ? qsr.ConvertToSql(right, 0, ConvertFlags.Key) : null;
-
 			var condition = new SqlQuery.SearchCondition();
-			//var ta        = TypeAccessor.GetAccessor(right.Type != typeof(object) ? right.Type : left.Type);
 
-			foreach (var col in lcols)
+			foreach (var lcol in lcols)
 			{
-				var field = col as SqlField;
-
-				for (var f = col; field == null; )
-				{
-					throw new NotImplementedException();
-				}
-
-				var mi = field.MemberMapper.MemberAccessor.MemberInfo;
+				if (lcol.Member == null)
+					throw new InvalidOperationException();
 
 				ISqlExpression rcol = null;
 
 				if (sr)
-				{
-					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, mi), 0, ConvertFlags.Field).Single();
-
-					/*
-					var column = rcol as QueryField.Column;
-
-					if (column == null && rcol is QueryField.SubQueryColumn)
-					{
-						var sc = rcol as QueryField.SubQueryColumn;
-
-						while (sc != null)
-						{
-							column = sc.Field as QueryField.Column;
-							if (column != null)
-								break;
-							sc = sc.Field as QueryField.SubQueryColumn;
-						}
-					}
-
-					if (column != null && column.Table.ParentAssociation != null)
-					{
-						foreach (var c in column.Table.ParentAssociationJoin.Condition.Conditions)
-						{
-							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-							if (ee.Expr2 == column.Field)
-							{
-								var fld = rightQueries[0].GetField((SqlField)ee.Expr1);
-
-								if (fld != null)
-								{
-									rcol = fld;
-									break;
-								}
-}
-						}
-					}
-					*/
-				}
-
-				var lcol = col; //GetField(leftLambda, Expression.MakeMemberAccess(left, mi), leftQueries);
-
-				/*
-				{
-					var column = lcol as QueryField.Column;
-
-					if (column == null && lcol is QueryField.SubQueryColumn)
-					{
-						var sc = lcol as QueryField.SubQueryColumn;
-
-						while (sc != null)
-						{
-							column = sc.Field as QueryField.Column;
-							if (column != null)
-								break;
-							sc = sc.Field as QueryField.SubQueryColumn;
-						}
-					}
-
-					if (column != null && column.Table.ParentAssociation != null)
-					{
-						foreach (var c in column.Table.ParentAssociationJoin.Condition.Conditions)
-						{
-							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-							if (ee.Expr2 == column.Field)
-							{
-								var fld = leftQueries[0].GetField((SqlField)ee.Expr1);
-
-								if (fld != null)
-								{
-									lcol = fld;
-									break;
-								}
-							}
-						}
-					}
-				}
-				*/
+					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lcol.Member), 0, ConvertFlags.Field).Single().Sql;
 
 				var rex =
 					isNull ?
 						new SqlValue(right.Type, null) :
 						sr ?
 							rcol :
-							GetParameter(right, mi);
+							GetParameter(right, lcol.Member);
 
 				var predicate = Convert(leftContext, new SqlQuery.Predicate.ExprExpr(
-					lcol,
+					lcol.Sql,
 					nodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
 					rex));
 

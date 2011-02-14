@@ -168,9 +168,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (IsSubQuery() && IsExpression(null, 0, RequestFor.Expression))
 					{
-						var idx = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
-
-						idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+						var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
+						var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
 						return Parser.BuildSql(expression.Type, idx);
 					}
@@ -222,9 +221,8 @@ namespace BLToolkit.Data.Linq.Parser
 													if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
 													    !sequence.IsExpression(e, 0, RequestFor.Field))
 													{
-														var idx = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
-
-														idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+														var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
+														var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
 														return Parser.BuildSql(e.Type, idx);
 													}
@@ -239,9 +237,8 @@ namespace BLToolkit.Data.Linq.Parser
 									if (!sequence.IsExpression(memberExpression, 0, RequestFor.Object) &&
 									    !sequence.IsExpression(memberExpression, 0, RequestFor.Field))
 									{
-										var idx = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
-
-										idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
+										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
 										return Parser.BuildSql(expression.Type, idx);
 									}
@@ -285,9 +282,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToSql
 
-		readonly Dictionary<MemberInfo,ISqlExpression[]> _sql = new Dictionary<MemberInfo,ISqlExpression[]>();
+		readonly Dictionary<MemberInfo,SqlInfo[]> _sql = new Dictionary<MemberInfo,SqlInfo[]>();
 
-		public virtual ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+		public virtual SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			if (IsScalar)
 			{
@@ -337,7 +334,7 @@ namespace BLToolkit.Data.Linq.Parser
 									case ExpressionType.Call         :
 										break;
 										//return GetSequence(expression, level).IsExpression(Body, 1, requestFlag);
-									default                          : return new[] { Parser.ParseExpression(this, expression) };
+									default                          : return new[] { new SqlInfo { Sql = Parser.ParseExpression(this, expression) } };
 								}
 							}
 							else
@@ -372,8 +369,9 @@ namespace BLToolkit.Data.Linq.Parser
 									if (flags != ConvertFlags.Field)
 									{
 										var q =
-											from m in Members.Values.Distinct()
-											select ConvertMember(m, flags) into mm
+											from m in Members
+											where !(m.Key is MethodInfo)
+											select ConvertMember(m.Value, flags) into mm
 											from m in mm
 											select m;
 
@@ -407,7 +405,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 											if (levelExpression == expression)
 											{
-												ISqlExpression[] sql;
+												SqlInfo[] sql;
 
 												if (!_sql.TryGetValue(member, out sql))
 												{
@@ -452,7 +450,7 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new NotImplementedException();
 		}
 
-		ISqlExpression[] ConvertMember(Expression expression, ConvertFlags flags)
+		SqlInfo[] ConvertMember(Expression expression, ConvertFlags flags)
 		{
 			switch (expression.NodeType)
 			{
@@ -466,18 +464,18 @@ namespace BLToolkit.Data.Linq.Parser
 			return ParseExpressions(expression, flags);
 		}
 
-		ISqlExpression[] ParseExpressions(Expression expression, ConvertFlags flags)
+		SqlInfo[] ParseExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Parser.ParseExpressions(this, expression, flags)
 				.Select(_ => CheckExpression(_))
 				.ToArray();
 		}
 
-		ISqlExpression CheckExpression(ISqlExpression expression)
+		SqlInfo CheckExpression(SqlInfo expression)
 		{
-			if (expression is SqlQuery.SearchCondition)
+			if (expression.Sql is SqlQuery.SearchCondition)
 			{
-				expression = Parser.Convert(this, new SqlFunction(typeof(bool), "CASE", expression, new SqlValue(true), new SqlValue(false)));
+				expression.Sql = Parser.Convert(this, new SqlFunction(typeof(bool), "CASE", expression.Sql, new SqlValue(true), new SqlValue(false)));
 			}
 
 			return expression;
@@ -487,9 +485,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToIndex
 
-		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]>();
+		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]>();
 
-		public virtual int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public virtual SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			if (IsScalar)
 			{
@@ -497,11 +495,15 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var member = Tuple.Create((MemberInfo)null, flags);
 
-					int[] idx;
+					SqlInfo[] idx;
 
 					if (!_memberIndex.TryGetValue(member, out idx))
 					{
-						idx = ConvertToSql(expression, 0, flags).Select(_ => GetIndex(_)).ToArray();
+						idx = ConvertToSql(expression, 0, flags);
+
+						foreach (var info in idx)
+							info.Index = GetIndex(info.Sql);
+
 						_memberIndex.Add(member, idx);
 					}
 
@@ -544,7 +546,14 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.Field :
 						{
 							if (level == 0)
-								return Parser.ParseExpressions(this, expression, flags).Select(s => GetIndex(s)).ToArray();
+							{
+								var idx = Parser.ParseExpressions(this, expression, flags);
+
+								foreach (var info in idx)
+									info.Index = GetIndex(info.Sql);
+
+								return idx;
+							}
 
 							var levelExpression = expression.GetLevelExpression(level);
 
@@ -556,16 +565,19 @@ namespace BLToolkit.Data.Linq.Parser
 										{
 											var member = Tuple.Create(((MemberExpression)levelExpression).Member, flags);
 
-											int[] idx;
+											SqlInfo[] idx;
 
 											if (!_memberIndex.TryGetValue(member, out idx))
 											{
-												var sql = ConvertToSql(expression, level, flags);
+												idx = ConvertToSql(expression, level, flags);
 
-												if (flags == ConvertFlags.Field && sql.Length != 1)
+												if (flags == ConvertFlags.Field && idx.Length != 1)
 													throw new InvalidOperationException();
 
-												idx = sql.Select(_ => GetIndex(_)).ToArray();
+												foreach (var info in idx)
+												{
+													info.Index = GetIndex(info.Sql);
+												}
 
 												_memberIndex.Add(member, idx);
 											}

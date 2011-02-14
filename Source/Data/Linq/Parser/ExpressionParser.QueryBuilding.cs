@@ -274,7 +274,7 @@ namespace BLToolkit.Data.Linq.Parser
 									throw new NotImplementedException();
 
 								//ctx.SqlQuery.Select.Columns.Clear();
-								ctx.SqlQuery.Select.Add(sql[0]);
+								ctx.SqlQuery.Select.Add(sql[0].Sql);
 
 								var idx = context.SqlQuery.Select.Add(ctx.SqlQuery);
 

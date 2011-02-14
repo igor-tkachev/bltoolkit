@@ -66,14 +66,14 @@ namespace BLToolkit.Data.Linq.Parser
 			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
 #if DEBUG
-			if (groupSql.Any(_ => !(_ is SqlField || _ is SqlQuery.Column)))
+			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 				throw new InvalidOperationException();
 #endif
 
 			sequence.SqlQuery.GroupBy.Items.Clear();
 
 			foreach (var sql in groupSql)
-				sequence.SqlQuery.GroupBy.Expr(sql);
+				sequence.SqlQuery.GroupBy.Expr(sql.Sql);
 
 			new QueryVisitor().Visit(sequence.SqlQuery.From, e =>
 			{
@@ -389,7 +389,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 					else //if (query.ElementSource is QuerySource.Scalar)
 					{
-						args = _element.ConvertToSql(null, 0, ConvertFlags.Field);
+						//args = _element.ConvertToSql(null, 0, ConvertFlags.Field);
 
 						//var scalar = (QuerySource.Scalar)query.ElementSource;
 						//args = new[] { scalar.GetExpressions(this)[0] };
@@ -401,7 +401,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			PropertyInfo _keyProperty;
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				if (level > 0)
 				{
@@ -413,7 +413,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								if (e.Method.DeclaringType == typeof(Enumerable))
 								{
-									return new[] { ParseEnumerable(e) };
+									return new[] { new SqlInfo { Sql = ParseEnumerable(e) } };
 								}
 
 								break;
@@ -453,7 +453,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}

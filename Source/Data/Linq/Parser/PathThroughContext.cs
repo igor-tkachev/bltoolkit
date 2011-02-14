@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new InvalidOperationException();
 		}
 
-		public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+		public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			if (level == 0)
 			{
@@ -63,7 +63,7 @@ namespace BLToolkit.Data.Linq.Parser
 			//return Array<ISqlExpression>.Empty;
 		}
 
-		public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			throw new InvalidOperationException();
 		}

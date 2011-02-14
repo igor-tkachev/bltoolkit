@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Parser
@@ -63,7 +64,7 @@ namespace BLToolkit.Data.Linq.Parser
 					new SqlFunction(
 						methodCall.Type,
 						methodCall.Method.Name,
-						sequence.ConvertToSql(null, 0, ConvertFlags.Field)));
+						sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
 
 				return context;
 			}
@@ -103,7 +104,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
@@ -115,7 +116,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}

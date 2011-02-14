@@ -180,12 +180,17 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var q = db.GrandChild
+				var q1 = GrandChild
 					.GroupBy(ch => new { ParentID = ch.ParentID + 1, ch.ChildID }, ch => ch.ChildID);
 
-				var list = q.ToList();
-				Assert.AreEqual(8, list.Count);
-				Assert.AreEqual(8, list[0].ToList());
+				var q2 = db.GrandChild
+					.GroupBy(ch => new { ParentID = ch.ParentID + 1, ch.ChildID }, ch => ch.ChildID);
+
+				var list1 = q1.AsEnumerable().OrderBy(_ => _.Key.ChildID).ToList();
+				var list2 = q2.AsEnumerable().OrderBy(_ => _.Key.ChildID).ToList();
+
+				Assert.AreEqual(list1.Count,       list2.Count);
+				Assert.AreEqual(list1[0].ToList(), list2[0].ToList());
 			});
 		}
 

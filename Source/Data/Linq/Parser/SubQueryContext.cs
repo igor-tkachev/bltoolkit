@@ -45,19 +45,21 @@ namespace BLToolkit.Data.Linq.Parser
 			//throw new NotImplementedException();
 		}
 
-		public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+		public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			return _subQuery
 				.ConvertToIndex(expression, level, flags)
-				.Select(idx => _subQuery.SqlQuery.Select.Columns[idx])
+				.Select(idx => new SqlInfo { Sql = _subQuery.SqlQuery.Select.Columns[idx.Index], Member = idx.Member })
 				.ToArray();
 		}
 
 		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
 
-		public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
-			return ConvertToSql(expression, level, flags).Select(_ => GetIndex(_)).ToArray();
+			return ConvertToSql(expression, level, flags)
+				.Select(_ => { _.Index = GetIndex(_.Sql); return _; })
+				.ToArray();
 		}
 
 		public bool IsExpression(Expression expression, int level, RequestFor testFlag)
