@@ -65,10 +65,12 @@ namespace BLToolkit.Data.Linq.Parser
 			var key      = new KeyContext(keySelector, sequence);
 			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
-#if DEBUG
 			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
-				throw new InvalidOperationException();
-#endif
+			{
+				sequence = new SubQueryContext(sequence);
+				key      = new KeyContext(keySelector, sequence);
+				groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
+			}
 
 			sequence.SqlQuery.GroupBy.Items.Clear();
 
@@ -389,7 +391,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 					else //if (query.ElementSource is QuerySource.Scalar)
 					{
-						//args = _element.ConvertToSql(null, 0, ConvertFlags.Field);
+						args = _element.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
 
 						//var scalar = (QuerySource.Scalar)query.ElementSource;
 						//args = new[] { scalar.GetExpressions(this)[0] };
@@ -403,6 +405,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
+				if (expression == null)
+					return _key.ConvertToSql(null, 0, flags);
+
 				if (level > 0)
 				{
 					switch (expression.NodeType)

@@ -441,11 +441,11 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Sum1()
+		public void GroupBy1()
 		{
-			var expected = Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key);
-
-			ForEachProvider(db => AreEqual(expected, db.Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key)));
+			ForEachProvider(db => AreEqual(
+				   Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key),
+				db.Child.GroupBy(ch => ch.ParentID).GroupBy(ch => ch).GroupBy(ch => ch).Select(p => p.Key.Key.Key)));
 		}
 
 		[Test]
