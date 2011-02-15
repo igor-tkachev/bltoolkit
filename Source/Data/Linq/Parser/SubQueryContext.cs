@@ -11,7 +11,21 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		readonly IParseContext _subQuery;
 
+		public SubQueryContext(IParseContext subQuery, SqlQuery sqlQuery, bool addToSql)
+		{
+			_subQuery = subQuery;
+			_subQuery.Parent = this;
+
+			SqlQuery = sqlQuery;
+
+			if (addToSql)
+				SqlQuery.From.Table(_subQuery.SqlQuery);
+
+			_subQuery.SqlQuery.ParentSql = SqlQuery;
+		}
+
 		public SubQueryContext(IParseContext subQuery, bool addToSql)
+			: this(subQuery, new SqlQuery { ParentSql = subQuery.SqlQuery.ParentSql }, addToSql)
 		{
 			_subQuery = subQuery;
 			_subQuery.Parent = this;

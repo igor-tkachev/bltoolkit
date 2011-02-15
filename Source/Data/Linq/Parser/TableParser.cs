@@ -43,6 +43,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 
 				case ExpressionType.MemberAccess:
+
 					if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
 						return action(3, null);
 
@@ -88,7 +89,7 @@ namespace BLToolkit.Data.Linq.Parser
 			});
 		}
 
-		class TableContext : IParseContext
+		public class TableContext : IParseContext
 		{
 			protected Type         OriginalType;
 			public    Type         ObjectType;
@@ -460,12 +461,15 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
-					if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
+					if (Parser.IsSubQueryParsing)
 					{
-						if (Parser.IsSubQueryParsing)
+						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
 							var association = GetAssociation(expression, level);
-							var table       = new TableContext(Parser, Expression, currentSql, association.Table.ObjectType) { Parent = Parent };
+							var table       = new TableContext(Parser, Expression, currentSql, association.Table.ObjectType)
+							{
+ 								Parent = Parser.ParentContext[0] is SelectManyParser.SelectManyContext ? this : Parent
+ 							};
 
 							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
 							{
@@ -478,8 +482,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 							return table;
 						}
-
-						throw new NotImplementedException();
+						else
+						{
+							var association = GetAssociation(levelExpression, level);
+							return association.Table.GetContext(expression, level + 1, currentSql);
+						}
 					}
 				}
 

@@ -179,6 +179,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void OneParam3()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				   Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t),
+				db.Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t)));
+		}
+
+		[Test]
 		public void ScalarQuery()
 		{
 			TestJohn(db =>
@@ -207,7 +215,7 @@ namespace Data.Linq
 		public void SelectManyLeftJoin2()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in Parent
+				from p in    Parent
 				from ch in (from c in    Child where p.ParentID == c.ParentID select c).DefaultIfEmpty()
 				select ch,
 				from p in db.Parent

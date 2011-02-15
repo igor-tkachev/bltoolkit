@@ -26,18 +26,82 @@ namespace BLToolkit.Data.Linq.Parser
 			//	return resultSelector == null ? sequence : new SelectContext(resultSelector, sequence, sequence);
 			//}
 
-			var context = new SelectManyContext(sequence, collectionSelector);
+			var context    = new SelectManyContext(sequence, collectionSelector);
+			var expr       = collectionSelector.Body.Unwrap();
+			var leftJoin   = false;
+			var crossApply = null != expr.Find(e => e == collectionSelector.Parameters[0]);
+
+			if (expr.NodeType == ExpressionType.Call)
+			{
+				var call = (MethodCallExpression) collectionSelector.Body;
+
+				if (call.IsQueryable("DefaultIfEmpty"))
+				{
+					leftJoin = true;
+					expr     = call.Arguments[0];
+				}
+			}
 
 			parser.ParentContext.Insert(0, context);
 
-			var collection = parser.ParseSequence(collectionSelector.Body.Unwrap(), context.SqlQuery);
+			var collection = parser.ParseSequence(expr, new SqlQuery());
 
-			parser.ParentContext.Remove(context);
+			parser.ParentContext.RemoveAt(0);
 
-			return resultSelector == null ? collection : new SelectContext(resultSelector, sequence, collection);
+			var sql = collection.SqlQuery;
+
+			if (!leftJoin && !crossApply)
+			{
+				sequence.SqlQuery.From.Table(sql);
+
+				return resultSelector == null ?
+					(IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true) :
+					new SelectContext(resultSelector, sequence, collection);
+			}
+
+			if (crossApply)
+			{
+				if (sql.GroupBy.IsEmpty &&
+					sql.Select.Columns.Count == 0 &&
+					!sql.Select.HasModifier &&
+					!sql.Where.IsEmpty &&
+					!sql.HasUnion && sql.From.Tables.Count == 1)
+				{
+					var join = leftJoin ? SqlQuery.LeftJoin(sql) : SqlQuery.InnerJoin(sql);
+
+					join.JoinedTable.Condition.Conditions.AddRange(sql.Where.SearchCondition.Conditions);
+
+					sql.Where.SearchCondition.Conditions.Clear();
+
+					if (collection is TableParser.TableContext)
+					{
+						var parent = (TableParser.TableContext)collection.Parent;
+						var ts     = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
+						{
+							if (e.ElementType == QueryElementType.TableSource)
+							{
+								var t = (SqlQuery.TableSource)e;
+								return t.Source == parent.SqlTable;
+							}
+
+							return false;
+						});
+
+						ts.Joins.Add(join.JoinedTable);
+					}
+					else
+						sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+
+					return resultSelector == null ?
+						(IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false) :
+						new SelectContext(resultSelector, sequence, collection);
+				}
+			}
+
+			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", expr);
 		}
 
-		class SelectManyContext : PathThroughContext
+		public class SelectManyContext : PathThroughContext
 		{
 			public SelectManyContext(IParseContext sequence, LambdaExpression lambda)
 				: base(sequence, lambda)
