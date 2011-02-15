@@ -173,12 +173,14 @@ namespace BLToolkit.Data.Linq.Parser
 		IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
 			ParentContext.Insert(0, context);
+			SubQueryParsingCounter++;
 
 			var sequence = ParseSequence(expr, new SqlQuery { ParentSql = context.SqlQuery });
 
 			sequence.Parent = context;
 
-			ParentContext.RemoveAt(0);
+			SubQueryParsingCounter--;
+			//ParentContext.RemoveAt(0);
 
 			return sequence;
 		}
@@ -1910,8 +1912,10 @@ namespace BLToolkit.Data.Linq.Parser
 			if (func != null)
 			{
 				ParentContext.Insert(0, context);
+				SubQueryParsingCounter++;
 				cond = func();
-				ParentContext.RemoveAt(0);
+				SubQueryParsingCounter--;
+				//ParentContext.RemoveAt(0);
 			}
 
 			return cond;

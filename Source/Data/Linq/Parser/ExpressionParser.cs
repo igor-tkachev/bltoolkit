@@ -68,7 +68,7 @@ namespace BLToolkit.Data.Linq.Parser
 		public readonly ParameterExpression[] CompiledParameters;
 		public readonly List<IParseContext>   ParentContext = new List<IParseContext>();
 
-		public bool IsSubQueryParsing { get { return ParentContext.Count > 0; } }
+		public int SubQueryParsingCounter;
 
 		private ISqlProvider _sqlProvider;
 		public  ISqlProvider  SqlProvider

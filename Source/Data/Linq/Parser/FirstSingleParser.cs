@@ -38,7 +38,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var take = 0;
 
-			if (!parser.IsSubQueryParsing || parser.SqlProvider.IsSubQueryTakeSupported)
+			if (parser.SubQueryParsingCounter == 0 || parser.SqlProvider.IsSubQueryTakeSupported)
 				switch (methodCall.Method.Name)
 				{
 					case "First"           :
@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					case "Single"          :
 					case "SingleOrDefault" :
-						if (!parser.IsSubQueryParsing)
+						if (parser.SubQueryParsingCounter == 0)
 							take = 2;
 							break;
 				}

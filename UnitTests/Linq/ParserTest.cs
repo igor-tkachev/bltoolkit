@@ -806,7 +806,7 @@ namespace Data.Linq
 			public IParseContext    Sequence   { get; set; }
 			public ExpressionParser Parser     { get { return Sequence.Parser; } }
 			public Expression       Expression { get; set; }
-			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } }
+			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } set { Sequence.SqlQuery = value; } }
 			public IParseContext    Parent     { get; set; }
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)

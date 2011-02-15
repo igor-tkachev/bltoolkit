@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		ExpressionParser Parser     { get; }
 		Expression       Expression { get; }
-		SqlQuery         SqlQuery   { get; }
+		SqlQuery         SqlQuery   { get; set; }
 		IParseContext    Parent     { get; set; }
 
 		void             BuildQuery<T>       (Query<T> query, ParameterExpression queryParameter);

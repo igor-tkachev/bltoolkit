@@ -49,7 +49,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					// Looking for association.
 					//
-					if (parser.IsSubQueryParsing && sqlQuery.From.Tables.Count == 0)
+					if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
 					{
 						var ctx = parser.GetContext(null, expression);
 						if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Association))
@@ -98,7 +98,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public ExpressionParser Parser     { get; private set; }
 			public Expression       Expression { get; private set; }
-			public SqlQuery         SqlQuery   { get; private set; }
+			public SqlQuery         SqlQuery   { get; set; }
 			public IParseContext    Parent     { get; set; }
 
 			public TableContext(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Type originalType)
@@ -461,7 +461,7 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
-					if (Parser.IsSubQueryParsing)
+					if (Parser.SubQueryParsingCounter > 0)
 					{
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{

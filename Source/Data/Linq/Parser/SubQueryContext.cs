@@ -45,7 +45,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public ExpressionParser Parser     { get { return _subQuery.Parser;     } }
 		public Expression       Expression { get { return _subQuery.Expression; } }
-		public SqlQuery         SqlQuery   { get; private set; }
+		public SqlQuery         SqlQuery   { get; set; }
 		public IParseContext    Parent     { get; set; }
 
 		public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
