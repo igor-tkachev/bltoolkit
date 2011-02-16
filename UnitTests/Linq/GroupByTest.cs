@@ -221,6 +221,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Simple14()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent
+				select
+					from c in p.Children
+					group c by c.ParentID into g
+					select g.Key,
+				from p in db.Parent
+				select
+					from c in p.Children
+					group c by c.ParentID into g
+					select g.Key));
+		}
+
+		[Test]
 		public void MemberInit()
 		{
 			ForEachProvider(db => AreEqual(

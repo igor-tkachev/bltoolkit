@@ -12,6 +12,7 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			return
 				methodCall.IsQueryable("SelectMany") &&
+				methodCall.Arguments.Count == 3      &&
 				((LambdaExpression)methodCall.Arguments[1].Unwrap()).Parameters.Count == 1;
 		}
 
@@ -19,7 +20,7 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			var sequence           = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
 			var collectionSelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var resultSelector     = methodCall.Arguments.Count == 3 ? (LambdaExpression)methodCall.Arguments[2].Unwrap() : null;
+			var resultSelector     = (LambdaExpression)methodCall.Arguments[2].Unwrap();
 
 			//if (collectionSelector.Parameters[0] == collectionSelector.Body.Unwrap())
 			//{
@@ -60,7 +61,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true);
 
-				return resultSelector == null ? col : new SelectContext(resultSelector, sequence, col);
+				return new SelectContext(resultSelector, sequence, col);
 			}
 
 			if (crossApply)
@@ -79,19 +80,27 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (collection is TableParser.TableContext)
 					{
-						var parent = (TableParser.TableContext)collection.Parent;
-						var ts     = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
+						var parent = collection.Parent as TableParser.TableContext;
+
+						if (parent != null)
 						{
-							if (e.ElementType == QueryElementType.TableSource)
+							var ts     = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
 							{
-								var t = (SqlQuery.TableSource)e;
-								return t.Source == parent.SqlTable;
-							}
+								if (e.ElementType == QueryElementType.TableSource)
+								{
+									var t = (SqlQuery.TableSource)e;
+									return t.Source == parent.SqlTable;
+								}
 
-							return false;
-						});
+								return false;
+							});
 
-						ts.Joins.Add(join.JoinedTable);
+							ts.Joins.Add(join.JoinedTable);
+						}
+						else
+						{
+							sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+						}
 					}
 					else
 					{
@@ -99,9 +108,11 @@ namespace BLToolkit.Data.Linq.Parser
 						//collection.SqlQuery = sequence.SqlQuery;
 					}
 
-					return resultSelector == null ?
-						(IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false) :
-						new SelectContext(resultSelector, sequence, collection);
+					sql.ParentSql = sequence.SqlQuery;
+
+					var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false);
+
+					return new SelectContext(resultSelector, sequence, col);
 				}
 			}
 

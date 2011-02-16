@@ -200,12 +200,10 @@ namespace Data.Linq
 		[Test]
 		public void SelectManyLeftJoin1()
 		{
-			var expected =
-				from p in Parent
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in Parent
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
-				select new { p.Value1, o = c };
-
-			ForEachProvider(db => Assert.AreEqual(expected.Count(),
+				select new { p.Value1, o = c }).Count(),
 				(from p in db.Parent
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
 				select new { p.Value1, o = c }).AsEnumerable().Count()));

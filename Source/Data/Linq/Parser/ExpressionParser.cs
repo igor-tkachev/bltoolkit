@@ -310,8 +310,11 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var me = (MethodCallExpression)expr;
 
-							if (me.IsQueryable("GroupBy"))
-								return ConvertGroupBy(me);
+							if (me.IsQueryable()) switch (me.Method.Name)
+							{
+								case "GroupBy"    : return ConvertGroupBy   (me);
+								case "SelectMany" : return ConvertSelectMany(me);
+							}
 
 							break;
 						}
@@ -333,10 +336,14 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			void Set(bool wrapInSubQuery, Expression sourceExpression, LambdaExpression keySelector, LambdaExpression elementSelector, LambdaExpression resultSelector);
 
-			Expression AddElementSelector    ();
-			Expression AddResult             ();
-			Expression WrapInSubQuery        ();
-			Expression WrapInSubQueryResult  ();
+			Expression AddElementSelectorQ  ();
+			Expression AddElementSelectorE  ();
+			Expression AddResultQ           ();
+			Expression AddResultE           ();
+			Expression WrapInSubQueryQ      ();
+			Expression WrapInSubQueryE      ();
+			Expression WrapInSubQueryResultQ();
+			Expression WrapInSubQueryResultE();
 		}
 
 		class GroupByHelper<TSource,TKey,TElement,TResult> : IGroupByHelper
@@ -361,7 +368,7 @@ namespace BLToolkit.Data.Linq.Parser
 				_resultSelector   = resultSelector;
 			}
 
-			public Expression AddElementSelector()
+			public Expression AddElementSelectorQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<IGrouping<TKey,TSource>>>> func = (source,key,e,r) => source
 					.GroupBy(keyParam => key, _ => _)
@@ -373,7 +380,19 @@ namespace BLToolkit.Data.Linq.Parser
 				return Convert(func, keyArg, null, null);
 			}
 
-			public Expression AddResult()
+			public Expression AddElementSelectorE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<IGrouping<TKey,TSource>>>> func = (source,key,e,r) => source
+					.GroupBy(keyParam => key, _ => _)
+					;
+
+				var body   = func.Body.Unwrap();
+				var keyArg = GetLambda(body, 1).Parameters[0]; // .GroupBy(keyParam
+
+				return Convert(func, keyArg, null, null);
+			}
+
+			public Expression AddResultQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<TResult>>> func = (source,key,e,r) => source
 					.GroupBy(keyParam => key, elemParam => e)
@@ -388,7 +407,22 @@ namespace BLToolkit.Data.Linq.Parser
 				return Convert(func, keyArg, elemArg, resArg);
 			}
 
-			public Expression WrapInSubQuery()
+			public Expression AddResultE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<TResult>>> func = (source,key,e,r) => source
+					.GroupBy(keyParam => key, elemParam => e)
+					.Select (resParam => r)
+					;
+
+				var body    = func.Body.Unwrap();
+				var keyArg  = GetLambda(body, 0, 1).Parameters[0]; // .GroupBy(keyParam
+				var elemArg = GetLambda(body, 0, 2).Parameters[0]; // .GroupBy(..., elemParam
+				var resArg  = GetLambda(body, 1).   Parameters[0]; // .Select (resParam
+
+				return Convert(func, keyArg, elemArg, resArg);
+			}
+
+			public Expression WrapInSubQueryQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<IGrouping<TKey,TElement>>>> func = (source,key,e,r) => source
 					.Select(selectParam => new GroupSubQuery<TKey,TSource>
@@ -406,9 +440,47 @@ namespace BLToolkit.Data.Linq.Parser
 				return Convert(func, keyArg, elemArg, null);
 			}
 
-			public Expression WrapInSubQueryResult()
+			public Expression WrapInSubQueryE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<IGrouping<TKey,TElement>>>> func = (source,key,e,r) => source
+					.Select(selectParam => new GroupSubQuery<TKey,TSource>
+					{
+						Key     = key,
+						Element = selectParam
+					})
+					.GroupBy(_ => _.Key, elemParam => e)
+					;
+
+				var body    = func.Body.Unwrap();
+				var keyArg  = GetLambda(body, 0, 1).Parameters[0]; // .Select (selectParam
+				var elemArg = GetLambda(body, 2).   Parameters[0]; // .GroupBy(..., elemParam
+
+				return Convert(func, keyArg, elemArg, null);
+			}
+
+			public Expression WrapInSubQueryResultQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<TResult>>> func = (source,key,e,r) => source
+					.Select(selectParam => new GroupSubQuery<TKey,TSource>
+					{
+						Key     = key,
+						Element = selectParam
+					})
+					.GroupBy(_ => _.Key, elemParam => e)
+					.Select (resParam => r)
+					;
+
+				var body    = func.Body.Unwrap();
+				var keyArg  = GetLambda(body, 0, 0, 1).Parameters[0]; // .Select (selectParam
+				var elemArg = GetLambda(body, 0, 2).   Parameters[0]; // .GroupBy(..., elemParam
+				var resArg  = GetLambda(body, 1).      Parameters[0]; // .Select (resParam
+
+				return Convert(func, keyArg, elemArg, resArg);
+			}
+
+			public Expression WrapInSubQueryResultE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<TResult>>> func = (source,key,e,r) => source
 					.Select(selectParam => new GroupSubQuery<TKey,TSource>
 					{
 						Key     = key,
@@ -509,10 +581,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 			helper.Set(needSubQuery, sourceExpression, keySelector, elementSelector, resultSelector);
 
-			if (!needSubQuery)
-				return resultSelector == null ? helper.AddElementSelector() : helper.AddResult();
+			if (method.Method.DeclaringType == typeof(Queryable))
+			{
+				if (!needSubQuery)
+					return resultSelector == null ? helper.AddElementSelectorQ() : helper.AddResultQ();
 
-			return resultSelector == null ? helper.WrapInSubQuery() : helper.WrapInSubQueryResult();
+				return resultSelector == null ? helper.WrapInSubQueryQ() : helper.WrapInSubQueryResultQ();
+			}
+			else
+			{
+				if (!needSubQuery)
+					return resultSelector == null ? helper.AddElementSelectorE() : helper.AddResultE();
+
+				return resultSelector == null ? helper.WrapInSubQueryE() : helper.WrapInSubQueryResultE();
+			}
 		}
 
 		bool IsExpression(Expression ex)
@@ -558,6 +640,93 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return true;
+		}
+
+		#endregion
+
+		#region ConvertSelectMany
+
+		interface ISelectManyHelper
+		{
+			void Set(Expression sourceExpression, LambdaExpression colSelector);
+
+			Expression AddElementSelectorQ();
+			Expression AddElementSelectorE();
+		}
+
+		class SelectManyHelper<TSource,TCollection> : ISelectManyHelper
+		{
+			Expression       _sourceExpression;
+			LambdaExpression _colSelector;
+
+			public void Set(Expression sourceExpression, LambdaExpression colSelector)
+			{
+				_sourceExpression = sourceExpression;
+				_colSelector      = colSelector;
+			}
+
+			public Expression AddElementSelectorQ()
+			{
+				Expression<Func<IQueryable<TSource>,IEnumerable<TCollection>,IQueryable<TCollection>>> func = (source,col) => source
+					.SelectMany(colParam => col, (s,c) => c)
+					;
+
+				var body   = func.Body.Unwrap();
+				var colArg = GetLambda(body, 1).Parameters[0]; // .SelectMany(colParam
+
+				return Convert(func, colArg);
+			}
+
+			public Expression AddElementSelectorE()
+			{
+				Expression<Func<IEnumerable<TSource>,IEnumerable<TCollection>,IEnumerable<TCollection>>> func = (source,col) => source
+					.SelectMany(colParam => col, (s,c) => c)
+					;
+
+				var body   = func.Body.Unwrap();
+				var colArg = GetLambda(body, 1).Parameters[0]; // .SelectMany(colParam
+
+				return Convert(func, colArg);
+			}
+
+			Expression Convert(LambdaExpression func, ParameterExpression colArg)
+			{
+				var body = func.Body.Unwrap();
+				var expr = body.Convert(ex =>
+				{
+					if (ex == func.Parameters[0])
+						return _sourceExpression;
+
+					if (ex == func.Parameters[1])
+						return _colSelector.Body.Convert(e => e == _colSelector.Parameters[0] ? colArg : e);
+
+					return ex;
+				});
+
+				return expr;
+			}
+		}
+
+		Expression ConvertSelectMany(MethodCallExpression method)
+		{
+			if (method.Arguments.Count != 2 || ((LambdaExpression)method.Arguments[1].Unwrap()).Parameters.Count != 1)
+				return method;
+
+			var types = method.Method.GetGenericMethodDefinition().GetGenericArguments()
+				.Zip(method.Method.GetGenericArguments(), (n, t) => new { n = n.Name, t })
+				.ToDictionary(_ => _.n, _ => _.t);
+
+			var sourceExpression = OptimizeExpression(method.Arguments[0].Unwrap());
+			var colSelector      = (LambdaExpression)OptimizeExpression(method.Arguments[1].Unwrap());
+
+			var gtype  = typeof(SelectManyHelper<,>).MakeGenericType(types["TSource"], types["TResult"]);
+			var helper = (ISelectManyHelper)Activator.CreateInstance(gtype);
+
+			helper.Set(sourceExpression, colSelector);
+
+			return method.Method.DeclaringType == typeof(Queryable) ?
+				helper.AddElementSelectorQ() :
+				helper.AddElementSelectorE();
 		}
 
 		#endregion
