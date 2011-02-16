@@ -319,7 +319,7 @@ namespace Data.Linq
 		[Test]
 		public void Test5()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.Access }, db =>
 			{
 				var q3 =
 					from p in db.Parent
@@ -334,7 +334,7 @@ namespace Data.Linq
 		[Test]
 		public void Test6()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.Access }, db =>
 			{
 				var q3 =
 					from p in db.Parent

@@ -775,7 +775,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 		{
-			return GetSequence(expression, level).GetContext(expression, level + 1, currentSql);
+			var sequence = GetSequence(expression, level);
+
+			return sequence.GetContext(expression, level + 1, currentSql);
 		}
 
 		#endregion
@@ -816,7 +818,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (IsScalar)
 			{
-				var root =  Body.GetRootObject();
+				var root =  expression.GetRootObject();
 
 				if (root.NodeType == ExpressionType.Parameter)
 					for (var i = 0; i < Lambda.Parameters.Count; i++)
