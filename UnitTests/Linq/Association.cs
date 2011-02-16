@@ -22,8 +22,9 @@ namespace Data.Linq
 		//[Test]
 		public void Test2()
 		{
-			var expected = from p in Parent select p.Children.Select(c => c.ChildID);
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent select p.Children.Select(c => c.ChildID)));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select p.Children.Select(c => c.ChildID),
+				from p in db.Parent select p.Children.Select(c => c.ChildID)));
 		}
 
 		[Test]

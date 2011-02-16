@@ -55,6 +55,19 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var sql = collection.SqlQuery;
 
+			if (!leftJoin && crossApply)
+			{
+				if (sql.GroupBy.IsEmpty &&
+					sql.Select.Columns.Count == 0 &&
+					!sql.Select.HasModifier &&
+					sql.Where.IsEmpty &&
+					!sql.HasUnion &&
+					sql.From.Tables.Count == 1)
+				{
+					crossApply = false;
+				}
+			}
+
 			if (!leftJoin && !crossApply)
 			{
 				sequence.SqlQuery.From.Table(sql);
