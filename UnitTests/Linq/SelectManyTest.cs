@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+
 using BLToolkit.Data.DataProvider;
-using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq

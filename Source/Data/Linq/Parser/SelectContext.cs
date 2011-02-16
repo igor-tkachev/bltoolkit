@@ -491,6 +491,11 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			if (IsScalar)
 			{
+				if (Body.NodeType == ExpressionType.Parameter)
+					for (var i = 0; i < Sequence.Length; i++)
+						if (Body == Lambda.Parameters[i])
+							return Sequence[i].ConvertToIndex(expression, level, flags);
+
 				if (expression == null)
 				{
 					var member = Tuple.Create((MemberInfo)null, flags);

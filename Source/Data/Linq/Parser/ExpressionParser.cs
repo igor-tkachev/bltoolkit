@@ -46,18 +46,24 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region Init
 
+		readonly Query                             _query;
 		readonly List<ISequenceParser>             _parsers = _sequenceParsers;
 		private  bool                              _reorder;
 		readonly Dictionary<Expression,Expression> _expressionAccessors;
 		readonly List<ParameterAccessor>           _currentSqlParameters = new List<ParameterAccessor>();
 
-		public ExpressionParser(IDataContextInfo dataContext, Expression expression, ParameterExpression[] compiledParameters)
+		public ExpressionParser(
+			Query                 query,
+			IDataContextInfo      dataContext,
+			Expression            expression,
+			ParameterExpression[] compiledParameters)
 		{
+			_query               = query;
 			_expressionAccessors = expression.GetExpressionAccessors(ExpressionParam);
 
-			DataContextInfo    = dataContext;
-			Expression         = ConvertExpression(expression, compiledParameters);
 			CompiledParameters = compiledParameters;
+			DataContextInfo    = dataContext;
+			Expression         = ConvertExpression(expression);
 		}
 
 		#endregion
@@ -104,12 +110,13 @@ namespace BLToolkit.Data.Linq.Parser
 					_sequenceParsers = _sequenceParsers.OrderByDescending(_ => _.ParsingCounter).ToList();
 				}
 
-			var query = new Query<T>(sequence, _currentSqlParameters);
+			_query.Init(sequence, _currentSqlParameters);
+
 			var param = Expression.Parameter(typeof(Query<T>), "info");
 
-			sequence.BuildQuery(query, param);
+			sequence.BuildQuery((Query<T>)_query, param);
 
-			return query;
+			return (Query<T>)_query;
 		}
 
 		[JetBrains.Annotations.NotNull]
@@ -141,31 +148,33 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertExpression
 
-		Expression ConvertExpression(Expression expression, ParameterExpression[] parameters)
+		Expression ConvertExpression(Expression expression)
 		{
-			expression = ConvertParameters  (expression, parameters);
+			expression = ConvertParameters  (expression);
 			expression = ConverLetSubqueries(expression);
 
 			return OptimizeExpression(expression);
 		}
 
-		static Expression ConvertParameters(Expression expression, ParameterExpression[] parameters)
+		#region ConvertParameters
+
+		Expression ConvertParameters(Expression expression)
 		{
 			return expression.Convert(expr =>
 			{
 				switch (expr.NodeType)
 				{
 					case ExpressionType.Parameter:
-						if (parameters != null)
+						if (CompiledParameters != null)
 						{
-							var idx = Array.IndexOf(parameters, (ParameterExpression)expr);
+							var idx = Array.IndexOf(CompiledParameters, (ParameterExpression)expr);
 
 							if (idx > 0)
 								return
 									Expression.Convert(
 										Expression.ArrayIndex(
 											ParametersParam,
-											Expression.Constant(Array.IndexOf(parameters, (ParameterExpression)expr))),
+											Expression.Constant(Array.IndexOf(CompiledParameters, (ParameterExpression)expr))),
 										expr.Type);
 						}
 
@@ -175,6 +184,10 @@ namespace BLToolkit.Data.Linq.Parser
 				return expr;
 			});
 		}
+
+		#endregion
+
+		#region ConverLetSubqueries
 
 		static Expression ConverLetSubqueries(Expression expression)
 		{
@@ -269,6 +282,10 @@ namespace BLToolkit.Data.Linq.Parser
 			return expression;
 		}
 
+		#endregion
+
+		#region OptimizeExpression
+
 		Expression OptimizeExpression(Expression expression)
 		{
 			return expression.Convert(expr =>
@@ -303,6 +320,14 @@ namespace BLToolkit.Data.Linq.Parser
 									return Expression.Call(null, mi, me.Expression);
 								}
 							}
+
+							if (TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
+							{
+								var ex = ConvertIQueriable(expr);
+
+								if (ex != expr)
+									return ConvertExpression(ex);
+							}
 						}
 
 						break;
@@ -324,6 +349,8 @@ namespace BLToolkit.Data.Linq.Parser
 				return expr;
 			});
 		}
+
+		#endregion
 
 		#region ConvertGroupBy
 
@@ -728,6 +755,43 @@ namespace BLToolkit.Data.Linq.Parser
 			return method.Method.DeclaringType == typeof(Queryable) ?
 				helper.AddElementSelectorQ() :
 				helper.AddElementSelectorE();
+		}
+
+		#endregion
+
+		#region ConvertIQueriable
+
+		Expression ConvertIQueriable(Expression expression)
+		{
+			if (expression.NodeType == ExpressionType.MemberAccess || expression.NodeType == ExpressionType.Call)
+			{
+				var p    = Expression.Parameter(typeof(Expression), "exp");
+				var exas = expression.GetExpressionAccessors(p);
+				var expr = ReplaceParameter(exas, expression, _ => {});
+				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
+				var qe   = l.Compile();
+				var n    = _query.AddQueryableAccessors(expression, qe);
+
+				Expression accessor;
+
+				_expressionAccessors.TryGetValue(expression, out accessor);
+
+				var path =
+					Expression.Call(
+						Expression.Constant(_query),
+						ReflectionHelper.Expressor<Query>.MethodExpressor(a => a.GetIQueryable(0, null)),
+						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
+
+				var qex  = qe(expression).Expression;
+
+				foreach (var a in qex.GetExpressionAccessors(path))
+					if (!_expressionAccessors.ContainsKey(a.Key))
+						_expressionAccessors.Add(a.Key, a.Value);
+
+				return qex;
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		#endregion

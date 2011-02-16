@@ -103,6 +103,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public void SetAlias(string alias)
 		{
+			if (alias.Contains('<'))
+				return;
+
 			if (SqlQuery.From.Tables[0].Alias == null)
 				SqlQuery.From.Tables[0].Alias = alias;
 		}

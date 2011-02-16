@@ -500,6 +500,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public void SetAlias(string alias)
 			{
+				if (alias.Contains('<'))
+					return;
+
 				if (SqlTable.Alias == null)
 					SqlTable.Alias = alias;
 			}
