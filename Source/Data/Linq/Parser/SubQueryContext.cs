@@ -21,21 +21,12 @@ namespace BLToolkit.Data.Linq.Parser
 			if (addToSql)
 				SqlQuery.From.Table(_subQuery.SqlQuery);
 
-			_subQuery.SqlQuery.ParentSql = SqlQuery;
+			//_subQuery.SqlQuery.ParentSql = SqlQuery;
 		}
 
 		public SubQueryContext(IParseContext subQuery, bool addToSql)
 			: this(subQuery, new SqlQuery { ParentSql = subQuery.SqlQuery.ParentSql }, addToSql)
 		{
-			_subQuery = subQuery;
-			_subQuery.Parent = this;
-
-			SqlQuery = new SqlQuery { ParentSql = _subQuery.SqlQuery.ParentSql };
-
-			if (addToSql)
-				SqlQuery.From.Table(_subQuery.SqlQuery);
-
-			_subQuery.SqlQuery.ParentSql = SqlQuery;
 		}
 
 		public SubQueryContext(IParseContext subQuery)

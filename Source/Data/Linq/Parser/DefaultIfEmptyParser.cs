@@ -39,15 +39,23 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var idx = Sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
 
-					Expression cond;
+					Expression cond = null;
 
 					foreach (var info in idx)
 					{
 						var n = ConvertToParentIndex(info.Index, this);
 
-						//Expression.Call(ExpressionParser.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index2)),
-						
+						var e = Expression.Call(
+							ExpressionParser.DataReaderParam,
+							ReflectionHelper.DataReader.IsDBNull,
+							Expression.Constant(n)) as Expression;
+
+						cond = cond == null ? e : Expression.AndAlso(cond, e);
 					}
+
+					var defaultValue = _defaultValue ?? Expression.Constant(null, expr.Type);
+
+					expr = Expression.Condition(cond, defaultValue, expr);
 				}
 
 				return expr;

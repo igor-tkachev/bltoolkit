@@ -465,7 +465,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Sum2()
+		public void Sum1()
 		{
 			var expected =
 				from ch in Child
@@ -479,7 +479,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Sum3()
+		public void Sum2()
 		{
 			var expected =
 				from ch in Child

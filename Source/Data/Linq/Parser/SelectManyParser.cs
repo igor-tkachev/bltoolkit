@@ -29,7 +29,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var context    = new SelectManyContext(collectionSelector, sequence);
 			var expr       = collectionSelector.Body.Unwrap();
-			var leftJoin   = sequence is DefaultIfEmptyParser.DefaultIfEmptyContext;
 			var crossApply = null != expr.Find(e => e == collectionSelector.Parameters[0]);
 
 			/*
@@ -49,6 +48,7 @@ namespace BLToolkit.Data.Linq.Parser
 			parser.SubQueryParsingCounter++;
 
 			var collection = parser.ParseSequence(expr, new SqlQuery());
+			var leftJoin   = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
 
 			parser.SubQueryParsingCounter--;
 			//parser.ParentContext.RemoveAt(0);
@@ -66,12 +66,12 @@ namespace BLToolkit.Data.Linq.Parser
 				return new SelectContext(resultSelector, sequence, col);
 			}
 
-			if (crossApply)
+			//if (crossApply)
 			{
 				if (sql.GroupBy.IsEmpty &&
 					sql.Select.Columns.Count == 0 &&
 					!sql.Select.HasModifier &&
-					!sql.Where.IsEmpty &&
+					//!sql.Where.IsEmpty &&
 					!sql.HasUnion && sql.From.Tables.Count == 1)
 				{
 					var join = leftJoin ? SqlQuery.LeftJoin(sql) : SqlQuery.InnerJoin(sql);
