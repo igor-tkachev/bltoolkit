@@ -29,9 +29,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var context    = new SelectManyContext(collectionSelector, sequence);
 			var expr       = collectionSelector.Body.Unwrap();
-			var leftJoin   = false;
+			var leftJoin   = sequence is DefaultIfEmptyParser.DefaultIfEmptyContext;
 			var crossApply = null != expr.Find(e => e == collectionSelector.Parameters[0]);
 
+			/*
 			if (expr.NodeType == ExpressionType.Call)
 			{
 				var call = (MethodCallExpression)collectionSelector.Body;
@@ -42,6 +43,7 @@ namespace BLToolkit.Data.Linq.Parser
 					expr     = call.Arguments[0];
 				}
 			}
+			*/
 
 			parser.ParentContext.Insert(0, context);
 			parser.SubQueryParsingCounter++;
@@ -57,7 +59,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				sequence.SqlQuery.From.Table(sql);
 
-				sql.ParentSql = sequence.SqlQuery;
+				//sql.ParentSql = sequence.SqlQuery;
 
 				var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true);
 
@@ -108,7 +110,7 @@ namespace BLToolkit.Data.Linq.Parser
 						//collection.SqlQuery = sequence.SqlQuery;
 					}
 
-					sql.ParentSql = sequence.SqlQuery;
+					//sql.ParentSql = sequence.SqlQuery;
 
 					var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false);
 

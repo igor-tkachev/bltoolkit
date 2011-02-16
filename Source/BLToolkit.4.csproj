@@ -177,6 +177,7 @@
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs" />
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
+    <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
     <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
     <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />

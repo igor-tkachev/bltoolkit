@@ -475,7 +475,7 @@ namespace BLToolkit.Data.Linq.Parser
 				if (!SqlQuery.GroupBy.Items.Exists(_ => _ == expr))
 					SqlQuery.GroupBy.Items.Add(expr);
 
-				return base.ConvertToParentIndex(index, context);
+				return base.ConvertToParentIndex(index, this);
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)

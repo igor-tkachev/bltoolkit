@@ -22,18 +22,19 @@ namespace BLToolkit.Data.Linq.Parser
 
 		static List<ISequenceParser> _sequenceParsers = new List<ISequenceParser>
 		{
-			new TableParser       (),
-			new SelectParser      (),
-			new SelectManyParser  (),
-			new WhereParser       (),
-			new OrderByParser     (),
-			new GroupByParser     (),
-			new JoinParser        (),
-			new DistinctParser    (),
-			new FirstSingleParser (),
-			new AggregationParser (),
-			new ScalarSelectParser(),
-			new CountParser       (),
+			new TableParser         (),
+			new SelectParser        (),
+			new SelectManyParser    (),
+			new WhereParser         (),
+			new OrderByParser       (),
+			new GroupByParser       (),
+			new JoinParser          (),
+			new DefaultIfEmptyParser(),
+			new DistinctParser      (),
+			new FirstSingleParser   (),
+			new AggregationParser   (),
+			new ScalarSelectParser  (),
+			new CountParser         (),
 		};
 
 		public static void AddParser(ISequenceParser parser)

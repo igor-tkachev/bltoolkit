@@ -51,7 +51,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual int ConvertToParentIndex(int index, IParseContext context)
 		{
-			return Parent == null ? index : Parent.ConvertToParentIndex(index, this);
+			return Parent == null ? index : Parent.ConvertToParentIndex(index, context);
 		}
 
 		public virtual void SetAlias(string alias)
