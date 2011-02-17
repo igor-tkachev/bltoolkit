@@ -144,7 +144,7 @@ namespace SybaseDataModel
 		public Patient Patient { get; set; }
 	}
 
-	//View
+	// View
 	[TableName(Name="sysquerymetrics")]
 	public partial class sysquerymetrics
 	{

@@ -333,7 +333,9 @@ namespace BLToolkit.Data.Linq.Parser
 									orderby f.PrimaryKeyOrder
 									select new SqlInfo { Sql = f, Member = f.MemberMapper.MemberAccessor.MemberInfo };
 
-								return q.ToArray();
+								var key = q.ToArray();
+
+								return key.Length != 0 ? key : ConvertToSql(expression, level, ConvertFlags.All);
 							}
 
 							break;

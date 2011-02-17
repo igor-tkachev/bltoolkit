@@ -40,7 +40,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW4;TRACE_PARSING1;OVERRIDETOSTRING;NEW_PARSER1;</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;FW4;TRACE_PARSING1;OVERRIDETOSTRING;NEW_PARSER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>

@@ -490,8 +490,8 @@ namespace Data.Linq
 					.Select    (t => t)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0, 1 }, ctx.ConvertToIndex(null, 0, ConvertFlags.All));
-				Assert.AreEqual(new[] { 0    }, ctx.ConvertToIndex(null, 0, ConvertFlags.Key));
+				Assert.AreEqual(new[] { 0, 1 }, ctx.ConvertToIndex(null, 0, ConvertFlags.All).Select(_ => _.Index).ToArray());
+				Assert.AreEqual(new[] { 0    }, ctx.ConvertToIndex(null, 0, ConvertFlags.Key).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -504,8 +504,8 @@ namespace Data.Linq
 					.Select    (t => t)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0, 1 }, ctx.ConvertToIndex(null, 0, ConvertFlags.All));
-				Assert.AreEqual(new[] { 0, 1 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Key));
+				Assert.AreEqual(new[] { 0, 1 }, ctx.ConvertToIndex(null, 0, ConvertFlags.All).Select(_ => _.Index).ToArray());
+				Assert.AreEqual(new[] { 0, 1 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Key).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -518,7 +518,7 @@ namespace Data.Linq
 					.Select    (t => t.ParentID)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -531,7 +531,7 @@ namespace Data.Linq
 					.Select    (t => t.Value1)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -546,7 +546,7 @@ namespace Data.Linq
 					.Select    (t => t)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -564,7 +564,7 @@ namespace Data.Linq
 					.Select    (p2 => p2)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -578,7 +578,7 @@ namespace Data.Linq
 					.Select    (p2 => p2)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -593,7 +593,7 @@ namespace Data.Linq
 					.Select    (p2 => p2)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -607,7 +607,7 @@ namespace Data.Linq
 					.Select    (p2 => p2.p.p)
 					.GetContext();
 
-				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field));
+				Assert.AreEqual(new[] { 0 }, ctx.ConvertToIndex(null, 0, ConvertFlags.Field).Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -628,7 +628,7 @@ namespace Data.Linq
 				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.Field);
 
 				Assert.AreEqual        (1, sql.Length);
-				Assert.IsAssignableFrom(typeof(SqlField), sql[0]);
+				Assert.IsAssignableFrom(typeof(SqlField), sql[0].Sql);
 				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
 			}
 		}
@@ -646,7 +646,7 @@ namespace Data.Linq
 				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.Field);
 
 				Assert.AreEqual        (1, sql.Length);
-				Assert.IsAssignableFrom(typeof(SqlBinaryExpression), sql[0]);
+				Assert.IsAssignableFrom(typeof(SqlBinaryExpression), sql[0].Sql);
 			}
 		}
 
@@ -664,7 +664,7 @@ namespace Data.Linq
 				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.Field);
 
 				Assert.AreEqual        (1, sql.Length);
-				Assert.IsAssignableFrom(typeof(SqlQuery.Column), sql[0]);
+				Assert.IsAssignableFrom(typeof(SqlQuery.Column), sql[0].Sql);
 			}
 		}
 
@@ -681,7 +681,7 @@ namespace Data.Linq
 				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.Field);
 
 				Assert.AreEqual        (1, sql.Length);
-				Assert.IsAssignableFrom(typeof(SqlField), sql[0]);
+				Assert.IsAssignableFrom(typeof(SqlField), sql[0].Sql);
 				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
 			}
 		}
@@ -700,7 +700,7 @@ namespace Data.Linq
 				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.Field);
 
 				Assert.AreEqual        (1, sql.Length);
-				Assert.IsAssignableFrom(typeof(SqlField), sql[0]);
+				Assert.IsAssignableFrom(typeof(SqlField), sql[0].Sql);
 				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
 			}
 		}
