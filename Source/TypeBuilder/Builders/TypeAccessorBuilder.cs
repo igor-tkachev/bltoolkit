@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -381,7 +379,7 @@ namespace BLToolkit.TypeBuilder.Builders
 			}
 			else
 			{
-				if (!methodType.IsClass)
+				if (methodType.IsValueType)
 				{
 					var loc = emit.DeclareLocal(methodType);
 
