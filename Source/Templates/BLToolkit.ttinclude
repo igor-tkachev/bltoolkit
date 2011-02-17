@@ -137,6 +137,12 @@ static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key
 		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()),
 		key.CanBeNull ? "true" : "false");
 
+	if (key.Attributes.Count > 0)
+	{
+		WriteAttribute(tt, string.Join(", ", key.Attributes.Distinct().ToArray()));
+		WriteAttributeLine(tt);
+	}
+
 	tt.Write("public ");
 
 	if (key.AssociationType == AssociationType.OneToMany)
@@ -530,6 +536,7 @@ public partial class ForeignKey
 	public Table        OtherTable;
 	public List<Column> ThisColumns  = new List<Column>();
 	public List<Column> OtherColumns = new List<Column>();
+	public List<string> Attributes   = new List<string>();
 	public bool         CanBeNull    = true;
 	public ForeignKey   BackReference;
 
