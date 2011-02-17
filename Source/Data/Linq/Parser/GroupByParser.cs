@@ -13,6 +13,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class GroupByParser : MethodCallParser
 	{
+		#region Parser Methods
+
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
 			if (!methodCall.IsQueryable("GroupBy"))
@@ -44,7 +46,6 @@ namespace BLToolkit.Data.Linq.Parser
 			var groupingType    = methodCall.Type.GetGenericArguments()[0];
 			var keySelector     = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var elementSelector = (LambdaExpression)methodCall.Arguments[2].Unwrap();
-			var isSubQuery      = false;
 
 			if (methodCall.Arguments[0].NodeType == ExpressionType.Call)
 			{
@@ -56,8 +57,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ExpressionParser.GroupSubQuery<,>))
 					{
-						isSubQuery = true;
-						sequence   = new SubQueryContext(sequence);
+						sequence = new SubQueryContext(sequence);
 					}
 				}
 			}
@@ -65,24 +65,17 @@ namespace BLToolkit.Data.Linq.Parser
 			var key      = new KeyContext(keySelector, sequence);
 			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
-			if (groupSql.Any(_ => !(_ is SqlField || _ is SqlQuery.Column)))
+			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 			{
-				isSubQuery = true;
-				sequence   = new SubQueryContext(sequence);
-
+				sequence = new SubQueryContext(sequence);
 				key      = new KeyContext(keySelector, sequence);
 				groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 			}
 
-			// Can be used instead of GroupBy.Items.Clear().
-			//
-			//if (!wrap)
-			//	wrap = CurrentSql.GroupBy.Items.Count > 0;
-
 			sequence.SqlQuery.GroupBy.Items.Clear();
 
 			foreach (var sql in groupSql)
-				sequence.SqlQuery.GroupBy.Expr(sql);
+				sequence.SqlQuery.GroupBy.Expr(sql.Sql);
 
 			new QueryVisitor().Visit(sequence.SqlQuery.From, e =>
 			{
@@ -95,10 +88,14 @@ namespace BLToolkit.Data.Linq.Parser
 			});
 
 			var element = new SelectContext (elementSelector, sequence);
-			var groupBy = new GroupByContext(sequenceExpr, groupingType, sequence, key, element, isSubQuery);
+			var groupBy = new GroupByContext(sequenceExpr, groupingType, sequence, key, element);
 
 			return groupBy;
 		}
+
+		#endregion
+
+		#region KeyContext
 
 		class KeyContext : SelectContext
 		{
@@ -108,23 +105,26 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 		}
 
+		#endregion
+
+		#region GroupByContext
+
 		class GroupByContext : SequenceContextBase
 		{
-			public GroupByContext(Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element, bool isSubQuery)
+			public GroupByContext(Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element)
 				: base(sequence, null)
 			{
 				_sequenceExpr = sequenceExpr;
 				_key          = key;
 				_element      = element;
-				_isSubQuery   = isSubQuery;
-
 				_groupingType = groupingType;
+
+				key.Parent = this;
 			}
 
 			readonly Expression    _sequenceExpr;
 			readonly KeyContext    _key;
 			readonly SelectContext _element;
-			readonly bool          _isSubQuery;
 			readonly Type          _groupingType;
 
 			class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
@@ -192,7 +192,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var expr = Expression.Call(
 						null,
+// ReSharper disable AssignNullToNotNullAttribute
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
+// ReSharper restore AssignNullToNotNullAttribute
 						context._sequenceExpr,
 						Expression.Lambda<Func<TSource,bool>>(
 							Expression.Equal(context._key.Lambda.Body, keyParam),
@@ -200,7 +202,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 					expr = Expression.Call(
 						null,
+// ReSharper disable AssignNullToNotNullAttribute
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Select(null, (Expression<Func<TSource,TElement>>)null)),
+// ReSharper restore AssignNullToNotNullAttribute
 						expr,
 						context._element.Lambda);
 
@@ -387,7 +391,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 					else //if (query.ElementSource is QuerySource.Scalar)
 					{
-						args = _element.ConvertToSql(null, 0, ConvertFlags.Field);
+						args = _element.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
 
 						//var scalar = (QuerySource.Scalar)query.ElementSource;
 						//args = new[] { scalar.GetExpressions(this)[0] };
@@ -397,20 +401,13 @@ namespace BLToolkit.Data.Linq.Parser
 				return new SqlFunction(expr.Type, expr.Method.Name, args);
 			}
 
-			static Expression ParseLambdaArgument(Expression expr)
-			{
-				expr = expr.Unwrap();
-
-				if (expr is LambdaExpression)
-					expr = ((LambdaExpression)expr).Body.Unwrap();
-
-				return expr;
-			}
-
 			PropertyInfo _keyProperty;
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
+				if (expression == null)
+					return _key.ConvertToSql(null, 0, flags);
+
 				if (level > 0)
 				{
 					switch (expression.NodeType)
@@ -421,7 +418,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								if (e.Method.DeclaringType == typeof(Enumerable))
 								{
-									return new[] { ParseEnumerable(e) };
+									return new[] { new SqlInfo { Sql = ParseEnumerable(e) } };
 								}
 
 								break;
@@ -461,7 +458,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}
@@ -478,7 +475,7 @@ namespace BLToolkit.Data.Linq.Parser
 				if (!SqlQuery.GroupBy.Items.Exists(_ => _ == expr))
 					SqlQuery.GroupBy.Items.Add(expr);
 
-				return base.ConvertToParentIndex(index, context);
+				return base.ConvertToParentIndex(index, this);
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
@@ -486,5 +483,8 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 		}
+
+		#endregion
 	}
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  

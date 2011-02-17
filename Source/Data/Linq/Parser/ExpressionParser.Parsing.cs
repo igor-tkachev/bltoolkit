@@ -20,7 +20,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public IParseContext ParseWhere(IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
-			bool makeHaving = false;
+			var makeHaving = false;
 
 			var  ctx  = new PathThroughContext(sequence, condition);
 			var  expr = condition.Body.Unwrap();
@@ -140,7 +140,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					sql.Select.Take(parm);
 
-					var ep = (from pm in _currentSqlParameters where pm.SqlParameter == skip select pm).First();
+					var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
 
 					ep = new ParameterAccessor
 					{
@@ -149,7 +149,7 @@ namespace BLToolkit.Data.Linq.Parser
 						SqlParameter = parm
 					};
 
-					_currentSqlParameters.Add(ep);
+					CurrentSqlParameters.Add(ep);
 				}
 				else
 					sql.Select.Take(Convert(
@@ -173,12 +173,14 @@ namespace BLToolkit.Data.Linq.Parser
 		IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
 			ParentContext.Insert(0, context);
+			SubQueryParsingCounter++;
 
 			var sequence = ParseSequence(expr, new SqlQuery { ParentSql = context.SqlQuery });
 
 			sequence.Parent = context;
 
-			ParentContext.RemoveAt(0);
+			SubQueryParsingCounter--;
+			//ParentContext.RemoveAt(0);
 
 			return sequence;
 		}
@@ -205,7 +207,7 @@ namespace BLToolkit.Data.Linq.Parser
 								if (sql.Length != 1)
 									throw new NotImplementedException();
 
-								ctx.SqlQuery.Select.Add(sql[0]);
+								ctx.SqlQuery.Select.Add(sql[0].Sql);
 
 								var idx = context.SqlQuery.Select.Add(ctx.SqlQuery);
 
@@ -321,7 +323,7 @@ namespace BLToolkit.Data.Linq.Parser
 				//while (source is QuerySource.SubQuerySourceColumn)
 				//	source = ((QuerySource.SubQuerySourceColumn)source).SourceColumn;
 
-				if (ctx.IsExpression(expr, 0, RequestFor.Query))
+				if (ctx.IsExpression(expr, 0, RequestFor.Object))
 					return true;
 			}
 
@@ -364,7 +366,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ParseExpression
 
-		public ISqlExpression[] ParseExpressions(IParseContext context, Expression expression, ConvertFlags queryConvertFlag)
+		public SqlInfo[] ParseExpressions(IParseContext context, Expression expression, ConvertFlags queryConvertFlag)
 		{
 			switch (expression.NodeType)
 			{
@@ -372,11 +374,24 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var expr = (NewExpression)expression;
 
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
 						if (expr.Members == null)
-							return Array<ISqlExpression>.Empty;
+							return Array<SqlInfo>.Empty;
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
 
 						return expr.Arguments
-							.Select(arg => ParseExpression(context, arg))
+							.Select((arg,i) =>
+							{
+								var sql = ParseExpression(context, arg);
+								var mi  = expr.Members[i];
+
+								if (mi is MethodInfo)
+									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
+
+								return new SqlInfo { Sql = sql, Member = mi };
+							})
 							.ToArray();
 					}
 
@@ -387,7 +402,16 @@ namespace BLToolkit.Data.Linq.Parser
 						return expr.Bindings
 							.Where(b => b is MemberAssignment)
 							.Cast<MemberAssignment>()
-							.Select(a => ParseExpression(context, a.Expression))
+							.Select(a =>
+							{
+								var sql = ParseExpression(context, a.Expression);
+								var mi  = a.Member;
+
+								if (mi is MethodInfo)
+									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
+
+								return new SqlInfo { Sql = sql, Member = mi };
+							})
 							.ToArray();
 					}
 			}
@@ -396,11 +420,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (ctx != null)
 			{
-				if (ctx.IsExpression(expression, 0, RequestFor.Query))
+				if (ctx.IsExpression(expression, 0, RequestFor.Object))
 					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 			}
 
-			return new[] { ParseExpression(context, expression) };
+			return new[] { new SqlInfo { Sql = ParseExpression(context, expression) } };
 		}
 
 		public ISqlExpression ParseExpression(IParseContext context, Expression expression)
@@ -595,7 +619,7 @@ namespace BLToolkit.Data.Linq.Parser
 							switch (sql.Length)
 							{
 								case 0  : break;
-								case 1  : return sql[0];
+								case 1  : return sql[0].Sql;
 								default : throw new InvalidOperationException();
 							}
 						}
@@ -614,7 +638,7 @@ namespace BLToolkit.Data.Linq.Parser
 							switch (sql.Length)
 							{
 								case 0  : break;
-								case 1  : return sql[0];
+								case 1  : return sql[0].Sql;
 								default : throw new InvalidOperationException();
 							}
 						}
@@ -651,7 +675,7 @@ namespace BLToolkit.Data.Linq.Parser
 								if (sql.Length != 1)
 									throw new InvalidOperationException();
 
-								return sql[0];
+								return sql[0].Sql;
 							}
 
 							return ParseEnumerable(context, e);
@@ -670,8 +694,7 @@ namespace BLToolkit.Data.Linq.Parser
 							if (e.Object != null)
 								parms.Add(ParseExpression(context, e.Object));
 
-							for (var i = 0; i < e.Arguments.Count; i++)
-								parms.Add(ParseExpression(context, e.Arguments[i]));
+							parms.AddRange(e.Arguments.Select(t => ParseExpression(context, t)));
 
 							return Convert(context, attr.GetExpression(e.Method, parms.ToArray()));
 						}
@@ -955,7 +978,7 @@ namespace BLToolkit.Data.Linq.Parser
 			};
 
 			_parameters.Add(expr, p);
-			_currentSqlParameters.Add(p);
+			CurrentSqlParameters.Add(p);
 
 			return p;
 		}
@@ -1346,7 +1369,7 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var ctx = GetContext(context, left);
 
-					if (ctx.IsExpression(left, 0, RequestFor.Query) ||
+					if (ctx.IsExpression(left, 0, RequestFor.Object) ||
 						left.NodeType == ExpressionType.Parameter && ctx.IsExpression(left, 0, RequestFor.Field))
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
@@ -1386,8 +1409,8 @@ namespace BLToolkit.Data.Linq.Parser
 			var qsl = GetContext(leftContext,  left);
 			var qsr = GetContext(rightContext, right);
 
-			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Query);
-			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Query);
+			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Object);
+			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Object);
 
 			if (sl == false && sr == false)
 				return null;
@@ -1416,114 +1439,27 @@ namespace BLToolkit.Data.Linq.Parser
 			if (lcols.Length == 0)
 				return null;
 
-			//var rcols = qsr != null ? qsr.ConvertToSql(right, 0, ConvertFlags.Key) : null;
-
 			var condition = new SqlQuery.SearchCondition();
-			//var ta        = TypeAccessor.GetAccessor(right.Type != typeof(object) ? right.Type : left.Type);
 
-			foreach (var col in lcols)
+			foreach (var lcol in lcols)
 			{
-				var field = col as SqlField;
-
-				for (var f = col; field == null; )
-				{
-					throw new NotImplementedException();
-				}
-
-				var mi = field.MemberMapper.MemberAccessor.MemberInfo;
+				if (lcol.Member == null)
+					throw new InvalidOperationException();
 
 				ISqlExpression rcol = null;
 
 				if (sr)
-				{
-					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, mi), 0, ConvertFlags.Field).Single();
-
-					/*
-					var column = rcol as QueryField.Column;
-
-					if (column == null && rcol is QueryField.SubQueryColumn)
-					{
-						var sc = rcol as QueryField.SubQueryColumn;
-
-						while (sc != null)
-						{
-							column = sc.Field as QueryField.Column;
-							if (column != null)
-								break;
-							sc = sc.Field as QueryField.SubQueryColumn;
-						}
-					}
-
-					if (column != null && column.Table.ParentAssociation != null)
-					{
-						foreach (var c in column.Table.ParentAssociationJoin.Condition.Conditions)
-						{
-							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-							if (ee.Expr2 == column.Field)
-							{
-								var fld = rightQueries[0].GetField((SqlField)ee.Expr1);
-
-								if (fld != null)
-								{
-									rcol = fld;
-									break;
-								}
-}
-						}
-					}
-					*/
-				}
-
-				var lcol = col; //GetField(leftLambda, Expression.MakeMemberAccess(left, mi), leftQueries);
-
-				/*
-				{
-					var column = lcol as QueryField.Column;
-
-					if (column == null && lcol is QueryField.SubQueryColumn)
-					{
-						var sc = lcol as QueryField.SubQueryColumn;
-
-						while (sc != null)
-						{
-							column = sc.Field as QueryField.Column;
-							if (column != null)
-								break;
-							sc = sc.Field as QueryField.SubQueryColumn;
-						}
-					}
-
-					if (column != null && column.Table.ParentAssociation != null)
-					{
-						foreach (var c in column.Table.ParentAssociationJoin.Condition.Conditions)
-						{
-							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-							if (ee.Expr2 == column.Field)
-							{
-								var fld = leftQueries[0].GetField((SqlField)ee.Expr1);
-
-								if (fld != null)
-								{
-									lcol = fld;
-									break;
-								}
-							}
-						}
-					}
-				}
-				*/
+					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lcol.Member), 0, ConvertFlags.Field).Single().Sql;
 
 				var rex =
 					isNull ?
 						new SqlValue(right.Type, null) :
 						sr ?
 							rcol :
-							GetParameter(right, mi);
+							GetParameter(right, lcol.Member);
 
 				var predicate = Convert(leftContext, new SqlQuery.Predicate.ExprExpr(
-					lcol,
+					lcol.Sql,
 					nodeType == ExpressionType.Equal ? SqlQuery.Predicate.Operator.Equal : SqlQuery.Predicate.Operator.NotEqual,
 					rex));
 
@@ -1597,7 +1533,7 @@ namespace BLToolkit.Data.Linq.Parser
 			};
 
 			_parameters.Add(expr, p);
-			_currentSqlParameters.Add(p);
+			CurrentSqlParameters.Add(p);
 
 			return p.SqlParameter;
 		}
@@ -1976,8 +1912,10 @@ namespace BLToolkit.Data.Linq.Parser
 			if (func != null)
 			{
 				ParentContext.Insert(0, context);
+				SubQueryParsingCounter++;
 				cond = func();
-				ParentContext.RemoveAt(0);
+				SubQueryParsingCounter--;
+				//ParentContext.RemoveAt(0);
 			}
 
 			return cond;

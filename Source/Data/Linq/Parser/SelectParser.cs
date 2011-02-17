@@ -42,88 +42,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 			switch (body.NodeType)
 			{
-				case ExpressionType.Parameter  :
-					// .Select(p => p)
-					//
-					//if (body == selector.Parameters[0])
-					//	return sequence;
-
-					//foreach (var parent in parser.ParentContext)
-					//	if (parent.IsExpression(body, 0, RequestFor.Root))
-					//		return parent;
-
+				case ExpressionType.Parameter : break;
+				default                       :
+					sequence = CheckSubQueryForSelect(sequence);
 					break;
-					//throw new InvalidOperationException();
-
-				case ExpressionType.MemberAccess:
-					{
-						sequence = CheckSubQueryForSelect(sequence);
-
-						/*
-						var src = GetSource(l, l.Body, sources);
-
-						if (src != null)
-						{
-							src = _convertSource(src, l);
-
-							if (CurrentSql.From.Tables.Count == 0)
-							{
-								var table = src as QuerySource.Table;
-
-								if (table != null)
-								{
-									while (table.ParentAssociation != null)
-										table = table.ParentAssociation;
-
-									CurrentSql = table.SqlQuery;
-								}
-							}
-
-							if (src.Lambda == null && src is QuerySource.SubQuerySourceColumn)
-								src = new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
-
-							return src;
-						}
-						*/
-					}
-
-					goto default;
-
-				case ExpressionType.New        :
-					{
-						sequence = CheckSubQueryForSelect(sequence);
-
-						/*
-						if (_sequenceNumber > 1)
-						{
-							var pie = ConvertNew((NewExpression)l.Body);
-							if (pie != null)
-								return ParseSelect(new LambdaInfo(pie, l.Parameters), sources)[0];
-						}
-
-						return new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
-						*/
-
-						break;
-					}
-
-				case ExpressionType.MemberInit :
-					{
-						sequence = CheckSubQueryForSelect(sequence);
-						//return new QuerySource.Expr(CurrentSql, l, Concat(sources, ParentQueries));
-						break;
-					}
-
-				default                        :
-					{
-						sequence = CheckSubQueryForSelect(sequence);
-						//var scalar = new QuerySource.Scalar(CurrentSql, l, Concat(sources, ParentQueries));
-						//return scalar.Fields[0] is QuerySource ? (QuerySource)scalar.Fields[0] : scalar;
-						break;
-					}
 			}
 
-			return selector.Parameters.Count == 1 ? new SelectContext (selector, sequence) : new SelectContext2(selector, sequence);
+			return selector.Parameters.Count == 1 ? new SelectContext(selector, sequence) : new SelectContext2(selector, sequence);
 		}
 
 		static IParseContext CheckSubQueryForSelect(IParseContext context)
@@ -149,7 +74,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				var expr = this.BuildExpression(null, 0);
 
 				var mapper = Expression.Lambda<Func<int,QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []

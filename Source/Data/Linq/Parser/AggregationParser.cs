@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Parser
@@ -11,17 +12,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			if (!methodCall.IsQueryable())
-				return false;
-
-			switch (methodCall.Method.Name)
-			{
-				case "Average" :
-				case "Min"     :
-				case "Max"     :
-				case "Sum"     : return true;
-				default        : return false;
-			}
+			return methodCall.IsQueryable("Average", "Min", "Max", "Sum");
 		}
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
@@ -63,7 +54,7 @@ namespace BLToolkit.Data.Linq.Parser
 					new SqlFunction(
 						methodCall.Type,
 						methodCall.Method.Name,
-						sequence.ConvertToSql(null, 0, ConvertFlags.Field)));
+						sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
 
 				return context;
 			}
@@ -103,7 +94,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
@@ -115,7 +106,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}

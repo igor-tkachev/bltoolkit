@@ -422,7 +422,11 @@ namespace BLToolkit.TypeBuilder
 					{
 						var a = ass[i];
 
-						if (!(a is _AssemblyBuilder) &&
+						if (!(
+#if FW4
+							a.IsDynamic ||
+#endif
+							a is _AssemblyBuilder) &&
 							(a.CodeBase.IndexOf("Microsoft.NET/Framework") > 0 || a.FullName.StartsWith("System."))) continue;
 
 						type = a.GetType(typeName);

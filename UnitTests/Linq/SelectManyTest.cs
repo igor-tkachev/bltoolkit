@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+
 using BLToolkit.Data.DataProvider;
-using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -21,10 +22,19 @@ namespace Data.Linq
 				var q = db.Person.Select(p => p);
 
 				return db.Person
-					.SelectMany(p1 => q/*db.Person.Select(p => p)*/, (p1, p2) => new { p1, p2 })
-					.Where(t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
-					.Select(t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName });
+					.SelectMany(p1 => q, (p1, p2) => new { p1, p2 })
+					.Where     (t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
+					.Select    (t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName });
 			});
+		}
+
+		[Test]
+		public void Test11()
+		{
+			TestJohn(db => db.Person
+				.SelectMany(p1 => db.Person.Select(p => p), (p1, p2) => new { p1, p2 })
+				.Where     (t => t.p1.ID == t.p2.ID && t.p1.ID == 1)
+				.Select    (t => new Person { ID = t.p1.ID, FirstName = t.p2.FirstName }));
 		}
 
 		[Test]
@@ -156,9 +166,25 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void OneParam()
+		public void OneParam1()
 		{
 			TestJohn(db => db.Person.SelectMany(p => db.Person).Where(t => t.ID == 1).Select(t => t));
+		}
+
+		[Test]
+		public void OneParam2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children).Where(t => t.ParentID == 1).Select(t => t),
+				db.Parent.SelectMany(p => p.Children).Where(t => t.ParentID == 1).Select(t => t)));
+		}
+
+		[Test]
+		public void OneParam3()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				   Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t),
+				db.Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t)));
 		}
 
 		[Test]
@@ -175,12 +201,10 @@ namespace Data.Linq
 		[Test]
 		public void SelectManyLeftJoin1()
 		{
-			var expected =
-				from p in Parent
+			ForEachProvider(db => Assert.AreEqual(
+				(from p in Parent
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
-				select new { p.Value1, o = c };
-
-			ForEachProvider(db => Assert.AreEqual(expected.Count(),
+				select new { p.Value1, o = c }).Count(),
 				(from p in db.Parent
 				from c in p.Children.Select(o => new { o.ChildID, p.ParentID }).DefaultIfEmpty()
 				select new { p.Value1, o = c }).AsEnumerable().Count()));
@@ -190,7 +214,7 @@ namespace Data.Linq
 		public void SelectManyLeftJoin2()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in Parent
+				from p in    Parent
 				from ch in (from c in    Child where p.ParentID == c.ParentID select c).DefaultIfEmpty()
 				select ch,
 				from p in db.Parent
@@ -295,7 +319,7 @@ namespace Data.Linq
 		[Test]
 		public void Test5()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.Access }, db =>
 			{
 				var q3 =
 					from p in db.Parent
@@ -310,7 +334,7 @@ namespace Data.Linq
 		[Test]
 		public void Test6()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.Access }, db =>
 			{
 				var q3 =
 					from p in db.Parent

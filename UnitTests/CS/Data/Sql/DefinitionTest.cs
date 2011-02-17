@@ -15,10 +15,11 @@ namespace Data.Sql
 
 		static class Tables
 		{
-			public static SqlTable Order = new SqlTable
+			public static readonly SqlTable Order = new SqlTable
 			{
-				Name   = "Order",
-				Fields =
+				Name         = "Order",
+				PhysicalName = "Order",
+				Fields       =
 				{
 					new SqlField { Name = "ID", PhysicalName = "OrderID" }
 				},
@@ -32,11 +33,12 @@ namespace Data.Sql
 				}
 			};
 
-			public static SqlTable OrderItem = new SqlTable
+			public static readonly SqlTable OrderItem = new SqlTable
 			{
-				Name   = "OrderItem",
-				Alias  = "oi",
-				Fields =
+				Name         = "OrderItem",
+				PhysicalName = "OrderItem",
+				Alias        = "oi",
+				Fields       =
 				{
 					new SqlField { Name = "OrderID" },
 					new SqlField { Name = "ID", PhysicalName = "OrderItemID" }
@@ -48,10 +50,10 @@ namespace Data.Sql
 		{
 			static readonly ExtensionList _ext = TypeExtension.GetExtensions("DefinitionData.xml");
 
-			public static SqlTable Order     = new SqlTable(_ext, "Order");
-			public static SqlTable Order2    = new SqlTable(_ext, "Order2") { Name = "Order" };
-			public static SqlTable Order3    = new SqlTable(_ext, "Order3") { Name = "Order" };
-			public static SqlTable OrderItem = new SqlTable(_ext, "OrderItem");
+			public static readonly SqlTable Order     = new SqlTable(_ext, "Order");
+			public static readonly SqlTable Order2    = new SqlTable(_ext, "Order2") { Name = "Order", PhysicalName = "Order" };
+			public static readonly SqlTable Order3    = new SqlTable(_ext, "Order3") { Name = "Order", PhysicalName = "Order" };
+			public static readonly SqlTable OrderItem = new SqlTable(_ext, "OrderItem");
 		}
 
 		public class Types
@@ -67,7 +69,7 @@ namespace Data.Sql
 				[MapField("OrderItemID")] public int ID;
 			}
 
-			public static SqlTable OrderTable = new SqlTable<Order>()
+			public static SqlTable OrderTable = new SqlTable<Order>
 			{
 				Joins =
 				{
@@ -78,7 +80,7 @@ namespace Data.Sql
 					}
 				}
 			};
-			public static SqlTable OrderItemTable = new SqlTable<OrderItem>() { Alias = "oi"};
+			public static SqlTable OrderItemTable = new SqlTable<OrderItem> { Alias = "oi" };
 		}
 
 		#endregion
@@ -106,7 +108,7 @@ namespace Data.Sql
 				Assert.AreEqual(j1.Alias,         j2.Alias);
 				Assert.AreEqual(j1.JoinOns.Count, j2.JoinOns.Count);
 
-				for (int j = 0; j < j1.JoinOns.Count; j++)
+				for (var j = 0; j < j1.JoinOns.Count; j++)
 				{
 					Assert.AreEqual(j1.JoinOns[j].Field,      j2.JoinOns[j].Field);
 					Assert.AreEqual(j1.JoinOns[j].OtherField, j2.JoinOns[j].OtherField);

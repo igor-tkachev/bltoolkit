@@ -18,14 +18,56 @@ namespace BLToolkit.Data.Linq
 	using Parser;
 	using Reflection;
 
-	public class Query<T>
+	public abstract class Query
+	{
+		#region Init
+
+		public abstract void Init(IParseContext parseContext, List<ParameterAccessor> sqlParameters);
+
+		#endregion
+
+		#region Compare
+
+		public string        ContextID;
+		public Expression    Expression;
+		public MappingSchema MappingSchema;
+
+		public bool Compare(string contextID, MappingSchema mappingSchema, Expression expr)
+		{
+			return
+				ContextID.Length == contextID.Length &&
+				ContextID        == contextID        &&
+				MappingSchema    == mappingSchema    &&
+				ExpressionHelper.Compare(Expression, expr, _queryableAccessorDic);
+		}
+
+		readonly Dictionary<Expression,Func<Expression,IQueryable>> _queryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
+		readonly List<Func<Expression,IQueryable>>                  _queryableAccessorList = new List<Func<Expression,IQueryable>>();
+
+		public int AddQueryableAccessors(Expression expr, Func<Expression,IQueryable> qe)
+		{
+			_queryableAccessorDic. Add(expr, qe);
+			_queryableAccessorList.Add(qe);
+
+			return _queryableAccessorList.Count - 1;
+		}
+
+		public Expression GetIQueryable(int n, Expression expr)
+		{
+			return _queryableAccessorList[n](expr).Expression;
+		}
+
+		#endregion
+	}
+
+	public class Query<T> : Query
 	{
 		public Query()
 		{
 			GetIEnumerable = MakeEnumerable;
 		}
 
-		public Query(IParseContext parseContext, List<ParameterAccessor> sqlParameters)
+		public override void Init(IParseContext parseContext, List<ParameterAccessor> sqlParameters)
 		{
 			Queries.Add(new QueryInfo
 			{
@@ -43,10 +85,7 @@ namespace BLToolkit.Data.Linq
 		#region Properties & Fields
 
 		public Query<T>              Next;
-		public Expression            Expression;
 		public ParameterExpression[] CompiledParameters;
-		public string                ContextID;
-		public MappingSchema         MappingSchema;
 		public List<QueryInfo>       Queries = new List<QueryInfo>(1);
 		public Func<ISqlProvider>    CreateSqlProvider;
 
@@ -87,7 +126,7 @@ namespace BLToolkit.Data.Linq
 					{
 
 #if NEW_PARSER
-						query = new ExpressionParser(dataContextInfo, expr, null).Parse<T>();
+						query = new ExpressionParser(new Query<T>(), dataContextInfo, expr, null).Parse<T>();
 #else
 						query = new ExpressionParserOld<T>().Parse(
 							dataContextInfo.ContextID,
@@ -647,35 +686,6 @@ namespace BLToolkit.Data.Linq
 				case ElementMethod.Single          : GetElement = (ctx, db, expr, ps) => GetIEnumerable(ctx, db, expr, ps).Single();          break;
 				case ElementMethod.SingleOrDefault : GetElement = (ctx, db, expr, ps) => GetIEnumerable(ctx, db, expr, ps).SingleOrDefault(); break;
 			}
-		}
-
-		#endregion
-
-		#region Compare
-
-		public bool Compare(string contextID, MappingSchema mappingSchema, Expression expr)
-		{
-			return
-				ContextID.Length == contextID.Length &&
-				ContextID        == contextID        &&
-				MappingSchema    == mappingSchema    &&
-				ExpressionHelper.Compare(Expression, expr, _queryableAccessorDic);
-		}
-
-		readonly Dictionary<Expression,Func<Expression,IQueryable>> _queryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
-		readonly List<Func<Expression,IQueryable>>                  _queryableAccessorList = new List<Func<Expression,IQueryable>>();
-
-		public int AddQueryableAccessors(Expression expr, Func<Expression,IQueryable> qe)
-		{
-			_queryableAccessorDic. Add(expr, qe);
-			_queryableAccessorList.Add(qe);
-
-			return _queryableAccessorList.Count - 1;
-		}
-
-		public Expression GetIQueryable(int n, Expression expr)
-		{
-			return _queryableAccessorList[n](expr).Expression;
 		}
 
 		#endregion

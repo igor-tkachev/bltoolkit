@@ -938,5 +938,22 @@ namespace Update
 				}
 			});
 		}
+
+
+		private static readonly Func<TestDbManager,int,string,int> _updateQuery =
+			CompiledQuery.Compile   <TestDbManager,int,string,int>((ctx,key,value) =>
+				ctx.Person
+					.Where(_ => _.ID == key)
+					.Set(_ => _.FirstName, value)
+					.Update());
+
+		[Test]
+		public void CompiledUpdate()
+		{
+			using (var ctx = new TestDbManager())
+			{
+				_updateQuery(ctx, 12345, "54321");
+			}
+		}
 	}
 }

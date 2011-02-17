@@ -43,15 +43,15 @@ namespace BLToolkit.Data.Linq.Parser
 			query.SetQuery(mapper.Compile());
 		}
 
-		public abstract Expression       BuildExpression(Expression expression, int level);
-		public abstract ISqlExpression[] ConvertToSql   (Expression expression, int level, ConvertFlags flags);
-		public abstract int[]            ConvertToIndex (Expression expression, int level, ConvertFlags flags);
-		public abstract bool             IsExpression   (Expression expression, int level, RequestFor requestFlag);
-		public abstract IParseContext    GetContext     (Expression expression, int level, SqlQuery currentSql);
+		public abstract Expression    BuildExpression(Expression expression, int level);
+		public abstract SqlInfo[]     ConvertToSql   (Expression expression, int level, ConvertFlags flags);
+		public abstract SqlInfo[]     ConvertToIndex (Expression expression, int level, ConvertFlags flags);
+		public abstract bool          IsExpression   (Expression expression, int level, RequestFor requestFlag);
+		public abstract IParseContext GetContext     (Expression expression, int level, SqlQuery currentSql);
 
 		public virtual int ConvertToParentIndex(int index, IParseContext context)
 		{
-			return Parent == null ? index : Parent.ConvertToParentIndex(index, this);
+			return Parent == null ? index : Parent.ConvertToParentIndex(index, context);
 		}
 
 		public virtual void SetAlias(string alias)
