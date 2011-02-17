@@ -76,6 +76,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true);
 
+				return new SelectContext(resultSelector, context, col);
 				return new SelectContext(resultSelector, sequence, col);
 			}
 
@@ -127,6 +128,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false);
 
+					return new SelectContext(resultSelector, context, col);
 					return new SelectContext(resultSelector, sequence, col);
 				}
 			}
@@ -140,6 +142,24 @@ namespace BLToolkit.Data.Linq.Parser
 				: base(lambda, sequence)
 			{
 			}
+
+			/*
+			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			{
+				if (expression == null || level == 0 && expression == Body)
+				{
+					switch (requestFlag)
+					{
+						case RequestFor.Object      : return true;
+						case RequestFor.Association :
+						case RequestFor.Field       :
+						case RequestFor.Expression  : return false;
+					}
+				}
+
+				return base.IsExpression(expression, level, requestFlag);
+			}
+			*/
 		}
 	}
 }

@@ -12,7 +12,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			if (!methodCall.IsQueryable("Join") || methodCall.Arguments.Count != 5)
+			if (!methodCall.IsQueryable("Join", "GroupJoin") || methodCall.Arguments.Count != 5)
 				return false;
 
 			var body = ((LambdaExpression)methodCall.Arguments[2].Unwrap()).Body.Unwrap();
@@ -36,6 +36,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
+			var isGroup      = methodCall.Method.Name == "GroupJoin";
 			var outerContext = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
 			var innerContext = parser.ParseSequence(methodCall.Arguments[1], new SqlQuery());
 
@@ -119,10 +120,12 @@ namespace BLToolkit.Data.Linq.Parser
 						.Expr(parser.ParseExpression(innerKeyContext, innerKeySelector));
 			}
 
-			return new JoinContext(selector, outerContext, innerContext, sql);
+			return isGroup ?
+				new GroupJoinContext(selector, outerContext, innerContext, sql) :
+				new      JoinContext(selector, outerContext, innerContext, sql);
 		}
 
-		class JoinContext : SelectContext
+		internal class JoinContext : SelectContext
 		{
 			public JoinContext(LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
 				: base(lambda, outerContext, innerContext)
@@ -156,6 +159,14 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var idx = GetIndex(context.SqlQuery.Select.Columns[index]);
 				return Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+			}
+		}
+
+		public class GroupJoinContext : JoinContext
+		{
+			public GroupJoinContext(LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
+				: base(lambda, outerContext, innerContext, sql)
+			{
 			}
 		}
 	}

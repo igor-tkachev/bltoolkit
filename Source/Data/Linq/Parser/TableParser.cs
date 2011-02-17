@@ -52,7 +52,7 @@ namespace BLToolkit.Data.Linq.Parser
 					if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
 					{
 						var ctx = parser.GetContext(null, expression);
-						if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Association))
+						if (ctx != null)
 							return action(4, ctx);
 					}
 
@@ -82,7 +82,10 @@ namespace BLToolkit.Data.Linq.Parser
 					case 1 : return new TableContext(parser, expression, sqlQuery, ((IQueryable)((ConstantExpression)expression).Value).ElementType);
 					case 2 :
 					case 3 : return new TableContext(parser, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
-					case 4 : return ctx.GetContext(expression, 0, sqlQuery);
+					case 4 :
+						return ctx.IsExpression(expression, 0, RequestFor.Association) ?
+							ctx.GetContext(expression, 0, sqlQuery) :
+							ctx;
 				}
 
 				throw new InvalidOperationException();
