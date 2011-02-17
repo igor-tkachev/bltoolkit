@@ -1664,6 +1664,16 @@ namespace BLToolkit.Linq
 			return method.Method.Name == name && method.IsQueryable();
 		}
 
+		static public bool IsQueryable(this MethodCallExpression method, params string[] names)
+		{
+			if (method.IsQueryable())
+				foreach (var name in names)
+					if (method.Method.Name == name)
+						return true;
+
+			return false;
+		}
+
 		static Expression FindLevel(Expression expression, int level, ref int current)
 		{
 			switch (expression.NodeType)

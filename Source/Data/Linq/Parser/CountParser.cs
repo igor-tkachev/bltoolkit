@@ -11,15 +11,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			if (!methodCall.IsQueryable())
-				return false;
-
-			switch (methodCall.Method.Name)
-			{
-				case "Count"     :
-				case "LongCount" : return true;
-				default          : return false;
-			}
+			return methodCall.IsQueryable("Count", "LongCount");
 		}
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)

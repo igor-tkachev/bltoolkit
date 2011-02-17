@@ -12,17 +12,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			if (!methodCall.IsQueryable())
-				return false;
-
-			switch (methodCall.Method.Name)
-			{
-				case "Average" :
-				case "Min"     :
-				case "Max"     :
-				case "Sum"     : return true;
-				default        : return false;
-			}
+			return methodCall.IsQueryable("Average", "Min", "Max", "Sum");
 		}
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)

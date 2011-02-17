@@ -140,7 +140,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					sql.Select.Take(parm);
 
-					var ep = (from pm in _currentSqlParameters where pm.SqlParameter == skip select pm).First();
+					var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
 
 					ep = new ParameterAccessor
 					{
@@ -149,7 +149,7 @@ namespace BLToolkit.Data.Linq.Parser
 						SqlParameter = parm
 					};
 
-					_currentSqlParameters.Add(ep);
+					CurrentSqlParameters.Add(ep);
 				}
 				else
 					sql.Select.Take(Convert(
@@ -978,7 +978,7 @@ namespace BLToolkit.Data.Linq.Parser
 			};
 
 			_parameters.Add(expr, p);
-			_currentSqlParameters.Add(p);
+			CurrentSqlParameters.Add(p);
 
 			return p;
 		}
@@ -1533,7 +1533,7 @@ namespace BLToolkit.Data.Linq.Parser
 			};
 
 			_parameters.Add(expr, p);
-			_currentSqlParameters.Add(p);
+			CurrentSqlParameters.Add(p);
 
 			return p.SqlParameter;
 		}

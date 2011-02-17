@@ -197,7 +197,7 @@ namespace Data.Linq
 			ForEachProvider(db =>
 			{
 				var list = db.Child.Skip(2).Take(5).ToList();
-				Assert.AreEqual( 5, list.Count);
+				Assert.AreEqual(5, list.Count);
 			});
 		}
 

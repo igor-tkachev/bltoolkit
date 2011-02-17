@@ -181,6 +181,7 @@
     <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
     <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
     <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
+    <Compile Include="Data\Linq\Parser\TakeSkipParser.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Parsing.cs" />

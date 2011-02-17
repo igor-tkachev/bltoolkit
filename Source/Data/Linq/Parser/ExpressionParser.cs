@@ -29,6 +29,7 @@ namespace BLToolkit.Data.Linq.Parser
 			new OrderByParser       (),
 			new GroupByParser       (),
 			new JoinParser          (),
+			new TakeSkipParser      (),
 			new DefaultIfEmptyParser(),
 			new DistinctParser      (),
 			new FirstSingleParser   (),
@@ -51,7 +52,8 @@ namespace BLToolkit.Data.Linq.Parser
 		readonly List<ISequenceParser>             _parsers = _sequenceParsers;
 		private  bool                              _reorder;
 		readonly Dictionary<Expression,Expression> _expressionAccessors;
-		readonly List<ParameterAccessor>           _currentSqlParameters = new List<ParameterAccessor>();
+
+		readonly public List<ParameterAccessor>    CurrentSqlParameters = new List<ParameterAccessor>();
 
 		public ExpressionParser(
 			Query                 query,
@@ -111,7 +113,7 @@ namespace BLToolkit.Data.Linq.Parser
 					_sequenceParsers = _sequenceParsers.OrderByDescending(_ => _.ParsingCounter).ToList();
 				}
 
-			_query.Init(sequence, _currentSqlParameters);
+			_query.Init(sequence, CurrentSqlParameters);
 
 			var param = Expression.Parameter(typeof(Query<T>), "info");
 
@@ -123,6 +125,8 @@ namespace BLToolkit.Data.Linq.Parser
 		[JetBrains.Annotations.NotNull]
 		public IParseContext ParseSequence(Expression expression, SqlQuery sqlQuery)
 		{
+			expression = expression.Unwrap();
+
 			var n = _parsers[0].ParsingCounter;
 
 			foreach (var parser in _parsers)
@@ -322,7 +326,7 @@ namespace BLToolkit.Data.Linq.Parser
 								}
 							}
 
-							if (TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
+							if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
 							{
 								var ex = ConvertIQueriable(expr);
 

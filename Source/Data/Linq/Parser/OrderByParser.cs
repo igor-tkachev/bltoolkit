@@ -11,17 +11,8 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			if (!methodCall.IsQueryable())
+			if (!methodCall.IsQueryable("OrderBy", "OrderByDescending", "ThenBy", "ThenByDescending"))
 				return false;
-
-			switch (methodCall.Method.Name)
-			{
-				case "OrderBy"           :
-				case "OrderByDescending" :
-				case "ThenBy"            :
-				case "ThenByDescending"  : break;
-				default                  : return false;
-			}
 
 			var body = ((LambdaExpression)methodCall.Arguments[1].Unwrap()).Body.Unwrap();
 

@@ -367,31 +367,33 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.Key   :
 					case ConvertFlags.All   :
 
-						return ConvertToSql(expression, level, flags)
-							.Select(expr =>
+						var info = ConvertToSql(expression, level, flags);
+
+						for (var i = 0; i < info.Length; i++)
+						{
+							var expr = info[i];
+							
+							SqlInfo n;
+
+							if (_indexes.TryGetValue(expr.Sql, out n))
+								info[i] = n;
+							else
 							{
-								SqlInfo n;
-
-								if (!_indexes.TryGetValue(expr.Sql, out n))
+								if (expr.Sql is SqlField)
 								{
-									n = expr;
-
-									if (expr.Sql is SqlField)
-									{
-										var field = (SqlField)expr.Sql;
-										expr.Index = SqlQuery.Select.Add(field, field.Alias);
-									}
-									else
-									{
-										expr.Index = SqlQuery.Select.Add(expr.Sql);
-									}
-
-									_indexes.Add(expr.Sql, n);
+									var field = (SqlField)expr.Sql;
+									expr.Index = SqlQuery.Select.Add(field, field.Alias);
+								}
+								else
+								{
+									expr.Index = SqlQuery.Select.Add(expr.Sql);
 								}
 
-								return n;
-							})
-							.ToArray();
+								_indexes.Add(expr.Sql, expr);
+							}
+						}
+
+						return info;
 				}
 
 				throw new NotImplementedException();
