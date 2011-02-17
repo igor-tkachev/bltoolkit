@@ -205,6 +205,7 @@ private void LoadServerMetadata()
 					JOIN syscolumns c ON i.id = c.id
 			WHERE
 				i.status2 & 2 = 2 AND
+				i.status & 2048 = 2048 AND
 				i.indid > 0 AND
 				c.colid < i.keycnt + CASE WHEN i.indid = 1 THEN 1 ELSE 0 END";
 
