@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 
 using NUnit.Framework;
-
-using BLToolkit.Reflection;
 
 namespace Reflection
 {
@@ -36,6 +39,49 @@ namespace Reflection
 			var a = TypeAccessor.GetAccessor(o);
 
 			Assert.AreEqual(1, a["Field1"].GetInt32(o));
+		}
+
+		[MapField("MasterId", "Master.MasterId")]
+		public interface IMaster2
+		{
+			[Relation]
+			Master2 Master
+			{
+				get;
+				set;
+			}
+		}
+
+		[TableName("Master")]
+		public abstract class Master2
+		{
+			[PrimaryKey]
+			public abstract int           MasterId  { get; set; }
+			//[Relation(Destination=typeof(Detail2))]
+			public abstract List<Detail2> Details   { get; set; }
+			public abstract string        Name      { get; set; }
+		}
+
+		[TableName("Detail")]
+		public abstract class Detail2 : IMaster2
+		{
+			[PrimaryKey, MapField("Id")]
+			public abstract int           DetailId  { get; set; }
+			public abstract Master2       Master    { get; set; }
+		}
+
+		[Test]
+		public void InterfaceTest()
+		{
+			var ta  = TypeAccessor<IMaster2>.Instance;
+			var ta2 = TypeAccessor<Detail2>.Instance;
+			var d2  = TypeAccessor<Detail2>.CreateInstance();
+
+			var m = ta2["Master"].GetValue(d2); // OK
+			Assert.IsNotNull(m);
+
+			m = ta["Master"].GetValue(d2); // Exception 
+			Assert.IsNotNull(m);
 		}
 	}
 }
