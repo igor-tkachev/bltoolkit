@@ -11,17 +11,22 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		readonly IParseContext _subQuery;
 
-		public SubQueryContext(IParseContext subQuery, bool addToSql)
+		public SubQueryContext(IParseContext subQuery, SqlQuery sqlQuery, bool addToSql)
 		{
 			_subQuery = subQuery;
 			_subQuery.Parent = this;
 
-			SqlQuery = new SqlQuery { ParentSql = _subQuery.SqlQuery.ParentSql };
+			SqlQuery = sqlQuery;
 
 			if (addToSql)
 				SqlQuery.From.Table(_subQuery.SqlQuery);
 
-			_subQuery.SqlQuery.ParentSql = SqlQuery;
+			//_subQuery.SqlQuery.ParentSql = SqlQuery;
+		}
+
+		public SubQueryContext(IParseContext subQuery, bool addToSql)
+			: this(subQuery, new SqlQuery { ParentSql = subQuery.SqlQuery.ParentSql }, addToSql)
+		{
 		}
 
 		public SubQueryContext(IParseContext subQuery)
@@ -31,7 +36,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public ExpressionParser Parser     { get { return _subQuery.Parser;     } }
 		public Expression       Expression { get { return _subQuery.Expression; } }
-		public SqlQuery         SqlQuery   { get; private set; }
+		public SqlQuery         SqlQuery   { get; set; }
 		public IParseContext    Parent     { get; set; }
 
 		public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
@@ -45,19 +50,21 @@ namespace BLToolkit.Data.Linq.Parser
 			//throw new NotImplementedException();
 		}
 
-		public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+		public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			return _subQuery
 				.ConvertToIndex(expression, level, flags)
-				.Select(idx => _subQuery.SqlQuery.Select.Columns[idx])
+				.Select(idx => new SqlInfo { Sql = _subQuery.SqlQuery.Select.Columns[idx.Index], Member = idx.Member })
 				.ToArray();
 		}
 
 		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
 
-		public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
-			return ConvertToSql(expression, level, flags).Select(_ => GetIndex(_)).ToArray();
+			return ConvertToSql(expression, level, flags)
+				.Select(_ => { _.Index = GetIndex(_.Sql); return _; })
+				.ToArray();
 		}
 
 		public bool IsExpression(Expression expression, int level, RequestFor testFlag)
@@ -96,6 +103,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public void SetAlias(string alias)
 		{
+			if (alias.Contains('<'))
+				return;
+
 			if (SqlQuery.From.Tables[0].Alias == null)
 				SqlQuery.From.Tables[0].Alias = alias;
 		}

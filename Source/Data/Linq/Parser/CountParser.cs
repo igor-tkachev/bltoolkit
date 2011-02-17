@@ -63,8 +63,8 @@ namespace BLToolkit.Data.Linq.Parser
 				_returnType = returnType;
 			}
 
-			private  int[] _index;
-			readonly Type  _returnType;
+			private  SqlInfo[] _index;
+			readonly Type      _returnType;
 
 			public int FieldIndex;
 
@@ -87,24 +87,25 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				return Parser.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0]);
+				return Parser.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
 			}
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
-					case ConvertFlags.Field : return new[] { SqlQuery };
+					case ConvertFlags.Field : return new[] { new SqlInfo { Sql = SqlQuery } };
 				}
 
 				throw new NotImplementedException();
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
-					case ConvertFlags.Field : return _index ?? (_index = new[] { Parent.SqlQuery.Select.Add(SqlQuery) });
+					case ConvertFlags.Field :
+						return _index ?? (_index = new[] { new SqlInfo { Index = Parent.SqlQuery.Select.Add(SqlQuery) } });
 				}
 
 				throw new NotImplementedException();

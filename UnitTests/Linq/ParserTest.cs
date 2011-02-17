@@ -629,7 +629,7 @@ namespace Data.Linq
 
 				Assert.AreEqual        (1, sql.Length);
 				Assert.IsAssignableFrom(typeof(SqlField), sql[0]);
-				Assert.AreEqual        ("ParentID", ((SqlField)sql[0]).Name);
+				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
 			}
 		}
 
@@ -682,7 +682,7 @@ namespace Data.Linq
 
 				Assert.AreEqual        (1, sql.Length);
 				Assert.IsAssignableFrom(typeof(SqlField), sql[0]);
-				Assert.AreEqual        ("ParentID", ((SqlField)sql[0]).Name);
+				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
 			}
 		}
 
@@ -701,7 +701,7 @@ namespace Data.Linq
 
 				Assert.AreEqual        (1, sql.Length);
 				Assert.IsAssignableFrom(typeof(SqlField), sql[0]);
-				Assert.AreEqual        ("ParentID", ((SqlField)sql[0]).Name);
+				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
 			}
 		}
 
@@ -806,7 +806,7 @@ namespace Data.Linq
 			public IParseContext    Sequence   { get; set; }
 			public ExpressionParser Parser     { get { return Sequence.Parser; } }
 			public Expression       Expression { get; set; }
-			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } }
+			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } set { Sequence.SqlQuery = value; } }
 			public IParseContext    Parent     { get; set; }
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
@@ -819,12 +819,12 @@ namespace Data.Linq
 				return Sequence.BuildExpression(expression, level);
 			}
 
-			public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				return Sequence.ConvertToSql(expression, level, flags);
 			}
 
-			public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				return Sequence.ConvertToIndex(expression, level, flags);
 			}

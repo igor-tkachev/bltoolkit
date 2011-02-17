@@ -59,7 +59,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			foreach (var expr in sql)
 			{
-				var e = expr;
+				var e = expr.Sql;
 
 				if (e is SqlQuery.SearchCondition)
 				{

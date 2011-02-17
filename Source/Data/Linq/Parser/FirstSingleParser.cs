@@ -38,7 +38,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var take = 0;
 
-			if (!parser.IsSubQueryParsing || parser.SqlProvider.IsSubQueryTakeSupported)
+			if (parser.SubQueryParsingCounter == 0 || parser.SqlProvider.IsSubQueryTakeSupported)
 				switch (methodCall.Method.Name)
 				{
 					case "First"           :
@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					case "Single"          :
 					case "SingleOrDefault" :
-						if (!parser.IsSubQueryParsing)
+						if (parser.SubQueryParsingCounter == 0)
 							take = 2;
 							break;
 				}
@@ -90,12 +90,12 @@ namespace BLToolkit.Data.Linq.Parser
 				//return Sequence.BuildExpression(expression, level + 1);
 			}
 
-			public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				return Sequence.ConvertToSql(expression, level + 1, flags);
 			}
 
-			public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}
