@@ -134,9 +134,11 @@
       <DependentUpon>Convert.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
+    <Compile Include="Data\Linq\Parser\AsQueryableParser.cs" />
     <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
     <Compile Include="Data\Linq\Parser\AggregationParser.cs" />
     <Compile Include="Data\Linq\Parser\CountParser.cs" />
+    <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
     <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.QueryBuilding.cs" />
     <Compile Include="Data\Linq\Parser\GroupByParser.cs" />
@@ -147,6 +149,9 @@
     <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
     <Compile Include="Data\Linq\Parser\ScalarSelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SelectContext.cs" />
+    <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
+    <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
+    <Compile Include="Data\Linq\Parser\TakeSkipParser.cs" />
     <Compile Include="Data\Linq\Parser\WhereParser.cs" />
     <Compile Include="Data\Linq\Parser\DistinctParser.cs" />
     <Compile Include="Data\Linq\Parser\IParseContext.cs" />
