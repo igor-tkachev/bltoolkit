@@ -76,8 +76,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true);
 
-				return new SelectContext(resultSelector, context, col);
-				//return new SelectContext(resultSelector, sequence, col);
+				return new SelectContext(resultSelector, sequence, col);
 			}
 
 			//if (crossApply)
@@ -128,8 +127,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false);
 
-					return new SelectContext(resultSelector, context, col);
-					//return new SelectContext(resultSelector, sequence, col);
+					return new SelectContext(resultSelector, sequence, col);
 				}
 			}
 
