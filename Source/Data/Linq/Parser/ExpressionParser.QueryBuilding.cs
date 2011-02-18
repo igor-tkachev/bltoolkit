@@ -95,6 +95,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 					case ExpressionType.Parameter:
 						{
+							if (pi == ParametersParam)
+								break;
+
 							var ctx = GetContext(context, pi);
 
 							if (ctx != null)
@@ -111,9 +114,6 @@ namespace BLToolkit.Data.Linq.Parser
 							{
 								return Expression.MakeMemberAccess(_contextParam, QueryCtx.Counter);
 							}
-
-							if (pi == ParametersParam)
-								return pi;
 
 							var field = query.GetBaseField(lambda, pi);
 
@@ -274,7 +274,7 @@ namespace BLToolkit.Data.Linq.Parser
 									throw new NotImplementedException();
 
 								//ctx.SqlQuery.Select.Columns.Clear();
-								ctx.SqlQuery.Select.Add(sql[0]);
+								ctx.SqlQuery.Select.Add(sql[0].Sql);
 
 								var idx = context.SqlQuery.Select.Add(ctx.SqlQuery);
 

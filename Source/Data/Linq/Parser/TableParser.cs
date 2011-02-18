@@ -43,15 +43,16 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 
 				case ExpressionType.MemberAccess:
+
 					if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
 						return action(3, null);
 
 					// Looking for association.
 					//
-					if (parser.IsSubQueryParsing && sqlQuery.From.Tables.Count == 0)
+					if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
 					{
 						var ctx = parser.GetContext(null, expression);
-						if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Association))
+						if (ctx != null)
 							return action(4, ctx);
 					}
 
@@ -81,14 +82,17 @@ namespace BLToolkit.Data.Linq.Parser
 					case 1 : return new TableContext(parser, expression, sqlQuery, ((IQueryable)((ConstantExpression)expression).Value).ElementType);
 					case 2 :
 					case 3 : return new TableContext(parser, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
-					case 4 : return ctx.GetContext(expression, 0, sqlQuery);
+					case 4 :
+						return ctx.IsExpression(expression, 0, RequestFor.Association) ?
+							ctx.GetContext(expression, 0, sqlQuery) :
+							ctx;
 				}
 
 				throw new InvalidOperationException();
 			});
 		}
 
-		class TableContext : IParseContext
+		public class TableContext : IParseContext
 		{
 			protected Type         OriginalType;
 			public    Type         ObjectType;
@@ -97,7 +101,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public ExpressionParser Parser     { get; private set; }
 			public Expression       Expression { get; private set; }
-			public SqlQuery         SqlQuery   { get; private set; }
+			public SqlQuery         SqlQuery   { get; set; }
 			public IParseContext    Parent     { get; set; }
 
 			public TableContext(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Type originalType)
@@ -256,11 +260,11 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				// Get indexes for all fields.
 				//
-				var index = ConvertToIndex(null, 0, ConvertFlags.All);
+				var info = ConvertToIndex(null, 0, ConvertFlags.All);
 
 				// Convert to parent indexes.
 				//
-				index = index.Select(idx => ConvertToParentIndex(idx, null)).ToArray();
+				var index = info.Select(idx => ConvertToParentIndex(idx.Index, null)).ToArray();
 
 				// Build an expression.
 				//
@@ -295,14 +299,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 				// Build field.
 				//
-				var idx = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
-
-				idx = ConvertToParentIndex(idx, null);
+				var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
+				var idx  = ConvertToParentIndex(info.Index, null);
 
 				return Parser.BuildSql(expression.Type, idx);
 			}
 
-			public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
@@ -311,7 +314,9 @@ namespace BLToolkit.Data.Linq.Parser
 							var table = FindTable(expression, level);
 
 							if (table.Field == null)
-								return table.Table.SqlTable.Fields.Values.ToArray();
+								return table.Table.SqlTable.Fields.Values
+									.Select(_ => new SqlInfo { Sql = _, Member = _.MemberMapper.MemberAccessor.MemberInfo })
+									.ToArray();
 
 							break;
 						}
@@ -321,7 +326,15 @@ namespace BLToolkit.Data.Linq.Parser
 							var table = FindTable(expression, level);
 
 							if (table.Field == null)
-								return table.Table.SqlTable.GetKeys(true).ToArray();
+							{
+								var q =
+									from f in table.Table.SqlTable.Fields.Values
+									where f.IsPrimaryKey
+									orderby f.PrimaryKeyOrder
+									select new SqlInfo { Sql = f, Member = f.MemberMapper.MemberAccessor.MemberInfo };
+
+								return q.ToArray();
+							}
 
 							break;
 						}
@@ -331,7 +344,14 @@ namespace BLToolkit.Data.Linq.Parser
 							var table = FindTable(expression, level);
 
 							if (table.Field != null)
-								return new[] { table.Field };
+								return new[]
+								{
+									new SqlInfo
+									{
+										Sql    = table.Field,
+										Member = table.Field.MemberMapper.MemberAccessor.MemberInfo
+									}
+								};
 
 							break;
 						}
@@ -340,9 +360,9 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
+			readonly Dictionary<ISqlExpression,SqlInfo> _indexes = new Dictionary<ISqlExpression,SqlInfo>();
 
-			public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
 				{
@@ -350,29 +370,33 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.Key   :
 					case ConvertFlags.All   :
 
-						return ConvertToSql(expression, level, flags)
-							.Select(expr =>
+						var info = ConvertToSql(expression, level, flags);
+
+						for (var i = 0; i < info.Length; i++)
+						{
+							var expr = info[i];
+							
+							SqlInfo n;
+
+							if (_indexes.TryGetValue(expr.Sql, out n))
+								info[i] = n;
+							else
 							{
-								int n;
-
-								if (!_indexes.TryGetValue(expr, out n))
+								if (expr.Sql is SqlField)
 								{
-									if (expr is SqlField)
-									{
-										var field = (SqlField)expr;
-										n = SqlQuery.Select.Add(field, field.Alias);
-									}
-									else
-									{
-										n = SqlQuery.Select.Add(expr);
-									}
-
-									_indexes.Add(expr, n);
+									var field = (SqlField)expr.Sql;
+									expr.Index = SqlQuery.Select.Add(field, field.Alias);
+								}
+								else
+								{
+									expr.Index = SqlQuery.Select.Add(expr.Sql);
 								}
 
-								return n;
-							})
-							.ToArray();
+								_indexes.Add(expr.Sql, expr);
+							}
+						}
+
+						return info;
 				}
 
 				throw new NotImplementedException();
@@ -388,7 +412,7 @@ namespace BLToolkit.Data.Linq.Parser
 							return table != null && table.Field != null;
 						}
 
-					case RequestFor.Query      :
+					case RequestFor.Object      :
 						{
 							var table = FindTable(expression, level);
 							return
@@ -442,12 +466,15 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
-					if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
+					if (Parser.SubQueryParsingCounter > 0)
 					{
-						if (Parser.IsSubQueryParsing)
+						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
 							var association = GetAssociation(expression, level);
-							var table       = new TableContext(Parser, Expression, currentSql, association.Table.ObjectType) { Parent = Parent };
+							var table       = new TableContext(Parser, Expression, currentSql, association.Table.ObjectType)
+							{
+ 								Parent = Parser.ParentContext[0] is SelectManyParser.SelectManyContext ? this : Parent
+ 							};
 
 							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
 							{
@@ -460,8 +487,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 							return table;
 						}
-
-						throw new NotImplementedException();
+						else
+						{
+							var association = GetAssociation(levelExpression, level);
+							return association.Table.GetContext(expression, level + 1, currentSql);
+						}
 					}
 				}
 
@@ -475,6 +505,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public void SetAlias(string alias)
 			{
+				if (alias.Contains('<'))
+					return;
+
 				if (SqlTable.Alias == null)
 					SqlTable.Alias = alias;
 			}

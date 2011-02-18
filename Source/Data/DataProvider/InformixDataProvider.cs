@@ -65,6 +65,10 @@ namespace BLToolkit.Data.DataProvider
 					p.Value  = value;
 					p.Size   = value.Length;
 				}
+				else if (p.Value is bool)
+				{
+					p.Value = ((InformixSqlProvider)SqlProvider).ConvertBooleanValue((bool)p.Value);
+				}
 				//else if (p.DbType == DbType.Binary)
 				//{
 				//	var ip = (IfxParameter)p;

@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new InvalidOperationException();
 		}
 
-		public override ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+		public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			if (level == 0)
 			{
@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Linq.Parser
 										return ctx.ConvertToSql(expression, 0, flags);
 
 									return root == expression ?
-										Sequence.ConvertToSql(null, 0, flags) :
+										Sequence.ConvertToSql(null,       0,         flags) :
 										Sequence.ConvertToSql(expression, level + 1, flags);
 								}
 							}
@@ -63,7 +63,7 @@ namespace BLToolkit.Data.Linq.Parser
 			//return Array<ISqlExpression>.Empty;
 		}
 
-		public override int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			throw new InvalidOperationException();
 		}
@@ -75,7 +75,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case RequestFor.Root        : return expression == Lambda.Parameters[0];
 
 				case RequestFor.Association :
-				case RequestFor.Query       :
+				case RequestFor.Object       :
 				case RequestFor.Field       :
 				case RequestFor.Expression  :
 					{

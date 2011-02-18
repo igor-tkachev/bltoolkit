@@ -168,9 +168,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (IsSubQuery() && IsExpression(null, 0, RequestFor.Expression))
 					{
-						var idx = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
-
-						idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+						var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
+						var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
 						return Parser.BuildSql(expression.Type, idx);
 					}
@@ -219,12 +218,11 @@ namespace BLToolkit.Data.Linq.Parser
 											{
 												if (e != memberExpression)
 												{
-													if (!sequence.IsExpression(e, 0, RequestFor.Query) &&
+													if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
 													    !sequence.IsExpression(e, 0, RequestFor.Field))
 													{
-														var idx = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
-
-														idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+														var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
+														var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
 														return Parser.BuildSql(e.Type, idx);
 													}
@@ -236,12 +234,11 @@ namespace BLToolkit.Data.Linq.Parser
 											});
 									}
 
-									if (!sequence.IsExpression(memberExpression, 0, RequestFor.Query) &&
+									if (!sequence.IsExpression(memberExpression, 0, RequestFor.Object) &&
 									    !sequence.IsExpression(memberExpression, 0, RequestFor.Field))
 									{
-										var idx = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
-
-										idx = Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
+										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
+										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
 										return Parser.BuildSql(expression.Type, idx);
 									}
@@ -260,9 +257,8 @@ namespace BLToolkit.Data.Linq.Parser
 								case ExpressionType.New        :
 								case ExpressionType.MemberInit :
 									{
-										var memberMemberExpresion = expression.GetLevelExpression(level + 1);
-
-										break;
+										var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+										return BuildExpression(mmExpresion, 0);
 									}
 							}
 
@@ -286,21 +282,21 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToSql
 
-		readonly Dictionary<MemberInfo,ISqlExpression[]> _sql = new Dictionary<MemberInfo,ISqlExpression[]>();
+		readonly Dictionary<MemberInfo,SqlInfo[]> _sql = new Dictionary<MemberInfo,SqlInfo[]>();
 
-		public virtual ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+		public virtual SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			if (IsScalar)
 			{
+				if (expression == null)
+					return Parser.ParseExpressions(this, Body, flags);
+
 				switch (flags)
 				{
 					case ConvertFlags.Field :
 					case ConvertFlags.Key   :
 					case ConvertFlags.All   :
 						{
-							if (expression == null)
-								return ConvertToSql(Body, 0, flags);
-
 							if (Body.NodeType == ExpressionType.Parameter)
 							{
 								if (level == 0)
@@ -338,7 +334,7 @@ namespace BLToolkit.Data.Linq.Parser
 									case ExpressionType.Call         :
 										break;
 										//return GetSequence(expression, level).IsExpression(Body, 1, requestFlag);
-									default                          : return new[] { Parser.ParseExpression(this, expression) };
+									default                          : return new[] { new SqlInfo { Sql = Parser.ParseExpression(this, expression) } };
 								}
 							}
 							else
@@ -356,29 +352,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 							break;
 						}
-
-						/*
-						if (Body.NodeType == ExpressionType.Parameter)
-						{
-							if (expression == null)
-								return GetSequence(Body, 0).ConvertToSql(null, 0, flags);
-
-							var levelExpression = expression.GetLevelExpression(level);
-
-							if (levelExpression == expression)
-								return GetSequence(expression, level).ConvertToSql(null, 0, flags);
-						}
-						else
-						{
-							if (expression == null)
-								return new[] { Parser.ParseExpression(this, Body) };
-
-							if (level == 0)
-								return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
-						}
-
-						break;
-						*/
 				}
 			}
 			else
@@ -389,43 +362,6 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.Key   :
 					case ConvertFlags.Field :
 						{
-							if (level != 0)
-							{
-								var levelExpression = expression.GetLevelExpression(level);
-
-								switch (levelExpression.NodeType)
-								{
-									case ExpressionType.MemberAccess :
-										{
-											var member = ((MemberExpression)levelExpression).Member;
-
-											if (levelExpression == expression)
-											{
-												ISqlExpression[] sql;
-
-												if (!_sql.TryGetValue(member, out sql))
-												{
-													sql = ParseExpressions(Members[member], flags);
-													_sql.Add(member, sql);
-												}
-
-												return sql;
-											}
-
-											var memberExpression = Members[member];
-											var parseExpression  = GetParseExpression(expression, levelExpression, memberExpression);
-
-											return ParseExpressions(parseExpression, flags);
-										}
-
-									case ExpressionType.Parameter:
-
-										if (levelExpression != expression)
-											return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
-										break;
-								}
-							}
-
 							if (level == 0)
 							{
 								if (expression == null)
@@ -433,8 +369,9 @@ namespace BLToolkit.Data.Linq.Parser
 									if (flags != ConvertFlags.Field)
 									{
 										var q =
-											from m in Members.Values.Distinct()
-											select ConvertMember(m, flags) into mm
+											from m in Members
+											where !(m.Key is MethodInfo)
+											select ConvertMember(m.Value, flags) into mm
 											from m in mm
 											select m;
 
@@ -456,6 +393,54 @@ namespace BLToolkit.Data.Linq.Parser
 									}
 								}
 							}
+							else
+							{
+								var levelExpression = expression.GetLevelExpression(level);
+
+								switch (levelExpression.NodeType)
+								{
+									case ExpressionType.MemberAccess :
+										{
+											var member = ((MemberExpression)levelExpression).Member;
+
+											if (levelExpression == expression)
+											{
+												SqlInfo[] sql;
+
+												if (!_sql.TryGetValue(member, out sql))
+												{
+													sql = ParseExpressions(Members[member], flags);
+													_sql.Add(member, sql);
+												}
+
+												return sql;
+											}
+
+											var memberExpression = Members[member];
+
+											switch (memberExpression.NodeType)
+											{
+												case ExpressionType.New          :
+												case ExpressionType.MemberInit   :
+													{
+														var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+														return ConvertToSql(mmExpresion, 0, flags);
+													}
+											}
+
+											var parseExpression = GetParseExpression(expression, levelExpression, memberExpression);
+
+											return ParseExpressions(parseExpression, flags);
+										}
+
+									case ExpressionType.Parameter:
+
+										if (levelExpression != expression)
+											return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
+										break;
+								}
+							}
+
 
 							break;
 						}
@@ -465,7 +450,7 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new NotImplementedException();
 		}
 
-		ISqlExpression[] ConvertMember(Expression expression, ConvertFlags flags)
+		SqlInfo[] ConvertMember(Expression expression, ConvertFlags flags)
 		{
 			switch (expression.NodeType)
 			{
@@ -479,18 +464,18 @@ namespace BLToolkit.Data.Linq.Parser
 			return ParseExpressions(expression, flags);
 		}
 
-		ISqlExpression[] ParseExpressions(Expression expression, ConvertFlags flags)
+		SqlInfo[] ParseExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Parser.ParseExpressions(this, expression, flags)
 				.Select(_ => CheckExpression(_))
 				.ToArray();
 		}
 
-		ISqlExpression CheckExpression(ISqlExpression expression)
+		SqlInfo CheckExpression(SqlInfo expression)
 		{
-			if (expression is SqlQuery.SearchCondition)
+			if (expression.Sql is SqlQuery.SearchCondition)
 			{
-				expression = Parser.Convert(this, new SqlFunction(typeof(bool), "CASE", expression, new SqlValue(true), new SqlValue(false)));
+				expression.Sql = Parser.Convert(this, new SqlFunction(typeof(bool), "CASE", expression.Sql, new SqlValue(true), new SqlValue(false)));
 			}
 
 			return expression;
@@ -500,19 +485,34 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToIndex
 
-		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,int[]>();
+		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]>();
 
-		int[] _scalarIndex;
-
-		public virtual int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public virtual SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			if (IsScalar)
 			{
+				if (Body.NodeType == ExpressionType.Parameter)
+					for (var i = 0; i < Sequence.Length; i++)
+						if (Body == Lambda.Parameters[i])
+							return Sequence[i].ConvertToIndex(expression, level, flags);
+
 				if (expression == null)
 				{
-					if (_scalarIndex == null)
-						_scalarIndex = ConvertToSql(expression, 0, flags).Select(_ => GetIndex(_)).ToArray();
-					return _scalarIndex;
+					var member = Tuple.Create((MemberInfo)null, flags);
+
+					SqlInfo[] idx;
+
+					if (!_memberIndex.TryGetValue(member, out idx))
+					{
+						idx = ConvertToSql(expression, 0, flags);
+
+						foreach (var info in idx)
+							info.Index = GetIndex(info.Sql);
+
+						_memberIndex.Add(member, idx);
+					}
+
+					return idx;
 				}
 
 				switch (flags)
@@ -551,7 +551,14 @@ namespace BLToolkit.Data.Linq.Parser
 					case ConvertFlags.Field :
 						{
 							if (level == 0)
-								return Parser.ParseExpressions(this, expression, flags).Select(s => GetIndex(s)).ToArray();
+							{
+								var idx = Parser.ParseExpressions(this, expression, flags);
+
+								foreach (var info in idx)
+									info.Index = GetIndex(info.Sql);
+
+								return idx;
+							}
 
 							var levelExpression = expression.GetLevelExpression(level);
 
@@ -563,16 +570,19 @@ namespace BLToolkit.Data.Linq.Parser
 										{
 											var member = Tuple.Create(((MemberExpression)levelExpression).Member, flags);
 
-											int[] idx;
+											SqlInfo[] idx;
 
 											if (!_memberIndex.TryGetValue(member, out idx))
 											{
-												var sql = ConvertToSql(expression, level, flags);
+												idx = ConvertToSql(expression, level, flags);
 
-												if (flags == ConvertFlags.Field && sql.Length != 1)
+												if (flags == ConvertFlags.Field && idx.Length != 1)
 													throw new InvalidOperationException();
 
-												idx = sql.Select(s => GetIndex(s)).ToArray();
+												foreach (var info in idx)
+												{
+													info.Index = GetIndex(info.Sql);
+												}
 
 												_memberIndex.Add(member, idx);
 											}
@@ -620,17 +630,17 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (IsScalar)
 			{
+				if (expression == null)
+					return IsExpression(Body, 0, requestFlag);
+
 				switch (requestFlag)
 				{
 					default                     : return false;
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
-					case RequestFor.Query       :
+					case RequestFor.Object       :
 						{
-							if (expression == null)
-								return IsExpression(Body, 0, requestFlag);
-
 							if (Body.NodeType == ExpressionType.Parameter)
 							{
 								if (level == 0)
@@ -657,8 +667,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								switch (Body.NodeType)
 								{
-									case ExpressionType.MemberAccess :
-									case ExpressionType.Call         : return GetSequence(expression, level).IsExpression(null, 0, requestFlag);
+									case ExpressionType.MemberAccess : return GetSequence(expression, level).IsExpression(null, 0, requestFlag);
 									default                          : return requestFlag == RequestFor.Expression;
 								}
 							}
@@ -687,14 +696,14 @@ namespace BLToolkit.Data.Linq.Parser
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
-					case RequestFor.Query       :
+					case RequestFor.Object       :
 						{
 							if (expression == null)
 							{
 								if (requestFlag == RequestFor.Expression)
 									return Members.Values.Any(member => IsExpression(member, 0, requestFlag));
 
-								return requestFlag == RequestFor.Query;
+								return requestFlag == RequestFor.Object;
 							}
 
 							var levelExpression = expression.GetLevelExpression(level);
@@ -714,12 +723,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 										switch (memberExpression.NodeType)
 										{
+											default                          : return requestFlag == RequestFor.Expression;
 											case ExpressionType.MemberAccess :
 											case ExpressionType.Parameter    :
 											case ExpressionType.Call         : return sequence.IsExpression(parseExpression, 1, requestFlag);
 											case ExpressionType.New          :
-											case ExpressionType.MemberInit   : return requestFlag == RequestFor.Query;
-											default                          : return requestFlag == RequestFor.Expression;
+											case ExpressionType.MemberInit   :
+												{
+													if (levelExpression == expression)
+														return requestFlag == RequestFor.Object;
+
+													var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+
+													return IsExpression(mmExpresion, 0, requestFlag);
+												}
 										}
 									}
 
@@ -740,7 +757,7 @@ namespace BLToolkit.Data.Linq.Parser
 									}
 
 								case ExpressionType.New         :
-								case ExpressionType.MemberInit  : return requestFlag == RequestFor.Query;
+								case ExpressionType.MemberInit  : return requestFlag == RequestFor.Object;
 								default                         : return requestFlag == RequestFor.Expression;
 							}
 
@@ -758,7 +775,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 		{
-			return GetSequence(expression, level).GetContext(expression, level + 1, currentSql);
+			var sequence = GetSequence(expression, level);
+
+			return sequence.GetContext(expression, level + 1, currentSql);
 		}
 
 		#endregion
@@ -799,10 +818,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (IsScalar)
 			{
-				var root =  Body.GetRootObject();
+				var root =  expression.GetRootObject();
 
 				if (root.NodeType == ExpressionType.Parameter)
-					for (int i = 0; i < Lambda.Parameters.Count; i++)
+					for (var i = 0; i < Lambda.Parameters.Count; i++)
 						if (root == Lambda.Parameters[i])
 							return Sequence[i];
 			}
@@ -815,7 +834,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var memberExpression = Members[((MemberExpression)levelExpression).Member];
 							var root             =  memberExpression.GetRootObject();
 
-							for (int i = 0; i < Lambda.Parameters.Count; i++)
+							for (var i = 0; i < Lambda.Parameters.Count; i++)
 								if (root == Lambda.Parameters[i])
 									return Sequence[i];
 
@@ -828,7 +847,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (levelExpression == root)
 							{
-								for (int i = 0; i < Lambda.Parameters.Count; i++)
+								for (var i = 0; i < Lambda.Parameters.Count; i++)
 									if (levelExpression == Lambda.Parameters[i])
 										return Sequence[i];
 							}
@@ -848,6 +867,77 @@ namespace BLToolkit.Data.Linq.Parser
 				memberExpression;
 		}
 
+		static Expression GetMemberExpression(Expression newExpression, Expression expression, int level)
+		{
+			var levelExpresion = expression.GetLevelExpression(level);
+
+			switch (newExpression.NodeType)
+			{
+				case ExpressionType.New        :
+				case ExpressionType.MemberInit : break;
+				default                        :
+					//if (levelExpresion == expression)
+					//	return newExpression;
+
+					var le = expression.GetLevelExpression(level - 1);
+
+					return GetParseExpression(expression, le, newExpression);
+			}
+
+			if (levelExpresion.NodeType != ExpressionType.MemberAccess)
+				throw new LinqException("Invalid expression {0}", levelExpresion);
+
+			var me = (MemberExpression)levelExpresion;
+
+			switch (newExpression.NodeType)
+			{
+				case ExpressionType.New:
+					{
+						var expr = (NewExpression)newExpression;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+						if (expr.Members == null)
+							throw new LinqException("Invalid expression {0}", expression);
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+
+						for (var i = 0; i < expr.Members.Count; i++)
+							if (me.Member == expr.Members[i])
+								return levelExpresion == expression ?
+									expr.Arguments[i].Unwrap() :
+									GetMemberExpression(expr.Arguments[i].Unwrap(), expression, level + 1);
+
+						throw new LinqException("Invalid expression {0}", expression);
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						var expr = (MemberInitExpression)newExpression;
+
+						foreach (var binding in expr.Bindings)
+						{
+							if (binding is MemberAssignment)
+							{
+								var ma = (MemberAssignment)binding;
+
+								if (me.Member == binding.Member)
+									return levelExpresion == expression ?
+										ma.Expression.Unwrap() :
+										GetMemberExpression(ma.Expression.Unwrap(), expression, level + 1);
+							}
+							else
+								throw new InvalidOperationException();
+						}
+
+						throw new LinqException("Invalid expression {0}", expression);
+					}
+			}
+
+			return expression;
+		}
+
 		#endregion
 	}
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

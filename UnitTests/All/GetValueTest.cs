@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace UnitTests.All
 {
-	[TestFixture]
+	//[TestFixture]
 	public class GetValueTest
 	{
 		[ExpectedException(typeof(ApplicationException))]
@@ -14,7 +14,7 @@ namespace UnitTests.All
 		{
 			try
 			{
-				InterceptCallInfo info = new InterceptCallInfo();
+				var info = new InterceptCallInfo();
 
 				info.ParameterValues = new object[2];
 				info.ParameterValues[0] = "123";

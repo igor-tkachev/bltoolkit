@@ -1632,7 +1632,7 @@ namespace BLToolkit.Linq
 						if (e.Object != null)
 							return GetRootObject(e.Object);
 
-						if (e.Arguments != null && e.Arguments.Count > 0)
+						if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
 							return GetRootObject(e.Arguments[0]);
 
 						break;
@@ -1662,6 +1662,16 @@ namespace BLToolkit.Linq
 		static public bool IsQueryable(this MethodCallExpression method, string name)
 		{
 			return method.Method.Name == name && method.IsQueryable();
+		}
+
+		static public bool IsQueryable(this MethodCallExpression method, params string[] names)
+		{
+			if (method.IsQueryable())
+				foreach (var name in names)
+					if (method.Method.Name == name)
+						return true;
+
+			return false;
 		}
 
 		static Expression FindLevel(Expression expression, int level, ref int current)

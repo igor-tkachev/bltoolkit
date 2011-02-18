@@ -22,17 +22,21 @@ namespace BLToolkit.Data.Linq.Parser
 
 		static List<ISequenceParser> _sequenceParsers = new List<ISequenceParser>
 		{
-			new TableParser       (),
-			new SelectParser      (),
-			new WhereParser       (),
-			new OrderByParser     (),
-			new GroupByParser     (),
-			new JoinParser        (),
-			new DistinctParser    (),
-			new FirstSingleParser (),
-			new AggregationParser (),
-			new ScalarSelectParser(),
-			new CountParser       (),
+			new TableParser         (),
+			new SelectParser        (),
+			new SelectManyParser    (),
+			new WhereParser         (),
+			new OrderByParser       (),
+			new GroupByParser       (),
+			new JoinParser          (),
+			new TakeSkipParser      (),
+			new DefaultIfEmptyParser(),
+			new DistinctParser      (),
+			new FirstSingleParser   (),
+			new AggregationParser   (),
+			new ScalarSelectParser  (),
+			new CountParser         (),
+			new AsQueryableParser   (),
 		};
 
 		public static void AddParser(ISequenceParser parser)
@@ -44,18 +48,25 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region Init
 
+		readonly Query                             _query;
 		readonly List<ISequenceParser>             _parsers = _sequenceParsers;
 		private  bool                              _reorder;
 		readonly Dictionary<Expression,Expression> _expressionAccessors;
-		readonly List<ParameterAccessor>           _currentSqlParameters = new List<ParameterAccessor>();
 
-		public ExpressionParser(IDataContextInfo dataContext, Expression expression, ParameterExpression[] compiledParameters)
+		readonly public List<ParameterAccessor>    CurrentSqlParameters = new List<ParameterAccessor>();
+
+		public ExpressionParser(
+			Query                 query,
+			IDataContextInfo      dataContext,
+			Expression            expression,
+			ParameterExpression[] compiledParameters)
 		{
+			_query               = query;
 			_expressionAccessors = expression.GetExpressionAccessors(ExpressionParam);
 
-			DataContextInfo    = dataContext;
-			Expression         = ConvertExpression(expression, compiledParameters);
 			CompiledParameters = compiledParameters;
+			DataContextInfo    = dataContext;
+			Expression         = ConvertExpression(expression);
 		}
 
 		#endregion
@@ -67,7 +78,7 @@ namespace BLToolkit.Data.Linq.Parser
 		public readonly ParameterExpression[] CompiledParameters;
 		public readonly List<IParseContext>   ParentContext = new List<IParseContext>();
 
-		public bool IsSubQueryParsing { get { return ParentContext.Count > 0; } }
+		public int SubQueryParsingCounter;
 
 		private ISqlProvider _sqlProvider;
 		public  ISqlProvider  SqlProvider
@@ -102,17 +113,20 @@ namespace BLToolkit.Data.Linq.Parser
 					_sequenceParsers = _sequenceParsers.OrderByDescending(_ => _.ParsingCounter).ToList();
 				}
 
-			var query = new Query<T>(sequence, _currentSqlParameters);
+			_query.Init(sequence, CurrentSqlParameters);
+
 			var param = Expression.Parameter(typeof(Query<T>), "info");
 
-			sequence.BuildQuery(query, param);
+			sequence.BuildQuery((Query<T>)_query, param);
 
-			return query;
+			return (Query<T>)_query;
 		}
 
 		[JetBrains.Annotations.NotNull]
 		public IParseContext ParseSequence(Expression expression, SqlQuery sqlQuery)
 		{
+			expression = expression.Unwrap();
+
 			var n = _parsers[0].ParsingCounter;
 
 			foreach (var parser in _parsers)
@@ -139,31 +153,33 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertExpression
 
-		static Expression ConvertExpression(Expression expression, ParameterExpression[] parameters)
+		Expression ConvertExpression(Expression expression)
 		{
-			expression = ConvertParameters  (expression, parameters);
+			expression = ConvertParameters  (expression);
 			expression = ConverLetSubqueries(expression);
 
 			return OptimizeExpression(expression);
 		}
 
-		static Expression ConvertParameters(Expression expression, ParameterExpression[] parameters)
+		#region ConvertParameters
+
+		Expression ConvertParameters(Expression expression)
 		{
 			return expression.Convert(expr =>
 			{
 				switch (expr.NodeType)
 				{
 					case ExpressionType.Parameter:
-						if (parameters != null)
+						if (CompiledParameters != null)
 						{
-							var idx = Array.IndexOf(parameters, (ParameterExpression)expr);
+							var idx = Array.IndexOf(CompiledParameters, (ParameterExpression)expr);
 
 							if (idx > 0)
 								return
 									Expression.Convert(
 										Expression.ArrayIndex(
 											ParametersParam,
-											Expression.Constant(Array.IndexOf(parameters, (ParameterExpression)expr))),
+											Expression.Constant(Array.IndexOf(CompiledParameters, (ParameterExpression)expr))),
 										expr.Type);
 						}
 
@@ -173,6 +189,10 @@ namespace BLToolkit.Data.Linq.Parser
 				return expr;
 			});
 		}
+
+		#endregion
+
+		#region ConverLetSubqueries
 
 		static Expression ConverLetSubqueries(Expression expression)
 		{
@@ -267,7 +287,11 @@ namespace BLToolkit.Data.Linq.Parser
 			return expression;
 		}
 
-		static Expression OptimizeExpression(Expression expression)
+		#endregion
+
+		#region OptimizeExpression
+
+		Expression OptimizeExpression(Expression expression)
 		{
 			return expression.Convert(expr =>
 			{
@@ -301,6 +325,14 @@ namespace BLToolkit.Data.Linq.Parser
 									return Expression.Call(null, mi, me.Expression);
 								}
 							}
+
+							if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
+							{
+								var ex = ConvertIQueriable(expr);
+
+								if (ex != expr)
+									return ConvertExpression(ex);
+							}
 						}
 
 						break;
@@ -309,8 +341,11 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var me = (MethodCallExpression)expr;
 
-							if (me.IsQueryable("GroupBy"))
-								return ConvertGroupBy(me);
+							if (me.IsQueryable()) switch (me.Method.Name)
+							{
+								case "GroupBy"    : return ConvertGroupBy   (me);
+								case "SelectMany" : return ConvertSelectMany(me);
+							}
 
 							break;
 						}
@@ -319,6 +354,8 @@ namespace BLToolkit.Data.Linq.Parser
 				return expr;
 			});
 		}
+
+		#endregion
 
 		#region ConvertGroupBy
 
@@ -332,10 +369,14 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			void Set(bool wrapInSubQuery, Expression sourceExpression, LambdaExpression keySelector, LambdaExpression elementSelector, LambdaExpression resultSelector);
 
-			Expression AddElementSelector    ();
-			Expression AddResult             ();
-			Expression WrapInSubQuery        ();
-			Expression WrapInSubQueryResult  ();
+			Expression AddElementSelectorQ  ();
+			Expression AddElementSelectorE  ();
+			Expression AddResultQ           ();
+			Expression AddResultE           ();
+			Expression WrapInSubQueryQ      ();
+			Expression WrapInSubQueryE      ();
+			Expression WrapInSubQueryResultQ();
+			Expression WrapInSubQueryResultE();
 		}
 
 		class GroupByHelper<TSource,TKey,TElement,TResult> : IGroupByHelper
@@ -360,7 +401,7 @@ namespace BLToolkit.Data.Linq.Parser
 				_resultSelector   = resultSelector;
 			}
 
-			public Expression AddElementSelector()
+			public Expression AddElementSelectorQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<IGrouping<TKey,TSource>>>> func = (source,key,e,r) => source
 					.GroupBy(keyParam => key, _ => _)
@@ -372,7 +413,19 @@ namespace BLToolkit.Data.Linq.Parser
 				return Convert(func, keyArg, null, null);
 			}
 
-			public Expression AddResult()
+			public Expression AddElementSelectorE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<IGrouping<TKey,TSource>>>> func = (source,key,e,r) => source
+					.GroupBy(keyParam => key, _ => _)
+					;
+
+				var body   = func.Body.Unwrap();
+				var keyArg = GetLambda(body, 1).Parameters[0]; // .GroupBy(keyParam
+
+				return Convert(func, keyArg, null, null);
+			}
+
+			public Expression AddResultQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<TResult>>> func = (source,key,e,r) => source
 					.GroupBy(keyParam => key, elemParam => e)
@@ -387,7 +440,22 @@ namespace BLToolkit.Data.Linq.Parser
 				return Convert(func, keyArg, elemArg, resArg);
 			}
 
-			public Expression WrapInSubQuery()
+			public Expression AddResultE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<TResult>>> func = (source,key,e,r) => source
+					.GroupBy(keyParam => key, elemParam => e)
+					.Select (resParam => r)
+					;
+
+				var body    = func.Body.Unwrap();
+				var keyArg  = GetLambda(body, 0, 1).Parameters[0]; // .GroupBy(keyParam
+				var elemArg = GetLambda(body, 0, 2).Parameters[0]; // .GroupBy(..., elemParam
+				var resArg  = GetLambda(body, 1).   Parameters[0]; // .Select (resParam
+
+				return Convert(func, keyArg, elemArg, resArg);
+			}
+
+			public Expression WrapInSubQueryQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<IGrouping<TKey,TElement>>>> func = (source,key,e,r) => source
 					.Select(selectParam => new GroupSubQuery<TKey,TSource>
@@ -405,9 +473,47 @@ namespace BLToolkit.Data.Linq.Parser
 				return Convert(func, keyArg, elemArg, null);
 			}
 
-			public Expression WrapInSubQueryResult()
+			public Expression WrapInSubQueryE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<IGrouping<TKey,TElement>>>> func = (source,key,e,r) => source
+					.Select(selectParam => new GroupSubQuery<TKey,TSource>
+					{
+						Key     = key,
+						Element = selectParam
+					})
+					.GroupBy(_ => _.Key, elemParam => e)
+					;
+
+				var body    = func.Body.Unwrap();
+				var keyArg  = GetLambda(body, 0, 1).Parameters[0]; // .Select (selectParam
+				var elemArg = GetLambda(body, 2).   Parameters[0]; // .GroupBy(..., elemParam
+
+				return Convert(func, keyArg, elemArg, null);
+			}
+
+			public Expression WrapInSubQueryResultQ()
 			{
 				Expression<Func<IQueryable<TSource>,TKey,TElement,TResult,IQueryable<TResult>>> func = (source,key,e,r) => source
+					.Select(selectParam => new GroupSubQuery<TKey,TSource>
+					{
+						Key     = key,
+						Element = selectParam
+					})
+					.GroupBy(_ => _.Key, elemParam => e)
+					.Select (resParam => r)
+					;
+
+				var body    = func.Body.Unwrap();
+				var keyArg  = GetLambda(body, 0, 0, 1).Parameters[0]; // .Select (selectParam
+				var elemArg = GetLambda(body, 0, 2).   Parameters[0]; // .GroupBy(..., elemParam
+				var resArg  = GetLambda(body, 1).      Parameters[0]; // .Select (resParam
+
+				return Convert(func, keyArg, elemArg, resArg);
+			}
+
+			public Expression WrapInSubQueryResultE()
+			{
+				Expression<Func<IEnumerable<TSource>,TKey,TElement,TResult,IEnumerable<TResult>>> func = (source,key,e,r) => source
 					.Select(selectParam => new GroupSubQuery<TKey,TSource>
 					{
 						Key     = key,
@@ -479,7 +585,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return (LambdaExpression)expression;
 		}
 
-		static Expression ConvertGroupBy(MethodCallExpression method)
+		Expression ConvertGroupBy(MethodCallExpression method)
 		{
 			if (method.Arguments[method.Arguments.Count - 1].Unwrap().NodeType != ExpressionType.Lambda)
 				return method;
@@ -494,22 +600,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var resultSelector   = types.ContainsKey("TResult")  ?
 				(LambdaExpression)OptimizeExpression(method.Arguments[types.ContainsKey("TElement") ? 3 : 2].Unwrap()) : null;
 
-			var needSubQuery = null != keySelector.Body.Unwrap().Find(ex =>
-			{
-				switch (ex.NodeType)
-				{
-					case ExpressionType.Convert        :
-					case ExpressionType.ConvertChecked :
-					case ExpressionType.MemberInit     :
-					case ExpressionType.New            :
-					case ExpressionType.NewArrayBounds :
-					case ExpressionType.NewArrayInit   :
-					case ExpressionType.MemberAccess   :
-					case ExpressionType.Parameter      : return false;
-				}
-
-				return true;
-			});
+			var needSubQuery = null != keySelector.Body.Unwrap().Find(IsExpression);
 
 			if (!needSubQuery && resultSelector == null && elementSelector != null)
 				return method;
@@ -523,17 +614,189 @@ namespace BLToolkit.Data.Linq.Parser
 
 			helper.Set(needSubQuery, sourceExpression, keySelector, elementSelector, resultSelector);
 
-			if (!needSubQuery)
+			if (method.Method.DeclaringType == typeof(Queryable))
 			{
-				if (resultSelector == null)
-					return helper.AddElementSelector();
-				return helper.AddResult();
+				if (!needSubQuery)
+					return resultSelector == null ? helper.AddElementSelectorQ() : helper.AddResultQ();
+
+				return resultSelector == null ? helper.WrapInSubQueryQ() : helper.WrapInSubQueryResultQ();
+			}
+			else
+			{
+				if (!needSubQuery)
+					return resultSelector == null ? helper.AddElementSelectorE() : helper.AddResultE();
+
+				return resultSelector == null ? helper.WrapInSubQueryE() : helper.WrapInSubQueryResultE();
+			}
+		}
+
+		bool IsExpression(Expression ex)
+		{
+			switch (ex.NodeType)
+			{
+				case ExpressionType.Convert        :
+				case ExpressionType.ConvertChecked :
+				case ExpressionType.MemberInit     :
+				case ExpressionType.New            :
+				case ExpressionType.NewArrayBounds :
+				case ExpressionType.NewArrayInit   :
+				case ExpressionType.Parameter      : return false;
+				case ExpressionType.MemberAccess   :
+					{
+						var ma = (MemberExpression)ex;
+						var l  = ConvertMember(ma.Member);
+
+						if (l != null)
+						{
+							var ef  = l.Body.Unwrap();
+							var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+
+							return pie.Find(IsExpression) != null;
+						}
+
+						var attr = GetFunctionAttribute(ma.Member);
+
+						if (attr != null)
+							return true;
+
+						if (ma.Member.DeclaringType == typeof(TimeSpan))
+						{
+							switch (ma.Expression.NodeType)
+							{
+								case ExpressionType.Subtract        :
+								case ExpressionType.SubtractChecked : return true;
+							}
+						}
+
+						return false;
+					}
 			}
 
-			if (resultSelector == null)
-				return helper.WrapInSubQuery();
+			return true;
+		}
 
-			return helper.WrapInSubQueryResult();
+		#endregion
+
+		#region ConvertSelectMany
+
+		interface ISelectManyHelper
+		{
+			void Set(Expression sourceExpression, LambdaExpression colSelector);
+
+			Expression AddElementSelectorQ();
+			Expression AddElementSelectorE();
+		}
+
+		class SelectManyHelper<TSource,TCollection> : ISelectManyHelper
+		{
+			Expression       _sourceExpression;
+			LambdaExpression _colSelector;
+
+			public void Set(Expression sourceExpression, LambdaExpression colSelector)
+			{
+				_sourceExpression = sourceExpression;
+				_colSelector      = colSelector;
+			}
+
+			public Expression AddElementSelectorQ()
+			{
+				Expression<Func<IQueryable<TSource>,IEnumerable<TCollection>,IQueryable<TCollection>>> func = (source,col) => source
+					.SelectMany(colParam => col, (s,c) => c)
+					;
+
+				var body   = func.Body.Unwrap();
+				var colArg = GetLambda(body, 1).Parameters[0]; // .SelectMany(colParam
+
+				return Convert(func, colArg);
+			}
+
+			public Expression AddElementSelectorE()
+			{
+				Expression<Func<IEnumerable<TSource>,IEnumerable<TCollection>,IEnumerable<TCollection>>> func = (source,col) => source
+					.SelectMany(colParam => col, (s,c) => c)
+					;
+
+				var body   = func.Body.Unwrap();
+				var colArg = GetLambda(body, 1).Parameters[0]; // .SelectMany(colParam
+
+				return Convert(func, colArg);
+			}
+
+			Expression Convert(LambdaExpression func, ParameterExpression colArg)
+			{
+				var body = func.Body.Unwrap();
+				var expr = body.Convert(ex =>
+				{
+					if (ex == func.Parameters[0])
+						return _sourceExpression;
+
+					if (ex == func.Parameters[1])
+						return _colSelector.Body.Convert(e => e == _colSelector.Parameters[0] ? colArg : e);
+
+					return ex;
+				});
+
+				return expr;
+			}
+		}
+
+		Expression ConvertSelectMany(MethodCallExpression method)
+		{
+			if (method.Arguments.Count != 2 || ((LambdaExpression)method.Arguments[1].Unwrap()).Parameters.Count != 1)
+				return method;
+
+			var types = method.Method.GetGenericMethodDefinition().GetGenericArguments()
+				.Zip(method.Method.GetGenericArguments(), (n, t) => new { n = n.Name, t })
+				.ToDictionary(_ => _.n, _ => _.t);
+
+			var sourceExpression = OptimizeExpression(method.Arguments[0].Unwrap());
+			var colSelector      = (LambdaExpression)OptimizeExpression(method.Arguments[1].Unwrap());
+
+			var gtype  = typeof(SelectManyHelper<,>).MakeGenericType(types["TSource"], types["TResult"]);
+			var helper = (ISelectManyHelper)Activator.CreateInstance(gtype);
+
+			helper.Set(sourceExpression, colSelector);
+
+			return method.Method.DeclaringType == typeof(Queryable) ?
+				helper.AddElementSelectorQ() :
+				helper.AddElementSelectorE();
+		}
+
+		#endregion
+
+		#region ConvertIQueriable
+
+		Expression ConvertIQueriable(Expression expression)
+		{
+			if (expression.NodeType == ExpressionType.MemberAccess || expression.NodeType == ExpressionType.Call)
+			{
+				var p    = Expression.Parameter(typeof(Expression), "exp");
+				var exas = expression.GetExpressionAccessors(p);
+				var expr = ReplaceParameter(exas, expression, _ => {});
+				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
+				var qe   = l.Compile();
+				var n    = _query.AddQueryableAccessors(expression, qe);
+
+				Expression accessor;
+
+				_expressionAccessors.TryGetValue(expression, out accessor);
+
+				var path =
+					Expression.Call(
+						Expression.Constant(_query),
+						ReflectionHelper.Expressor<Query>.MethodExpressor(a => a.GetIQueryable(0, null)),
+						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
+
+				var qex  = qe(expression).Expression;
+
+				foreach (var a in qex.GetExpressionAccessors(path))
+					if (!_expressionAccessors.ContainsKey(a.Key))
+						_expressionAccessors.Add(a.Key, a.Value);
+
+				return qex;
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		#endregion
@@ -541,3 +804,4 @@ namespace BLToolkit.Data.Linq.Parser
 		#endregion
 	}
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          

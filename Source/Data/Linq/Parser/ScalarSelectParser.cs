@@ -30,7 +30,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				var expr = this.BuildExpression(null, 0);
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
@@ -74,12 +74,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 			}
 
-			public ISqlExpression[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}
 
-			public int[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				throw new NotImplementedException();
 			}

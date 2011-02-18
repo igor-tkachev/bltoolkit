@@ -302,8 +302,12 @@ namespace Data.Linq
 		public void ReferenceJoin2()
 		{
 			ForEachProvider(db => AreEqual(
-				from g in    GrandChild join c in    Child on g.Child equals c select new { c.ParentID, g.GrandChildID },
-				from g in db.GrandChild join c in db.Child on g.Child equals c select new { c.ParentID, g.GrandChildID }));
+				from g in    GrandChild
+					join c in    Child on g.Child equals c
+				select new { c.ParentID, g.GrandChildID },
+				from g in db.GrandChild
+					join c in db.Child on g.Child equals c
+				select new { c.ParentID, g.GrandChildID }));
 		}
 
 		[Test]
