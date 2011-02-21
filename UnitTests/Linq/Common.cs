@@ -154,5 +154,24 @@ namespace Data.Linq
 				var results = (int)((IQueryable)emp).Provider.Execute(exp);
 			}
 		}
+
+		class MyClass
+		{
+			public int ID;
+		}
+
+		[Test]
+		public void NewObjectTest()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				select new { ID = new MyClass { ID = p.ParentID } } into p1
+				where p1.ID.ID == 1
+				select new { ID = new MyClass { ID = p1.ID.ID } },
+				from p in db.Parent
+				select new { ID = new MyClass { ID = p.ParentID } } into p1
+				where p1.ID.ID == 1
+				select new { ID = new MyClass { ID = p1.ID.ID } }));
+		}
 	}
 }

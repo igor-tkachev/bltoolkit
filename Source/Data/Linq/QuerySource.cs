@@ -1294,7 +1294,65 @@ namespace BLToolkit.Data.Linq
 			if (field is QuerySource)
 				return ((QuerySource)field).GetField(members, currentMember + 1);
 
+			if (field is ExprColumn)
+			{
+				var ec = (ExprColumn)field;
+
+				if (ec.Expr.NodeType == ExpressionType.New || ec.Expr.NodeType == ExpressionType.MemberInit)
+				{
+					var ex = GetMemberExpression(ec.Expr, members[currentMember + 1]);
+
+					return BaseQuery.GetField(null, ex, 0);
+				}
+			}
+
 			return field;
+		}
+
+		static Expression GetMemberExpression(Expression newExpression, MemberInfo member)
+		{
+			switch (newExpression.NodeType)
+			{
+				case ExpressionType.New:
+					{
+						var expr = (NewExpression)newExpression;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+						if (expr.Members == null)
+							throw new LinqException("Invalid expression {0}", expr);
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+
+						for (var i = 0; i < expr.Members.Count; i++)
+							if (member == expr.Members[i])
+								return expr.Arguments[i];
+
+						throw new LinqException("Invalid expression {0}", expr);
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						var expr = (MemberInitExpression)newExpression;
+
+						foreach (var binding in expr.Bindings)
+						{
+							if (binding is MemberAssignment)
+							{
+								var ma = (MemberAssignment)binding;
+
+								if (member == binding.Member)
+									return ma.Expression;
+							}
+							else
+								throw new InvalidOperationException();
+						}
+
+						throw new LinqException("Invalid expression {0}", expr);
+					}
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		public virtual QueryField EnsureField(QueryField field)
