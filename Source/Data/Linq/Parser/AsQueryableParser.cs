@@ -13,9 +13,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return methodCall.IsQueryable("AsQueryable");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			return parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			return parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 		}
 	}
 }

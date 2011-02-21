@@ -34,11 +34,11 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
 			var isGroup      = methodCall.Method.Name == "GroupJoin";
-			var outerContext = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
-			var innerContext = parser.ParseSequence(methodCall.Arguments[1], new SqlQuery());
+			var outerContext = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var innerContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
 
 			outerContext = new SubQueryContext(outerContext);
 			innerContext = new SubQueryContext(innerContext);

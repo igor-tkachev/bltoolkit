@@ -790,10 +790,10 @@ namespace Data.Linq
 			return call != null && call.Method.Name == "GetContext";
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			var call = (MethodCallExpression)expression;
-			return new Context(parser.ParseSequence(call.Arguments[0], sqlQuery));
+			return new Context(parser.ParseSequence(parent, call.Arguments[0], sqlQuery));
 		}
 
 		public class Context : IParseContext

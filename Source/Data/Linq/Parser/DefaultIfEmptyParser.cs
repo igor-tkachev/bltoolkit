@@ -13,9 +13,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return methodCall.IsQueryable("DefaultIfEmpty");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			var sequence     = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			var sequence     = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var defaultValue = methodCall.Arguments.Count == 1 ? null : methodCall.Arguments[1].Unwrap();
 
 			return new DefaultIfEmptyContext(sequence, defaultValue);

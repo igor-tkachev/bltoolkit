@@ -16,9 +16,9 @@ namespace BLToolkit.Data.Linq.Parser
 				((LambdaExpression)methodCall.Arguments[1].Unwrap()).Parameters.Count == 1;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			var sequence           = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			var sequence           = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var collectionSelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var resultSelector     = (LambdaExpression)methodCall.Arguments[2].Unwrap();
 
@@ -44,16 +44,12 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 			*/
 
-			parser.ParentContext.Insert(0, context);
 			parser.SubQueryParsingCounter++;
-
-			var collection = parser.ParseSequence(expr, new SqlQuery());
-			var leftJoin   = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
-
+			var collection = parser.ParseSequence(context, expr, new SqlQuery());
 			parser.SubQueryParsingCounter--;
-			//parser.ParentContext.RemoveAt(0);
 
-			var sql = collection.SqlQuery;
+			var leftJoin = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
+			var sql      = collection.SqlQuery;
 
 			if (!leftJoin && crossApply)
 			{
@@ -95,16 +91,16 @@ namespace BLToolkit.Data.Linq.Parser
 
 					if (collection is TableParser.TableContext)
 					{
-						var parent = collection.Parent as TableParser.TableContext;
+						var collectionParent = collection.Parent as TableParser.TableContext;
 
-						if (parent != null)
+						if (collectionParent != null)
 						{
 							var ts     = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
 							{
 								if (e.ElementType == QueryElementType.TableSource)
 								{
 									var t = (SqlQuery.TableSource)e;
-									return t.Source == parent.SqlTable;
+									return t.Source == collectionParent.SqlTable;
 								}
 
 								return false;
