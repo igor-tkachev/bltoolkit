@@ -33,9 +33,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			var sequence = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 
 			if (sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 				sequence = new SubQueryContext(sequence);

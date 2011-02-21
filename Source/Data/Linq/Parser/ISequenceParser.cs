@@ -9,6 +9,6 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		int           ParsingCounter { get; set; }
 		bool          CanParse     (ExpressionParser parser, Expression expression, SqlQuery sqlQuery);
-		IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery);
+		IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery);
 	}
 }

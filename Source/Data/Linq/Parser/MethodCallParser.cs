@@ -16,14 +16,14 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			if (expression.NodeType == ExpressionType.Call)
-				return ParseMethodCall(parser, (MethodCallExpression)expression, sqlQuery);
+				return ParseMethodCall(parser, parent, (MethodCallExpression)expression, sqlQuery);
 			return null;
 		}
 
 		protected abstract bool          CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery);
-		protected abstract IParseContext ParseMethodCall   (ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery);
+		protected abstract IParseContext ParseMethodCall   (ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery);
 	}
 }

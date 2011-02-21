@@ -76,7 +76,6 @@ namespace BLToolkit.Data.Linq.Parser
 		public readonly IDataContextInfo      DataContextInfo;
 		public readonly Expression            Expression;
 		public readonly ParameterExpression[] CompiledParameters;
-		public readonly List<IParseContext>   ParentContext = new List<IParseContext>();
 
 		public int SubQueryParsingCounter;
 
@@ -104,7 +103,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		internal Query<T> Parse<T>()
 		{
-			var sequence = ParseSequence(Expression, new SqlQuery());
+			var sequence = ParseSequence(null, Expression, new SqlQuery());
 
 			if (_reorder)
 				lock (_sync)
@@ -123,7 +122,7 @@ namespace BLToolkit.Data.Linq.Parser
 		}
 
 		[JetBrains.Annotations.NotNull]
-		public IParseContext ParseSequence(Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			expression = expression.Unwrap();
 
@@ -133,7 +132,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				if (parser.CanParse(this, expression, sqlQuery))
 				{
-					var sequence = parser.ParseSequence(this, expression, sqlQuery);
+					var sequence = parser.ParseSequence(this, parent, expression, sqlQuery);
 
 					lock (parser)
 						parser.ParsingCounter++;

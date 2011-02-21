@@ -72,16 +72,16 @@ namespace BLToolkit.Data.Linq.Parser
 			return Parse(parser, expression, sqlQuery, (n,_) => n > 0);
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			return Parse(parser, expression, sqlQuery, (n,ctx) =>
 			{
 				switch (n)
 				{
 					case 0 : return null;
-					case 1 : return new TableContext(parser, expression, sqlQuery, ((IQueryable)((ConstantExpression)expression).Value).ElementType);
+					case 1 : return new TableContext(parser, parent, expression, sqlQuery, ((IQueryable)((ConstantExpression)expression).Value).ElementType);
 					case 2 :
-					case 3 : return new TableContext(parser, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
+					case 3 : return new TableContext(parser, parent, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
 					case 4 :
 						return ctx.IsExpression(expression, 0, RequestFor.Association) ?
 							ctx.GetContext(expression, 0, sqlQuery) :
@@ -104,9 +104,10 @@ namespace BLToolkit.Data.Linq.Parser
 			public SqlQuery         SqlQuery   { get; set; }
 			public IParseContext    Parent     { get; set; }
 
-			public TableContext(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Type originalType)
+			public TableContext(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery, Type originalType)
 			{
 				Parser     = parser;
+				Parent     = parent;
 				Expression = expression;
 				SqlQuery   = sqlQuery;
 
@@ -333,7 +334,9 @@ namespace BLToolkit.Data.Linq.Parser
 									orderby f.PrimaryKeyOrder
 									select new SqlInfo { Sql = f, Member = f.MemberMapper.MemberAccessor.MemberInfo };
 
-								return q.ToArray();
+								var key = q.ToArray();
+
+								return key.Length != 0 ? key : ConvertToSql(expression, level, ConvertFlags.All);
 							}
 
 							break;
@@ -471,10 +474,12 @@ namespace BLToolkit.Data.Linq.Parser
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
 							var association = GetAssociation(expression, level);
-							var table       = new TableContext(Parser, Expression, currentSql, association.Table.ObjectType)
-							{
- 								Parent = Parser.ParentContext[0] is SelectManyParser.SelectManyContext ? this : Parent
- 							};
+							var table       = new TableContext(
+								Parser,
+								Parent is SelectManyParser.SelectManyContext ? this : Parent,
+								Expression,
+								currentSql,
+								association.Table.ObjectType);
 
 							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
 							{

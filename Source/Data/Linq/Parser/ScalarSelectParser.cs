@@ -16,9 +16,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return expression.NodeType == ExpressionType.Lambda && ((LambdaExpression)expression).Parameters.Count == 0;
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
-			return new ScalarSelectContext { Parser = parser, Expression = expression, SqlQuery = sqlQuery };
+			return new ScalarSelectContext { Parser = parser, Parent = parent, Expression = expression, SqlQuery = sqlQuery };
 		}
 
 		class ScalarSelectContext : IParseContext

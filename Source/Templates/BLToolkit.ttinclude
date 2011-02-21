@@ -137,6 +137,12 @@ static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key
 		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()),
 		key.CanBeNull ? "true" : "false");
 
+	if (key.Attributes.Count > 0)
+	{
+		WriteAttribute(tt, string.Join(", ", key.Attributes.Distinct().ToArray()));
+		WriteAttributeLine(tt);
+	}
+
 	tt.Write("public ");
 
 	if (key.AssociationType == AssociationType.OneToMany)
@@ -468,6 +474,32 @@ void LoadMetadata()
 	if (Tables.Values.SelectMany(_ => _.ForeignKeys.Values).Any(_ => _.AssociationType == AssociationType.OneToMany))
 		Usings.Add("System.Collections.Generic");
 
+	var keyWords = new HashSet<string>
+	{
+		"abstract", "as",       "base",     "bool",    "break",     "byte",     "case",       "catch",     "char",    "checked",
+		"class",    "const",    "continue", "decimal", "default",   "delegate", "do",         "double",    "else",    "enum",
+		"event",    "explicit", "extern",   "false",   "finally",   "fixed",    "float",      "for",       "foreach", "goto",
+		"if",       "implicit", "in",       "int",     "interface", "internal", "is",         "lock",      "long",    "new",
+		"null",     "object",   "operator", "out",     "override",  "params",   "private",    "protected", "public",  "readonly",
+		"ref",      "return",   "sbyte",    "sealed",  "short",     "sizeof",   "stackalloc", "static",    "struct",  "switch",
+		"this",     "throw",    "true",     "try",     "typeof",    "uint",     "ulong",      "unchecked", "unsafe",  "ushort",
+		"using",    "virtual",  "volatile", "void",    "while"
+	};
+
+	foreach (var t in Tables.Values)
+	{
+		if (keyWords.Contains(t.ClassName))
+			t.ClassName = "@" + t.ClassName;
+
+		if (keyWords.Contains(t.DataContextPropertyName))
+			t.DataContextPropertyName = "@" + t.DataContextPropertyName;
+
+		foreach (var col in t.Columns.Values)
+			if (keyWords.Contains(col.MemberName))
+				col.MemberName = "@" + col.MemberName;
+	}
+
+
 	AfterLoadMetadata(this);
 }
 
@@ -530,6 +562,7 @@ public partial class ForeignKey
 	public Table        OtherTable;
 	public List<Column> ThisColumns  = new List<Column>();
 	public List<Column> OtherColumns = new List<Column>();
+	public List<string> Attributes   = new List<string>();
 	public bool         CanBeNull    = true;
 	public ForeignKey   BackReference;
 

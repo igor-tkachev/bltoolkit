@@ -39,9 +39,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return (methodCall.Arguments[methodCall.Arguments.Count - 1].Unwrap().NodeType == ExpressionType.Lambda);
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			var sequence        = parser.ParseSequence(methodCall.Arguments[0], sqlQuery);
+			var sequence        = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var sequenceExpr    = methodCall.Arguments[0];
 			var groupingType    = methodCall.Type.GetGenericArguments()[0];
 			var keySelector     = (LambdaExpression)methodCall.Arguments[1].Unwrap();
