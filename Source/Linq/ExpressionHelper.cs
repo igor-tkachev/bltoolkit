@@ -1103,6 +1103,154 @@ namespace BLToolkit.Linq
 			func(expr);
 		}
 
+		static void Visit<T>(IEnumerable<T> source, Func<T,bool> func)
+		{
+			foreach (var item in source)
+				func(item);
+		}
+
+		static void Visit<T>(IEnumerable<T> source, Func<Expression,bool> func)
+			where T : Expression
+		{
+			foreach (var item in source)
+				Visit(item, func);
+		}
+
+		public static void Visit(this Expression expr, Func<Expression,bool> func)
+		{
+			if (expr == null || !func(expr))
+				return;
+
+			switch (expr.NodeType)
+			{
+				case ExpressionType.Add:
+				case ExpressionType.AddChecked:
+				case ExpressionType.And:
+				case ExpressionType.AndAlso:
+				case ExpressionType.ArrayIndex:
+				case ExpressionType.Coalesce:
+				case ExpressionType.Divide:
+				case ExpressionType.Equal:
+				case ExpressionType.ExclusiveOr:
+				case ExpressionType.GreaterThan:
+				case ExpressionType.GreaterThanOrEqual:
+				case ExpressionType.LeftShift:
+				case ExpressionType.LessThan:
+				case ExpressionType.LessThanOrEqual:
+				case ExpressionType.Modulo:
+				case ExpressionType.Multiply:
+				case ExpressionType.MultiplyChecked:
+				case ExpressionType.NotEqual:
+				case ExpressionType.Or:
+				case ExpressionType.OrElse:
+				case ExpressionType.Power:
+				case ExpressionType.RightShift:
+				case ExpressionType.Subtract:
+				case ExpressionType.SubtractChecked:
+					{
+						var e = (BinaryExpression)expr;
+
+						Visit(e.Conversion, func);
+						Visit(e.Left,       func);
+						Visit(e.Right,      func);
+
+						break;
+					}
+
+				case ExpressionType.ArrayLength:
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+				case ExpressionType.Negate:
+				case ExpressionType.NegateChecked:
+				case ExpressionType.Not:
+				case ExpressionType.Quote:
+				case ExpressionType.TypeAs:
+				case ExpressionType.UnaryPlus:
+					Visit(((UnaryExpression)expr).Operand, func);
+					break;
+
+				case ExpressionType.Call:
+					{
+						var e = (MethodCallExpression)expr;
+
+						Visit(e.Object,    func);
+						Visit(e.Arguments, func);
+
+						break;
+					}
+
+				case ExpressionType.Conditional:
+					{
+						var e = (ConditionalExpression)expr;
+
+						Visit(e.Test,    func);
+						Visit(e.IfTrue,  func);
+						Visit(e.IfFalse, func);
+
+						break;
+					}
+
+				case ExpressionType.Invoke:
+					{
+						var e = (InvocationExpression)expr;
+
+						Visit(e.Expression, func);
+						Visit(e.Arguments,  func);
+
+						break;
+					}
+
+				case ExpressionType.Lambda:
+					{
+						var e = (LambdaExpression)expr;
+
+						Visit(e.Body,       func);
+						Visit(e.Parameters, func);
+
+						break;
+					}
+
+				case ExpressionType.ListInit:
+					{
+						var e = (ListInitExpression)expr;
+
+						Visit(e.NewExpression, func);
+						Visit(e.Initializers,  ex => Visit(ex.Arguments, func));
+
+						break;
+					}
+
+				case ExpressionType.MemberAccess: Visit(((MemberExpression)expr).Expression, func); break;
+
+				case ExpressionType.MemberInit:
+					{
+						Func<MemberBinding,bool> modify = null; modify = b =>
+						{
+							switch (b.BindingType)
+							{
+								case MemberBindingType.Assignment    : Visit(((MemberAssignment)b). Expression,   func);                          break;
+								case MemberBindingType.ListBinding   : Visit(((MemberListBinding)b).Initializers, p => Visit(p.Arguments, func)); break;
+								case MemberBindingType.MemberBinding : Visit(((MemberMemberBinding)b).Bindings,   modify);                        break;
+							}
+
+							return true;
+						};
+
+						var e = (MemberInitExpression)expr;
+
+						Visit(e.NewExpression, func);
+						Visit(e.Bindings,      modify);
+
+						break;
+					}
+
+				case ExpressionType.New            : Visit(((NewExpression)       expr).Arguments,   func); break;
+				case ExpressionType.NewArrayBounds : Visit(((NewArrayExpression)  expr).Expressions, func); break;
+				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
+				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
+			}
+		}
+
 		#endregion
 
 		#region Find

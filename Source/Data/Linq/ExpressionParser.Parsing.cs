@@ -1270,7 +1270,7 @@ namespace BLToolkit.Data.Linq
 			var isHaving       = false;
 			var isWhere        = false;
 
-			lambda.Body.Find(pi =>
+			lambda.Body.Visit(pi =>
 			{
 				if (IsSubQuery(pi, query))
 					return isWhere = true;
@@ -1292,6 +1292,8 @@ namespace BLToolkit.Data.Linq
 
 									if (field is QueryField.ExprColumn)
 										stopWalking = makeSubQuery = true;
+									else if (field is QueryField.Column)
+										stopWalking = true;
 								}
 							}
 
@@ -1324,7 +1326,7 @@ namespace BLToolkit.Data.Linq
 						break;
 				}
 
-				return stopWalking;
+				return !stopWalking;
 			});
 
 			makeHaving = isHaving && !isWhere;
