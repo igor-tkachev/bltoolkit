@@ -158,6 +158,16 @@ namespace Data.Linq
 		class MyClass
 		{
 			public int ID;
+
+			public override bool Equals(object obj)
+			{
+				return ((MyClass)obj).ID == ID;
+			}
+
+			public override int GetHashCode()
+			{
+				return ID;
+			}
 		}
 
 		[Test]
@@ -167,11 +177,11 @@ namespace Data.Linq
 				from p in Parent
 				select new { ID = new MyClass { ID = p.ParentID } } into p1
 				where p1.ID.ID == 1
-				select new { ID = new MyClass { ID = p1.ID.ID } },
+				select p1,
 				from p in db.Parent
 				select new { ID = new MyClass { ID = p.ParentID } } into p1
 				where p1.ID.ID == 1
-				select new { ID = new MyClass { ID = p1.ID.ID } }));
+				select p1));
 		}
 	}
 }

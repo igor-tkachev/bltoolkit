@@ -102,8 +102,10 @@
     <Compile Include="Data\Linq\LinqExtensions.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\Parser\AggregationParser.cs" />
+    <Compile Include="Data\Linq\Parser\AsQueryableParser.cs" />
     <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
     <Compile Include="Data\Linq\Parser\CountParser.cs" />
+    <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
     <Compile Include="Data\Linq\Parser\DistinctParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.cs" />
     <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
@@ -119,10 +121,13 @@
     <Compile Include="Data\Linq\Parser\RequestFor.cs" />
     <Compile Include="Data\Linq\Parser\ScalarSelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SelectContext.cs" />
+    <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
     <Compile Include="Data\Linq\Parser\SelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SequenceContextBase.cs" />
+    <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
     <Compile Include="Data\Linq\Parser\SubQueryContext.cs" />
     <Compile Include="Data\Linq\Parser\TableParser.cs" />
+    <Compile Include="Data\Linq\Parser\TakeSkipParser.cs" />
     <Compile Include="Data\Linq\Parser\WhereParser.cs" />
     <Compile Include="Data\Linq\ParsingTracer.cs" />
     <Compile Include="Data\Linq\Query.cs" />
