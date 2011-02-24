@@ -2086,9 +2086,9 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			var root = expression.GetRootObject();
 
-			for (var ctx = current; current != null; current = current.Parent)
-				if (ctx.IsExpression(root, 0, RequestFor.Root))
-					return ctx;
+			for (; current != null; current = current.Parent)
+				if (current.IsExpression(root, 0, RequestFor.Root))
+					return current;
 
 			return null;
 		}

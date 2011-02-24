@@ -70,9 +70,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 				//sql.ParentSql = sequence.SqlQuery;
 
-				var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true);
+				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
 
-				return new SelectContext(parent, resultSelector, sequence, col);
+				return new SelectContext(parent, resultSelector, sequence, context);
 			}
 
 			//if (crossApply)
@@ -123,9 +123,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 					//sql.ParentSql = sequence.SqlQuery;
 
-					var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false);
+					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 
-					return new SelectContext(parent, resultSelector, sequence, col);
+					return new SelectContext(parent, resultSelector, sequence, context);
 				}
 			}
 
@@ -139,23 +139,81 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 			}
 
+			private IParseContext _collection;
+			public  IParseContext  Collection
+			{
+				get { return _collection; }
+				set
+				{
+					_collection = value;
+					_collection.Parent = this;
+				}
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				if (expression == null)
+					return Collection.BuildExpression(expression, level);
+
+				var root = expression.GetRootObject();
+
+				if (root == Lambda.Parameters[0])
+					return base.BuildExpression(expression, level);
+
+				return Collection.BuildExpression(expression, level);
+			}
+
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			{
+				if (Collection == null)
+					base.BuildQuery<T>(query, queryParameter);
+
+				throw new NotImplementedException();
+			}
+
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			{
+				if (Collection == null)
+					return base.ConvertToIndex(expression, level, flags);
+
+				throw new NotImplementedException();
+			}
+
 			/*
+			public override int ConvertToParentIndex(int index, IParseContext context)
+			{
+				if (Collection == null)
+					return base.ConvertToParentIndex(index, context);
+
+				throw new NotImplementedException();
+			}
+			*/
+
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				if (Collection != null)
+					return Collection.ConvertToSql(expression, level, flags);
+				return base.ConvertToSql(expression, level, flags);
+			}
+
+			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			{
+				if (Collection == null)
+					return base.GetContext(expression, level, currentSql);
+
+				throw new NotImplementedException();
+			}
+
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				if (expression == null || level == 0 && expression == Body)
-				{
-					switch (requestFlag)
-					{
-						case RequestFor.Object      : return true;
-						case RequestFor.Association :
-						case RequestFor.Field       :
-						case RequestFor.Expression  : return false;
-					}
-				}
+				if (requestFlag == RequestFor.Root)
+					return base.IsExpression(expression, level, requestFlag);
+
+				if (Collection != null)
+					return Collection.IsExpression(expression, level, requestFlag);
 
 				return base.IsExpression(expression, level, requestFlag);
 			}
-			*/
 		}
 	}
 }
