@@ -62,13 +62,13 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			var key      = new KeyContext(keySelector, sequence);
+			var key      = new KeyContext(parent, keySelector, sequence);
 			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
 			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 			{
 				sequence = new SubQueryContext(sequence);
-				key      = new KeyContext(keySelector, sequence);
+				key      = new KeyContext(parent, keySelector, sequence);
 				groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 			}
 
@@ -87,8 +87,8 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			});
 
-			var element = new SelectContext (elementSelector, sequence);
-			var groupBy = new GroupByContext(sequenceExpr, groupingType, sequence, key, element);
+			var element = new SelectContext (parent, elementSelector, sequence);
+			var groupBy = new GroupByContext(parent, sequenceExpr, groupingType, sequence, key, element);
 
 			return groupBy;
 		}
@@ -99,8 +99,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class KeyContext : SelectContext
 		{
-			public KeyContext(LambdaExpression lambda, params IParseContext[] sequences)
-				: base(lambda, sequences)
+			public KeyContext(IParseContext parent, LambdaExpression lambda, params IParseContext[] sequences)
+				: base(parent, lambda, sequences)
 			{
 			}
 		}
@@ -111,8 +111,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class GroupByContext : SequenceContextBase
 		{
-			public GroupByContext(Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element)
-				: base(sequence, null)
+			public GroupByContext(IParseContext parent, Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element)
+				: base(parent, sequence, null)
 			{
 				_sequenceExpr = sequenceExpr;
 				_key          = key;
@@ -302,7 +302,7 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var ctx = _element;
 						var l   = (LambdaExpression)expr.Arguments[1].Unwrap();
-						var cnt = Parser.ParseWhere(ctx, l, false);
+						var cnt = Parser.ParseWhere(Parent, ctx, l, false);
 						var sql = cnt.SqlQuery.Clone((_ => !(_ is SqlParameter)));
 
 						sql.ParentSql = SqlQuery;
@@ -357,7 +357,7 @@ namespace BLToolkit.Data.Linq.Parser
 						if (ex is LambdaExpression)
 						{
 							var l   = (LambdaExpression)ex;
-							var ctx = new PathThroughContext(_element, l);
+							var ctx = new PathThroughContext(Parent, _element, l);
 
 							args[i - 1] = Parser.ParseExpression(ctx, l.Body.Unwrap());
 						}

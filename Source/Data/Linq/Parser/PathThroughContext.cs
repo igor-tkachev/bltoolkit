@@ -8,13 +8,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 	public class PathThroughContext : SequenceContextBase
 	{
-		public PathThroughContext(IParseContext sequence, LambdaExpression lambda)
-			: base(sequence, lambda)
+		public PathThroughContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
+			: base(parent, sequence, lambda)
 		{
 		}
 
-		public PathThroughContext(IParseContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
-			: base(sequence, lambda)
+		public PathThroughContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
+			: base(parent, sequence, lambda)
 		{
 			SqlQuery = sqlQuery;
 		}

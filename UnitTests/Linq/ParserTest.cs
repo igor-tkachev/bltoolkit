@@ -784,7 +784,7 @@ namespace Data.Linq
 	{
 		public int ParsingCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			var call = expression as MethodCallExpression;
 			return call != null && call.Method.Name == "GetContext";

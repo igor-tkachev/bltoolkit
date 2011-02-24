@@ -11,7 +11,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		public int ParsingCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			return expression.NodeType == ExpressionType.Lambda && ((LambdaExpression)expression).Parameters.Count == 0;
 		}

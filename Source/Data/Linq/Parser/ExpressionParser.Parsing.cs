@@ -18,17 +18,17 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		#region Parse Where
 
-		public IParseContext ParseWhere(IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
+		public IParseContext ParseWhere(IParseContext parent, IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
 			var makeHaving = false;
 
-			var  ctx  = new PathThroughContext(sequence, condition);
+			var  ctx  = new PathThroughContext(parent, sequence, condition);
 			var  expr = condition.Body.Unwrap();
 
 			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
 			{
 				sequence = new SubQueryContext(sequence);
-				ctx      = new PathThroughContext(sequence, condition);
+				ctx      = new PathThroughContext(parent, sequence, condition);
 			}
 
 			ParseSearchCondition(
@@ -2082,7 +2082,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region Helpers
 
-		public IParseContext GetContext(IParseContext current, Expression expression)
+		public IParseContext GetContext([JetBrains.Annotations.NotNull] IParseContext current, Expression expression)
 		{
 			var root = expression.GetRootObject();
 

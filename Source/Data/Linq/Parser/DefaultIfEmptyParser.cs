@@ -18,13 +18,13 @@ namespace BLToolkit.Data.Linq.Parser
 			var sequence     = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var defaultValue = methodCall.Arguments.Count == 1 ? null : methodCall.Arguments[1].Unwrap();
 
-			return new DefaultIfEmptyContext(sequence, defaultValue);
+			return new DefaultIfEmptyContext(parent, sequence, defaultValue);
 		}
 
 		public class DefaultIfEmptyContext : SequenceContextBase
 		{
-			public DefaultIfEmptyContext(IParseContext sequence, Expression defaultValue) 
-				: base(sequence, null)
+			public DefaultIfEmptyContext(IParseContext parent, IParseContext sequence, Expression defaultValue) 
+				: base(parent, sequence, null)
 			{
 				_defaultValue = defaultValue;
 			}

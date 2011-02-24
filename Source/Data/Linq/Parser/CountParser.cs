@@ -36,11 +36,11 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-				sequence = parser.ParseWhere(sequence, condition, true);
+				sequence = parser.ParseWhere(parent, sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
-			var context = new CountConext(sequence, methodCall.Method.ReturnType);
+			var context = new CountConext(parent, sequence, methodCall.Method.ReturnType);
 
 			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, context.SqlQuery), "cnt");
 
@@ -49,8 +49,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class CountConext : SequenceContextBase
 		{
-			public CountConext(IParseContext sequence, Type returnType)
-				: base(sequence, null)
+			public CountConext(IParseContext parent, IParseContext sequence, Type returnType)
+				: base(parent, sequence, null)
 			{
 				_returnType = returnType;
 			}

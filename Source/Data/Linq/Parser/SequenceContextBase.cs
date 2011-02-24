@@ -8,8 +8,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 	public abstract class SequenceContextBase : IParseContext
 	{
-		protected SequenceContextBase(IParseContext sequence, LambdaExpression lambda)
+		protected SequenceContextBase(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
 		{
+			Parent   = parent;
 			Sequence = sequence;
 			Parser   = sequence.Parser;
 			Lambda   = lambda;
@@ -18,11 +19,11 @@ namespace BLToolkit.Data.Linq.Parser
 			Sequence.Parent = this;
 		}
 
+		public IParseContext    Parent   { get; set; }
 		public IParseContext    Sequence { get; set; }
 		public ExpressionParser Parser   { get; set; }
 		public LambdaExpression Lambda   { get; set; }
 		public SqlQuery         SqlQuery { get; set; }
-		public IParseContext    Parent   { get; set; }
 
 		Expression IParseContext.Expression { get { return Lambda; } }
 

@@ -34,8 +34,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>();
 
-		public SelectContext(LambdaExpression lambda, params IParseContext[] sequences)
+		public SelectContext(IParseContext parent, LambdaExpression lambda, params IParseContext[] sequences)
 		{
+			Parent   = parent;
 			Sequence = sequences;
 			Parser   = sequences[0].Parser;
 			Lambda   = lambda;

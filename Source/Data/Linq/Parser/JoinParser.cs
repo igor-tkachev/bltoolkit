@@ -59,8 +59,8 @@ namespace BLToolkit.Data.Linq.Parser
 			var outerKeySelector = outerKeyLambda.Body.Unwrap();
 			var innerKeySelector = innerKeyLambda.Body.Unwrap();
 
-			var outerKeyContext = new PathThroughContext(outerContext, outerKeyLambda);
-			var innerKeyContext = new PathThroughContext(innerContext, innerKeyLambda);
+			var outerKeyContext = new PathThroughContext(parent, outerContext, outerKeyLambda);
+			var innerKeyContext = new PathThroughContext(parent, innerContext, innerKeyLambda);
 
 			if (outerKeySelector.NodeType == ExpressionType.New)
 			{
@@ -121,14 +121,14 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return isGroup ?
-				new GroupJoinContext(selector, outerContext, innerContext, sql) :
-				new      JoinContext(selector, outerContext, innerContext, sql);
+				new GroupJoinContext(parent, selector, outerContext, innerContext, sql) :
+				new      JoinContext(parent, selector, outerContext, innerContext, sql);
 		}
 
 		internal class JoinContext : SelectContext
 		{
-			public JoinContext(LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
-				: base(lambda, outerContext, innerContext)
+			public JoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
+				: base(parent, lambda, outerContext, innerContext)
 			{
 				SqlQuery = sql;
 			}
@@ -164,8 +164,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public class GroupJoinContext : JoinContext
 		{
-			public GroupJoinContext(LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
-				: base(lambda, outerContext, innerContext, sql)
+			public GroupJoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
+				: base(parent, lambda, outerContext, innerContext, sql)
 			{
 			}
 		}

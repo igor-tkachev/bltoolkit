@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		public int ParsingCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			if (expression.NodeType == ExpressionType.Call)
 				return CanParseMethodCall(parser, (MethodCallExpression)expression, sqlQuery);
@@ -18,9 +18,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
-			if (expression.NodeType == ExpressionType.Call)
-				return ParseMethodCall(parser, parent, (MethodCallExpression)expression, sqlQuery);
-			return null;
+			return ParseMethodCall(parser, parent, (MethodCallExpression)expression, sqlQuery);
 		}
 
 		protected abstract bool          CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery);

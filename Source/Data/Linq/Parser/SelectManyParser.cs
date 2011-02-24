@@ -27,7 +27,7 @@ namespace BLToolkit.Data.Linq.Parser
 			//	return resultSelector == null ? sequence : new SelectContext(resultSelector, sequence, sequence);
 			//}
 
-			var context    = new SelectManyContext(collectionSelector, sequence);
+			var context    = new SelectManyContext(parent, collectionSelector, sequence);
 			var expr       = collectionSelector.Body.Unwrap();
 			var crossApply = null != expr.Find(e => e == collectionSelector.Parameters[0]);
 
@@ -72,7 +72,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, true);
 
-				return new SelectContext(resultSelector, sequence, col);
+				return new SelectContext(parent, resultSelector, sequence, col);
 			}
 
 			//if (crossApply)
@@ -93,9 +93,11 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var collectionParent = collection.Parent as TableParser.TableContext;
 
+						// Association.
+						//
 						if (collectionParent != null)
 						{
-							var ts     = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
+							var ts = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
 							{
 								if (e.ElementType == QueryElementType.TableSource)
 								{
@@ -123,7 +125,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var col = (IParseContext)new SubQueryContext(collection, sequence.SqlQuery, false);
 
-					return new SelectContext(resultSelector, sequence, col);
+					return new SelectContext(parent, resultSelector, sequence, col);
 				}
 			}
 
@@ -132,8 +134,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public class SelectManyContext : SelectContext
 		{
-			public SelectManyContext(LambdaExpression lambda, IParseContext sequence)
-				: base(lambda, sequence)
+			public SelectManyContext(IParseContext parent, LambdaExpression lambda, IParseContext sequence)
+				: base(parent, lambda, sequence)
 			{
 			}
 

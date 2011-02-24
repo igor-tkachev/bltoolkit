@@ -8,7 +8,7 @@ namespace BLToolkit.Data.Linq.Parser
 	public interface ISequenceParser
 	{
 		int           ParsingCounter { get; set; }
-		bool          CanParse     (ExpressionParser parser, Expression expression, SqlQuery sqlQuery);
+		bool          CanParse     (ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery);
 		IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery);
 	}
 }

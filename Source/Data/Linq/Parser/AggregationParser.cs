@@ -36,7 +36,7 @@ namespace BLToolkit.Data.Linq.Parser
 			if (methodCall.Arguments.Count == 2)
 			{
 				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-				var context = new AggregationContext(sequence, lambda, methodCall.Method.ReturnType);
+				var context = new AggregationContext(parent, sequence, lambda, methodCall.Method.ReturnType);
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
 					new SqlFunction(
@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 			else
 			{
-				var context = new AggregationContext(sequence, null, methodCall.Method.ReturnType);
+				var context = new AggregationContext(parent, sequence, null, methodCall.Method.ReturnType);
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
 					new SqlFunction(
@@ -62,8 +62,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class AggregationContext : SequenceContextBase
 		{
-			public AggregationContext(IParseContext sequence, LambdaExpression lambda, Type returnType)
-				: base(sequence, lambda)
+			public AggregationContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda, Type returnType)
+				: base(parent, sequence, lambda)
 			{
 				_returnType = returnType;
 			}

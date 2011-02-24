@@ -22,7 +22,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-				sequence = parser.ParseWhere(sequence, condition, true);
+				sequence = parser.ParseWhere(parent, sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
@@ -48,13 +48,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 			//sequence.BuildExpression(null, 0);
 
-			return new FirstSingleContext(sequence, methodCall.Method.Name);
+			return new FirstSingleContext(parent, sequence, methodCall.Method.Name);
 		}
 
 		class FirstSingleContext : SequenceContextBase
 		{
-			public FirstSingleContext(IParseContext sequence, string methodName)
-				: base(sequence, null)
+			public FirstSingleContext(IParseContext parent, IParseContext sequence, string methodName)
+				: base(parent, sequence, null)
 			{
 				_methodName = methodName;
 			}

@@ -18,7 +18,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		int ISequenceParser.ParsingCounter { get; set; }
 
-		public T Parse<T>(ExpressionParser parser, Expression expression, SqlQuery sqlQuery, Func<int,IParseContext,T> action)
+		public T Parse<T>(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery, Func<int,IParseContext,T> action)
 		{
 			switch (expression.NodeType)
 			{
@@ -51,7 +51,7 @@ namespace BLToolkit.Data.Linq.Parser
 					//
 					if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
 					{
-						var ctx = parser.GetContext(null, expression);
+						var ctx = parser.GetContext(parent, expression);
 						if (ctx != null)
 							return action(4, ctx);
 					}
@@ -67,14 +67,14 @@ namespace BLToolkit.Data.Linq.Parser
 			return action(0, null);
 		}
 
-		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
-			return Parse(parser, expression, sqlQuery, (n,_) => n > 0);
+			return Parse(parser, parent, expression, sqlQuery, (n,_) => n > 0);
 		}
 
 		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
 		{
-			return Parse(parser, expression, sqlQuery, (n,ctx) =>
+			return Parse(parser, parent, expression, sqlQuery, (n,ctx) =>
 			{
 				switch (n)
 				{

@@ -130,7 +130,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			foreach (var parser in _parsers)
 			{
-				if (parser.CanParse(this, expression, sqlQuery))
+				if (parser.CanParse(this, parent, expression, sqlQuery))
 				{
 					var sequence = parser.ParseSequence(this, parent, expression, sqlQuery);
 

@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Linq.Parser
 				sequence = new SubQueryContext(sequence);
 
 			var lambda = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var order  = new PathThroughContext(sequence, lambda);
+			var order  = new PathThroughContext(parent, sequence, lambda);
 			var body   = lambda.Body.Unwrap();
 			var sql    = parser.ParseExpressions(order, body, ConvertFlags.Key);
 

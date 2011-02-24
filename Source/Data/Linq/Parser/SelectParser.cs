@@ -48,7 +48,9 @@ namespace BLToolkit.Data.Linq.Parser
 					break;
 			}
 
-			return selector.Parameters.Count == 1 ? new SelectContext(selector, sequence) : new SelectContext2(selector, sequence);
+			return selector.Parameters.Count == 1 ?
+				new SelectContext (parent, selector, sequence) :
+				new SelectContext2(parent, selector, sequence);
 		}
 
 		static IParseContext CheckSubQueryForSelect(IParseContext context)
@@ -65,8 +67,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class SelectContext2 : SelectContext
 		{
-			public SelectContext2(LambdaExpression lambda, IParseContext sequence)
-				: base(lambda, sequence)
+			public SelectContext2(IParseContext parent, LambdaExpression lambda, IParseContext sequence)
+				: base(parent, lambda, sequence)
 			{
 			}
 
