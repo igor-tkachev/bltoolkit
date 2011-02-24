@@ -442,7 +442,6 @@ namespace BLToolkit.Data.Linq.Parser
 								}
 							}
 
-
 							break;
 						}
 				}
@@ -641,52 +640,11 @@ namespace BLToolkit.Data.Linq.Parser
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
 					case RequestFor.Object       :
-						{
-							if (Body.NodeType == ExpressionType.Parameter)
-							{
-								if (level == 0)
-								{
-									var sequence = GetSequence(Body, 0);
-
-									return expression == Body ?
-										sequence.IsExpression(null,       0, requestFlag) :
-										sequence.IsExpression(expression, 1, requestFlag);
-								}
-
-								var levelExpression = expression.GetLevelExpression(level - 1);
-								var parseExpression = GetParseExpression(expression, levelExpression, Body);
-
-								return IsExpression(parseExpression, 0, requestFlag);
-							}
-
-							if (level == 0)
-							{
-								var levelExpression = expression.GetLevelExpression(level);
-
-								if (levelExpression != expression)
-									return GetSequence(expression, level).IsExpression(expression, level + 1, requestFlag);
-
-								switch (Body.NodeType)
-								{
-									case ExpressionType.MemberAccess : return GetSequence(expression, level).IsExpression(null, 0, requestFlag);
-									default                          : return requestFlag == RequestFor.Expression;
-								}
-							}
-							else
-							{
-								var root = Body.GetRootObject();
-
-								if (root.NodeType == ExpressionType.Parameter)
-								{
-									var levelExpression = expression.GetLevelExpression(level - 1);
-									var parseExpression = GetParseExpression(expression, levelExpression, Body);
-
-									return IsExpression(parseExpression, 0, requestFlag);
-								}
-							}
-
-							break;
-						}
+						return ProcessScalar(
+							expression,
+							level,
+							(ctx, ex, l) => ctx.IsExpression(ex, l, requestFlag),
+							() => requestFlag == RequestFor.Expression);
 				}
 			}
 			else
@@ -776,9 +734,23 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 		{
-			var sequence = GetSequence(expression, level);
+			if (IsScalar)
+			{
+				return ProcessScalar(
+					expression,
+					level,
+					(ctx, ex, l) => ctx.GetContext(ex, l, currentSql),
+					() => { throw new NotImplementedException(); });
+			}
 
-			return sequence.GetContext(expression, level + 1, currentSql);
+			if (level == 0)
+			{
+				var sequence = GetSequence(expression, level);
+
+				return sequence.GetContext(expression, level + 1, currentSql);
+			}
+
+			throw new NotImplementedException();
 		}
 
 		#endregion
@@ -801,6 +773,46 @@ namespace BLToolkit.Data.Linq.Parser
 		#endregion
 
 		#region Helpers
+
+		T ProcessScalar<T>(Expression expression, int level, Func<IParseContext,Expression,int,T> action, Func<T> defaultAction)
+		{
+			if (level == 0)
+			{
+				if (Body.NodeType == ExpressionType.Parameter)
+				{
+					var sequence = GetSequence(Body, 0);
+
+					return expression == Body ?
+						action(sequence, null,       0) :
+						action(sequence, expression, 1);
+				}
+
+				var levelExpression = expression.GetLevelExpression(level);
+
+				if (levelExpression != expression)
+					return action(GetSequence(expression, level), expression, level + 1);
+
+				switch (Body.NodeType)
+				{
+					case ExpressionType.MemberAccess : return action(GetSequence(expression, level), null, 0);
+					default                          : return defaultAction();
+				}
+			}
+			else
+			{
+				var root = Body.GetRootObject();
+
+				if (root.NodeType == ExpressionType.Parameter)
+				{
+					var levelExpression = expression.GetLevelExpression(level - 1);
+					var parseExpression = GetParseExpression(expression, levelExpression, Body);
+
+					return action(this, parseExpression, 0);
+				}
+			}
+
+			throw new NotImplementedException();
+		}
 
 		protected bool IsSubQuery()
 		{

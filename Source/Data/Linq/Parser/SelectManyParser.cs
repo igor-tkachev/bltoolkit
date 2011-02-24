@@ -166,17 +166,25 @@ namespace BLToolkit.Data.Linq.Parser
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				if (Collection == null)
-					base.BuildQuery<T>(query, queryParameter);
+					base.BuildQuery(query, queryParameter);
 
 				throw new NotImplementedException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				if (Collection == null)
-					return base.ConvertToIndex(expression, level, flags);
+				if (Collection != null)
+				{
+					if (expression == null)
+						return Collection.ConvertToIndex(expression, level, flags);
 
-				throw new NotImplementedException();
+					var root = expression.GetRootObject();
+
+					if (root != Lambda.Parameters[0])
+						return Collection.ConvertToIndex(expression, level, flags);
+				}
+
+				return base.ConvertToIndex(expression, level, flags);
 			}
 
 			/*
@@ -192,25 +200,47 @@ namespace BLToolkit.Data.Linq.Parser
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
 				if (Collection != null)
-					return Collection.ConvertToSql(expression, level, flags);
+				{
+					if (expression == null)
+						return Collection.ConvertToSql(expression, level, flags);
+
+					var root = expression.GetRootObject();
+
+					if (root != Lambda.Parameters[0])
+						return Collection.ConvertToSql(expression, level, flags);
+				}
+
 				return base.ConvertToSql(expression, level, flags);
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 			{
-				if (Collection == null)
-					return base.GetContext(expression, level, currentSql);
+				if (Collection != null)
+				{
+					if (expression == null)
+						return Collection.GetContext(expression, level, currentSql);
 
-				throw new NotImplementedException();
+					var root = expression.GetRootObject();
+
+					if (root != Lambda.Parameters[0])
+						return Collection.GetContext(expression, level, currentSql);
+				}
+
+				return base.GetContext(expression, level, currentSql);
 			}
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				if (requestFlag == RequestFor.Root)
-					return base.IsExpression(expression, level, requestFlag);
-
 				if (Collection != null)
-					return Collection.IsExpression(expression, level, requestFlag);
+				{
+					if (expression == null)
+						return Collection.IsExpression(expression, level, requestFlag);
+
+					var root = expression.GetRootObject();
+
+					if (root != Lambda.Parameters[0])
+						return Collection.IsExpression(expression, level, requestFlag);
+				}
 
 				return base.IsExpression(expression, level, requestFlag);
 			}
