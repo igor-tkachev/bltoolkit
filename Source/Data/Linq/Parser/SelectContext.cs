@@ -286,89 +286,74 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 			else
 			{
+				if (expression == null)
+				{
+					if (flags != ConvertFlags.Field)
+					{
+						var q =
+							from m in Members
+							where !(m.Key is MethodInfo)
+							select ConvertMember(m.Value, flags) into mm
+							from m in mm
+							select m;
+
+						return q.ToArray();
+					}
+
+					throw new NotImplementedException();
+				}
+
 				switch (flags)
 				{
 					case ConvertFlags.All   :
 					case ConvertFlags.Key   :
 					case ConvertFlags.Field :
 						{
-							if (level == 0)
+							var levelExpression = expression.GetLevelExpression(level);
+
+							switch (levelExpression.NodeType)
 							{
-								if (expression == null)
-								{
-									if (flags != ConvertFlags.Field)
+								case ExpressionType.MemberAccess :
 									{
-										var q =
-											from m in Members
-											where !(m.Key is MethodInfo)
-											select ConvertMember(m.Value, flags) into mm
-											from m in mm
-											select m;
-
-										return q.ToArray();
-									}
-								}
-								else
-								{
-									if (expression.NodeType == ExpressionType.Parameter)
-									{
-										var levelExpression = expression.GetLevelExpression(level);
-
-										if (levelExpression == expression)
-											return GetSequence(expression, level).ConvertToSql(null, 0, flags);
-									}
-									else
-									{
-										return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
-									}
-								}
-							}
-							else
-							{
-								var levelExpression = expression.GetLevelExpression(level);
-
-								switch (levelExpression.NodeType)
-								{
-									case ExpressionType.MemberAccess :
+										if (level != 0 && levelExpression == expression)
 										{
 											var member = ((MemberExpression)levelExpression).Member;
 
-											if (levelExpression == expression)
+											SqlInfo[] sql;
+
+											if (!_sql.TryGetValue(member, out sql))
 											{
-												SqlInfo[] sql;
-
-												if (!_sql.TryGetValue(member, out sql))
-												{
-													sql = ParseExpressions(Members[member], flags);
-													_sql.Add(member, sql);
-												}
-
-												return sql;
+												sql = ParseExpressions(Members[member], flags);
+												_sql.Add(member, sql);
 											}
 
-											var memberExpression = Members[member];
-
-											switch (memberExpression.NodeType)
-											{
-												case ExpressionType.New          :
-												case ExpressionType.MemberInit   :
-													{
-														var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
-														return ConvertToSql(mmExpresion, 0, flags);
-													}
-											}
-
-											var parseExpression = GetParseExpression(expression, levelExpression, memberExpression);
-
-											return ParseExpressions(parseExpression, flags);
+											return sql;
 										}
 
-									case ExpressionType.Parameter:
+										return ProcessMemberAccess(
+											expression, levelExpression, level,
+											(n,ctx,ex,l,mex) =>
+											{
+												switch (n)
+												{
+													case 0 :
+													//case 2 :
+														var parseExpression = GetParseExpression(expression, levelExpression, mex);
+														return ParseExpressions(parseExpression, flags);
+													default:
+														return ctx.ConvertToSql(ex, l, flags);
+												}
+											});
+									}
 
-										if (levelExpression != expression)
-											return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
-										break;
-								}
+								case ExpressionType.Parameter:
+									if (levelExpression != expression)
+										return GetSequence(expression, level).ConvertToSql(expression, level + 1, flags);
+
+									if (level == 0)
+										return GetSequence(expression, level).ConvertToSql(null, 0, flags);
+
+									break;
 							}
 
 							break;
@@ -519,7 +504,13 @@ namespace BLToolkit.Data.Linq.Parser
 											return idx;
 										}
 
-										return GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags);
+										return ProcessMemberAccess(
+											expression,
+											levelExpression,
+											level,
+											(n, ctx, ex, l, _) => n == 0 ?
+												GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags) :
+												ctx.ConvertToIndex(ex, l, flags));
 									}
 
 								case ExpressionType.Parameter:
@@ -588,7 +579,6 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							if (expression == null)
 							{
-								ParallelQuery op = Members.Values.AsParallel();
 								if (requestFlag == RequestFor.Expression)
 									return Members.Values.Any(member => IsExpression(member, 0, requestFlag));
 
@@ -602,31 +592,23 @@ namespace BLToolkit.Data.Linq.Parser
 								case ExpressionType.MemberAccess :
 									{
 										var memberExpression = Members[((MemberExpression)levelExpression).Member];
-										var parseExpression  = GetParseExpression(expression, levelExpression, memberExpression);
 
-										var sequence  = GetSequence(expression, level);
-										var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
-
-										if (memberExpression == parameter && levelExpression == expression)
-											return sequence.IsExpression(null, 0, requestFlag);
-
-										switch (memberExpression.NodeType)
+										if (levelExpression == expression)
 										{
-											default                          : return requestFlag == RequestFor.Expression;
-											case ExpressionType.MemberAccess :
-											case ExpressionType.Parameter    :
-											case ExpressionType.Call         : return sequence.IsExpression(parseExpression, 1, requestFlag);
-											case ExpressionType.New          :
-											case ExpressionType.MemberInit   :
-												{
-													if (levelExpression == expression)
-														return requestFlag == RequestFor.Object;
-
-													var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
-
-													return IsExpression(mmExpresion, 0, requestFlag);
-												}
+											switch (memberExpression.NodeType)
+											{
+												case ExpressionType.New        :
+												case ExpressionType.MemberInit : return requestFlag == RequestFor.Object;
+											}
 										}
+
+										return ProcessMemberAccess(
+											expression,
+											levelExpression,
+											level,
+											(n,ctx,ex,l,_) => n == 0 ?
+												requestFlag == RequestFor.Expression :
+												ctx.IsExpression(ex, l, requestFlag));
 									}
 
 								case ExpressionType.Parameter    :
@@ -645,9 +627,9 @@ namespace BLToolkit.Data.Linq.Parser
 										break;
 									}
 
-								case ExpressionType.New         :
-								case ExpressionType.MemberInit  : return requestFlag == RequestFor.Object;
-								default                         : return requestFlag == RequestFor.Expression;
+								case ExpressionType.New          :
+								case ExpressionType.MemberInit   : return requestFlag == RequestFor.Object;
+								default                          : return requestFlag == RequestFor.Expression;
 							}
 
 							break;
@@ -672,12 +654,50 @@ namespace BLToolkit.Data.Linq.Parser
 					(ctx, ex, l) => ctx.GetContext(ex, l, currentSql),
 					() => { throw new NotImplementedException(); });
 			}
-
-			if (level == 0)
+			else
 			{
-				var sequence = GetSequence(expression, level);
+				var levelExpression = expression.GetLevelExpression(level);
 
-				return sequence.GetContext(expression, level + 1, currentSql);
+				switch (levelExpression.NodeType)
+				{
+					case ExpressionType.MemberAccess :
+						{
+							var context = ProcessMemberAccess(
+								expression,
+								levelExpression,
+								level,
+								(n,ctx,ex,l,_) => n == 0 ?
+									null :
+									ctx.GetContext(ex, l, currentSql));
+
+							if (context == null)
+								throw new NotImplementedException();
+
+							return context;
+						}
+
+					case ExpressionType.Parameter    :
+						{
+							var sequence  = GetSequence(expression, level);
+							var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+
+							if (levelExpression == expression)
+							{
+								if (levelExpression == parameter)
+									return sequence.GetContext(null, 0, currentSql);
+							}
+							else if (level == 0)
+								return sequence.GetContext(expression, 1, currentSql);
+
+							break;
+						}
+				}
+
+				if (level == 0)
+				{
+					var sequence = GetSequence(expression, level);
+					return sequence.GetContext(expression, level + 1, currentSql);
+				}
 			}
 
 			throw new NotImplementedException();
@@ -742,6 +762,34 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			throw new NotImplementedException();
+		}
+
+		T ProcessMemberAccess<T>(Expression expression, Expression levelExpression, int level,
+			Func<int,IParseContext,Expression,int,Expression,T> action)
+		{
+			var memberExpression = Members[((MemberExpression)levelExpression).Member];
+			var parseExpression  = GetParseExpression(expression, levelExpression, memberExpression);
+
+			var sequence  = GetSequence(expression, level);
+			var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+
+			if (memberExpression == parameter && levelExpression == expression)
+				return action(1, sequence, null, 0, memberExpression);
+
+			switch (memberExpression.NodeType)
+			{
+				case ExpressionType.MemberAccess :
+				case ExpressionType.Parameter    :
+				case ExpressionType.Call         : return action(2, sequence, parseExpression, 1, memberExpression);
+				case ExpressionType.New          :
+				case ExpressionType.MemberInit   :
+					{
+						var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+						return action(3, this, mmExpresion, 0, memberExpression);
+					}
+			}
+
+			return action(0, this, null, 0, memberExpression);
 		}
 
 		protected bool IsSubQuery()
