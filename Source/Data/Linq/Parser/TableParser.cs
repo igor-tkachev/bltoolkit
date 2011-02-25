@@ -83,9 +83,9 @@ namespace BLToolkit.Data.Linq.Parser
 					case 2 :
 					case 3 : return new TableContext(parser, parent, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
 					case 4 :
-						return ctx.IsExpression(expression, 0, RequestFor.Association) ?
-							ctx.GetContext(expression, 0, sqlQuery) :
-							ctx;
+						return //ctx.IsExpression(expression, 0, RequestFor.Association) ?
+							ctx.GetContext(expression, 0, sqlQuery); //:
+							//ctx;
 				}
 
 				throw new InvalidOperationException();
@@ -465,6 +465,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 			{
+				if (expression == null)
+					return this;
+
 				if (ObjectMapper.Associations.Count > 0)
 				{
 					var levelExpression = expression.GetLevelExpression(level);
