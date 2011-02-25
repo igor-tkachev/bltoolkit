@@ -438,6 +438,31 @@ namespace Data.Linq
 			});
 		}
 
+		[Test]
+		public void Test91()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db =>
+			{
+				var q2 =
+					from p in db.Parent
+					join c in db.GrandChild on p.ParentID equals c.ParentID
+					where p.ParentID == 1
+					select p;
+
+				q2 = q2.Distinct();
+
+				var q3 =
+					from p in q2
+					from g in p.GrandChildren
+					let r = g.Child
+					where
+						p.ParentID == g.ParentID
+					select r;
+
+				q3.ToList();
+			});
+		}
+
 		void Foo(Expression<Func<object[],object>> func)
 		{
 			/*

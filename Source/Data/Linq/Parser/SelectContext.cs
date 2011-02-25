@@ -432,7 +432,12 @@ namespace BLToolkit.Data.Linq.Parser
 				switch (flags)
 				{
 					case ConvertFlags.Field :
-					case ConvertFlags.All   : return GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags);
+					case ConvertFlags.All   :
+						return ProcessScalar(
+							expression,
+							level,
+							(ctx, ex, l) => ctx.ConvertToIndex(ex, l, flags),
+							() => GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags));
 				}
 			}
 			else
