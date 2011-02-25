@@ -171,7 +171,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void NewObjectTest()
+		public void NewObjectTest1()
 		{
 			ForEachProvider(db => AreEqual(
 				from p in Parent
@@ -182,6 +182,28 @@ namespace Data.Linq
 				select new { ID = new MyClass { ID = p.ParentID } } into p1
 				where p1.ID.ID == 1
 				select p1));
+		}
+
+		[Test]
+		public void NewObjectTest2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				select new { ID = new MyClass { ID = p.ParentID } } into p
+				join j in
+					from c in Child
+					select new { ID = new MyClass { ID = c.ParentID } }
+				on p.ID.ID equals j.ID.ID
+				where p.ID.ID == 1
+				select p,
+				from p in db.Parent
+				select new { ID = new MyClass { ID = p.ParentID } } into p
+				join j in
+					from c in db.Child
+					select new { ID = new MyClass { ID = c.ParentID } }
+				on p.ID.ID equals j.ID.ID
+				where p.ID.ID == 1
+				select p));
 		}
 	}
 }
