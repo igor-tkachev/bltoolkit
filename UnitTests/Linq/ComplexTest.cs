@@ -249,23 +249,54 @@ namespace Data.Linq
 			});
 		}
 
+		public class MyObject
+		{
+			public Parent Parent;
+			public Child  Child;
+		}
+
+		IQueryable<MyObject> GetData(ITestDataContext db, int id)
+		{
+			var q =
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ChildID
+				where p.ParentID == id && c.ChildID > 0
+				select new MyObject { Parent = p, Child = c };
+
+			return q;
+		}
+
+		[Test]
+		public void Join2()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from o in GetData(db, 1)
+					from g in o.Parent.GrandChildren
+					select new { o, g };
+
+				var list = q.ToList();
+			});
+		}
+
 		[Test]
 		public void ExpressionTest1()
 		{
 			Expression<Func<Northwind.Customer,bool>> pred1 = cust=>cust.Country=="UK";
 			Expression<Func<Northwind.Customer,bool>> pred2 = cust=>cust.Country=="France";
 
-			var param = Expression.Parameter(typeof(Northwind.Customer), "x"); 
-			var final = Expression.Lambda<Func<Northwind.Customer, bool>>( 
-				Expression.OrElse( 
-					Expression.Invoke(pred1, param), 
-					Expression.Invoke(pred2, param) 
-				), param); 
+			var param = Expression.Parameter(typeof(Northwind.Customer), "x");
+			var final = Expression.Lambda<Func<Northwind.Customer, bool>>(
+				Expression.OrElse(
+					Expression.Invoke(pred1, param),
+					Expression.Invoke(pred2, param)
+				), param);
 
-			using (var db = new NorthwindDB()) 
-			{ 
-				var count = db.Customer.Count(final); 
-			} 
+			using (var db = new NorthwindDB())
+			{
+				var count = db.Customer.Count(final);
+			}
 		}
 
 		[Test]
@@ -274,17 +305,17 @@ namespace Data.Linq
 			Expression<Func<Parent,bool>> pred1 = _=>_.ParentID == 1;
 			Expression<Func<Parent,bool>> pred2 = _=>_.Value1   == 1 || _.Value1 == null;
 
-			var param = Expression.Parameter(typeof(Parent), "x"); 
-			var final = Expression.Lambda<Func<Parent, bool>>( 
-				Expression.AndAlso( 
-					Expression.Invoke(pred1, param), 
-					Expression.Invoke(pred2, param) 
-				), param); 
+			var param = Expression.Parameter(typeof(Parent), "x");
+			var final = Expression.Lambda<Func<Parent, bool>>(
+				Expression.AndAlso(
+					Expression.Invoke(pred1, param),
+					Expression.Invoke(pred2, param)
+				), param);
 
-			using (var db = new TestDbManager()) 
-			{ 
+			using (var db = new TestDbManager())
+			{
 				Assert.AreEqual(1, db.Parent.Count(final));
-			} 
+			}
 		}
 
 		#region IEnumerableTest
