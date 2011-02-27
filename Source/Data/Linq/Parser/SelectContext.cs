@@ -776,16 +776,24 @@ namespace BLToolkit.Data.Linq.Parser
 			var parseExpression  = GetParseExpression(expression, levelExpression, memberExpression);
 
 			var sequence  = GetSequence(expression, level);
-			var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
 
-			if (memberExpression == parameter && levelExpression == expression)
-				return action(1, sequence, null, 0, memberExpression);
+			if (sequence != null)
+			{
+				var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+
+				if (memberExpression == parameter && levelExpression == expression)
+					return action(1, sequence, null, 0, memberExpression);
+			}
 
 			switch (memberExpression.NodeType)
 			{
 				case ExpressionType.MemberAccess :
 				case ExpressionType.Parameter    :
-				case ExpressionType.Call         : return action(2, sequence, parseExpression, 1, memberExpression);
+				case ExpressionType.Call         :
+					if (sequence != null)
+						return action(2, sequence, parseExpression, 1, memberExpression);
+					throw new NotImplementedException();
+
 				case ExpressionType.New          :
 				case ExpressionType.MemberInit   :
 					{
@@ -829,6 +837,9 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var memberExpression = Members[((MemberExpression)levelExpression).Member];
 							var root             =  memberExpression.GetRootObject();
+
+							if (root.NodeType != ExpressionType.Parameter)
+								return null;
 
 							for (var i = 0; i < Lambda.Parameters.Count; i++)
 								if (root == Lambda.Parameters[i])

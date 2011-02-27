@@ -18,6 +18,17 @@ namespace BLToolkit.Data.Linq.Parser
 			var sequence     = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var defaultValue = methodCall.Arguments.Count == 1 ? null : methodCall.Arguments[1].Unwrap();
 
+			if (parent is SelectManyParser.SelectManyContext)
+			{
+				var groupJoin = ((SelectManyParser.SelectManyContext)parent).Sequence[0] as JoinParser.GroupJoinContext;
+
+				if (groupJoin != null)
+				{
+					groupJoin.SqlQuery.From.Tables[0].Joins[0].JoinType = SqlQuery.JoinType.Left;
+					groupJoin.SqlQuery.From.Tables[0].Joins[0].IsWeak   = false;
+				}
+			}
+
 			return new DefaultIfEmptyContext(parent, sequence, defaultValue);
 		}
 

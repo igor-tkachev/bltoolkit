@@ -23,40 +23,40 @@ namespace Data.Linq
 		public void Contains1()
 		{
 			var q1 =
-				from gc in GrandChild
+				from gc1 in GrandChild
 					join max in
 						from gch in GrandChild
 						group gch by gch.ChildID into g
 						select g.Max(c => c.GrandChildID)
-					on gc.GrandChildID equals max
-				select gc;
+					on gc1.GrandChildID equals max
+				select gc1;
 
 			var expected =
 				from ch in Child
-					join p  in Parent on ch.ParentID equals p.ParentID
-					join gc in q1     on p.ParentID  equals gc.ParentID into g
-					from gc in g.DefaultIfEmpty()
-				where gc == null || !new[] { 111, 222 }.Contains(gc.GrandChildID.Value)
-				select new { p.ParentID, gc };
+					join p   in Parent on ch.ParentID equals p.ParentID
+					join gc2 in q1     on p.ParentID  equals gc2.ParentID into g
+					from gc3 in g.DefaultIfEmpty()
+				where gc3 == null || !new[] { 111, 222 }.Contains(gc3.GrandChildID.Value)
+				select new { p.ParentID, gc3 };
 
 			ForEachProvider(new [] { ProviderName.Firebird, ProviderName.Access }, db =>
 			{
 				var q2 =
-					from gc in db.GrandChild
+					from gc1 in db.GrandChild
 						join max in
 							from gch in db.GrandChild
 							group gch by gch.ChildID into g
 							select g.Max(c => c.GrandChildID)
-						on gc.GrandChildID equals max
-					select gc;
+						on gc1.GrandChildID equals max
+					select gc1;
 
 				var result =
 					from ch in db.Child
-						join p  in db.Parent on ch.ParentID equals p.ParentID
-						join gc in q2        on p.ParentID  equals gc.ParentID into g
-						from gc in g.DefaultIfEmpty()
-				where gc == null || !new[] { 111, 222 }.Contains(gc.GrandChildID.Value)
-				select new { p.ParentID, gc };
+						join p   in db.Parent on ch.ParentID equals p.ParentID
+						join gc2 in q2        on p.ParentID  equals gc2.ParentID into g
+						from gc3 in g.DefaultIfEmpty()
+				where gc3 == null || !new[] { 111, 222 }.Contains(gc3.GrandChildID.Value)
+				select new { p.ParentID, gc3 };
 
 				AreEqual(expected, result);
 			});

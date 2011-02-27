@@ -3447,19 +3447,33 @@ namespace BLToolkit.Data.Sql
 			{
 				var query = (SqlQuery)source.Source;
 
-				if (query.From.Tables.Count == 1 &&
-				   //!query.Select.IsDistinct      &&
-				   //query.From.Tables[0].Joins.Count == 0 &&
-				    (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
-				   !query.HasUnion               &&
-				    query.GroupBy.IsEmpty        &&
-				   !query.Select.HasModifier     &&
-				   !query.Select.Columns.Exists(c => !(c.Expression is SqlField)))
+				var isSourceOK =
+					 query.From.Tables.Count == 1 &&
+					//!query.Select.IsDistinct      &&
+					//query.From.Tables[0].Joins.Count == 0 &&
+					 (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
+					!query.HasUnion           &&
+					 query.GroupBy.IsEmpty    &&
+					!query.Select.HasModifier &&
+					!query.Select.Columns.Exists(c => !(c.Expression is SqlField));
+
+				var isThisOK =
+					 this.From.Tables.Count == 1 &&
+					//!this.Select.IsDistinct      &&
+					//this.From.Tables[0].Joins.Count == 0 &&
+					 this.Where.IsEmpty      &&
+					 this.Having.IsEmpty     &&
+					!this.HasUnion           &&
+					 this.GroupBy.IsEmpty    &&
+					!this.Select.HasModifier &&
+					!this.Select.Columns.Exists(c => !(c.Expression is Column));
+
+				if (isSourceOK || isThisOK)
 				{
-					var map = new Dictionary<ISqlExpression,SqlField>(query.Select.Columns.Count);
+					var map = new Dictionary<ISqlExpression,ISqlExpression>(query.Select.Columns.Count);
 
 					foreach (var c in query.Select.Columns)
-						map.Add(c, (SqlField)c.Expression);
+						map.Add(c, c.Expression);
 
 					var top = this;
 
@@ -3468,7 +3482,7 @@ namespace BLToolkit.Data.Sql
 
 					((ISqlExpressionWalkable)top).Walk(false, expr =>
 					{
-						SqlField fld;
+						ISqlExpression fld;
 						return map.TryGetValue(expr, out fld) ? fld : expr;
 					});
 

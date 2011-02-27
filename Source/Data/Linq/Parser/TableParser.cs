@@ -60,6 +60,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 				case ExpressionType.Parameter:
 					{
+						if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
+						{
+							var ctx = parser.GetContext(parent, expression);
+							if (ctx != null)
+								return action(4, ctx);
+						}
+
 						break;
 					}
 			}
@@ -532,12 +539,45 @@ namespace BLToolkit.Data.Linq.Parser
 					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
 						if (levelExpression != expression)
+						{
+							var levelMember = (MemberExpression)levelExpression;
+
 							if (TypeHelper.IsNullableValueMember(memberExpression.Member) && memberExpression.Expression == levelExpression)
-								memberExpression = (MemberExpression)levelExpression;
+								memberExpression = levelMember;
+							else
+							{
+								var sameType =
+									levelMember.Member.ReflectedType == SqlTable.ObjectType ||
+									levelMember.Member.DeclaringType == SqlTable.ObjectType;
+
+								if (!sameType)
+								{
+									var mi = SqlTable.ObjectType.GetMember(levelMember.Member.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+									sameType = mi.Any(_ => _.DeclaringType == levelMember.Member.DeclaringType);
+								}
+
+								if (sameType)
+								{
+									foreach (var field in SqlTable.Fields.Values)
+									{
+										if (field.MemberMapper is MemberMapper.ComplexMapper)
+										{
+											var name = levelMember.Member.Name;
+
+											for (var ex = (MemberExpression)expression; ex != levelMember; ex = (MemberExpression)ex.Expression)
+												name += "." + ex.Member.Name;
+
+											if (field.MemberMapper.MemberName == name)
+												return field;
+										}
+									}
+								}
+							}
+						}
 
 						if (levelExpression == memberExpression)
 							foreach (var field in SqlTable.Fields.Values)
-								if (field.MemberMapper.MemberAccessor.MemberInfo == memberExpression.Member)
+								if (TypeHelper.Equals(field.MemberMapper.MemberAccessor.MemberInfo, memberExpression.Member))
 									return field;
 					}
 				}
@@ -595,9 +635,7 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var q =
 								from a in ObjectMapper.Associations
-								where 
-									a.MemberAccessor.MemberInfo.DeclaringType == memberExpression.Member.DeclaringType &&
-									a.MemberAccessor.MemberInfo.Name          == memberExpression.Member.Name
+								where TypeHelper.Equals(a.MemberAccessor.MemberInfo, memberExpression.Member)
 								select new AssociatedTableContext(Parser, this, a) { Parent = Parent };
 
 							tableAssociation = q.FirstOrDefault();

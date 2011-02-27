@@ -351,7 +351,8 @@ namespace BLToolkit.Data.Linq.Parser
 				&& TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
 
 			if (res && expr.NodeType == ExpressionType.MemberAccess)
-				res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
+				return false;
+				//res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
 
 			return res;
 		}
