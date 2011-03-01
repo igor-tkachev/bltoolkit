@@ -9,14 +9,24 @@
 			Usings.Add("BLToolkit.Validation");
 
 			foreach (var t in Tables.Values)
+			{
+				var maxLength = t.Columns.Values
+					.Where (x => x.Type == "string")
+					.Select(x => x.Length)
+					.OrderByDescending(x => x)
+					.FirstOrDefault()
+					// Get exponent slowly
+					.ToString().Length;
+
 				foreach (var c in t.Columns.Values)
 				{
 					if (c.Type == "string" && c.Length > 0)
-						c.Attributes.Add(string.Format("MaxLength({0})", c.Length));
+						c.Attributes.Add(string.Format("MaxLength({0," + maxLength + "})", c.Length));
 
 					if (!c.IsNullable)
 						c.Attributes.Add("Required");
 				}
+			}
 		};
 	}
 #>
