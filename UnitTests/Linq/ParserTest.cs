@@ -552,7 +552,7 @@ namespace Data.Linq
 
 		#endregion
 
-		#region ConvertToIndexScalar
+		#region ConvertToIndex
 
 		[Test]
 		public void ConvertToIndexScalar1()
@@ -611,12 +611,58 @@ namespace Data.Linq
 			}
 		}
 
-		#endregion
+		[Test]
+		public void ConvertToIndexJoin1()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q2 =
+					from gc1 in db.GrandChild
+						join max in
+							from gch in db.GrandChild
+							group gch by gch.ChildID into g
+							select g.Max(c => c.GrandChildID)
+						on gc1.GrandChildID equals max
+					select gc1;
 
-		#region ConvertToIndexSelect
+				var result =
+					from ch in db.Child
+						join p   in db.Parent on ch.ParentID equals p.ParentID
+						join gc2 in q2        on p.ParentID  equals gc2.ParentID into g
+						from gc3 in g.DefaultIfEmpty()
+				select gc3;
+
+				var ctx = result.GetContext();
+				var idx = ctx.ConvertToIndex(null, 0, ConvertFlags.Key);
+
+				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
+			}
+		}
 
 		[Test]
-		public void ConvertToIndexSelect1()
+		public void ConvertToIndexJoin2()
+		{
+			using (var db = new TestDbManager())
+			{
+				var result =
+					from ch in db.Child
+						join gc2 in db.GrandChild on ch.ParentID  equals gc2.ParentID into g
+						from gc3 in g.DefaultIfEmpty()
+					select gc3;
+
+				var ctx = result.GetContext();
+				var idx = ctx.ConvertToIndex(null, 0, ConvertFlags.Key);
+
+				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
+			}
+		}
+
+		#endregion
+
+		#region ConvertToSql
+
+		[Test]
+		public void ConvertToSql1()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -634,7 +680,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect2()
+		public void ConvertToSql2()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -651,7 +697,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect3()
+		public void ConvertToSql3()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -669,7 +715,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect4()
+		public void ConvertToSql4()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -687,7 +733,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect5()
+		public void ConvertToSql5()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -702,78 +748,6 @@ namespace Data.Linq
 				Assert.AreEqual        (1, sql.Length);
 				Assert.IsAssignableFrom(typeof(SqlField), sql[0].Sql);
 				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
-			}
-		}
-
-		[Test]
-		public void ConvertToIndexSelect9()
-		{
-			using (var db = new TestDbManager())
-			{
-				var ctx = db.GrandChild
-					.Select    (p => new { p, p.Child })
-					.Select    (p => new { p.Child.Parent.ParentID, p.p.ChildID })
-					.Select    (p => p.ParentID)
-					.GetContext();
-
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
-			}
-		}
-
-		[Test]
-		public void ConvertToIndexSelect10()
-		{
-			using (var db = new TestDbManager())
-			{
-				var ctx = db.Parent
-					.Select    (p => p.Children.Max(c => (int?)c.ChildID) ?? p.Value1)
-					.Select    (p => p)
-					.GetContext();
-
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
-			}
-		}
-
-		[Test]
-		public void ConvertToIndexJoin1()
-		{
-			using (var db = new TestDbManager())
-			{
-				var ctx = db.Parent
-					.Join  (db.Child, p => p.ParentID, c => c.ParentID, (p, c) => new { p, c })
-					.Where (t => t.c.ChildID > 20)
-					.Select(t => t.p)
-					.Select(p => p.ParentID)
-					.GetContext();
-
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsFalse (ctx.IsExpression(null, 0, RequestFor.Expression));
-			}
-		}
-
-		[Test]
-		public void ConvertToIndexJoin2()
-		{
-			using (var db = new TestDbManager())
-			{
-				var ctx = db.Parent
-					.Join  (db.Child, p => p.ParentID, c => c.ParentID, (p, c) => c)
-					.Select(t => t)
-					.Select(p => p.ParentID)
-					.GetContext();
-
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
 			}
 		}
 

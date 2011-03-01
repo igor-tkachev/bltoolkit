@@ -217,7 +217,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				if (expression == _counterExpression)
+				if (expression != null && expression == _counterExpression)
 					return _counterInfo ?? (_counterInfo = new[] { new SqlInfo { Index = CounterSql.ParentSql.Select.Add(CounterSql) } });
 
 				return base.ConvertToIndex(expression, level, flags);
