@@ -39,9 +39,11 @@ namespace BLToolkit.Data.Linq.Parser
 			var isGroup      = methodCall.Method.Name == "GroupJoin";
 			var outerContext = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var innerContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
+			var countContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
 
 			outerContext = new SubQueryContext(outerContext);
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext) : new SubQueryContext(innerContext);;
+			countContext = new SubQueryContext(countContext);
 
 			var join = innerContext.SqlQuery.InnerJoin();
 			var sql  = new SqlQuery();
@@ -61,7 +63,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var outerKeyContext = new PathThroughContext(parent, outerContext, outerKeyLambda);
 			var innerKeyContext = new PathThroughContext(parent, innerContext, innerKeyLambda);
+			var countKeyContext = new PathThroughContext(parent, countContext, innerKeyLambda);
 
+			// Process counter.
+			//
+			var counterSql = ((SubQueryContext)countContext).SqlQuery;
+
+			// Make join and where for the counter.
+			//
 			if (outerKeySelector.NodeType == ExpressionType.New)
 			{
 				var new1 = (NewExpression)outerKeySelector;
@@ -72,14 +81,7 @@ namespace BLToolkit.Data.Linq.Parser
 					var arg1 = new1.Arguments[i];
 					var arg2 = new2.Arguments[i];
 
-					var predicate = parser.ParseObjectComparison(ExpressionType.Equal, outerKeyContext, arg1, innerKeyContext, arg2);
-
-					if (predicate != null)
-						join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
-					else
-						join
-							.Expr(parser.ParseExpression(outerKeyContext, arg1)).Equal
-							.Expr(parser.ParseExpression(innerKeyContext, arg2));
+					ParseJoin(parser, join, outerKeyContext, arg1, innerKeyContext, arg2, countKeyContext, counterSql);
 				}
 			}
 			else if (outerKeySelector.NodeType == ExpressionType.MemberInit)
@@ -95,38 +97,57 @@ namespace BLToolkit.Data.Linq.Parser
 					var arg1 = ((MemberAssignment)mi1.Bindings[i]).Expression;
 					var arg2 = ((MemberAssignment)mi2.Bindings[i]).Expression;
 
-					var predicate = parser.ParseObjectComparison(ExpressionType.Equal, outerKeyContext, arg1, innerKeyContext, arg2);
-
-					if (predicate != null)
-						join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
-					else
-						join
-							.Expr(parser.ParseExpression(outerKeyContext, arg1)).Equal
-							.Expr(parser.ParseExpression(innerKeyContext, arg2));
+					ParseJoin(parser, join, outerKeyContext, arg1, innerKeyContext, arg2, countKeyContext, counterSql);
 				}
 			}
 			else
 			{
-				var predicate = parser.ParseObjectComparison(
-					ExpressionType.Equal,
-					outerKeyContext, outerKeySelector,
-					innerKeyContext, innerKeySelector);
-
-				if (predicate != null)
-					join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
-				else
-					join
-						.Expr(parser.ParseExpression(outerKeyContext, outerKeySelector)).Equal
-						.Expr(parser.ParseExpression(innerKeyContext, innerKeySelector));
+				ParseJoin(parser, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
 			}
 
 			if (isGroup)
 			{
-				((GroupJoinSubQueryContext)innerContext).Join = join.JoinedTable;
+				counterSql.ParentSql = sql;
+				counterSql.Select.Columns.Clear();
+
+				((GroupJoinSubQueryContext)innerContext).Join       = join.JoinedTable;
+				((GroupJoinSubQueryContext)innerContext).CounterSql = counterSql;
 				return new GroupJoinContext(parent, selector, outerContext, innerContext, sql);
 			}
 
 			return new JoinContext(parent, selector, outerContext, innerContext, sql);
+		}
+
+		static void ParseJoin(
+			ExpressionParser         parser,
+			SqlQuery.FromClause.Join join,
+			PathThroughContext outerKeyContext, Expression outerKeySelector,
+			PathThroughContext innerKeyContext, Expression innerKeySelector,
+			PathThroughContext countKeyContext, SqlQuery countSql)
+		{
+			var predicate = parser.ParseObjectComparison(
+				ExpressionType.Equal,
+				outerKeyContext, outerKeySelector,
+				innerKeyContext, innerKeySelector);
+
+			if (predicate != null)
+				join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+			else
+				join
+					.Expr(parser.ParseExpression(outerKeyContext, outerKeySelector)).Equal
+					.Expr(parser.ParseExpression(innerKeyContext, innerKeySelector));
+
+			predicate = parser.ParseObjectComparison(
+				ExpressionType.Equal,
+				outerKeyContext, outerKeySelector,
+				countKeyContext, innerKeySelector);
+
+			if (predicate != null)
+				countSql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+			else
+				countSql.Where
+					.Expr(parser.ParseExpression(outerKeyContext, outerKeySelector)).Equal
+					.Expr(parser.ParseExpression(countKeyContext, innerKeySelector));
 		}
 
 		internal class JoinContext : SelectContext
@@ -177,6 +198,7 @@ namespace BLToolkit.Data.Linq.Parser
 		internal class GroupJoinSubQueryContext : SubQueryContext
 		{
 			public SqlQuery.JoinedTable Join;
+			public SqlQuery             CounterSql;
 
 			public GroupJoinSubQueryContext(IParseContext subQuery) : base(subQuery)
 			{
@@ -190,32 +212,24 @@ namespace BLToolkit.Data.Linq.Parser
 				return base.GetContext(expression, level, currentSql);
 			}
 
-			public SqlQuery GetCounter()
+			Expression _counterExpression;
+			SqlInfo[]  _counterInfo;
+
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			{
+				if (expression == _counterExpression)
+					return _counterInfo ?? (_counterInfo = new[] { new SqlInfo { Index = CounterSql.ParentSql.Select.Add(CounterSql) } });
+
+				return base.ConvertToIndex(expression, level, flags);
+			}
+
+			public SqlQuery GetCounter(Expression expr)
 			{
 				Join.IsWeak = true;
 
-				var visitor = new QueryVisitor();
-				var sql     = visitor.Convert(SqlQuery, e =>
-				{
-					if (e.ElementType == QueryElementType.SqlTable)
-					{
-						var t = (SqlTable)e;
+				_counterExpression = expr;
 
-						return new SqlTable(t);
-					}
-
-					return e;
-				});
-
-				var sc = new QueryVisitor().Convert(Join.Condition, e =>
-				{
-					IQueryElement ne;
-					return visitor.VisitedElements.TryGetValue(e, out ne) ? ne : e;
-				});
-
-				sql.Where.SearchCondition.Conditions.AddRange(sc.Conditions);
-
-				return sql;
+				return CounterSql;
 			}
 		}
 	}

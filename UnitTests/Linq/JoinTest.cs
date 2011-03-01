@@ -359,6 +359,42 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CountGroupJoin3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count(),
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count(),
+				}));
+		}
+
+		[Test]
+		public void CountGroupJoin4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count() + gc.Count(),
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count() + gc.Count(),
+				}));
+		}
+
+		[Test]
 		public void JoinByAnonymousTest()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(

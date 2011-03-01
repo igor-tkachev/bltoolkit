@@ -21,21 +21,11 @@ namespace BLToolkit.Data.Linq.Parser
 			if (sequence is JoinParser.GroupJoinSubQueryContext)
 			{
 				var ctx = new CountConext(parent, sequence, methodCall.Method.ReturnType);
-				var sql = ((JoinParser.GroupJoinSubQueryContext)sequence).GetCounter();
 
-				sql.ParentSql = sequence.SqlQuery;
-				sql.FinalizeAndValidate();
+				ctx.SqlQuery   = ((JoinParser.GroupJoinSubQueryContext)sequence).GetCounter(methodCall);
+				ctx.FieldIndex = sequence.ConvertToIndex(methodCall, 0, ConvertFlags.Field)[0].Index;
 
-				while (sql.Select.Columns.Count > 0)
-				{
-					sql.Select.Columns.Clear();
-					sql.FinalizeAndValidate();
-				}
-
-				sql.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, sql));
-
-				ctx.SqlQuery   = sqlQuery;
-				ctx.FieldIndex = sqlQuery.Select.Add(sql, "cnt");
+				ctx.SqlQuery.Select.Expr(SqlFunction.CreateCount(methodCall.Method.ReturnType, ctx.SqlQuery), "cnt");
 
 				return ctx;
 			}

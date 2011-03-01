@@ -3460,7 +3460,7 @@ namespace BLToolkit.Data.Sql
 				var isThisOK =
 					 this.From.Tables.Count == 1 &&
 					//!this.Select.IsDistinct      &&
-					//this.From.Tables[0].Joins.Count == 0 &&
+					 this.From.Tables[0].Joins.Count == 0 &&
 					 this.Where.IsEmpty      &&
 					 this.Having.IsEmpty     &&
 					!this.HasUnion           &&

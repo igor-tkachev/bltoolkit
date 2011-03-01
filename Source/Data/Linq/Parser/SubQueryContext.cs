@@ -60,7 +60,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
 
-		public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		public virtual SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			return ConvertToSql(expression, level, flags)
 				.Select(_ => { _.Index = GetIndex(_.Sql); return _; })
