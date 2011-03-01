@@ -311,7 +311,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void CountGroupJoin()
+		public void CountGroupJoin1()
 		{
 			ForEachProvider(db => AreEqual(
 				from p in Parent
@@ -325,6 +325,32 @@ namespace Data.Linq
 				from p in db.Parent
 				join c in db.Child on p.ParentID equals c.ParentID into gc
 				join g in db.GrandChild on p.ParentID equals g.ParentID into gg
+				select new
+				{
+					Count1 = gc.Count(),
+					Count2 = gg.Count()
+				}));
+		}
+
+		[Test]
+		public void CountGroupJoin2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				join g in GrandChild on p.ParentID equals g.ParentID into gg
+				let gc1 = gc
+				let gg1 = gg
+				select new
+				{
+					Count1 = gc1.Count(),
+					Count2 = gg1.Count()
+				} ,
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				join g in db.GrandChild on p.ParentID equals g.ParentID into gg
+				let gc1 = gc
+				let gg1 = gg
 				select new
 				{
 					Count1 = gc.Count(),

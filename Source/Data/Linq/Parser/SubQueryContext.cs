@@ -9,17 +9,17 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class SubQueryContext : IParseContext
 	{
-		readonly IParseContext _subQuery;
+		public readonly IParseContext SubQuery;
 
 		public SubQueryContext(IParseContext subQuery, SqlQuery sqlQuery, bool addToSql)
 		{
-			_subQuery = subQuery;
-			_subQuery.Parent = this;
+			SubQuery = subQuery;
+			SubQuery.Parent = this;
 
 			SqlQuery = sqlQuery;
 
 			if (addToSql)
-				SqlQuery.From.Table(_subQuery.SqlQuery);
+				SqlQuery.From.Table(SubQuery.SqlQuery);
 
 			//_subQuery.SqlQuery.ParentSql = SqlQuery;
 		}
@@ -34,27 +34,27 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 		}
 
-		public ExpressionParser Parser     { get { return _subQuery.Parser;     } }
-		public Expression       Expression { get { return _subQuery.Expression; } }
+		public ExpressionParser Parser     { get { return SubQuery.Parser;     } }
+		public Expression       Expression { get { return SubQuery.Expression; } }
 		public SqlQuery         SqlQuery   { get; set; }
 		public IParseContext    Parent     { get; set; }
 
 		public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
-			_subQuery.BuildQuery(query, queryParameter);
+			SubQuery.BuildQuery(query, queryParameter);
 		}
 
 		public Expression BuildExpression(Expression expression, int level)
 		{
-			return _subQuery.BuildExpression(expression, level);
+			return SubQuery.BuildExpression(expression, level);
 			//throw new NotImplementedException();
 		}
 
 		public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
-			return _subQuery
+			return SubQuery
 				.ConvertToIndex(expression, level, flags)
-				.Select(idx => new SqlInfo { Sql = _subQuery.SqlQuery.Select.Columns[idx.Index], Member = idx.Member })
+				.Select(idx => new SqlInfo { Sql = SubQuery.SqlQuery.Select.Columns[idx.Index], Member = idx.Member })
 				.ToArray();
 		}
 
@@ -74,12 +74,12 @@ namespace BLToolkit.Data.Linq.Parser
 				case RequestFor.SubQuery : return true;
 			}
 
-			return _subQuery.IsExpression(expression, level, testFlag);
+			return SubQuery.IsExpression(expression, level, testFlag);
 		}
 
-		public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+		public virtual IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 		{
-			return _subQuery.GetContext(expression, level, currentSql);
+			return SubQuery.GetContext(expression, level, currentSql);
 		}
 
 		int GetIndex(ISqlExpression sql)

@@ -2255,7 +2255,7 @@ namespace BLToolkit.Data.Sql
 							JoinedTable.Table.Joins.Add(join.JoinedTable);
 				}
 
-				internal JoinedTable JoinedTable { get; private set; }
+				public JoinedTable JoinedTable { get; private set; }
 			}
 
 			#endregion

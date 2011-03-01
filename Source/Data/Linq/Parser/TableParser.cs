@@ -473,7 +473,21 @@ namespace BLToolkit.Data.Linq.Parser
 			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 			{
 				if (expression == null)
+				{
+					if (Parser.SubQueryParsingCounter > 0)
+					{
+						var table = new TableContext(
+							Parser,
+							Parent is SelectManyParser.SelectManyContext ? this : Parent,
+							Expression,
+							currentSql,
+							SqlTable.ObjectType);
+
+						return table;
+					}
+
 					return this;
+				}
 
 				if (ObjectMapper.Associations.Count > 0)
 				{

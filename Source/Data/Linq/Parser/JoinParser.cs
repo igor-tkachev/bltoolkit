@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var innerContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
 
 			outerContext = new SubQueryContext(outerContext);
-			innerContext = new SubQueryContext(innerContext);
+			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext) : new SubQueryContext(innerContext);;
 
 			var join = innerContext.SqlQuery.InnerJoin();
 			var sql  = new SqlQuery();
@@ -120,9 +120,13 @@ namespace BLToolkit.Data.Linq.Parser
 						.Expr(parser.ParseExpression(innerKeyContext, innerKeySelector));
 			}
 
-			return isGroup ?
-				new GroupJoinContext(parent, selector, outerContext, innerContext, sql) :
-				new      JoinContext(parent, selector, outerContext, innerContext, sql);
+			if (isGroup)
+			{
+				((GroupJoinSubQueryContext)innerContext).Join = join.JoinedTable;
+				return new GroupJoinContext(parent, selector, outerContext, innerContext, sql);
+			}
+
+			return new JoinContext(parent, selector, outerContext, innerContext, sql);
 		}
 
 		internal class JoinContext : SelectContext
@@ -162,11 +166,56 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 		}
 
-		public class GroupJoinContext : JoinContext
+		internal class GroupJoinContext : JoinContext
 		{
 			public GroupJoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
 				: base(parent, lambda, outerContext, innerContext, sql)
 			{
+			}
+		}
+
+		internal class GroupJoinSubQueryContext : SubQueryContext
+		{
+			public SqlQuery.JoinedTable Join;
+
+			public GroupJoinSubQueryContext(IParseContext subQuery) : base(subQuery)
+			{
+			}
+
+			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			{
+				if (expression == null)
+					return this;
+
+				return base.GetContext(expression, level, currentSql);
+			}
+
+			public SqlQuery GetCounter()
+			{
+				Join.IsWeak = true;
+
+				var visitor = new QueryVisitor();
+				var sql     = visitor.Convert(SqlQuery, e =>
+				{
+					if (e.ElementType == QueryElementType.SqlTable)
+					{
+						var t = (SqlTable)e;
+
+						return new SqlTable(t);
+					}
+
+					return e;
+				});
+
+				var sc = new QueryVisitor().Convert(Join.Condition, e =>
+				{
+					IQueryElement ne;
+					return visitor.VisitedElements.TryGetValue(e, out ne) ? ne : e;
+				});
+
+				sql.Where.SearchCondition.Conditions.AddRange(sc.Conditions);
+
+				return sql;
 			}
 		}
 	}

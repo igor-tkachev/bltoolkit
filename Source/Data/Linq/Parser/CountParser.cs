@@ -18,6 +18,28 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 
+			if (sequence is JoinParser.GroupJoinSubQueryContext)
+			{
+				var ctx = new CountConext(parent, sequence, methodCall.Method.ReturnType);
+				var sql = ((JoinParser.GroupJoinSubQueryContext)sequence).GetCounter();
+
+				sql.ParentSql = sequence.SqlQuery;
+				sql.FinalizeAndValidate();
+
+				while (sql.Select.Columns.Count > 0)
+				{
+					sql.Select.Columns.Clear();
+					sql.FinalizeAndValidate();
+				}
+
+				sql.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, sql));
+
+				ctx.SqlQuery   = sqlQuery;
+				ctx.FieldIndex = sqlQuery.Select.Add(sql, "cnt");
+
+				return ctx;
+			}
+
 			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 			{
 				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
@@ -41,6 +63,8 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			var context = new CountConext(parent, sequence, methodCall.Method.ReturnType);
+
+			//context.SqlQuery.Select.Columns.Clear();
 
 			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, context.SqlQuery), "cnt");
 

@@ -912,6 +912,9 @@ namespace BLToolkit.Data.Sql
 						{
 							doConvert = null != Find(q, e =>
 							{
+								if (_visitedElements.ContainsKey(e) && _visitedElements[e] != e)
+									return true;
+
 								var ret = action(e);
 
 								if (ret != null && !ReferenceEquals(e, ret))
