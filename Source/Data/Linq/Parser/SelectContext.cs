@@ -5,6 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+using JetBrains.Annotations;
+
 namespace BLToolkit.Data.Linq.Parser
 {
 	using BLToolkit.Linq;
@@ -19,6 +21,11 @@ namespace BLToolkit.Data.Linq.Parser
 	public class SelectContext : IParseContext
 	{
 		#region Init
+
+#if DEBUG
+		[CLSCompliant(false)]
+		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+#endif
 
 		public IParseContext[]  Sequence { get; set; }
 		public LambdaExpression Lambda   { get; set; }

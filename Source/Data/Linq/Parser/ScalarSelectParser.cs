@@ -23,6 +23,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class ScalarSelectContext : IParseContext
 		{
+#if DEBUG
+			public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+#endif
+
 			public ExpressionParser Parser     { get; set; }
 			public Expression       Expression { get; set; }
 			public SqlQuery         SqlQuery   { get; set; }

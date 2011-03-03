@@ -106,6 +106,10 @@ namespace BLToolkit.Data.Linq.Parser
 			protected ObjectMapper ObjectMapper;
 			public    SqlTable     SqlTable;
 
+#if DEBUG
+			public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+#endif
+
 			public ExpressionParser Parser     { get; private set; }
 			public Expression       Expression { get; private set; }
 			public SqlQuery         SqlQuery   { get; set; }

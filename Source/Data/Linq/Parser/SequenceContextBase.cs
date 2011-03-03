@@ -19,6 +19,11 @@ namespace BLToolkit.Data.Linq.Parser
 			Sequence.Parent = this;
 		}
 
+#if DEBUG
+		[CLSCompliant(false)]
+		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+#endif
+
 		public IParseContext    Parent   { get; set; }
 		public IParseContext    Sequence { get; set; }
 		public ExpressionParser Parser   { get; set; }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq.Parser
 {
@@ -33,6 +34,10 @@ namespace BLToolkit.Data.Linq.Parser
 			: this(subQuery, true)
 		{
 		}
+
+#if DEBUG
+		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+#endif
 
 		public ExpressionParser Parser     { get { return SubQuery.Parser;     } }
 		public Expression       Expression { get { return SubQuery.Expression; } }
