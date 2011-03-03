@@ -889,6 +889,8 @@ namespace Data.Linq
 				Sequence = sequence;
 			}
 
+			public string _sqlQueryText { get { return Sequence._sqlQueryText; } }
+
 			public IParseContext    Sequence   { get; set; }
 			public ExpressionParser Parser     { get { return Sequence.Parser; } }
 			public Expression       Expression { get; set; }

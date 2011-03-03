@@ -23,9 +23,7 @@ namespace BLToolkit.Data.Linq.Parser
 				var ctx = new CountConext(parent, sequence, methodCall.Method.ReturnType);
 
 				ctx.SqlQuery   = ((JoinParser.GroupJoinSubQueryContext)sequence).GetCounter(methodCall);
-				ctx.FieldIndex = sequence.ConvertToIndex(methodCall, 0, ConvertFlags.Field)[0].Index;
-
-				ctx.SqlQuery.Select.Expr(SqlFunction.CreateCount(methodCall.Method.ReturnType, ctx.SqlQuery), "cnt");
+				ctx.FieldIndex = ctx.SqlQuery.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, ctx.SqlQuery), "cnt");
 
 				return ctx;
 			}
