@@ -99,15 +99,13 @@ namespace Data.Linq
 		[Test]
 		public void InnerJoin8()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from t in
 					from ch in Child
 						join p in Parent on ch.ParentID equals p.ParentID
 					select new { ID = ch.ParentID + p.ParentID }
 				where t.ID > 2
-				select t;
-
-			ForEachProvider(db => AreEqual(expected,
+				select t,
 				from t in
 					from ch in db.Child
 						join p in db.Parent on ch.ParentID equals p.ParentID

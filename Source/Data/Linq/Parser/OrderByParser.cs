@@ -40,10 +40,13 @@ namespace BLToolkit.Data.Linq.Parser
 			if (sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 				sequence = new SubQueryContext(sequence);
 
-			var lambda = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var order  = new PathThroughContext(parent, sequence, lambda);
-			var body   = lambda.Body.Unwrap();
-			var sql    = parser.ParseExpressions(order, body, ConvertFlags.Key);
+			var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+			var sparent = sequence.Parent;
+			var order   = new PathThroughContext(parent, sequence, lambda);
+			var body    = lambda.Body.Unwrap();
+			var sql     = parser.ParseExpressions(order, body, ConvertFlags.Key);
+
+			sequence.Parent = sparent;
 
 			if (!methodCall.Method.Name.StartsWith("Then"))
 				sequence.SqlQuery.OrderBy.Items.Clear();

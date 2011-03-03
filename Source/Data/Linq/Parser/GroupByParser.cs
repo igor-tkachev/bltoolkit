@@ -357,7 +357,10 @@ namespace BLToolkit.Data.Linq.Parser
 						if (ex is LambdaExpression)
 						{
 							var l   = (LambdaExpression)ex;
+							var p   = _element.Parent;
 							var ctx = new PathThroughContext(Parent, _element, l);
+
+							_element.Parent = p;
 
 							args[i - 1] = Parser.ParseExpression(ctx, l.Body.Unwrap());
 						}

@@ -34,21 +34,25 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(
+			ExpressionParser     parser,
+			IParseContext        parent,
+			MethodCallExpression methodCall,
+			SqlQuery             sqlQuery)
 		{
 			var isGroup      = methodCall.Method.Name == "GroupJoin";
 			var outerContext = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 			var innerContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
 			var countContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
 
-			outerContext = new SubQueryContext(outerContext);
+			var context  = new SubQueryContext(outerContext);
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext) : new SubQueryContext(innerContext);;
 			countContext = new SubQueryContext(countContext);
 
 			var join = innerContext.SqlQuery.InnerJoin();
-			var sql  = new SqlQuery();
+			var sql  = context.SqlQuery;
 
-			sql.From.Table(outerContext.SqlQuery, join);
+			sql.From.Tables[0].Joins.Add(join.JoinedTable);
 
 			var selector = (LambdaExpression)methodCall.Arguments[4].Unwrap();
 
@@ -60,6 +64,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var outerKeySelector = outerKeyLambda.Body.Unwrap();
 			var innerKeySelector = innerKeyLambda.Body.Unwrap();
+
+			var outerParent = outerContext.Parent;
+			var innerParent = innerContext.Parent;
+			var countParent = countContext.Parent;
 
 			var outerKeyContext = new PathThroughContext(parent, outerContext, outerKeyLambda);
 			var innerKeyContext = new PathThroughContext(parent, innerContext, innerKeyLambda);
@@ -105,6 +113,10 @@ namespace BLToolkit.Data.Linq.Parser
 				ParseJoin(parser, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
 			}
 
+			outerContext.Parent = outerParent;
+			innerContext.Parent = innerParent;
+			countContext.Parent = countParent;
+
 			if (isGroup)
 			{
 				counterSql.ParentSql = sql;
@@ -112,10 +124,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 				((GroupJoinSubQueryContext)innerContext).Join       = join.JoinedTable;
 				((GroupJoinSubQueryContext)innerContext).CounterSql = counterSql;
-				return new GroupJoinContext(parent, selector, outerContext, innerContext, sql);
+				return new GroupJoinContext(parent, selector, context, innerContext);
 			}
 
-			return new JoinContext(parent, selector, outerContext, innerContext, sql);
+			return new JoinContext(parent, selector, context, innerContext);
 		}
 
 		static void ParseJoin(
@@ -150,12 +162,71 @@ namespace BLToolkit.Data.Linq.Parser
 					.Expr(parser.ParseExpression(countKeyContext, innerKeySelector));
 		}
 
-		internal class JoinContext : SelectContext
+		internal class JoinContext : SelectContext, IParseContext
 		{
-			public JoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
+			public JoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext)
 				: base(parent, lambda, outerContext, innerContext)
 			{
-				SqlQuery = sql;
+			}
+
+			/*
+			Expression _lastExpression;
+
+			SqlInfo[] ConvertToSqlEx(Expression expression, int level, ConvertFlags flags)
+			{
+				if (_lastExpression != null)
+				{
+					if (_lastExpression != expression)
+						throw new NotSupportedException();
+
+					return base.ConvertToSql(expression, level, flags);
+				}
+
+				_lastExpression = expression;
+
+				var info = base.ConvertToIndex(expression, level, flags)
+					.Select(idx => new SqlInfo
+					{
+						Query = SqlQuery, Sql = idx.Query.Select.Columns[idx.Index], Member = idx.Member
+					})
+					.ToArray();
+
+				_lastExpression = null;
+
+				return info;
+			}
+
+			SqlInfo[] IParseContext.ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				return ConvertToSqlEx(expression, level, flags);
+			}
+
+			SqlInfo[] IParseContext.ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			{
+				var baseInfo = base.ConvertToIndex(expression, level, flags);
+				var info     = new SqlInfo[baseInfo.Length];
+
+				for (var i = 0; i < baseInfo.Length; i++)
+				{
+					var bi = baseInfo[i];
+
+					if (bi.Query == SqlQuery)
+						info[i] = bi;
+					else
+					{
+						var sql = bi.Query.Select.Columns[bi.Index];
+
+						info[i] = new SqlInfo
+						{
+							Query  = SqlQuery,
+							Index  = GetIndex(sql),
+							Sql    = sql,
+							Member = bi.Member
+						};
+					}
+				}
+
+				return info;
 			}
 
 			readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
@@ -173,24 +244,18 @@ namespace BLToolkit.Data.Linq.Parser
 				return idx;
 			}
 
-			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
-			{
-				return ConvertToSql(expression, level, flags)
-					.Select(i => { i.Index = GetIndex(i.Sql); return i; })
-					.ToArray();
-			}
-
 			public override int ConvertToParentIndex(int index, IParseContext context)
 			{
 				var idx = GetIndex(context.SqlQuery.Select.Columns[index]);
 				return Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
 			}
+			*/
 		}
 
 		internal class GroupJoinContext : JoinContext
 		{
-			public GroupJoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext, SqlQuery sql)
-				: base(parent, lambda, outerContext, innerContext, sql)
+			public GroupJoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext)
+				: base(parent, lambda, outerContext, innerContext)
 			{
 			}
 		}
@@ -218,7 +283,15 @@ namespace BLToolkit.Data.Linq.Parser
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				if (expression != null && expression == _counterExpression)
-					return _counterInfo ?? (_counterInfo = new[] { new SqlInfo { Index = CounterSql.ParentSql.Select.Add(CounterSql) } });
+					return _counterInfo ?? (_counterInfo = new[]
+					{
+						new SqlInfo
+						{
+							Query = CounterSql.ParentSql,
+							Index = CounterSql.ParentSql.Select.Add(CounterSql),
+							Sql   = CounterSql
+						}
+					});
 
 				return base.ConvertToIndex(expression, level, flags);
 			}

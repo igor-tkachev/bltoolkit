@@ -402,6 +402,8 @@ namespace BLToolkit.Data.Linq.Parser
 									expr.Index = SqlQuery.Select.Add(expr.Sql);
 								}
 
+								expr.Query = SqlQuery;
+
 								_indexes.Add(expr.Sql, expr);
 							}
 						}

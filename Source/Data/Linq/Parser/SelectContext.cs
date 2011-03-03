@@ -137,6 +137,18 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual Expression BuildExpression(Expression expression, int level)
 		{
+			{
+				var key = Tuple.Create(expression, level, ConvertFlags.Field);
+
+				SqlInfo[] info;
+
+				if (_expressionIndex.TryGetValue(key, out info))
+				{
+					var idx  = Parent == null ? info[0].Index : Parent.ConvertToParentIndex(info[0].Index, this);
+					return Parser.BuildSql((expression ?? Body).Type, idx);
+				}
+			}
+
 			if (expression == null)
 				return Parser.BuildExpression(this, Body);
 
@@ -399,9 +411,26 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToIndex
 
-		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]>();
+		readonly Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]> _expressionIndex = new Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]>();
 
 		public virtual SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+		{
+			var key = Tuple.Create(expression, level, flags);
+
+			SqlInfo[] info;
+
+			if (!_expressionIndex.TryGetValue(key, out info))
+			{
+				info = ConvertToIndexInternal(expression, level, flags);
+				_expressionIndex.Add(key, info);
+			}
+
+			return info;
+		}
+
+		readonly Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]> _memberIndex = new Dictionary<Tuple<MemberInfo,ConvertFlags>,SqlInfo[]>();
+
+		SqlInfo[] ConvertToIndexInternal(Expression expression, int level, ConvertFlags flags)
 		{
 			if (IsScalar)
 			{
@@ -412,18 +441,18 @@ namespace BLToolkit.Data.Linq.Parser
 
 				if (expression == null)
 				{
-					var member = Tuple.Create((MemberInfo)null, flags);
+					var key = Tuple.Create((MemberInfo)null, flags);
 
 					SqlInfo[] idx;
 
-					if (!_memberIndex.TryGetValue(member, out idx))
+					if (!_memberIndex.TryGetValue(key, out idx))
 					{
-						idx = ConvertToSql(expression, 0, flags);
+						idx = ConvertToSql(null, 0, flags);
 
 						foreach (var info in idx)
-							info.Index = GetIndex(info.Sql);
+							SetInfo(info);
 
-						_memberIndex.Add(member, idx);
+						_memberIndex.Add(key, idx);
 					}
 
 					return idx;
@@ -474,7 +503,7 @@ namespace BLToolkit.Data.Linq.Parser
 								var idx = Parser.ParseExpressions(this, expression, flags);
 
 								foreach (var info in idx)
-									info.Index = GetIndex(info.Sql);
+									SetInfo(info);
 
 								return idx;
 							}
@@ -499,9 +528,7 @@ namespace BLToolkit.Data.Linq.Parser
 													throw new InvalidOperationException();
 
 												foreach (var info in idx)
-												{
-													info.Index = GetIndex(info.Sql);
-												}
+													SetInfo(info);
 
 												_memberIndex.Add(member, idx);
 											}
@@ -533,9 +560,10 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new NotImplementedException();
 		}
 
-		int GetIndex(ISqlExpression sql)
+		void SetInfo(SqlInfo info)
 		{
-			return SqlQuery.Select.Add(sql);
+			info.Query = SqlQuery;
+			info.Index = SqlQuery.Select.Add(info.Sql);
 		}
 
 		#endregion

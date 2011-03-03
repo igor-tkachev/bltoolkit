@@ -654,6 +654,10 @@ namespace Data.Linq
 				var idx = ctx.ConvertToIndex(null, 0, ConvertFlags.Key);
 
 				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
+
+				idx = ctx.ConvertToIndex(null, 0, ConvertFlags.All);
+
+				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
 			}
 		}
 
@@ -748,6 +752,95 @@ namespace Data.Linq
 				Assert.AreEqual        (1, sql.Length);
 				Assert.IsAssignableFrom(typeof(SqlField), sql[0].Sql);
 				Assert.AreEqual        ("ParentID", ((SqlField)sql[0].Sql).Name);
+			}
+		}
+
+		#endregion
+
+		#region SqlTest
+
+		[Test]
+		public void Join1()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from t in
+						from ch in db.Child
+							join p in db.Parent on ch.ParentID equals p.ParentID
+						select ch.ParentID + p.ParentID
+					where t > 2
+					select t;
+
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(1, ctx.SqlQuery.Select.Columns.Count);
+			}
+		}
+
+		[Test]
+		public void Join2()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from t in
+						from ch in db.Child
+							join p in db.Parent on ch.ParentID equals p.ParentID
+						select new { ID = ch.ParentID + p.ParentID }
+					where t.ID > 2
+					select t;
+
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(2, ctx.SqlQuery.Select.Columns.Count);
+			}
+		}
+
+		public class MyClass
+		{
+			public int ID;
+		}
+
+		[Test]
+		public void Join3()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from p in db.Parent
+					join j in db.Child on p.ParentID equals j.ParentID
+					select p;
+
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(2, ctx.SqlQuery.Select.Columns.Count);
+			}
+		}
+
+		[Test]
+		public void NewObject2()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from p in db.Parent
+					select new { ID = new MyClass { ID = p.ParentID } }
+					into p
+					join j in
+						from c in db.Child
+						select new { ID = new MyClass { ID = c.ParentID } }
+						on p.ID.ID equals j.ID.ID
+					where p.ID.ID == 1
+					select p;
+
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(1, ctx.SqlQuery.Select.Columns.Count);
 			}
 		}
 

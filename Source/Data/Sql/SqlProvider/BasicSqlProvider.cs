@@ -1120,7 +1120,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						var table = _sqlQuery.GetTableSource(column.Parent);
 
 						if (table == null)
+						{
+#if DEBUG
+							table = _sqlQuery.GetTableSource(column.Parent);
+#endif
+
 							throw new SqlException(string.Format("Table not found for '{0}'.", column));
+						}
 
 						var tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent, null);
 

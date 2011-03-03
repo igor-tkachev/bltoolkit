@@ -100,7 +100,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (flags)
 				{
-					case ConvertFlags.Field : return new[] { new SqlInfo { Sql = SqlQuery } };
+					case ConvertFlags.Field : return new[] { new SqlInfo { Query = Parent.SqlQuery, Sql = SqlQuery } };
 				}
 
 				throw new NotImplementedException();
@@ -111,7 +111,10 @@ namespace BLToolkit.Data.Linq.Parser
 				switch (flags)
 				{
 					case ConvertFlags.Field :
-						return _index ?? (_index = new[] { new SqlInfo { Index = Parent.SqlQuery.Select.Add(SqlQuery) } });
+						return _index ?? (_index = new[]
+						{
+							new SqlInfo { Query = Parent.SqlQuery, Index = Parent.SqlQuery.Select.Add(SqlQuery), Sql = SqlQuery, }
+						});
 				}
 
 				throw new NotImplementedException();

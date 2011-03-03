@@ -1872,11 +1872,40 @@ namespace BLToolkit.Data.Sql
 				return Columns.IndexOf(AddOrGetColumn(new Column(SqlQuery, expr, alias)));
 			}
 
+
+
 			Column AddOrGetColumn(Column col)
 			{
 				foreach (var c in Columns)
 					if (c.Equals(col))
 						return col;
+
+#if DEBUG
+
+				switch (col.Expression.ElementType)
+				{
+					case QueryElementType.SqlField :
+						{
+							var table = ((SqlField)col.Expression).Table;
+
+							if (!SqlQuery.From.GetFromTables().Any(_ => _ == table))
+								throw new InvalidOperationException("Wrong field usage.");
+
+							break;
+						}
+
+					case QueryElementType.Column :
+						{
+							var query = ((Column)col.Expression).Parent;
+
+							if (!SqlQuery.From.GetFromQueries().Any(_ => _ == query))
+								throw new InvalidOperationException("Wrong column usage.");
+
+							break;
+						}
+				}
+
+#endif
 
 				Columns.Add(col);
 
@@ -2363,6 +2392,26 @@ namespace BLToolkit.Data.Sql
 			public   List<TableSource>  Tables
 			{
 				get { return _tables; }
+			}
+
+			IEnumerable<ISqlTableSource> GetJoinTables(TableSource source, QueryElementType elementType)
+			{
+				if (source.Source.ElementType == elementType)
+					yield return source.Source;
+
+				foreach (var join in source.Joins)
+					foreach (var table in GetJoinTables(join.Table, elementType))
+						yield return table;
+			}
+
+			internal IEnumerable<ISqlTableSource> GetFromTables()
+			{
+				return Tables.SelectMany(_ => GetJoinTables(_, QueryElementType.SqlTable));
+			}
+
+			internal IEnumerable<ISqlTableSource> GetFromQueries()
+			{
+				return Tables.SelectMany(_ => GetJoinTables(_, QueryElementType.SqlQuery));
 			}
 
 			#region Overrides
@@ -3452,10 +3501,11 @@ namespace BLToolkit.Data.Sql
 					//!query.Select.IsDistinct      &&
 					//query.From.Tables[0].Joins.Count == 0 &&
 					 (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
-					!query.HasUnion           &&
-					 query.GroupBy.IsEmpty    &&
-					!query.Select.HasModifier &&
-					!query.Select.Columns.Exists(c => !(c.Expression is SqlField));
+					!query.HasUnion &&
+					 query.GroupBy.IsEmpty &&
+					!query.Select.HasModifier;
+
+				var isSourceColumnOK = !query.Select.Columns.Exists(c => !(c.Expression is SqlField));
 
 				var isThisOK =
 					 this.From.Tables.Count == 1 &&
@@ -3468,7 +3518,7 @@ namespace BLToolkit.Data.Sql
 					!this.Select.HasModifier &&
 					!this.Select.Columns.Exists(c => !(c.Expression is Column));
 
-				if (isSourceOK || isThisOK)
+				if (isSourceOK && (isSourceColumnOK || isThisOK))
 				{
 					var map = new Dictionary<ISqlExpression,ISqlExpression>(query.Select.Columns.Count);
 

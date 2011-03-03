@@ -79,15 +79,14 @@ namespace BLToolkit.Data.Linq.Parser
 				//sql.ParentSql = sequence.SqlQuery;
 
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
-
 				return new SelectContext(parent, resultSelector, sequence, context);
 			}
 
-			if (leftJoin && collectionSql != sql)
-			{
-				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-				return new SelectContext(parent, resultSelector, sequence, context);
-			}
+			//if (leftJoin && collectionSql != sql)
+			//{
+			//	context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
+			//	return new SelectContext(parent, resultSelector, sequence, context);
+			//}
 
 			//if (crossApply)
 			{
@@ -138,7 +137,6 @@ namespace BLToolkit.Data.Linq.Parser
 					//sql.ParentSql = sequence.SqlQuery;
 
 					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-
 					return new SelectContext(parent, resultSelector, sequence, context);
 				}
 			}

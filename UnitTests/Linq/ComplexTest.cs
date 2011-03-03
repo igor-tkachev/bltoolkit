@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
+using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
-
 using NUnit.Framework;
-
-using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq
 {

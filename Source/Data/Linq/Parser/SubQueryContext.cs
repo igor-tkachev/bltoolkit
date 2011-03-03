@@ -58,12 +58,18 @@ namespace BLToolkit.Data.Linq.Parser
 				.ToArray();
 		}
 
-		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
-
+		// JoinContext has similar logic. Consider to review it.
+		//
 		public virtual SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 		{
 			return ConvertToSql(expression, level, flags)
-				.Select(_ => { _.Index = GetIndex(_.Sql); return _; })
+				.Select(idx =>
+				{
+					idx.Query = SqlQuery;
+					idx.Index = GetIndex(idx.Sql);
+
+					return idx;
+				})
 				.ToArray();
 		}
 
@@ -81,6 +87,8 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			return SubQuery.GetContext(expression, level, currentSql);
 		}
+
+		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
 
 		int GetIndex(ISqlExpression sql)
 		{

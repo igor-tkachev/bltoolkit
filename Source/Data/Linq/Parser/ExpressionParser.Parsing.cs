@@ -21,14 +21,18 @@ namespace BLToolkit.Data.Linq.Parser
 		public IParseContext ParseWhere(IParseContext parent, IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
 			var makeHaving = false;
+			var prevParent = sequence.Parent;
 
 			var  ctx  = new PathThroughContext(parent, sequence, condition);
 			var  expr = condition.Body.Unwrap();
 
 			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
 			{
+				sequence.Parent = prevParent;
 				sequence = new SubQueryContext(sequence);
-				ctx      = new PathThroughContext(parent, sequence, condition);
+				prevParent = sequence.Parent;
+
+				ctx = new PathThroughContext(parent, sequence, condition);
 			}
 
 			ParseSearchCondition(
@@ -37,6 +41,8 @@ namespace BLToolkit.Data.Linq.Parser
 				makeHaving ?
 					ctx.SqlQuery.Having.SearchCondition.Conditions :
 					ctx.SqlQuery.Where. SearchCondition.Conditions);
+
+			sequence.Parent = prevParent;
 
 			return sequence;
 		}
