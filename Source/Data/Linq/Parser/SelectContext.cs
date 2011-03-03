@@ -422,6 +422,25 @@ namespace BLToolkit.Data.Linq.Parser
 			if (!_expressionIndex.TryGetValue(key, out info))
 			{
 				info = ConvertToIndexInternal(expression, level, flags);
+
+				var newInfo = new SqlInfo[info.Length];
+
+				for (var i = 0; i < info.Length; i++)
+				{
+					var ni = info[i];
+
+					if (ni.Query != SqlQuery)
+					{
+						ni = new SqlInfo
+						{
+							Query = SqlQuery,
+							Index = SqlQuery.Select.Add(ni.Query.Select.Columns[ni.Index])
+						};
+					}
+
+					newInfo[i] = ni;
+				}
+
 				_expressionIndex.Add(key, info);
 			}
 
@@ -742,6 +761,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public virtual int ConvertToParentIndex(int index, IParseContext context)
 		{
+			if (context.SqlQuery != SqlQuery)
+				index = SqlQuery.Select.Add(context.SqlQuery.Select.Columns[index]);
+
 			return Parent == null ? index : Parent.ConvertToParentIndex(index, this);
 		}
 

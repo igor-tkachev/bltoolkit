@@ -822,7 +822,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void NewObject2()
+		public void Join4()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -841,6 +841,25 @@ namespace Data.Linq
 				ctx.BuildExpression(null, 0);
 
 				Assert.AreEqual(1, ctx.SqlQuery.Select.Columns.Count);
+			}
+		}
+
+		[Test]
+		public void Join5()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from p in db.Parent
+						join c in db.Child      on p.ParentID equals c.ParentID
+						join g in db.GrandChild on p.ParentID equals g.ParentID
+					select new { p, c, g } into x
+					select x.c.ParentID;
+
+				var ctx = q.GetContext();
+				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.All);
+
+				Assert.AreEqual(1, sql.Length);
 			}
 		}
 
