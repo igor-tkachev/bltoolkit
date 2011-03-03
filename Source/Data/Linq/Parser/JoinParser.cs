@@ -56,7 +56,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var selector = (LambdaExpression)methodCall.Arguments[4].Unwrap();
 
-			outerContext.SetAlias(selector.Parameters[0].Name);
+			context.SetAlias(selector.Parameters[0].Name);
 			innerContext.SetAlias(selector.Parameters[1].Name);
 
 			var outerKeyLambda = ((LambdaExpression)methodCall.Arguments[2].Unwrap());
@@ -65,11 +65,11 @@ namespace BLToolkit.Data.Linq.Parser
 			var outerKeySelector = outerKeyLambda.Body.Unwrap();
 			var innerKeySelector = innerKeyLambda.Body.Unwrap();
 
-			var outerParent = outerContext.Parent;
+			var outerParent = context.     Parent;
 			var innerParent = innerContext.Parent;
 			var countParent = countContext.Parent;
 
-			var outerKeyContext = new PathThroughContext(parent, outerContext, outerKeyLambda);
+			var outerKeyContext = new PathThroughContext(parent, context,      outerKeyLambda);
 			var innerKeyContext = new PathThroughContext(parent, innerContext, innerKeyLambda);
 			var countKeyContext = new PathThroughContext(parent, countContext, innerKeyLambda);
 
@@ -113,7 +113,7 @@ namespace BLToolkit.Data.Linq.Parser
 				ParseJoin(parser, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
 			}
 
-			outerContext.Parent = outerParent;
+			context.     Parent = outerParent;
 			innerContext.Parent = innerParent;
 			countContext.Parent = countParent;
 

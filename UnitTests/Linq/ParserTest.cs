@@ -879,7 +879,15 @@ namespace Data.Linq
 
 				var sql = db.GetSqlText(ctx.SqlQuery);
 
-				Assert.AreEqual(3, sql);
+				CompareSql(sql, @"
+					SELECT
+						[g].[ParentID],
+						[g].[ChildID],
+						[g].[GrandChildID]
+					FROM
+						[GrandChild] [g]
+							LEFT JOIN [Child] [t1] ON [g].[ParentID] = [t1].[ParentID] AND [g].[ChildID] = [t1].[ChildID]
+							INNER JOIN [Parent] [p] ON [t1].[ParentID] = [p].[ParentID]");
 			}
 		}
 
