@@ -1080,7 +1080,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								var ts = _sqlQuery.GetTableSource(field.Table);
 
 								if (ts == null)
+								{
+#if DEBUG
+									_sqlQuery.GetTableSource(field.Table);
+#endif
+
 									throw new SqlException(string.Format("Table {0} not found.", field.Table));
+								}
 
 								var table = GetTableAlias(ts);
 

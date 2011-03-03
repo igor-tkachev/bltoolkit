@@ -863,6 +863,26 @@ namespace Data.Linq
 			}
 		}
 
+		[Test]
+		public void Join6()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from g in db.GrandChild
+					join p in db.Parent4 on g.Child.ParentID equals p.ParentID
+					select g;
+
+				var ctx = q.GetContext();
+
+				ctx.BuildExpression(null, 0);
+
+				var sql = db.GetSqlText(ctx.SqlQuery);
+
+				Assert.AreEqual(3, sql);
+			}
+		}
+
 		#endregion
 	}
 
