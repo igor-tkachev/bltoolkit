@@ -589,7 +589,11 @@ namespace BLToolkit.Data.Linq.Parser
 		void SetInfo(SqlInfo info)
 		{
 			info.Query = SqlQuery;
-			info.Index = SqlQuery.Select.Add(info.Sql);
+
+			if (info.Sql == SqlQuery)
+				info.Index = SqlQuery.Select.Columns.Count - 1;
+			else
+				info.Index = SqlQuery.Select.Add(info.Sql);
 		}
 
 		#endregion

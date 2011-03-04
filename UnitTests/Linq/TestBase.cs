@@ -701,7 +701,7 @@ namespace Data.Linq
 			var resultList   = result.  ToList();
 
 			Assert.AreNotEqual(0, expectedList.Count);
-			Assert.AreEqual(expectedList.Count, resultList.Count);
+			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
 			var exceptExpected = resultList.  Except(expectedList).Count();
 			var exceptResult   = expectedList.Except(resultList).  Count();
