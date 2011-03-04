@@ -91,7 +91,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				return Parser.BuildSql(_returnType, FieldIndex);
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -115,7 +115,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Root : return expression == Lambda.Parameters[0];
+					case RequestFor.Root : return Lambda != null && expression == Lambda.Parameters[0];
 				}
 
 				return false;

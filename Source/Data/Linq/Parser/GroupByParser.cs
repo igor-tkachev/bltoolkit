@@ -429,28 +429,27 @@ namespace BLToolkit.Data.Linq.Parser
 
 						case ExpressionType.MemberAccess :
 							{
-								if (level != 0)
+								var levelExpression = expression.GetLevelExpression(level);
+
+								if (levelExpression.NodeType == ExpressionType.MemberAccess)
 								{
-									var levelExpression = expression.GetLevelExpression(level);
+									var e = (MemberExpression)levelExpression;
 
-									if (levelExpression.NodeType == ExpressionType.MemberAccess)
+									if (e.Member.Name == "Key")
 									{
-										var e = (MemberExpression)levelExpression;
+										if (_keyProperty == null)
+											_keyProperty = _groupingType.GetProperty("Key");
 
-										if (e.Member.Name == "Key")
+										if (e.Member == _keyProperty)
 										{
-											if (_keyProperty == null)
-												_keyProperty = _groupingType.GetProperty("Key");
+											if (levelExpression == expression)
+												return _key.ConvertToSql(null, 0, flags);
 
-											if (e.Member == _keyProperty)
-											{
-												if (levelExpression == expression)
-													return _key.ConvertToSql(null, 0, flags);
-
-												return _key.ConvertToSql(expression, level + 1, flags);
-											}
+											return _key.ConvertToSql(expression, level + 1, flags);
 										}
 									}
+
+									return Sequence.ConvertToSql(expression, level, flags);
 								}
 
 								break;
@@ -468,6 +467,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
+				switch (requestFlag)
+				{
+					case RequestFor.Object: return expression == null;
+				}
+
 				return false;
 			}
 
@@ -483,6 +487,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 			{
+				if (expression == null)
+					return this;
+
 				throw new NotImplementedException();
 			}
 		}

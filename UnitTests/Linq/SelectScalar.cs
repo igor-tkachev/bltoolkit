@@ -210,11 +210,31 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => AreEqual(
 				(from ch in Child
-				group ch by ch.ParentID into g
-				select g.Select(ch => ch.ChildID).Max()),
+				 group ch by ch.ParentID into g
+				 select g.Select(ch => ch.ChildID).Max()),
 				(from ch in db.Child
-				group ch by ch.ParentID into g
-				select g.Select(ch => ch.ChildID).Max())));
+				 group ch by ch.ParentID into g
+				 select g.Select(ch => ch.ChildID).Max())));
+		}
+
+		[Test]
+		public void Scalar51()
+		{
+			ForEachProvider(db => AreEqual(
+				(from ch in Child
+				 group ch by ch.ParentID into g
+				 select new
+					 {
+						 Max1 = g.Select(ch => ch.ChildID              ).Max(),
+						 Max2 = g.Select(ch => ch.ChildID + ch.ParentID).Max()
+					 }),
+				(from ch in db.Child
+				 group ch by ch.ParentID into g
+				 select new
+					 {
+						 Max1 = g.Select(ch => ch.ChildID              ).Max(),
+						 Max2 = g.Select(ch => ch.ChildID + ch.ParentID).Max()
+					 })));
 		}
 
 		[Test]
@@ -222,11 +242,11 @@ namespace Data.Linq
 		{
 			ForEachProvider(db => AreEqual(
 				(from ch in Child
-				group ch by ch.ParentID into g
-				select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max),
+				 group ch by ch.ParentID into g
+				 select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max),
 				(from ch in db.Child
-				group ch by ch.ParentID into g
-				select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max)));
+				 group ch by ch.ParentID into g
+				 select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max)));
 		}
 
 		[Test]

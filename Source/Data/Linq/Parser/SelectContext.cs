@@ -804,6 +804,15 @@ namespace BLToolkit.Data.Linq.Parser
 				if (levelExpression != expression)
 					return action(GetSequence(expression, level), expression, level + 1);
 
+				if (expression.NodeType == ExpressionType.Parameter)
+				{
+					var sequence  = GetSequence(expression, level);
+					var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+
+					if (levelExpression == parameter)
+						return action(sequence, null, 0);
+				}
+
 				switch (Body.NodeType)
 				{
 					case ExpressionType.MemberAccess : return action(GetSequence(expression, level), null, 0);

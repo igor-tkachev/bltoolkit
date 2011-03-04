@@ -1872,8 +1872,6 @@ namespace BLToolkit.Data.Sql
 				return Columns.IndexOf(AddOrGetColumn(new Column(SqlQuery, expr, alias)));
 			}
 
-
-
 			Column AddOrGetColumn(Column col)
 			{
 				foreach (var c in Columns)
@@ -1901,6 +1899,13 @@ namespace BLToolkit.Data.Sql
 							if (!SqlQuery.From.GetFromQueries().Any(_ => _ == query))
 								throw new InvalidOperationException("Wrong column usage.");
 
+							break;
+						}
+
+					case QueryElementType.SqlQuery :
+						{
+							if (col.Expression == SqlQuery)
+								throw new InvalidOperationException("Wrong query usage.");
 							break;
 						}
 				}
