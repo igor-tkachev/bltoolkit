@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Sql
 		{
 			var defaultType = GetDataType(dbType);
 
-			DbType    = dbType;
+			SqlDbType = dbType;
 			Type      = defaultType.Type;
 			Length    = defaultType.Length;
 			Precision = defaultType.Precision;
@@ -27,9 +27,9 @@ namespace BLToolkit.Data.Sql
 		{
 			if (length <= 0) throw new ArgumentOutOfRangeException("length");
 
-			DbType = dbType;
-			Type   = GetDataType(dbType).Type;
-			Length = length;
+			SqlDbType = dbType;
+			Type      = GetDataType(dbType).Type;
+			Length    = length;
 		}
 
 		public SqlDataType(SqlDbType dbType, int precision, int scale)
@@ -37,7 +37,7 @@ namespace BLToolkit.Data.Sql
 			if (precision <= 0) throw new ArgumentOutOfRangeException("precision");
 			if (scale     <  0) throw new ArgumentOutOfRangeException("scale");
 
-			DbType    = dbType;
+			SqlDbType = dbType;
 			Type      = GetDataType(dbType).Type;
 			Precision = precision;
 			Scale     = scale;
@@ -49,7 +49,7 @@ namespace BLToolkit.Data.Sql
 
 			var defaultType = GetDataType(type);
 
-			DbType    = defaultType.DbType;
+			SqlDbType = defaultType.SqlDbType;
 			Type      = type;
 			Length    = defaultType.Length;
 			Precision = defaultType.Precision;
@@ -61,9 +61,9 @@ namespace BLToolkit.Data.Sql
 			if (type   == null) throw new ArgumentNullException      ("type");
 			if (length <= 0)    throw new ArgumentOutOfRangeException("length");
 
-			DbType = GetDataType(type).DbType;
-			Type   = type;
-			Length = length;
+			SqlDbType = GetDataType(type).SqlDbType;
+			Type      = type;
+			Length    = length;
 		}
 
 		public SqlDataType([JetBrains.Annotations.NotNull] Type type, int precision, int scale)
@@ -72,7 +72,7 @@ namespace BLToolkit.Data.Sql
 			if (precision <= 0) throw new ArgumentOutOfRangeException("precision");
 			if (scale     <  0) throw new ArgumentOutOfRangeException("scale");
 
-			DbType    = GetDataType(type).DbType;
+			SqlDbType = GetDataType(type).SqlDbType;
 			Type      = type;
 			Precision = precision;
 			Scale     = scale;
@@ -84,7 +84,7 @@ namespace BLToolkit.Data.Sql
 
 			var defaultType = GetDataType(dbType);
 
-			DbType    = dbType;
+			SqlDbType = dbType;
 			Type      = type;
 			Length    = defaultType.Length;
 			Precision = defaultType.Precision;
@@ -96,9 +96,9 @@ namespace BLToolkit.Data.Sql
 			if (type   == null) throw new ArgumentNullException      ("type");
 			if (length <= 0)    throw new ArgumentOutOfRangeException("length");
 
-			DbType = dbType;
-			Type   = type;
-			Length = length;
+			SqlDbType = dbType;
+			Type      = type;
+			Length    = length;
 		}
 
 		public SqlDataType(SqlDbType dbType, [JetBrains.Annotations.NotNull] Type type, int precision, int scale)
@@ -107,7 +107,7 @@ namespace BLToolkit.Data.Sql
 			if (precision <= 0) throw new ArgumentOutOfRangeException("precision");
 			if (scale     <  0) throw new ArgumentOutOfRangeException("scale");
 
-			DbType    = dbType;
+			SqlDbType = dbType;
 			Type      = type;
 			Precision = precision;
 			Scale     = scale;
@@ -117,7 +117,7 @@ namespace BLToolkit.Data.Sql
 
 		#region Public Members
 
-		public SqlDbType DbType    { get; private set; }
+		public SqlDbType SqlDbType { get; private set; }
 		public Type      Type      { get; private set; }
 		public int       Length    { get; private set; }
 		public int       Precision { get; private set; }
@@ -131,14 +131,14 @@ namespace BLToolkit.Data.Sql
 		{
 			public TypeInfo(SqlDbType dbType, int maxLength, int maxPrecision, int maxScale, int maxDisplaySize)
 			{
-				DbType         = dbType;
+				SqlDbType      = dbType;
 				MaxLength      = maxLength;
 				MaxPrecision   = maxPrecision;
 				MaxScale       = maxScale;
 				MaxDisplaySize = maxDisplaySize;
 			}
 
-			public readonly SqlDbType DbType;
+			public readonly SqlDbType SqlDbType;
 			public readonly int       MaxLength;
 			public readonly int       MaxPrecision;
 			public readonly int       MaxScale;
@@ -150,13 +150,13 @@ namespace BLToolkit.Data.Sql
 			var maxIndex = 0;
 
 			foreach (var typeInfo in info)
-				if (maxIndex < (int)typeInfo.DbType)
-					maxIndex = (int)typeInfo.DbType;
+				if (maxIndex < (int)typeInfo.SqlDbType)
+					maxIndex = (int)typeInfo.SqlDbType;
 
 			var sortedInfo = new TypeInfo[maxIndex + 1];
 
 			foreach (var typeInfo in info)
-				sortedInfo[(int)typeInfo.DbType] = typeInfo;
+				sortedInfo[(int)typeInfo.SqlDbType] = typeInfo;
 
 			return sortedInfo;
 		}
@@ -242,12 +242,12 @@ namespace BLToolkit.Data.Sql
 				case TypeCode.DateTime : return DateTime;
 				case TypeCode.String   : return String;
 				case TypeCode.Object   :
-					if (type == typeof(Guid))           return Guid;
-					if (type == typeof(byte[]))         return ByteArray;
-					if (type == typeof(System.Data.Linq.Binary)) return LinqBinary;
-					if (type == typeof(char[]))         return CharArray;
-					if (type == typeof(DateTimeOffset)) return DateTimeOffset;
-					if (type == typeof(TimeSpan))       return TimeSpan;
+					if (underlyingType == typeof(Guid))           return Guid;
+					if (underlyingType == typeof(byte[]))         return ByteArray;
+					if (underlyingType == typeof(System.Data.Linq.Binary)) return LinqBinary;
+					if (underlyingType == typeof(char[]))         return CharArray;
+					if (underlyingType == typeof(DateTimeOffset)) return DateTimeOffset;
+					if (underlyingType == typeof(TimeSpan))       return TimeSpan;
 					break;
 
 				case TypeCode.DBNull   :
@@ -257,22 +257,22 @@ namespace BLToolkit.Data.Sql
 
 #if !SILVERLIGHT
 
-			if (type == typeof(SqlByte))     return SqlByte;
-			if (type == typeof(SqlInt16))    return SqlInt16;
-			if (type == typeof(SqlInt32))    return SqlInt32;
-			if (type == typeof(SqlInt64))    return SqlInt64;
-			if (type == typeof(SqlSingle))   return SqlSingle;
-			if (type == typeof(SqlBoolean))  return SqlBoolean;
-			if (type == typeof(SqlDouble))   return SqlDouble;
-			if (type == typeof(SqlDateTime)) return SqlDateTime;
-			if (type == typeof(SqlDecimal))  return SqlDecimal;
-			if (type == typeof(SqlMoney))    return SqlMoney;
-			if (type == typeof(SqlString))   return SqlString;
-			if (type == typeof(SqlBinary))   return SqlBinary;
-			if (type == typeof(SqlGuid))     return SqlGuid;
-			if (type == typeof(SqlBytes))    return SqlBytes;
-			if (type == typeof(SqlChars))    return SqlChars;
-			if (type == typeof(SqlXml))      return SqlXml;
+			if (underlyingType == typeof(SqlByte))     return SqlByte;
+			if (underlyingType == typeof(SqlInt16))    return SqlInt16;
+			if (underlyingType == typeof(SqlInt32))    return SqlInt32;
+			if (underlyingType == typeof(SqlInt64))    return SqlInt64;
+			if (underlyingType == typeof(SqlSingle))   return SqlSingle;
+			if (underlyingType == typeof(SqlBoolean))  return SqlBoolean;
+			if (underlyingType == typeof(SqlDouble))   return SqlDouble;
+			if (underlyingType == typeof(SqlDateTime)) return SqlDateTime;
+			if (underlyingType == typeof(SqlDecimal))  return SqlDecimal;
+			if (underlyingType == typeof(SqlMoney))    return SqlMoney;
+			if (underlyingType == typeof(SqlString))   return SqlString;
+			if (underlyingType == typeof(SqlBinary))   return SqlBinary;
+			if (underlyingType == typeof(SqlGuid))     return SqlGuid;
+			if (underlyingType == typeof(SqlBytes))    return SqlBytes;
+			if (underlyingType == typeof(SqlChars))    return SqlChars;
+			if (underlyingType == typeof(SqlXml))      return SqlXml;
 
 #endif
 
@@ -337,7 +337,7 @@ namespace BLToolkit.Data.Sql
 
 		internal SqlDataType(SqlDbType dbType, Type type, int length, int precision, int scale)
 		{
-			DbType    = dbType;
+			SqlDbType = dbType;
 			Type      = type;
 			Length    = length;
 			Precision = precision;
@@ -505,7 +505,7 @@ namespace BLToolkit.Data.Sql
 			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
-				objectTree.Add(this, clone = new SqlDataType(DbType, Type, Length, Precision, Scale));
+				objectTree.Add(this, clone = new SqlDataType(SqlDbType, Type, Length, Precision, Scale));
 
 			return clone;
 		}
@@ -518,7 +518,7 @@ namespace BLToolkit.Data.Sql
 
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
-			sb.Append(DbType);
+			sb.Append(SqlDbType);
 
 			if (Length != 0)
 				sb.Append('(').Append(Length).Append(')');

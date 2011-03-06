@@ -147,10 +147,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
-			switch (type.DbType)
+			switch (type.SqlDbType)
 			{
 				case SqlDbType.Decimal       :
-					base.BuildDataType(sb, type.Precision > 18 ? new SqlDataType(type.DbType, type.Type, 18, type.Scale) : type);
+					base.BuildDataType(sb, type.Precision > 18 ? new SqlDataType(type.SqlDbType, type.Type, 18, type.Scale) : type);
 					break;
 				case SqlDbType.TinyInt       : sb.Append("SmallInt");        break;
 				case SqlDbType.Money         : sb.Append("Decimal(18,4)");   break;

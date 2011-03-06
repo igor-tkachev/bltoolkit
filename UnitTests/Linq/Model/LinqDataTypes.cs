@@ -70,6 +70,7 @@ namespace Data.Linq.Model
 		public DateTime? DateTimeValue;
 		public bool?     BoolValue;
 		public Guid?     GuidValue;
+		public short?    SmallIntValue;
 
 		public override bool Equals(object obj)
 		{

@@ -2513,8 +2513,9 @@ namespace BLToolkit.Data
 
 					for (var i = 0; i < members.Length; i++)
 					{
-						var value = members[i].GetValue(obj);
-						var type  = members[i].MemberAccessor.Type;
+						var value  = members[i].GetValue(obj);
+						var type   = members[i].MemberAccessor.Type;
+						var dbType = members[i].GetDbType();
 
 						IDbDataParameter p;
 
@@ -2527,7 +2528,7 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value);
+							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
 						}
 
 						parameters.Add(p);
@@ -2548,9 +2549,10 @@ namespace BLToolkit.Data
 
 						_dataProvider.SetParameterValue(
 							parameters[n + i],
-							value == null || members[i].MapMemberInfo.Nullable && _mappingSchema.IsNull(value)
-								? DBNull.Value
-								: value);
+							value ?? DBNull.Value);
+							//value == null || members[i].MapMemberInfo.Nullable && _mappingSchema.IsNull(value)
+							//	? DBNull.Value
+							//	: value);
 					}
 				}
 

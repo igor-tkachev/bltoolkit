@@ -134,8 +134,8 @@ namespace BLToolkit.Data.DataProvider
 			IDbCommand           command,
 			NameOrIndexParameter nameOrIndex)
 		{
-			return (IDbDataParameter)(nameOrIndex.ByName?
-				command.Parameters[nameOrIndex.Name]: command.Parameters[nameOrIndex.Index]);
+			return (IDbDataParameter)(nameOrIndex.ByName ?
+				command.Parameters[nameOrIndex.Name] : command.Parameters[nameOrIndex.Index]);
 		}
 
 		public virtual void AttachParameter(

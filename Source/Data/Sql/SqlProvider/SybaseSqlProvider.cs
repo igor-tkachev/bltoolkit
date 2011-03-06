@@ -105,7 +105,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
-			switch (type.DbType)
+			switch (type.SqlDbType)
 			{
 				case SqlDbType.DateTime2 : sb.Append("DateTime");        break;
 				default                  : base.BuildDataType(sb, type); break;
