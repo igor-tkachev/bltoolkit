@@ -960,7 +960,7 @@ namespace Update
 		[Test]
 		public void InsertBatch1()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.PostgreSQL }, db =>
 			{
 				if (db is DbManager)
 				{
@@ -968,8 +968,8 @@ namespace Update
 
 					((DbManager)db).InsertBatch(1, new[]
 					{
-						new LinqDataTypes2 { ID = 1003, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null },
-						new LinqDataTypes2 { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b"), SmallIntValue =  2 },
+						new LinqDataTypes2 { ID = 1003, MoneyValue = 0m, DateTimeValue = null,         BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null },
+						new LinqDataTypes2 { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null,                                             SmallIntValue =  2 },
 					});
 
 					db.Types2.Delete(_ => _.ID > 1000);

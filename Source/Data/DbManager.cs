@@ -2468,6 +2468,9 @@ namespace BLToolkit.Data
 			var                rowSql         = new List<int>(maxRows);
 			IDbDataParameter[] baseParameters = null;
 			var                parameters     = new List<IDbDataParameter>();
+			var                hasValue       = new List<bool>();
+
+			var  isPrepared = false;
 
 			foreach (var obj in collection)
 			{
@@ -2490,12 +2493,8 @@ namespace BLToolkit.Data
 						baseSql += _dataProvider.EndOfSql;
 				}
 
-				bool isSet;
-
 				if (rowSql.Count < maxRows)
 				{
-					isSet = false;
-
 // ReSharper disable AccessToModifiedClosure
 					Converter<IDbDataParameter,string> c1 = p => p.ParameterName + nRows;
 // ReSharper restore AccessToModifiedClosure
@@ -2515,7 +2514,7 @@ namespace BLToolkit.Data
 					{
 						var value  = members[i].GetValue(obj);
 						var type   = members[i].MemberAccessor.Type;
-						var dbType = members[i].GetDbType();
+						//var dbType = members[i].GetDbType();
 
 						IDbDataParameter p;
 
@@ -2528,31 +2527,48 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
+							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
 						}
 
 						parameters.Add(p);
+						hasValue.Add(value != null);
 					}
 				}
 				else
 				{
-					isSet = true;
-
 					var n = nRows * members.Length;
 
 					for (var i = 0; i < members.Length; i++)
 					{
 						var value = members[i].GetValue(obj);
 
-						if (value != null && value.GetType().IsEnum)
-							value = MappingSchema.MapEnumToValue(value, true);
+						if (!hasValue[n + i] && value != null)
+						{
+							isPrepared = false;
 
-						_dataProvider.SetParameterValue(
-							parameters[n + i],
-							value ?? DBNull.Value);
-							//value == null || members[i].MapMemberInfo.Nullable && _mappingSchema.IsNull(value)
-							//	? DBNull.Value
-							//	: value);
+							var type   = members[i].MemberAccessor.Type;
+
+							if (value.GetType().IsEnum)
+								value = MappingSchema.MapEnumToValue(value, true);
+
+							var p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+
+							parameters[n + i] = p;
+							hasValue  [n + i] = true;
+						}
+						else
+						{
+							if (value != null && value.GetType().IsEnum)
+								value = MappingSchema.MapEnumToValue(value, true);
+
+							_dataProvider.SetParameterValue(
+								parameters[n + i],
+								value ?? DBNull.Value);
+								//value == null || members[i].MapMemberInfo.Nullable && _mappingSchema.IsNull(value)
+								//	? DBNull.Value
+								//	: value);
+						}
+
 					}
 				}
 
@@ -2560,10 +2576,11 @@ namespace BLToolkit.Data
 
 				if (nRows >= maxRows)
 				{
-					if (isSet == false)
+					if (!isPrepared)
 					{
 						SetCommand(sb.ToString(), parameters.ToArray());
 						Prepare();
+						isPrepared = true;
 					}
 					else
 					{
