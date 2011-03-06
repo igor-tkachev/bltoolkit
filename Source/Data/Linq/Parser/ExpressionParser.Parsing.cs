@@ -1877,20 +1877,39 @@ namespace BLToolkit.Data.Linq.Parser
 						func = () => ParseAnyCondition(SetType.Any, call, null/*call.Arguments[1]*/, null);
 					else
 						return null;
-					break;
+					throw new NotImplementedException();
+					//break;
 
 				case "All" :
 
 					if (call.Arguments.Count == 2)
-						func = () => ParseAnyCondition(SetType.Any, call, null/*call.Arguments[1]*/, null);
+						func = () => ParseAnyCondition(SetType.All, call, null/*call.Arguments[1]*/, null);
 					else
 						return null;
-					break;
+					throw new NotImplementedException();
+					//break;
 
 				case "Contains":
 
 					if (call.Method.DeclaringType == typeof(Queryable))
 					{
+						if (call.Arguments.Count == 2)
+						{
+							Expression seq = call.Arguments[0];
+							Expression ex  = call.Arguments[1];
+
+							func = () =>
+							{
+								var param  = Expression.Parameter(ex.Type, ex.NodeType == ExpressionType.Parameter ? ((ParameterExpression)ex).Name : "t");
+								var lambda = new LambdaInfo(Expression.Equal(param, ex), param);
+								return ParseAnyCondition(SetType.In, seq, lambda, ex);
+							};
+						}
+						else
+							return null;
+
+						break;
+
 						throw new NotImplementedException();
 						/*
 						Expression s = null;

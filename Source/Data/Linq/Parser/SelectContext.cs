@@ -47,7 +47,7 @@ namespace BLToolkit.Data.Linq.Parser
 			Sequence = sequences;
 			Parser   = sequences[0].Parser;
 			Lambda   = lambda;
-			Body     = lambda.Body.Unwrap();
+			Body     = lambda.Body;//.Unwrap();
 			SqlQuery = sequences[0].SqlQuery;
 
 			foreach (var context in Sequence)
