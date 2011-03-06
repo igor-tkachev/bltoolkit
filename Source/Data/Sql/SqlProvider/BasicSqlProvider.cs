@@ -1474,7 +1474,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	
 		protected virtual void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
-			sb.Append(type.DbType.ToString());
+			sb.Append(type.SqlDbType.ToString());
 
 			if (type.Length > 0)
 				sb.Append('(').Append(type.Length).Append(')');
@@ -1745,8 +1745,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (expr.ElementType)
 			{
-				case QueryElementType.SqlDataType   : return ((SqlDataType)expr).DbType == SqlDbType.Date;
-				case QueryElementType.SqlExpression : return ((SqlExpression)expr).Expr == dateName;
+				case QueryElementType.SqlDataType   : return ((SqlDataType)  expr).SqlDbType == SqlDbType.Date;
+				case QueryElementType.SqlExpression : return ((SqlExpression)expr).Expr      == dateName;
 			}
 
 			return false;
@@ -1756,8 +1756,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (expr.ElementType)
 			{
-				case QueryElementType.SqlDataType   : return ((SqlDataType)expr).DbType == SqlDbType.Time;
-				case QueryElementType.SqlExpression : return ((SqlExpression)expr).Expr == "Time";
+				case QueryElementType.SqlDataType   : return ((SqlDataType)expr).  SqlDbType == SqlDbType.Time;
+				case QueryElementType.SqlExpression : return ((SqlExpression)expr).Expr      == "Time";
 			}
 
 			return false;
@@ -2153,10 +2153,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region DataTypes
 
-		protected virtual int GetMaxLength     (SqlDataType type) { return SqlDataType.GetMaxLength     (type.DbType); }
-		protected virtual int GetMaxPrecision  (SqlDataType type) { return SqlDataType.GetMaxPrecision  (type.DbType); }
-		protected virtual int GetMaxScale      (SqlDataType type) { return SqlDataType.GetMaxScale      (type.DbType); }
-		protected virtual int GetMaxDisplaySize(SqlDataType type) { return SqlDataType.GetMaxDisplaySize(type.DbType); }
+		protected virtual int GetMaxLength     (SqlDataType type) { return SqlDataType.GetMaxLength     (type.SqlDbType); }
+		protected virtual int GetMaxPrecision  (SqlDataType type) { return SqlDataType.GetMaxPrecision  (type.SqlDbType); }
+		protected virtual int GetMaxScale      (SqlDataType type) { return SqlDataType.GetMaxScale      (type.SqlDbType); }
+		protected virtual int GetMaxDisplaySize(SqlDataType type) { return SqlDataType.GetMaxDisplaySize(type.SqlDbType); }
 
 		protected virtual ISqlExpression ConvertConvertion(SqlFunction func)
 		{
@@ -2174,7 +2174,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				var newScale     = maxScale     >= 0 ? Math.Min(to.Scale,     maxScale)     : to.Scale;
 
 				if (to.Precision != newPrecision || to.Scale != newScale)
-					to = new SqlDataType(to.DbType, to.Type, newPrecision, newScale);
+					to = new SqlDataType(to.SqlDbType, to.Type, newPrecision, newScale);
 			}
 			else if (to.Length > 0)
 			{
@@ -2182,7 +2182,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				var newLength = maxLength >= 0 ? Math.Min(to.Length, maxLength) : to.Length;
 
 				if (to.Length != newLength)
-					to = new SqlDataType(to.DbType, to.Type, newLength);
+					to = new SqlDataType(to.SqlDbType, to.Type, newLength);
 			}
 			else if (from.Type == typeof(short) && to.Type == typeof(int))
 				return func.Parameters[2];
@@ -2300,7 +2300,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								if (be.Expr1.SystemType == typeof(string) && be.Expr2.SystemType != typeof(string))
 								{
-									var len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).DbType);
+									var len = be.Expr2.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr2.SystemType).SqlDbType);
 
 									if (len <= 0)
 										len = 100;
@@ -2315,7 +2315,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 								if (be.Expr1.SystemType != typeof(string) && be.Expr2.SystemType == typeof(string))
 								{
-									var len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).DbType);
+									var len = be.Expr1.SystemType == null ? 100 : SqlDataType.GetMaxDisplaySize(SqlDataType.GetDataType(be.Expr1.SystemType).SqlDbType);
 
 									if (len <= 0)
 										len = 100;

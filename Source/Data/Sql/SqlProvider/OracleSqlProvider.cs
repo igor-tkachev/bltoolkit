@@ -245,7 +245,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
-			switch (type.DbType)
+			switch (type.SqlDbType)
 			{
 				case SqlDbType.BigInt     : sb.Append("Number(19)");      break;
 				case SqlDbType.TinyInt    : sb.Append("Number(3)");       break;

@@ -61,7 +61,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDataType(System.Text.StringBuilder sb, SqlDataType type)
 		{
-			switch (type.DbType)
+			switch (type.SqlDbType)
 			{
 				case SqlDbType.DateTimeOffset :
 				case SqlDbType.Time           :

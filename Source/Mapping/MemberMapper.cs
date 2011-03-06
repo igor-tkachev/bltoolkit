@@ -4,7 +4,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
-
+using BLToolkit.Data.Sql;
 using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
@@ -87,6 +87,109 @@ namespace BLToolkit.Mapping
 		public virtual Type Type
 		{
 			get { return _type; }
+		}
+
+		public DbType GetDbType()
+		{
+			if (MapMemberInfo.IsDbTypeSet)
+				return DbType;
+
+			if (DbType != DbType.Object)
+				return DbType;
+
+			var dataType = SqlDataType.GetDataType(_type);
+
+			switch (dataType.SqlDbType)
+			{
+				case SqlDbType.BigInt           : return DbType.Int64;
+				case SqlDbType.Binary           : return DbType.Binary;
+				case SqlDbType.Bit              : return DbType.Boolean;
+				case SqlDbType.Char             : return DbType.AnsiStringFixedLength;
+				case SqlDbType.DateTime         : return DbType.DateTime;
+				case SqlDbType.Decimal          : return DbType.Decimal;
+				case SqlDbType.Float            : return DbType.Double;
+				case SqlDbType.Image            : return DbType.Binary;
+				case SqlDbType.Int              : return DbType.Int32;
+				case SqlDbType.Money            : return DbType.Currency;
+				case SqlDbType.NChar            : return DbType.StringFixedLength;
+				case SqlDbType.NText            : return DbType.String;
+				case SqlDbType.NVarChar         : return DbType.String;
+				case SqlDbType.Real             : return DbType.Single;
+				case SqlDbType.UniqueIdentifier : return DbType.Guid;
+				case SqlDbType.SmallDateTime    : return DbType.DateTime;
+				case SqlDbType.SmallInt         : return DbType.Int16;
+				case SqlDbType.SmallMoney       : return DbType.Currency;
+				case SqlDbType.Text             : return DbType.AnsiString;
+				case SqlDbType.Timestamp        : return DbType.Binary;
+				case SqlDbType.TinyInt          : return DbType.Byte;
+				case SqlDbType.VarBinary        : return DbType.Binary;
+				case SqlDbType.VarChar          : return DbType.AnsiString;
+				case SqlDbType.Variant          : return DbType.Object;
+				case SqlDbType.Xml              : return DbType.Xml;
+				case SqlDbType.Udt              : return DbType.Binary;
+				case SqlDbType.Structured       : return DbType.Binary;
+				case SqlDbType.Date             : return DbType.Date;
+				case SqlDbType.Time             : return DbType.Time;
+				case SqlDbType.DateTime2        : return DbType.DateTime2;
+				case SqlDbType.DateTimeOffset   : return DbType.DateTimeOffset;
+			}
+
+			return DbType.Object;
+		}
+
+		public int GetDbSize(object value)
+		{
+			if (MapMemberInfo.IsDbSizeSet)
+				return MapMemberInfo.DbSize;
+
+			if (value == null)
+				return 0;
+
+			if (value is string)
+				return ((string)value).Length;
+
+			if (value is byte[])
+				return ((byte[])value).Length;
+
+
+			var dataType = SqlDataType.GetDataType(_type);
+
+			switch (dataType.SqlDbType)
+			{
+				case SqlDbType.BigInt           : return 0;
+				case SqlDbType.Binary           : return 0;
+				case SqlDbType.Bit              : return 0;
+				case SqlDbType.Char             : return 0;
+				case SqlDbType.DateTime         : return 0;
+				case SqlDbType.Decimal          : return 0;
+				case SqlDbType.Float            : return 0;
+				case SqlDbType.Image            : return 0;
+				case SqlDbType.Int              : return 0;
+				case SqlDbType.Money            : return 0;
+				case SqlDbType.NChar            : return 0;
+				case SqlDbType.NText            : return 0;
+				case SqlDbType.NVarChar         : return 0;
+				case SqlDbType.Real             : return 0;
+				case SqlDbType.UniqueIdentifier : return 0;
+				case SqlDbType.SmallDateTime    : return 0;
+				case SqlDbType.SmallInt         : return 0;
+				case SqlDbType.SmallMoney       : return 0;
+				case SqlDbType.Text             : return 0;
+				case SqlDbType.Timestamp        : return 0;
+				case SqlDbType.TinyInt          : return 0;
+				case SqlDbType.VarBinary        : return 0;
+				case SqlDbType.VarChar          : return 0;
+				case SqlDbType.Variant          : return 0;
+				case SqlDbType.Xml              : return 0;
+				case SqlDbType.Udt              : return 0;
+				case SqlDbType.Structured       : return 0;
+				case SqlDbType.Date             : return 0;
+				case SqlDbType.Time             : return 0;
+				case SqlDbType.DateTime2        : return 0;
+				case SqlDbType.DateTimeOffset   : return 0;
+			}
+
+			return 0;
 		}
 
 		#endregion

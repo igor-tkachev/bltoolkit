@@ -612,7 +612,7 @@ namespace BLToolkit.ServiceModel
 						{
 							var elem = (SqlDataType)e;
 
-							Append((int)elem.DbType);
+							Append((int)elem.SqlDbType);
 							Append(elem.Type);
 							Append(elem.Length);
 							Append(elem.Precision);

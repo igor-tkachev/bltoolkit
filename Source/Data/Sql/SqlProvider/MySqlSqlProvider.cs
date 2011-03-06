@@ -122,7 +122,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
-			switch (type.DbType)
+			switch (type.SqlDbType)
 			{
 				case SqlDbType.Int           :
 				case SqlDbType.SmallInt      : sb.Append("Signed");        break;

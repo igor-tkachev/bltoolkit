@@ -124,12 +124,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								return new SqlFunction(func.SystemType, "RTrim", new SqlFunction(typeof(string), "Char", func.Parameters[1]));
 
 							if (type.Length > 0)
-								return new SqlFunction(func.SystemType, type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
+								return new SqlFunction(func.SystemType, type.SqlDbType.ToString(), func.Parameters[1], new SqlValue(type.Length));
 
 							if (type.Precision > 0)
-								return new SqlFunction(func.SystemType, type.DbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
+								return new SqlFunction(func.SystemType, type.SqlDbType.ToString(), func.Parameters[1], new SqlValue(type.Precision), new SqlValue(type.Scale));
 
-							return new SqlFunction(func.SystemType, type.DbType.ToString(), func.Parameters[1]);
+							return new SqlFunction(func.SystemType, type.SqlDbType.ToString(), func.Parameters[1]);
 						}
 
 						if (func.Parameters[0] is SqlFunction)
