@@ -3923,7 +3923,8 @@ namespace BLToolkit.Data.Sql
 
 		SqlQuery(SqlQuery clone, Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			objectTree.Add(clone, this);
+			objectTree.Add(clone,     this);
+			objectTree.Add(clone.All, All);
 
 			SourceID = Interlocked.Increment(ref SourceIDCounter);
 

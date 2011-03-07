@@ -359,8 +359,10 @@ namespace BLToolkit.Data.Sql
 				if (TableArguments != null)
 					TableArguments = TableArguments.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray();
 
-				objectTree.Add(this, clone = table);
+				objectTree.Add(this, table);
 				objectTree.Add(All,  table.All);
+
+				clone = table;
 			}
 
 			return clone;

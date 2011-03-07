@@ -75,23 +75,21 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy11()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from ch in Child
 				group ch by ch.ParentID into g
 				select new
 				{
-					ID1 = g.Max  (ch => ch.ChildID > 20),
+					ID1 = g.Max  (ch => ch.ChildID),
 					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
 					ID3 = g.Count(ch => ch.ChildID > 20),
 					ID4 = g.Count(ch => ch.ChildID > 10),
-				};
-
-			ForEachProvider(db => AreEqual(expected,
+				},
 				from ch in db.Child
 				group ch by ch.ParentID into g
 				select new
 				{
-					ID1 = g.Max  (ch => ch.ChildID > 20),
+					ID1 = g.Max  (ch => ch.ChildID),
 					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
 					ID3 = g.Count(ch => ch.ChildID > 20),
 					ID4 = g.Count(ch => ch.ChildID > 10),

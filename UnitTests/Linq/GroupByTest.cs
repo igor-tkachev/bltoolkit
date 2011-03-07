@@ -605,6 +605,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Max11()
+		{
+			var expected = Child.Max(c => c.ChildID > 20);
+			Assert.AreNotEqual(0, expected);
+			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Max(c => c.ChildID > 20)));
+		}
+
+		[Test]
 		public void Max2()
 		{
 			var expected =
