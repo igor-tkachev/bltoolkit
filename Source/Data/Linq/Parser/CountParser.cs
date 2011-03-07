@@ -136,16 +136,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var context = new CountConext(parent, sequence, returnType);
 
-			//if (sequence.SqlQuery != sqlQuery)
-			//{
-			//	throw new NotImplementedException();
-			//	context.Sql = SqlFunction.CreateCount(returnType, context.SqlQuery);
-			//}
-			//else
-			{
-				context.Sql        = context.SqlQuery;
-				context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
-			}
+			context.Sql        = context.SqlQuery;
+			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
 
 			return context;
 		}
