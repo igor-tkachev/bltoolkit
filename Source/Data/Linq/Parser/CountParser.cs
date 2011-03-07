@@ -42,64 +42,76 @@ namespace BLToolkit.Data.Linq.Parser
 
 				if (sequence is GroupByParser.GroupByContext)
 				{
-					var groupBy = (GroupByParser.GroupByContext)sequence;
-					var sql     = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
-
-					groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
-
-					sql.Select.Columns.Clear();
-
-					if (parser.SqlProvider.IsSubQueryColumnSupported && parser.SqlProvider.IsCountSubQuerySupported)
+					if (methodCall.Arguments.Count == 2)
 					{
-						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+						var groupBy = (GroupByParser.GroupByContext)sequence;
+						var sql     = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
+
+						groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
+
+						sql.Select.Columns.Clear();
+
+						if (parser.SqlProvider.IsSubQueryColumnSupported && parser.SqlProvider.IsCountSubQuerySupported)
 						{
-							var item1 = sql.GroupBy.Items[i];
-							var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-							var pr    = parser.Convert(sequence, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
+							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+							{
+								var item1 = sql.GroupBy.Items[i];
+								var item2 = groupBy.SqlQuery.GroupBy.Items[i];
+								var pr    = parser.Convert(sequence, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
 
-							sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
+								sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
+							}
+
+							sql.GroupBy.Items.Clear();
+							sql.ParentSql = groupBy.SqlQuery;
+
+							var ctx = new CountConext(parent, sequence, returnType);
+
+							ctx.SqlQuery   = sql;
+							ctx.Sql        = sql;
+							ctx.FieldIndex = sql.Select.Add(SqlFunction.CreateCount(returnType, sql), "cnt");
+
+							return ctx;
 						}
+						else
+						{
+							var join = sql.WeakLeftJoin();
 
-						sql.GroupBy.Items.Clear();
-						sql.ParentSql = groupBy.SqlQuery;
+							groupBy.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
 
-						var ctx = new CountConext(parent, sequence, returnType);
+							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
+							{
+								var item1 = sql.GroupBy.Items[i];
+								var item2 = groupBy.SqlQuery.GroupBy.Items[i];
+								var col   = sql.Select.Columns[sql.Select.Add(item1)];
+								var pr    = parser.Convert(sequence, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
 
-						ctx.SqlQuery   = sql;
-						ctx.Sql        = sql;
-						ctx.FieldIndex = sql.Select.Add(SqlFunction.CreateCount(returnType, sql), "cnt");
+								join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
+							}
 
-						return ctx;
+							sql.ParentSql = groupBy.SqlQuery;
+
+							var ctx = new CountConext(parent, sequence, returnType);
+
+							ctx.SqlQuery   = sql;
+							ctx.Sql        = new SqlFunction(returnType, "Count", sql.Select.Columns[0]);
+							ctx.FieldIndex = -1;
+
+							return ctx;
+						}
 					}
 					else
 					{
-						var join = sql.WeakLeftJoin();
-
-						groupBy.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
-
-						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-						{
-							var item1 = sql.GroupBy.Items[i];
-							var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-							var col   = sql.Select.Columns[sql.Select.Add(item1)];
-							var pr    = parser.Convert(sequence, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
-
-							join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
-						}
-
-						sql.ParentSql = groupBy.SqlQuery;
-
 						var ctx = new CountConext(parent, sequence, returnType);
 
-						ctx.SqlQuery   = sql;
-						ctx.Sql        = new SqlFunction(returnType, "Count", sql.Select.Columns[0]);
+						ctx.Sql        = SqlFunction.CreateCount(returnType, sequence.SqlQuery);;
 						ctx.FieldIndex = -1;
 
 						return ctx;
 					}
 				}
 
-				throw new NotImplementedException();
+				//throw new NotImplementedException();
 			}
 
 			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
@@ -110,11 +122,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (!sequence.SqlQuery.GroupBy.IsEmpty)
 			{
-				//sequence.SqlQuery.Select.Columns.Clear();
-
-				//foreach (var item in sequence.SqlQuery.GroupBy.Items)
-				//	sequence.SqlQuery.Select.Add(item);
-
 				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
 				sequence = new SubQueryContext(sequence);
 			}
@@ -129,10 +136,16 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var context = new CountConext(parent, sequence, returnType);
 
-			//context.SqlQuery.Select.Columns.Clear();
-
-			context.Sql        = context.SqlQuery;
-			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
+			//if (sequence.SqlQuery != sqlQuery)
+			//{
+			//	throw new NotImplementedException();
+			//	context.Sql = SqlFunction.CreateCount(returnType, context.SqlQuery);
+			//}
+			//else
+			{
+				context.Sql        = context.SqlQuery;
+				context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
+			}
 
 			return context;
 		}

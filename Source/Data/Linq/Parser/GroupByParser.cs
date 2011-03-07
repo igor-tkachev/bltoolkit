@@ -484,10 +484,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				switch (requestFlag)
-				{
-					case RequestFor.Object: return expression == null;
-				}
+				//switch (requestFlag)
+				//{
+				//	case RequestFor.Object: return expression == null;
+				//}
 
 				return false;
 			}

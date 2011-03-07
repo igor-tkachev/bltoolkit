@@ -92,6 +92,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
 		{
+			if (expression != null)
+			{
+				//var levelExpression = expression.GetLevelExpression(level);
+
+				if (expression == Lambda.Parameters[0])
+					return Sequence;
+			}
+
 			return Sequence.GetContext(expression, level + 1, currentSql);
 		}
 	}

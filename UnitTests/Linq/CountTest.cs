@@ -59,6 +59,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Count7()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from p in    Parent where p.Children.Count > 2 select p,
+				from p in db.Parent where p.Children.Count > 2 select p));
+		}
+
+		[Test]
 		public void GroupBy1()
 		{
 			var expected =
