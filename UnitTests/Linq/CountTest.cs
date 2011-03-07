@@ -383,5 +383,89 @@ namespace Data.Linq
 				   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
 				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
 		}
+
+		[Test]
+		public void GroupJoin1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				join g in GrandChild on p.ParentID equals g.ParentID into gg
+				select new
+				{
+					Count1 = gc.Count(),
+					Count2 = gg.Count()
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				join g in db.GrandChild on p.ParentID equals g.ParentID into gg
+				select new
+				{
+					Count1 = gc.Count(),
+					Count2 = gg.Count()
+				}));
+		}
+
+		[Test]
+		public void GroupJoin2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				join g in GrandChild on p.ParentID equals g.ParentID into gg
+				let gc1 = gc
+				let gg1 = gg
+				select new
+				{
+					Count1 = gc1.Count(),
+					Count2 = gg1.Count()
+				} ,
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				join g in db.GrandChild on p.ParentID equals g.ParentID into gg
+				let gc1 = gc
+				let gg1 = gg
+				select new
+				{
+					Count1 = gc.Count(),
+					Count2 = gg.Count()
+				}));
+		}
+
+		[Test]
+		public void GroupJoin3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count(),
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count(),
+				}));
+		}
+
+		[Test]
+		public void GroupJoin4()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count() + gc.Count(),
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into gc
+				select new
+				{
+					Count1 = gc.Count() + gc.Count(),
+				}));
+		}
 	}
 }
