@@ -138,6 +138,7 @@
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
     <Compile Include="Association.cs" />
+    <Compile Include="CountTest.cs" />
     <Compile Include="DataContextTest.cs" />
     <Compile Include="Exceptions\Common.cs" />
     <Compile Include="ExtensionTests.cs" />
