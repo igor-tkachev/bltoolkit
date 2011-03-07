@@ -16,14 +16,17 @@ namespace BLToolkit.Data.Linq.Parser
 
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
 		{
-			if (parser.SubQueryParsingCounter == 0)
-			{
-				
-			}
-
 			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
 
-			if (sqlQuery != sequence.SqlQuery)
+			if (methodCall.Arguments.Count == 2)
+			{
+				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+
+				sequence = parser.ParseWhere(parent, sequence, condition, true);
+				sequence.SetAlias(condition.Parameters[0].Name);
+			}
+
+			if (sequence.SqlQuery != sqlQuery)
 			{
 				if (sequence is JoinParser.GroupJoinSubQueryContext)
 				{
@@ -34,41 +37,46 @@ namespace BLToolkit.Data.Linq.Parser
 
 					return ctx;
 				}
+
+				if (sequence is GroupByParser.GroupByContext)
+				{
+				}
+
+				throw new NotImplementedException();
 			}
-			else
+
+			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 			{
-				if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
-				{
-					sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
-					sequence = new SubQueryContext(sequence);
-				}
-
-				if (sequence.SqlQuery.OrderBy.Items.Count > 0)
-				{
-					if (sequence.SqlQuery.Select.TakeValue == null && sequence.SqlQuery.Select.SkipValue == null)
-						sequence.SqlQuery.OrderBy.Items.Clear();
-					else
-						sequence = new SubQueryContext(sequence);
-				}
-
-				if (methodCall.Arguments.Count == 2)
-				{
-					var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-
-					sequence = parser.ParseWhere(parent, sequence, condition, true);
-					sequence.SetAlias(condition.Parameters[0].Name);
-				}
-
-				var context = new CountConext(parent, sequence, methodCall.Method.ReturnType);
-
-				//context.SqlQuery.Select.Columns.Clear();
-
-				context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, context.SqlQuery), "cnt");
-
-				return context;
+				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
+				sequence = new SubQueryContext(sequence);
 			}
 
-			throw new NotImplementedException();
+			if (!sequence.SqlQuery.GroupBy.IsEmpty)
+			{
+				//sequence.SqlQuery.Select.Columns.Clear();
+
+				//foreach (var item in sequence.SqlQuery.GroupBy.Items)
+				//	sequence.SqlQuery.Select.Add(item);
+
+				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
+				sequence = new SubQueryContext(sequence);
+			}
+
+			if (sequence.SqlQuery.OrderBy.Items.Count > 0)
+			{
+				if (sequence.SqlQuery.Select.TakeValue == null && sequence.SqlQuery.Select.SkipValue == null)
+					sequence.SqlQuery.OrderBy.Items.Clear();
+				else
+					sequence = new SubQueryContext(sequence);
+			}
+
+			var context = new CountConext(parent, sequence, methodCall.Method.ReturnType);
+
+			//context.SqlQuery.Select.Columns.Clear();
+
+			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(methodCall.Method.ReturnType, context.SqlQuery), "cnt");
+
+			return context;
 		}
 
 		static bool IsParent(IParseContext sequence, IParseContext parent)

@@ -97,7 +97,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region KeyContext
 
-		class KeyContext : SelectContext
+		internal class KeyContext : SelectContext
 		{
 			public KeyContext(IParseContext parent, LambdaExpression lambda, params IParseContext[] sequences)
 				: base(parent, lambda, sequences)
@@ -109,7 +109,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region GroupByContext
 
-		class GroupByContext : SequenceContextBase
+		internal class GroupByContext : SequenceContextBase
 		{
 			public GroupByContext(IParseContext parent, Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element)
 				: base(parent, sequence, null)
@@ -460,9 +460,26 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
+			readonly Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]> _expressionIndex = new Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]>();
+
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				var key = Tuple.Create(expression, level, flags);
+
+				SqlInfo[] info;
+
+				if (!_expressionIndex.TryGetValue(key, out info))
+				{
+					info = ConvertToSql(expression, level, flags);
+
+					foreach (var item in info)
+					{
+						item.Query = SqlQuery;
+						item.Index = SqlQuery.Select.Add(item.Sql);
+					}
+				}
+
+				return info;
 			}
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)

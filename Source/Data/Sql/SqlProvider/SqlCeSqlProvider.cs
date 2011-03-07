@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class SqlCeSqlProvider : BasicSqlProvider
 	{
@@ -253,7 +253,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							}
 						}
 
-						if (modified)
+						if (modified || isAggregated)
 							query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
 					}
 				}
