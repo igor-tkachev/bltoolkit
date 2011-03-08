@@ -367,15 +367,15 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertExpression
 
-		interface IConvertNullableHelper
+		interface IConvertHelper
 		{
-			Expression Convert(MemberExpression expression);
+			Expression ConvertNull(MemberExpression expression);
 		}
 
-		class ConvertNullableHelper<T> : IConvertNullableHelper
+		class ConvertHelper<T> : IConvertHelper
 			where T : struct 
 		{
-			public Expression Convert(MemberExpression expression)
+			public Expression ConvertNull(MemberExpression expression)
 			{
 				return Expression.Call(
 					null,
@@ -388,8 +388,27 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			return expression.Convert(e =>
 			{
+				//if (CanBeConstant(e) || CanBeCompiled(e))
+				//	return e;
+
 				switch (e.NodeType)
 				{
+					case ExpressionType.New:
+						{
+							var ex = ConvertNew((NewExpression)e);
+							if (ex != null)
+								return ConvertExpression(ex);
+							break;
+						}
+
+					case ExpressionType.Call:
+						{
+							var cm = ConvertMethod((MethodCallExpression)e);
+							if (cm != null)
+								return ConvertExpression(cm);
+							break;
+						}
+
 					case ExpressionType.MemberAccess:
 						{
 							var ma = (MemberExpression)e;
@@ -405,12 +424,50 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (TypeHelper.IsNullableValueMember(ma.Member))
 							{
-								var ntype  = typeof(ConvertNullableHelper<>).MakeGenericType(ma.Type);
-								var helper = (IConvertNullableHelper)Activator.CreateInstance(ntype);
-								var expr   = helper.Convert(ma);
+								var ntype  = typeof(ConvertHelper<>).MakeGenericType(ma.Type);
+								var helper = (IConvertHelper)Activator.CreateInstance(ntype);
+								var expr   = helper.ConvertNull(ma);
 
 								return ConvertExpression(expr);
 							}
+
+							if (ma.Member.DeclaringType == typeof(TimeSpan))
+							{
+								switch (ma.Expression.NodeType)
+								{
+									case ExpressionType.Subtract       :
+									case ExpressionType.SubtractChecked:
+
+										Sql.DateParts datePart;
+
+										switch (ma.Member.Name)
+										{
+											case "TotalMilliseconds" : datePart = Sql.DateParts.Millisecond; break;
+											case "TotalSeconds"      : datePart = Sql.DateParts.Second;      break;
+											case "TotalMinutes"      : datePart = Sql.DateParts.Minute;      break;
+											case "TotalHours"        : datePart = Sql.DateParts.Hour;        break;
+											case "TotalDays"         : datePart = Sql.DateParts.Day;         break;
+											default                  : return e;
+										}
+
+										var ex     = (BinaryExpression)ma.Expression;
+										var method = ReflectionHelper.Expressor<object>.MethodExpressor(
+											_ => Sql.DateDiff(Sql.DateParts.Day, DateTime.MinValue, DateTime.MinValue));
+
+										var call   =
+											Expression.Convert(
+												Expression.Call(
+													null,
+													method,
+													Expression.Constant(datePart),
+													Expression.Convert(ex.Right, typeof(DateTime?)),
+													Expression.Convert(ex.Left,  typeof(DateTime?))),
+												typeof(double));
+
+										return ConvertExpression(call);
+								}
+							}
+
 
 							break;
 						}
@@ -420,12 +477,112 @@ namespace BLToolkit.Data.Linq.Parser
 			});
 		}
 
+		LambdaExpression ConvertMember(MemberInfo mi)
+		{
+			var lambda = SqlProvider.ConvertMember(mi);
+
+			if (lambda == null)
+			{
+				var attrs = mi.GetCustomAttributes(typeof(MethodExpressionAttribute), true);
+
+				if (attrs.Length == 0)
+					return null;
+
+				MethodExpressionAttribute attr = null;
+
+				foreach (MethodExpressionAttribute a in attrs)
+				{
+					if (a.SqlProvider == SqlProvider.Name)
+					{
+						attr = a;
+						break;
+					}
+
+					if (a.SqlProvider == null)
+						attr = a;
+				}
+
+				if (attr != null)
+				{
+					var call = Expression.Lambda<Func<LambdaExpression>>(
+						Expression.Convert(Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty), typeof(LambdaExpression)));
+
+					lambda = call.Compile()();
+				}
+			}
+
+			return lambda;
+		}
+
+		Expression ConvertMethod(MethodCallExpression pi)
+		{
+			var l = ConvertMember(pi.Method);
+
+			if (l == null)
+				return null;
+
+			var ef    = l.Body.Unwrap();
+			var parms = new Dictionary<string,int>(l.Parameters.Count);
+			var pn    = pi.Method.IsStatic ? 0 : -1;
+
+			foreach (var p in l.Parameters)
+				parms.Add(p.Name, pn++);
+
+			var pie = ef.Convert(wpi =>
+			{
+				if (wpi.NodeType == ExpressionType.Parameter)
+				{
+					int n;
+					if (parms.TryGetValue(((ParameterExpression)wpi).Name, out n))
+						return n < 0 ? pi.Object : pi.Arguments[n];
+				}
+
+				return wpi;
+			});
+
+			if (pi.Method.ReturnType != pie.Type)
+				pie = new ChangeTypeExpression(pie, pi.Method.ReturnType);
+
+			return pie;
+		}
+
+		Expression ConvertNew(NewExpression pi)
+		{
+			var lambda = ConvertMember(pi.Constructor);
+
+			if (lambda != null)
+			{
+				var ef    = lambda.Body.Unwrap();
+				var parms = new Dictionary<string,int>(lambda.Parameters.Count);
+				var pn    = 0;
+
+				foreach (var p in lambda.Parameters)
+					parms.Add(p.Name, pn++);
+
+				return ef.Convert(wpi =>
+				{
+					if (wpi.NodeType == ExpressionType.Parameter)
+					{
+						var pe   = (ParameterExpression)wpi;
+						var n    = parms[pe.Name];
+						return pi.Arguments[n];
+					}
+
+					return wpi;
+				});
+			}
+
+			return null;
+		}
+
 		#endregion
 
 		#region ParseExpression
 
 		public SqlInfo[] ParseExpressions(IParseContext context, Expression expression, ConvertFlags queryConvertFlag)
 		{
+			expression = ConvertExpression(expression);
+
 			switch (expression.NodeType)
 			{
 				case ExpressionType.New :
@@ -483,6 +640,12 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return new[] { new SqlInfo { Sql = ParseExpression(context, expression) } };
+		}
+
+		public ISqlExpression ConvertAndParseExpression(IParseContext context, Expression expression)
+		{
+			var expr = ConvertExpression(expression);
+			return ParseExpression(context, expr);
 		}
 
 		public ISqlExpression ParseExpression(IParseContext context, Expression expression)
@@ -752,9 +915,16 @@ namespace BLToolkit.Data.Linq.Parser
 							return ParseEnumerable(context, e);
 						}
 
+#if DEBUG
+
 						var cm = ConvertMethod(e);
 						if (cm != null)
-							return ParseExpression(context, cm);
+						{
+							throw new InvalidOperationException();
+							//return ParseExpression(context, cm);
+						}
+
+#endif
 
 						var attr = GetFunctionAttribute(e.Method);
 
@@ -769,16 +939,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 							return Convert(context, attr.GetExpression(e.Method, parms.ToArray()));
 						}
-
-						break;
-					}
-
-				case ExpressionType.New:
-					{
-						var pie = ConvertNew((NewExpression)expression);
-
-						if (pie != null)
-							return ParseExpression(context, pie);
 
 						break;
 					}
@@ -813,6 +973,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 						break;
 					}
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					return ParseExpression(context, ((ChangeTypeExpression)expression).Expression);
 			}
 
 			throw new LinqException("'{0}' cannot be converted to SQL.", expression);
@@ -2126,12 +2289,7 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					case ExpressionType.MemberAccess:
 						{
-							var ma = (MemberExpression)pi;
-							var l  = ConvertMember(ma.Member);
-
-							if (l != null)
-								return !CanBeTranslatedToSql(context, l.Body.Unwrap(), canBeCompiled);
-
+							var ma   = (MemberExpression)pi;
 							var attr = GetFunctionAttribute(ma.Member);
 
 							if (attr == null && !TypeHelper.IsNullableValueMember(ma.Member))
@@ -2153,11 +2311,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (e.Method.DeclaringType != typeof(Enumerable))
 							{
-								var cm = ConvertMethod(e);
-
-								if (cm != null)
-									return !CanBeTranslatedToSql(context, cm, canBeCompiled);
-
 								var attr = GetFunctionAttribute(e.Method);
 
 								if (attr == null && canBeCompiled)
@@ -2237,43 +2390,6 @@ namespace BLToolkit.Data.Linq.Parser
 			return attr;
 		}
 
-		LambdaExpression ConvertMember(MemberInfo mi)
-		{
-			var lambda = SqlProvider.ConvertMember(mi);
-
-			if (lambda == null)
-			{
-				var attrs = mi.GetCustomAttributes(typeof(MethodExpressionAttribute), true);
-
-				if (attrs.Length == 0)
-					return null;
-
-				MethodExpressionAttribute attr = null;
-
-				foreach (MethodExpressionAttribute a in attrs)
-				{
-					if (a.SqlProvider == SqlProvider.Name)
-					{
-						attr = a;
-						break;
-					}
-
-					if (a.SqlProvider == null)
-						attr = a;
-				}
-
-				if (attr != null)
-				{
-					var call = Expression.Lambda<Func<LambdaExpression>>(
-						Expression.Convert(Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty), typeof(LambdaExpression)));
-
-					lambda = call.Compile()();
-				}
-			}
-
-			return lambda;
-		}
-
 		public ISqlExpression Convert(IParseContext context, ISqlExpression expr)
 		{
 			SqlProvider.SqlQuery = context.SqlQuery;
@@ -2319,64 +2435,6 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return null;
-		}
-
-		Expression ConvertNew(NewExpression pi)
-		{
-			var lambda = ConvertMember(pi.Constructor);
-
-			if (lambda != null)
-			{
-				var ef    = lambda.Body.Unwrap();
-				var parms = new Dictionary<string,int>(lambda.Parameters.Count);
-				var pn    = 0;
-
-				foreach (var p in lambda.Parameters)
-					parms.Add(p.Name, pn++);
-
-				return ef.Convert(wpi =>
-				{
-					if (wpi.NodeType == ExpressionType.Parameter)
-					{
-						var pe   = (ParameterExpression)wpi;
-						var n    = parms[pe.Name];
-						return pi.Arguments[n];
-					}
-
-					return wpi;
-				});
-			}
-
-			return null;
-		}
-
-		Expression ConvertMethod(MethodCallExpression pi)
-		{
-			var l = ConvertMember(pi.Method);
-
-			if (l == null)
-				return null;
-
-			var ef    = l.Body.Unwrap();
-			var parms = new Dictionary<string,int>(l.Parameters.Count);
-			var pn    = pi.Method.IsStatic ? 0 : -1;
-
-			foreach (var p in l.Parameters)
-				parms.Add(p.Name, pn++);
-
-			var pie = ef.Convert(wpi =>
-			{
-				if (wpi.NodeType == ExpressionType.Parameter)
-				{
-					int n;
-					if (parms.TryGetValue(((ParameterExpression)wpi).Name, out n))
-						return n < 0 ? pi.Object : pi.Arguments[n];
-				}
-
-				return wpi;
-			});
-
-			return pie;
 		}
 
 		#endregion

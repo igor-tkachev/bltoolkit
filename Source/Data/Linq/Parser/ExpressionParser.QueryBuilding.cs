@@ -194,14 +194,14 @@ namespace BLToolkit.Data.Linq.Parser
 						if (pi.Type == typeof(string) && MappingSchema.GetDefaultNullValue<string>() != null)
 							return BuildSql(context, pi);
 
-						if (CanBeTranslatedToSql(context, pi, true))
+						if (CanBeTranslatedToSql(context, ConvertExpression(pi), true))
 							return BuildSql(context, pi);
 
 						break;
 
 					case ExpressionType.Conditional:
 
-						if (CanBeTranslatedToSql(context, pi, true))
+						if (CanBeTranslatedToSql(context, ConvertExpression(pi), true))
 							return BuildSql(context, pi);
 						break;
 
@@ -329,7 +329,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		Expression BuildSql(IParseContext context, Expression expression)
 		{
-			var sqlex = ParseExpression(context, expression);
+			var sqlex = ConvertAndParseExpression(context, expression);
 			var idx   = context.SqlQuery.Select.Add(sqlex);
 			var field = BuildSql(expression.Type, idx);
 

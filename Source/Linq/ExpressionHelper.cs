@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Data.Linq.Parser;
 
 namespace BLToolkit.Linq
 {
@@ -1098,6 +1099,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					Visit(((ChangeTypeExpression)expr).Expression,  func); break;
 			}
 
 			func(expr);
@@ -1248,6 +1252,10 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					Visit(((ChangeTypeExpression)expr).Expression,  func);
+					break;
 			}
 		}
 
@@ -1405,6 +1413,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds : return Find(((NewArrayExpression)  expr).Expressions, func);
 				case ExpressionType.NewArrayInit   : return Find(((NewArrayExpression)  expr).Expressions, func);
 				case ExpressionType.TypeIs         : return Find(((TypeBinaryExpression)expr).Expression,  func);
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					return Find(((ChangeTypeExpression)expr).Expression, func);
 			}
 
 			return null;
@@ -1718,6 +1729,24 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Constant : return func(expr);
 				case ExpressionType.Parameter: return func(expr);
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
+						var e  = expr as ChangeTypeExpression;
+						var ex = Convert(e.Expression, func);
+
+						if (ex == e.Expression)
+							return expr;
+
+						if (ex.Type == e.Type)
+							return ex;
+
+						return new ChangeTypeExpression(ex, e.Type);
+					}
 			}
 
 			throw new InvalidOperationException();
