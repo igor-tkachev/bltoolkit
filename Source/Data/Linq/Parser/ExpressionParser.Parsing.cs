@@ -2440,6 +2440,26 @@ namespace BLToolkit.Data.Linq.Parser
 			return null;
 		}
 
+		internal ISqlExpression ConvertSearchCondition(IParseContext context, ISqlExpression sqlExpression)
+		{
+			if (sqlExpression is SqlQuery.SearchCondition)
+			{
+				if (sqlExpression.CanBeNull())
+				{
+					var notExpr = new SqlQuery.SearchCondition
+					{
+						Conditions = { new SqlQuery.Condition(true, new SqlQuery.Predicate.Expr(sqlExpression, sqlExpression.Precedence)) }
+					};
+
+					return Convert(context, new SqlFunction(sqlExpression.SystemType, "CASE", sqlExpression, new SqlValue(1), notExpr, new SqlValue(0), new SqlValue(null)));
+				}
+
+				return Convert(context, new SqlFunction(sqlExpression.SystemType, "CASE", sqlExpression, new SqlValue(1), new SqlValue(0)));
+			}
+
+			return sqlExpression;
+		}
+
 		#endregion
 	}
 }

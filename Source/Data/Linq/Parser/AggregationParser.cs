@@ -47,6 +47,10 @@ namespace BLToolkit.Data.Linq.Parser
 					sequence = new SubQueryContext(sequence);
 					context  = new AggregationContext(parseInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
 				}
+				else
+				{
+					expr = parser.ConvertSearchCondition(context, expr);
+				}
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
 					new SqlFunction(

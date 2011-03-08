@@ -53,23 +53,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			foreach (var expr in sql)
 			{
-				var e = expr.Sql;
-
-				if (e is SqlQuery.SearchCondition)
-				{
-					if (e.CanBeNull())
-					{
-						var notExpr = new SqlQuery.SearchCondition
-						{
-							Conditions = { new SqlQuery.Condition(true, new SqlQuery.Predicate.Expr(e, e.Precedence)) }
-						};
-
-						e = parser.Convert(sequence, new SqlFunction(e.SystemType, "CASE", e, new SqlValue(1), notExpr, new SqlValue(0), new SqlValue(null)));
-					}
-					else
-						e = parser.Convert(sequence, new SqlFunction(e.SystemType, "CASE", e, new SqlValue(1), new SqlValue(0)));
-				}
-
+				var e = parser.ConvertSearchCondition(sequence, expr.Sql);
 				sequence.SqlQuery.OrderBy.Expr(e, methodCall.Method.Name.EndsWith("Descending"));
 			}
 
