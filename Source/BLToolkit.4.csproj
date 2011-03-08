@@ -183,6 +183,7 @@
     <Compile Include="Data\Linq\Parser\ParseInfo.cs" />
     <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
     <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
+    <Compile Include="Data\Linq\Parser\TableAttributeParser.cs" />
     <Compile Include="Data\Linq\Parser\TakeSkipParser.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />

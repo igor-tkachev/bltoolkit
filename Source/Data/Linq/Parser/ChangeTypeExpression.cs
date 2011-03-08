@@ -7,6 +7,8 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		public const int ChangeTypeType = 1000;
 
+#if FW4 || SILVERLIGHT
+
 		public ChangeTypeExpression(Expression expression, Type type)
 		{
 			Expression = expression;
@@ -15,22 +17,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 		readonly Type _type;
 
-		public Expression Expression              { get; private set; }
 		public override   Type           Type     { get { return _type;                          } }
 		public override   ExpressionType NodeType { get { return (ExpressionType)ChangeTypeType; } }
 
-		public override bool CanReduce
+#else
+
+		public ChangeTypeExpression(Expression expression, Type type)
+			: base((ExpressionType)ChangeTypeType, type)
 		{
-			get
-			{
-				return base.CanReduce;
-			}
+			Expression = expression;
 		}
 
-		public override Expression Reduce()
-		{
-			return base.Reduce();
-		}
+#endif
+
+		public Expression Expression { get; private set; }
 
 		public override string ToString()
 		{
