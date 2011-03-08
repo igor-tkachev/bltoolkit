@@ -11,14 +11,22 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		public int ParsingCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
 		{
-			return expression.NodeType == ExpressionType.Lambda && ((LambdaExpression)expression).Parameters.Count == 0;
+			return
+				parseInfo.Expression.NodeType == ExpressionType.Lambda &&
+				((LambdaExpression)parseInfo.Expression).Parameters.Count == 0;
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
 		{
-			return new ScalarSelectContext { Parser = parser, Parent = parent, Expression = expression, SqlQuery = sqlQuery };
+			return new ScalarSelectContext
+			{
+				Parser     = parser,
+				Parent     = parseInfo.Parent,
+				Expression = parseInfo.Expression,
+				SqlQuery   = parseInfo.SqlQuery
+			};
 		}
 
 		class ScalarSelectContext : IParseContext
@@ -34,7 +42,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = this.BuildExpression(null, 0);
+				var expr = BuildExpression(null, 0);
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
@@ -97,7 +105,7 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				throw new NotImplementedException();
 			}

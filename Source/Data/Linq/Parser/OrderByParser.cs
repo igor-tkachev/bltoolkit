@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class OrderByParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			if (!methodCall.IsQueryable("OrderBy", "OrderByDescending", "ThenBy", "ThenByDescending"))
 				return false;
@@ -33,16 +33,16 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 
 			if (sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 				sequence = new SubQueryContext(sequence);
 
 			var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var sparent = sequence.Parent;
-			var order   = new PathThroughContext(parent, sequence, lambda);
+			var order   = new PathThroughContext(parseInfo.Parent, sequence, lambda);
 			var body    = lambda.Body.Unwrap();
 			var sql     = parser.ParseExpressions(order, body, ConvertFlags.Key);
 

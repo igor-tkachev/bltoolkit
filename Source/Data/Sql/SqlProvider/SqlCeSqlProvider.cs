@@ -114,6 +114,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					((SqlParameter)element).IsQueryParameter = false;
 			});
 
+			var dic = new Dictionary<IQueryElement,IQueryElement>();
+
 			new QueryVisitor().Visit(sqlQuery, element =>
 			{
 				if (element.ElementType != QueryElementType.SqlQuery)
@@ -254,9 +256,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 
 						if (modified || isAggregated)
+						{
 							query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
+							dic.Add(col, query.Select.Columns[i]);
+						}
 					}
 				}
+			});
+
+			sqlQuery = new QueryVisitor().Convert(sqlQuery, e =>
+			{
+				IQueryElement ne;
+				return dic.TryGetValue(e, out ne) ? ne : e;
 			});
 
 			sqlQuery = base.Finalize(sqlQuery);

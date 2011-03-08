@@ -10,7 +10,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class JoinParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			if (!methodCall.IsQueryable("Join", "GroupJoin") || methodCall.Arguments.Count != 5)
 				return false;
@@ -34,16 +34,12 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(
-			ExpressionParser     parser,
-			IParseContext        parent,
-			MethodCallExpression methodCall,
-			SqlQuery             sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			var isGroup      = methodCall.Method.Name == "GroupJoin";
-			var outerContext = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
-			var innerContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
-			var countContext = parser.ParseSequence(parent, methodCall.Arguments[1], new SqlQuery());
+			var outerContext = parser.ParseSequence(new ParseInfo(parseInfo.Parent, methodCall.Arguments[0], parseInfo.SqlQuery));
+			var innerContext = parser.ParseSequence(new ParseInfo(parseInfo.Parent, methodCall.Arguments[1], new SqlQuery()));
+			var countContext = parser.ParseSequence(new ParseInfo(parseInfo.Parent, methodCall.Arguments[1], new SqlQuery()));
 
 			var context  = new SubQueryContext(outerContext);
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext) : new SubQueryContext(innerContext);;
@@ -69,9 +65,9 @@ namespace BLToolkit.Data.Linq.Parser
 			var innerParent = innerContext.Parent;
 			var countParent = countContext.Parent;
 
-			var outerKeyContext = new PathThroughContext(parent, context,      outerKeyLambda);
-			var innerKeyContext = new PathThroughContext(parent, innerContext, innerKeyLambda);
-			var countKeyContext = new PathThroughContext(parent, countContext, innerKeyLambda);
+			var outerKeyContext = new PathThroughContext(parseInfo.Parent, context,      outerKeyLambda);
+			var innerKeyContext = new PathThroughContext(parseInfo.Parent, innerContext, innerKeyLambda);
+			var countKeyContext = new PathThroughContext(parseInfo.Parent, countContext, innerKeyLambda);
 
 			// Process counter.
 			//
@@ -124,10 +120,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 				((GroupJoinSubQueryContext)innerContext).Join       = join.JoinedTable;
 				((GroupJoinSubQueryContext)innerContext).CounterSql = counterSql;
-				return new GroupJoinContext(parent, selector, context, innerContext);
+				return new GroupJoinContext(parseInfo.Parent, selector, context, innerContext);
 			}
 
-			return new JoinContext(parent, selector, context, innerContext);
+			return new JoinContext(parseInfo.Parent, selector, context, innerContext);
 		}
 
 		static void ParseJoin(
@@ -269,12 +265,12 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				if (expression == null)
 					return this;
 
-				return base.GetContext(expression, level, currentSql);
+				return base.GetContext(expression, level, parseInfo);
 			}
 
 			Expression _counterExpression;

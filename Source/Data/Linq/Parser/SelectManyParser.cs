@@ -8,7 +8,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class SelectManyParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			return
 				methodCall.IsQueryable("SelectMany") &&
@@ -16,9 +16,9 @@ namespace BLToolkit.Data.Linq.Parser
 				((LambdaExpression)methodCall.Arguments[1].Unwrap()).Parameters.Count == 1;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence           = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence           = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 			var collectionSelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var resultSelector     = (LambdaExpression)methodCall.Arguments[2].Unwrap();
 
@@ -27,7 +27,7 @@ namespace BLToolkit.Data.Linq.Parser
 			//	return resultSelector == null ? sequence : new SelectContext(resultSelector, sequence, sequence);
 			//}
 
-			var context    = new SelectManyContext(parent, collectionSelector, sequence);
+			var context    = new SelectManyContext(parseInfo.Parent, collectionSelector, sequence);
 			var expr       = collectionSelector.Body.Unwrap();
 			var crossApply = null != expr.Find(e => e == collectionSelector.Parameters[0]);
 
@@ -47,7 +47,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var collectionSql = new SqlQuery();
 
 			parser.SubQueryParsingCounter++;
-			var collection = parser.ParseSequence(context, expr, collectionSql);
+			var collection = parser.ParseSequence(new ParseInfo(context, expr, collectionSql));
 			parser.SubQueryParsingCounter--;
 
 			var leftJoin = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
@@ -69,7 +69,7 @@ namespace BLToolkit.Data.Linq.Parser
 			if (collectionSql != sql)
 			{
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-				return new SelectContext(parent, resultSelector, sequence, context);
+				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 			}
 
 			if (!leftJoin && !crossApply)
@@ -79,7 +79,7 @@ namespace BLToolkit.Data.Linq.Parser
 				//sql.ParentSql = sequence.SqlQuery;
 
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
-				return new SelectContext(parent, resultSelector, sequence, context);
+				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 			}
 
 			//if (leftJoin && collectionSql != sql)
@@ -137,7 +137,7 @@ namespace BLToolkit.Data.Linq.Parser
 					//sql.ParentSql = sequence.SqlQuery;
 
 					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-					return new SelectContext(parent, resultSelector, sequence, context);
+					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 				}
 			}
 
@@ -225,20 +225,20 @@ namespace BLToolkit.Data.Linq.Parser
 				return base.ConvertToSql(expression, level, flags);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				if (Collection != null)
 				{
 					if (expression == null)
-						return Collection.GetContext(expression, level, currentSql);
+						return Collection.GetContext(expression, level, parseInfo);
 
 					var root = expression.GetRootObject();
 
 					if (root != Lambda.Parameters[0])
-						return Collection.GetContext(expression, level, currentSql);
+						return Collection.GetContext(expression, level, parseInfo);
 				}
 
-				return base.GetContext(expression, level, currentSql);
+				return base.GetContext(expression, level, parseInfo);
 			}
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)

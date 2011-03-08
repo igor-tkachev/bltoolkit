@@ -179,6 +179,7 @@
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
     <Compile Include="Data\Linq\Parser\AsQueryableParser.cs" />
     <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
+    <Compile Include="Data\Linq\Parser\ParseInfo.cs" />
     <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
     <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
     <Compile Include="Data\Linq\Parser\TakeSkipParser.cs" />

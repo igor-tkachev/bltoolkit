@@ -5,13 +5,12 @@ using System.Linq.Expressions;
 namespace BLToolkit.Data.Linq.Parser
 {
 	using BLToolkit.Linq;
-	using Data.Sql;
 
 	class SelectParser : MethodCallParser
 	{
 		#region SelectParser
 
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			if (methodCall.IsQueryable("Select"))
 			{
@@ -26,10 +25,10 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			var selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 
 			sequence.SetAlias(selector.Parameters[0].Name);
 
@@ -49,8 +48,8 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return selector.Parameters.Count == 1 ?
-				new SelectContext (parent, selector, sequence) :
-				new SelectContext2(parent, selector, sequence);
+				new SelectContext (parseInfo.Parent, selector, sequence) :
+				new SelectContext2(parseInfo.Parent, selector, sequence);
 		}
 
 		static IParseContext CheckSubQueryForSelect(IParseContext context)
@@ -76,7 +75,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = this.BuildExpression(null, 0);
+				var expr = BuildExpression(null, 0);
 
 				var mapper = Expression.Lambda<Func<int,QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []

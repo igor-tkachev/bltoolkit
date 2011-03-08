@@ -10,16 +10,18 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class AggregationParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			return methodCall.IsQueryable("Average", "Min", "Max", "Sum");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 
-			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
+			if (sequence.SqlQuery.Select.IsDistinct ||
+				sequence.SqlQuery.Select.TakeValue != null ||
+				sequence.SqlQuery.Select.SkipValue != null)
 			{
 				//sequence.ConvertToIndex(null, 0, ConvertFlags.All);
 				sequence = new SubQueryContext(sequence);
@@ -36,19 +38,27 @@ namespace BLToolkit.Data.Linq.Parser
 			if (methodCall.Arguments.Count == 2)
 			{
 				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-				var context = new AggregationContext(parent, sequence, lambda, methodCall.Method.ReturnType);
+				var context = new AggregationContext(parseInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
+				var expr    = parser.ParseExpression(context, lambda.Body.Unwrap());
+
+				if (expr.ElementType == QueryElementType.SqlQuery && expr != parseInfo.SqlQuery)
+				{
+					expr     = sequence.SqlQuery.Select.Columns[sequence.SqlQuery.Select.Add(expr)];
+					sequence = new SubQueryContext(sequence);
+					context  = new AggregationContext(parseInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
+				}
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
 					new SqlFunction(
 						methodCall.Type,
 						methodCall.Method.Name,
-						parser.ParseExpression(context, context.Lambda.Body.Unwrap())));
+						expr));
 
 				return context;
 			}
 			else
 			{
-				var context = new AggregationContext(parent, sequence, null, methodCall.Method.ReturnType);
+				var context = new AggregationContext(parseInfo.Parent, sequence, null, methodCall.Method.ReturnType);
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
 					new SqlFunction(
@@ -121,7 +131,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return false;
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				throw new NotImplementedException();
 			}

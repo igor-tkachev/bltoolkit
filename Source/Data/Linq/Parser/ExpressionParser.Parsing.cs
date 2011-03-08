@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var prevParent = sequence.Parent;
 
 			var  ctx  = new PathThroughContext(parent, sequence, condition);
-			var  expr = condition.Body.Unwrap();
+			var  expr = ConvertExpression(condition.Body.Unwrap());
 
 			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
 			{
@@ -179,7 +179,7 @@ namespace BLToolkit.Data.Linq.Parser
 		IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
 			SubQueryParsingCounter++;
-			var sequence = ParseSequence(context, expr, new SqlQuery { ParentSql = context.SqlQuery });
+			var sequence = ParseSequence(new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery }));
 			SubQueryParsingCounter--;
 
 			return sequence;
@@ -361,6 +361,63 @@ namespace BLToolkit.Data.Linq.Parser
 				//res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
 
 			return res;
+		}
+
+		#endregion
+
+		#region ConvertExpression
+
+		interface IConvertNullableHelper
+		{
+			Expression Convert(MemberExpression expression);
+		}
+
+		class ConvertNullableHelper<T> : IConvertNullableHelper
+			where T : struct 
+		{
+			public Expression Convert(MemberExpression expression)
+			{
+				return Expression.Call(
+					null,
+					ReflectionHelper.Expressor<T?>.MethodExpressor(p => Sql.ConvertNullable(p)),
+					expression.Expression);
+			}
+		}
+
+		Expression ConvertExpression(Expression expression)
+		{
+			return expression.Convert(e =>
+			{
+				switch (e.NodeType)
+				{
+					case ExpressionType.MemberAccess:
+						{
+							var ma = (MemberExpression)e;
+							var l  = ConvertMember(ma.Member);
+
+							if (l != null)
+							{
+								var body = l.Body.Unwrap();
+								var expr = body.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+
+								return ConvertExpression(expr);
+							}
+
+							if (TypeHelper.IsNullableValueMember(ma.Member))
+							{
+								var ntype  = typeof(ConvertNullableHelper<>).MakeGenericType(ma.Type);
+								var helper = (IConvertNullableHelper)Activator.CreateInstance(ntype);
+								var expr   = helper.Convert(ma);
+
+								return ConvertExpression(expr);
+							}
+
+							break;
+						}
+				}
+
+				return e;
+			});
 		}
 
 		#endregion
@@ -588,28 +645,41 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.MemberAccess:
 					{
 						var ma = (MemberExpression)expression;
+
+#if DEBUG
+
 						var l  = ConvertMember(ma.Member);
 
 						if (l != null)
 						{
-							var ef  = l.Body.Unwrap();
-							var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+							throw new InvalidOperationException();
 
-							return ParseExpression(context, pie);
+							//var ef  = l.Body.Unwrap();
+							//var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+
+							//return ParseExpression(context, pie);
 						}
+
+						if (TypeHelper.IsNullableValueMember(ma.Member))
+						{
+							throw new InvalidOperationException();
+							//return ParseExpression(context, ma.Expression);
+						}
+
+						var de = ParseTimeSpanMember(context, ma);
+
+						if (de != null)
+						{
+							throw new InvalidOperationException();
+							//return de;
+						}
+
+#endif
 
 						var attr = GetFunctionAttribute(ma.Member);
 
 						if (attr != null)
 							return Convert(context, attr.GetExpression(ma.Member));
-
-						if (TypeHelper.IsNullableValueMember(ma.Member))
-							return ParseExpression(context, ma.Expression);
-
-						var de = ParseTimeSpanMember(context, ma);
-
-						if (de != null)
-							return de;
 
 						var ctx = GetContext(context, expression);
 

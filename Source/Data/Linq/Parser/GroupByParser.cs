@@ -15,7 +15,7 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		#region Parser Methods
 
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			if (!methodCall.IsQueryable("GroupBy"))
 				return false;
@@ -39,9 +39,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return (methodCall.Arguments[methodCall.Arguments.Count - 1].Unwrap().NodeType == ExpressionType.Lambda);
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence        = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence        = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 			var sequenceExpr    = methodCall.Arguments[0];
 			var groupingType    = methodCall.Type.GetGenericArguments()[0];
 			var keySelector     = (LambdaExpression)methodCall.Arguments[1].Unwrap();
@@ -62,13 +62,13 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			var key      = new KeyContext(parent, keySelector, sequence);
+			var key      = new KeyContext(parseInfo.Parent, keySelector, sequence);
 			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
 			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 			{
 				sequence = new SubQueryContext(sequence);
-				key      = new KeyContext(parent, keySelector, sequence);
+				key      = new KeyContext(parseInfo.Parent, keySelector, sequence);
 				groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 			}
 
@@ -87,8 +87,8 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			});
 
-			var element = new SelectContext (parent, elementSelector, sequence);
-			var groupBy = new GroupByContext(parent, sequenceExpr, groupingType, sequence, key, element);
+			var element = new SelectContext (parseInfo.Parent, elementSelector, sequence);
+			var groupBy = new GroupByContext(parseInfo.Parent, sequenceExpr, groupingType, sequence, key, element);
 
 			return groupBy;
 		}
@@ -502,7 +502,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return base.ConvertToParentIndex(index, this);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				if (expression == null)
 					return this;

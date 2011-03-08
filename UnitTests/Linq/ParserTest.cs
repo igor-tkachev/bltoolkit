@@ -898,16 +898,16 @@ namespace Data.Linq
 	{
 		public int ParsingCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
 		{
-			var call = expression as MethodCallExpression;
+			var call = parseInfo.Expression as MethodCallExpression;
 			return call != null && call.Method.Name == "GetContext";
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
 		{
-			var call = (MethodCallExpression)expression;
-			return new Context(parser.ParseSequence(parent, call.Arguments[0], sqlQuery));
+			var call = (MethodCallExpression)parseInfo.Expression;
+			return new Context(parser.ParseSequence(new ParseInfo(parseInfo, call.Arguments[0])));
 		}
 
 		public class Context : IParseContext
@@ -950,9 +950,9 @@ namespace Data.Linq
 				return Sequence.IsExpression(null,  0, requestFlag);
 			}
 
-			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
-				return Sequence.GetContext(expression, level, currentSql);
+				return Sequence.GetContext(expression, level, parseInfo);
 			}
 
 			public int ConvertToParentIndex(int index, IParseContext context)

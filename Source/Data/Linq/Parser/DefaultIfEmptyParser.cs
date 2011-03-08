@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Parser
@@ -8,19 +9,19 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class DefaultIfEmptyParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			return methodCall.IsQueryable("DefaultIfEmpty");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence     = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence     = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 			var defaultValue = methodCall.Arguments.Count == 1 ? null : methodCall.Arguments[1].Unwrap();
 
-			if (parent is SelectManyParser.SelectManyContext)
+			if (parseInfo.Parent is SelectManyParser.SelectManyContext)
 			{
-				var groupJoin = ((SelectManyParser.SelectManyContext)parent).Sequence[0] as JoinParser.GroupJoinContext;
+				var groupJoin = ((SelectManyParser.SelectManyContext)parseInfo.Parent).Sequence[0] as JoinParser.GroupJoinContext;
 
 				if (groupJoin != null)
 				{
@@ -29,7 +30,7 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			return new DefaultIfEmptyContext(parent, sequence, defaultValue);
+			return new DefaultIfEmptyContext(parseInfo.Parent, sequence, defaultValue);
 		}
 
 		public class DefaultIfEmptyContext : SequenceContextBase
@@ -48,25 +49,26 @@ namespace BLToolkit.Data.Linq.Parser
 
 				if (expression == null)
 				{
-					var idx = Sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
+					var q =
+						from col in SqlQuery.Select.Columns
+						where !col.CanBeNull()
+						select SqlQuery.Select.Columns.IndexOf(col);
 
-					Expression cond = null;
+					var idx = q.DefaultIfEmpty(-1).First();
 
-					foreach (var info in idx)
-					{
-						var n = ConvertToParentIndex(info.Index, this);
+					if (idx == -1)
+						idx = SqlQuery.Select.Add(new SqlValue((int?) 1));
 
-						var e = Expression.Call(
-							ExpressionParser.DataReaderParam,
-							ReflectionHelper.DataReader.IsDBNull,
-							Expression.Constant(n)) as Expression;
+					var n = ConvertToParentIndex(idx, this);
 
-						cond = cond == null ? e : Expression.AndAlso(cond, e);
-					}
+					var e = Expression.Call(
+						ExpressionParser.DataReaderParam,
+						ReflectionHelper.DataReader.IsDBNull,
+						Expression.Constant(n)) as Expression;
 
 					var defaultValue = _defaultValue ?? Expression.Constant(null, expr.Type);
 
-					expr = Expression.Condition(cond, defaultValue, expr);
+					expr = Expression.Condition(e, defaultValue, expr);
 				}
 
 				return expr;
@@ -87,9 +89,9 @@ namespace BLToolkit.Data.Linq.Parser
 				return Sequence.IsExpression(expression, level, requestFlag);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
-				return Sequence.GetContext(expression, level, currentSql);
+				return Sequence.GetContext(expression, level, parseInfo);
 			}
 		}
 	}

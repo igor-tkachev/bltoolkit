@@ -367,7 +367,7 @@ namespace Data.Linq
 		[Test]
 		public void SubQuery6()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Sybase }, db => AreEqual(
 				   Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count()),
 				db.Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count())));
 		}
@@ -385,7 +385,7 @@ namespace Data.Linq
 		[Test]
 		public void SubQueryMax()
 		{
-			ForEachProvider(db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => Assert.AreEqual(
 				   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
 				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
 		}

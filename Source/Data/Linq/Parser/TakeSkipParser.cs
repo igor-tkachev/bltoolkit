@@ -10,14 +10,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class TakeSkipParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			return methodCall.IsQueryable("Skip", "Take");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 
 			var arg = methodCall.Arguments[1].Unwrap();
 

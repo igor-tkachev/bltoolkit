@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq.Parser
 {
@@ -88,9 +87,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return SubQuery.IsExpression(expression, level, testFlag);
 		}
 
-		public virtual IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+		public virtual IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 		{
-			return SubQuery.GetContext(expression, level, currentSql);
+			return SubQuery.GetContext(expression, level, parseInfo);
 		}
 
 		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();

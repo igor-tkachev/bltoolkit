@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Parser
 {
-	using Data.Sql;
-
 	public interface ISequenceParser
 	{
 		int           ParsingCounter { get; set; }
-		bool          CanParse     (ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery);
-		IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery);
+		bool          CanParse     (ExpressionParser parser, ParseInfo parseInfo);
+		IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo);
 	}
 }

@@ -18,8 +18,10 @@ namespace BLToolkit.Data.Linq.Parser
 	{
 		int ISequenceParser.ParsingCounter { get; set; }
 
-		public T Parse<T>(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery, Func<int,IParseContext,T> action)
+		public T Parse<T>(ExpressionParser parser, ParseInfo parseInfo, Func<int,IParseContext,T> action)
 		{
+			var expression = parseInfo.Expression;
+
 			switch (expression.NodeType)
 			{
 				case ExpressionType.Constant:
@@ -49,9 +51,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 					// Looking for association.
 					//
-					if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
+					if (parser.SubQueryParsingCounter > 0 && parseInfo.SqlQuery.From.Tables.Count == 0)
 					{
-						var ctx = parser.GetContext(parent, expression);
+						var ctx = parser.GetContext(parseInfo.Parent, expression);
 						if (ctx != null)
 							return action(4, ctx);
 					}
@@ -60,9 +62,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 				case ExpressionType.Parameter:
 					{
-						if (parser.SubQueryParsingCounter > 0 && sqlQuery.From.Tables.Count == 0)
+						if (parser.SubQueryParsingCounter > 0 && parseInfo.SqlQuery.From.Tables.Count == 0)
 						{
-							var ctx = parser.GetContext(parent, expression);
+							var ctx = parser.GetContext(parseInfo.Parent, expression);
 							if (ctx != null)
 								return action(4, ctx);
 						}
@@ -74,25 +76,22 @@ namespace BLToolkit.Data.Linq.Parser
 			return action(0, null);
 		}
 
-		public bool CanParse(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
 		{
-			return Parse(parser, parent, expression, sqlQuery, (n,_) => n > 0);
+			return Parse(parser, parseInfo, (n,_) => n > 0);
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
 		{
-			return Parse(parser, parent, expression, sqlQuery, (n,ctx) =>
+			return Parse(parser, parseInfo, (n,ctx) =>
 			{
 				switch (n)
 				{
 					case 0 : return null;
-					case 1 : return new TableContext(parser, parent, expression, sqlQuery, ((IQueryable)((ConstantExpression)expression).Value).ElementType);
+					case 1 : return new TableContext(parser, parseInfo, ((IQueryable)((ConstantExpression)parseInfo.Expression).Value).ElementType);
 					case 2 :
-					case 3 : return new TableContext(parser, parent, expression, sqlQuery, expression.Type.GetGenericArguments()[0]);
-					case 4 :
-						return //ctx.IsExpression(expression, 0, RequestFor.Association) ?
-							ctx.GetContext(expression, 0, sqlQuery); //:
-							//ctx;
+					case 3 : return new TableContext(parser, parseInfo, parseInfo.Expression.Type.GetGenericArguments()[0]);
+					case 4 : return ctx.GetContext(parseInfo.Expression, 0, parseInfo);
 				}
 
 				throw new InvalidOperationException();
@@ -115,12 +114,12 @@ namespace BLToolkit.Data.Linq.Parser
 			public SqlQuery         SqlQuery   { get; set; }
 			public IParseContext    Parent     { get; set; }
 
-			public TableContext(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery, Type originalType)
+			public TableContext(ExpressionParser parser, ParseInfo parseInfo, Type originalType)
 			{
 				Parser     = parser;
-				Parent     = parent;
-				Expression = expression;
-				SqlQuery   = sqlQuery;
+				Parent     = parseInfo.Parent;
+				Expression = parseInfo.Expression;
+				SqlQuery   = parseInfo.SqlQuery;
 
 				OriginalType = originalType;
 				ObjectType   = GetObjectType();
@@ -476,7 +475,54 @@ namespace BLToolkit.Data.Linq.Parser
 				return false;
 			}
 
-			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			interface IAssociationHelper
+			{
+				Expression GetExpression(Expression parent, TableLevel association);
+			}
+
+			class AssociationHelper<T> : IAssociationHelper
+				where T : class
+			{
+				public Expression GetExpression(Expression parent, TableLevel association)
+				{
+					Expression expr  = null;
+					var        param = Expression.Parameter(typeof(T), "c");
+
+					foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
+					{
+						var p  = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
+						var e1 = Expression.MakeMemberAccess(parent, ((SqlField)p.Expr1).MemberMapper.MemberAccessor.MemberInfo);
+						var e2 = Expression.MakeMemberAccess(param,  ((SqlField)p.Expr2).MemberMapper.MemberAccessor.MemberInfo) as Expression;
+
+						while (e1.Type != e2.Type)
+						{
+							if (TypeHelper.IsNullableType(e1.Type))
+							{
+								e1 = Expression.PropertyOrField(e1, "Value");
+								continue;
+							}
+
+							if (TypeHelper.IsNullableType(e2.Type))
+							{
+								e2 = Expression.PropertyOrField(e2, "Value");
+								continue;
+							}
+
+							e2 = Expression.Convert(e2, e1.Type);
+						}
+
+						var ex = Expression.Equal(e1, e2);
+							
+						expr = expr == null ? ex : Expression.AndAlso(expr, ex);
+					}
+
+					var predicate = Expression.Lambda<Func<T,bool>>(expr, param);
+
+					return Linq.Extensions.GetTable<T>(null).Where(predicate).Expression;
+				}
+			}
+
+			public IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				if (expression == null)
 				{
@@ -484,9 +530,7 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var table = new TableContext(
 							Parser,
-							Parent is SelectManyParser.SelectManyContext ? this : Parent,
-							Expression,
-							currentSql,
+							new ParseInfo(Parent is SelectManyParser.SelectManyContext ? this : Parent, Expression, parseInfo.SqlQuery),
 							SqlTable.ObjectType);
 
 						return table;
@@ -504,28 +548,36 @@ namespace BLToolkit.Data.Linq.Parser
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
 							var association = GetAssociation(expression, level);
+							var ma          = (MemberExpression)parseInfo.Expression;
+
+							var atype  = typeof(AssociationHelper<>).MakeGenericType(association.Table.ObjectType);
+							var helper = (IAssociationHelper)Activator.CreateInstance(atype);
+							var expr   = helper.GetExpression(ma.Expression, association);
+
+							return Parser.ParseSequence(new ParseInfo(parseInfo, expr));
+
+							/*
 							var table       = new TableContext(
 								Parser,
-								Parent is SelectManyParser.SelectManyContext ? this : Parent,
-								Expression,
-								currentSql,
+								new ParseInfo(Parent is SelectManyParser.SelectManyContext ? this : Parent, Expression, parseInfo.SqlQuery),
 								association.Table.ObjectType);
 
 							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
 							{
 								var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
-								currentSql.Where
+								parseInfo.SqlQuery.Where
 									.Expr(predicate.Expr1)
 									.Equal
 									.Field(table.SqlTable.Fields[((SqlField)predicate.Expr2).Name]);
 							}
 
 							return table;
+							*/
 						}
 						else
 						{
 							var association = GetAssociation(levelExpression, level);
-							return association.Table.GetContext(expression, level + 1, currentSql);
+							return association.Table.GetContext(expression, level + 1, parseInfo);
 						}
 					}
 				}

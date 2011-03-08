@@ -707,14 +707,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region GetContext
 
-		public virtual IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+		public virtual IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 		{
 			if (IsScalar)
 			{
 				return ProcessScalar(
 					expression,
 					level,
-					(ctx, ex, l) => ctx.GetContext(ex, l, currentSql),
+					(ctx, ex, l) => ctx.GetContext(ex, l, parseInfo),
 					() => { throw new NotImplementedException(); });
 			}
 			else
@@ -731,7 +731,7 @@ namespace BLToolkit.Data.Linq.Parser
 								level,
 								(n,ctx,ex,l,_) => n == 0 ?
 									null :
-									ctx.GetContext(ex, l, currentSql));
+									ctx.GetContext(ex, l, parseInfo));
 
 							if (context == null)
 								throw new NotImplementedException();
@@ -747,10 +747,10 @@ namespace BLToolkit.Data.Linq.Parser
 							if (levelExpression == expression)
 							{
 								if (levelExpression == parameter)
-									return sequence.GetContext(null, 0, currentSql);
+									return sequence.GetContext(null, 0, parseInfo);
 							}
 							else if (level == 0)
-								return sequence.GetContext(expression, 1, currentSql);
+								return sequence.GetContext(expression, 1, parseInfo);
 
 							break;
 						}
@@ -759,7 +759,7 @@ namespace BLToolkit.Data.Linq.Parser
 				if (level == 0)
 				{
 					var sequence = GetSequence(expression, level);
-					return sequence.GetContext(expression, level + 1, currentSql);
+					return sequence.GetContext(expression, level + 1, parseInfo);
 				}
 			}
 

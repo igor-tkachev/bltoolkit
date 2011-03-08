@@ -26,6 +26,13 @@ namespace BLToolkit.Data.Linq
 			return obj;
 		}
 
+		[SqlExpression("{0}", 0)]
+		public static T ConvertNullable<T>(T? value)
+			where T : struct
+		{
+			return value.Value;
+		}
+
 		#endregion
 
 		#region Guid Functions

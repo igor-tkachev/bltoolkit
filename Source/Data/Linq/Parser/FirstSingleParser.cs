@@ -9,20 +9,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 	class FirstSingleParser : MethodCallParser
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			return methodCall.IsQueryable("First", "FirstOrDefault", "Single", "SingleOrDefault");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, IParseContext parent, MethodCallExpression methodCall, SqlQuery sqlQuery)
+		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
-			var sequence = parser.ParseSequence(parent, methodCall.Arguments[0], sqlQuery);
+			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 
 			if (methodCall.Arguments.Count == 2)
 			{
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-				sequence = parser.ParseWhere(parent, sequence, condition, true);
+				sequence = parser.ParseWhere(parseInfo.Parent, sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			//sequence.BuildExpression(null, 0);
 
-			return new FirstSingleContext(parent, sequence, methodCall.Method.Name);
+			return new FirstSingleContext(parseInfo.Parent, sequence, methodCall.Method.Name);
 		}
 
 		class FirstSingleContext : SequenceContextBase
@@ -95,7 +95,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return false;
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				throw new NotImplementedException();
 			}

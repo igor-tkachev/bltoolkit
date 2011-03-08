@@ -66,7 +66,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			CompiledParameters = compiledParameters;
 			DataContextInfo    = dataContext;
-			Expression         = ConvertExpression(expression);
+			Expression         = ConvertExpressionTree(expression);
 		}
 
 		#endregion
@@ -103,7 +103,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		internal Query<T> Parse<T>()
 		{
-			var sequence = ParseSequence(null, Expression, new SqlQuery());
+			var sequence = ParseSequence(new ParseInfo(Expression, new SqlQuery()));
 
 			if (_reorder)
 				lock (_sync)
@@ -122,17 +122,17 @@ namespace BLToolkit.Data.Linq.Parser
 		}
 
 		[JetBrains.Annotations.NotNull]
-		public IParseContext ParseSequence(IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public IParseContext ParseSequence(ParseInfo parseInfo)
 		{
-			expression = expression.Unwrap();
+			parseInfo.Expression = parseInfo.Expression.Unwrap();
 
 			var n = _parsers[0].ParsingCounter;
 
 			foreach (var parser in _parsers)
 			{
-				if (parser.CanParse(this, parent, expression, sqlQuery))
+				if (parser.CanParse(this, parseInfo))
 				{
-					var sequence = parser.ParseSequence(this, parent, expression, sqlQuery);
+					var sequence = parser.ParseSequence(this, parseInfo);
 
 					lock (parser)
 						parser.ParsingCounter++;
@@ -145,14 +145,14 @@ namespace BLToolkit.Data.Linq.Parser
 				n = parser.ParsingCounter;
 			}
 
-			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", expression);
+			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", parseInfo.Expression);
 		}
 
 		#endregion
 
 		#region ConvertExpression
 
-		Expression ConvertExpression(Expression expression)
+		Expression ConvertExpressionTree(Expression expression)
 		{
 			expression = ConvertParameters  (expression);
 			expression = ConverLetSubqueries(expression);
@@ -330,7 +330,7 @@ namespace BLToolkit.Data.Linq.Parser
 								var ex = ConvertIQueriable(expr);
 
 								if (ex != expr)
-									return ConvertExpression(ex);
+									return ConvertExpressionTree(ex);
 							}
 						}
 
@@ -599,7 +599,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var resultSelector   = types.ContainsKey("TResult")  ?
 				(LambdaExpression)OptimizeExpression(method.Arguments[types.ContainsKey("TElement") ? 3 : 2].Unwrap()) : null;
 
-			var needSubQuery = null != keySelector.Body.Unwrap().Find(IsExpression);
+			var needSubQuery = null != ConvertExpression(keySelector.Body.Unwrap()).Find(IsExpression);
 
 			if (!needSubQuery && resultSelector == null && elementSelector != null)
 				return method;
@@ -642,30 +642,11 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Parameter      : return false;
 				case ExpressionType.MemberAccess   :
 					{
-						var ma = (MemberExpression)ex;
-						var l  = ConvertMember(ma.Member);
-
-						if (l != null)
-						{
-							var ef  = l.Body.Unwrap();
-							var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
-
-							return pie.Find(IsExpression) != null;
-						}
-
+						var ma   = (MemberExpression)ex;
 						var attr = GetFunctionAttribute(ma.Member);
 
 						if (attr != null)
 							return true;
-
-						if (ma.Member.DeclaringType == typeof(TimeSpan))
-						{
-							switch (ma.Expression.NodeType)
-							{
-								case ExpressionType.Subtract        :
-								case ExpressionType.SubtractChecked : return true;
-							}
-						}
 
 						return false;
 					}

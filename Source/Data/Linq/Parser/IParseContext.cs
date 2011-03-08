@@ -28,7 +28,7 @@ namespace BLToolkit.Data.Linq.Parser
 		SqlInfo[]        ConvertToSql        (Expression expression, int level, ConvertFlags flags);
 		SqlInfo[]        ConvertToIndex      (Expression expression, int level, ConvertFlags flags);
 		bool             IsExpression        (Expression expression, int level, RequestFor requestFlag);
-		IParseContext    GetContext          (Expression expression, int level, SqlQuery currentSql);
+		IParseContext    GetContext          (Expression expression, int level, ParseInfo parseInfo);
 		int              ConvertToParentIndex(int index, IParseContext context);
 		void             SetAlias            (string alias);
 	}

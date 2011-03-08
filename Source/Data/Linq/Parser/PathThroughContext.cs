@@ -72,10 +72,10 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.Root        : return expression == Lambda.Parameters[0];
+				case RequestFor.Root       : return expression == Lambda.Parameters[0];
 
 				case RequestFor.Association :
-				case RequestFor.Object       :
+				case RequestFor.Object      :
 				case RequestFor.Field       :
 				case RequestFor.Expression  :
 					{
@@ -90,7 +90,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		public override IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+		public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 		{
 			if (expression != null)
 			{
@@ -100,7 +100,7 @@ namespace BLToolkit.Data.Linq.Parser
 					return Sequence;
 			}
 
-			return Sequence.GetContext(expression, level + 1, currentSql);
+			return Sequence.GetContext(expression, level + 1, parseInfo);
 		}
 	}
 }
