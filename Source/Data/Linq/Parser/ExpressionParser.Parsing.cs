@@ -81,6 +81,10 @@ namespace BLToolkit.Data.Linq.Parser
 									stopWalking = true;
 								}
 							}
+							else
+							{
+								throw new InvalidOperationException();
+							}
 
 							isWhere = true;
 
@@ -386,10 +390,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 		Expression ConvertExpression(Expression expression)
 		{
-			return expression.Convert(e =>
+			return expression.Convert2(e =>
 			{
-				//if (CanBeConstant(e) || CanBeCompiled(e))
-				//	return e;
+				if (CanBeConstant(e) || CanBeCompiled(e))
+					return new ExpressionHelper.ConvertInfo(e, true);
 
 				switch (e.NodeType)
 				{
@@ -397,7 +401,7 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var ex = ConvertNew((NewExpression)e);
 							if (ex != null)
-								return ConvertExpression(ex);
+								return new ExpressionHelper.ConvertInfo(ConvertExpression(ex));
 							break;
 						}
 
@@ -405,7 +409,7 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var cm = ConvertMethod((MethodCallExpression)e);
 							if (cm != null)
-								return ConvertExpression(cm);
+								return new ExpressionHelper.ConvertInfo(ConvertExpression(cm));
 							break;
 						}
 
@@ -419,7 +423,10 @@ namespace BLToolkit.Data.Linq.Parser
 								var body = l.Body.Unwrap();
 								var expr = body.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
 
-								return ConvertExpression(expr);
+								if (expr.Type != e.Type)
+									expr = new ChangeTypeExpression(expr, e.Type);
+
+								return new ExpressionHelper.ConvertInfo(ConvertExpression(expr));
 							}
 
 							if (TypeHelper.IsNullableValueMember(ma.Member))
@@ -428,7 +435,7 @@ namespace BLToolkit.Data.Linq.Parser
 								var helper = (IConvertHelper)Activator.CreateInstance(ntype);
 								var expr   = helper.ConvertNull(ma);
 
-								return ConvertExpression(expr);
+								return new ExpressionHelper.ConvertInfo(ConvertExpression(expr));
 							}
 
 							if (ma.Member.DeclaringType == typeof(TimeSpan))
@@ -447,7 +454,7 @@ namespace BLToolkit.Data.Linq.Parser
 											case "TotalMinutes"      : datePart = Sql.DateParts.Minute;      break;
 											case "TotalHours"        : datePart = Sql.DateParts.Hour;        break;
 											case "TotalDays"         : datePart = Sql.DateParts.Day;         break;
-											default                  : return e;
+											default                  : return new ExpressionHelper.ConvertInfo(e);
 										}
 
 										var ex     = (BinaryExpression)ma.Expression;
@@ -464,7 +471,7 @@ namespace BLToolkit.Data.Linq.Parser
 													Expression.Convert(ex.Left,  typeof(DateTime?))),
 												typeof(double));
 
-										return ConvertExpression(call);
+										return new ExpressionHelper.ConvertInfo(ConvertExpression(call));
 								}
 							}
 
@@ -473,7 +480,7 @@ namespace BLToolkit.Data.Linq.Parser
 						}
 				}
 
-				return e;
+				return new ExpressionHelper.ConvertInfo(e);
 			});
 		}
 
