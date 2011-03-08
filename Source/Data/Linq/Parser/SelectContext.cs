@@ -64,7 +64,7 @@ namespace BLToolkit.Data.Linq.Parser
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
 						if (expr.Members == null)
-							return;
+							goto default;
 // ReSharper restore HeuristicUnreachableCode
 // ReSharper restore ConditionIsAlwaysTrueOrFalse
 

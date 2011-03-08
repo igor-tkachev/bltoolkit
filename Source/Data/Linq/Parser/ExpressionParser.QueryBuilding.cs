@@ -28,12 +28,16 @@ namespace BLToolkit.Data.Linq.Parser
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
 								return BuildSql(context, pi);
 
+							var ma = (MemberExpression)pi;
+
+							if (ConvertMember(ma.Member) != null)
+								break;
+
 							var ctx = GetContext(context, pi);
 
 							if (ctx != null)
 								return ctx.BuildExpression(pi, 0);
 
-							var ma = (MemberExpression)pi;
 							var ex = ma.Expression;
 
 							/*

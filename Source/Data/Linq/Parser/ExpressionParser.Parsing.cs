@@ -81,10 +81,6 @@ namespace BLToolkit.Data.Linq.Parser
 									stopWalking = true;
 								}
 							}
-							else
-							{
-								throw new InvalidOperationException();
-							}
 
 							isWhere = true;
 
