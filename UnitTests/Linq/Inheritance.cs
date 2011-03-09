@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
-
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -162,6 +162,39 @@ namespace Data.Linq
 		{
 			using (var db = new TestDbManager())
 				Assert.AreEqual(1, db.GetTable<PersonEx>().Where(_ => _.FirstName == "John").Select(_ => _.ID).Single());
+		}
+
+		[InheritanceMapping(Code = 1, Type = typeof(Parent222))]
+		[TableName("Parent")]
+		public class Parent111
+		{
+			[MapField(IsInheritanceDiscriminator = true)]
+			public int ParentID;
+		}
+
+		[MapField("Value1", "Value.ID")]
+		public class Parent222 : Parent111
+		{
+			[MapIgnore]
+			public Value111 Value;
+		}
+
+		public class Value111
+		{
+			public int ID;
+		}
+
+		[Test]
+		public void InheritanceMappingIssueTest()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q1 = db.GetTable<Parent222>();
+				var q  = q1.Where(_ => _.Value.ID == 1);
+
+				var sql = ((Table<Parent222>)q).SqlText;
+				Assert.IsNotEmpty(sql);
+			}
 		}
 	}
 }
