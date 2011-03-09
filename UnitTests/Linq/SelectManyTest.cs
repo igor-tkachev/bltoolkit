@@ -15,6 +15,90 @@ namespace Data.Linq
 	public class SelectManyTest : TestBase
 	{
 		[Test]
+		public void Basic1()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child),
+				db.Parent.SelectMany(p => db.Child)));
+		}
+
+		[Test]
+		public void Basic11()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.SelectMany(t =>    GrandChild)),
+				db.Parent.SelectMany(p => db.Child.SelectMany(t => db.GrandChild))));
+		}
+
+		[Test]
+		public void Basic2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(_ => _.ParentID + 1)),
+				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1))));
+		}
+
+		[Test]
+		public void Basic3()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(_ => _.ParentID + 1).Where(_ => _ > 1)),
+				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1).Where(_ => _ > 1))));
+		}
+
+		[Test]
+		public void Basic4()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(_ => _.ParentID + 1).Where(_ => p.ParentID == _)),
+				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1).Where(_ => p.ParentID == _))));
+		}
+
+		[Test]
+		public void Basic5()
+		{
+			ForEachProvider(db => AreEqual(
+				   Child.SelectMany(t => t.Parent.GrandChildren),
+				db.Child.SelectMany(t => t.Parent.GrandChildren)));
+		}
+
+		[Test]
+		public void Basic6()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1)),
+				db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1))));
+		}
+
+		[Test]
+		public void Basic7()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children),
+				db.Parent.SelectMany(p => p.Children)));
+		}
+
+		[Test]
+		public void Basic8()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.SelectMany(t => t.GrandChildren)),
+				db.Parent.SelectMany(p => p.Children.SelectMany(t => t.GrandChildren))));
+		}
+
+		[Test]
+		public void Basic9()
+		{
+			ForEachProvider(db => AreEqual(
+				   Child
+					.GroupBy(o => o.ParentID2)
+					.SelectMany(g => g.Select(o => o.Parent)),
+				db.Child
+					.GroupBy(o => o.ParentID2)
+					.SelectMany(g => g.Select(o => o.Parent))));
+		}
+
+		[Test]
 		public void Test1()
 		{
 			TestJohn(db =>
@@ -185,6 +269,20 @@ namespace Data.Linq
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				   Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t),
 				db.Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t)));
+		}
+
+		[Test]
+		public void GroupBy1()
+		{
+			ForEachProvider(db => AreEqual(
+				   Child
+					.GroupBy(o => o.ParentID2)
+					.Where(g => g.Count() > 20)
+					.SelectMany(g => g.Select(o => o.Parent)),
+				db.Child
+					.GroupBy(o => o.ParentID2)
+					.Where(g => g.Count() > 20)
+					.SelectMany(g => g.Select(o => o.Parent))));
 		}
 
 		[Test]
@@ -461,6 +559,20 @@ namespace Data.Linq
 
 				q3.ToList();
 			});
+		}
+
+		[Test]
+		public void Test92()
+		{
+			ForEachProvider(db => AreEqual(
+				db.Parent
+					.SelectMany(c => c.Children, (c, p) => new { c, p, })
+					.Select(_ => new { _.c, p = new Child { ParentID = _.c.ParentID, ChildID = _.p.ChildID } })
+					.SelectMany(ch => ch.p.GrandChildren, (ch, t) => new { t, ch }),
+				db.Parent
+					.SelectMany(c => c.Children, (c, p) => new { c, p, })
+					.Select(_ => new { _.c, p = new Child { ParentID = _.c.ParentID, ChildID = _.p.ChildID } })
+					.SelectMany(ch => ch.p.GrandChildren, (ch, t) => new { t, ch })));
 		}
 
 		void Foo(Expression<Func<object[],object>> func)

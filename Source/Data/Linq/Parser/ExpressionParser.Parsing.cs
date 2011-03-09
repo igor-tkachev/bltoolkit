@@ -178,11 +178,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 		IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
-			SubQueryParsingCounter++;
-			var sequence = ParseSequence(new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery }));
-			SubQueryParsingCounter--;
-
-			return sequence;
+			return ParseSequence(
+				new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery })
+				{
+					IsSubQuery = true
+				});
 		}
 
 		ISqlExpression ParseSubQuery(IParseContext context, Expression expression)
@@ -2167,9 +2167,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (func != null)
 			{
-				SubQueryParsingCounter++;
 				cond = func();
-				SubQueryParsingCounter--;
 			}
 
 			return cond;

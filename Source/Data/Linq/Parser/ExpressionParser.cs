@@ -78,20 +78,17 @@ namespace BLToolkit.Data.Linq.Parser
 		public readonly Expression            Expression;
 		public readonly ParameterExpression[] CompiledParameters;
 
-		public int SubQueryParsingCounter;
-
 		private ISqlProvider _sqlProvider;
 		public  ISqlProvider  SqlProvider
 		{
 			get { return _sqlProvider ?? (_sqlProvider = DataContextInfo.CreateSqlProvider()); }
 		}
 
-		public static readonly ParameterExpression ContextParam     = Expression.Parameter(typeof(QueryContext),  "context");
-		public static readonly ParameterExpression DataContextParam = Expression.Parameter(typeof(IDataContext),  "dctx");
-		public static readonly ParameterExpression DataReaderParam  = Expression.Parameter(typeof(IDataReader),   "rd");
-		//public static readonly ParameterExpression MapSchemaParam   = Expression.Parameter(typeof(MappingSchema), "ms");
-		public static readonly ParameterExpression ParametersParam  = Expression.Parameter(typeof(object[]),      "ps");
-		public static readonly ParameterExpression ExpressionParam  = Expression.Parameter(typeof(Expression),    "expr");
+		public static readonly ParameterExpression ContextParam     = Expression.Parameter(typeof(QueryContext), "context");
+		public static readonly ParameterExpression DataContextParam = Expression.Parameter(typeof(IDataContext), "dctx");
+		public static readonly ParameterExpression DataReaderParam  = Expression.Parameter(typeof(IDataReader),  "rd");
+		public static readonly ParameterExpression ParametersParam  = Expression.Parameter(typeof(object[]),     "ps");
+		public static readonly ParameterExpression ExpressionParam  = Expression.Parameter(typeof(Expression),   "expr");
 
 		public MappingSchema MappingSchema
 		{

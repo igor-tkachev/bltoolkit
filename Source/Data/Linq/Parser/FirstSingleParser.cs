@@ -28,7 +28,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			var take = 0;
 
-			if (parser.SubQueryParsingCounter == 0 || parser.SqlProvider.IsSubQueryTakeSupported)
+			if (!parseInfo.IsSubQuery || parser.SqlProvider.IsSubQueryTakeSupported)
 				switch (methodCall.Method.Name)
 				{
 					case "First"           :
@@ -38,15 +38,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 					case "Single"          :
 					case "SingleOrDefault" :
-						if (parser.SubQueryParsingCounter == 0)
+						if (!parseInfo.IsSubQuery)
 							take = 2;
 							break;
 				}
 
 			if (take != 0)
 				parser.ParseTake(sequence, new SqlValue(take));
-
-			//sequence.BuildExpression(null, 0);
 
 			return new FirstSingleContext(parseInfo.Parent, sequence, methodCall.Method.Name);
 		}

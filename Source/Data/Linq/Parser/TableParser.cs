@@ -51,7 +51,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					// Looking for association.
 					//
-					if (parser.SubQueryParsingCounter > 0 && parseInfo.SqlQuery.From.Tables.Count == 0)
+					if (parseInfo.IsSubQuery && parseInfo.SqlQuery.From.Tables.Count == 0)
 					{
 						var ctx = parser.GetContext(parseInfo.Parent, expression);
 						if (ctx != null)
@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 				case ExpressionType.Parameter:
 					{
-						if (parser.SubQueryParsingCounter > 0 && parseInfo.SqlQuery.From.Tables.Count == 0)
+						if (parseInfo.IsSubQuery && parseInfo.SqlQuery.From.Tables.Count == 0)
 						{
 							var ctx = parser.GetContext(parseInfo.Parent, expression);
 							if (ctx != null)
@@ -526,7 +526,7 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				if (expression == null)
 				{
-					if (Parser.SubQueryParsingCounter > 0)
+					if (parseInfo.IsSubQuery)
 					{
 						var table = new TableContext(
 							Parser,
@@ -543,7 +543,7 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
-					if (Parser.SubQueryParsingCounter > 0)
+					if (parseInfo.IsSubQuery)
 					{
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
@@ -577,6 +577,7 @@ namespace BLToolkit.Data.Linq.Parser
 						else
 						{
 							var association = GetAssociation(levelExpression, level);
+							((AssociatedTableContext)association.Table).ParentAssociationJoin.IsWeak = false;
 							return association.Table.GetContext(expression, level + 1, parseInfo);
 						}
 					}

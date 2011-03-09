@@ -44,29 +44,33 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 			*/
 
-			var collectionSql = new SqlQuery();
+			var collectionInfo = new ParseInfo(context, expr, new SqlQuery()) { IsSubQuery = true };
+			var collection     = parser.ParseSequence(collectionInfo);
 
-			parser.SubQueryParsingCounter++;
-			var collection = parser.ParseSequence(new ParseInfo(context, expr, collectionSql));
-			parser.SubQueryParsingCounter--;
 
-			var leftJoin = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
-			var sql      = collection.SqlQuery;
+			context.Collection = collection;
+			return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+
+
+
+
+			var leftJoin       = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
+			var sql            = collection.SqlQuery;
 
 			if (!leftJoin && crossApply)
 			{
-				if (sql.GroupBy.IsEmpty &&
-					sql.Select.Columns.Count == 0 &&
+				if ( sql.GroupBy.IsEmpty &&
+					 sql.Select.Columns.Count == 0 &&
 					!sql.Select.HasModifier &&
-					sql.Where.IsEmpty &&
+					 sql.Where.IsEmpty &&
 					!sql.HasUnion &&
-					sql.From.Tables.Count == 1)
+					 sql.From.Tables.Count == 1)
 				{
 					crossApply = false;
 				}
 			}
 
-			if (collectionSql != sql)
+			if (collectionInfo.SqlQuery != sql)
 			{
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);

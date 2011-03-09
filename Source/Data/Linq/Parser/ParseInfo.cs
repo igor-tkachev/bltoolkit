@@ -27,5 +27,7 @@ namespace BLToolkit.Data.Linq.Parser
 		public IParseContext Parent     { get; set; }
 		public Expression    Expression { get; set; }
 		public SqlQuery      SqlQuery   { get; set; }
+
+		public bool          IsSubQuery { get; set; }
 	}
 }
