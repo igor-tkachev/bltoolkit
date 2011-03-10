@@ -12,6 +12,10 @@ namespace BLToolkit.Data.Sql
 		public static FJoin LeftJoin     (this ISqlTableSource table, string alias, params FJoin[] joins) { return SqlQuery.LeftJoin     (table, alias, joins); }
 		public static FJoin Join         (this ISqlTableSource table,               params FJoin[] joins) { return SqlQuery.Join         (table,        joins); }
 		public static FJoin Join         (this ISqlTableSource table, string alias, params FJoin[] joins) { return SqlQuery.Join         (table, alias, joins); }
+		public static FJoin CrossApply   (this ISqlTableSource table,               params FJoin[] joins) { return SqlQuery.CrossApply   (table,        joins); }
+		public static FJoin CrossApply   (this ISqlTableSource table, string alias, params FJoin[] joins) { return SqlQuery.CrossApply   (table, alias, joins); }
+		public static FJoin OuterApply   (this ISqlTableSource table,               params FJoin[] joins) { return SqlQuery.OuterApply   (table,        joins); }
+		public static FJoin OuterApply   (this ISqlTableSource table, string alias, params FJoin[] joins) { return SqlQuery.OuterApply   (table, alias, joins); }
 
 		public static FJoin WeakInnerJoin(this ISqlTableSource table,               params FJoin[] joins) { return SqlQuery.WeakInnerJoin(table,        joins); }
 		public static FJoin WeakInnerJoin(this ISqlTableSource table, string alias, params FJoin[] joins) { return SqlQuery.WeakInnerJoin(table, alias, joins); }

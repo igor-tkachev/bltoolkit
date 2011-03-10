@@ -90,6 +90,14 @@ namespace Data.Linq
 		public void Basic9()
 		{
 			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.SelectMany(t => p.GrandChildren)),
+				db.Parent.SelectMany(p => p.Children.SelectMany(t => p.GrandChildren))));
+		}
+
+		[Test]
+		public void Basic10()
+		{
+			ForEachProvider(db => AreEqual(
 				   Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent)),
 				db.Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent))));
 		}

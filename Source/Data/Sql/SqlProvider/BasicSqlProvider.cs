@@ -455,12 +455,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent++;
 			AppendIndent(sb);
 
-			switch (join.JoinType)
-			{
-				case SqlQuery.JoinType.Inner : sb.Append("INNER JOIN "); break;
-				case SqlQuery.JoinType.Left  : sb.Append("LEFT JOIN ");  break;
-				default: throw new InvalidOperationException();
-			}
+			var buildOn = BuildJoinType(sb, join);
 
 			if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
 				sb.Append('(');
@@ -475,17 +470,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
 					sb.Append(')');
 
-				sb.AppendLine();
-				AppendIndent(sb);
-				sb.Append("ON ");
+				if (buildOn)
+				{
+					sb.AppendLine();
+					AppendIndent(sb);
+					sb.Append("ON ");
+				}
 			}
-			else
+			else if (buildOn)
 				sb.Append(" ON ");
 
-			if (join.Condition.Conditions.Count != 0)
-				BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
-			else
-				sb.Append("1=1");
+			if (buildOn)
+			{
+				if (join.Condition.Conditions.Count != 0)
+					BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
+				else
+					sb.Append("1=1");
+			}
 
 			if (joinCounter > 0)
 			{
@@ -498,6 +499,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					BuildJoinTable(sb, jt, ref joinCounter);
 
 			_indent--;
+		}
+
+		protected virtual bool BuildJoinType(StringBuilder sb, SqlQuery.JoinedTable join)
+		{
+			switch (join.JoinType)
+			{
+				case SqlQuery.JoinType.Inner      : sb.Append("INNER JOIN ");  return true;
+				case SqlQuery.JoinType.Left       : sb.Append("LEFT JOIN ");   return true;
+				case SqlQuery.JoinType.CrossApply : sb.Append("CROSS APPLY "); return false;
+				case SqlQuery.JoinType.OuterApply : sb.Append("OUTER APPLY "); return false;
+				default: throw new InvalidOperationException();
+			}
 		}
 
 		#endregion

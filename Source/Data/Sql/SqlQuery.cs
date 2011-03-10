@@ -522,7 +522,9 @@ namespace BLToolkit.Data.Sql
 		{
 			Auto,
 			Inner,
-			Left
+			Left,
+			CrossApply,
+			OuterApply
 		}
 
 		public class JoinedTable : IQueryElement, ISqlExpressionWalkable, ICloneableElement
@@ -606,7 +608,15 @@ namespace BLToolkit.Data.Sql
 
 				dic.Add(this, this);
 
-				sb.Append(JoinType == JoinType.Inner ? "INNER" : "LEFT").Append(" JOIN ");
+				switch (JoinType)
+				{
+					case JoinType.Inner      : sb.Append("INNER JOIN ");  break;
+					case JoinType.Left       : sb.Append("LEFT JOIN ");   break;
+					case JoinType.CrossApply : sb.Append("CROSS APPLY "); break;
+					case JoinType.OuterApply : sb.Append("OUTER APPLY "); break;
+					default                  : sb.Append("SOME JOIN "); break;
+				}
+
 				((IQueryElement)Table).ToString(sb, dic);
 				sb.Append(" ON ");
 				((IQueryElement)Condition).ToString(sb, dic);
@@ -2472,19 +2482,23 @@ namespace BLToolkit.Data.Sql
 			#endregion
 		}
 
-		public static FJoin InnerJoin    (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  false, joins); }
-		public static FJoin InnerJoin    (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, false, joins); }
-		public static FJoin LeftJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  false, joins); }
-		public static FJoin LeftJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, false, joins); }
-		public static FJoin Join         (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  false, joins); }
-		public static FJoin Join         (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, false, joins); }
+		public static FJoin InnerJoin    (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, null,  false, joins); }
+		public static FJoin InnerJoin    (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, alias, false, joins); }
+		public static FJoin LeftJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,       table, null,  false, joins); }
+		public static FJoin LeftJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,       table, alias, false, joins); }
+		public static FJoin Join         (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, null,  false, joins); }
+		public static FJoin Join         (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, alias, false, joins); }
+		public static FJoin CrossApply   (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.CrossApply, table, null,  false, joins); }
+		public static FJoin CrossApply   (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.CrossApply, table, alias, false, joins); }
+		public static FJoin OuterApply   (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.OuterApply, table, null,  false, joins); }
+		public static FJoin OuterApply   (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.OuterApply, table, alias, false, joins); }
 
-		public static FJoin WeakInnerJoin(ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  true,  joins); }
-		public static FJoin WeakInnerJoin(ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, true,  joins); }
-		public static FJoin WeakLeftJoin (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  true,  joins); }
-		public static FJoin WeakLeftJoin (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, true,  joins); }
-		public static FJoin WeakJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  true,  joins); }
-		public static FJoin WeakJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, true,  joins); }
+		public static FJoin WeakInnerJoin(ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, null,  true,  joins); }
+		public static FJoin WeakInnerJoin(ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, alias, true,  joins); }
+		public static FJoin WeakLeftJoin (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,       table, null,  true,  joins); }
+		public static FJoin WeakLeftJoin (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,       table, alias, true,  joins); }
+		public static FJoin WeakJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, null,  true,  joins); }
+		public static FJoin WeakJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, alias, true,  joins); }
 
 		private FromClause _from;
 		public  FromClause  From
@@ -3256,6 +3270,7 @@ namespace BLToolkit.Data.Sql
 			ResolveWeakJoins();
 			OptimizeColumns();
 			OptimizeSubQueries();
+			OptimizeApplies();
 
 			new QueryVisitor().Visit(this, e =>
 			{
@@ -3580,6 +3595,47 @@ namespace BLToolkit.Data.Sql
 			return source;
 		}
 
+		void OptimizeApply(TableSource tableSource, JoinedTable joinTable)
+		{
+			var joinSource = joinTable.Table;
+
+			foreach (var join in joinSource.Joins)
+				if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
+					OptimizeApply(joinSource, join);
+
+			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
+			{
+				var sql = (SqlQuery)joinSource.Source;
+
+				var searchCondition = new List<Condition>(sql.Where.SearchCondition.Conditions);
+
+				sql.Where.SearchCondition.Conditions.Clear();
+
+				if (!ContainsTable(tableSource, sql))
+				{
+					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
+					joinTable.Condition.Conditions.AddRange(searchCondition);
+				}
+				else
+				{
+					sql.Where.SearchCondition.Conditions.AddRange(searchCondition);
+				}
+			}
+			else
+			{
+				if (!ContainsTable(tableSource, joinSource.Source))
+					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
+			}
+		}
+
+		static bool ContainsTable(ISqlTableSource table, IQueryElement sql)
+		{
+			return null != new QueryVisitor().Find(sql, e =>
+				e == table ||
+				e.ElementType == QueryElementType.SqlField && table == ((SqlField)e).Table ||
+				e.ElementType == QueryElementType.Column   && table == ((SqlQuery.Column)e).Parent);
+		}
+
 		static void ConcatSearchCondition(WhereClause where1, WhereClause where2)
 		{
 			if (where1.IsEmpty)
@@ -3628,6 +3684,14 @@ namespace BLToolkit.Data.Sql
 					From.Tables[i] = table;
 				}
 			}
+		}
+
+		void OptimizeApplies()
+		{
+			foreach (var table in From.Tables)
+				foreach (var join in table.Joins)
+					if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
+						OptimizeApply(table, join);
 		}
 
 		void OptimizeColumns()
