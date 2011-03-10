@@ -211,7 +211,7 @@
     <Compile Include="Data\Linq\Parser\JoinParser.cs" />
     <Compile Include="Data\Linq\Parser\MethodCallParser.cs" />
     <Compile Include="Data\Linq\Parser\OrderByParser.cs" />
-    <Compile Include="Data\Linq\Parser\PathThroughContext.cs" />
+    <Compile Include="Data\Linq\Parser\ExpressionContext.cs" />
     <Compile Include="Data\Linq\Parser\RequestFor.cs" />
     <Compile Include="Data\Linq\Parser\ScalarSelectParser.cs" />
     <Compile Include="Data\Linq\Parser\SelectContext.cs" />

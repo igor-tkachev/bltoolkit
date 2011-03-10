@@ -22,65 +22,39 @@ namespace BLToolkit.Data.Linq.Parser
 			var collectionSelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var resultSelector     = (LambdaExpression)methodCall.Arguments[2].Unwrap();
 
-			//if (collectionSelector.Parameters[0] == collectionSelector.Body.Unwrap())
-			//{
-			//	return resultSelector == null ? sequence : new SelectContext(resultSelector, sequence, sequence);
-			//}
+			var context        = new SelectManyContext(parseInfo.Parent, collectionSelector, sequence);
+			var expr           = collectionSelector.Body.Unwrap();
 
-			var context    = new SelectManyContext(parseInfo.Parent, collectionSelector, sequence);
-			var expr       = collectionSelector.Body.Unwrap();
-			var crossApply = null != expr.Find(e => e == collectionSelector.Parameters[0]);
-
-			/*
-			if (expr.NodeType == ExpressionType.Call)
-			{
-				var call = (MethodCallExpression)collectionSelector.Body;
-
-				if (call.IsQueryable("DefaultIfEmpty"))
-				{
-					leftJoin = true;
-					expr     = call.Arguments[0];
-				}
-			}
-			*/
-
-			var collectionInfo = new ParseInfo(context, expr, new SqlQuery()) { IsSubQuery = true };
+			var collectionInfo = new ParseInfo(context, expr, new SqlQuery());
 			var collection     = parser.ParseSequence(collectionInfo);
-
-
-			context.Collection = collection;
-			return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
-
-
-
-
 			var leftJoin       = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
 			var sql            = collection.SqlQuery;
 
+			var crossApply = collectionInfo.IsAssociationParsed; //null != expr.Find(e => e == collectionSelector.Parameters[0]);
+
 			if (!leftJoin && crossApply)
 			{
-				if ( sql.GroupBy.IsEmpty &&
-					 sql.Select.Columns.Count == 0 &&
-					!sql.Select.HasModifier &&
-					 sql.Where.IsEmpty &&
-					!sql.HasUnion &&
+				if ( sql != collectionInfo.SqlQuery ||
+					 sql.GroupBy.IsEmpty            &&
+					 sql.Select.Columns.Count == 0  &&
+					!sql.Select.HasModifier         &&
+					 sql.Where.IsEmpty              &&
+					!sql.HasUnion                   &&
 					 sql.From.Tables.Count == 1)
 				{
 					crossApply = false;
 				}
 			}
 
-			if (collectionInfo.SqlQuery != sql)
-			{
-				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
-			}
+			//if (collectionInfo.IsAssociationParsed && collectionInfo.SqlQuery != sql)
+			//{
+			//	context.Collection = new SubQueryContext(collection, sql/*sequence.SqlQuery*/, false);
+			//	return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+			//}
 
 			if (!leftJoin && !crossApply)
 			{
 				sequence.SqlQuery.From.Table(sql);
-
-				//sql.ParentSql = sequence.SqlQuery;
 
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
 				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
@@ -106,7 +80,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					sql.Where.SearchCondition.Conditions.Clear();
 
-					if (collection is TableParser.TableContext)
+					if (collection is TableParser.TableContext && collectionInfo.IsAssociationParsed)
 					{
 						var collectionParent = collection.Parent as TableParser.TableContext;
 

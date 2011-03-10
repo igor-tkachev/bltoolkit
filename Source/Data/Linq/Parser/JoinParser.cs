@@ -37,9 +37,9 @@ namespace BLToolkit.Data.Linq.Parser
 		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
 		{
 			var isGroup      = methodCall.Method.Name == "GroupJoin";
-			var outerContext = parser.ParseSequence(new ParseInfo(parseInfo.Parent, methodCall.Arguments[0], parseInfo.SqlQuery));
-			var innerContext = parser.ParseSequence(new ParseInfo(parseInfo.Parent, methodCall.Arguments[1], new SqlQuery()));
-			var countContext = parser.ParseSequence(new ParseInfo(parseInfo.Parent, methodCall.Arguments[1], new SqlQuery()));
+			var outerContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0], parseInfo.SqlQuery));
+			var innerContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[1], new SqlQuery()));
+			var countContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[1], new SqlQuery()));
 
 			var context  = new SubQueryContext(outerContext);
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext) : new SubQueryContext(innerContext);;
@@ -65,9 +65,9 @@ namespace BLToolkit.Data.Linq.Parser
 			var innerParent = innerContext.Parent;
 			var countParent = countContext.Parent;
 
-			var outerKeyContext = new PathThroughContext(parseInfo.Parent, context,      outerKeyLambda);
-			var innerKeyContext = new PathThroughContext(parseInfo.Parent, innerContext, innerKeyLambda);
-			var countKeyContext = new PathThroughContext(parseInfo.Parent, countContext, innerKeyLambda);
+			var outerKeyContext = new ExpressionContext(parseInfo.Parent, context,      outerKeyLambda);
+			var innerKeyContext = new ExpressionContext(parseInfo.Parent, innerContext, innerKeyLambda);
+			var countKeyContext = new ExpressionContext(parseInfo.Parent, countContext, innerKeyLambda);
 
 			// Process counter.
 			//
@@ -129,9 +129,9 @@ namespace BLToolkit.Data.Linq.Parser
 		static void ParseJoin(
 			ExpressionParser         parser,
 			SqlQuery.FromClause.Join join,
-			PathThroughContext outerKeyContext, Expression outerKeySelector,
-			PathThroughContext innerKeyContext, Expression innerKeySelector,
-			PathThroughContext countKeyContext, SqlQuery countSql)
+			ExpressionContext outerKeyContext, Expression outerKeySelector,
+			ExpressionContext innerKeyContext, Expression innerKeySelector,
+			ExpressionContext countKeyContext, SqlQuery countSql)
 		{
 			var predicate = parser.ParseObjectComparison(
 				ExpressionType.Equal,

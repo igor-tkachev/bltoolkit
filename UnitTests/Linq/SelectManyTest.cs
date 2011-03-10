@@ -57,7 +57,7 @@ namespace Data.Linq
 		[Test]
 		public void Basic5()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				   Child.SelectMany(t => t.Parent.GrandChildren),
 				db.Child.SelectMany(t => t.Parent.GrandChildren)));
 		}
@@ -90,12 +90,8 @@ namespace Data.Linq
 		public void Basic9()
 		{
 			ForEachProvider(db => AreEqual(
-				   Child
-					.GroupBy(o => o.ParentID2)
-					.SelectMany(g => g.Select(o => o.Parent)),
-				db.Child
-					.GroupBy(o => o.ParentID2)
-					.SelectMany(g => g.Select(o => o.Parent))));
+				   Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent)),
+				db.Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent))));
 		}
 
 		[Test]

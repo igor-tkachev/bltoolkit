@@ -6,14 +6,14 @@ namespace BLToolkit.Data.Linq.Parser
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	public class PathThroughContext : SequenceContextBase
+	public class ExpressionContext : SequenceContextBase
 	{
-		public PathThroughContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
+		public ExpressionContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
 			: base(parent, sequence, lambda)
 		{
 		}
 
-		public PathThroughContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
+		public ExpressionContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
 			: base(parent, sequence, lambda)
 		{
 			SqlQuery = sqlQuery;
@@ -59,8 +59,6 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			throw new InvalidOperationException();
-
-			//return Array<ISqlExpression>.Empty;
 		}
 
 		public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
@@ -92,13 +90,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 		{
-			if (expression != null)
-			{
-				//var levelExpression = expression.GetLevelExpression(level);
-
-				if (expression == Lambda.Parameters[0])
-					return Sequence;
-			}
+			if (expression == Lambda.Parameters[0])
+				return Sequence;
 
 			return Sequence.GetContext(expression, level + 1, parseInfo);
 		}

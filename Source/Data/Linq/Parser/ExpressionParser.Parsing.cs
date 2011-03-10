@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var makeHaving = false;
 			var prevParent = sequence.Parent;
 
-			var  ctx  = new PathThroughContext(parent, sequence, condition);
+			var  ctx  = new ExpressionContext(parent, sequence, condition);
 			var  expr = ConvertExpression(condition.Body.Unwrap());
 
 			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
@@ -32,7 +32,7 @@ namespace BLToolkit.Data.Linq.Parser
 				sequence = new SubQueryContext(sequence);
 				prevParent = sequence.Parent;
 
-				ctx = new PathThroughContext(parent, sequence, condition);
+				ctx = new ExpressionContext(parent, sequence, condition);
 			}
 
 			ParseSearchCondition(
@@ -178,11 +178,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
-			return ParseSequence(
-				new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery })
-				{
-					IsSubQuery = true
-				});
+			return ParseSequence(new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery }));
 		}
 
 		ISqlExpression ParseSubQuery(IParseContext context, Expression expression)

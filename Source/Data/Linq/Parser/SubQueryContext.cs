@@ -13,6 +13,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		public SubQueryContext(IParseContext subQuery, SqlQuery sqlQuery, bool addToSql)
 		{
+			if (sqlQuery == subQuery.SqlQuery)
+				throw new ArgumentException("Wrong subQuery argument.", "subQuery");
+
 			SubQuery = subQuery;
 			SubQuery.Parent = this;
 

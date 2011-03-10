@@ -358,7 +358,7 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var l   = (LambdaExpression)ex;
 							var p   = _element.Parent;
-							var ctx = new PathThroughContext(Parent, _element, l);
+							var ctx = new ExpressionContext(Parent, _element, l);
 
 							_element.Parent = p;
 

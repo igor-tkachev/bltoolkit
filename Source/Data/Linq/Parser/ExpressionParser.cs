@@ -101,7 +101,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		internal Query<T> Parse<T>()
 		{
-			var sequence = ParseSequence(new ParseInfo(Expression, new SqlQuery()));
+			var sequence = ParseSequence(new ParseInfo((IParseContext)null, Expression, new SqlQuery()));
 
 			if (_reorder)
 				lock (_sync)
