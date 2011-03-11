@@ -9,6 +9,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public abstract class MsSqlSqlProvider : BasicSqlProvider
 	{
+		public override bool IsApplyJoinSupported { get { return true; } }
+
 		protected override string FirstFormat
 		{
 			get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" : null; }

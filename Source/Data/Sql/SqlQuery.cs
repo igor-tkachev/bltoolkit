@@ -2902,7 +2902,7 @@ namespace BLToolkit.Data.Sql
 
 		#region FinalizeAndValidate
 
-		public void FinalizeAndValidate()
+		public void FinalizeAndValidate(bool isApplySupported)
 		{
 #if DEBUG
 			var sqlText = SqlText;
@@ -2924,7 +2924,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal();
+			FinalizeAndValidateInternal(isApplySupported);
 			ResolveFields();
 			SetAliases();
 
@@ -3242,7 +3242,7 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal()
+		void FinalizeAndValidateInternal(bool isApplySupported)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
@@ -3260,7 +3260,7 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal();
+					sql.FinalizeAndValidateInternal(isApplySupported);
 
 					if (sql.ParameterDependent)
 						ParameterDependent = true;
@@ -3269,7 +3269,8 @@ namespace BLToolkit.Data.Sql
 
 			ResolveWeakJoins();
 			OptimizeColumns();
-			OptimizeSubQueries();
+			OptimizeApplies();
+			OptimizeSubQueries(isApplySupported);
 			OptimizeApplies();
 
 			new QueryVisitor().Visit(this, e =>
@@ -3493,12 +3494,15 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere)
+		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere, bool allColumns, bool isApplySupported)
 		{
-			for (var i = 0; i < source.Joins.Count; i++)
+			foreach (var jt in source.Joins)
 			{
-				var jt    = source.Joins[i];
-				var table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
+				var table = OptimizeSubQuery(
+					jt.Table,
+					jt.JoinType == JoinType.Inner || jt.JoinType == JoinType.CrossApply,
+					jt.JoinType == JoinType.CrossApply,
+					isApplySupported);
 
 				if (table != jt.Table)
 				{
@@ -3512,87 +3516,75 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			if (source.Source is SqlQuery)
+			return source.Source is SqlQuery ? RemoveSubQuery(source, optimizeWhere, allColumns && !isApplySupported) : source;
+		}
+
+		TableSource RemoveSubQuery(TableSource childSource, bool concatWhere, bool allColumns)
+		{
+			var query = (SqlQuery)childSource. Source;
+
+			var isQueryOK = query.From.Tables.Count == 1;
+
+			isQueryOK = !isQueryOK || !concatWhere && (!query.Where.IsEmpty || !query.Having.IsEmpty);
+			isQueryOK = !isQueryOK || !query.HasUnion && query.GroupBy.IsEmpty && query.Select.HasModifier;
+
+			if (!isQueryOK)
+				return childSource;
+
+			var isColumnsOK = allColumns || !query.Select.Columns.Exists(c => !(c.Expression is SqlField || c.Expression is Column));
+
+			if (!isColumnsOK)
+				return childSource;
+
+			var map = new Dictionary<ISqlExpression,ISqlExpression>(query.Select.Columns.Count);
+
+			foreach (var c in query.Select.Columns)
+				map.Add(c, c.Expression);
+
+			var top = this;
+
+			while (top.ParentSql != null)
+				top = top.ParentSql;
+
+			((ISqlExpressionWalkable)top).Walk(false, expr =>
 			{
-				var query = (SqlQuery)source.Source;
+				ISqlExpression fld;
+				return map.TryGetValue(expr, out fld) ? fld : expr;
+			});
 
-				var isSourceOK =
-					 query.From.Tables.Count == 1 &&
-					//!query.Select.IsDistinct      &&
-					//query.From.Tables[0].Joins.Count == 0 &&
-					 (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
-					!query.HasUnion &&
-					 query.GroupBy.IsEmpty &&
-					!query.Select.HasModifier;
-
-				var isSourceColumnOK = !query.Select.Columns.Exists(c => !(c.Expression is SqlField));
-
-				var isThisOK =
-					 this.From.Tables.Count == 1 &&
-					//!this.Select.IsDistinct      &&
-					 this.From.Tables[0].Joins.Count == 0 &&
-					 this.Where.IsEmpty      &&
-					 this.Having.IsEmpty     &&
-					!this.HasUnion           &&
-					 this.GroupBy.IsEmpty    &&
-					!this.Select.HasModifier &&
-					!this.Select.Columns.Exists(c => !(c.Expression is Column));
-
-				if (isSourceOK && (isSourceColumnOK || isThisOK))
+			new QueryVisitor().Visit(top, expr =>
+			{
+				if (expr.ElementType == QueryElementType.InListPredicate)
 				{
-					var map = new Dictionary<ISqlExpression,ISqlExpression>(query.Select.Columns.Count);
+					var p = (Predicate.InList)expr;
 
-					foreach (var c in query.Select.Columns)
-						map.Add(c, c.Expression);
-
-					var top = this;
-
-					while (top.ParentSql != null)
-						top = top.ParentSql;
-
-					((ISqlExpressionWalkable)top).Walk(false, expr =>
-					{
-						ISqlExpression fld;
-						return map.TryGetValue(expr, out fld) ? fld : expr;
-					});
-
-					new QueryVisitor().Visit(top, expr =>
-					{
-						if (expr.ElementType == QueryElementType.InListPredicate)
-						{
-							var p = (Predicate.InList)expr;
-
-							if (p.Expr1 == query)
-								p.Expr1 = query.From.Tables[0];
-						}
-					});
-
-					query.From.Tables[0].Joins.AddRange(source.Joins);
-
-					if (query.From.Tables[0].Alias == null)
-						query.From.Tables[0].Alias = source.Alias;
-
-					if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
-					if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
-
-					((ISqlExpressionWalkable)top).Walk(false, expr =>
-					{
-						if (expr is SqlQuery)
-						{
-							var sql = (SqlQuery)expr;
-
-							if (sql.ParentSql == query)
-								sql.ParentSql = query.ParentSql ?? this;
-						}
-
-						return expr;
-					});
-
-					return query.From.Tables[0];
+					if (p.Expr1 == query)
+						p.Expr1 = query.From.Tables[0];
 				}
-			}
+			});
 
-			return source;
+			query.From.Tables[0].Joins.AddRange(childSource.Joins);
+
+			if (query.From.Tables[0].Alias == null)
+				query.From.Tables[0].Alias = childSource.Alias;
+
+			if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
+			if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
+
+			((ISqlExpressionWalkable)top).Walk(false, expr =>
+			{
+				if (expr is SqlQuery)
+				{
+					var sql = (SqlQuery)expr;
+
+					if (sql.ParentSql == query)
+						sql.ParentSql = query.ParentSql ?? this;
+				}
+
+				return expr;
+			});
+
+			return query.From.Tables[0];
 		}
 
 		void OptimizeApply(TableSource tableSource, JoinedTable joinTable)
@@ -3611,7 +3603,7 @@ namespace BLToolkit.Data.Sql
 
 				sql.Where.SearchCondition.Conditions.Clear();
 
-				if (!ContainsTable(tableSource, sql))
+				if (!ContainsTable(tableSource.Source, sql))
 				{
 					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
 					joinTable.Condition.Conditions.AddRange(searchCondition);
@@ -3623,7 +3615,7 @@ namespace BLToolkit.Data.Sql
 			}
 			else
 			{
-				if (!ContainsTable(tableSource, joinSource.Source))
+				if (!ContainsTable(tableSource.Source, joinSource.Source))
 					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
 			}
 		}
@@ -3633,7 +3625,7 @@ namespace BLToolkit.Data.Sql
 			return null != new QueryVisitor().Find(sql, e =>
 				e == table ||
 				e.ElementType == QueryElementType.SqlField && table == ((SqlField)e).Table ||
-				e.ElementType == QueryElementType.Column   && table == ((SqlQuery.Column)e).Parent);
+				e.ElementType == QueryElementType.Column   && table == ((Column)  e).Parent);
 		}
 
 		static void ConcatSearchCondition(WhereClause where1, WhereClause where2)
@@ -3667,11 +3659,11 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void OptimizeSubQueries()
+		void OptimizeSubQueries(bool isApplySupported)
 		{
 			for (var i = 0; i < From.Tables.Count; i++)
 			{
-				var table = OptimizeSubQuery(From.Tables[i], true);
+				var table = OptimizeSubQuery(From.Tables[i], true, false, isApplySupported);
 
 				if (table != From.Tables[i])
 				{

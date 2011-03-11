@@ -71,6 +71,23 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Basic61()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1 || _ > 2)).Where(_ => _ > 0 || _ > 3),
+				db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1 || _ > 2)).Where(_ => _ > 0 || _ > 3)));
+		}
+
+		[Test]
+		public void Basic62()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + p.ParentID).Where(_ => _ > 1)),
+					db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + p.ParentID).Where(_ => _ > 1))));
+		}
+
+		[Test]
 		public void Basic7()
 		{
 			ForEachProvider(db => AreEqual(
@@ -391,15 +408,15 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
 				(from p in Parent
-				from g in p.GrandChildren
-				from t in Person
-				let c = g.Child
-				select c).Count(),
+				 from g in p.GrandChildren
+				 from t in Person
+				 let c = g.Child
+				 select c).Count(),
 				(from p in db.Parent
-				from g in p.GrandChildren
-				from t in db.Person
-				let c = g.Child
-				select c).Count()));
+				 from g in p.GrandChildren
+				 from t in db.Person
+				 let c = g.Child
+				 select c).Count()));
 		}
 
 		[Test]
@@ -565,7 +582,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		/////[Test]
 		public void Test92()
 		{
 			ForEachProvider(db => AreEqual(

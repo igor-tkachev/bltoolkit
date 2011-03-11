@@ -62,6 +62,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsNestedJoinSupported           { get { return true;  } }
 		public virtual bool IsNestedJoinParenthesisRequired { get { return false; } }
 		public virtual bool IsIdentityParameterRequired     { get { return false; } }
+		public virtual bool IsApplyJoinSupported            { get { return false; } }
 
 		#endregion
 
@@ -2830,7 +2831,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			sqlQuery.FinalizeAndValidate();
+			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
 			return sqlQuery;
 		}
 
