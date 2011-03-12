@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -42,7 +41,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var countContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[1], new SqlQuery()));
 
 			var context  = new SubQueryContext(outerContext);
-			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext) : new SubQueryContext(innerContext);;
+			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext, methodCall) : new SubQueryContext(innerContext);
 			countContext = new SubQueryContext(countContext);
 
 			var join = innerContext.SqlQuery.InnerJoin();
@@ -118,9 +117,11 @@ namespace BLToolkit.Data.Linq.Parser
 				counterSql.ParentSql = sql;
 				counterSql.Select.Columns.Clear();
 
-				((GroupJoinSubQueryContext)innerContext).Join       = join.JoinedTable;
-				((GroupJoinSubQueryContext)innerContext).CounterSql = counterSql;
-				return new GroupJoinContext(parseInfo.Parent, selector, context, innerContext);
+				var inner = (GroupJoinSubQueryContext)innerContext;
+
+				inner.Join       = join.JoinedTable;
+				inner.CounterSql = counterSql;
+				return new GroupJoinContext(parseInfo.Parent, selector, context, inner);
 			}
 
 			return new JoinContext(parseInfo.Parent, selector, context, innerContext);
@@ -158,111 +159,52 @@ namespace BLToolkit.Data.Linq.Parser
 					.Expr(parser.ParseExpression(countKeyContext, innerKeySelector));
 		}
 
-		internal class JoinContext : SelectContext, IParseContext
+		internal class JoinContext : SelectContext
 		{
 			public JoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext)
 				: base(parent, lambda, outerContext, innerContext)
 			{
 			}
-
-			/*
-			Expression _lastExpression;
-
-			SqlInfo[] ConvertToSqlEx(Expression expression, int level, ConvertFlags flags)
-			{
-				if (_lastExpression != null)
-				{
-					if (_lastExpression != expression)
-						throw new NotSupportedException();
-
-					return base.ConvertToSql(expression, level, flags);
-				}
-
-				_lastExpression = expression;
-
-				var info = base.ConvertToIndex(expression, level, flags)
-					.Select(idx => new SqlInfo
-					{
-						Query = SqlQuery, Sql = idx.Query.Select.Columns[idx.Index], Member = idx.Member
-					})
-					.ToArray();
-
-				_lastExpression = null;
-
-				return info;
-			}
-
-			SqlInfo[] IParseContext.ConvertToSql(Expression expression, int level, ConvertFlags flags)
-			{
-				return ConvertToSqlEx(expression, level, flags);
-			}
-
-			SqlInfo[] IParseContext.ConvertToIndex(Expression expression, int level, ConvertFlags flags)
-			{
-				var baseInfo = base.ConvertToIndex(expression, level, flags);
-				var info     = new SqlInfo[baseInfo.Length];
-
-				for (var i = 0; i < baseInfo.Length; i++)
-				{
-					var bi = baseInfo[i];
-
-					if (bi.Query == SqlQuery)
-						info[i] = bi;
-					else
-					{
-						var sql = bi.Query.Select.Columns[bi.Index];
-
-						info[i] = new SqlInfo
-						{
-							Query  = SqlQuery,
-							Index  = GetIndex(sql),
-							Sql    = sql,
-							Member = bi.Member
-						};
-					}
-				}
-
-				return info;
-			}
-
-			readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
-
-			int GetIndex(ISqlExpression sql)
-			{
-				int idx;
-
-				if (!_indexes.TryGetValue(sql, out idx))
-				{
-					idx = SqlQuery.Select.Add(sql);
-					_indexes.Add(sql, idx);
-				}
-
-				return idx;
-			}
-
-			public override int ConvertToParentIndex(int index, IParseContext context)
-			{
-				var idx = GetIndex(context.SqlQuery.Select.Columns[index]);
-				return Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);
-			}
-			*/
 		}
 
 		internal class GroupJoinContext : JoinContext
 		{
-			public GroupJoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext)
+			public GroupJoinContext(
+				IParseContext            parent,
+				LambdaExpression         lambda,
+				IParseContext            outerContext,
+				GroupJoinSubQueryContext innerContext)
 				: base(parent, lambda, outerContext, innerContext)
 			{
+				innerContext.GroupJoin = this;
 			}
 		}
 
 		internal class GroupJoinSubQueryContext : SubQueryContext
 		{
+			readonly MethodCallExpression _methodCall;
+
 			public SqlQuery.JoinedTable Join;
 			public SqlQuery             CounterSql;
+			public GroupJoinContext     GroupJoin;
 
-			public GroupJoinSubQueryContext(IParseContext subQuery) : base(subQuery)
+			public GroupJoinSubQueryContext(IParseContext subQuery, MethodCallExpression methodCall)
+				: base(subQuery)
 			{
+				_methodCall = methodCall;
+			}
+
+			Expression BuildJoin()
+			{
+				throw new NotImplementedException();
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				if (expression == null)
+					return BuildJoin();
+
+				return base.BuildExpression(expression, level);
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)

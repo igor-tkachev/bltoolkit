@@ -350,8 +350,8 @@ namespace Data.Linq
 
 		#region Parent/Child Model
 
-		private   List<Parent> _parent;
-		protected List<Parent>  Parent
+		private          List<Parent> _parent;
+		protected IEnumerable<Parent>  Parent
 		{
 			get
 			{
@@ -369,7 +369,8 @@ namespace Data.Linq
 						}
 					}
 
-				return _parent;
+				foreach (var parent in _parent)
+					yield return parent;
 			}
 		}
 
@@ -455,8 +456,8 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<Child> _child;
-		protected List<Child>  Child
+		private          List<Child> _child;
+		protected IEnumerable<Child>  Child
 		{
 			get
 			{
@@ -475,12 +476,13 @@ namespace Data.Linq
 						}
 					}
 
-				return _child;
+				foreach (var child in _child)
+					yield return child;
 			}
 		}
 
-		private   List<GrandChild> _grandChild;
-		protected List<GrandChild>  GrandChild
+		private          List<GrandChild> _grandChild;
+		protected IEnumerable<GrandChild>  GrandChild
 		{
 			get
 			{
@@ -494,7 +496,8 @@ namespace Data.Linq
 							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
 					}
 
-				return _grandChild;
+				foreach (var grandChild in _grandChild)
+					yield return grandChild;
 			}
 		}
 
@@ -697,8 +700,8 @@ namespace Data.Linq
 
 		protected void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)
 		{
-			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
+			var expectedList = expected.ToList();
 
 			Assert.AreNotEqual(0, expectedList.Count);
 			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");

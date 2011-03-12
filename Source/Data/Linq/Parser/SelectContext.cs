@@ -448,7 +448,9 @@ namespace BLToolkit.Data.Linq.Parser
 					newInfo[i] = ni;
 				}
 
-				_expressionIndex.Add(key, info);
+				_expressionIndex.Add(key, newInfo);
+
+				return newInfo;
 			}
 
 			return info;

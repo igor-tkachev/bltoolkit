@@ -22,6 +22,11 @@ namespace BLToolkit.Data.Linq.Parser
 			var collectionSelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var resultSelector     = (LambdaExpression)methodCall.Arguments[2].Unwrap();
 
+			if (!sequence.SqlQuery.GroupBy.IsEmpty)
+			{
+				sequence = new SubQueryContext(sequence);
+			}
+
 			var context        = new SelectManyContext(parseInfo.Parent, collectionSelector, sequence);
 			var expr           = collectionSelector.Body.Unwrap();
 
@@ -31,26 +36,38 @@ namespace BLToolkit.Data.Linq.Parser
 			var sql            = collection.SqlQuery;
 
 			var sequenceTable  = sequence.SqlQuery.From.Tables[0].Source;
+			var newQuery       = null != new QueryVisitor().Find(sql, e => e == collectionInfo.SqlQuery);
 			var crossApply     = null != new QueryVisitor().Find(sql, e =>
 				e == sequenceTable ||
 				e.ElementType == QueryElementType.SqlField && sequenceTable == ((SqlField)e).Table ||
 				e.ElementType == QueryElementType.Column   && sequenceTable == ((SqlQuery.Column)e).Parent);
 
+			if (!newQuery)
+			{
+				context.Collection = collection;
+				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+			}
+
 			if (!crossApply)
 			{
 				if (!leftJoin)
 				{
-					sequence.SqlQuery.From.Table(sql);
+					//sequence.SqlQuery.From.Table(sql);
 
-					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
+					context.Collection = newQuery ? new SubQueryContext(collection, sequence.SqlQuery, true) : collection;
 					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 				}
 				else
 				{
-					var join = SqlQuery.OuterApply(sql);
-					sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+					if (newQuery)
+					{
+						var join = SqlQuery.OuterApply(sql);
+						sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+						context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
+					}
+					else
+						context.Collection = collection;
 
-					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 				}
 			}

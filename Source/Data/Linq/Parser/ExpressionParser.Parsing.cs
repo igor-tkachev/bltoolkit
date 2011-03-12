@@ -1682,7 +1682,10 @@ namespace BLToolkit.Data.Linq.Parser
 				ISqlExpression rcol = null;
 
 				if (sr)
-					rcol = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lcol.Member), 0, ConvertFlags.Field).Single().Sql;
+				{
+					var info = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lcol.Member), 0, ConvertFlags.Field).Single();
+					rcol = info.Sql;
+				}
 
 				var rex =
 					isNull ?

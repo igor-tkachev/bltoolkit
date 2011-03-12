@@ -51,10 +51,9 @@ namespace BLToolkit.Data.Linq.Parser
 			SubQuery.BuildQuery(query, queryParameter);
 		}
 
-		public Expression BuildExpression(Expression expression, int level)
+		public virtual Expression BuildExpression(Expression expression, int level)
 		{
 			return SubQuery.BuildExpression(expression, level);
-			//throw new NotImplementedException();
 		}
 
 		public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)

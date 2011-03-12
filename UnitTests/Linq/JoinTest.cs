@@ -60,8 +60,8 @@ namespace Data.Linq
 		{
 			TestJohn(db =>
 				from p1 in db.Person
-					join p2 in db.Person on new { p1.ID, p1.FirstName } equals new { p2.ID, p2.FirstName }
-						join p3 in db.Person on new { p1.ID, p2.LastName } equals new { p3.ID, p3.LastName }
+				join p2 in db.Person on new { p1.ID, p1.FirstName } equals new { p2.ID, p2.FirstName }
+				join p3 in db.Person on new { p1.ID, p2.LastName  } equals new { p3.ID, p3.LastName  }
 				where p1.ID == 1
 				select new Person { ID = p1.ID, FirstName = p2.FirstName, LastName = p3.LastName });
 		}
@@ -143,7 +143,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin1()
+		public void GroupJoin1()
 		{
 			ForEachProvider(db => AreEqual(
 				from p in Parent
@@ -157,7 +157,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin2()
+		public void GroupJoin2()
 		{
 			ForEachProvider(db =>
 			{
@@ -181,7 +181,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin3()
+		public void GroupJoin3()
 		{
 			ForEachProvider(db =>
 			{
@@ -203,7 +203,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin4()
+		public void GroupJoin4()
 		{
 			ForEachProvider(db =>
 			{
@@ -223,7 +223,21 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin5()
+		public void GroupJoin5()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.First(),
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.First()));
+		}
+
+		[Test]
+		public void LeftJoin1()
 		{
 			var expected =
 				from p in Parent
@@ -241,7 +255,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin6()
+		public void LeftJoin2()
 		{
 			var expected =
 				from p in Parent
@@ -257,7 +271,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LeftJoin7()
+		public void LeftJoin3()
 		{
 			ForEachProvider(db => AreEqual(
 				from c in    Child select c.Parent,
@@ -291,7 +305,7 @@ namespace Data.Linq
 		[Test]
 		public void ReferenceJoin1()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				from c in    Child join g in    GrandChild on c equals g.Child select new { c.ParentID, g.GrandChildID },
 				from c in db.Child join g in db.GrandChild on c equals g.Child select new { c.ParentID, g.GrandChildID }));
 		}
@@ -299,7 +313,7 @@ namespace Data.Linq
 		[Test]
 		public void ReferenceJoin2()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				from g in    GrandChild
 					join c in    Child on g.Child equals c
 				select new { c.ParentID, g.GrandChildID },

@@ -23,7 +23,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Basic11()
+		public void Basic1_1()
 		{
 			ForEachProvider(db => AreEqual(
 				   Parent.SelectMany(p =>    Child.SelectMany(t =>    GrandChild)),
@@ -81,7 +81,7 @@ namespace Data.Linq
 		[Test]
 		public void Basic62()
 		{
-			ForEachProvider(
+			ForEachProvider(new[] { ProviderName.Access },
 				db => AreEqual(
 					   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + p.ParentID).Where(_ => _ > 1)),
 					db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + p.ParentID).Where(_ => _ > 1))));
@@ -114,9 +114,21 @@ namespace Data.Linq
 		[Test]
 		public void Basic10()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				   Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent)),
 				db.Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent))));
+		}
+
+		[Test]
+		public void Basic11()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				   Child
+					.GroupBy(o => o.ParentID2)
+					.SelectMany(g => g.Select(o => o.ParentID)),
+				db.Child
+					.GroupBy(o => o.ParentID2)
+					.SelectMany(g => db.Child.Where(o => o.ParentID2 == g.Key).Select(o => o.ParentID))));
 		}
 
 		[Test]
@@ -290,20 +302,6 @@ namespace Data.Linq
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				   Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t),
 				db.Child.SelectMany(p => p.Parent.GrandChildren).Where(t => t.ParentID == 1).Select(t => t)));
-		}
-
-		[Test]
-		public void GroupBy1()
-		{
-			ForEachProvider(db => AreEqual(
-				   Child
-					.GroupBy(o => o.ParentID2)
-					.Where(g => g.Count() > 20)
-					.SelectMany(g => g.Select(o => o.Parent)),
-				db.Child
-					.GroupBy(o => o.ParentID2)
-					.Where(g => g.Count() > 20)
-					.SelectMany(g => g.Select(o => o.Parent))));
 		}
 
 		[Test]

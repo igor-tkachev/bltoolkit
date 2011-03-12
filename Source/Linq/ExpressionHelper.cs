@@ -4,7 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+
 using BLToolkit.Data.Linq.Parser;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
 
 namespace BLToolkit.Linq
 {
@@ -60,7 +64,7 @@ namespace BLToolkit.Linq
 		{
 			if (expr.NodeType == ExpressionType.Constant)
 			{
-				var c = expr as ConstantExpression;
+				var c = (ConstantExpression)expr;
 				return c.Value is T? func((T)c.Value, c): false;
 			}
 
@@ -1493,7 +1497,7 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as BinaryExpression;
+						var e = (BinaryExpression)expr;
 						var c = Convert(e.Conversion, func);
 						var l = Convert(e.Left,       func);
 						var r = Convert(e.Right,      func);

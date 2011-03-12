@@ -3269,9 +3269,9 @@ namespace BLToolkit.Data.Sql
 
 			ResolveWeakJoins();
 			OptimizeColumns();
-			OptimizeApplies();
+			OptimizeApplies   (isApplySupported);
 			OptimizeSubQueries(isApplySupported);
-			OptimizeApplies();
+			OptimizeApplies   (isApplySupported);
 
 			new QueryVisitor().Visit(this, e =>
 			{
@@ -3501,7 +3501,7 @@ namespace BLToolkit.Data.Sql
 				var table = OptimizeSubQuery(
 					jt.Table,
 					jt.JoinType == JoinType.Inner || jt.JoinType == JoinType.CrossApply,
-					jt.JoinType == JoinType.CrossApply,
+					false,
 					isApplySupported);
 
 				if (table != jt.Table)
@@ -3525,8 +3525,8 @@ namespace BLToolkit.Data.Sql
 
 			var isQueryOK = query.From.Tables.Count == 1;
 
-			isQueryOK = !isQueryOK || !concatWhere && (!query.Where.IsEmpty || !query.Having.IsEmpty);
-			isQueryOK = !isQueryOK || !query.HasUnion && query.GroupBy.IsEmpty && query.Select.HasModifier;
+			isQueryOK = isQueryOK && (concatWhere || query.Where.IsEmpty && query.Having.IsEmpty);
+			isQueryOK = isQueryOK && !query.HasUnion && query.GroupBy.IsEmpty && !query.Select.HasModifier;
 
 			if (!isQueryOK)
 				return childSource;
@@ -3587,13 +3587,13 @@ namespace BLToolkit.Data.Sql
 			return query.From.Tables[0];
 		}
 
-		void OptimizeApply(TableSource tableSource, JoinedTable joinTable)
+		void OptimizeApply(TableSource tableSource, JoinedTable joinTable, bool isApplySupported)
 		{
 			var joinSource = joinTable.Table;
 
 			foreach (var join in joinSource.Joins)
 				if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
-					OptimizeApply(joinSource, join);
+					OptimizeApply(joinSource, join, isApplySupported);
 
 			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
 			{
@@ -3611,6 +3611,25 @@ namespace BLToolkit.Data.Sql
 				else
 				{
 					sql.Where.SearchCondition.Conditions.AddRange(searchCondition);
+
+					var table = OptimizeSubQuery(
+						joinTable.Table,
+						joinTable.JoinType == JoinType.Inner || joinTable.JoinType == JoinType.CrossApply,
+						joinTable.JoinType == JoinType.CrossApply,
+						isApplySupported);
+
+					if (table != joinTable.Table)
+					{
+						var q = joinTable.Table.Source as SqlQuery;
+
+						if (q != null && q.OrderBy.Items.Count > 0)
+							foreach (var item in q.OrderBy.Items)
+								OrderBy.Expr(item.Expression, item.IsDescending);
+
+						joinTable.Table = table;
+
+						OptimizeApply(tableSource, joinTable, isApplySupported);
+					}
 				}
 			}
 			else
@@ -3678,12 +3697,12 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void OptimizeApplies()
+		void OptimizeApplies(bool isApplySupported)
 		{
 			foreach (var table in From.Tables)
 				foreach (var join in table.Joins)
 					if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
-						OptimizeApply(table, join);
+						OptimizeApply(table, join, isApplySupported);
 		}
 
 		void OptimizeColumns()

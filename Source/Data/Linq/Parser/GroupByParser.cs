@@ -190,11 +190,11 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var keyParam = Expression.Parameter(typeof(TKey), "key");
 
+// ReSharper disable AssignNullToNotNullAttribute
+
 					var expr = Expression.Call(
 						null,
-// ReSharper disable AssignNullToNotNullAttribute
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
-// ReSharper restore AssignNullToNotNullAttribute
 						context._sequenceExpr,
 						Expression.Lambda<Func<TSource,bool>>(
 							Expression.Equal(context._key.Lambda.Body, keyParam),
@@ -202,11 +202,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 					expr = Expression.Call(
 						null,
-// ReSharper disable AssignNullToNotNullAttribute
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Select(null, (Expression<Func<TSource,TElement>>)null)),
-// ReSharper restore AssignNullToNotNullAttribute
 						expr,
 						context._element.Lambda);
+
+// ReSharper restore AssignNullToNotNullAttribute
 
 					var lambda = Expression.Lambda<Func<IDataContext,TKey,IQueryable<TElement>>>(
 						Expression.Convert(expr, typeof(IQueryable<TElement>)),
@@ -286,6 +286,8 @@ namespace BLToolkit.Data.Linq.Parser
 								_key.BuildExpression(null,       0) :
 								_key.BuildExpression(expression, level + 1);
 						}
+
+						//return Sequence.BuildExpression(expression, level);
 					}
 				}
 
@@ -489,6 +491,25 @@ namespace BLToolkit.Data.Linq.Parser
 				//	case RequestFor.Object: return expression == null;
 				//}
 
+				if (level != 0)
+				{
+					var levelExpression = expression.GetLevelExpression(level);
+
+					if (levelExpression.NodeType == ExpressionType.MemberAccess)
+					{
+						var ma = (MemberExpression)levelExpression;
+
+						if (ma.Member.Name == "Key" && ma.Member.DeclaringType == _groupingType)
+						{
+							return levelExpression == expression ?
+								_key.IsExpression(null,       0,         requestFlag) :
+								_key.IsExpression(expression, level + 1, requestFlag);
+						}
+
+						//return Sequence.BuildExpression(expression, level);
+					}
+				}
+
 				return false;
 			}
 
@@ -502,10 +523,45 @@ namespace BLToolkit.Data.Linq.Parser
 				return base.ConvertToParentIndex(index, this);
 			}
 
+			interface IContextHelper
+			{
+				Expression GetContext(Expression sequence, ParameterExpression param, Expression expr1, Expression expr2);
+			}
+
+			class ContextHelper<T> : IContextHelper
+			{
+				public Expression GetContext(Expression sequence, ParameterExpression param, Expression expr1, Expression expr2)
+				{
+					return Expression.Call(
+						null,
+// ReSharper disable AssignNullToNotNullAttribute
+						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<T,bool>>)null)),
+// ReSharper restore AssignNullToNotNullAttribute
+						sequence,
+						Expression.Lambda<Func<T,bool>>(Expression.Equal(expr1, expr2), new[] { param }));
+				}
+			}
+
 			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
 			{
 				if (expression == null)
+				{
+					if (parseInfo.Parent is SelectManyParser.SelectManyContext)
+					{
+						var sm     = (SelectManyParser.SelectManyContext)parseInfo.Parent;
+						var ctype  = typeof(ContextHelper<>).MakeGenericType(_key.Lambda.Parameters[0].Type);
+						var helper = (IContextHelper)Activator.CreateInstance(ctype);
+						var expr   = helper.GetContext(
+							Sequence.Expression,
+							_key.Lambda.Parameters[0],
+							Expression.PropertyOrField(sm.Lambda.Parameters[0], "Key"),
+							_key.Lambda.Body);
+
+						return Parser.ParseSequence(new ParseInfo(parseInfo, expr));
+					}
+
 					return this;
+				}
 
 				throw new NotImplementedException();
 			}
@@ -514,4 +570,3 @@ namespace BLToolkit.Data.Linq.Parser
 		#endregion
 	}
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  

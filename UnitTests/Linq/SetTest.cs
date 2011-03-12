@@ -420,7 +420,7 @@ namespace Data.Linq
 		[Test]
 		public void Contains8()
 		{
-			var arr = new[] { GrandChild[0], GrandChild[1] };
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
 
 			ForEachProvider(db => AreEqual(
 				from p in Parent

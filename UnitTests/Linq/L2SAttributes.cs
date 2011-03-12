@@ -35,7 +35,7 @@ namespace Data.Linq
 	[TestFixture]
 	public class L2SAttributes : TestBase
 	{
-		[Test]
+		//[Test]
 		public void IsDbGeneratedTest()
 		{
 			using (var db = new TestDbManager("Sql2008"))
