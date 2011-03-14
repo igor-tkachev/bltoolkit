@@ -179,7 +179,16 @@ namespace BLToolkit.Data.Linq.Parser
 		public IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
 			var info = new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery });
-			return ParseSequence(info);
+			var ctx  = ParseSequence(info);
+
+			if (ctx.SqlQuery.Select.Columns.Count == 0 &&
+				(ctx.IsExpression(null, 0, RequestFor.Expression) ||
+				 ctx.IsExpression(null, 0, RequestFor.Field)))
+			{
+				ctx.ConvertToIndex(null, 0, ConvertFlags.Field);
+			}
+
+			return ctx;
 		}
 
 		ISqlExpression ParseSubQuery(IParseContext context, Expression expression)

@@ -85,12 +85,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				return Sequence.ConvertToIndex(expression, level, flags);
 			}
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				return false;
+				return Sequence.IsExpression(expression, level, requestFlag);
 			}
 
 			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
