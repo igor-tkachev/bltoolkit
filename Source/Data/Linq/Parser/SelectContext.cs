@@ -5,8 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using JetBrains.Annotations;
-
 namespace BLToolkit.Data.Linq.Parser
 {
 	using BLToolkit.Linq;

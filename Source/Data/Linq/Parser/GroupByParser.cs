@@ -298,6 +298,20 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var args = new ISqlExpression[expr.Arguments.Count - 1];
 
+				if (expr.Arguments[0].NodeType == ExpressionType.Call)
+				{
+					var ctx = Parser.GetSubQuery(this, expr);
+
+					if (Parser.SqlProvider.IsSubQueryColumnSupported)
+						return ctx.SqlQuery;
+
+					var join = ctx.SqlQuery.CrossApply();
+
+					SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+
+					return ctx.SqlQuery.Select.Columns[0];
+				}
+
 				if (expr.Method.Name == "Count")
 				{
 					if (args.Length > 0)
@@ -348,20 +362,6 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 
 					return SqlFunction.CreateCount(expr.Type, SqlQuery);
-				}
-
-				if (expr.Arguments[0].NodeType == ExpressionType.Call)
-				{
-					var ctx = Parser.GetSubQuery(this, expr);
-
-					if (Parser.SqlProvider.IsSubQueryColumnSupported)
-						return ctx.SqlQuery;
-
-					var join = ctx.SqlQuery.CrossApply();
-
-					SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
-
-					return ctx.SqlQuery.Select.Columns[0];
 				}
 
 				if (expr.Arguments.Count > 1)

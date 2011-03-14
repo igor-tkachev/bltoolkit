@@ -873,7 +873,7 @@ namespace Data.Linq
 				 select g.Select(ch => ch.ChildID).Where(id => id > 0).Max())));
 		}
 
-		[Test]
+		//[Test]
 		public void Scalar4()
 		{
 			ForEachProvider(db => AreEqual(
@@ -887,7 +887,7 @@ namespace Data.Linq
 				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min())));
 		}
 
-		[Test]
+		//[Test]
 		public void Scalar5()
 		{
 			ForEachProvider(db => AreEqual(
@@ -902,11 +902,13 @@ namespace Data.Linq
 		[Test]
 		public void Scalar6()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
+				 where ch.ParentID < 3
 				 group ch by ch.ParentID into g
 				 select g.Where(ch => ch.ParentID < 3).Max(ch => ch.ChildID)),
 				(from ch in db.Child
+				 where ch.ParentID < 3
 				 group ch by ch.ParentID into g
 				 select g.Where(ch => ch.ParentID < 3).Max(ch => ch.ChildID))));
 		}
@@ -914,7 +916,7 @@ namespace Data.Linq
 		[Test]
 		public void Scalar7()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
 				 select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max),
@@ -938,7 +940,7 @@ namespace Data.Linq
 		[Test]
 		public void Scalar9()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count()),
@@ -950,7 +952,7 @@ namespace Data.Linq
 		[Test]
 		public void Scalar10()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20)),
