@@ -3531,7 +3531,9 @@ namespace BLToolkit.Data.Sql
 			if (!isQueryOK)
 				return childSource;
 
-			var isColumnsOK = allColumns || !query.Select.Columns.Exists(c => !(c.Expression is SqlField || c.Expression is Column));
+			var isColumnsOK = 
+				(allColumns && !query.Select.Columns.Exists(c => IsAggregationFunction(c.Expression))) ||
+				!query.Select.Columns.Exists(c => !(c.Expression is SqlField || c.Expression is Column));
 
 			if (!isColumnsOK)
 				return childSource;
@@ -3587,6 +3589,21 @@ namespace BLToolkit.Data.Sql
 			return query.From.Tables[0];
 		}
 
+		static bool IsAggregationFunction(ISqlExpression expr)
+		{
+			if (expr is SqlFunction)
+				switch (((SqlFunction)expr).Name)
+				{
+					case "Average":
+					case "Min":
+					case "Max":
+					case "Sum":
+						return true;
+				}
+
+			return false;
+		}
+
 		void OptimizeApply(TableSource tableSource, JoinedTable joinTable, bool isApplySupported)
 		{
 			var joinSource = joinTable.Table;
@@ -3598,6 +3615,9 @@ namespace BLToolkit.Data.Sql
 			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
 			{
 				var sql = (SqlQuery)joinSource.Source;
+
+				if (sql.Select.Columns.Exists(c => IsAggregationFunction(c.Expression)))
+					return;
 
 				var searchCondition = new List<Condition>(sql.Where.SearchCondition.Conditions);
 

@@ -807,7 +807,7 @@ namespace Data.Linq
 				select g.Sum(_ => _.ChildID)));
 		}
 
-		//[Test]
+		[Test]
 		public void SelectMany()
 		{
 			ForEachProvider(db => AreEqual(
@@ -818,7 +818,7 @@ namespace Data.Linq
 		[Test]
 		public void Scalar1()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Max()),
@@ -828,9 +828,23 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Scalar2()
+		public void Scalar101()
 		{
 			ForEachProvider(db => AreEqual(
+				(from ch in Child
+				 select ch.ChildID into id
+				 group id by id into g
+				 select g.Max()),
+				(from ch in db.Child
+				 select ch.ChildID into id
+				 group id by id into g
+				 select g.Max())));
+		}
+
+		[Test]
+		public void Scalar2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
 				 select new
@@ -850,7 +864,7 @@ namespace Data.Linq
 		[Test]
 		public void Scalar3()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Where(id => id > 0).Max()),
@@ -865,10 +879,12 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				(from ch in Child
 				 group ch by ch.ParentID into g
-				 select g.Where(ch => ch.ChildID > 20).Select(ch => ch.ChildID).Min()),
+				 where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()),
 				(from ch in db.Child
 				 group ch by ch.ParentID into g
-				 select g.Where(ch => ch.ChildID > 20).Select(ch => ch.ChildID).Min())));
+				 where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min())));
 		}
 
 		[Test]
@@ -929,6 +945,18 @@ namespace Data.Linq
 				(from ch in db.Child
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count())));
+		}
+
+		[Test]
+		public void Scalar10()
+		{
+			ForEachProvider(db => AreEqual(
+				(from ch in Child
+				 group ch by ch.ParentID into g
+				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20)),
+				(from ch in db.Child
+				 group ch by ch.ParentID into g
+				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20))));
 		}
 	}
 }

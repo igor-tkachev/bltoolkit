@@ -350,6 +350,20 @@ namespace BLToolkit.Data.Linq.Parser
 					return SqlFunction.CreateCount(expr.Type, SqlQuery);
 				}
 
+				if (expr.Arguments[0].NodeType == ExpressionType.Call)
+				{
+					var ctx = Parser.GetSubQuery(this, expr);
+
+					if (Parser.SqlProvider.IsSubQueryColumnSupported)
+						return ctx.SqlQuery;
+
+					var join = ctx.SqlQuery.CrossApply();
+
+					SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+
+					return ctx.SqlQuery.Select.Columns[0];
+				}
+
 				if (expr.Arguments.Count > 1)
 				{
 					for (var i = 1; i < expr.Arguments.Count; i++)
@@ -374,33 +388,7 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 				else
 				{
-					if (expr.Arguments[0].NodeType == ExpressionType.Call)
-					{
-						var arg = expr.Arguments[0];
-
-						if (arg.NodeType == ExpressionType.Call)
-						{
-							var call = (MethodCallExpression)arg;
-
-							if (call.Method.Name == "Select" && call.IsQueryableMethod((seq,l) =>
-							{
-								if (seq.NodeType == ExpressionType.Parameter)
-								{
-									args = new[] { Parser.ParseExpression(this, l.Body) };
-								}
-
-								return false;
-							}))
-							{}
-						}
-					}
-					else //if (query.ElementSource is QuerySource.Scalar)
-					{
-						args = _element.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
-
-						//var scalar = (QuerySource.Scalar)query.ElementSource;
-						//args = new[] { scalar.GetExpressions(this)[0] };
-					}
+					args = _element.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
 				}
 
 				return new SqlFunction(expr.Type, expr.Method.Name, args);
@@ -555,6 +543,19 @@ namespace BLToolkit.Data.Linq.Parser
 							Sequence.Expression,
 							_key.Lambda.Parameters[0],
 							Expression.PropertyOrField(sm.Lambda.Parameters[0], "Key"),
+							_key.Lambda.Body);
+
+						return Parser.ParseSequence(new ParseInfo(parseInfo, expr));
+					}
+
+					if (parseInfo.Parent == this)
+					{
+						var ctype  = typeof(ContextHelper<>).MakeGenericType(_key.Lambda.Parameters[0].Type);
+						var helper = (IContextHelper)Activator.CreateInstance(ctype);
+						var expr   = helper.GetContext(
+							Sequence.Expression,
+							_key.Lambda.Parameters[0],
+							Expression.PropertyOrField(parseInfo.Expression, "Key"),
 							_key.Lambda.Body);
 
 						return Parser.ParseSequence(new ParseInfo(parseInfo, expr));

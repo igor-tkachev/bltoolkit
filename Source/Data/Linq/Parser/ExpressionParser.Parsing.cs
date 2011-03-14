@@ -176,9 +176,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ParseSubQuery
 
-		IParseContext GetSubQuery(IParseContext context, Expression expr)
+		public IParseContext GetSubQuery(IParseContext context, Expression expr)
 		{
-			return ParseSequence(new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery }));
+			var info = new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery });
+			return ParseSequence(info);
 		}
 
 		ISqlExpression ParseSubQuery(IParseContext context, Expression expression)
