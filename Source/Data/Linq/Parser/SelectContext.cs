@@ -509,8 +509,18 @@ namespace BLToolkit.Data.Linq.Parser
 								var q =
 									from m in Members.Keys
 									where !(m is MethodInfo)
-									select ConvertToIndex(Expression.MakeMemberAccess(p, m), 1, flags) into mm
-									from m in mm
+									select new
+									{
+										Sql    = ConvertToIndex(Expression.MakeMemberAccess(p, m), 1, flags),
+										Member = m
+									} into mm
+									from m in mm.Sql.Select(s => new SqlInfo
+										{
+											Sql    = s.Sql,
+											Index  = s.Index,
+											Member = mm.Member,
+											Query  = s.Query
+										})
 									select m;
 
 								return q.ToArray();
