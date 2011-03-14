@@ -409,16 +409,20 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<ParentInheritanceBase> _parentInheritance;
-		protected List<ParentInheritanceBase>  ParentInheritance
+		private          List<ParentInheritanceBase> _parentInheritance;
+		protected IEnumerable<ParentInheritanceBase>  ParentInheritance
 		{
 			get
 			{
-				return _parentInheritance ?? (_parentInheritance = Parent.Select(p =>
-					p.Value1       == null ? new ParentInheritanceNull  { ParentID = p.ParentID } :
-					p.Value1.Value == 1    ? new ParentInheritance1     { ParentID = p.ParentID, Value1 = p.Value1.Value } :
-					 (ParentInheritanceBase) new ParentInheritanceValue { ParentID = p.ParentID, Value1 = p.Value1.Value }
-				).ToList());
+				if (_parentInheritance == null)
+					_parentInheritance = Parent.Select(p =>
+						p.Value1       == null ? new ParentInheritanceNull  { ParentID = p.ParentID } :
+						p.Value1.Value == 1    ? new ParentInheritance1     { ParentID = p.ParentID, Value1 = p.Value1.Value } :
+						 (ParentInheritanceBase) new ParentInheritanceValue { ParentID = p.ParentID, Value1 = p.Value1.Value }
+					).ToList();
+
+				foreach (var item in _parentInheritance)
+					yield return item;
 			}
 		}
 
