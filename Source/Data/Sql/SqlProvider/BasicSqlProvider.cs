@@ -1269,6 +1269,35 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		static readonly Dictionary<Type,INullableValueReader> _nullableValueReader = new Dictionary<Type,INullableValueReader>();
 
+		public NumberFormatInfo NumberFormatInfo = new NumberFormatInfo
+		{
+			CurrencyDecimalDigits    = NumberFormatInfo.InvariantInfo.CurrencyDecimalDigits,
+			CurrencyDecimalSeparator = NumberFormatInfo.InvariantInfo.CurrencyDecimalSeparator,
+			CurrencyGroupSeparator   = NumberFormatInfo.InvariantInfo.CurrencyGroupSeparator,
+			CurrencyGroupSizes       = NumberFormatInfo.InvariantInfo.CurrencyGroupSizes,
+			CurrencyNegativePattern  = NumberFormatInfo.InvariantInfo.CurrencyNegativePattern,
+			CurrencyPositivePattern  = NumberFormatInfo.InvariantInfo.CurrencyPositivePattern,
+			CurrencySymbol           = NumberFormatInfo.InvariantInfo.CurrencySymbol,
+			NaNSymbol                = NumberFormatInfo.InvariantInfo.NaNSymbol,
+			NegativeInfinitySymbol   = NumberFormatInfo.InvariantInfo.NegativeInfinitySymbol,
+			NegativeSign             = NumberFormatInfo.InvariantInfo.NegativeSign,
+			NumberDecimalDigits      = NumberFormatInfo.InvariantInfo.NumberDecimalDigits,
+			NumberDecimalSeparator   = ".",
+			NumberGroupSeparator     = NumberFormatInfo.InvariantInfo.NumberGroupSeparator,
+			NumberGroupSizes         = NumberFormatInfo.InvariantInfo.NumberGroupSizes,
+			NumberNegativePattern    = NumberFormatInfo.InvariantInfo.NumberNegativePattern,
+			PercentDecimalDigits     = NumberFormatInfo.InvariantInfo.PercentDecimalDigits,
+			PercentDecimalSeparator  = ".",
+			PercentGroupSeparator    = NumberFormatInfo.InvariantInfo.PercentGroupSeparator,
+			PercentGroupSizes        = NumberFormatInfo.InvariantInfo.PercentGroupSizes,
+			PercentNegativePattern   = NumberFormatInfo.InvariantInfo.PercentNegativePattern,
+			PercentPositivePattern   = NumberFormatInfo.InvariantInfo.PercentPositivePattern,
+			PercentSymbol            = NumberFormatInfo.InvariantInfo.PercentSymbol,
+			PerMilleSymbol           = NumberFormatInfo.InvariantInfo.PerMilleSymbol,
+			PositiveInfinitySymbol   = NumberFormatInfo.InvariantInfo.PositiveInfinitySymbol,
+			PositiveSign             = NumberFormatInfo.InvariantInfo.PositiveSign,
+		};
+
 		protected virtual void BuildValue(StringBuilder sb, object value)
 		{
 			if      (value == null)                   sb.Append("NULL");
@@ -1277,9 +1306,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
 			else if (value is DateTime)               sb.AppendFormat("'{0:yyyy-MM-dd HH:mm:ss.fffffff}'", value);
 			else if (value is Guid)                   sb.Append('\'').Append(value).Append('\'');
-			else if (value is decimal)                sb.Append(((decimal)value).ToString(NumberFormatInfo.InvariantInfo));
-			else if (value is double)                 sb.Append(((double) value).ToString(NumberFormatInfo.InvariantInfo));
-			else if (value is float)                  sb.Append(((float)  value).ToString(NumberFormatInfo.InvariantInfo));
+			else if (value is decimal)                sb.Append(((decimal)value).ToString(NumberFormatInfo));
+			else if (value is double)                 sb.Append(((double) value).ToString(NumberFormatInfo));
+			else if (value is float)                  sb.Append(((float)  value).ToString(NumberFormatInfo));
 			else
 			{
 				var type = value.GetType();
