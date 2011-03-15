@@ -44,7 +44,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (!newQuery)
 			{
-				context.Collection = collection;
+				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 			}
 
@@ -52,21 +52,14 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				if (!leftJoin)
 				{
-					//sequence.SqlQuery.From.Table(sql);
-
-					context.Collection = newQuery ? new SubQueryContext(collection, sequence.SqlQuery, true) : collection;
+					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
 					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 				}
 				else
 				{
-					if (newQuery)
-					{
-						var join = SqlQuery.OuterApply(sql);
-						sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
-						context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-					}
-					else
-						context.Collection = collection;
+					var join = SqlQuery.OuterApply(sql);
+					sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 
 					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
 				}

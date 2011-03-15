@@ -493,6 +493,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Sum3()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by ch.Parent into g
+				select g.Key.Children.Sum(p => p.ChildID),
+				from ch in db.Child
+				group ch by ch.Parent into g
+				select g.Key.Children.Sum(p => p.ChildID)));
+		}
+
+		[Test]
 		public void SumSubQuery1()
 		{
 			var n = 1;

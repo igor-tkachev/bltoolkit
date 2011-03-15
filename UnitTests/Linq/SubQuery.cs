@@ -221,6 +221,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase }, db => AreEqual(
+				from p in Parent
+				where (from p1 in Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
+				select p,
+				from p in db.Parent
+				where (from p1 in db.Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
+				select p));
+		}
+
+		[Test]
 		public void SubSub1()
 		{
 			ForEachProvider(db => AreEqual(

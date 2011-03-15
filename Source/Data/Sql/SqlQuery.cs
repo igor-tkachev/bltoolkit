@@ -1896,8 +1896,8 @@ namespace BLToolkit.Data.Sql
 						{
 							var table = ((SqlField)col.Expression).Table;
 
-							if (!SqlQuery.From.GetFromTables().Any(_ => _ == table))
-								throw new InvalidOperationException("Wrong field usage.");
+							//if (SqlQuery.From.GetFromTables().Any(_ => _ == table))
+							//	throw new InvalidOperationException("Wrong field usage.");
 
 							break;
 						}
@@ -1906,8 +1906,8 @@ namespace BLToolkit.Data.Sql
 						{
 							var query = ((Column)col.Expression).Parent;
 
-							if (!SqlQuery.From.GetFromQueries().Any(_ => _ == query))
-								throw new InvalidOperationException("Wrong column usage.");
+							//if (!SqlQuery.From.GetFromQueries().Any(_ => _ == query))
+							//	throw new InvalidOperationException("Wrong column usage.");
 
 							break;
 						}

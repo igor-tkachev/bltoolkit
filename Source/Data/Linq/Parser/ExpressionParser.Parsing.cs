@@ -1736,6 +1736,13 @@ namespace BLToolkit.Data.Linq.Parser
 			var newRight = right as NewExpression;
 			var newExpr  = (NewExpression)left;
 
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+			if (newExpr.Members == null)
+				return null;
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+
 			for (var i = 0; i < newExpr.Arguments.Count; i++)
 			{
 				var lex = ParseExpression(context, newExpr.Arguments[i]);
@@ -1863,9 +1870,6 @@ namespace BLToolkit.Data.Linq.Parser
 
 		ISqlPredicate ParseLikePredicate(IParseContext context, MethodCallExpression expression, string start, string end)
 		{
-			throw new NotImplementedException();
-
-			/*
 			var e = expression;
 			var o = ParseExpression(context, e.Object);
 			var a = ParseExpression(context, e.Arguments[0]);
@@ -1887,7 +1891,7 @@ namespace BLToolkit.Data.Linq.Parser
 				var p  = (SqlParameter)a;
 				var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
 
-				ep = new Query<T>.Parameter
+				ep = new ParameterAccessor
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
@@ -1901,10 +1905,9 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return null;
-			*/
 		}
 
-		private ISqlPredicate ParseLikePredicate(IParseContext context, MethodCallExpression expression)
+		ISqlPredicate ParseLikePredicate(IParseContext context, MethodCallExpression expression)
 		{
 			var e  = expression;
 			var a1 = ParseExpression(context, e.Arguments[0]);
@@ -2117,22 +2120,22 @@ namespace BLToolkit.Data.Linq.Parser
 				case "Any" :
 
 					if (call.Arguments.Count == 1)
-						func = () => ParseAnyCondition(SetType.Any, call, null, null);
+						func = () => ParseAnyCondition(context, SetType.Any, call, null, null);
 					else if (call.Arguments.Count == 2)
-						func = () => ParseAnyCondition(SetType.Any, call, null/*call.Arguments[1]*/, null);
+						func = () => ParseAnyCondition(context, SetType.Any, call, (LambdaExpression)call.Arguments[1], null);
 					else
 						return null;
-					throw new NotImplementedException();
-					//break;
+
+					break;
 
 				case "All" :
 
 					if (call.Arguments.Count == 2)
-						func = () => ParseAnyCondition(SetType.All, call, null/*call.Arguments[1]*/, null);
+						func = () => ParseAnyCondition(context, SetType.All, call, (LambdaExpression)call.Arguments[1], null);
 					else
 						return null;
-					throw new NotImplementedException();
-					//break;
+
+					break;
 
 				case "Contains":
 
@@ -2140,14 +2143,14 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						if (call.Arguments.Count == 2)
 						{
-							Expression seq = call.Arguments[0];
-							Expression ex  = call.Arguments[1];
+							var seq = call.Arguments[0];
+							var ex  = call.Arguments[1];
 
 							func = () =>
 							{
 								var param  = Expression.Parameter(ex.Type, ex.NodeType == ExpressionType.Parameter ? ((ParameterExpression)ex).Name : "t");
-								var lambda = new LambdaInfo(Expression.Equal(param, ex), param);
-								return ParseAnyCondition(SetType.In, seq, lambda, ex);
+								var lambda = Expression.Lambda(Expression.Equal(param, ex), param);
+								return ParseAnyCondition(context, SetType.In, seq, lambda, ex);
 							};
 						}
 						else
@@ -2190,12 +2193,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 		enum SetType { Any, All, In }
 
-		SqlQuery.Condition ParseAnyCondition(SetType setType, Expression expr, LambdaInfo lambda, Expression inExpr)
+		SqlQuery.Condition ParseAnyCondition(
+			IParseContext context, SetType setType, Expression expr, LambdaExpression lambda, Expression inExpr)
 		{
-			throw new NotImplementedException();
-
 			/*
-			var sql = CurrentSql;
+			var sql = context.SqlQuery;
 			var cs  = _convertSource;
 
 			CurrentSql = new SqlQuery();
@@ -2247,11 +2249,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 				return s;
 			};
+			*/
 
-			var query = ParseSequence(expr)[0];
-			var any   = CurrentSql;
+			var query = GetSubQuery(context, expr);
+			var any   = query.SqlQuery;
 
-			_convertSource = cs;
+			//_convertSource = cs;
 
 			if (lambda != null)
 			{
@@ -2260,31 +2263,29 @@ namespace BLToolkit.Data.Linq.Parser
 					var e  = Expression.Not(lambda.Body);
 					//var pi = new NotParseInfo(e, lambda.Body);
 
-					lambda = new LambdaInfo(e, lambda.Parameters);
+					lambda = Expression.Lambda(e, lambda.Parameters);
 				}
 
-				if (inExpr == null || query.Fields.Count != 1)
-					ParseWhere(lambda, query);
+				if (inExpr == null || query.SqlQuery.Select.Columns.Count != 1)
+					ParseWhere(context, query, lambda, true);
 			}
 
-			any.ParentSql = sql;
-			CurrentSql    = sql;
+			any.ParentSql = context.SqlQuery;
+
+			//CurrentSql    = sql;
 
 			SqlQuery.Condition cond;
 
-			if (inExpr != null && query.Fields.Count == 1)
+			if (inExpr != null && query.SqlQuery.Select.Columns.Count == 1)
 			{
-				query.Select(this);
-				var ex = ParseExpression(inExpr);
+				//query.Select(this);
+				var ex = ParseExpression(context, inExpr);
 				cond = new SqlQuery.Condition(false, new SqlQuery.Predicate.InSubQuery(ex, false, any));
 			}
 			else
 				cond = new SqlQuery.Condition(setType == SetType.All, new SqlQuery.Predicate.FuncLike(SqlFunction.CreateExists(any)));
 
-			ParsingTracer.DecIndentLevel();
 			return cond;
-
-			*/
 		}
 
 		#endregion
