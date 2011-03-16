@@ -180,6 +180,7 @@
     <Compile Include="Data\Linq\Parser\AsQueryableParser.cs" />
     <Compile Include="Data\Linq\Parser\ChangeTypeExpression.cs" />
     <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
+    <Compile Include="Data\Linq\Parser\InsertParser.cs" />
     <Compile Include="Data\Linq\Parser\ParseInfo.cs" />
     <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
     <Compile Include="Data\Linq\Parser\SqlInfo.cs" />

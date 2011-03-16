@@ -38,6 +38,7 @@ namespace BLToolkit.Data.Linq.Parser
 			new CountParser         (),
 			new AsQueryableParser   (),
 			new TableAttributeParser(),
+			new InsertParser        (),
 		};
 
 		public static void AddParser(ISequenceParser parser)
