@@ -55,7 +55,8 @@ string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
 string OneToManyAssociationType = "IEnumerable<{0}>";
 
-bool   RenderField = false;
+bool   RenderField          = false;
+bool   RenderBackReferences = true;
 
 bool   IsMetadataLoaded;
 
@@ -203,7 +204,7 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 
 	if (t.ForeignKeys.Count > 0)
 	{
-		foreach (var key in t.ForeignKeys.Values)
+		foreach (var key in t.ForeignKeys.Values.Where(k => tt.RenderBackReferences || k.BackReference != null))
 		{
 			tt.WriteLine("");
 			RenderForeignKey(tt, key);
