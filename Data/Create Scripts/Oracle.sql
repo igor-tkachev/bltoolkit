@@ -593,7 +593,8 @@ CREATE TABLE LinqDataTypes
 	BoolValue     smallint,
 	GuidValue     raw(16),
 	BinaryValue   blob,
-	SmallIntValue smallint
+	SmallIntValue smallint,
+	IntValue      int NULL
 )
 /
 
