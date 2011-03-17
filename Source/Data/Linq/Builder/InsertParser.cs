@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
 
-			return new InsertContext(parseInfo.Parent, sequence, methodCall.Method.Name);
+			return new InsertContext(parseInfo.Parent, sequence, null);
 		}
 	}
 
