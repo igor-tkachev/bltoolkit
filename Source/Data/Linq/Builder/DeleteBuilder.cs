@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq.Expressions;
-using System.Reflection;
-using BLToolkit.Data.Sql;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
+	using Data.Sql;
 
 	class DeleteBuilder : MethodCallBuilder
 	{
@@ -26,43 +24,43 @@ namespace BLToolkit.Data.Linq.Builder
 
 			return new DeleteContext(buildInfo.Parent, sequence);
 		}
-	}
 
-	class DeleteContext : SequenceContextBase
-	{
-		public DeleteContext(IBuildContext parent, IBuildContext sequence)
-			: base(parent, sequence, null)
+		class DeleteContext : SequenceContextBase
 		{
-		}
+			public DeleteContext(IBuildContext parent, IBuildContext sequence)
+				: base(parent, sequence, null)
+			{
+			}
 
-		public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
-		{
-			query.SetNonQueryQuery();
-		}
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			{
+				query.SetNonQueryQuery();
+			}
 
-		public override Expression BuildExpression(Expression expression, int level)
-		{
-			throw new NotImplementedException();
-		}
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				throw new NotImplementedException();
+			}
 
-		public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
-		{
-			throw new NotImplementedException();
-		}
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				throw new NotImplementedException();
+			}
 
-		public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
-		{
-			throw new NotImplementedException();
-		}
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			{
+				throw new NotImplementedException();
+			}
 
-		public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
-		{
-			throw new NotImplementedException();
-		}
+			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			{
+				throw new NotImplementedException();
+			}
 
-		public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
-		{
-			throw new NotImplementedException();
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
+			{
+				throw new NotImplementedException();
+			}
 		}
 	}
 }

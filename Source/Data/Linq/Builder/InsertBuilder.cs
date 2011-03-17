@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
-	using Reflection;
 
 	class InsertBuilder : MethodCallBuilder
 	{
@@ -39,7 +37,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case 2 : // static int Insert<T>(this Table<T> target, Expression<Func<T>> setter)
 					{
-						BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[1].Unwrap(), sequence, sequence);
+						UpdateBuilder.BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[1].Unwrap(), sequence, sequence);
 
 						sequence.SqlQuery.Set.Into  = ((TableBuilder.TableContext)sequence).SqlTable;
 						sequence.SqlQuery.From.Tables.Clear();
@@ -51,7 +49,7 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var into = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[1], new SqlQuery()));
 
-						BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[2].Unwrap(), into, sequence);
+						UpdateBuilder.BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[2].Unwrap(), into, sequence);
 
 						sequence.SqlQuery.Select.Columns.Clear();
 
@@ -68,45 +66,6 @@ namespace BLToolkit.Data.Linq.Builder
 			sequence.SqlQuery.Set.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
 
 			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Set.WithIdentity);
-		}
-
-		static void BuildSetter(
-			ExpressionBuilder builder,
-			BuildInfo         buildInfo,
-			LambdaExpression  setter,
-			IBuildContext     into,
-			IBuildContext     sequence)
-		{
-			if (setter.Body.NodeType != ExpressionType.MemberInit)
-				throw new LinqException("Object initializer expected for insert statement.");
-
-			var body = (MemberInitExpression)setter.Body;
-			var ex   = body;
-			var ctx  = new ExpressionContext(buildInfo.Parent, sequence, setter);
-
-			for (var i = 0; i < ex.Bindings.Count; i++)
-			{
-				var binding = ex.Bindings[i];
-				var member  = binding.Member;
-
-				if (member is MethodInfo)
-					member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
-
-				if (binding is MemberAssignment)
-				{
-					var ma     = binding as MemberAssignment;
-					var column = into.ConvertToSql(
-						Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType), member), 1, ConvertFlags.Field);
-					var expr   = builder.ConvertToSql(ctx, ma.Expression);
-
-					if (expr is SqlParameter && ma.Expression.Type.IsEnum)
-						((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
-
-					sequence.SqlQuery.Set.Items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
-				}
-				else
-					throw new InvalidOperationException();
-			}
 		}
 
 		#endregion
@@ -213,50 +172,20 @@ namespace BLToolkit.Data.Linq.Builder
 				var extract  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 				var update   =                   methodCall.Arguments[2].Unwrap();
 
+				if (sequence.SqlQuery.Set.Into == null)
+				{
+					sequence.SqlQuery.Set.Into = (SqlTable)sequence.SqlQuery.From.Tables[0].Source;
+					sequence.SqlQuery.From.Tables.Clear();
+				}
 
-
+				if (update.NodeType == ExpressionType.Lambda)
+					UpdateBuilder.ParseSet(builder, buildInfo, extract, (LambdaExpression)update, sequence);
+				else
+					UpdateBuilder.ParseSet(builder, buildInfo, extract, update, sequence);
 
 				return sequence;
 			}
 		}
-
-/*
-		static IValueInsertable<T> Value<T,TV>(this Table<T>            source, Expression<Func<T,TV>> field, Expression<Func<TV>> value)
-		static IValueInsertable<T> Value<T,TV>(this Table<T>            source, Expression<Func<T,TV>> field, TV                   value)
-		static IValueInsertable<T> Value<T,TV>(this IValueInsertable<T> source, Expression<Func<T,TV>> field, Expression<Func<TV>> value)
-		static IValueInsertable<T> Value<T,TV>(this IValueInsertable<T> source, Expression<Func<T,TV>> field, TV                   value)
-
-		static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(this ISelectInsertable<TSource,TTarget> source, Expression<Func<TTarget,TValue>> field, Expression<Func<TSource,TValue>> value)
-		static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(this ISelectInsertable<TSource,TTarget> source, Expression<Func<TTarget,TValue>> field, Expression<Func<TValue>>         value)
-		static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(this ISelectInsertable<TSource,TTarget> source, Expression<Func<TTarget,TValue>> field, TValue                           value)
- * 
-		void ParseValue(LambdaInfo extract, Expression update, QuerySource select)
-		{
-			if (!ExpressionHelper.IsConstant(update.Type) && !_asParameters.Contains(update))
-				_asParameters.Add(update);
-
-			if (CurrentSql.Set.Into == null)
-			{
-				CurrentSql.Set.Into = (SqlTable)CurrentSql.From.Tables[0].Source;
-				CurrentSql.From.Tables.Clear();
-			}
-
-			ParseSet(extract, update, select);
-		}
-
-		void ParseValue(LambdaInfo extract, LambdaInfo update, QuerySource select)
-		{
-			if (CurrentSql.Set.Into == null)
-			{
-				CurrentSql.Set.Into = (SqlTable)CurrentSql.From.Tables[0].Source;
-				CurrentSql.From.Tables.Clear();
-			}
-
-			ParseSet(extract, update, select);
-		}
- * 
- * 
- */
 
 		#endregion
 	}

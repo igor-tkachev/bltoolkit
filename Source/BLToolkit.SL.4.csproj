@@ -86,6 +86,7 @@
     <Compile Include="Data\Linq\Builder\ConvertFlags.cs" />
     <Compile Include="Data\Linq\Builder\CountBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DefaultIfEmptyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DistinctBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionBuilder.QueryBuilder.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="Data\Linq\Builder\TableAttributeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TableBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\WhereBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />

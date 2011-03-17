@@ -41,6 +41,8 @@ namespace BLToolkit.Data.Linq.Builder
 			new InsertBuilder        (),
 			new InsertBuilder.Into   (),
 			new InsertBuilder.Value  (),
+			new UpdateBuilder        (),
+			new UpdateBuilder.Set    (),
 			new DeleteBuilder        (),
 		};
 

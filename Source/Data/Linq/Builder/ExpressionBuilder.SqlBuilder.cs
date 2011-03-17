@@ -1197,7 +1197,8 @@ namespace BLToolkit.Data.Linq.Builder
 		#region Build Parameter
 
 		readonly Dictionary<Expression,ParameterAccessor> _parameters   = new Dictionary<Expression, ParameterAccessor>();
-		readonly HashSet<Expression>                      _asParameters = new HashSet<Expression>();
+
+		public readonly HashSet<Expression> AsParameters = new HashSet<Expression>();
 
 		ParameterAccessor BuildParameter(Expression expr)
 		{
@@ -1234,7 +1235,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var c = (ConstantExpression)expr;
 
-					if (!ExpressionHelper.IsConstant(expr.Type) || _asParameters.Contains(c))
+					if (!ExpressionHelper.IsConstant(expr.Type) || AsParameters.Contains(c))
 					{
 						var val = expressionAccessors[expr];
 
@@ -2263,7 +2264,7 @@ namespace BLToolkit.Data.Linq.Builder
 					var e  = Expression.Not(lambda.Body);
 					//var pi = new NotParseInfo(e, lambda.Body);
 
-					lambda = Expression.Lambda(e, lambda.Parameters);
+					lambda = Expression.Lambda(e, lambda.Parameters.ToArray());
 				}
 
 				if (inExpr == null || query.SqlQuery.Select.Columns.Count != 1)

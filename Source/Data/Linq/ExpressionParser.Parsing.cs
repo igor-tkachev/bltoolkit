@@ -2076,7 +2076,7 @@ namespace BLToolkit.Data.Linq
 				pi = ((UnaryExpression)pi).Operand;
 
 			if (pi.NodeType != ExpressionType.MemberAccess)
-				throw new LinqException("Member expression expected forthe 'Set' statement.");
+				throw new LinqException("Member expression expected for the 'Set' statement.");
 
 			var body   = (MemberExpression)pi;
 			var member = body.Member;
