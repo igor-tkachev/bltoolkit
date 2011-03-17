@@ -6,16 +6,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class GroupByParser : MethodCallParser
+	class GroupByBuilder : MethodCallBuilder
 	{
-		#region Parser Methods
+		#region Builder Methods
 
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			if (!methodCall.IsQueryable("GroupBy"))
 				return false;
@@ -39,9 +39,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return (methodCall.Arguments[methodCall.Arguments.Count - 1].Unwrap().NodeType == ExpressionType.Lambda);
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence        = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence        = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 			var sequenceExpr    = methodCall.Arguments[0];
 			var groupingType    = methodCall.Type.GetGenericArguments()[0];
 			var keySelector     = (LambdaExpression)methodCall.Arguments[1].Unwrap();
@@ -55,21 +55,21 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var type = ((LambdaExpression)call.Arguments[1].Unwrap()).Body.Type;
 
-					if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ExpressionParser.GroupSubQuery<,>))
+					if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ExpressionBuilder.GroupSubQuery<,>))
 					{
 						sequence = new SubQueryContext(sequence);
 					}
 				}
 			}
 
-			var key      = new KeyContext(parseInfo.Parent, keySelector, sequence);
-			var groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
+			var key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
+			var groupSql = builder.ConvertExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
 			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 			{
 				sequence = new SubQueryContext(sequence);
-				key      = new KeyContext(parseInfo.Parent, keySelector, sequence);
-				groupSql = parser.ParseExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
+				key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
+				groupSql = builder.ConvertExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 			}
 
 			sequence.SqlQuery.GroupBy.Items.Clear();
@@ -87,8 +87,8 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			});
 
-			var element = new SelectContext (parseInfo.Parent, elementSelector, sequence);
-			var groupBy = new GroupByContext(parseInfo.Parent, sequenceExpr, groupingType, sequence, key, element);
+			var element = new SelectContext (buildInfo.Parent, elementSelector, sequence);
+			var groupBy = new GroupByContext(buildInfo.Parent, sequenceExpr, groupingType, sequence, key, element);
 
 			return groupBy;
 		}
@@ -99,7 +99,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		internal class KeyContext : SelectContext
 		{
-			public KeyContext(IParseContext parent, LambdaExpression lambda, params IParseContext[] sequences)
+			public KeyContext(IBuildContext parent, LambdaExpression lambda, params IBuildContext[] sequences)
 				: base(parent, lambda, sequences)
 			{
 			}
@@ -111,7 +111,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		internal class GroupByContext : SequenceContextBase
 		{
-			public GroupByContext(IParseContext parent, Expression sequenceExpr, Type groupingType, IParseContext sequence, KeyContext key, SelectContext element)
+			public GroupByContext(IBuildContext parent, Expression sequenceExpr, Type groupingType, IBuildContext sequence, KeyContext key, SelectContext element)
 				: base(parent, sequence, null)
 			{
 				_sequenceExpr = sequenceExpr;
@@ -219,11 +219,11 @@ namespace BLToolkit.Data.Linq.Parser
 						keyExpr,
 						new []
 						{
-							ExpressionParser.ContextParam,
-							ExpressionParser.DataContextParam,
-							ExpressionParser.DataReaderParam,
-							ExpressionParser.ExpressionParam,
-							ExpressionParser.ParametersParam,
+							ExpressionBuilder.ContextParam,
+							ExpressionBuilder.DataContextParam,
+							ExpressionBuilder.DataReaderParam,
+							ExpressionBuilder.ExpressionParam,
+							ExpressionBuilder.ParametersParam,
 						});
 
 					return Expression.Call(
@@ -231,11 +231,11 @@ namespace BLToolkit.Data.Linq.Parser
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => GetGrouping(null, null, null, null, null, null, null)),
 						new Expression[]
 						{
-							ExpressionParser.ContextParam,
-							ExpressionParser.DataContextParam,
-							ExpressionParser.DataReaderParam,
-							ExpressionParser.ExpressionParam,
-							ExpressionParser.ParametersParam,
+							ExpressionBuilder.ContextParam,
+							ExpressionBuilder.DataContextParam,
+							ExpressionBuilder.DataReaderParam,
+							ExpressionBuilder.ExpressionParam,
+							ExpressionBuilder.ParametersParam,
 							Expression.Constant(keyReader.Compile()),
 							Expression.Constant(itemReader),
 						});
@@ -294,15 +294,15 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new NotImplementedException();
 			}
 
-			ISqlExpression ParseEnumerable(MethodCallExpression expr)
+			ISqlExpression ConvertEnumerable(MethodCallExpression expr)
 			{
 				var args = new ISqlExpression[expr.Arguments.Count - 1];
 
 				if (expr.Arguments[0].NodeType == ExpressionType.Call)
 				{
-					var ctx = Parser.GetSubQuery(this, expr);
+					var ctx = Builder.GetSubQuery(this, expr);
 
-					if (Parser.SqlProvider.IsSubQueryColumnSupported)
+					if (Builder.SqlProvider.IsSubQueryColumnSupported)
 						return ctx.SqlQuery;
 
 					var join = ctx.SqlQuery.CrossApply();
@@ -318,7 +318,7 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var ctx = _element;
 						var l   = (LambdaExpression)expr.Arguments[1].Unwrap();
-						var cnt = Parser.ParseWhere(Parent, ctx, l, false);
+						var cnt = Builder.BuildWhere(Parent, ctx, l, false);
 						var sql = cnt.SqlQuery.Clone((_ => !(_ is SqlParameter)));
 
 						sql.ParentSql = SqlQuery;
@@ -327,13 +327,13 @@ namespace BLToolkit.Data.Linq.Parser
 						if (ctx == cnt)
 							ctx.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(ctx.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
 
-						if (Parser.SqlProvider.IsSubQueryColumnSupported && Parser.SqlProvider.IsCountSubQuerySupported)
+						if (Builder.SqlProvider.IsSubQueryColumnSupported && Builder.SqlProvider.IsCountSubQuerySupported)
 						{
 							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 							{
 								var item1 = sql.GroupBy.Items[i];
 								var item2 = SqlQuery.GroupBy.Items[i];
-								var pr    = Parser.Convert(this, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
+								var pr    = Builder.Convert(this, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
 
 								sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
 							}
@@ -353,7 +353,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var item1 = sql.GroupBy.Items[i];
 							var item2 = SqlQuery.GroupBy.Items[i];
 							var col   = sql.Select.Columns[sql.Select.Add(item1)];
-							var pr    = Parser.Convert(this, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
+							var pr    = Builder.Convert(this, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
 
 							join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
 						}
@@ -378,7 +378,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							_element.Parent = p;
 
-							args[i - 1] = Parser.ParseExpression(ctx, l.Body.Unwrap());
+							args[i - 1] = Builder.ConvertToSql(ctx, l.Body.Unwrap());
 						}
 						else
 						{
@@ -411,7 +411,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 								if (e.Method.DeclaringType == typeof(Enumerable))
 								{
-									return new[] { new SqlInfo { Sql = ParseEnumerable(e) } };
+									return new[] { new SqlInfo { Sql = ConvertEnumerable(e) } };
 								}
 
 								break;
@@ -501,7 +501,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return false;
 			}
 
-			public override int ConvertToParentIndex(int index, IParseContext context)
+			public override int ConvertToParentIndex(int index, IBuildContext context)
 			{
 				var expr = SqlQuery.Select.Columns[index].Expression;
 
@@ -530,13 +530,13 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				if (expression == null)
 				{
-					if (parseInfo.Parent is SelectManyParser.SelectManyContext)
+					if (buildInfo.Parent is SelectManyBuilder.SelectManyContext)
 					{
-						var sm     = (SelectManyParser.SelectManyContext)parseInfo.Parent;
+						var sm     = (SelectManyBuilder.SelectManyContext)buildInfo.Parent;
 						var ctype  = typeof(ContextHelper<>).MakeGenericType(_key.Lambda.Parameters[0].Type);
 						var helper = (IContextHelper)Activator.CreateInstance(ctype);
 						var expr   = helper.GetContext(
@@ -545,20 +545,20 @@ namespace BLToolkit.Data.Linq.Parser
 							Expression.PropertyOrField(sm.Lambda.Parameters[0], "Key"),
 							_key.Lambda.Body);
 
-						return Parser.ParseSequence(new ParseInfo(parseInfo, expr));
+						return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 					}
 
-					if (parseInfo.Parent == this)
+					if (buildInfo.Parent == this)
 					{
 						var ctype  = typeof(ContextHelper<>).MakeGenericType(_key.Lambda.Parameters[0].Type);
 						var helper = (IContextHelper)Activator.CreateInstance(ctype);
 						var expr   = helper.GetContext(
 							Sequence.Expression,
 							_key.Lambda.Parameters[0],
-							Expression.PropertyOrField(parseInfo.Expression, "Key"),
+							Expression.PropertyOrField(buildInfo.Expression, "Key"),
 							_key.Lambda.Body);
 
-						return Parser.ParseSequence(new ParseInfo(parseInfo, expr));
+						return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 					}
 
 					return this;

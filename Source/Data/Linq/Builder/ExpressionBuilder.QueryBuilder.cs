@@ -2,13 +2,13 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 
-	partial class ExpressionParser
+	partial class ExpressionBuilder
 	{
-		public Expression BuildExpression(IParseContext context, Expression expression)
+		public Expression BuildExpression(IBuildContext context, Expression expression)
 		{
 			var newExpr = expression.Convert(pi =>
 			{
@@ -243,14 +243,14 @@ namespace BLToolkit.Data.Linq.Parser
 			return newExpr;
 		}
 
-		bool EnforceServerSide(IParseContext context)
+		bool EnforceServerSide(IBuildContext context)
 		{
 			return context.SqlQuery.Select.IsDistinct;
 		}
 
 		#region BuildSubQuery
 
-		Expression BuildSubQuery(IParseContext context, Expression expression)
+		Expression BuildSubQuery(IBuildContext context, Expression expression)
 		{
 			if (expression.NodeType == ExpressionType.MemberAccess)
 			{
@@ -298,7 +298,7 @@ namespace BLToolkit.Data.Linq.Parser
 			var prev = _isSubQueryParsing;
 			_isSubQueryParsing = true;
 
-			var seq = ParseSequence(expr)[0];
+			var seq = BuildSequence(expr)[0];
 
 			_isSubQueryParsing = prev;
 
@@ -325,9 +325,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region BuildSql
 
-		Expression BuildSql(IParseContext context, Expression expression)
+		Expression BuildSql(IBuildContext context, Expression expression)
 		{
-			var sqlex = ConvertAndParseExpression(context, expression);
+			var sqlex = ConvertToSqlAndBuild(context, expression);
 			var idx   = context.SqlQuery.Select.Add(sqlex);
 			var field = BuildSql(expression.Type, idx);
 

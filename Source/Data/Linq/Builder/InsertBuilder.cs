@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 
-	class InsertParser : MethodCallParser
+	class InsertBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("Insert", "InsertWithIdentity");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
-			return new InsertContext(parseInfo.Parent, sequence, null);
+			return new InsertContext(buildInfo.Parent, sequence, null);
 		}
 	}
 
 	class InsertContext : SequenceContextBase
 	{
-		public InsertContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
+		public InsertContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
 			: base(parent, sequence, lambda)
 		{
 		}
@@ -47,7 +47,7 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new NotImplementedException();
 		}
 
-		public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+		public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
 			throw new NotImplementedException();
 		}

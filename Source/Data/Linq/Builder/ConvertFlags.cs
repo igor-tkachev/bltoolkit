@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	public enum ConvertFlags
 	{

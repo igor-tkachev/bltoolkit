@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class JoinParser : MethodCallParser
+	class JoinBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			if (!methodCall.IsQueryable("Join", "GroupJoin") || methodCall.Arguments.Count != 5)
 				return false;
@@ -33,12 +33,12 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var isGroup      = methodCall.Method.Name == "GroupJoin";
-			var outerContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0], parseInfo.SqlQuery));
-			var innerContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[1], new SqlQuery()));
-			var countContext = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[1], new SqlQuery()));
+			var outerContext = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0], buildInfo.SqlQuery));
+			var innerContext = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[1], new SqlQuery()));
+			var countContext = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[1], new SqlQuery()));
 
 			var context  = new SubQueryContext(outerContext);
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext, methodCall) : new SubQueryContext(innerContext);
@@ -64,9 +64,9 @@ namespace BLToolkit.Data.Linq.Parser
 			var innerParent = innerContext.Parent;
 			var countParent = countContext.Parent;
 
-			var outerKeyContext = new ExpressionContext(parseInfo.Parent, context,      outerKeyLambda);
-			var innerKeyContext = new ExpressionContext(parseInfo.Parent, innerContext, innerKeyLambda);
-			var countKeyContext = new ExpressionContext(parseInfo.Parent, countContext, innerKeyLambda);
+			var outerKeyContext = new ExpressionContext(buildInfo.Parent, context,      outerKeyLambda);
+			var innerKeyContext = new ExpressionContext(buildInfo.Parent, innerContext, innerKeyLambda);
+			var countKeyContext = new ExpressionContext(buildInfo.Parent, countContext, innerKeyLambda);
 
 			// Process counter.
 			//
@@ -84,7 +84,7 @@ namespace BLToolkit.Data.Linq.Parser
 					var arg1 = new1.Arguments[i];
 					var arg2 = new2.Arguments[i];
 
-					ParseJoin(parser, join, outerKeyContext, arg1, innerKeyContext, arg2, countKeyContext, counterSql);
+					BuildJoin(builder, join, outerKeyContext, arg1, innerKeyContext, arg2, countKeyContext, counterSql);
 				}
 			}
 			else if (outerKeySelector.NodeType == ExpressionType.MemberInit)
@@ -100,12 +100,12 @@ namespace BLToolkit.Data.Linq.Parser
 					var arg1 = ((MemberAssignment)mi1.Bindings[i]).Expression;
 					var arg2 = ((MemberAssignment)mi2.Bindings[i]).Expression;
 
-					ParseJoin(parser, join, outerKeyContext, arg1, innerKeyContext, arg2, countKeyContext, counterSql);
+					BuildJoin(builder, join, outerKeyContext, arg1, innerKeyContext, arg2, countKeyContext, counterSql);
 				}
 			}
 			else
 			{
-				ParseJoin(parser, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
+				BuildJoin(builder, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
 			}
 
 			context.     Parent = outerParent;
@@ -121,20 +121,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 				inner.Join       = join.JoinedTable;
 				inner.CounterSql = counterSql;
-				return new GroupJoinContext(parseInfo.Parent, selector, context, inner);
+				return new GroupJoinContext(buildInfo.Parent, selector, context, inner);
 			}
 
-			return new JoinContext(parseInfo.Parent, selector, context, innerContext);
+			return new JoinContext(buildInfo.Parent, selector, context, innerContext);
 		}
 
-		static void ParseJoin(
-			ExpressionParser         parser,
+		static void BuildJoin(
+			ExpressionBuilder        builder,
 			SqlQuery.FromClause.Join join,
 			ExpressionContext outerKeyContext, Expression outerKeySelector,
 			ExpressionContext innerKeyContext, Expression innerKeySelector,
 			ExpressionContext countKeyContext, SqlQuery countSql)
 		{
-			var predicate = parser.ParseObjectComparison(
+			var predicate = builder.ConvertObjectComparison(
 				ExpressionType.Equal,
 				outerKeyContext, outerKeySelector,
 				innerKeyContext, innerKeySelector);
@@ -143,10 +143,10 @@ namespace BLToolkit.Data.Linq.Parser
 				join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 			else
 				join
-					.Expr(parser.ParseExpression(outerKeyContext, outerKeySelector)).Equal
-					.Expr(parser.ParseExpression(innerKeyContext, innerKeySelector));
+					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector)).Equal
+					.Expr(builder.ConvertToSql(innerKeyContext, innerKeySelector));
 
-			predicate = parser.ParseObjectComparison(
+			predicate = builder.ConvertObjectComparison(
 				ExpressionType.Equal,
 				outerKeyContext, outerKeySelector,
 				countKeyContext, innerKeySelector);
@@ -155,13 +155,13 @@ namespace BLToolkit.Data.Linq.Parser
 				countSql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 			else
 				countSql.Where
-					.Expr(parser.ParseExpression(outerKeyContext, outerKeySelector)).Equal
-					.Expr(parser.ParseExpression(countKeyContext, innerKeySelector));
+					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector)).Equal
+					.Expr(builder.ConvertToSql(countKeyContext, innerKeySelector));
 		}
 
 		internal class JoinContext : SelectContext
 		{
-			public JoinContext(IParseContext parent, LambdaExpression lambda, IParseContext outerContext, IParseContext innerContext)
+			public JoinContext(IBuildContext parent, LambdaExpression lambda, IBuildContext outerContext, IBuildContext innerContext)
 				: base(parent, lambda, outerContext, innerContext)
 			{
 			}
@@ -170,9 +170,9 @@ namespace BLToolkit.Data.Linq.Parser
 		internal class GroupJoinContext : JoinContext
 		{
 			public GroupJoinContext(
-				IParseContext            parent,
+				IBuildContext            parent,
 				LambdaExpression         lambda,
-				IParseContext            outerContext,
+				IBuildContext            outerContext,
 				GroupJoinSubQueryContext innerContext)
 				: base(parent, lambda, outerContext, innerContext)
 			{
@@ -188,7 +188,7 @@ namespace BLToolkit.Data.Linq.Parser
 			public SqlQuery             CounterSql;
 			public GroupJoinContext     GroupJoin;
 
-			public GroupJoinSubQueryContext(IParseContext subQuery, MethodCallExpression methodCall)
+			public GroupJoinSubQueryContext(IBuildContext subQuery, MethodCallExpression methodCall)
 				: base(subQuery)
 			{
 				_methodCall = methodCall;
@@ -207,12 +207,12 @@ namespace BLToolkit.Data.Linq.Parser
 				return base.BuildExpression(expression, level);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				if (expression == null)
 					return this;
 
-				return base.GetContext(expression, level, parseInfo);
+				return base.GetContext(expression, level, buildInfo);
 			}
 
 			Expression _counterExpression;

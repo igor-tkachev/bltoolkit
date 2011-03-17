@@ -2,33 +2,33 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class FirstSingleParser : MethodCallParser
+	class FirstSingleBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("First", "FirstOrDefault", "Single", "SingleOrDefault");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			if (methodCall.Arguments.Count == 2)
 			{
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-				sequence = parser.ParseWhere(parseInfo.Parent, sequence, condition, true);
+				sequence = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
 			var take = 0;
 
-			if (!parseInfo.IsSubQuery || parser.SqlProvider.IsSubQueryTakeSupported)
+			if (!buildInfo.IsSubQuery || builder.SqlProvider.IsSubQueryTakeSupported)
 				switch (methodCall.Method.Name)
 				{
 					case "First"           :
@@ -38,20 +38,20 @@ namespace BLToolkit.Data.Linq.Parser
 
 					case "Single"          :
 					case "SingleOrDefault" :
-						if (!parseInfo.IsSubQuery)
+						if (!buildInfo.IsSubQuery)
 							take = 2;
 							break;
 				}
 
 			if (take != 0)
-				parser.ParseTake(sequence, new SqlValue(take));
+				builder.BuildTake(sequence, new SqlValue(take));
 
-			return new FirstSingleContext(parseInfo.Parent, sequence, methodCall.Method.Name);
+			return new FirstSingleContext(buildInfo.Parent, sequence, methodCall.Method.Name);
 		}
 
 		class FirstSingleContext : SequenceContextBase
 		{
-			public FirstSingleContext(IParseContext parent, IParseContext sequence, string methodName)
+			public FirstSingleContext(IBuildContext parent, IBuildContext sequence, string methodName)
 				: base(parent, sequence, null)
 			{
 				_methodName = methodName;
@@ -93,7 +93,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return Sequence.IsExpression(expression, level, requestFlag);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				throw new NotImplementedException();
 			}

@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
 	public class ExpressionContext : SequenceContextBase
 	{
-		public ExpressionContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
+		public ExpressionContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
 			: base(parent, sequence, lambda)
 		{
 		}
 
-		public ExpressionContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
+		public ExpressionContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda, SqlQuery sqlQuery)
 			: base(parent, sequence, lambda)
 		{
 			SqlQuery = sqlQuery;
@@ -38,7 +38,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (root.NodeType == ExpressionType.Parameter)
 							{
-								var ctx = Parser.GetContext(this, root);
+								var ctx = Builder.GetContext(this, root);
 
 								if (ctx != null)
 								{
@@ -88,12 +88,12 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+		public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
 			if (expression == Lambda.Parameters[0])
 				return Sequence;
 
-			return Sequence.GetContext(expression, level + 1, parseInfo);
+			return Sequence.GetContext(expression, level + 1, buildInfo);
 		}
 	}
 }

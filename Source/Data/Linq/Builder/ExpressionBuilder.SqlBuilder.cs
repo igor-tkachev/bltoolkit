@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Common;
@@ -14,11 +14,11 @@ namespace BLToolkit.Data.Linq.Parser
 	using Mapping;
 	using Reflection;
 
-	partial class ExpressionParser
+	partial class ExpressionBuilder
 	{
-		#region Parse Where
+		#region Build Where
 
-		public IParseContext ParseWhere(IParseContext parent, IParseContext sequence, LambdaExpression condition, bool checkForSubQuery)
+		public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, LambdaExpression condition, bool checkForSubQuery)
 		{
 			var makeHaving = false;
 			var prevParent = sequence.Parent;
@@ -35,7 +35,7 @@ namespace BLToolkit.Data.Linq.Parser
 				ctx = new ExpressionContext(parent, sequence, condition);
 			}
 
-			ParseSearchCondition(
+			BuildSearchCondition(
 				ctx,
 				expr,
 				makeHaving ?
@@ -47,7 +47,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return sequence;
 		}
 
-		bool CheckSubQueryForWhere(IParseContext context, Expression expression, out bool makeHaving)
+		bool CheckSubQueryForWhere(IBuildContext context, Expression expression, out bool makeHaving)
 		{
 			//var checkParameter = true; //context.IsExpression(expression, 0, RequestFor.ScalarExpression);
 			var makeSubQuery   = false;
@@ -125,9 +125,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseTake
+		#region BuildTake
 
-		public void ParseTake(IParseContext context, ISqlExpression expr)
+		public void BuildTake(IBuildContext context, ISqlExpression expr)
 		{
 			var sql = context.SqlQuery;
 
@@ -174,12 +174,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseSubQuery
+		#region SubQueryToSql
 
-		public IParseContext GetSubQuery(IParseContext context, Expression expr)
+		public IBuildContext GetSubQuery(IBuildContext context, Expression expr)
 		{
-			var info = new ParseInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery });
-			var ctx  = ParseSequence(info);
+			var info = new BuildInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery });
+			var ctx  = BuildSequence(info);
 
 			if (ctx.SqlQuery.Select.Columns.Count == 0 &&
 				(ctx.IsExpression(null, 0, RequestFor.Expression) ||
@@ -191,7 +191,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return ctx;
 		}
 
-		ISqlExpression ParseSubQuery(IParseContext context, Expression expression)
+		ISqlExpression SubQueryToSql(IBuildContext context, Expression expression)
 		{
 			if (expression.NodeType == ExpressionType.MemberAccess)
 			{
@@ -242,12 +242,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region IsSubquery
 
-		bool IsSubQuery(IParseContext context, Expression expression)
+		bool IsSubQuery(IBuildContext context, Expression expression)
 		{
 			return IsSubQuery(context, expression, false);
 		}
 
-		bool IsSubQuery(IParseContext context, Expression expression, bool ignoreMembers)
+		bool IsSubQuery(IBuildContext context, Expression expression, bool ignoreMembers)
 		{
 			/////if (queries.Length > 0 &&
 			/////	queries[0] is QuerySource.SubQuerySourceColumn &&
@@ -317,7 +317,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		bool IsSubQuerySource(IParseContext context, Expression expr)
+		bool IsSubQuerySource(IBuildContext context, Expression expr)
 		{
 			if (expr == null)
 				return false;
@@ -586,9 +586,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseExpression
+		#region BuildExpression
 
-		public SqlInfo[] ParseExpressions(IParseContext context, Expression expression, ConvertFlags queryConvertFlag)
+		public SqlInfo[] ConvertExpressions(IBuildContext context, Expression expression, ConvertFlags queryConvertFlag)
 		{
 			expression = ConvertExpression(expression);
 
@@ -608,7 +608,7 @@ namespace BLToolkit.Data.Linq.Parser
 						return expr.Arguments
 							.Select((arg,i) =>
 							{
-								var sql = ParseExpression(context, arg);
+								var sql = ConvertToSql(context, arg);
 								var mi  = expr.Members[i];
 
 								if (mi is MethodInfo)
@@ -628,7 +628,7 @@ namespace BLToolkit.Data.Linq.Parser
 							.Cast<MemberAssignment>()
 							.Select(a =>
 							{
-								var sql = ParseExpression(context, a.Expression);
+								var sql = ConvertToSql(context, a.Expression);
 								var mi  = a.Member;
 
 								if (mi is MethodInfo)
@@ -648,16 +648,16 @@ namespace BLToolkit.Data.Linq.Parser
 					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 			}
 
-			return new[] { new SqlInfo { Sql = ParseExpression(context, expression) } };
+			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression) } };
 		}
 
-		public ISqlExpression ConvertAndParseExpression(IParseContext context, Expression expression)
+		public ISqlExpression ConvertToSqlAndBuild(IBuildContext context, Expression expression)
 		{
 			var expr = ConvertExpression(expression);
-			return ParseExpression(context, expr);
+			return ConvertToSql(context, expr);
 		}
 
-		public ISqlExpression ParseExpression(IParseContext context, Expression expression)
+		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression)
 		{
 			/*
 			var qlen = queries.Length;
@@ -665,7 +665,7 @@ namespace BLToolkit.Data.Linq.Parser
 			if (expression.NodeType == ExpressionType.Parameter && qlen == 1 && queries[0] is QuerySource.Scalar)
 			{
 				var ma = (QuerySource.Scalar)queries[0];
-				return ParseExpression(ma.Lambda, ma.Lambda.Body, ma.Sources);
+				return ConvertToSql(ma.Lambda, ma.Lambda.Body, ma.Sources);
 			}
 			*/
 
@@ -676,7 +676,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return BuildParameter(expression).SqlParameter;
 
 			if (IsSubQuery(context, expression))
-				return ParseSubQuery(context, expression);
+				return SubQueryToSql(context, expression);
 
 			switch (expression.NodeType)
 			{
@@ -691,7 +691,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.LessThanOrEqual:
 					{
 						var condition = new SqlQuery.SearchCondition();
-						ParseSearchCondition(context, expression, condition.Conditions);
+						BuildSearchCondition(context, expression, condition.Conditions);
 						return condition;
 					}
 
@@ -710,8 +710,8 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Coalesce:
 					{
 						var e = (BinaryExpression)expression;
-						var l = ParseExpression(context, e.Left);
-						var r = ParseExpression(context, e.Right);
+						var l = ConvertToSql(context, e.Left);
+						var r = ConvertToSql(context, e.Right);
 						var t = e.Type;
 
 						switch (expression.NodeType)
@@ -757,7 +757,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.NegateChecked:
 					{
 						var e = (UnaryExpression)expression;
-						var o = ParseExpression(context, e.Operand);
+						var o = ConvertToSql(context, e.Operand);
 						var t = e.Type;
 
 						switch (expression.NodeType)
@@ -775,7 +775,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.ConvertChecked :
 					{
 						var e = (UnaryExpression)expression;
-						var o = ParseExpression(context, e.Operand);
+						var o = ConvertToSql(context, e.Operand);
 
 						if (e.Method == null && e.IsLifted)
 							return o;
@@ -791,9 +791,9 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Conditional   :
 					{
 						var e = (ConditionalExpression)expression;
-						var s = ParseExpression(context, e.Test);
-						var t = ParseExpression(context, e.IfTrue);
-						var f = ParseExpression(context, e.IfFalse);
+						var s = ConvertToSql(context, e.Test);
+						var t = ConvertToSql(context, e.IfTrue);
+						var f = ConvertToSql(context, e.IfFalse);
 
 						if (f is SqlFunction)
 						{
@@ -829,16 +829,16 @@ namespace BLToolkit.Data.Linq.Parser
 							//var ef  = l.Body.Unwrap();
 							//var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
 
-							//return ParseExpression(context, pie);
+							//return ConvertToSql(context, pie);
 						}
 
 						if (TypeHelper.IsNullableValueMember(ma.Member))
 						{
 							throw new InvalidOperationException();
-							//return ParseExpression(context, ma.Expression);
+							//return ConvertToSql(context, ma.Expression);
 						}
 
-						var de = ParseTimeSpanMember(context, ma);
+						var de = ConvertTimeSpanMember(context, ma);
 
 						if (de != null)
 						{
@@ -921,7 +921,7 @@ namespace BLToolkit.Data.Linq.Parser
 								return sql[0].Sql;
 							}
 
-							return ParseEnumerable(context, e);
+							return ConvertEnumerable(context, e);
 						}
 
 #if DEBUG
@@ -930,7 +930,7 @@ namespace BLToolkit.Data.Linq.Parser
 						if (cm != null)
 						{
 							throw new InvalidOperationException();
-							//return ParseExpression(context, cm);
+							//return ConvertToSql(context, cm);
 						}
 
 #endif
@@ -942,9 +942,9 @@ namespace BLToolkit.Data.Linq.Parser
 							var parms = new List<ISqlExpression>();
 
 							if (e.Object != null)
-								parms.Add(ParseExpression(context, e.Object));
+								parms.Add(ConvertToSql(context, e.Object));
 
-							parms.AddRange(e.Arguments.Select(t => ParseExpression(context, t)));
+							parms.AddRange(e.Arguments.Select(t => ConvertToSql(context, t)));
 
 							return Convert(context, attr.GetExpression(e.Method, parms.ToArray()));
 						}
@@ -961,7 +961,7 @@ namespace BLToolkit.Data.Linq.Parser
 							ex = ((UnaryExpression)ex).Operand;
 
 						//if (ex.NodeType == ExpressionType.MemberAccess)
-						//	return ParseExpression(lambda, ex, queries);
+						//	return ConvertToSql(lambda, ex, queries);
 
 						if (ex.NodeType == ExpressionType.Lambda)
 						{
@@ -977,14 +977,14 @@ namespace BLToolkit.Data.Linq.Parser
 								return dic.TryGetValue(wpi, out ppi) ? ppi : wpi;
 							});
 
-							return ParseExpression(context, pie);
+							return ConvertToSql(context, pie);
 						}
 
 						break;
 					}
 
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
-					return ParseExpression(context, ((ChangeTypeExpression)expression).Expression);
+					return ConvertToSql(context, ((ChangeTypeExpression)expression).Expression);
 			}
 
 			throw new LinqException("'{0}' cannot be converted to SQL.", expression);
@@ -1254,11 +1254,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseEnumerable
+		#region ConvertEnumerable
 
-		ISqlExpression ParseEnumerable(IParseContext context, MethodCallExpression expression)
+		ISqlExpression ConvertEnumerable(IBuildContext context, MethodCallExpression expression)
 		{
-			return ParseSubQuery(context, expression);
+			return SubQueryToSql(context, expression);
 
 			//throw new NotImplementedException();
 
@@ -1281,7 +1281,7 @@ namespace BLToolkit.Data.Linq.Parser
 				throw new LinqException("'{0}' cannot be converted to SQL.", expression);
 
 			var groupBy = (QuerySource.GroupBy)field;
-			var expr    = ParseEnumerable(expression, groupBy);
+			var expr    = ConvertEnumerable(expression, groupBy);
 
 			if (queries.Length == 1 && queries[0] is QuerySource.SubQuery)
 			{
@@ -1298,9 +1298,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region Predicate Parser
+		#region Predicate Converter
 
-		ISqlPredicate ParsePredicate(IParseContext context, Expression expression)
+		ISqlPredicate ConvertPredicate(IBuildContext context, Expression expression)
 		{
 			switch (expression.NodeType)
 			{
@@ -1312,7 +1312,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.LessThanOrEqual    :
 					{
 						var e = (BinaryExpression)expression;
-						return ParseCompare(context, expression.NodeType, e.Left, e.Right);
+						return ConvertCompare(context, expression.NodeType, e.Left, e.Right);
 					}
 
 				case ExpressionType.Call               :
@@ -1322,15 +1322,15 @@ namespace BLToolkit.Data.Linq.Parser
 						ISqlPredicate predicate = null;
 
 						if (e.Method.Name == "Equals" && e.Object != null && e.Arguments.Count == 1)
-							return ParseCompare(context, ExpressionType.Equal, e.Object, e.Arguments[0]);
+							return ConvertCompare(context, ExpressionType.Equal, e.Object, e.Arguments[0]);
 
 						if (e.Method.DeclaringType == typeof(string))
 						{
 							switch (e.Method.Name)
 							{
-								case "Contains"   : predicate = ParseLikePredicate(context, e, "%", "%"); break;
-								case "StartsWith" : predicate = ParseLikePredicate(context, e, "",  "%"); break;
-								case "EndsWith"   : predicate = ParseLikePredicate(context, e, "%", "");  break;
+								case "Contains"   : predicate = ConvertLikePredicate(context, e, "%", "%"); break;
+								case "StartsWith" : predicate = ConvertLikePredicate(context, e, "",  "%"); break;
+								case "EndsWith"   : predicate = ConvertLikePredicate(context, e, "%", "");  break;
 							}
 						}
 						else if (e.Method.DeclaringType == typeof(Enumerable))
@@ -1338,7 +1338,7 @@ namespace BLToolkit.Data.Linq.Parser
 							switch (e.Method.Name)
 							{
 								case "Contains" :
-									predicate = ParseInPredicate(context, e);
+									predicate = ConvertInPredicate(context, e);
 									break;
 							}
 						}
@@ -1347,16 +1347,16 @@ namespace BLToolkit.Data.Linq.Parser
 							switch (e.Method.Name)
 							{
 								case "Contains" :
-									predicate = ParseInPredicate(context, e);
+									predicate = ConvertInPredicate(context, e);
 									break;
 							}
 						}
 #if !SILVERLIGHT
-						else if (e.Method == ReflectionHelper.Functions.String.Like11) predicate = ParseLikePredicate(context, e);
-						else if (e.Method == ReflectionHelper.Functions.String.Like12) predicate = ParseLikePredicate(context, e);
+						else if (e.Method == ReflectionHelper.Functions.String.Like11) predicate = ConvertLikePredicate(context, e);
+						else if (e.Method == ReflectionHelper.Functions.String.Like12) predicate = ConvertLikePredicate(context, e);
 #endif
-						else if (e.Method == ReflectionHelper.Functions.String.Like21) predicate = ParseLikePredicate(context, e);
-						else if (e.Method == ReflectionHelper.Functions.String.Like22) predicate = ParseLikePredicate(context, e);
+						else if (e.Method == ReflectionHelper.Functions.String.Like21) predicate = ConvertLikePredicate(context, e);
+						else if (e.Method == ReflectionHelper.Functions.String.Like22) predicate = ConvertLikePredicate(context, e);
 
 						if (predicate != null)
 							return Convert(context, predicate);
@@ -1367,7 +1367,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Conditional:
 					return Convert(context,
 						new SqlQuery.Predicate.ExprExpr(
-							ParseExpression(context, expression),
+							ConvertToSql(context, expression),
 							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(true)));
 
@@ -1379,7 +1379,7 @@ namespace BLToolkit.Data.Linq.Parser
 							e.Member.DeclaringType.IsGenericType && 
 							e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
 						{
-							var expr = ParseExpression(context, e.Expression);
+							var expr = ConvertToSql(context, e.Expression);
 							return Convert(context, new SqlQuery.Predicate.IsNull(expr, true));
 						}
 
@@ -1402,7 +1402,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 			}
 
-			var ex = ParseExpression(context, expression);
+			var ex = ConvertToSql(context, expression);
 
 			if (SqlExpression.NeedsEqual(ex))
 				return Convert(context, new SqlQuery.Predicate.ExprExpr(ex, SqlQuery.Predicate.Operator.Equal, new SqlValue(true)));
@@ -1410,9 +1410,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return Convert(context, new SqlQuery.Predicate.Expr(ex));
 		}
 
-		#region ParseCompare
+		#region ConvertCompare
 
-		ISqlPredicate ParseCompare(IParseContext context, ExpressionType nodeType, Expression left, Expression right)
+		ISqlPredicate ConvertCompare(IBuildContext context, ExpressionType nodeType, Expression left, Expression right)
 		{
 			if (left.NodeType == ExpressionType.Convert && left.Type == typeof(int) && right.NodeType == ExpressionType.Constant)
 			{
@@ -1441,21 +1441,21 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Equal    :
 				case ExpressionType.NotEqual :
 
-					var p = ParseObjectComparison(nodeType, context, left, context, right);
+					var p = ConvertObjectComparison(nodeType, context, left, context, right);
 					if (p != null)
 						return p;
 
-					p = ParseObjectNullComparison(context, left, right, nodeType == ExpressionType.Equal);
+					p = ConvertObjectNullComparison(context, left, right, nodeType == ExpressionType.Equal);
 					if (p != null)
 						return p;
 
-					p = ParseObjectNullComparison(context, right, left, nodeType == ExpressionType.Equal);
+					p = ConvertObjectNullComparison(context, right, left, nodeType == ExpressionType.Equal);
 					if (p != null)
 						return p;
 
 					if (left.NodeType == ExpressionType.New || right.NodeType == ExpressionType.New)
 					{
-						p = ParseNewObjectComparison(context, nodeType, left, right);
+						p = ConvertNewObjectComparison(context, nodeType, left, right);
 						if (p != null)
 							return p;
 					}
@@ -1478,13 +1478,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert)
 			{
-				var p = ParseEnumConversion(context, left, op, right);
+				var p = ConvertEnumConversion(context, left, op, right);
 				if (p != null)
 					return p;
 			}
 
-			var l = ParseExpression(context, left);
-			var r = ParseExpression(context, right);
+			var l = ConvertToSql(context, left);
+			var r = ConvertToSql(context, right);
 
 			switch (nodeType)
 			{
@@ -1516,9 +1516,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseEnumConversion
+		#region ConvertEnumConversion
 
-		ISqlPredicate ParseEnumConversion(IParseContext context, Expression left, SqlQuery.Predicate.Operator op, Expression right)
+		ISqlPredicate ConvertEnumConversion(IBuildContext context, Expression left, SqlQuery.Predicate.Operator op, Expression right)
 		{
 			UnaryExpression conv;
 			Expression      value;
@@ -1571,12 +1571,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 						if (left.NodeType == ExpressionType.Convert)
 						{
-							l = ParseExpression(context, operand);
+							l = ConvertToSql(context, operand);
 							r = new SqlValue(mapValue);
 						}
 						else
 						{
-							r = ParseExpression(context, operand);
+							r = ConvertToSql(context, operand);
 							l = new SqlValue(mapValue);
 						}
 
@@ -1587,8 +1587,8 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						value = ((UnaryExpression)value).Operand;
 
-						var l = ParseExpression(context, operand);
-						var r = ParseExpression(context, value);
+						var l = ConvertToSql(context, operand);
+						var r = ConvertToSql(context, value);
 
 						if (l is SqlParameter) ((SqlParameter)l).SetEnumConverter(type, MappingSchema);
 						if (r is SqlParameter) ((SqlParameter)r).SetEnumConverter(type, MappingSchema);
@@ -1602,9 +1602,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseObjectNullComparison
+		#region ConvertObjectNullComparison
 
-		ISqlPredicate ParseObjectNullComparison(IParseContext context, Expression left, Expression right, bool isEqual)
+		ISqlPredicate ConvertObjectNullComparison(IBuildContext context, Expression left, Expression right, bool isEqual)
 		{
 			if (right.NodeType == ExpressionType.Constant && ((ConstantExpression)right).Value == null)
 			{
@@ -1640,13 +1640,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseObjectComparison
+		#region ConvertObjectComparison
 
-		public ISqlPredicate ParseObjectComparison(
+		public ISqlPredicate ConvertObjectComparison(
 			ExpressionType nodeType,
-			IParseContext  leftContext,
+			IBuildContext  leftContext,
 			Expression     left,
-			IParseContext  rightContext,
+			IBuildContext  rightContext,
 			Expression     right)
 		{
 			var qsl = GetContext(leftContext,  left);
@@ -1719,7 +1719,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return condition;
 		}
 
-		ISqlPredicate ParseNewObjectComparison(IParseContext context, ExpressionType nodeType, Expression left, Expression right)
+		ISqlPredicate ConvertNewObjectComparison(IBuildContext context, ExpressionType nodeType, Expression left, Expression right)
 		{
 			left  = FindExpression(left);
 			right = FindExpression(right);
@@ -1745,10 +1745,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 			for (var i = 0; i < newExpr.Arguments.Count; i++)
 			{
-				var lex = ParseExpression(context, newExpr.Arguments[i]);
+				var lex = ConvertToSql(context, newExpr.Arguments[i]);
 				var rex =
 					newRight != null ?
-						ParseExpression(context, newRight.Arguments[i]) :
+						ConvertToSql(context, newRight.Arguments[i]) :
 						GetParameter(right, newExpr.Members[i]);
 
 				var predicate = Convert(context,
@@ -1822,14 +1822,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseInPredicate
+		#region ConvertInPredicate
 
-		private ISqlPredicate ParseInPredicate(IParseContext context, MethodCallExpression expression)
+		private ISqlPredicate ConvertInPredicate(IBuildContext context, MethodCallExpression expression)
 		{
 			var e        = expression;
 			var argIndex = e.Object != null ? 0 : 1;
 
-			var expr = ParseExpression(context, e.Arguments[argIndex]);
+			var expr = ConvertToSql(context, e.Arguments[argIndex]);
 			var arr  = e.Object ?? e.Arguments[0];
 
 			switch (arr.NodeType)
@@ -1844,7 +1844,7 @@ namespace BLToolkit.Data.Linq.Parser
 						var exprs  = new ISqlExpression[newArr.Expressions.Count];
 
 						for (var i = 0; i < newArr.Expressions.Count; i++)
-							exprs[i] = ParseExpression(context, newArr.Expressions[i]);
+							exprs[i] = ConvertToSql(context, newArr.Expressions[i]);
 
 						return new SqlQuery.Predicate.InList(expr, false, exprs);
 					}
@@ -1868,11 +1868,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region LIKE predicate
 
-		ISqlPredicate ParseLikePredicate(IParseContext context, MethodCallExpression expression, string start, string end)
+		ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression, string start, string end)
 		{
 			var e = expression;
-			var o = ParseExpression(context, e.Object);
-			var a = ParseExpression(context, e.Arguments[0]);
+			var o = ConvertToSql(context, e.Object);
+			var a = ConvertToSql(context, e.Arguments[0]);
 
 			if (a is SqlValue)
 			{
@@ -1907,16 +1907,16 @@ namespace BLToolkit.Data.Linq.Parser
 			return null;
 		}
 
-		ISqlPredicate ParseLikePredicate(IParseContext context, MethodCallExpression expression)
+		ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression)
 		{
 			var e  = expression;
-			var a1 = ParseExpression(context, e.Arguments[0]);
-			var a2 = ParseExpression(context, e.Arguments[1]);
+			var a1 = ConvertToSql(context, e.Arguments[0]);
+			var a2 = ConvertToSql(context, e.Arguments[1]);
 
 			ISqlExpression a3 = null;
 
 			if (e.Arguments.Count == 3)
-				a3 = ParseExpression(context, e.Arguments[2]);
+				a3 = ConvertToSql(context, e.Arguments[2]);
 
 			return new SqlQuery.Predicate.Like(a1, false, a2, a3);
 		}
@@ -1954,7 +1954,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region MakeIsPredicate
 
-		ISqlPredicate MakeIsPredicate(IParseContext context, QuerySource.Table table, Type typeOperand)
+		ISqlPredicate MakeIsPredicate(IBuildContext context, QuerySource.Table table, Type typeOperand)
 		{
 			if (typeOperand == table.ObjectType && table.InheritanceMapping.Count(m => m.Type == typeOperand) == 0)
 				return Convert(context, new SqlQuery.Predicate.Expr(new SqlValue(true)));
@@ -2015,13 +2015,13 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region Search Condition Parser
+		#region Search Condition Builder
 
-		void ParseSearchCondition(IParseContext context, Expression expression, List<SqlQuery.Condition> conditions)
+		void BuildSearchCondition(IBuildContext context, Expression expression, List<SqlQuery.Condition> conditions)
 		{
 			if (IsSubQuery(context, expression))
 			{
-				var cond = ParseConditionSubQuery(context, expression);
+				var cond = BuildConditionSubQuery(context, expression);
 
 				if (cond != null)
 				{
@@ -2036,8 +2036,8 @@ namespace BLToolkit.Data.Linq.Parser
 					{
 						var e = (BinaryExpression)expression;
 
-						ParseSearchCondition(context, e.Left,  conditions);
-						ParseSearchCondition(context, e.Right, conditions);
+						BuildSearchCondition(context, e.Left,  conditions);
+						BuildSearchCondition(context, e.Right, conditions);
 
 						break;
 					}
@@ -2047,9 +2047,9 @@ namespace BLToolkit.Data.Linq.Parser
 						var e           = (BinaryExpression)expression;
 						var orCondition = new SqlQuery.SearchCondition();
 
-						ParseSearchCondition(context, e.Left,  orCondition.Conditions);
+						BuildSearchCondition(context, e.Left,  orCondition.Conditions);
 						orCondition.Conditions[orCondition.Conditions.Count - 1].IsOr = true;
-						ParseSearchCondition(context, e.Right, orCondition.Conditions);
+						BuildSearchCondition(context, e.Right, orCondition.Conditions);
 
 						conditions.Add(new SqlQuery.Condition(false, orCondition));
 
@@ -2061,7 +2061,7 @@ namespace BLToolkit.Data.Linq.Parser
 						var e            = expression as UnaryExpression;
 						var notCondition = new SqlQuery.SearchCondition();
 
-						ParseSearchCondition(context, e.Operand, notCondition.Conditions);
+						BuildSearchCondition(context, e.Operand, notCondition.Conditions);
 
 						if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SqlQuery.Predicate.NotExpr)
 						{
@@ -2076,7 +2076,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 
 				default:
-					var predicate = ParsePredicate(context, expression);
+					var predicate = ConvertPredicate(context, expression);
 
 					if (predicate is SqlQuery.Predicate.Expr)
 					{
@@ -2100,9 +2100,9 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 		}
 
-		#region ParseConditionSubQuery
+		#region BuildConditionSubQuery
 
-		SqlQuery.Condition ParseConditionSubQuery(IParseContext context, Expression expr)
+		SqlQuery.Condition BuildConditionSubQuery(IBuildContext context, Expression expr)
 		{
 			if (expr.NodeType != ExpressionType.Call)
 				return null;
@@ -2120,9 +2120,9 @@ namespace BLToolkit.Data.Linq.Parser
 				case "Any" :
 
 					if (call.Arguments.Count == 1)
-						func = () => ParseAnyCondition(context, SetType.Any, call, null, null);
+						func = () => BuildAnyCondition(context, SetType.Any, call, null, null);
 					else if (call.Arguments.Count == 2)
-						func = () => ParseAnyCondition(context, SetType.Any, call, (LambdaExpression)call.Arguments[1], null);
+						func = () => BuildAnyCondition(context, SetType.Any, call, (LambdaExpression)call.Arguments[1], null);
 					else
 						return null;
 
@@ -2131,7 +2131,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case "All" :
 
 					if (call.Arguments.Count == 2)
-						func = () => ParseAnyCondition(context, SetType.All, call, (LambdaExpression)call.Arguments[1], null);
+						func = () => BuildAnyCondition(context, SetType.All, call, (LambdaExpression)call.Arguments[1], null);
 					else
 						return null;
 
@@ -2150,7 +2150,7 @@ namespace BLToolkit.Data.Linq.Parser
 							{
 								var param  = Expression.Parameter(ex.Type, ex.NodeType == ExpressionType.Parameter ? ((ParameterExpression)ex).Name : "t");
 								var lambda = Expression.Lambda(Expression.Equal(param, ex), param);
-								return ParseAnyCondition(context, SetType.In, seq, lambda, ex);
+								return BuildAnyCondition(context, SetType.In, seq, lambda, ex);
 							};
 						}
 						else
@@ -2167,7 +2167,7 @@ namespace BLToolkit.Data.Linq.Parser
 							{
 								var param  = Expression.Parameter(ex.Type, ex.NodeType == ExpressionType.Parameter ? ((ParameterExpression)ex).Name : "t");
 								var lambda = new LambdaInfo(Expression.Equal(param, ex), param);
-								return ParseAnyCondition(SetType.In, s, lambda, ex);
+								return ConvertAnyCondition(SetType.In, s, lambda, ex);
 							};
 							return true;
 						});
@@ -2189,12 +2189,12 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region ParseAny
+		#region BuildAny
 
 		enum SetType { Any, All, In }
 
-		SqlQuery.Condition ParseAnyCondition(
-			IParseContext context, SetType setType, Expression expr, LambdaExpression lambda, Expression inExpr)
+		SqlQuery.Condition BuildAnyCondition(
+			IBuildContext context, SetType setType, Expression expr, LambdaExpression lambda, Expression inExpr)
 		{
 			/*
 			var sql = context.SqlQuery;
@@ -2267,7 +2267,7 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 
 				if (inExpr == null || query.SqlQuery.Select.Columns.Count != 1)
-					ParseWhere(context, query, lambda, true);
+					BuildWhere(context, query, lambda, true);
 			}
 
 			any.ParentSql = context.SqlQuery;
@@ -2279,7 +2279,7 @@ namespace BLToolkit.Data.Linq.Parser
 			if (inExpr != null && query.SqlQuery.Select.Columns.Count == 1)
 			{
 				//query.Select(this);
-				var ex = ParseExpression(context, inExpr);
+				var ex = ConvertToSql(context, inExpr);
 				cond = new SqlQuery.Condition(false, new SqlQuery.Predicate.InSubQuery(ex, false, any));
 			}
 			else
@@ -2292,7 +2292,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region CanBeTranslatedToSql
 
-		bool CanBeTranslatedToSql(IParseContext context, Expression expr, bool canBeCompiled)
+		bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
 		{
 			return null == expr.Find(pi =>
 			{
@@ -2342,7 +2342,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region Helpers
 
-		public IParseContext GetContext([JetBrains.Annotations.NotNull] IParseContext current, Expression expression)
+		public IBuildContext GetContext([JetBrains.Annotations.NotNull] IBuildContext current, Expression expression)
 		{
 			var root = expression.GetRootObject();
 
@@ -2401,19 +2401,19 @@ namespace BLToolkit.Data.Linq.Parser
 			return attr;
 		}
 
-		public ISqlExpression Convert(IParseContext context, ISqlExpression expr)
+		public ISqlExpression Convert(IBuildContext context, ISqlExpression expr)
 		{
 			SqlProvider.SqlQuery = context.SqlQuery;
 			return SqlProvider.ConvertExpression(expr);
 		}
 
-		public ISqlPredicate Convert(IParseContext context, ISqlPredicate predicate)
+		public ISqlPredicate Convert(IBuildContext context, ISqlPredicate predicate)
 		{
 			SqlProvider.SqlQuery = context.SqlQuery;
 			return SqlProvider.ConvertPredicate(predicate);
 		}
 
-		public ISqlExpression ParseTimeSpanMember(IParseContext context, MemberExpression expression)
+		public ISqlExpression ConvertTimeSpanMember(IBuildContext context, MemberExpression expression)
 		{
 			if (expression.Member.DeclaringType == typeof(TimeSpan))
 			{
@@ -2440,15 +2440,15 @@ namespace BLToolkit.Data.Linq.Parser
 							typeof(int),
 							"DateDiff",
 							new SqlValue(datePart),
-							ParseExpression(context, e.Right),
-							ParseExpression(context, e.Left));
+							ConvertToSql(context, e.Right),
+							ConvertToSql(context, e.Left));
 				}
 			}
 
 			return null;
 		}
 
-		internal ISqlExpression ConvertSearchCondition(IParseContext context, ISqlExpression sqlExpression)
+		internal ISqlExpression ConvertSearchCondition(IBuildContext context, ISqlExpression sqlExpression)
 		{
 			if (sqlExpression is SqlQuery.SearchCondition)
 			{

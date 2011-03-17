@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using Data.Sql;
 
-	class SubQueryContext : IParseContext
+	class SubQueryContext : IBuildContext
 	{
-		public readonly IParseContext SubQuery;
+		public readonly IBuildContext SubQuery;
 
-		public SubQueryContext(IParseContext subQuery, SqlQuery sqlQuery, bool addToSql)
+		public SubQueryContext(IBuildContext subQuery, SqlQuery sqlQuery, bool addToSql)
 		{
 			if (sqlQuery == subQuery.SqlQuery)
 				throw new ArgumentException("Wrong subQuery argument.", "subQuery");
@@ -27,12 +27,12 @@ namespace BLToolkit.Data.Linq.Parser
 			//_subQuery.SqlQuery.ParentSql = SqlQuery;
 		}
 
-		public SubQueryContext(IParseContext subQuery, bool addToSql)
+		public SubQueryContext(IBuildContext subQuery, bool addToSql)
 			: this(subQuery, new SqlQuery { ParentSql = subQuery.SqlQuery.ParentSql }, addToSql)
 		{
 		}
 
-		public SubQueryContext(IParseContext subQuery)
+		public SubQueryContext(IBuildContext subQuery)
 			: this(subQuery, true)
 		{
 		}
@@ -41,10 +41,10 @@ namespace BLToolkit.Data.Linq.Parser
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-		public ExpressionParser Parser     { get { return SubQuery.Parser;     } }
+		public ExpressionBuilder Builder     { get { return SubQuery.Builder;     } }
 		public Expression       Expression { get { return SubQuery.Expression; } }
 		public SqlQuery         SqlQuery   { get; set; }
-		public IParseContext    Parent     { get; set; }
+		public IBuildContext    Parent     { get; set; }
 
 		public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
@@ -89,9 +89,9 @@ namespace BLToolkit.Data.Linq.Parser
 			return SubQuery.IsExpression(expression, level, testFlag);
 		}
 
-		public virtual IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+		public virtual IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
-			return SubQuery.GetContext(expression, level, parseInfo);
+			return SubQuery.GetContext(expression, level, buildInfo);
 		}
 
 		readonly Dictionary<ISqlExpression,int> _indexes = new Dictionary<ISqlExpression,int>();
@@ -109,7 +109,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return idx;
 		}
 
-		public int ConvertToParentIndex(int index, IParseContext context)
+		public int ConvertToParentIndex(int index, IBuildContext context)
 		{
 			var idx = GetIndex(context.SqlQuery.Select.Columns[index]);
 			return Parent == null ? idx : Parent.ConvertToParentIndex(idx, this);

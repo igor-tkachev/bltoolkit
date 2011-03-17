@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Linq.Parser
 	// But the class means to have a lot of inheritors, and functionality of the inheritors
 	// will be doubled as well. So lets double it once here.
 	//
-	public class SelectContext : IParseContext
+	public class SelectContext : IBuildContext
 	{
 		#region Init
 
@@ -25,25 +25,25 @@ namespace BLToolkit.Data.Linq.Parser
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-		public IParseContext[]  Sequence { get; set; }
+		public IBuildContext[]  Sequence { get; set; }
 		public LambdaExpression Lambda   { get; set; }
 		public Expression       Body     { get; set; }
-		public ExpressionParser Parser   { get; private set; }
+		public ExpressionBuilder Builder   { get; private set; }
 		public SqlQuery         SqlQuery { get; set; }
-		public IParseContext    Parent   { get; set; }
+		public IBuildContext    Parent   { get; set; }
 		public bool             IsScalar { get; private set; }
 
-		Expression IParseContext.Expression { get { return Lambda; } }
+		Expression IBuildContext.Expression { get { return Lambda; } }
 
 		bool _isGroupBySubquery;
 
 		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>();
 
-		public SelectContext(IParseContext parent, LambdaExpression lambda, params IParseContext[] sequences)
+		public SelectContext(IBuildContext parent, LambdaExpression lambda, params IBuildContext[] sequences)
 		{
 			Parent   = parent;
 			Sequence = sequences;
-			Parser   = sequences[0].Parser;
+			Builder   = sequences[0].Builder;
 			Lambda   = lambda;
 			Body     = lambda.Body;//.Unwrap();
 			SqlQuery = sequences[0].SqlQuery;
@@ -102,7 +102,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 						_isGroupBySubquery =
 							Body.Type.IsGenericType &&
-							Body.Type.GetGenericTypeDefinition() == typeof(ExpressionParser.GroupSubQuery<,>);
+							Body.Type.GetGenericTypeDefinition() == typeof(ExpressionBuilder.GroupSubQuery<,>);
 
 						break;
 					}
@@ -126,11 +126,11 @@ namespace BLToolkit.Data.Linq.Parser
 			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 				expr, new []
 				{
-					ExpressionParser.ContextParam,
-					ExpressionParser.DataContextParam,
-					ExpressionParser.DataReaderParam,
-					ExpressionParser.ExpressionParam,
-					ExpressionParser.ParametersParam,
+					ExpressionBuilder.ContextParam,
+					ExpressionBuilder.DataContextParam,
+					ExpressionBuilder.DataReaderParam,
+					ExpressionBuilder.ExpressionParam,
+					ExpressionBuilder.ParametersParam,
 				});
 
 			query.SetQuery(mapper.Compile());
@@ -150,12 +150,12 @@ namespace BLToolkit.Data.Linq.Parser
 				if (_expressionIndex.TryGetValue(key, out info))
 				{
 					var idx  = Parent == null ? info[0].Index : Parent.ConvertToParentIndex(info[0].Index, this);
-					return Parser.BuildSql((expression ?? Body).Type, idx);
+					return Builder.BuildSql((expression ?? Body).Type, idx);
 				}
 			}
 
 			if (expression == null)
-				return Parser.BuildExpression(this, Body);
+				return Builder.BuildExpression(this, Body);
 
 			var levelExpression = expression.GetLevelExpression(level);
 
@@ -168,7 +168,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 							var idx = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
-							return Parser.BuildSql(expression.Type, idx);
+							return Builder.BuildSql(expression.Type, idx);
 						}
 
 				return ProcessScalar(
@@ -211,10 +211,10 @@ namespace BLToolkit.Data.Linq.Parser
 														var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
 														var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
-														return Parser.BuildSql(e.Type, idx);
+														return Builder.BuildSql(e.Type, idx);
 													}
 
-													return Parser.BuildExpression(this, e);
+													return Builder.BuildExpression(this, e);
 												}
 
 												return e;
@@ -227,11 +227,11 @@ namespace BLToolkit.Data.Linq.Parser
 										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
-										return Parser.BuildSql(expression.Type, idx);
+										return Builder.BuildSql(expression.Type, idx);
 									}
 								}
 
-								return Parser.BuildExpression(this, memberExpression);
+								return Builder.BuildExpression(this, memberExpression);
 							}
 
 							switch (memberExpression.NodeType)
@@ -276,7 +276,7 @@ namespace BLToolkit.Data.Linq.Parser
 			if (IsScalar)
 			{
 				if (expression == null)
-					return Parser.ParseExpressions(this, Body, flags);
+					return Builder.ConvertExpressions(this, Body, flags);
 
 				switch (flags)
 				{
@@ -297,7 +297,7 @@ namespace BLToolkit.Data.Linq.Parser
 								expression,
 								level,
 								(ctx, ex, l) => ctx.ConvertToSql(ex, l, flags),
-								() => new[] { new SqlInfo { Sql = Parser.ParseExpression(this, expression) } });
+								() => new[] { new SqlInfo { Sql = Builder.ConvertToSql(this, expression) } });
 						}
 				}
 			}
@@ -340,7 +340,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 											if (!_sql.TryGetValue(member, out sql))
 											{
-												sql = ParseExpressions(Members[member], flags);
+												sql = ConvertExpressions(Members[member], flags);
 												_sql.Add(member, sql);
 											}
 
@@ -355,8 +355,8 @@ namespace BLToolkit.Data.Linq.Parser
 												{
 													case 0 :
 													//case 2 :
-														var parseExpression = GetParseExpression(expression, levelExpression, mex);
-														return ParseExpressions(parseExpression, flags);
+														var buildExpression = GetExpression(expression, levelExpression, mex);
+														return ConvertExpressions(buildExpression, flags);
 													default:
 														return ctx.ConvertToSql(ex, l, flags);
 												}
@@ -392,12 +392,12 @@ namespace BLToolkit.Data.Linq.Parser
 					return ConvertToSql(expression, 0, flags);
 			}
 
-			return ParseExpressions(expression, flags);
+			return ConvertExpressions(expression, flags);
 		}
 
-		SqlInfo[] ParseExpressions(Expression expression, ConvertFlags flags)
+		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
 		{
-			return Parser.ParseExpressions(this, expression, flags)
+			return Builder.ConvertExpressions(this, expression, flags)
 				.Select(_ => CheckExpression(_))
 				.ToArray();
 		}
@@ -406,7 +406,7 @@ namespace BLToolkit.Data.Linq.Parser
 		{
 			if (expression.Sql is SqlQuery.SearchCondition)
 			{
-				expression.Sql = Parser.Convert(this, new SqlFunction(typeof(bool), "CASE", expression.Sql, new SqlValue(true), new SqlValue(false)));
+				expression.Sql = Builder.Convert(this, new SqlFunction(typeof(bool), "CASE", expression.Sql, new SqlValue(true), new SqlValue(false)));
 			}
 
 			return expression;
@@ -536,7 +536,7 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							if (level == 0)
 							{
-								var idx = Parser.ParseExpressions(this, expression, flags);
+								var idx = Builder.ConvertExpressions(this, expression, flags);
 
 								foreach (var info in idx)
 									SetInfo(info);
@@ -717,14 +717,14 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region GetContext
 
-		public virtual IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+		public virtual IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
 			if (IsScalar)
 			{
 				return ProcessScalar(
 					expression,
 					level,
-					(ctx, ex, l) => ctx.GetContext(ex, l, parseInfo),
+					(ctx, ex, l) => ctx.GetContext(ex, l, buildInfo),
 					() => { throw new NotImplementedException(); });
 			}
 			else
@@ -741,7 +741,7 @@ namespace BLToolkit.Data.Linq.Parser
 								level,
 								(n,ctx,ex,l,_) => n == 0 ?
 									null :
-									ctx.GetContext(ex, l, parseInfo));
+									ctx.GetContext(ex, l, buildInfo));
 
 							if (context == null)
 								throw new NotImplementedException();
@@ -757,10 +757,10 @@ namespace BLToolkit.Data.Linq.Parser
 							if (levelExpression == expression)
 							{
 								if (levelExpression == parameter)
-									return sequence.GetContext(null, 0, parseInfo);
+									return sequence.GetContext(null, 0, buildInfo);
 							}
 							else if (level == 0)
-								return sequence.GetContext(expression, 1, parseInfo);
+								return sequence.GetContext(expression, 1, buildInfo);
 
 							break;
 						}
@@ -769,7 +769,7 @@ namespace BLToolkit.Data.Linq.Parser
 				if (level == 0)
 				{
 					var sequence = GetSequence(expression, level);
-					return sequence.GetContext(expression, level + 1, parseInfo);
+					return sequence.GetContext(expression, level + 1, buildInfo);
 				}
 			}
 
@@ -780,7 +780,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region ConvertToParentIndex
 
-		public virtual int ConvertToParentIndex(int index, IParseContext context)
+		public virtual int ConvertToParentIndex(int index, IBuildContext context)
 		{
 			if (context.SqlQuery != SqlQuery)
 				index = SqlQuery.Select.Add(context.SqlQuery.Select.Columns[index]);
@@ -800,7 +800,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region Helpers
 
-		T ProcessScalar<T>(Expression expression, int level, Func<IParseContext,Expression,int,T> action, Func<T> defaultAction)
+		T ProcessScalar<T>(Expression expression, int level, Func<IBuildContext,Expression,int,T> action, Func<T> defaultAction)
 		{
 			if (level == 0)
 			{
@@ -840,9 +840,9 @@ namespace BLToolkit.Data.Linq.Parser
 				if (root.NodeType == ExpressionType.Parameter)
 				{
 					var levelExpression = expression.GetLevelExpression(level - 1);
-					var parseExpression = GetParseExpression(expression, levelExpression, Body);
+					var newExpression   = GetExpression(expression, levelExpression, Body);
 
-					return action(this, parseExpression, 0);
+					return action(this, newExpression, 0);
 				}
 			}
 
@@ -850,10 +850,10 @@ namespace BLToolkit.Data.Linq.Parser
 		}
 
 		T ProcessMemberAccess<T>(Expression expression, Expression levelExpression, int level,
-			Func<int,IParseContext,Expression,int,Expression,T> action)
+			Func<int,IBuildContext,Expression,int,Expression,T> action)
 		{
 			var memberExpression = Members[((MemberExpression)levelExpression).Member];
-			var parseExpression  = GetParseExpression(expression, levelExpression, memberExpression);
+			var newExpression    = GetExpression(expression, levelExpression, memberExpression);
 
 			var sequence  = GetSequence(expression, level);
 
@@ -871,7 +871,7 @@ namespace BLToolkit.Data.Linq.Parser
 				case ExpressionType.Parameter    :
 				case ExpressionType.Call         :
 					if (sequence != null)
-						return action(2, sequence, parseExpression, 1, memberExpression);
+						return action(2, sequence, newExpression, 1, memberExpression);
 					throw new NotImplementedException();
 
 				case ExpressionType.New          :
@@ -893,7 +893,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		IParseContext GetSequence(Expression expression, int level)
+		IBuildContext GetSequence(Expression expression, int level)
 		{
 			if (Sequence.Length == 1)
 				return Sequence[0];
@@ -947,7 +947,7 @@ namespace BLToolkit.Data.Linq.Parser
 			throw new NotImplementedException();
 		}
 
-		static Expression GetParseExpression(Expression expression, Expression levelExpression, Expression memberExpression)
+		static Expression GetExpression(Expression expression, Expression levelExpression, Expression memberExpression)
 		{
 			return levelExpression != expression ?
 				expression.Convert(ex => ex == levelExpression ? memberExpression : ex) :
@@ -968,7 +968,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					var le = expression.GetLevelExpression(level - 1);
 
-					return GetParseExpression(expression, le, newExpression);
+					return GetExpression(expression, le, newExpression);
 			}
 
 			if (levelExpresion.NodeType != ExpressionType.MemberAccess)

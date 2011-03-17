@@ -1,48 +1,48 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using Data.Sql;
 
-	public class ParseInfo
+	public class BuildInfo
 	{
-		public ParseInfo(IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public BuildInfo(IBuildContext parent, Expression expression, SqlQuery sqlQuery)
 		{
 			Parent     = parent;
 			Expression = expression;
 			SqlQuery   = sqlQuery;
 		}
 
-		public ParseInfo(ParseInfo parseInfo, Expression expression)
-			: this(parseInfo.Parent, expression, parseInfo.SqlQuery)
+		public BuildInfo(BuildInfo buildInfo, Expression expression)
+			: this(buildInfo.Parent, expression, buildInfo.SqlQuery)
 		{
-			SequenceInfo = parseInfo;
+			SequenceInfo = buildInfo;
 		}
 
-		public ParseInfo(ParseInfo parseInfo, Expression expression, SqlQuery sqlQuery)
-			: this(parseInfo.Parent, expression, sqlQuery)
+		public BuildInfo(BuildInfo buildInfo, Expression expression, SqlQuery sqlQuery)
+			: this(buildInfo.Parent, expression, sqlQuery)
 		{
-			SequenceInfo = parseInfo;
+			SequenceInfo = buildInfo;
 		}
 
-		public ParseInfo     SequenceInfo        { get; set; }
-		public IParseContext Parent              { get; set; }
-		public Expression    Expression          { get; set; }
-		public SqlQuery      SqlQuery            { get; set; }
+		public BuildInfo       SequenceInfo { get; set; }
+		public IBuildContext Parent       { get; set; }
+		public Expression      Expression   { get; set; }
+		public SqlQuery        SqlQuery     { get; set; }
 
-		public bool          IsSubQuery          { get { return Parent != null; } }
+		public bool            IsSubQuery   { get { return Parent != null; } }
 
-		private bool _isAssociationParsed;
-		public  bool  IsAssociationParsed
+		private bool _isAssociationBuilt;
+		public  bool  IsAssociationBuilе
 		{
-			get { return _isAssociationParsed; }
+			get { return _isAssociationBuilt; }
 			set
 			{
-				_isAssociationParsed = value;
+				_isAssociationBuilt = value;
 
 				if (SequenceInfo != null)
-					SequenceInfo.IsAssociationParsed = value;
+					SequenceInfo.IsAssociationBuilе = value;
 			}
 		}
 	}

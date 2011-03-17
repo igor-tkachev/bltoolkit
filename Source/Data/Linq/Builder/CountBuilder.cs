@@ -2,62 +2,62 @@
 using System.Data;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class CountParser : MethodCallParser
+	class CountBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("Count", "LongCount");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var returnType = methodCall.Method.ReturnType;
-			var sequence   = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence   = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			if (methodCall.Arguments.Count == 2)
 			{
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
-				sequence = parser.ParseWhere(parseInfo.Parent, sequence, condition, true);
+				sequence = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
-			if (sequence.SqlQuery != parseInfo.SqlQuery)
+			if (sequence.SqlQuery != buildInfo.SqlQuery)
 			{
-				if (sequence is JoinParser.GroupJoinSubQueryContext)
+				if (sequence is JoinBuilder.GroupJoinSubQueryContext)
 				{
-					var ctx = new CountConext(parseInfo.Parent, sequence, returnType);
+					var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
 
-					ctx.SqlQuery   = ((JoinParser.GroupJoinSubQueryContext)sequence).GetCounter(methodCall);
+					ctx.SqlQuery   = ((JoinBuilder.GroupJoinSubQueryContext)sequence).GetCounter(methodCall);
 					ctx.Sql        = ctx.SqlQuery;
 					ctx.FieldIndex = ctx.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, ctx.SqlQuery), "cnt");
 
 					return ctx;
 				}
 
-				if (sequence is GroupByParser.GroupByContext)
+				if (sequence is GroupByBuilder.GroupByContext)
 				{
 					if (methodCall.Arguments.Count == 2)
 					{
-						var groupBy = (GroupByParser.GroupByContext)sequence;
+						var groupBy = (GroupByBuilder.GroupByContext)sequence;
 						var sql     = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
 
 						groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
 
 						sql.Select.Columns.Clear();
 
-						if (parser.SqlProvider.IsSubQueryColumnSupported && parser.SqlProvider.IsCountSubQuerySupported)
+						if (builder.SqlProvider.IsSubQueryColumnSupported && builder.SqlProvider.IsCountSubQuerySupported)
 						{
 							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
 							{
 								var item1 = sql.GroupBy.Items[i];
 								var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-								var pr    = parser.Convert(sequence, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
+								var pr    = builder.Convert(sequence, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
 
 								sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
 							}
@@ -65,7 +65,7 @@ namespace BLToolkit.Data.Linq.Parser
 							sql.GroupBy.Items.Clear();
 							sql.ParentSql = groupBy.SqlQuery;
 
-							var ctx = new CountConext(parseInfo.Parent, sequence, returnType);
+							var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
 
 							ctx.SqlQuery   = sql;
 							ctx.Sql        = sql;
@@ -84,14 +84,14 @@ namespace BLToolkit.Data.Linq.Parser
 								var item1 = sql.GroupBy.Items[i];
 								var item2 = groupBy.SqlQuery.GroupBy.Items[i];
 								var col   = sql.Select.Columns[sql.Select.Add(item1)];
-								var pr    = parser.Convert(sequence, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
+								var pr    = builder.Convert(sequence, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
 
 								join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
 							}
 
 							sql.ParentSql = groupBy.SqlQuery;
 
-							var ctx = new CountConext(parseInfo.Parent, sequence, returnType);
+							var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
 
 							ctx.SqlQuery   = sql;
 							ctx.Sql        = new SqlFunction(returnType, "Count", sql.Select.Columns[0]);
@@ -102,7 +102,7 @@ namespace BLToolkit.Data.Linq.Parser
 					}
 					else
 					{
-						var ctx = new CountConext(parseInfo.Parent, sequence, returnType);
+						var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
 
 						ctx.Sql        = SqlFunction.CreateCount(returnType, sequence.SqlQuery);
 						ctx.FieldIndex = -1;
@@ -134,7 +134,7 @@ namespace BLToolkit.Data.Linq.Parser
 					sequence = new SubQueryContext(sequence);
 			}
 
-			var context = new CountConext(parseInfo.Parent, sequence, returnType);
+			var context = new CountConext(buildInfo.Parent, sequence, returnType);
 
 			context.Sql        = context.SqlQuery;
 			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
@@ -142,7 +142,7 @@ namespace BLToolkit.Data.Linq.Parser
 			return context;
 		}
 
-		static bool IsParent(IParseContext sequence, IParseContext parent)
+		static bool IsParent(IBuildContext sequence, IBuildContext parent)
 		{
 			for (; sequence != null; sequence = sequence.Parent)
 				if (sequence == parent)
@@ -153,7 +153,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class CountConext : SequenceContextBase
 		{
-			public CountConext(IParseContext parent, IParseContext sequence, Type returnType)
+			public CountConext(IBuildContext parent, IBuildContext sequence, Type returnType)
 				: base(parent, sequence, null)
 			{
 				_returnType = returnType;
@@ -167,16 +167,16 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = Expression.Convert(Parser.BuildSql(_returnType, FieldIndex), typeof(object));
+				var expr = Expression.Convert(Builder.BuildSql(_returnType, FieldIndex), typeof(object));
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
 					expr, new []
 					{
-						ExpressionParser.ContextParam,
-						ExpressionParser.DataContextParam,
-						ExpressionParser.DataReaderParam,
-						ExpressionParser.ExpressionParam,
-						ExpressionParser.ParametersParam,
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
 					});
 
 				query.SetElementQuery(mapper.Compile());
@@ -184,7 +184,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				return Parser.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
+				return Builder.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -221,9 +221,9 @@ namespace BLToolkit.Data.Linq.Parser
 				return false;
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				return Sequence.GetContext(expression, level, parseInfo);
+				return Sequence.GetContext(expression, level, buildInfo);
 			}
 		}
 	}

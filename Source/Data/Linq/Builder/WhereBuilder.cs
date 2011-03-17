@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 
-	class WhereParser : MethodCallParser
+	class WhereBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("Where");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence  = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence  = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 			var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var result    = parser.ParseWhere(parseInfo.Parent, sequence, condition, true);
+			var result    = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
 
 			result.SetAlias(condition.Parameters[0].Name);
 

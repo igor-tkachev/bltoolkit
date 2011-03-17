@@ -5,11 +5,11 @@ using System.Linq.Expressions;
 #pragma warning disable 3010
 #endif
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using Data.Sql;
 
-	public interface IParseContext
+	public interface IBuildContext
 	{
 #if DEBUG
 // ReSharper disable InconsistentNaming
@@ -18,18 +18,18 @@ namespace BLToolkit.Data.Linq.Parser
 // ReSharper restore InconsistentNaming
 #endif
 
-		ExpressionParser Parser     { get; }
-		Expression       Expression { get; }
-		SqlQuery         SqlQuery   { get; set; }
-		IParseContext    Parent     { get; set; }
+		ExpressionBuilder Builder    { get; }
+		Expression        Expression { get; }
+		SqlQuery          SqlQuery   { get; set; }
+		IBuildContext     Parent     { get; set; }
 
-		void             BuildQuery<T>       (Query<T> query, ParameterExpression queryParameter);
-		Expression       BuildExpression     (Expression expression, int level);
-		SqlInfo[]        ConvertToSql        (Expression expression, int level, ConvertFlags flags);
-		SqlInfo[]        ConvertToIndex      (Expression expression, int level, ConvertFlags flags);
-		bool             IsExpression        (Expression expression, int level, RequestFor requestFlag);
-		IParseContext    GetContext          (Expression expression, int level, ParseInfo parseInfo);
-		int              ConvertToParentIndex(int index, IParseContext context);
-		void             SetAlias            (string alias);
+		void              BuildQuery<T>       (Query<T> query, ParameterExpression queryParameter);
+		Expression        BuildExpression     (Expression expression, int level);
+		SqlInfo[]         ConvertToSql        (Expression expression, int level, ConvertFlags flags);
+		SqlInfo[]         ConvertToIndex      (Expression expression, int level, ConvertFlags flags);
+		bool              IsExpression        (Expression expression, int level, RequestFor requestFlag);
+		IBuildContext     GetContext          (Expression expression, int level, BuildInfo buildInfo);
+		int               ConvertToParentIndex(int index, IBuildContext context);
+		void              SetAlias            (string alias);
 	}
 }

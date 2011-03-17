@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 namespace BLToolkit.Data.Linq
 {
 	using Mapping;
-	using Parser;
+	using Builder;
 
 	class CompiledTable<T>
 	{
@@ -63,8 +63,8 @@ namespace BLToolkit.Data.Linq
 						if (query == null)
 						{
 #if NEW_PARSER
-							query = new ExpressionParser(new Query<T>(), dataContextInfo, _expression, _lambda.Parameters.ToArray())
-								.Parse<T>();
+							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, _expression, _lambda.Parameters.ToArray())
+								.Build<T>();
 #else
 							query = new ExpressionParserOld<T>().Parse(
 								contextID,

@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
-	public interface ISequenceParser
+	public interface ISequenceBuilder
 	{
-		int           ParsingCounter { get; set; }
-		bool          CanParse     (ExpressionParser parser, ParseInfo parseInfo);
-		IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo);
+		int             BuildCounter { get; set; }
+		bool            CanBuild     (ExpressionBuilder builder, BuildInfo buildInfo);
+		IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo);
 	}
 }

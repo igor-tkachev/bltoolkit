@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
@@ -14,36 +14,36 @@ namespace BLToolkit.Data.Linq.Parser
 	using Mapping;
 	using Reflection;
 
-	public partial class ExpressionParser
+	public partial class ExpressionBuilder
 	{
 		#region Sequence
 
 		static readonly object _sync = new object();
 
-		static List<ISequenceParser> _sequenceParsers = new List<ISequenceParser>
+		static List<ISequenceBuilder> _sequenceBuilders = new List<ISequenceBuilder>
 		{
-			new TableParser         (),
-			new SelectParser        (),
-			new SelectManyParser    (),
-			new WhereParser         (),
-			new OrderByParser       (),
-			new GroupByParser       (),
-			new JoinParser          (),
-			new TakeSkipParser      (),
-			new DefaultIfEmptyParser(),
-			new DistinctParser      (),
-			new FirstSingleParser   (),
-			new AggregationParser   (),
-			new ScalarSelectParser  (),
-			new CountParser         (),
-			new AsQueryableParser   (),
-			new TableAttributeParser(),
-			new InsertParser        (),
+			new TableBuilder         (),
+			new SelectBuilder        (),
+			new SelectManyBuilder    (),
+			new WhereBuilder         (),
+			new OrderByBuilder       (),
+			new GroupByBuilder       (),
+			new JoinBuilder          (),
+			new TakeSkipBuilder      (),
+			new DefaultIfEmptyBuilder(),
+			new DistinctBuilder      (),
+			new FirstSingleBuilder   (),
+			new AggregationBuilder   (),
+			new ScalarSelectBuilder  (),
+			new CountBuilder         (),
+			new AsQueryableBuilder   (),
+			new TableAttributeBuilder(),
+			new InsertBuilder        (),
 		};
 
-		public static void AddParser(ISequenceParser parser)
+		public static void AddBuilder(ISequenceBuilder builder)
 		{
-			_sequenceParsers.Add(parser);
+			_sequenceBuilders.Add(builder);
 		}
 
 		#endregion
@@ -51,13 +51,13 @@ namespace BLToolkit.Data.Linq.Parser
 		#region Init
 
 		readonly Query                             _query;
-		readonly List<ISequenceParser>             _parsers = _sequenceParsers;
+		readonly List<ISequenceBuilder>            _builders = _sequenceBuilders;
 		private  bool                              _reorder;
 		readonly Dictionary<Expression,Expression> _expressionAccessors;
 
 		readonly public List<ParameterAccessor>    CurrentSqlParameters = new List<ParameterAccessor>();
 
-		public ExpressionParser(
+		public ExpressionBuilder(
 			Query                 query,
 			IDataContextInfo      dataContext,
 			Expression            expression,
@@ -98,17 +98,17 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#endregion
 
-		#region Parse
+		#region Builder SQL
 
-		internal Query<T> Parse<T>()
+		internal Query<T> Build<T>()
 		{
-			var sequence = ParseSequence(new ParseInfo((IParseContext)null, Expression, new SqlQuery()));
+			var sequence = BuildSequence(new BuildInfo((IBuildContext)null, Expression, new SqlQuery()));
 
 			if (_reorder)
 				lock (_sync)
 				{
 					_reorder = false;
-					_sequenceParsers = _sequenceParsers.OrderByDescending(_ => _.ParsingCounter).ToList();
+					_sequenceBuilders = _sequenceBuilders.OrderByDescending(_ => _.BuildCounter).ToList();
 				}
 
 			_query.Init(sequence, CurrentSqlParameters);
@@ -121,30 +121,30 @@ namespace BLToolkit.Data.Linq.Parser
 		}
 
 		[JetBrains.Annotations.NotNull]
-		public IParseContext ParseSequence(ParseInfo parseInfo)
+		public IBuildContext BuildSequence(BuildInfo buildInfo)
 		{
-			parseInfo.Expression = parseInfo.Expression.Unwrap();
+			buildInfo.Expression = buildInfo.Expression.Unwrap();
 
-			var n = _parsers[0].ParsingCounter;
+			var n = _builders[0].BuildCounter;
 
-			foreach (var parser in _parsers)
+			foreach (var builder in _builders)
 			{
-				if (parser.CanParse(this, parseInfo))
+				if (builder.CanBuild(this, buildInfo))
 				{
-					var sequence = parser.ParseSequence(this, parseInfo);
+					var sequence = builder.BuildSequence(this, buildInfo);
 
-					lock (parser)
-						parser.ParsingCounter++;
+					lock (builder)
+						builder.BuildCounter++;
 
-					_reorder = _reorder || n < parser.ParsingCounter;
+					_reorder = _reorder || n < builder.BuildCounter;
 
 					return sequence;
 				}
 
-				n = parser.ParsingCounter;
+				n = builder.BuildCounter;
 			}
 
-			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", parseInfo.Expression);
+			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", buildInfo.Expression);
 		}
 
 		#endregion

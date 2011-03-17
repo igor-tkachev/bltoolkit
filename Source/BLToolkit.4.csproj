@@ -184,7 +184,7 @@
     <Compile Include="Data\Linq\Builder\BuildInfo.cs" />
     <Compile Include="Data\Linq\Builder\SelectManyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\SqlInfo.cs" />
-    <Compile Include="Data\Linq\Builder\TableAttributeParser.cs" />
+    <Compile Include="Data\Linq\Builder\TableAttributeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />

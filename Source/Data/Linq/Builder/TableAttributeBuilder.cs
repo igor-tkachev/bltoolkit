@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 
-	class TableAttributeParser : MethodCallParser
+	class TableAttributeBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("TableName", "DatabaseName", "OwnerName");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
-			var table = (TableParser.TableContext)sequence;
+			var table = (TableBuilder.TableContext)sequence;
 			var value = (string)((ConstantExpression)methodCall.Arguments[1]).Value;
 
 			switch (methodCall.Method.Name)

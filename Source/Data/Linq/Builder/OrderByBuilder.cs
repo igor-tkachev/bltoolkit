@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class OrderByParser : MethodCallParser
+	class OrderByBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			if (!methodCall.IsQueryable("OrderBy", "OrderByDescending", "ThenBy", "ThenByDescending"))
 				return false;
@@ -33,18 +33,18 @@ namespace BLToolkit.Data.Linq.Parser
 			return true;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			if (sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
 				sequence = new SubQueryContext(sequence);
 
 			var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var sparent = sequence.Parent;
-			var order   = new ExpressionContext(parseInfo.Parent, sequence, lambda);
+			var order   = new ExpressionContext(buildInfo.Parent, sequence, lambda);
 			var body    = lambda.Body.Unwrap();
-			var sql     = parser.ParseExpressions(order, body, ConvertFlags.Key);
+			var sql     = builder.ConvertExpressions(order, body, ConvertFlags.Key);
 
 			sequence.Parent = sparent;
 
@@ -53,7 +53,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			foreach (var expr in sql)
 			{
-				var e = parser.ConvertSearchCondition(sequence, expr.Sql);
+				var e = builder.ConvertSearchCondition(sequence, expr.Sql);
 				sequence.SqlQuery.OrderBy.Expr(e, methodCall.Method.Name.EndsWith("Descending"));
 			}
 

@@ -4,9 +4,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 using BLToolkit.Data.Linq;
-using BLToolkit.Data.Linq.Parser;
+using BLToolkit.Data.Linq.Builder;
 using BLToolkit.Data.Sql;
+
 using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -16,7 +18,7 @@ namespace Data.Linq
 	{
 		static ParserTest()
 		{
-			ExpressionParser.AddParser(new ContextParser());
+			ExpressionBuilder.AddBuilder(new ContextParser());
 		}
 
 		#region IsExpressionTable
@@ -894,36 +896,36 @@ namespace Data.Linq
 		#endregion
 	}
 
-	class ContextParser : ISequenceParser
+	class ContextParser : ISequenceBuilder
 	{
-		public int ParsingCounter { get; set; }
+		public int BuildCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
+		public bool CanBuild(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			var call = parseInfo.Expression as MethodCallExpression;
+			var call = buildInfo.Expression as MethodCallExpression;
 			return call != null && call.Method.Name == "GetContext";
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
+		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			var call = (MethodCallExpression)parseInfo.Expression;
-			return new Context(parser.ParseSequence(new ParseInfo(parseInfo, call.Arguments[0])));
+			var call = (MethodCallExpression)buildInfo.Expression;
+			return new Context(builder.BuildSequence(new BuildInfo(buildInfo, call.Arguments[0])));
 		}
 
-		public class Context : IParseContext
+		public class Context : IBuildContext
 		{
-			public Context(IParseContext sequence)
+			public Context(IBuildContext sequence)
 			{
 				Sequence = sequence;
 			}
 
 			public string _sqlQueryText { get { return Sequence._sqlQueryText; } }
 
-			public IParseContext    Sequence   { get; set; }
-			public ExpressionParser Parser     { get { return Sequence.Parser; } }
+			public IBuildContext    Sequence   { get; set; }
+			public ExpressionBuilder Builder     { get { return Sequence.Builder; } }
 			public Expression       Expression { get; set; }
 			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } set { Sequence.SqlQuery = value; } }
-			public IParseContext    Parent     { get; set; }
+			public IBuildContext    Parent     { get; set; }
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
@@ -950,12 +952,12 @@ namespace Data.Linq
 				return Sequence.IsExpression(null,  0, requestFlag);
 			}
 
-			public IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				return Sequence.GetContext(expression, level, parseInfo);
+				return Sequence.GetContext(expression, level, buildInfo);
 			}
 
-			public int ConvertToParentIndex(int index, IParseContext context)
+			public int ConvertToParentIndex(int index, IBuildContext context)
 			{
 				return Sequence.ConvertToParentIndex(index, context);
 			}

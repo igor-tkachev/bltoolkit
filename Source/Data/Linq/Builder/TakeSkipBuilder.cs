@@ -3,50 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class TakeSkipParser : MethodCallParser
+	class TakeSkipBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("Skip", "Take");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			var arg = methodCall.Arguments[1].Unwrap();
 
 			if (arg.NodeType == ExpressionType.Lambda)
 				arg = ((LambdaExpression)arg).Body.Unwrap();
 
-			var expr = parser.ParseExpression(sequence, arg);
+			var expr = builder.ConvertToSql(sequence, arg);
 
 			if (methodCall.Method.Name == "Take")
 			{
-				ParseTake(parser, sequence, expr);
+				BuildTake(builder, sequence, expr);
 			}
 			else
 			{
-				ParseSkip(parser, sequence, sequence.SqlQuery.Select.SkipValue, expr);
+				BuildSkip(builder, sequence, sequence.SqlQuery.Select.SkipValue, expr);
 			}
 
 			return sequence;
 		}
 
-		static void ParseTake(ExpressionParser parser, IParseContext sequence, ISqlExpression expr)
+		static void BuildTake(ExpressionBuilder builder, IBuildContext sequence, ISqlExpression expr)
 		{
 			var sql = sequence.SqlQuery;
 
-			parser.SqlProvider.SqlQuery = sql;
+			builder.SqlProvider.SqlQuery = sql;
 
 			sql.Select.Take(expr);
 
-			if (sql.Select.SkipValue != null && parser.SqlProvider.IsTakeSupported && !parser.SqlProvider.IsSkipSupported)
+			if (sql.Select.SkipValue != null && builder.SqlProvider.IsTakeSupported && !builder.SqlProvider.IsSkipSupported)
 			{
 				if (sql.Select.SkipValue is SqlParameter && sql.Select.TakeValue is SqlValue)
 				{
@@ -57,7 +57,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 					sql.Select.Take(parm);
 
-					var ep = (from pm in parser.CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
+					var ep = (from pm in builder.CurrentSqlParameters where pm.SqlParameter == skip select pm).First();
 
 					ep = new ParameterAccessor
 					{
@@ -66,15 +66,15 @@ namespace BLToolkit.Data.Linq.Parser
 						SqlParameter = parm
 					};
 
-					parser.CurrentSqlParameters.Add(ep);
+					builder.CurrentSqlParameters.Add(ep);
 				}
 				else
-					sql.Select.Take(parser.Convert(
+					sql.Select.Take(builder.Convert(
 						sequence,
 						new SqlBinaryExpression(typeof(int), sql.Select.SkipValue, "+", sql.Select.TakeValue, Precedence.Additive)));
 			}
 
-			if (!parser.SqlProvider.TakeAcceptsParameter)
+			if (!builder.SqlProvider.TakeAcceptsParameter)
 			{
 				var p = sql.Select.TakeValue as SqlParameter;
 
@@ -83,30 +83,30 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 		}
 
-		static void ParseSkip(ExpressionParser parser, IParseContext sequence, ISqlExpression prevSkipValue, ISqlExpression expr)
+		static void BuildSkip(ExpressionBuilder builder, IBuildContext sequence, ISqlExpression prevSkipValue, ISqlExpression expr)
 		{
 			var sql = sequence.SqlQuery;
 
-			parser.SqlProvider.SqlQuery = sql;
+			builder.SqlProvider.SqlQuery = sql;
 
 			sql.Select.Skip(expr);
 
-			parser.SqlProvider.SqlQuery = sql;
+			builder.SqlProvider.SqlQuery = sql;
 
 			if (sql.Select.TakeValue != null)
 			{
-				if (parser.SqlProvider.IsSkipSupported || !parser.SqlProvider.IsTakeSupported)
-					sql.Select.Take(parser.Convert(
+				if (builder.SqlProvider.IsSkipSupported || !builder.SqlProvider.IsTakeSupported)
+					sql.Select.Take(builder.Convert(
 						sequence,
 						new SqlBinaryExpression(typeof(int), sql.Select.TakeValue, "-", sql.Select.SkipValue, Precedence.Additive)));
 
 				if (prevSkipValue != null)
-					sql.Select.Skip(parser.Convert(
+					sql.Select.Skip(builder.Convert(
 						sequence,
 						new SqlBinaryExpression(typeof(int), prevSkipValue, "+", sql.Select.SkipValue, Precedence.Additive)));
 			}
 
-			if (!parser.SqlProvider.TakeAcceptsParameter)
+			if (!builder.SqlProvider.TakeAcceptsParameter)
 			{
 				var p = sql.Select.SkipValue as SqlParameter;
 

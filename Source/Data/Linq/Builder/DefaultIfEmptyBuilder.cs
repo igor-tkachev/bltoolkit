@@ -2,26 +2,26 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class DefaultIfEmptyParser : MethodCallParser
+	class DefaultIfEmptyBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("DefaultIfEmpty");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence     = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence     = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 			var defaultValue = methodCall.Arguments.Count == 1 ? null : methodCall.Arguments[1].Unwrap();
 
-			if (parseInfo.Parent is SelectManyParser.SelectManyContext)
+			if (buildInfo.Parent is SelectManyBuilder.SelectManyContext)
 			{
-				var groupJoin = ((SelectManyParser.SelectManyContext)parseInfo.Parent).Sequence[0] as JoinParser.GroupJoinContext;
+				var groupJoin = ((SelectManyBuilder.SelectManyContext)buildInfo.Parent).Sequence[0] as JoinBuilder.GroupJoinContext;
 
 				if (groupJoin != null)
 				{
@@ -30,12 +30,12 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			return new DefaultIfEmptyContext(parseInfo.Parent, sequence, defaultValue);
+			return new DefaultIfEmptyContext(buildInfo.Parent, sequence, defaultValue);
 		}
 
 		public class DefaultIfEmptyContext : SequenceContextBase
 		{
-			public DefaultIfEmptyContext(IParseContext parent, IParseContext sequence, Expression defaultValue) 
+			public DefaultIfEmptyContext(IBuildContext parent, IBuildContext sequence, Expression defaultValue) 
 				: base(parent, sequence, null)
 			{
 				_defaultValue = defaultValue;
@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq.Parser
 					var n = ConvertToParentIndex(idx, this);
 
 					var e = Expression.Call(
-						ExpressionParser.DataReaderParam,
+						ExpressionBuilder.DataReaderParam,
 						ReflectionHelper.DataReader.IsDBNull,
 						Expression.Constant(n)) as Expression;
 
@@ -89,9 +89,9 @@ namespace BLToolkit.Data.Linq.Parser
 				return Sequence.IsExpression(expression, level, requestFlag);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				return Sequence.GetContext(expression, level, parseInfo);
+				return Sequence.GetContext(expression, level, buildInfo);
 			}
 		}
 	}

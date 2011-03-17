@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class SelectManyParser : MethodCallParser
+	class SelectManyBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return
 				methodCall.IsQueryable("SelectMany") &&
@@ -16,9 +16,9 @@ namespace BLToolkit.Data.Linq.Parser
 				((LambdaExpression)methodCall.Arguments[1].Unwrap()).Parameters.Count == 1;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence           = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence           = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 			var collectionSelector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var resultSelector     = (LambdaExpression)methodCall.Arguments[2].Unwrap();
 
@@ -27,12 +27,12 @@ namespace BLToolkit.Data.Linq.Parser
 				sequence = new SubQueryContext(sequence);
 			}
 
-			var context        = new SelectManyContext(parseInfo.Parent, collectionSelector, sequence);
+			var context        = new SelectManyContext(buildInfo.Parent, collectionSelector, sequence);
 			var expr           = collectionSelector.Body.Unwrap();
 
-			var collectionInfo = new ParseInfo(context, expr, new SqlQuery());
-			var collection     = parser.ParseSequence(collectionInfo);
-			var leftJoin       = collection is DefaultIfEmptyParser.DefaultIfEmptyContext;
+			var collectionInfo = new BuildInfo(context, expr, new SqlQuery());
+			var collection     = builder.BuildSequence(collectionInfo);
+			var leftJoin       = collection is DefaultIfEmptyBuilder.DefaultIfEmptyContext;
 			var sql            = collection.SqlQuery;
 
 			var sequenceTable  = sequence.SqlQuery.From.Tables[0].Source;
@@ -45,7 +45,7 @@ namespace BLToolkit.Data.Linq.Parser
 			if (!newQuery)
 			{
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+				return new SelectContext(buildInfo.Parent, resultSelector, sequence, context);
 			}
 
 			if (!crossApply)
@@ -53,7 +53,7 @@ namespace BLToolkit.Data.Linq.Parser
 				if (!leftJoin)
 				{
 					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, true);
-					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+					return new SelectContext(buildInfo.Parent, resultSelector, sequence, context);
 				}
 				else
 				{
@@ -61,11 +61,11 @@ namespace BLToolkit.Data.Linq.Parser
 					sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
 					context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 
-					return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+					return new SelectContext(buildInfo.Parent, resultSelector, sequence, context);
 				}
 			}
 
-			if (collection is TableParser.TableContext)
+			if (collection is TableBuilder.TableContext)
 			{
 				var join = leftJoin ? SqlQuery.LeftJoin(sql) : SqlQuery.InnerJoin(sql);
 
@@ -73,11 +73,11 @@ namespace BLToolkit.Data.Linq.Parser
 
 				sql.Where.SearchCondition.Conditions.Clear();
 
-				var collectionParent = collection.Parent as TableParser.TableContext;
+				var collectionParent = collection.Parent as TableBuilder.TableContext;
 
 				// Association.
 				//
-				if (collectionParent != null && collectionInfo.IsAssociationParsed)
+				if (collectionParent != null && collectionInfo.IsAssociationBuilе)
 				{
 					var ts = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
 					{
@@ -98,7 +98,7 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+				return new SelectContext(buildInfo.Parent, resultSelector, sequence, context);
 			}
 			else
 			{
@@ -106,19 +106,19 @@ namespace BLToolkit.Data.Linq.Parser
 				sequence.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
 
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
-				return new SelectContext(parseInfo.Parent, resultSelector, sequence, context);
+				return new SelectContext(buildInfo.Parent, resultSelector, sequence, context);
 			}
 		}
 
 		public class SelectManyContext : SelectContext
 		{
-			public SelectManyContext(IParseContext parent, LambdaExpression lambda, IParseContext sequence)
+			public SelectManyContext(IBuildContext parent, LambdaExpression lambda, IBuildContext sequence)
 				: base(parent, lambda, sequence)
 			{
 			}
 
-			private IParseContext _collection;
-			public  IParseContext  Collection
+			private IBuildContext _collection;
+			public  IBuildContext  Collection
 			{
 				get { return _collection; }
 				set
@@ -166,7 +166,7 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			/*
-			public override int ConvertToParentIndex(int index, IParseContext context)
+			public override int ConvertToParentIndex(int index, IBuildContext context)
 			{
 				if (Collection == null)
 					return base.ConvertToParentIndex(index, context);
@@ -191,20 +191,20 @@ namespace BLToolkit.Data.Linq.Parser
 				return base.ConvertToSql(expression, level, flags);
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				if (Collection != null)
 				{
 					if (expression == null)
-						return Collection.GetContext(expression, level, parseInfo);
+						return Collection.GetContext(expression, level, buildInfo);
 
 					var root = expression.GetRootObject();
 
 					if (root != Lambda.Parameters[0])
-						return Collection.GetContext(expression, level, parseInfo);
+						return Collection.GetContext(expression, level, buildInfo);
 				}
 
-				return base.GetContext(expression, level, parseInfo);
+				return base.GetContext(expression, level, buildInfo);
 			}
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)

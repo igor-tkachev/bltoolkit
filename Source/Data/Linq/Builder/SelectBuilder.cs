@@ -2,15 +2,15 @@
 using System.Data;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 
-	class SelectParser : MethodCallParser
+	class SelectBuilder : MethodCallBuilder
 	{
-		#region SelectParser
+		#region SelectBuilder
 
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			if (methodCall.IsQueryable("Select"))
 			{
@@ -25,10 +25,10 @@ namespace BLToolkit.Data.Linq.Parser
 			return false;
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			sequence.SetAlias(selector.Parameters[0].Name);
 
@@ -48,11 +48,11 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 
 			return selector.Parameters.Count == 1 ?
-				new SelectContext (parseInfo.Parent, selector, sequence) :
-				new SelectContext2(parseInfo.Parent, selector, sequence);
+				new SelectContext (buildInfo.Parent, selector, sequence) :
+				new SelectContext2(buildInfo.Parent, selector, sequence);
 		}
 
-		static IParseContext CheckSubQueryForSelect(IParseContext context)
+		static IBuildContext CheckSubQueryForSelect(IBuildContext context)
 		{
 			if (/*_parsingMethod[0] != ParsingMethod.OrderBy &&*/ context.SqlQuery.Select.IsDistinct)
 				return new SubQueryContext(context);
@@ -66,7 +66,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class SelectContext2 : SelectContext
 		{
-			public SelectContext2(IParseContext parent, LambdaExpression lambda, IParseContext sequence)
+			public SelectContext2(IBuildContext parent, LambdaExpression lambda, IBuildContext sequence)
 				: base(parent, lambda, sequence)
 			{
 			}
@@ -81,11 +81,11 @@ namespace BLToolkit.Data.Linq.Parser
 					expr, new []
 					{
 						_counterParam,
-						ExpressionParser.ContextParam,
-						ExpressionParser.DataContextParam,
-						ExpressionParser.DataReaderParam,
-						ExpressionParser.ExpressionParam,
-						ExpressionParser.ParametersParam,
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
 					});
 
 				var func    = mapper.Compile();

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-using BLToolkit.Data.Linq.Parser;
+using BLToolkit.Data.Linq.Builder;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode

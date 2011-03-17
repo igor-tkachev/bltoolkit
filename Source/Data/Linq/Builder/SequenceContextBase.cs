@@ -2,17 +2,17 @@
 using System.Data;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using Data.Sql;
 
-	public abstract class SequenceContextBase : IParseContext
+	public abstract class SequenceContextBase : IBuildContext
 	{
-		protected SequenceContextBase(IParseContext parent, IParseContext sequence, LambdaExpression lambda)
+		protected SequenceContextBase(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
 		{
 			Parent   = parent;
 			Sequence = sequence;
-			Parser   = sequence.Parser;
+			Builder  = sequence.Builder;
 			Lambda   = lambda;
 			SqlQuery = sequence.SqlQuery;
 
@@ -24,13 +24,13 @@ namespace BLToolkit.Data.Linq.Parser
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-		public IParseContext    Parent   { get; set; }
-		public IParseContext    Sequence { get; set; }
-		public ExpressionParser Parser   { get; set; }
-		public LambdaExpression Lambda   { get; set; }
-		public SqlQuery         SqlQuery { get; set; }
+		public IBuildContext   Parent   { get; set; }
+		public IBuildContext   Sequence { get; set; }
+		public ExpressionBuilder Builder  { get; set; }
+		public LambdaExpression  Lambda   { get; set; }
+		public SqlQuery          SqlQuery { get; set; }
 
-		Expression IParseContext.Expression { get { return Lambda; } }
+		Expression IBuildContext.Expression { get { return Lambda; } }
 
 		public virtual void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
@@ -39,23 +39,23 @@ namespace BLToolkit.Data.Linq.Parser
 			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 				expr, new []
 				{
-					ExpressionParser.ContextParam,
-					ExpressionParser.DataContextParam,
-					ExpressionParser.DataReaderParam,
-					ExpressionParser.ExpressionParam,
-					ExpressionParser.ParametersParam,
+					ExpressionBuilder.ContextParam,
+					ExpressionBuilder.DataContextParam,
+					ExpressionBuilder.DataReaderParam,
+					ExpressionBuilder.ExpressionParam,
+					ExpressionBuilder.ParametersParam,
 				});
 
 			query.SetQuery(mapper.Compile());
 		}
 
-		public abstract Expression    BuildExpression(Expression expression, int level);
-		public abstract SqlInfo[]     ConvertToSql   (Expression expression, int level, ConvertFlags flags);
-		public abstract SqlInfo[]     ConvertToIndex (Expression expression, int level, ConvertFlags flags);
-		public abstract bool          IsExpression   (Expression expression, int level, RequestFor requestFlag);
-		public abstract IParseContext GetContext     (Expression expression, int level, ParseInfo parseInfo);
+		public abstract Expression      BuildExpression(Expression expression, int level);
+		public abstract SqlInfo[]       ConvertToSql   (Expression expression, int level, ConvertFlags flags);
+		public abstract SqlInfo[]       ConvertToIndex (Expression expression, int level, ConvertFlags flags);
+		public abstract bool            IsExpression   (Expression expression, int level, RequestFor requestFlag);
+		public abstract IBuildContext GetContext     (Expression expression, int level, BuildInfo buildInfo);
 
-		public virtual int ConvertToParentIndex(int index, IParseContext context)
+		public virtual int ConvertToParentIndex(int index, IBuildContext context)
 		{
 			return Parent == null ? index : Parent.ConvertToParentIndex(index, context);
 		}

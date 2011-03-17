@@ -2,43 +2,43 @@
 using System.Data;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class ScalarSelectParser : ISequenceParser
+	class ScalarSelectBuilder : ISequenceBuilder
 	{
-		public int ParsingCounter { get; set; }
+		public int BuildCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
+		public bool CanBuild(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
 			return
-				parseInfo.Expression.NodeType == ExpressionType.Lambda &&
-				((LambdaExpression)parseInfo.Expression).Parameters.Count == 0;
+				buildInfo.Expression.NodeType == ExpressionType.Lambda &&
+				((LambdaExpression)buildInfo.Expression).Parameters.Count == 0;
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
+		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
 			return new ScalarSelectContext
 			{
-				Parser     = parser,
-				Parent     = parseInfo.Parent,
-				Expression = parseInfo.Expression,
-				SqlQuery   = parseInfo.SqlQuery
+				Builder     = builder,
+				Parent     = buildInfo.Parent,
+				Expression = buildInfo.Expression,
+				SqlQuery   = buildInfo.SqlQuery
 			};
 		}
 
-		class ScalarSelectContext : IParseContext
+		class ScalarSelectContext : IBuildContext
 		{
 #if DEBUG
 			public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-			public ExpressionParser Parser     { get; set; }
+			public ExpressionBuilder Builder     { get; set; }
 			public Expression       Expression { get; set; }
 			public SqlQuery         SqlQuery   { get; set; }
-			public IParseContext    Parent     { get; set; }
+			public IBuildContext    Parent     { get; set; }
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
@@ -47,11 +47,11 @@ namespace BLToolkit.Data.Linq.Parser
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
 					{
-						ExpressionParser.ContextParam,
-						ExpressionParser.DataContextParam,
-						ExpressionParser.DataReaderParam,
-						ExpressionParser.ExpressionParam,
-						ExpressionParser.ParametersParam,
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
 					});
 
 				query.SetQuery(mapper.Compile());
@@ -67,7 +67,7 @@ namespace BLToolkit.Data.Linq.Parser
 					case ExpressionType.New:
 					case ExpressionType.MemberInit:
 						{
-							var expr = Parser.BuildExpression(this, expression);
+							var expr = Builder.BuildExpression(this, expression);
 
 							if (SqlQuery.Select.Columns.Count == 0)
 								SqlQuery.Select.Expr(new SqlValue(1));
@@ -77,10 +77,10 @@ namespace BLToolkit.Data.Linq.Parser
 
 					default :
 						{
-							var expr = Parser.ParseExpression(this, expression);
+							var expr = Builder.ConvertToSql(this, expression);
 							var idx  = SqlQuery.Select.Add(expr);
 
-							return Parser.BuildSql(expression.Type, idx);
+							return Builder.BuildSql(expression.Type, idx);
 						}
 				}
 
@@ -105,12 +105,12 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			public IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				throw new NotImplementedException();
 			}
 
-			public int ConvertToParentIndex(int index, IParseContext context)
+			public int ConvertToParentIndex(int index, IBuildContext context)
 			{
 				throw new NotImplementedException();
 			}

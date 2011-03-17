@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using Data.Sql;
 

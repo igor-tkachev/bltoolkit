@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
@@ -14,15 +14,15 @@ namespace BLToolkit.Data.Linq.Parser
 	using Reflection;
 	using Reflection.Extension;
 
-	class TableParser : ISequenceParser
+	class TableBuilder : ISequenceBuilder
 	{
-		#region TableParser
+		#region TableBuilder
 
-		int ISequenceParser.ParsingCounter { get; set; }
+		int ISequenceBuilder.BuildCounter { get; set; }
 
-		public T Parse<T>(ExpressionParser parser, ParseInfo parseInfo, Func<int,IParseContext,T> action)
+		static T Find<T>(ExpressionBuilder builder, BuildInfo buildInfo, Func<int,IBuildContext,T> action)
 		{
-			var expression = parseInfo.Expression;
+			var expression = buildInfo.Expression;
 
 			switch (expression.NodeType)
 			{
@@ -53,9 +53,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 					// Looking for association.
 					//
-					if (parseInfo.IsSubQuery && parseInfo.SqlQuery.From.Tables.Count == 0)
+					if (buildInfo.IsSubQuery && buildInfo.SqlQuery.From.Tables.Count == 0)
 					{
-						var ctx = parser.GetContext(parseInfo.Parent, expression);
+						var ctx = builder.GetContext(buildInfo.Parent, expression);
 						if (ctx != null)
 							return action(4, ctx);
 					}
@@ -64,9 +64,9 @@ namespace BLToolkit.Data.Linq.Parser
 
 				case ExpressionType.Parameter:
 					{
-						if (parseInfo.IsSubQuery && parseInfo.SqlQuery.From.Tables.Count == 0)
+						if (buildInfo.IsSubQuery && buildInfo.SqlQuery.From.Tables.Count == 0)
 						{
-							var ctx = parser.GetContext(parseInfo.Parent, expression);
+							var ctx = builder.GetContext(buildInfo.Parent, expression);
 							if (ctx != null)
 								return action(4, ctx);
 						}
@@ -78,22 +78,22 @@ namespace BLToolkit.Data.Linq.Parser
 			return action(0, null);
 		}
 
-		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
+		public bool CanBuild(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			return Parse(parser, parseInfo, (n,_) => n > 0);
+			return Find(builder, buildInfo, (n,_) => n > 0);
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
+		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			return Parse(parser, parseInfo, (n,ctx) =>
+			return Find(builder, buildInfo, (n,ctx) =>
 			{
 				switch (n)
 				{
 					case 0 : return null;
-					case 1 : return new TableContext(parser, parseInfo, ((IQueryable)((ConstantExpression)parseInfo.Expression).Value).ElementType);
+					case 1 : return new TableContext(builder, buildInfo, ((IQueryable)((ConstantExpression)buildInfo.Expression).Value).ElementType);
 					case 2 :
-					case 3 : return new TableContext(parser, parseInfo, parseInfo.Expression.Type.GetGenericArguments()[0]);
-					case 4 : return ctx.GetContext(parseInfo.Expression, 0, parseInfo);
+					case 3 : return new TableContext(builder, buildInfo, buildInfo.Expression.Type.GetGenericArguments()[0]);
+					case 4 : return ctx.GetContext(buildInfo.Expression, 0, buildInfo);
 				}
 
 				throw new InvalidOperationException();
@@ -104,7 +104,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		#region TableContext
 
-		public class TableContext : IParseContext
+		public class TableContext : IBuildContext
 		{
 			#region Properties
 
@@ -112,10 +112,10 @@ namespace BLToolkit.Data.Linq.Parser
 			public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-			public ExpressionParser Parser     { get; private set; }
+			public ExpressionBuilder Builder     { get; private set; }
 			public Expression       Expression { get; private set; }
 			public SqlQuery         SqlQuery   { get; set; }
-			public IParseContext    Parent     { get; set; }
+			public IBuildContext    Parent     { get; set; }
 
 			protected Type         OriginalType;
 			public    Type         ObjectType;
@@ -126,24 +126,24 @@ namespace BLToolkit.Data.Linq.Parser
 
 			#region Init
 
-			public TableContext(ExpressionParser parser, ParseInfo parseInfo, Type originalType)
+			public TableContext(ExpressionBuilder builder, BuildInfo buildInfo, Type originalType)
 			{
-				Parser     = parser;
-				Parent     = parseInfo.Parent;
-				Expression = parseInfo.Expression;
-				SqlQuery   = parseInfo.SqlQuery;
+				Builder    = builder;
+				Parent     = buildInfo.Parent;
+				Expression = buildInfo.Expression;
+				SqlQuery   = buildInfo.SqlQuery;
 
 				OriginalType = originalType;
 				ObjectType   = GetObjectType();
-				SqlTable     = new SqlTable(parser.MappingSchema, ObjectType);
-				ObjectMapper = Parser.MappingSchema.GetObjectMapper(ObjectType);
+				SqlTable     = new SqlTable(builder.MappingSchema, ObjectType);
+				ObjectMapper = Builder.MappingSchema.GetObjectMapper(ObjectType);
 
 				SqlQuery.From.Table(SqlTable);
 			}
 
-			protected TableContext(ExpressionParser parser, SqlQuery sqlQuery)
+			protected TableContext(ExpressionBuilder builder, SqlQuery sqlQuery)
 			{
-				Parser   = parser;
+				Builder  = builder;
 				SqlQuery = sqlQuery;
 			}
 
@@ -151,8 +151,8 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				for (var type = OriginalType.BaseType; type != null && type != typeof(object); type = type.BaseType)
 				{
-					var extension = TypeExtension.GetTypeExtension(type, Parser.MappingSchema.Extensions);
-					var mapping   = Parser.MappingSchema.MetadataProvider.GetInheritanceMapping(type, extension);
+					var extension = TypeExtension.GetTypeExtension(type, Builder.MappingSchema.Extensions);
+					var mapping   = Builder.MappingSchema.MetadataProvider.GetInheritanceMapping(type, extension);
 
 					if (mapping.Length > 0)
 						return type;
@@ -270,15 +270,15 @@ namespace BLToolkit.Data.Linq.Parser
 			{
 				var data = new MappingData
 				{
-					MappingSchema = Parser.MappingSchema,
+					MappingSchema = Builder.MappingSchema,
 					ObjectMapper  = ObjectMapper,
 					Index         = index
 				};
 
 				return Expression.Convert(
 					Expression.Call(null, _mapperMethod,
-						ExpressionParser.DataContextParam,
-						ExpressionParser.DataReaderParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
 						Expression.Constant(data)),
 					ObjectType);
 			}
@@ -305,11 +305,11 @@ namespace BLToolkit.Data.Linq.Parser
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
 					{
-						ExpressionParser.ContextParam,
-						ExpressionParser.DataContextParam,
-						ExpressionParser.DataReaderParam,
-						ExpressionParser.ExpressionParam,
-						ExpressionParser.ParametersParam,
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
 					});
 
 				query.SetQuery(mapper.Compile());
@@ -333,7 +333,7 @@ namespace BLToolkit.Data.Linq.Parser
 				var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 				var idx  = ConvertToParentIndex(info.Index, null);
 
-				return Parser.BuildSql(expression.Type, idx);
+				return Builder.BuildSql(expression.Type, idx);
 			}
 
 			#endregion
@@ -558,15 +558,15 @@ namespace BLToolkit.Data.Linq.Parser
 				}
 			}
 
-			public IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				if (expression == null)
 				{
-					if (parseInfo.IsSubQuery)
+					if (buildInfo.IsSubQuery)
 					{
 						var table = new TableContext(
-							Parser,
-							new ParseInfo(Parent is SelectManyParser.SelectManyContext ? this : Parent, Expression, parseInfo.SqlQuery),
+							Builder,
+							new BuildInfo(Parent is SelectManyBuilder.SelectManyContext ? this : Parent, Expression, buildInfo.SqlQuery),
 							SqlTable.ObjectType);
 
 						return table;
@@ -579,7 +579,7 @@ namespace BLToolkit.Data.Linq.Parser
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
-					if (parseInfo.IsSubQuery)
+					if (buildInfo.IsSubQuery)
 					{
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
@@ -587,26 +587,26 @@ namespace BLToolkit.Data.Linq.Parser
 
 							if (association.IsList)
 							{
-								var ma     = (MemberExpression)parseInfo.Expression;
+								var ma     = (MemberExpression)buildInfo.Expression;
 								var atype  = typeof(AssociationHelper<>).MakeGenericType(association.ObjectType);
 								var helper = (IAssociationHelper)Activator.CreateInstance(atype);
 								var expr   = helper.GetExpression(ma.Expression, association);
 
-								parseInfo.IsAssociationParsed = true;
+								buildInfo.IsAssociationBuilе = true;
 
-								return Parser.ParseSequence(new ParseInfo(parseInfo, expr));
+								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 							}
 
 							/*
 							var table       = new TableContext(
-								Parser,
-								new ParseInfo(Parent is SelectManyParser.SelectManyContext ? this : Parent, Expression, parseInfo.SqlQuery),
+								Builder,
+								new BuildInfo(Parent is SelectManyBuilder.SelectManyContext ? this : Parent, Expression, buildInfo.SqlQuery),
 								association.Table.ObjectType);
 
 							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
 							{
 								var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
-								parseInfo.SqlQuery.Where
+								buildInfo.SqlQuery.Where
 									.Expr(predicate.Expr1)
 									.Equal
 									.Field(table.SqlTable.Fields[((SqlField)predicate.Expr2).Name]);
@@ -619,7 +619,7 @@ namespace BLToolkit.Data.Linq.Parser
 						{
 							var association = GetAssociation(levelExpression, level);
 							((AssociatedTableContext)association.Table).ParentAssociationJoin.IsWeak = false;
-							return association.Table.GetContext(expression, level + 1, parseInfo);
+							return association.Table.GetContext(expression, level + 1, buildInfo);
 						}
 					}
 				}
@@ -631,7 +631,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			#region ConvertToParentIndex
 
-			public int ConvertToParentIndex(int index, IParseContext context)
+			public int ConvertToParentIndex(int index, IBuildContext context)
 			{
 				return Parent == null ? index : Parent.ConvertToParentIndex(index, this);
 			}
@@ -760,7 +760,7 @@ namespace BLToolkit.Data.Linq.Parser
 							var q =
 								from a in ObjectMapper.Associations
 								where TypeHelper.Equals(a.MemberAccessor.MemberInfo, memberExpression.Member)
-								select new AssociatedTableContext(Parser, this, a) { Parent = Parent };
+								select new AssociatedTableContext(Builder, this, a) { Parent = Parent };
 
 							tableAssociation = q.FirstOrDefault();
 
@@ -800,8 +800,8 @@ namespace BLToolkit.Data.Linq.Parser
 			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
 			public          bool                  IsList;
 
-			public AssociatedTableContext(ExpressionParser parser, TableContext parent, Association association)
-				: base(parser, parent.SqlQuery)
+			public AssociatedTableContext(ExpressionBuilder builder, TableContext parent, Association association)
+				: base(builder, parent.SqlQuery)
 			{
 				var type = TypeHelper.GetMemberType(association.MemberAccessor.MemberInfo);
 
@@ -816,8 +816,8 @@ namespace BLToolkit.Data.Linq.Parser
 
 				OriginalType = type;
 				ObjectType   = GetObjectType();
-				ObjectMapper = Parser.MappingSchema.GetObjectMapper(ObjectType);
-				SqlTable     = new SqlTable(parser.MappingSchema, ObjectType);
+				ObjectMapper = Builder.MappingSchema.GetObjectMapper(ObjectType);
+				SqlTable     = new SqlTable(builder.MappingSchema, ObjectType);
 
 				var psrc = parent.SqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : IsList ? SqlTable.InnerJoin() : SqlTable.WeakInnerJoin();

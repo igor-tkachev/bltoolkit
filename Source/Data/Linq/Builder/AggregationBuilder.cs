@@ -3,21 +3,21 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
 
-	class AggregationParser : MethodCallParser
+	class AggregationBuilder : MethodCallBuilder
 	{
-		protected override bool CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable("Average", "Min", "Max", "Sum");
 		}
 
-		protected override IParseContext ParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo)
+		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = parser.ParseSequence(new ParseInfo(parseInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			if (sequence.SqlQuery.Select.IsDistinct ||
 				sequence.SqlQuery.Select.TakeValue != null ||
@@ -38,18 +38,18 @@ namespace BLToolkit.Data.Linq.Parser
 			if (methodCall.Arguments.Count == 2)
 			{
 				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-				var context = new AggregationContext(parseInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
-				var expr    = parser.ParseExpression(context, lambda.Body.Unwrap());
+				var context = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
+				var expr    = builder.ConvertToSql(context, lambda.Body.Unwrap());
 
-				if (expr.ElementType == QueryElementType.SqlQuery && expr != parseInfo.SqlQuery)
+				if (expr.ElementType == QueryElementType.SqlQuery && expr != buildInfo.SqlQuery)
 				{
 					expr     = sequence.SqlQuery.Select.Columns[sequence.SqlQuery.Select.Add(expr)];
 					sequence = new SubQueryContext(sequence);
-					context  = new AggregationContext(parseInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
+					context  = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
 				}
 				else
 				{
-					expr = parser.ConvertSearchCondition(context, expr);
+					expr = builder.ConvertSearchCondition(context, expr);
 				}
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq.Parser
 			}
 			else
 			{
-				var context = new AggregationContext(parseInfo.Parent, sequence, null, methodCall.Method.ReturnType);
+				var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
 
 				context.FieldIndex = context.SqlQuery.Select.Add(
 					new SqlFunction(
@@ -76,7 +76,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 		class AggregationContext : SequenceContextBase
 		{
-			public AggregationContext(IParseContext parent, IParseContext sequence, LambdaExpression lambda, Type returnType)
+			public AggregationContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda, Type returnType)
 				: base(parent, sequence, lambda)
 			{
 				_returnType = returnType;
@@ -88,16 +88,16 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = Expression.Convert(Parser.BuildSql(_returnType, FieldIndex), typeof(object));
+				var expr = Expression.Convert(Builder.BuildSql(_returnType, FieldIndex), typeof(object));
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
 					expr, new []
 					{
-						ExpressionParser.ContextParam,
-						ExpressionParser.DataContextParam,
-						ExpressionParser.DataReaderParam,
-						ExpressionParser.ExpressionParam,
-						ExpressionParser.ParametersParam,
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
 					});
 
 				query.SetElementQuery(mapper.Compile());
@@ -105,7 +105,7 @@ namespace BLToolkit.Data.Linq.Parser
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				return Parser.BuildSql(_returnType, FieldIndex);
+				return Builder.BuildSql(_returnType, FieldIndex);
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -135,7 +135,7 @@ namespace BLToolkit.Data.Linq.Parser
 				return false;
 			}
 
-			public override IParseContext GetContext(Expression expression, int level, ParseInfo parseInfo)
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				throw new NotImplementedException();
 			}

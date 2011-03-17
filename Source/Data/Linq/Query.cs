@@ -15,14 +15,14 @@ namespace BLToolkit.Data.Linq
 	using Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;
-	using Parser;
+	using Builder;
 	using Reflection;
 
 	public abstract class Query
 	{
 		#region Init
 
-		public abstract void Init(IParseContext parseContext, List<ParameterAccessor> sqlParameters);
+		public abstract void Init(IBuildContext parseContext, List<ParameterAccessor> sqlParameters);
 
 		#endregion
 
@@ -67,7 +67,7 @@ namespace BLToolkit.Data.Linq
 			GetIEnumerable = MakeEnumerable;
 		}
 
-		public override void Init(IParseContext parseContext, List<ParameterAccessor> sqlParameters)
+		public override void Init(IBuildContext parseContext, List<ParameterAccessor> sqlParameters)
 		{
 			Queries.Add(new QueryInfo
 			{
@@ -75,10 +75,10 @@ namespace BLToolkit.Data.Linq
 				Parameters = sqlParameters,
 			});
 
-			ContextID         = parseContext.Parser.DataContextInfo.ContextID;
-			MappingSchema     = parseContext.Parser.MappingSchema;
-			CreateSqlProvider = parseContext.Parser.DataContextInfo.CreateSqlProvider;
-			Expression        = parseContext.Parser.Expression;
+			ContextID         = parseContext.Builder.DataContextInfo.ContextID;
+			MappingSchema     = parseContext.Builder.MappingSchema;
+			CreateSqlProvider = parseContext.Builder.DataContextInfo.CreateSqlProvider;
+			Expression        = parseContext.Builder.Expression;
 			//Parameters        = parameters;
 		}
 
@@ -126,7 +126,7 @@ namespace BLToolkit.Data.Linq
 					{
 
 #if NEW_PARSER
-						query = new ExpressionParser(new Query<T>(), dataContextInfo, expr, null).Parse<T>();
+						query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
 #else
 						query = new ExpressionParserOld<T>().Parse(
 							dataContextInfo.ContextID,

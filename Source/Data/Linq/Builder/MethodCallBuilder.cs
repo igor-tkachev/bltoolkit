@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace BLToolkit.Data.Linq.Parser
+namespace BLToolkit.Data.Linq.Builder
 {
-	abstract class MethodCallParser : ISequenceParser
+	abstract class MethodCallBuilder : ISequenceBuilder
 	{
-		public int ParsingCounter { get; set; }
+		public int BuildCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, ParseInfo parseInfo)
+		public bool CanBuild(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			if (parseInfo.Expression.NodeType == ExpressionType.Call)
-				return CanParseMethodCall(parser, (MethodCallExpression)parseInfo.Expression, parseInfo);
+			if (buildInfo.Expression.NodeType == ExpressionType.Call)
+				return CanBuildMethodCall(builder, (MethodCallExpression)buildInfo.Expression, buildInfo);
 			return false;
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, ParseInfo parseInfo)
+		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			return ParseMethodCall(parser, (MethodCallExpression)parseInfo.Expression, parseInfo);
+			return BuildMethodCall(builder, (MethodCallExpression)buildInfo.Expression, buildInfo);
 		}
 
-		protected abstract bool          CanParseMethodCall(ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo);
-		protected abstract IParseContext ParseMethodCall   (ExpressionParser parser, MethodCallExpression methodCall, ParseInfo parseInfo);
+		protected abstract bool            CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
+		protected abstract IBuildContext BuildMethodCall   (ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
 	}
 }
