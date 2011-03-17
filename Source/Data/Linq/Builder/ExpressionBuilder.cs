@@ -39,6 +39,9 @@ namespace BLToolkit.Data.Linq.Builder
 			new AsQueryableBuilder   (),
 			new TableAttributeBuilder(),
 			new InsertBuilder        (),
+			new InsertBuilder.Into   (),
+			new InsertBuilder.Value  (),
+			new DeleteBuilder        (),
 		};
 
 		public static void AddBuilder(ISequenceBuilder builder)
