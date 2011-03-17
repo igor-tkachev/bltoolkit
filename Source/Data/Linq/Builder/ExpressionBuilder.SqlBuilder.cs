@@ -816,38 +816,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case ExpressionType.MemberAccess:
 					{
-						var ma = (MemberExpression)expression;
-
-#if DEBUG
-
-						var l  = ConvertMember(ma.Member);
-
-						if (l != null)
-						{
-							throw new InvalidOperationException();
-
-							//var ef  = l.Body.Unwrap();
-							//var pie = ef.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
-
-							//return ConvertToSql(context, pie);
-						}
-
-						if (TypeHelper.IsNullableValueMember(ma.Member))
-						{
-							throw new InvalidOperationException();
-							//return ConvertToSql(context, ma.Expression);
-						}
-
-						var de = ConvertTimeSpanMember(context, ma);
-
-						if (de != null)
-						{
-							throw new InvalidOperationException();
-							//return de;
-						}
-
-#endif
-
+						var ma   = (MemberExpression)expression;
 						var attr = GetFunctionAttribute(ma.Member);
 
 						if (attr != null)
@@ -887,25 +856,14 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 
 						break;
-
-						/*
-						var sql = context.ConvertToSql(expression, 0, ConvertFlags.None).ToList();
-
-						if (sql.Count != 0)
-						{
-							if (sql.Count == 1)
-								return sql[0];
-
-							throw new InvalidOperationException();
-						}
-
-						break;
-						*/
 					}
 
 				case ExpressionType.Call:
 					{
 						var e = (MethodCallExpression)expression;
+
+						if (e.IsQueryable())
+							return SubQueryToSql(context, expression);
 
 						if (e.Method.DeclaringType == typeof(Enumerable))
 						{
@@ -923,17 +881,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 							return ConvertEnumerable(context, e);
 						}
-
-#if DEBUG
-
-						var cm = ConvertMethod(e);
-						if (cm != null)
-						{
-							throw new InvalidOperationException();
-							//return ConvertToSql(context, cm);
-						}
-
-#endif
 
 						var attr = GetFunctionAttribute(e.Method);
 
@@ -959,9 +906,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (ex.NodeType == ExpressionType.Quote)
 							ex = ((UnaryExpression)ex).Operand;
-
-						//if (ex.NodeType == ExpressionType.MemberAccess)
-						//	return ConvertToSql(lambda, ex, queries);
 
 						if (ex.NodeType == ExpressionType.Lambda)
 						{
@@ -1374,7 +1318,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case ExpressionType.MemberAccess:
 					{
-						var e = expression as MemberExpression;
+						var e = (MemberExpression)expression;
 
 						if (e.Member.Name == "HasValue" && 
 							e.Member.DeclaringType.IsGenericType && 
