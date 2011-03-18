@@ -29,7 +29,7 @@ namespace Data.Linq
 		[Test]
 		public void Count3()
 		{
-			ForEachProvider(db => Assert.AreEqual(
+			ForEachProvider(db => AreEqual(
 				from p in    Parent select p.Children.Count(),
 				from p in db.Parent select p.Children.Count()));
 		}
@@ -37,7 +37,7 @@ namespace Data.Linq
 		[Test]
 		public void Count4()
 		{
-			ForEachProvider(db => Assert.AreEqual(
+			ForEachProvider(db => AreEqual(
 				from p in    Parent select    Child.Count(),
 				from p in db.Parent select db.Child.Count()));
 		}
@@ -81,7 +81,21 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupBy11()
+		public void GroupBy101()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				select g.Count();
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select g.Count()));
+		}
+
+		[Test]
+		public void GroupBy102()
 		{
 			ForEachProvider(db => AreEqual(
 				from ch in Child
@@ -103,6 +117,21 @@ namespace Data.Linq
 					ID4 = g.Count(ch => ch.ChildID > 10),
 				}));
 		}
+
+		[Test]
+		public void GroupBy103()
+		{
+			var expected =
+				from ch in Child
+				group ch by new { Parent = ch.ParentID, ch.ChildID } into g
+				select g.Count(ch => ch.ChildID > 20);
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by new { Parent = ch.ParentID, ch.ChildID } into g
+				select g.Count(ch => ch.ChildID > 20)));
+		}
+
 
 		[Test]
 		public void GroupBy21()

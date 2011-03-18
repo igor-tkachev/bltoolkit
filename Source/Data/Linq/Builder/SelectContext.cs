@@ -35,15 +35,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression IBuildContext.Expression { get { return Lambda; } }
 
-		bool _isGroupBySubquery;
-
 		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>();
 
 		public SelectContext(IBuildContext parent, LambdaExpression lambda, params IBuildContext[] sequences)
 		{
 			Parent   = parent;
 			Sequence = sequences;
-			Builder   = sequences[0].Builder;
+			Builder  = sequences[0].Builder;
 			Lambda   = lambda;
 			Body     = lambda.Body;//.Unwrap();
 			SqlQuery = sequences[0].SqlQuery;
@@ -51,68 +49,7 @@ namespace BLToolkit.Data.Linq.Builder
 			foreach (var context in Sequence)
 				context.Parent = this;
 
-			switch (Body.NodeType)
-			{
-				// .Select(p => new { ... })
-				//
-				case ExpressionType.New        :
-					{
-						var expr = (NewExpression)Body;
-
-// ReSharper disable ConditionIsAlwaysTrueOrFalse
-// ReSharper disable HeuristicUnreachableCode
-						if (expr.Members == null)
-							goto default;
-// ReSharper restore HeuristicUnreachableCode
-// ReSharper restore ConditionIsAlwaysTrueOrFalse
-
-						for (var i = 0; i < expr.Members.Count; i++)
-						{
-							var member = expr.Members[i];
-
-							Members.Add(member, expr.Arguments[i]);
-
-							if (member is MethodInfo)
-								Members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)member), expr.Arguments[i]);
-						}
-
-						break;
-					}
-
-				// .Select(p => new MyObject { ... })
-				//
-				case ExpressionType.MemberInit :
-					{
-						var expr = (MemberInitExpression)Body;
-
-						foreach (var binding in expr.Bindings)
-						{
-							if (binding is MemberAssignment)
-							{
-								var ma = (MemberAssignment)binding;
-
-								Members.Add(binding.Member, ma.Expression);
-
-								if (binding.Member is MethodInfo)
-									Members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)binding.Member), ma.Expression);
-							}
-							else
-								throw new InvalidOperationException();
-						}
-
-						_isGroupBySubquery =
-							Body.Type.IsGenericType &&
-							Body.Type.GetGenericTypeDefinition() == typeof(ExpressionBuilder.GroupSubQuery<,>);
-
-						break;
-					}
-
-				// .Select(p => everything else)
-				//
-				default                        :
-					IsScalar = true;
-					break;
-			}
+			IsScalar = !Builder.ProcessProjection(Members, Body);
 		}
 
 		#endregion
@@ -310,7 +247,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var q =
 							from m in Members
 							where !(m.Key is MethodInfo)
-							select ConvertMember(m.Value, flags) into mm
+							select ConvertMember(m.Key, m.Value, flags) into mm
 							from m in mm
 							select m;
 
@@ -381,7 +318,7 @@ namespace BLToolkit.Data.Linq.Builder
 			throw new NotImplementedException();
 		}
 
-		SqlInfo[] ConvertMember(Expression expression, ConvertFlags flags)
+		SqlInfo[] ConvertMember(MemberInfo member, Expression expression, ConvertFlags flags)
 		{
 			switch (expression.NodeType)
 			{
@@ -389,7 +326,10 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Parameter :
 					if (IsExpression(expression, 0, RequestFor.Field))
 						flags = ConvertFlags.Field;
-					return ConvertToSql(expression, 0, flags);
+
+					var sql = ConvertToSql(expression, 0, flags)[0];
+
+					return new[] { new SqlInfo { Sql = sql.Sql, Member = member, Query = sql.Query } };
 			}
 
 			return ConvertExpressions(expression, flags);

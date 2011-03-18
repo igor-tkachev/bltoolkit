@@ -548,7 +548,7 @@ namespace BLToolkit.Data.Linq.Builder
 						return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 					}
 
-					if (buildInfo.Parent == this)
+					//if (buildInfo.Parent == this)
 					{
 						var ctype  = typeof(ContextHelper<>).MakeGenericType(_key.Lambda.Parameters[0].Type);
 						var helper = (IContextHelper)Activator.CreateInstance(ctype);
@@ -558,10 +558,14 @@ namespace BLToolkit.Data.Linq.Builder
 							Expression.PropertyOrField(buildInfo.Expression, "Key"),
 							_key.Lambda.Body);
 
-						return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
+						var ctx = Builder.BuildSequence(new BuildInfo(buildInfo, expr));
+
+						Builder.BuiltFrom.Add(ctx, this);
+
+						return ctx;
 					}
 
-					return this;
+					//return this;
 				}
 
 				throw new NotImplementedException();

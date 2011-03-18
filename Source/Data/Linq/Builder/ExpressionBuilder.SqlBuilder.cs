@@ -1600,29 +1600,70 @@ namespace BLToolkit.Data.Linq.Builder
 			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Object);
 			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Object);
 
+			bool      isNull;
+			SqlInfo[] lcols;
+
+			var rmembers = new Dictionary<MemberInfo,Expression>();
+
 			if (sl == false && sr == false)
-				return null;
-
-			if (sl == false)
 			{
-				var r = right;
-				right = left;
-				left  = r;
+				var lmembers = new Dictionary<MemberInfo,Expression>();
 
-				var c = rightContext;
-				rightContext = leftContext;
-				leftContext  = c;
+				if (!ProcessProjection(lmembers, left) && !ProcessProjection(rmembers, right))
+					return null;
 
-				var q = qsr;
-				//qsr = qsl;
-				qsl = q;
+				if (lmembers.Count == 0)
+				{
+					var r = right;
+					right = left;
+					left  = r;
 
-				//sl = true;
-				sr = false;
+					var c = rightContext;
+					rightContext = leftContext;
+					leftContext  = c;
+
+					var q = qsr;
+					qsl = q;
+
+					sr = false;
+
+					var lm = lmembers;
+					lmembers = rmembers;
+					rmembers = lm;
+				}
+
+				isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
+				lcols  =
+					(from m in lmembers
+					select new { sql = leftContext.ConvertToSql(m.Value, 0, ConvertFlags.Field)[0], member = m.Key } into mm
+					select new SqlInfo { Sql = mm.sql.Sql, Member = mm.member }).ToArray();
 			}
+			else
+			{
+				if (sl == false)
+				{
+					var r = right;
+					right = left;
+					left  = r;
 
-			var isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
-			var lcols  = qsl.ConvertToSql(left, 0, ConvertFlags.Key);
+					var c = rightContext;
+					rightContext = leftContext;
+					leftContext  = c;
+
+					var q = qsr;
+					//qsr = qsl;
+					qsl = q;
+
+					//sl = true;
+					sr = false;
+				}
+
+				isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
+				lcols  = qsl.ConvertToSql(left, 0, ConvertFlags.Key);
+
+				if (!sr)
+					ProcessProjection(rmembers, right);
+			}
 
 			if (lcols.Length == 0)
 				return null;
@@ -1641,13 +1682,19 @@ namespace BLToolkit.Data.Linq.Builder
 					var info = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lcol.Member), 0, ConvertFlags.Field).Single();
 					rcol = info.Sql;
 				}
+				else
+				{
+					if (rmembers.Count != 0)
+					{
+						var info = rightContext.ConvertToSql(rmembers[lcol.Member], 0, ConvertFlags.Field)[0];
+						rcol = info.Sql;
+					}
+				}
 
 				var rex =
 					isNull ?
 						new SqlValue(right.Type, null) :
-						sr ?
-							rcol :
-							GetParameter(right, lcol.Member);
+						rcol ?? GetParameter(right, lcol.Member);
 
 				var predicate = Convert(leftContext, new SqlQuery.Predicate.ExprExpr(
 					lcol.Sql,
@@ -2411,6 +2458,68 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return sqlExpression;
+		}
+
+		public bool ProcessProjection(Dictionary<MemberInfo,Expression> members, Expression expression)
+		{
+			switch (expression.NodeType)
+			{
+				// new { ... }
+				//
+				case ExpressionType.New        :
+					{
+						var expr = (NewExpression)expression;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+						if (expr.Members == null)
+							return false;
+// ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+
+						for (var i = 0; i < expr.Members.Count; i++)
+						{
+							var member = expr.Members[i];
+
+							members.Add(member, expr.Arguments[i]);
+
+							if (member is MethodInfo)
+								members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)member), expr.Arguments[i]);
+						}
+
+						return true;
+					}
+
+				// new MyObject { ... }
+				//
+				case ExpressionType.MemberInit :
+					{
+						var expr = (MemberInitExpression)expression;
+
+						foreach (var binding in expr.Bindings)
+						{
+							if (binding is MemberAssignment)
+							{
+								var ma = (MemberAssignment)binding;
+
+								members.Add(binding.Member, ma.Expression);
+
+								if (binding.Member is MethodInfo)
+									members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)binding.Member), ma.Expression);
+							}
+							else
+								throw new InvalidOperationException();
+						}
+
+						return true;
+					}
+
+				// .Select(p => everything else)
+				//
+				default                        :
+					return false;
+			}
+
 		}
 
 		#endregion

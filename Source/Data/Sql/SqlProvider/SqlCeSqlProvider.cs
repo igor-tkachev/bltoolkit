@@ -158,6 +158,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
 
+						var isCount      = false;
 						var isAggregated = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
 						{
 							if (e.ElementType == QueryElementType.SqlFunction)
@@ -165,9 +166,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								{
 									case "Min"     :
 									case "Max"     :
-									case "Count"   :
 									case "Sum"     :
 									case "Average" : return true;
+									case "Count"   : isCount = true; return true;
 								}
 							return false;
 						});

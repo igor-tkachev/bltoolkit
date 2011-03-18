@@ -8,6 +8,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 	partial class ExpressionBuilder
 	{
+		#region BuildExpression
+
 		public Expression BuildExpression(IBuildContext context, Expression expression)
 		{
 			var newExpr = expression.Convert(pi =>
@@ -34,52 +36,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 							var ex = ma.Expression;
 
-							/*
-							if (query.Sources.Length > 0)
-							{
-								var field = query.GetBaseField(lambda, ma);
-
-								if (field != null)
-								{
-									if (field is QueryField.Column)
-										return BuildField(ma, field, converter);
-
-									if (field is QuerySource.SubQuery)
-										return BuildSubQuerySource(ma, (QuerySource.SubQuery)field, converter);
-
-									if (field is QueryField.ExprColumn)
-									{
-										var col = (QueryField.ExprColumn)field;
-										return BuildNewExpression(lambda, col.QuerySource, col.Expr, converter);
-									}
-
-									if (field is QuerySource.Table)
-										return BuildTable(ma, (QuerySource.Table)field, null, converter);
-
-									if (field is QueryField.SubQueryColumn)
-										return BuildSubQuerySource(ma, (QueryField.SubQueryColumn)field, converter);
-
-									if (field is QueryField.GroupByColumn)
-										return BuildGroupBy(ma, (QueryField.GroupByColumn)field, converter);
-
-									if (field is QuerySource.SubQuerySourceColumn)
-										return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)field, converter);
-
-									throw new InvalidOperationException();
-								}
-
-								//if (ex.Expr == expr.Expr && query is QuerySource.Scalar && ex.NodeType == ExpressionType.Constant)
-								//	return BuildField(lambda, query, ma);
-							}
-							else
-							{
-								var field = GetField(lambda, ma, query);
-
-								if (field != null)
-									return BuildField(ma, field, converter/*i => i/);
-							}
-							*/
-
 							if (ex != null && ex.NodeType == ExpressionType.Constant)
 							{
 								// field = localVariable
@@ -102,57 +58,6 @@ namespace BLToolkit.Data.Linq.Builder
 								return ctx.BuildExpression(pi, 0);
 
 							throw new NotImplementedException();
-
-							/*
-							if (query.Lambda                    != null &&
-							    query.Lambda.MethodInfo         != null     &&
-							    query.Lambda.MethodInfo.Name    == "Select" &&
-							    query.Lambda.Parameters.Length  == 2        &&
-							    query.Lambda.Parameters[1]      == pi)
-							{
-								return Expression.MakeMemberAccess(_contextParam, QueryCtx.Counter);
-							}
-
-							var field = query.GetBaseField(lambda, pi);
-
-							if (field != null)
-							{
-								//Func<FieldIndex,FieldIndex> conv = i => converter(query.EnsureField(i.Field).Select(this)[0]);
-
-								if (field is QuerySource.Table)
-									return BuildTable(pi, (QuerySource.Table)field, null, converter);
-
-								if (field is QuerySource.Scalar)
-								{
-									var source = (QuerySource)field;
-									return BuildNewExpression(lambda, source, source.Lambda.Body, converter);
-								}
-
-								if (field is QuerySource.Expr)
-								{
-									var source = (QuerySource)field;
-									return BuildQuerySourceExpr(query, source.Lambda.Body, converter);
-								}
-
-								if (field is QuerySource.GroupJoin)
-									return BuildGroupJoin(pi, (QuerySource.GroupJoin)field, converter);
-
-								if (field is QuerySource.SubQuery)
-									return BuildSubQuerySource(pi, (QuerySource.SubQuery)field, converter);
-
-								if (field is QuerySource.SubQuerySourceColumn)
-									return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)field, converter);
-
-								throw new InvalidOperationException();
-							}
-
-							//if (query.Lambda == null && query is QuerySource.SubQuerySourceColumn)
-							//{
-							//	return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)query, converter);
-							//}
-
-							break;
-							*/
 						}
 
 					case ExpressionType.Constant:
@@ -164,27 +69,6 @@ namespace BLToolkit.Data.Linq.Builder
 								return Expression.Convert(_expressionAccessors[pi], pi.Type);
 
 							throw new NotImplementedException();
-
-							/*
-							if (query.Sources.Length == 0)
-							{
-								var field = GetField(lambda, pi, query);
-
-								if (field != null)
-								{
-									var idx = field.Select(this);
-									return BuildField(pi, field.GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
-								}
-							}
-
-							if (query is QuerySource.Scalar && CurrentSql.Select.Columns.Count == 0 && expr == pi)
-								return BuildField(lambda, query.BaseQuery, pi, converter);
-
-							if (query is QuerySource.SubQuerySourceColumn)
-								return BuildSubQuerySourceColumn(pi, (QuerySource.SubQuerySourceColumn)query, converter);
-
-							return Expression.Convert(ExpressionAccessors[pi], pi.Type);
-							*/
 						}
 
 					case ExpressionType.Coalesce:
@@ -243,10 +127,12 @@ namespace BLToolkit.Data.Linq.Builder
 			return newExpr;
 		}
 
-		bool EnforceServerSide(IBuildContext context)
+		static bool EnforceServerSide(IBuildContext context)
 		{
 			return context.SqlQuery.Select.IsDistinct;
 		}
+
+		#endregion
 
 		#region BuildSubQuery
 
@@ -285,40 +171,6 @@ namespace BLToolkit.Data.Linq.Builder
 			var sequence = GetSubQuery(context, expression);
 
 			return sequence.BuildExpression(null, 0);
-
-
-			throw new NotImplementedException();
-
-			/*
-			ParentQueries.Insert(0, new ParentQuery { Parent = query.BaseQuery, Parameter = query.Lambda.Parameters[0]});
-			var sql = CurrentSql;
-
-			CurrentSql = new SqlQuery { ParentSql = sql };
-
-			var prev = _isSubQueryParsing;
-			_isSubQueryParsing = true;
-
-			var seq = BuildSequence(expr)[0];
-
-			_isSubQueryParsing = prev;
-
-			if (seq.Fields.Count == 1 && CurrentSql.Select.Columns.Count == 0)
-				seq.Fields[0].Select(this);
-
-			var column = new QueryField.ExprColumn(query, CurrentSql, null);
-
-			query.Fields.Add(column);
-
-			var idx    = column.Select(this);
-			var result = BuildField(expr, column.GetExpressions(this)[0], idx.Select(i => converter(i).Index).ToArray());
-
-			CurrentSql = sql;
-			ParentQueries.RemoveAt(0);
-
-			ParsingTracer.DecIndentLevel();
-
-			return result;
-			*/
 		}
 
 		#endregion

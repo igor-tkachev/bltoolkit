@@ -21,6 +21,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (methodCall.Arguments.Count == 2)
 			{
+				throw new InvalidOperationException();
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
 				sequence = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
@@ -44,6 +45,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					if (methodCall.Arguments.Count == 2)
 					{
+						throw new InvalidOperationException();
 						var groupBy = (GroupByBuilder.GroupByContext)sequence;
 						var sql     = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
 
