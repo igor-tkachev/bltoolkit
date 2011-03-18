@@ -159,19 +159,24 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
 
 						var isCount      = false;
-						var isAggregated = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
+						var isAggregated = false;
+						
+						if (subQuery.Select.Columns.Count == 1)
 						{
-							if (e.ElementType == QueryElementType.SqlFunction)
-								switch (((SqlFunction)e).Name)
+							var subCol = subQuery.Select.Columns[0];
+
+							if (subCol.Expression.ElementType == QueryElementType.SqlFunction)
+							{
+								switch (((SqlFunction)subCol.Expression).Name)
 								{
 									case "Min"     :
 									case "Max"     :
 									case "Sum"     :
-									case "Average" : return true;
-									case "Count"   : isCount = true; return true;
+									case "Average" : isAggregated = true;                 break;
+									case "Count"   : isAggregated = true; isCount = true; break;
 								}
-							return false;
-						});
+							}
+						}
 
 						var allAnd = true;
 
@@ -259,7 +264,33 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						if (modified || isAggregated)
 						{
-							query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
+							if (isCount)
+							{
+								var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
+
+								subQuery.Select.Columns.RemoveAt(0);
+
+								query.Select.Columns[i] = new SqlQuery.Column(
+									query,
+									new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[0]));
+							}
+							else if (isAggregated)
+							{
+								var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
+
+								subQuery.Select.Columns.RemoveAt(0);
+
+								var idx = subQuery.Select.Add(oldFunc.Parameters[0]);
+
+								query.Select.Columns[i] = new SqlQuery.Column(
+									query,
+									new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[idx]));
+							}
+							else
+							{
+								query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
+							}
+
 							dic.Add(col, query.Select.Columns[i]);
 						}
 					}

@@ -28,6 +28,16 @@ namespace BLToolkit.Data.Linq.Builder
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
+			IBuildContext fromContext;
+
+			if (builder.BuiltFrom.TryGetValue(sequence, out fromContext))
+			{
+				if (sequence is GroupByBuilder.GroupByContext)
+				{
+						
+				}
+			}
+
 			if (sequence.SqlQuery != buildInfo.SqlQuery)
 			{
 				if (sequence is JoinBuilder.GroupJoinSubQueryContext)

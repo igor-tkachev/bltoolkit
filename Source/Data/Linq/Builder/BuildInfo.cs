@@ -26,12 +26,12 @@ namespace BLToolkit.Data.Linq.Builder
 			SequenceInfo = buildInfo;
 		}
 
-		public BuildInfo       SequenceInfo { get; set; }
+		public BuildInfo     SequenceInfo { get; set; }
 		public IBuildContext Parent       { get; set; }
-		public Expression      Expression   { get; set; }
-		public SqlQuery        SqlQuery     { get; set; }
+		public Expression    Expression   { get; set; }
+		public SqlQuery      SqlQuery     { get; set; }
 
-		public bool            IsSubQuery   { get { return Parent != null; } }
+		public bool          IsSubQuery   { get { return Parent != null; } }
 
 		private bool _isAssociationBuilt;
 		public  bool  IsAssociationBuilе
