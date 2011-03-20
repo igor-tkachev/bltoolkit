@@ -41,8 +41,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence        = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 			var sequenceExpr    = methodCall.Arguments[0];
+			var sequence        = builder.BuildSequence(new BuildInfo(buildInfo, sequenceExpr));
 			var groupingType    = methodCall.Type.GetGenericArguments()[0];
 			var keySelector     = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			var elementSelector = (LambdaExpression)methodCall.Arguments[2].Unwrap();
@@ -520,13 +520,13 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				public Expression GetContext(Expression sequence, ParameterExpression param, Expression expr1, Expression expr2)
 				{
-					return Expression.Call(
-						null,
 // ReSharper disable AssignNullToNotNullAttribute
-						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<T,bool>>)null)),
+					//ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<T,bool>>)null)),
+					var mi   = ReflectionHelper.Expressor<object>.MethodExpressor(_ => Enumerable.Where(null, (Func<T,bool>)null));
 // ReSharper restore AssignNullToNotNullAttribute
-						sequence,
-						Expression.Lambda<Func<T,bool>>(Expression.Equal(expr1, expr2), new[] { param }));
+					var arg2 = Expression.Lambda<Func<T,bool>>(Expression.Equal(expr1, expr2), new[] { param });
+
+					return Expression.Call(null, mi, sequence, arg2);
 				}
 			}
 
@@ -553,14 +553,14 @@ namespace BLToolkit.Data.Linq.Builder
 						var ctype  = typeof(ContextHelper<>).MakeGenericType(_key.Lambda.Parameters[0].Type);
 						var helper = (IContextHelper)Activator.CreateInstance(ctype);
 						var expr   = helper.GetContext(
-							Sequence.Expression,
+							_sequenceExpr,
 							_key.Lambda.Parameters[0],
 							Expression.PropertyOrField(buildInfo.Expression, "Key"),
 							_key.Lambda.Body);
 
 						var ctx = Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 
-						Builder.BuiltFrom.Add(ctx, this);
+						ctx.SqlQuery.Properties.Add(Tuple.Create("from_group_by", SqlQuery));
 
 						return ctx;
 					}

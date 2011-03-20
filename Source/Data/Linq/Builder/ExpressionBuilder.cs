@@ -60,8 +60,6 @@ namespace BLToolkit.Data.Linq.Builder
 		private  bool                              _reorder;
 		readonly Dictionary<Expression,Expression> _expressionAccessors;
 
-		public readonly Dictionary<IBuildContext, IBuildContext> BuiltFrom = new Dictionary<IBuildContext, IBuildContext>();
-
 		readonly public List<ParameterAccessor>    CurrentSqlParameters = new List<ParameterAccessor>();
 
 		public ExpressionBuilder(

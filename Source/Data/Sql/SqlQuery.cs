@@ -97,6 +97,12 @@ namespace BLToolkit.Data.Sql
 			get { return _parameters; }
 		}
 
+		private List<object> _properties;
+		public  List<object>  Properties
+		{
+			get { return _properties ?? (_properties = new List<object>()); }
+		}
+
 		public bool     ParameterDependent { get; set; }
 		public SqlQuery ParentSql          { get; set; }
 

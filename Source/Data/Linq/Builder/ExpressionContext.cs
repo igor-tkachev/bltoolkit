@@ -91,7 +91,7 @@ namespace BLToolkit.Data.Linq.Builder
 		public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
 			if (expression == Lambda.Parameters[0])
-				return Sequence;
+				return Sequence.GetContext(null, 0, buildInfo);
 
 			return Sequence.GetContext(expression, level + 1, buildInfo);
 		}

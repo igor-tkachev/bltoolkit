@@ -28,21 +28,11 @@ namespace BLToolkit.Data.Linq.Builder
 				sequence.SetAlias(condition.Parameters[0].Name);
 			}
 
-			IBuildContext fromContext;
-
-			if (builder.BuiltFrom.TryGetValue(sequence, out fromContext))
-			{
-				if (sequence is GroupByBuilder.GroupByContext)
-				{
-						
-				}
-			}
-
 			if (sequence.SqlQuery != buildInfo.SqlQuery)
 			{
 				if (sequence is JoinBuilder.GroupJoinSubQueryContext)
 				{
-					var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
+					var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
 
 					ctx.SqlQuery   = ((JoinBuilder.GroupJoinSubQueryContext)sequence).GetCounter(methodCall);
 					ctx.Sql        = ctx.SqlQuery;
@@ -77,7 +67,7 @@ namespace BLToolkit.Data.Linq.Builder
 							sql.GroupBy.Items.Clear();
 							sql.ParentSql = groupBy.SqlQuery;
 
-							var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
+							var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
 
 							ctx.SqlQuery   = sql;
 							ctx.Sql        = sql;
@@ -103,7 +93,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							sql.ParentSql = groupBy.SqlQuery;
 
-							var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
+							var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
 
 							ctx.SqlQuery   = sql;
 							ctx.Sql        = new SqlFunction(returnType, "Count", sql.Select.Columns[0]);
@@ -114,7 +104,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 					else
 					{
-						var ctx = new CountConext(buildInfo.Parent, sequence, returnType);
+						var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
 
 						ctx.Sql        = SqlFunction.CreateCount(returnType, sequence.SqlQuery);
 						ctx.FieldIndex = -1;
@@ -146,7 +136,7 @@ namespace BLToolkit.Data.Linq.Builder
 					sequence = new SubQueryContext(sequence);
 			}
 
-			var context = new CountConext(buildInfo.Parent, sequence, returnType);
+			var context = new CountContext(buildInfo.Parent, sequence, returnType);
 
 			context.Sql        = context.SqlQuery;
 			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
@@ -163,9 +153,9 @@ namespace BLToolkit.Data.Linq.Builder
 			return false;
 		}
 
-		class CountConext : SequenceContextBase
+		internal class CountContext : SequenceContextBase
 		{
-			public CountConext(IBuildContext parent, IBuildContext sequence, Type returnType)
+			public CountContext(IBuildContext parent, IBuildContext sequence, Type returnType)
 				: base(parent, sequence, null)
 			{
 				_returnType = returnType;

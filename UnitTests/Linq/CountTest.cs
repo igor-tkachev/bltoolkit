@@ -97,7 +97,7 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy102()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				from ch in Child
 				group ch by ch.ParentID into g
 				select new
@@ -138,14 +138,12 @@ namespace Data.Linq
 		{
 			var n = 1;
 
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from ch in
 					from ch in Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
 				where ch.ParentID + 1 > n
 				group ch by ch into g
-				select g.Count(p => p.ParentID < 3);
-
-			ForEachProvider(db => AreEqual(expected,
+				select g.Count(p => p.ParentID < 3),
 				from ch in
 					from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
 				where ch.ParentID + 1 > n
@@ -247,13 +245,11 @@ namespace Data.Linq
 		[Test]
 		public void GroupByWhere1()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from ch in Child
 				group ch by ch.ParentID into g
 				where g.Key > 2
-				select g.Key;
-
-			ForEachProvider(db => AreEqual(expected,
+				select g.Key,
 				from ch in db.Child
 				group ch by ch.ParentID into g
 				where g.Key > 2
@@ -263,13 +259,11 @@ namespace Data.Linq
 		[Test]
 		public void GroupByWhere2()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from ch in Child
 				group ch by ch.ParentID into g
 				where g.Count() > 2
-				select g.Key;
-
-			ForEachProvider(db => AreEqual(expected,
+				select g.Key,
 				from ch in db.Child
 				group ch by ch.ParentID into g
 				where g.Count() > 2
@@ -277,18 +271,72 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupByWhere3()
+		public void GroupByWhere201()
 		{
-			var expected =
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				from ch in Child
 				group ch by ch.ParentID into g
-				where g.Count() > 2 && g.Key > 2
-				select g.Key;
-
-			ForEachProvider(db => AreEqual(expected,
+				where g.Count(ch => ch.ChildID > 20) > 2
+				select g.Key,
 				from ch in db.Child
 				group ch by ch.ParentID into g
-				where g.Count() > 2 && g.Key > 2
+				where g.Count(ch => ch.ChildID > 20) > 2
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByWhere202()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Count(ch => ch.ChildID > 20) > 2 || g.Count(ch => ch.ChildID == 20) > 2
+				select g.Key,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Count(ch => ch.ChildID > 20) > 2 || g.Count(ch => ch.ChildID == 20) > 2
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByWhere203()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Count(ch => ch.ChildID > 20) > 2 || g.Key > 2
+				select g.Key,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Count(ch => ch.ChildID > 20) > 2 || g.Key > 2
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByWhere3()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Count() > 2 && g.Key < 5
+				select g.Key,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Count() > 2 && g.Key < 5
+				select g.Key));
+		}
+
+		[Test]
+		public void GroupByWhere301()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				where g.Count() > 3 || g.Key == 1
+				select g.Key,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				where g.Count() > 3 || g.Key == 1
 				select g.Key));
 		}
 
@@ -310,7 +358,7 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy5()
 		{
-			var expected =
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				from ch in Child
 				group ch by ch.ParentID into g
 				select new
@@ -319,9 +367,7 @@ namespace Data.Linq
 					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
 					ID3 = g.Count(ch => ch.ChildID > 20),
 					ID4 = g.Count(ch => ch.ChildID > 10),
-				};
-
-			ForEachProvider(db => AreEqual(expected,
+				},
 				from ch in db.Child
 				group ch by ch.ParentID into g
 				select new

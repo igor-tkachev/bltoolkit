@@ -41,7 +41,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (table.SequenceAttributes != null)
 			{
-				SequenceNameAttribute attr = GetSequenceNameAttribute(table, false);
+				var attr = GetSequenceNameAttribute(table, false);
 
 				if (attr != null)
 					return new SqlExpression(attr.SequenceName + ".nextval", Precedence.Primary);
@@ -263,6 +263,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
 			CheckAliases(sqlQuery, 30);
+
+			new QueryVisitor().Visit(sqlQuery.Select, element =>
+			{
+				if (element.ElementType == QueryElementType.SqlParameter)
+					((SqlParameter)element).IsQueryParameter = false;
+			});
 
 			sqlQuery = base.Finalize(sqlQuery);
 
