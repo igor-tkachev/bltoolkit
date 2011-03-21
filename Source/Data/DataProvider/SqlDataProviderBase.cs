@@ -66,9 +66,9 @@ namespace BLToolkit.Data.DataProvider
 				//
 				if (p.SqlDbType == SqlDbType.Structured)
 				{
-					var lastDot = p.TypeName.LastIndexOf('.');
-					if (lastDot >= 0)
-						p.TypeName = p.TypeName.Substring(lastDot + 1);
+					var firstDot = p.TypeName.IndexOf('.');
+					if (firstDot >= 0)
+						p.TypeName = p.TypeName.Substring(firstDot + 1);
 				}
 			}
 
