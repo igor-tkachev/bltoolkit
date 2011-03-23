@@ -919,7 +919,9 @@ namespace Data.Linq
 				Sequence = sequence;
 			}
 
+#if DEBUG
 			public string _sqlQueryText { get { return Sequence._sqlQueryText; } }
+#endif
 
 			public IBuildContext    Sequence   { get; set; }
 			public ExpressionBuilder Builder     { get { return Sequence.Builder; } }
