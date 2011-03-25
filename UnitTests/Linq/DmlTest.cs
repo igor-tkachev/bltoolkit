@@ -962,14 +962,14 @@ namespace Update
 		{
 			ForEachProvider(new[] { ProviderName.PostgreSQL }, db =>
 			{
-				if (db is DbManager)
+				if (db is DbManager && ((DbManager)db).ConfigurationString == "Oracle")
 				{
 					db.Types2.Delete(_ => _.ID > 1000);
 
 					((DbManager)db).InsertBatch(1, new[]
 					{
-						new LinqDataTypes2 { ID = 1003, MoneyValue = 0m, DateTimeValue = null,         BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null },
-						new LinqDataTypes2 { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null,                                             SmallIntValue =  2 },
+						new LinqDataTypes2 { ID = 1003, MoneyValue = 0m, DateTimeValue = null,         BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null, IntValue = null },
+						new LinqDataTypes2 { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null,                                             SmallIntValue =  2,    IntValue = 1532334 },
 					});
 
 					db.Types2.Delete(_ => _.ID > 1000);

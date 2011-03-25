@@ -286,7 +286,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildFromClause(sb);
 		}
 
-		protected override void BuildValue(StringBuilder sb, object value)
+		public override void BuildValue(StringBuilder sb, object value)
 		{
 			if (value is Guid)
 			{

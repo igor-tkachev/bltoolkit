@@ -168,10 +168,9 @@ namespace BLToolkit.DataAccess
 		{
 			var query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
 
-			db.SetCommand(query.QueryText);
-
-			return ExecuteForEach(
+			return db.DataProvider.InsertBatch(
 				db,
+				query.QueryText,
 				list,
 				query.GetMemberMappers(),
 				maxBatchSize,
