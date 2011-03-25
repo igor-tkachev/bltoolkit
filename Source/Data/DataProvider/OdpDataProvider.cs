@@ -1497,7 +1497,16 @@ namespace BLToolkit.Data.DataProvider
 
 				foreach (var member in members)
 				{
-					sp.BuildValue(sb, member.GetValue(item));
+					var value = member.GetValue(item);
+
+					if (value is DateTime)
+					{
+						var dt = (DateTime)value;
+						sb.Append(string.Format("to_date('{0:dd.MM.yyyy HH:mm:ss}', 'DD.MM.YYYY HH24:MI:SS' )", dt));
+					}
+					else
+						sp.BuildValue(sb, value);
+
 					sb.Append(", ");
 				}
 
