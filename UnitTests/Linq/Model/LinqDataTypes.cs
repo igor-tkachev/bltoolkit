@@ -71,6 +71,7 @@ namespace Data.Linq.Model
 		public bool?     BoolValue;
 		public Guid?     GuidValue;
 		public short?    SmallIntValue;
+		public int?      IntValue;
 
 		public override bool Equals(object obj)
 		{

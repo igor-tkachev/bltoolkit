@@ -304,7 +304,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return new SqlFunction(systemType, "Iif", parameters[start], parameters[start + 1], ConvertCase(systemType, parameters, start + 2));
 		}
 
-		protected override void BuildValue(StringBuilder sb, object value)
+		public override void BuildValue(StringBuilder sb, object value)
 		{
 			if (value is bool)
 				sb.Append(value);
