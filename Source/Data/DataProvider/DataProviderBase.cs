@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 
@@ -336,6 +337,22 @@ namespace BLToolkit.Data.DataProvider
 			public abstract DateTimeOffset GetDateTimeOffset(int i);
 
 			#endregion
+		}
+
+		#endregion
+
+		#region InsertBatch
+
+		public virtual int InsertBatch<T>(
+			DbManager      db,
+			string         insertText,
+			IEnumerable<T> collection,
+			MemberMapper[] members,
+			int            maxBatchSize,
+			DbManager.ParameterProvider<T> getParameters)
+		{
+			db.SetCommand(insertText);
+			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
 		}
 
 		#endregion

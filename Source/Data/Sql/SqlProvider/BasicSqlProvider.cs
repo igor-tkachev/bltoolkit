@@ -1298,7 +1298,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			PositiveSign             = NumberFormatInfo.InvariantInfo.PositiveSign,
 		};
 
-		protected virtual void BuildValue(StringBuilder sb, object value)
+		public virtual void BuildValue(StringBuilder sb, object value)
 		{
 			if      (value == null)                   sb.Append("NULL");
 			else if (value is string)                 BuildString(sb, value.ToString());
