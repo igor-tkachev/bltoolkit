@@ -1,15 +1,19 @@
+call git archive --format=zip -o C:\Temp\BLToolkitSnapshot\bltoolkit_dev.zip master
+
 c:
 cd c:\temp\BLToolkitSnapshot\
-del *.zip
 
 rd /S /Q bl-toolkit
 md bl-toolkit
 
-"%ProgramW6432\%TortoiseProc.exe" /command:checkout /path:"c:\temp\BLToolkitSnapshot" /url:"http://bl-toolkit.googlecode.com/svn/trunk" /closeonend:1
+rem "%ProgramW6432\%TortoiseProc.exe" /command:checkout /path:"c:\temp\BLToolkitSnapshot" /url:"http://bl-toolkit.googlecode.com/svn/trunk" /closeonend:1
 
 cd bl-toolkit
 
-Tools\SvnRevision\SvnRevision.exe . Source\Templates\BLToolkitConstants.Revision.cs.template Source\Properties\Revision.generated.cs
+"%ProgramFiles(x86)%\WinRAR\WinRar.exe" x ..\bltoolkit_dev.zip
+del ..\*.zip
+
+rem Tools\SvnRevision\SvnRevision.exe . Source\Templates\BLToolkitConstants.Revision.cs.template Source\Properties\Revision.generated.cs
 
 "%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit_dev *.*
 "%ProgramFiles(x86)%\WinRAR\WinRar.exe" a -m5 -md1024 -s -r -rr -AFzip -x*\_svn\* c:\temp\BLToolkitSnapshot\bltoolkit Source\*.*
