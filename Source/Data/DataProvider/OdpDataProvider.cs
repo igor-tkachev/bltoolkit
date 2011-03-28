@@ -1464,8 +1464,6 @@ namespace BLToolkit.Data.DataProvider
 
 		#region InsertBatch
 
-
-
 		public override int InsertBatch<T>(
 			DbManager      db,
 			string         insertText,
@@ -1499,7 +1497,7 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
-					if (value is (DateTime?))
+					if (value is Nullable<DateTime>)
 						value = ((DateTime?)value).Value;
 
 					if (value is DateTime)
