@@ -1499,6 +1499,9 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
+					if (value is (DateTime?))
+						value = ((DateTime?)value).Value;
+
 					if (value is DateTime)
 					{
 						var dt = (DateTime)value;
