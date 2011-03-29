@@ -1861,9 +1861,31 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var e        = expression;
 			var argIndex = e.Object != null ? 0 : 1;
+			var arr      = e.Object ?? e.Arguments[0];
+			var arg      = e.Arguments[argIndex];
 
-			var expr = ConvertToSql(context, e.Arguments[argIndex]);
-			var arr  = e.Object ?? e.Arguments[0];
+			ISqlExpression expr = null;
+
+			var ctx = GetContext(context, arg);
+
+			if (ctx is TableBuilder.TableContext &&
+			    ctx.SqlQuery != context.SqlQuery &&
+			    ctx.IsExpression(arg, 0, RequestFor.Object))
+			{
+				expr = ctx.SqlQuery;
+			}
+
+			if (expr == null)
+			{
+				var sql = ConvertExpressions(context, arg, ConvertFlags.Key);
+
+				if (sql.Length == 1 && sql[0].Member == null)
+					expr = sql[0].Sql; //expr = ConvertToSql(context, arg);
+				else
+					expr = new SqlExpression(
+						'\x1' + string.Join(",", sql.Select(s => s.Member.Name)),
+						sql.Select(s => s.Sql).ToArray());
+			}
 
 			switch (arr.NodeType)
 			{

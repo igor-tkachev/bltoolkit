@@ -532,7 +532,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				if (expression == null)
+				if (expression == null && buildInfo != null)
 				{
 					if (buildInfo.Parent is SelectManyBuilder.SelectManyContext)
 					{

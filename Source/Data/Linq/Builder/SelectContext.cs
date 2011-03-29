@@ -278,6 +278,10 @@ namespace BLToolkit.Data.Linq.Builder
 											if (!_sql.TryGetValue(member, out sql))
 											{
 												sql = ConvertExpressions(Members[member], flags);
+
+												if (sql.Length == 1)
+													sql[0].Member = member;
+
 												_sql.Add(member, sql);
 											}
 
@@ -332,7 +336,12 @@ namespace BLToolkit.Data.Linq.Builder
 					return new[] { new SqlInfo { Sql = sql.Sql, Member = member, Query = sql.Query } };
 			}
 
-			return ConvertExpressions(expression, flags);
+			var exprs =  ConvertExpressions(expression, flags);
+
+			if (exprs.Length == 1)
+				exprs[0].Member = member;
+
+			return exprs;
 		}
 
 		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
@@ -659,6 +668,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public virtual IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
+			if (expression == null)
+				return this;
+
 			if (IsScalar)
 			{
 				return ProcessScalar(

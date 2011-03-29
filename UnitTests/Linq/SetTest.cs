@@ -452,6 +452,62 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains801()
+		{
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
+
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join ch in Child      on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				select new GrandChild { ParentID = 2, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID } into gc
+				where arr.Contains(gc)
+				select gc,
+				from p in db.Parent
+				join ch in db.Child      on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				select new GrandChild { ParentID = 2, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID } into gc
+				where arr.Contains(gc)
+				select gc));
+		}
+
+		[Test]
+		public void Contains802()
+		{
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
+
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join ch in Child on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = p.ParentID, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p,
+				from p in db.Parent
+				join ch in db.Child on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = p.ParentID, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p));
+		}
+
+		[Test]
+		public void Contains803()
+		{
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
+
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join ch in Child on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = 1, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p,
+				from p in db.Parent
+				join ch in db.Child on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = 1, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p));
+		}
+
+		[Test]
 		public void Contains9()
 		{
 			var arr = new[] { Parent1[0], Parent1[1] };

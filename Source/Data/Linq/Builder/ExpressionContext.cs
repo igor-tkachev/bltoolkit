@@ -70,7 +70,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.Root       : return expression == Lambda.Parameters[0];
+				case RequestFor.Root        : return expression == Lambda.Parameters[0];
 
 				case RequestFor.Association :
 				case RequestFor.Object      :
@@ -92,6 +92,13 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			if (expression == Lambda.Parameters[0])
 				return Sequence.GetContext(null, 0, buildInfo);
+
+			switch (expression.NodeType)
+			{
+				case ExpressionType.Constant   :
+				case ExpressionType.New        :
+				case ExpressionType.MemberInit : return null;
+			}
 
 			return Sequence.GetContext(expression, level + 1, buildInfo);
 		}

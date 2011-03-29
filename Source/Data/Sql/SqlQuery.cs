@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
+using BLToolkit.Reflection;
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Sql
@@ -4005,6 +4005,65 @@ namespace BLToolkit.Data.Sql
 							return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
 
 						return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
+					}
+				}
+
+				if (pr.Value is IEnumerable && p.Expr1 is SqlExpression)
+				{
+					var expr  = (SqlExpression)p.Expr1;
+
+					if (expr.Expr.Length > 1 && expr.Expr[0] == '\x1')
+					{
+						var type  = TypeHelper.GetListItemType(pr.Value);
+						var ta    = TypeAccessor.GetAccessor(type);
+						var items = (IEnumerable)pr.Value;
+						var names = expr.Expr.Substring(1).Split(',');
+
+						if (expr.Parameters.Length == 1)
+						{
+							var values = new List<ISqlExpression>();
+
+							foreach (var item in items)
+							{
+								var value = ta[names[0]].GetValue(item);
+								values.Add(new SqlValue(value));
+							}
+
+							if (values.Count == 0)
+								return new Predicate.Expr(new SqlValue(p.IsNot));
+
+							return new Predicate.InList(expr.Parameters[0], p.IsNot, values);
+						}
+
+						{
+							var sc = new SearchCondition();
+
+							foreach (var item in items)
+							{
+								var itemCond = new SearchCondition();
+
+								for (var i = 0; i < expr.Parameters.Length; i++)
+								{
+									var sql   = expr.Parameters[i];
+									var value = ta[names[i]].GetValue(item);
+									var cond  = value == null ?
+										new Condition(false, new Predicate.IsNull  (sql, false)) :
+										new Condition(false, new Predicate.ExprExpr(sql, Predicate.Operator.Equal, new SqlValue(value)));
+
+									itemCond.Conditions.Add(cond);
+								}
+
+								sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
+							}
+
+							if (sc.Conditions.Count == 0)
+								return new Predicate.Expr(new SqlValue(p.IsNot));
+
+							if (p.IsNot)
+								return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
+
+							return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
+						}
 					}
 				}
 			}
