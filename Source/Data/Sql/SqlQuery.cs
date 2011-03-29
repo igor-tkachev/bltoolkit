@@ -1310,6 +1310,11 @@ namespace BLToolkit.Data.Sql
 				_conditions.AddRange(list);
 			}
 
+			public SearchCondition(params Condition[] list)
+			{
+				_conditions.AddRange(list);
+			}
+
 			public class Next
 			{
 				internal Next(SearchCondition parent)

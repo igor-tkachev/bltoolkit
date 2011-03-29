@@ -376,6 +376,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains201()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select    Child.Select(c => c.ParentID).Contains(p.ParentID - 1),
+				from p in db.Parent select db.Child.Select(c => c.ParentID).Contains(p.ParentID - 1)));
+		}
+
+		[Test]
 		public void Contains3()
 		{
 			ForEachProvider(db => AreEqual(
@@ -415,6 +423,14 @@ namespace Data.Linq
 			ForEachProvider(db => Assert.AreEqual(
 				   Child.Select(c => c.ParentID).Contains(11),
 				db.Child.Select(c => c.ParentID).Contains(11)));
+		}
+
+		[Test]
+		public void Contains701()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Select(c => c.Parent).Contains(new Parent { ParentID = 11, Value1 = 11}),
+				db.Child.Select(c => c.Parent).Contains(new Parent { ParentID = 11, Value1 = 11})));
 		}
 
 		[Test]

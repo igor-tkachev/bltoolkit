@@ -736,6 +736,11 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 		}
 
+		public ISqlExpression GetSubQuery()
+		{
+			return SqlQuery;
+		}
+
 		#endregion
 
 		#region Helpers

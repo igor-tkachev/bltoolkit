@@ -123,5 +123,10 @@ namespace BLToolkit.Data.Linq.Builder
 			if (SqlQuery.From.Tables[0].Alias == null)
 				SqlQuery.From.Tables[0].Alias = alias;
 		}
+
+		public ISqlExpression GetSubQuery()
+		{
+			return SqlQuery;
+		}
 	}
 }

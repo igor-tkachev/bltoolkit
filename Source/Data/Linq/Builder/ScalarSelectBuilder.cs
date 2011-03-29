@@ -118,6 +118,11 @@ namespace BLToolkit.Data.Linq.Builder
 			public void SetAlias(string alias)
 			{
 			}
+
+			public ISqlExpression GetSubQuery()
+			{
+				return SqlQuery;
+			}
 		}
 	}
 }

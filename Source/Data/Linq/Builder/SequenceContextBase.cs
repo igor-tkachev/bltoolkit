@@ -24,8 +24,8 @@ namespace BLToolkit.Data.Linq.Builder
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-		public IBuildContext   Parent   { get; set; }
-		public IBuildContext   Sequence { get; set; }
+		public IBuildContext     Parent   { get; set; }
+		public IBuildContext     Sequence { get; set; }
 		public ExpressionBuilder Builder  { get; set; }
 		public LambdaExpression  Lambda   { get; set; }
 		public SqlQuery          SqlQuery { get; set; }
@@ -62,6 +62,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public virtual void SetAlias(string alias)
 		{
+		}
+
+		public virtual ISqlExpression GetSubQuery()
+		{
+			return SqlQuery;
 		}
 
 		protected bool IsSubQuery()

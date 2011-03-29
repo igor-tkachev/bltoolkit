@@ -171,6 +171,7 @@
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
+    <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />

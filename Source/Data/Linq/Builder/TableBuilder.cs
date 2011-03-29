@@ -651,6 +651,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#endregion
 
+			public ISqlExpression GetSubQuery()
+			{
+				return SqlQuery;
+			}
+
 			#region Helpers
 
 			SqlField GetField(Expression expression, int level)

@@ -2054,7 +2054,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		void BuildSearchCondition(IBuildContext context, Expression expression, List<SqlQuery.Condition> conditions)
 		{
-			if (IsSubQuery(context, expression))
+			/*if (IsSubQuery(context, expression))
 			{
 				var cond = BuildConditionSubQuery(context, expression);
 
@@ -2063,7 +2063,7 @@ namespace BLToolkit.Data.Linq.Builder
 					conditions.Add(cond);
 					return;
 				}
-			}
+			}*/
 
 			switch (expression.NodeType)
 			{

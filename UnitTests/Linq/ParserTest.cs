@@ -967,6 +967,11 @@ namespace Data.Linq
 			public void SetAlias(string alias)
 			{
 			}
+
+			public ISqlExpression GetSubQuery()
+			{
+				return SqlQuery;
+			}
 		}
 	}
 
