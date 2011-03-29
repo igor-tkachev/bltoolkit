@@ -17,18 +17,16 @@ namespace BLToolkit.Data.Linq.Builder
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
-			return new ContainsContext(buildInfo, methodCall, sequence);
+			return new ContainsContext(buildInfo.Parent, methodCall, sequence);
 		}
 
 		class ContainsContext : SequenceContextBase
 		{
-			readonly BuildInfo            _buildInfo;
 			readonly MethodCallExpression _methodCall;
 
-			public ContainsContext(BuildInfo buildInfo, MethodCallExpression methodCall, IBuildContext sequence)
-				: base(buildInfo.Parent, sequence, null)
+			public ContainsContext(IBuildContext parent, MethodCallExpression methodCall, IBuildContext sequence)
+				: base(parent, sequence, null)
 			{
-				_buildInfo  = buildInfo;
 				_methodCall = methodCall;
 			}
 
@@ -67,8 +65,8 @@ namespace BLToolkit.Data.Linq.Builder
 					var sql   = GetSubQuery(null);
 					var query = SqlQuery;
 
-					if (_buildInfo.Parent != null)
-						query = _buildInfo.Parent.SqlQuery;
+					if (Parent != null)
+						query = Parent.SqlQuery;
 
 					return new[] { new SqlInfo { Query = query, Sql = sql } };
 				}
