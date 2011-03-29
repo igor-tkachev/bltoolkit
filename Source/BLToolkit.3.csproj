@@ -138,6 +138,7 @@
     <Compile Include="Data\Linq\Builder\AsQueryableBuilder.cs" />
     <Compile Include="Data\Linq\Builder\BuildInfo.cs" />
     <Compile Include="Data\Linq\Builder\ChangeTypeExpression.cs" />
+    <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ConvertFlags.cs" />
     <Compile Include="Data\Linq\Builder\CountBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DefaultIfEmptyBuilder.cs" />

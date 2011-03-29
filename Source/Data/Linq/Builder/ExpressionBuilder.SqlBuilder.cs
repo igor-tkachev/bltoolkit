@@ -1883,7 +1883,7 @@ namespace BLToolkit.Data.Linq.Builder
 					expr = sql[0].Sql; //expr = ConvertToSql(context, arg);
 				else
 					expr = new SqlExpression(
-						'\x1' + string.Join(",", sql.Select(s => s.Member.Name)),
+						'\x1' + string.Join(",", sql.Select(s => s.Member.Name).ToArray()),
 						sql.Select(s => s.Sql).ToArray());
 			}
 

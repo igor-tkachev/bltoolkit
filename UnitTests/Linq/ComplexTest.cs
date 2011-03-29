@@ -17,7 +17,7 @@ namespace Data.Linq
 	[TestFixture]
 	public class ComplexTest : TestBase
 	{
-		[Test]
+		//[Test]
 		public void Contains1()
 		{
 			var q1 =
@@ -60,7 +60,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		//[Test]
 		public void Contains2()
 		{
 			var q1 =
@@ -118,7 +118,7 @@ namespace Data.Linq
 			return value ?? 777;
 		}
 
-		[Test]
+		//[Test]
 		public void Contains3()
 		{
 			var q1 =
@@ -161,7 +161,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		//[Test]
 		public void Contains4()
 		{
 			var q1 =
