@@ -124,9 +124,9 @@ namespace BLToolkit.Data.Linq.Builder
 				SqlQuery.From.Tables[0].Alias = alias;
 		}
 
-		public ISqlExpression GetSubQuery()
+		public ISqlExpression GetSubQuery(IBuildContext context)
 		{
-			return SqlQuery;
+			return null;
 		}
 	}
 }

@@ -227,6 +227,22 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				return Sequence.GetContext(expression, level, buildInfo);
 			}
+
+			public override ISqlExpression GetSubQuery(IBuildContext context)
+			{
+				var query = context.SqlQuery;
+
+				if (query == SqlQuery)
+				{
+					var col = query.Select.Columns[query.Select.Columns.Count - 1];
+
+					query.Select.Columns.RemoveAt(query.Select.Columns.Count - 1);
+
+					return col.Expression;
+				}
+
+				return null;
+			}
 		}
 	}
 }

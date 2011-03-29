@@ -736,12 +736,12 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 		}
 
-		public ISqlExpression GetSubQuery()
-		{
-			return SqlQuery;
-		}
-
 		#endregion
+
+		public ISqlExpression GetSubQuery(IBuildContext context)
+		{
+			return null;
+		}
 
 		#region Helpers
 

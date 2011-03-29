@@ -968,9 +968,9 @@ namespace Data.Linq
 			{
 			}
 
-			public ISqlExpression GetSubQuery()
+			public ISqlExpression GetSubQuery(IBuildContext context)
 			{
-				return SqlQuery;
+				return null;
 			}
 		}
 	}

@@ -224,19 +224,17 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			var sequence = GetSubQuery(context, expression);
+			var subSql   = sequence.GetSubQuery(context);
+
+			if (subSql != null)
+				return subSql;
 
 			var query    = context.SqlQuery;
 			var subQuery = sequence.SqlQuery;
 
-			if (query == subQuery && sequence is CountBuilder.CountContext)
-			{
-				var col = query.Select.Columns[query.Select.Columns.Count - 1];
-
-				query.Select.Columns.RemoveAt(query.Select.Columns.Count - 1);
-
-				return col.Expression;
-			}
-			else if (!query.GroupBy.IsEmpty && !subQuery.Where.IsEmpty)
+			// This code should be moved to context.
+			//
+			if (!query.GroupBy.IsEmpty && !subQuery.Where.IsEmpty)
 			{
 				var fromGroupBy = sequence.SqlQuery.Properties
 					.OfType<System.Tuple<string,SqlQuery>>()
@@ -246,15 +244,15 @@ namespace BLToolkit.Data.Linq.Builder
 				if (fromGroupBy)
 				{
 					if (subQuery.Select.Columns.Count == 1 &&
-						subQuery.Select.Columns[0].Expression.ElementType == QueryElementType.SqlFunction &&
-						subQuery.GroupBy.IsEmpty && !subQuery.Select.HasModifier && !subQuery.HasUnion &&
-						subQuery.Where.SearchCondition.Conditions.Count == 1)
+					    subQuery.Select.Columns[0].Expression.ElementType == QueryElementType.SqlFunction &&
+					    subQuery.GroupBy.IsEmpty && !subQuery.Select.HasModifier && !subQuery.HasUnion &&
+					    subQuery.Where.SearchCondition.Conditions.Count == 1)
 					{
 						var cond = subQuery.Where.SearchCondition.Conditions[0];
 
 						if (cond.Predicate.ElementType == QueryElementType.ExprExprPredicate && query.GroupBy.Items.Count == 1 ||
-							cond.Predicate.ElementType == QueryElementType.SearchCondition &&
-							query.GroupBy.Items.Count == ((SqlQuery.SearchCondition)cond.Predicate).Conditions.Count)
+						    cond.Predicate.ElementType == QueryElementType.SearchCondition &&
+						    query.GroupBy.Items.Count == ((SqlQuery.SearchCondition)cond.Predicate).Conditions.Count)
 						{
 							var func = (SqlFunction)subQuery.Select.Columns[0].Expression;
 

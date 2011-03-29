@@ -64,9 +64,9 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 		}
 
-		public virtual ISqlExpression GetSubQuery()
+		public virtual ISqlExpression GetSubQuery(IBuildContext context)
 		{
-			return SqlQuery;
+			return null;
 		}
 
 		protected bool IsSubQuery()

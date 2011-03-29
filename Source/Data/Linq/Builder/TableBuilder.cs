@@ -651,9 +651,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#endregion
 
-			public ISqlExpression GetSubQuery()
+			public ISqlExpression GetSubQuery(IBuildContext context)
 			{
-				return SqlQuery;
+				return null;
 			}
 
 			#region Helpers

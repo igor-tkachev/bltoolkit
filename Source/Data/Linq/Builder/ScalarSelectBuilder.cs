@@ -119,9 +119,9 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 			}
 
-			public ISqlExpression GetSubQuery()
+			public ISqlExpression GetSubQuery(IBuildContext context)
 			{
-				return SqlQuery;
+				return null;
 			}
 		}
 	}
