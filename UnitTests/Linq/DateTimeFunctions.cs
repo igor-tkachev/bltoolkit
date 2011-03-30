@@ -389,7 +389,7 @@ namespace Data.Linq
 
 		#region DateDiff
 
-		//[Test]
+		[Test]
 		public void SubDateDay()
 		{
 			ForEachProvider(db => AreEqual(

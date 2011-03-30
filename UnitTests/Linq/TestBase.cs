@@ -87,7 +87,7 @@ namespace Data.Linq
 
 		readonly List<ServiceHost> _hosts = new List<ServiceHost>();
 
-		const int StartIP = 12345;
+		const int StartIP = 2345;
 
 		[TestFixtureSetUp]
 		public void SetUp()

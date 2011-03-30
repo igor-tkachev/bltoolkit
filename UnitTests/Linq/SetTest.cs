@@ -376,6 +376,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains201()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select    Child.Select(c => c.ParentID).Contains(p.ParentID - 1),
+				from p in db.Parent select db.Child.Select(c => c.ParentID).Contains(p.ParentID - 1)));
+		}
+
+		[Test]
 		public void Contains3()
 		{
 			ForEachProvider(db => AreEqual(
@@ -418,6 +426,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains701()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Select(c => c.Parent).Contains(new Parent { ParentID = 11, Value1 = 11}),
+				db.Child.Select(c => c.Parent).Contains(new Parent { ParentID = 11, Value1 = 11})));
+		}
+
+		[Test]
 		public void Contains8()
 		{
 			var arr = new[] { GrandChild[0], GrandChild[1] };
@@ -432,6 +448,24 @@ namespace Data.Linq
 				join ch in db.Child on p.ParentID equals ch.ParentID
 				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
 				where arr.Contains(gc)
+				select p));
+		}
+
+		[Test]
+		public void Contains801()
+		{
+			var arr = new[] { GrandChild[0], GrandChild[1] };
+
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join ch in Child on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = p.ParentID, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p,
+				from p in db.Parent
+				join ch in db.Child on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = p.ParentID, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
 				select p));
 		}
 

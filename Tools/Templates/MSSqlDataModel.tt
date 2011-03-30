@@ -10,6 +10,7 @@
 	ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
+	//ConnectionString = "Server=.;Database=BLToolkitData;Integrated Security=SSPI";
 
 	Namespace = "MSSQLDataModel";
 
