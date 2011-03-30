@@ -206,42 +206,6 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Scalar5()
-		{
-			ForEachProvider(db => AreEqual(
-				(from ch in Child
-				group ch by ch.ParentID into g
-				select g.Select(ch => ch.ChildID).Max()),
-				(from ch in db.Child
-				group ch by ch.ParentID into g
-				select g.Select(ch => ch.ChildID).Max())));
-		}
-
-		[Test]
-		public void Scalar6()
-		{
-			ForEachProvider(db => AreEqual(
-				(from ch in Child
-				group ch by ch.ParentID into g
-				select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max),
-				(from ch in db.Child
-				group ch by ch.ParentID into g
-				select new { max = g.Select(ch => ch.ChildID).Max()}).Select(id => id.max)));
-		}
-
-		[Test]
-		public void Scalar7()
-		{
-			ForEachProvider(db => AreEqual(
-				(from ch in Child
-				group ch by ch.ParentID into g
-				select new { max = g.Max(ch => ch.ChildID)}).Select(id => id.max),
-				(from ch in db.Child
-				group ch by ch.ParentID into g
-				select new { max = g.Max(ch => ch.ChildID)}).Select(id => id.max)));
-		}
-
-		[Test]
 		public void Function()
 		{
 			var text = "123";

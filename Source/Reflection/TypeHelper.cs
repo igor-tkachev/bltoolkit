@@ -1491,8 +1491,6 @@ namespace BLToolkit.Reflection
 			return false;
 		}
 
-		#endregion
-
 		public static bool IsNullableValueMember(MemberInfo member)
 		{
 			return
@@ -1500,5 +1498,19 @@ namespace BLToolkit.Reflection
 				member.DeclaringType.IsGenericType &&
 				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
+
+		public static bool Equals(MemberInfo member1, MemberInfo member2)
+		{
+			if (ReferenceEquals(member1, member2))
+				return true;
+
+			return
+				member1 != null &&
+				member2 != null &&
+				member1.DeclaringType == member2.DeclaringType &&
+				member1.Name          == member2.Name;
+		}
+
+		#endregion
 	}
 }

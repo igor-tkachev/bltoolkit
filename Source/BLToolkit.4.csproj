@@ -40,7 +40,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW4;TRACE_PARSING1;OVERRIDETOSTRING;NEW_PARSER1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;FW4;TRACE_PARSING1;OVERRIDETOSTRING;NEW_PARSER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>
@@ -171,17 +171,26 @@
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
+    <Compile Include="Data\Linq\Builder\ConcatUnionBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs" />
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
-    <Compile Include="Data\Linq\Parser\AsQueryableParser.cs" />
-    <Compile Include="Data\Linq\Parser\DefaultIfEmptyParser.cs" />
-    <Compile Include="Data\Linq\Parser\SelectManyParser.cs" />
-    <Compile Include="Data\Linq\Parser\SqlInfo.cs" />
-    <Compile Include="Data\Linq\Parser\TakeSkipParser.cs" />
+    <Compile Include="Data\Linq\Builder\AsQueryableBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ChangeTypeExpression.cs" />
+    <Compile Include="Data\Linq\Builder\DefaultIfEmptyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\InsertBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\BuildInfo.cs" />
+    <Compile Include="Data\Linq\Builder\SelectManyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\SqlInfo.cs" />
+    <Compile Include="Data\Linq\Builder\TableAttributeBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Base.cs" />
     <Compile Include="Data\Linq\ExpressionParser.Parsing.cs" />
@@ -194,29 +203,29 @@
     <Compile Include="Data\Linq\Expressions.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
-    <Compile Include="Data\Linq\Parser\AggregationParser.cs" />
-    <Compile Include="Data\Linq\Parser\ConvertFlags.cs" />
-    <Compile Include="Data\Linq\Parser\CountParser.cs" />
-    <Compile Include="Data\Linq\Parser\DistinctParser.cs" />
-    <Compile Include="Data\Linq\Parser\ExpressionParser.cs" />
-    <Compile Include="Data\Linq\Parser\ExpressionParser.Parsing.cs" />
-    <Compile Include="Data\Linq\Parser\ExpressionParser.QueryBuilding.cs" />
-    <Compile Include="Data\Linq\Parser\FirstSingleParser.cs" />
-    <Compile Include="Data\Linq\Parser\GroupByParser.cs" />
-    <Compile Include="Data\Linq\Parser\IParseContext.cs" />
-    <Compile Include="Data\Linq\Parser\ISequenceParser.cs" />
-    <Compile Include="Data\Linq\Parser\JoinParser.cs" />
-    <Compile Include="Data\Linq\Parser\MethodCallParser.cs" />
-    <Compile Include="Data\Linq\Parser\OrderByParser.cs" />
-    <Compile Include="Data\Linq\Parser\PathThroughContext.cs" />
-    <Compile Include="Data\Linq\Parser\RequestFor.cs" />
-    <Compile Include="Data\Linq\Parser\ScalarSelectParser.cs" />
-    <Compile Include="Data\Linq\Parser\SelectContext.cs" />
-    <Compile Include="Data\Linq\Parser\SelectParser.cs" />
-    <Compile Include="Data\Linq\Parser\SequenceContextBase.cs" />
-    <Compile Include="Data\Linq\Parser\SubQueryContext.cs" />
-    <Compile Include="Data\Linq\Parser\TableParser.cs" />
-    <Compile Include="Data\Linq\Parser\WhereParser.cs" />
+    <Compile Include="Data\Linq\Builder\AggregationBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ConvertFlags.cs" />
+    <Compile Include="Data\Linq\Builder\CountBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\DistinctBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionBuilder.SqlBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionBuilder.QueryBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\FirstSingleBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\GroupByBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\IBuildContext.cs" />
+    <Compile Include="Data\Linq\Builder\ISequenceBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\JoinBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\MethodCallBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\OrderByBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionContext.cs" />
+    <Compile Include="Data\Linq\Builder\RequestFor.cs" />
+    <Compile Include="Data\Linq\Builder\ScalarSelectBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\SelectContext.cs" />
+    <Compile Include="Data\Linq\Builder\SelectBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\SequenceContextBase.cs" />
+    <Compile Include="Data\Linq\Builder\SubQueryContext.cs" />
+    <Compile Include="Data\Linq\Builder\TableBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\WhereBuilder.cs" />
     <Compile Include="Data\Linq\Query.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />

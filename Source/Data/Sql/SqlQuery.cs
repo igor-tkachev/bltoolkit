@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
+using BLToolkit.Reflection;
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Sql
@@ -97,6 +97,12 @@ namespace BLToolkit.Data.Sql
 			get { return _parameters; }
 		}
 
+		private List<object> _properties;
+		public  List<object>  Properties
+		{
+			get { return _properties ?? (_properties = new List<object>()); }
+		}
+
 		public bool     ParameterDependent { get; set; }
 		public SqlQuery ParentSql          { get; set; }
 
@@ -161,7 +167,7 @@ namespace BLToolkit.Data.Sql
 
 			public bool Equals(Column other)
 			{
-				return (_alias == other._alias || other._alias == null) && Expression.Equals(other.Expression);
+				return Expression.Equals(other.Expression);
 			}
 
 #if OVERRIDETOSTRING
@@ -522,7 +528,9 @@ namespace BLToolkit.Data.Sql
 		{
 			Auto,
 			Inner,
-			Left
+			Left,
+			CrossApply,
+			OuterApply
 		}
 
 		public class JoinedTable : IQueryElement, ISqlExpressionWalkable, ICloneableElement
@@ -606,7 +614,15 @@ namespace BLToolkit.Data.Sql
 
 				dic.Add(this, this);
 
-				sb.Append(JoinType == JoinType.Inner ? "INNER" : "LEFT").Append(" JOIN ");
+				switch (JoinType)
+				{
+					case JoinType.Inner      : sb.Append("INNER JOIN ");  break;
+					case JoinType.Left       : sb.Append("LEFT JOIN ");   break;
+					case JoinType.CrossApply : sb.Append("CROSS APPLY "); break;
+					case JoinType.OuterApply : sb.Append("OUTER APPLY "); break;
+					default                  : sb.Append("SOME JOIN "); break;
+				}
+
 				((IQueryElement)Table).ToString(sb, dic);
 				sb.Append(" ON ");
 				((IQueryElement)Condition).ToString(sb, dic);
@@ -1294,6 +1310,11 @@ namespace BLToolkit.Data.Sql
 				_conditions.AddRange(list);
 			}
 
+			public SearchCondition(params Condition[] list)
+			{
+				_conditions.AddRange(list);
+			}
+
 			public class Next
 			{
 				internal Next(SearchCondition parent)
@@ -1878,6 +1899,40 @@ namespace BLToolkit.Data.Sql
 					if (c.Equals(col))
 						return col;
 
+#if DEBUG
+
+				switch (col.Expression.ElementType)
+				{
+					case QueryElementType.SqlField :
+						{
+							var table = ((SqlField)col.Expression).Table;
+
+							//if (SqlQuery.From.GetFromTables().Any(_ => _ == table))
+							//	throw new InvalidOperationException("Wrong field usage.");
+
+							break;
+						}
+
+					case QueryElementType.Column :
+						{
+							var query = ((Column)col.Expression).Parent;
+
+							//if (!SqlQuery.From.GetFromQueries().Any(_ => _ == query))
+							//	throw new InvalidOperationException("Wrong column usage.");
+
+							break;
+						}
+
+					case QueryElementType.SqlQuery :
+						{
+							if (col.Expression == SqlQuery)
+								throw new InvalidOperationException("Wrong query usage.");
+							break;
+						}
+				}
+
+#endif
+
 				Columns.Add(col);
 
 				return col;
@@ -2255,7 +2310,7 @@ namespace BLToolkit.Data.Sql
 							JoinedTable.Table.Joins.Add(join.JoinedTable);
 				}
 
-				internal JoinedTable JoinedTable { get; private set; }
+				public JoinedTable JoinedTable { get; private set; }
 			}
 
 			#endregion
@@ -2365,6 +2420,26 @@ namespace BLToolkit.Data.Sql
 				get { return _tables; }
 			}
 
+			IEnumerable<ISqlTableSource> GetJoinTables(TableSource source, QueryElementType elementType)
+			{
+				if (source.Source.ElementType == elementType)
+					yield return source.Source;
+
+				foreach (var join in source.Joins)
+					foreach (var table in GetJoinTables(join.Table, elementType))
+						yield return table;
+			}
+
+			internal IEnumerable<ISqlTableSource> GetFromTables()
+			{
+				return Tables.SelectMany(_ => GetJoinTables(_, QueryElementType.SqlTable));
+			}
+
+			internal IEnumerable<ISqlTableSource> GetFromQueries()
+			{
+				return Tables.SelectMany(_ => GetJoinTables(_, QueryElementType.SqlQuery));
+			}
+
 			#region Overrides
 
 #if OVERRIDETOSTRING
@@ -2418,19 +2493,23 @@ namespace BLToolkit.Data.Sql
 			#endregion
 		}
 
-		public static FJoin InnerJoin    (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  false, joins); }
-		public static FJoin InnerJoin    (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, false, joins); }
-		public static FJoin LeftJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  false, joins); }
-		public static FJoin LeftJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, false, joins); }
-		public static FJoin Join         (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  false, joins); }
-		public static FJoin Join         (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, false, joins); }
+		public static FJoin InnerJoin    (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, null,  false, joins); }
+		public static FJoin InnerJoin    (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, alias, false, joins); }
+		public static FJoin LeftJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,       table, null,  false, joins); }
+		public static FJoin LeftJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,       table, alias, false, joins); }
+		public static FJoin Join         (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, null,  false, joins); }
+		public static FJoin Join         (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, alias, false, joins); }
+		public static FJoin CrossApply   (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.CrossApply, table, null,  false, joins); }
+		public static FJoin CrossApply   (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.CrossApply, table, alias, false, joins); }
+		public static FJoin OuterApply   (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.OuterApply, table, null,  false, joins); }
+		public static FJoin OuterApply   (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.OuterApply, table, alias, false, joins); }
 
-		public static FJoin WeakInnerJoin(ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner, table, null,  true,  joins); }
-		public static FJoin WeakInnerJoin(ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner, table, alias, true,  joins); }
-		public static FJoin WeakLeftJoin (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,  table, null,  true,  joins); }
-		public static FJoin WeakLeftJoin (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,  table, alias, true,  joins); }
-		public static FJoin WeakJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, null,  true,  joins); }
-		public static FJoin WeakJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,  table, alias, true,  joins); }
+		public static FJoin WeakInnerJoin(ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, null,  true,  joins); }
+		public static FJoin WeakInnerJoin(ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Inner,      table, alias, true,  joins); }
+		public static FJoin WeakLeftJoin (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Left,       table, null,  true,  joins); }
+		public static FJoin WeakLeftJoin (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Left,       table, alias, true,  joins); }
+		public static FJoin WeakJoin     (ISqlTableSource table,               params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, null,  true,  joins); }
+		public static FJoin WeakJoin     (ISqlTableSource table, string alias, params FJoin[] joins) { return new FJoin(JoinType.Auto,       table, alias, true,  joins); }
 
 		private FromClause _from;
 		public  FromClause  From
@@ -2834,7 +2913,7 @@ namespace BLToolkit.Data.Sql
 
 		#region FinalizeAndValidate
 
-		public void FinalizeAndValidate()
+		public void FinalizeAndValidate(bool isApplySupported)
 		{
 #if DEBUG
 			var sqlText = SqlText;
@@ -2856,7 +2935,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal();
+			FinalizeAndValidateInternal(isApplySupported);
 			ResolveFields();
 			SetAliases();
 
@@ -3174,7 +3253,7 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal()
+		void FinalizeAndValidateInternal(bool isApplySupported)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
@@ -3192,7 +3271,7 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal();
+					sql.FinalizeAndValidateInternal(isApplySupported);
 
 					if (sql.ParameterDependent)
 						ParameterDependent = true;
@@ -3201,7 +3280,9 @@ namespace BLToolkit.Data.Sql
 
 			ResolveWeakJoins();
 			OptimizeColumns();
-			OptimizeSubQueries();
+			OptimizeApplies   (isApplySupported);
+			OptimizeSubQueries(isApplySupported);
+			OptimizeApplies   (isApplySupported);
 
 			new QueryVisitor().Visit(this, e =>
 			{
@@ -3424,12 +3505,15 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere)
+		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere, bool allColumns, bool isApplySupported)
 		{
-			for (var i = 0; i < source.Joins.Count; i++)
+			foreach (var jt in source.Joins)
 			{
-				var jt    = source.Joins[i];
-				var table = OptimizeSubQuery(jt.Table, jt.JoinType == JoinType.Inner);
+				var table = OptimizeSubQuery(
+					jt.Table,
+					jt.JoinType == JoinType.Inner || jt.JoinType == JoinType.CrossApply,
+					false,
+					isApplySupported);
 
 				if (table != jt.Table)
 				{
@@ -3443,72 +3527,155 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			if (source.Source is SqlQuery)
+			return source.Source is SqlQuery ? RemoveSubQuery(source, optimizeWhere, allColumns && !isApplySupported) : source;
+		}
+
+		TableSource RemoveSubQuery(TableSource childSource, bool concatWhere, bool allColumns)
+		{
+			var query = (SqlQuery)childSource. Source;
+
+			var isQueryOK = query.From.Tables.Count == 1;
+
+			isQueryOK = isQueryOK && (concatWhere || query.Where.IsEmpty && query.Having.IsEmpty);
+			isQueryOK = isQueryOK && !query.HasUnion && query.GroupBy.IsEmpty && !query.Select.HasModifier;
+
+			if (!isQueryOK)
+				return childSource;
+
+			var isColumnsOK = 
+				(allColumns && !query.Select.Columns.Exists(c => IsAggregationFunction(c.Expression))) ||
+				!query.Select.Columns.Exists(c => !(c.Expression is SqlField || c.Expression is Column));
+
+			if (!isColumnsOK)
+				return childSource;
+
+			var map = new Dictionary<ISqlExpression,ISqlExpression>(query.Select.Columns.Count);
+
+			foreach (var c in query.Select.Columns)
+				map.Add(c, c.Expression);
+
+			var top = this;
+
+			while (top.ParentSql != null)
+				top = top.ParentSql;
+
+			((ISqlExpressionWalkable)top).Walk(false, expr =>
 			{
-				var query = (SqlQuery)source.Source;
+				ISqlExpression fld;
+				return map.TryGetValue(expr, out fld) ? fld : expr;
+			});
 
-				if (query.From.Tables.Count == 1 &&
-				   //!query.Select.IsDistinct      &&
-				   //query.From.Tables[0].Joins.Count == 0 &&
-				    (optimizeWhere || query.Where.IsEmpty && query.Having.IsEmpty) &&
-				   !query.HasUnion               &&
-				    query.GroupBy.IsEmpty        &&
-				   !query.Select.HasModifier     &&
-				   !query.Select.Columns.Exists(c => !(c.Expression is SqlField)))
+			new QueryVisitor().Visit(top, expr =>
+			{
+				if (expr.ElementType == QueryElementType.InListPredicate)
 				{
-					var map = new Dictionary<ISqlExpression,SqlField>(query.Select.Columns.Count);
+					var p = (Predicate.InList)expr;
 
-					foreach (var c in query.Select.Columns)
-						map.Add(c, (SqlField)c.Expression);
+					if (p.Expr1 == query)
+						p.Expr1 = query.From.Tables[0];
+				}
+			});
 
-					var top = this;
+			query.From.Tables[0].Joins.AddRange(childSource.Joins);
 
-					while (top.ParentSql != null)
-						top = top.ParentSql;
+			if (query.From.Tables[0].Alias == null)
+				query.From.Tables[0].Alias = childSource.Alias;
 
-					((ISqlExpressionWalkable)top).Walk(false, expr =>
+			if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
+			if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
+
+			((ISqlExpressionWalkable)top).Walk(false, expr =>
+			{
+				if (expr is SqlQuery)
+				{
+					var sql = (SqlQuery)expr;
+
+					if (sql.ParentSql == query)
+						sql.ParentSql = query.ParentSql ?? this;
+				}
+
+				return expr;
+			});
+
+			return query.From.Tables[0];
+		}
+
+		static bool IsAggregationFunction(ISqlExpression expr)
+		{
+			if (expr is SqlFunction)
+				switch (((SqlFunction)expr).Name)
+				{
+					case "Average":
+					case "Min":
+					case "Max":
+					case "Sum":
+						return true;
+				}
+
+			return false;
+		}
+
+		void OptimizeApply(TableSource tableSource, JoinedTable joinTable, bool isApplySupported)
+		{
+			var joinSource = joinTable.Table;
+
+			foreach (var join in joinSource.Joins)
+				if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
+					OptimizeApply(joinSource, join, isApplySupported);
+
+			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
+			{
+				var sql = (SqlQuery)joinSource.Source;
+
+				if (sql.Select.Columns.Exists(c => IsAggregationFunction(c.Expression)))
+					return;
+
+				var searchCondition = new List<Condition>(sql.Where.SearchCondition.Conditions);
+
+				sql.Where.SearchCondition.Conditions.Clear();
+
+				if (!ContainsTable(tableSource.Source, sql))
+				{
+					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
+					joinTable.Condition.Conditions.AddRange(searchCondition);
+				}
+				else
+				{
+					sql.Where.SearchCondition.Conditions.AddRange(searchCondition);
+
+					var table = OptimizeSubQuery(
+						joinTable.Table,
+						joinTable.JoinType == JoinType.Inner || joinTable.JoinType == JoinType.CrossApply,
+						joinTable.JoinType == JoinType.CrossApply,
+						isApplySupported);
+
+					if (table != joinTable.Table)
 					{
-						SqlField fld;
-						return map.TryGetValue(expr, out fld) ? fld : expr;
-					});
+						var q = joinTable.Table.Source as SqlQuery;
 
-					new QueryVisitor().Visit(top, expr =>
-					{
-						if (expr.ElementType == QueryElementType.InListPredicate)
-						{
-							var p = (Predicate.InList)expr;
+						if (q != null && q.OrderBy.Items.Count > 0)
+							foreach (var item in q.OrderBy.Items)
+								OrderBy.Expr(item.Expression, item.IsDescending);
 
-							if (p.Expr1 == query)
-								p.Expr1 = query.From.Tables[0];
-						}
-					});
+						joinTable.Table = table;
 
-					query.From.Tables[0].Joins.AddRange(source.Joins);
-
-					if (query.From.Tables[0].Alias == null)
-						query.From.Tables[0].Alias = source.Alias;
-
-					if (!query.Where. IsEmpty) ConcatSearchCondition(Where,  query.Where);
-					if (!query.Having.IsEmpty) ConcatSearchCondition(Having, query.Having);
-
-					((ISqlExpressionWalkable)top).Walk(false, expr =>
-					{
-						if (expr is SqlQuery)
-						{
-							var sql = (SqlQuery)expr;
-
-							if (sql.ParentSql == query)
-								sql.ParentSql = query.ParentSql ?? this;
-						}
-
-						return expr;
-					});
-
-					return query.From.Tables[0];
+						OptimizeApply(tableSource, joinTable, isApplySupported);
+					}
 				}
 			}
+			else
+			{
+				if (!ContainsTable(tableSource.Source, joinSource.Source))
+					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
+			}
+		}
 
-			return source;
+		static bool ContainsTable(ISqlTableSource table, IQueryElement sql)
+		{
+			return null != new QueryVisitor().Find(sql, e =>
+				e == table ||
+				e.ElementType == QueryElementType.SqlField && table == ((SqlField)e).Table ||
+				e.ElementType == QueryElementType.Column   && table == ((Column)  e).Parent);
 		}
 
 		static void ConcatSearchCondition(WhereClause where1, WhereClause where2)
@@ -3542,11 +3709,11 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void OptimizeSubQueries()
+		void OptimizeSubQueries(bool isApplySupported)
 		{
 			for (var i = 0; i < From.Tables.Count; i++)
 			{
-				var table = OptimizeSubQuery(From.Tables[i], true);
+				var table = OptimizeSubQuery(From.Tables[i], true, false, isApplySupported);
 
 				if (table != From.Tables[i])
 				{
@@ -3559,6 +3726,14 @@ namespace BLToolkit.Data.Sql
 					From.Tables[i] = table;
 				}
 			}
+		}
+
+		void OptimizeApplies(bool isApplySupported)
+		{
+			foreach (var table in From.Tables)
+				foreach (var join in table.Joins)
+					if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
+						OptimizeApply(table, join, isApplySupported);
 		}
 
 		void OptimizeColumns()
@@ -3832,6 +4007,65 @@ namespace BLToolkit.Data.Sql
 						return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
 					}
 				}
+
+				if (pr.Value is IEnumerable && p.Expr1 is SqlExpression)
+				{
+					var expr  = (SqlExpression)p.Expr1;
+
+					if (expr.Expr.Length > 1 && expr.Expr[0] == '\x1')
+					{
+						var type  = TypeHelper.GetListItemType(pr.Value);
+						var ta    = TypeAccessor.GetAccessor(type);
+						var items = (IEnumerable)pr.Value;
+						var names = expr.Expr.Substring(1).Split(',');
+
+						if (expr.Parameters.Length == 1)
+						{
+							var values = new List<ISqlExpression>();
+
+							foreach (var item in items)
+							{
+								var value = ta[names[0]].GetValue(item);
+								values.Add(new SqlValue(value));
+							}
+
+							if (values.Count == 0)
+								return new Predicate.Expr(new SqlValue(p.IsNot));
+
+							return new Predicate.InList(expr.Parameters[0], p.IsNot, values);
+						}
+
+						{
+							var sc = new SearchCondition();
+
+							foreach (var item in items)
+							{
+								var itemCond = new SearchCondition();
+
+								for (var i = 0; i < expr.Parameters.Length; i++)
+								{
+									var sql   = expr.Parameters[i];
+									var value = ta[names[i]].GetValue(item);
+									var cond  = value == null ?
+										new Condition(false, new Predicate.IsNull  (sql, false)) :
+										new Condition(false, new Predicate.ExprExpr(sql, Predicate.Operator.Equal, new SqlValue(value)));
+
+									itemCond.Conditions.Add(cond);
+								}
+
+								sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
+							}
+
+							if (sc.Conditions.Count == 0)
+								return new Predicate.Expr(new SqlValue(p.IsNot));
+
+							if (p.IsNot)
+								return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
+
+							return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
+						}
+					}
+				}
 			}
 
 			return null;
@@ -3854,7 +4088,8 @@ namespace BLToolkit.Data.Sql
 
 		SqlQuery(SqlQuery clone, Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
-			objectTree.Add(clone, this);
+			objectTree.Add(clone,     this);
+			objectTree.Add(clone.All, All);
 
 			SourceID = Interlocked.Increment(ref SourceIDCounter);
 

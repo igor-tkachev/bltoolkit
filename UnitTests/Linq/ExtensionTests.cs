@@ -38,5 +38,16 @@ namespace Data.Linq
 			using (var db = new TestDbManager("Sql2008"))
 				db.GetTable<Parent>().OwnerName("dbo").ToList();
 		}
+
+		[Test]
+		public void AllNames()
+		{
+			using (var db = new TestDbManager("Sql2008"))
+				db.GetTable<ParenTable>()
+					.DatabaseName("BLToolkitData")
+					.OwnerName("dbo")
+					.TableName("Parent")
+					.ToList();
+		}
 	}
 }

@@ -1069,7 +1069,7 @@ namespace BLToolkit.Data.Linq
 
 		static void CheckExplicitCtor(Expression expr)
 		{
-			if (expr.NodeType == ExpressionType	.MemberInit)
+			if (expr.NodeType == ExpressionType.MemberInit)
 			{
 				var mi        = (MemberInitExpression)expr;
 				var throwExpr = false;
@@ -2076,7 +2076,7 @@ namespace BLToolkit.Data.Linq
 				pi = ((UnaryExpression)pi).Operand;
 
 			if (pi.NodeType != ExpressionType.MemberAccess)
-				throw new LinqException("Member expression expected for set statement.");
+				throw new LinqException("Member expression expected for the 'Set' statement.");
 
 			var body   = (MemberExpression)pi;
 			var member = body.Member;
@@ -2104,7 +2104,7 @@ namespace BLToolkit.Data.Linq
 				pi = ((UnaryExpression)pi).Operand;
 
 			if (pi.NodeType != ExpressionType.MemberAccess)
-				throw new LinqException("Member expression expected for set statement.");
+				throw new LinqException("Member expression expected for the 'Set' statement.");
 
 			var body   = (MemberExpression)pi;
 			var member = body.Member;

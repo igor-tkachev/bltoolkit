@@ -5,6 +5,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
+using BLToolkit.Data.Linq.Builder;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+
 namespace BLToolkit.Linq
 {
 	using Common;
@@ -59,7 +64,7 @@ namespace BLToolkit.Linq
 		{
 			if (expr.NodeType == ExpressionType.Constant)
 			{
-				var c = expr as ConstantExpression;
+				var c = (ConstantExpression)expr;
 				return c.Value is T? func((T)c.Value, c): false;
 			}
 
@@ -1098,6 +1103,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					Visit(((ChangeTypeExpression)expr).Expression,  func); break;
 			}
 
 			func(expr);
@@ -1248,6 +1256,10 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					Visit(((ChangeTypeExpression)expr).Expression,  func);
+					break;
 			}
 		}
 
@@ -1405,6 +1417,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds : return Find(((NewArrayExpression)  expr).Expressions, func);
 				case ExpressionType.NewArrayInit   : return Find(((NewArrayExpression)  expr).Expressions, func);
 				case ExpressionType.TypeIs         : return Find(((TypeBinaryExpression)expr).Expression,  func);
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					return Find(((ChangeTypeExpression)expr).Expression, func);
 			}
 
 			return null;
@@ -1427,7 +1442,7 @@ namespace BLToolkit.Linq
 				modified = modified || e != item;
 			}
 
-			return modified? list: source;
+			return modified ? list : source;
 		}
 
 		static IEnumerable<T> Convert<T>(IEnumerable<T> source, Func<Expression,Expression> func)
@@ -1482,7 +1497,7 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as BinaryExpression;
+						var e = (BinaryExpression)expr;
 						var c = Convert(e.Conversion, func);
 						var l = Convert(e.Left,       func);
 						var r = Convert(e.Right,      func);
@@ -1718,6 +1733,373 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Constant : return func(expr);
 				case ExpressionType.Parameter: return func(expr);
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
+						var e  = expr as ChangeTypeExpression;
+						var ex = Convert(e.Expression, func);
+
+						if (ex == e.Expression)
+							return expr;
+
+						if (ex.Type == e.Type)
+							return ex;
+
+						return new ChangeTypeExpression(ex, e.Type);
+					}
+			}
+
+			throw new InvalidOperationException();
+		}
+
+		#endregion
+
+		#region Convert2
+
+		public struct ConvertInfo
+		{
+			public ConvertInfo(Expression expression, bool stop)
+			{
+				Expression = expression;
+				Stop       = stop;
+			}
+
+			public ConvertInfo(Expression expression)
+			{
+				Expression = expression;
+				Stop       = false;
+			}
+
+			public Expression Expression;
+			public bool       Stop;
+		}
+
+		static IEnumerable<T> Convert2<T>(IEnumerable<T> source, Func<T,T> func)
+			where T : class
+		{
+			var modified = false;
+			var list     = new List<T>();
+
+			foreach (var item in source)
+			{
+				var e = func(item);
+				list.Add(e);
+				modified = modified || e != item;
+			}
+
+			return modified ? list : source;
+		}
+
+		static IEnumerable<T> Convert2<T>(IEnumerable<T> source, Func<Expression,ConvertInfo> func)
+			where T : Expression
+		{
+			var modified = false;
+			var list     = new List<T>();
+
+			foreach (var item in source)
+			{
+				var e = Convert2(item, func);
+				list.Add((T)e);
+				modified = modified || e != item;
+			}
+
+			return modified ? list : source;
+		}
+
+		public static Expression Convert2(this Expression expr, Func<Expression,ConvertInfo> func)
+		{
+			if (expr == null)
+				return null;
+
+			switch (expr.NodeType)
+			{
+				case ExpressionType.Add:
+				case ExpressionType.AddChecked:
+				case ExpressionType.And:
+				case ExpressionType.AndAlso:
+				case ExpressionType.ArrayIndex:
+				case ExpressionType.Coalesce:
+				case ExpressionType.Divide:
+				case ExpressionType.Equal:
+				case ExpressionType.ExclusiveOr:
+				case ExpressionType.GreaterThan:
+				case ExpressionType.GreaterThanOrEqual:
+				case ExpressionType.LeftShift:
+				case ExpressionType.LessThan:
+				case ExpressionType.LessThanOrEqual:
+				case ExpressionType.Modulo:
+				case ExpressionType.Multiply:
+				case ExpressionType.MultiplyChecked:
+				case ExpressionType.NotEqual:
+				case ExpressionType.Or:
+				case ExpressionType.OrElse:
+				case ExpressionType.Power:
+				case ExpressionType.RightShift:
+				case ExpressionType.Subtract:
+				case ExpressionType.SubtractChecked:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as BinaryExpression;
+						var c = Convert2(e.Conversion, func);
+						var l = Convert2(e.Left,       func);
+						var r = Convert2(e.Right,      func);
+
+						return c != e.Conversion || l != e.Left || r != e.Right ?
+							Expression.MakeBinary(expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression)c):
+							expr;
+					}
+
+				case ExpressionType.ArrayLength:
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+				case ExpressionType.Negate:
+				case ExpressionType.NegateChecked:
+				case ExpressionType.Not:
+				case ExpressionType.Quote:
+				case ExpressionType.TypeAs:
+				case ExpressionType.UnaryPlus:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as UnaryExpression;
+						var o = Convert2(e.Operand, func);
+
+						return o != e.Operand ?
+							Expression.MakeUnary(expr.NodeType, o, e.Type, e.Method) :
+							expr;
+					}
+
+				case ExpressionType.Call:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as MethodCallExpression;
+						var o = Convert2(e.Object,    func);
+						var a = Convert2(e.Arguments, func);
+
+						return o != e.Object || a != e.Arguments ? 
+							Expression.Call(o, e.Method, a) : 
+							expr;
+					}
+
+				case ExpressionType.Conditional:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as ConditionalExpression;
+						var s = Convert2(e.Test,    func);
+						var t = Convert2(e.IfTrue,  func);
+						var f = Convert2(e.IfFalse, func);
+
+						return s != e.Test || t != e.IfTrue || f != e.IfFalse ?
+							Expression.Condition(s, t, f) :
+							expr;
+					}
+
+				case ExpressionType.Invoke:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as InvocationExpression;
+						var ex = Convert2(e.Expression, func);
+						var a  = Convert2(e.Arguments,  func);
+
+						return ex != e.Expression || a != e.Arguments ? Expression.Invoke(ex, a) : expr;
+					}
+
+				case ExpressionType.Lambda:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as LambdaExpression;
+						var b = Convert2(e.Body,       func);
+						var p = Convert2(e.Parameters, func);
+
+						return b != e.Body || p != e.Parameters ? Expression.Lambda(ex.Expression.Type, b, p.ToArray()) : expr;
+					}
+
+				case ExpressionType.ListInit:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as ListInitExpression;
+						var n = Convert2(e.NewExpression, func);
+						var i = Convert2(e.Initializers,  p =>
+						{
+							var args = Convert2(p.Arguments, func);
+							return args != p.Arguments? Expression.ElementInit(p.AddMethod, args): p;
+						});
+
+						return n != e.NewExpression || i != e.Initializers ?
+							Expression.ListInit((NewExpression)n, i) :
+							expr;
+					}
+
+				case ExpressionType.MemberAccess:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as MemberExpression;
+						var ex = Convert2(e.Expression, func);
+
+						return ex != e.Expression ? Expression.MakeMemberAccess(ex, e.Member) : expr;
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						Func<MemberBinding,MemberBinding> modify = null; modify = b =>
+						{
+							switch (b.BindingType)
+							{
+								case MemberBindingType.Assignment:
+									{
+										var ma = (MemberAssignment)b;
+										var ex = Convert2(ma.Expression, func);
+
+										if (ex != ma.Expression)
+											ma = Expression.Bind(ma.Member, ex);
+
+										return ma;
+									}
+
+								case MemberBindingType.ListBinding:
+									{
+										var ml = (MemberListBinding)b;
+										var i  = Convert(ml.Initializers, p =>
+										{
+											var args = Convert2(p.Arguments, func);
+											return args != p.Arguments? Expression.ElementInit(p.AddMethod, args): p;
+										});
+
+										if (i != ml.Initializers)
+											ml = Expression.ListBind(ml.Member, i);
+
+										return ml;
+									}
+
+								case MemberBindingType.MemberBinding:
+									{
+										var mm = (MemberMemberBinding)b;
+										var bs = Convert(mm.Bindings, modify);
+
+										if (bs != mm.Bindings)
+											mm = Expression.MemberBind(mm.Member);
+
+										return mm;
+									}
+							}
+
+							return b;
+						};
+
+						var e  = expr as MemberInitExpression;
+						var ne = Convert2(e.NewExpression, func);
+						var bb = Convert2(e.Bindings,      modify);
+
+						return ne != e.NewExpression || bb != e.Bindings ?
+							Expression.MemberInit((NewExpression)ne, bb) :
+							expr;
+					}
+
+				case ExpressionType.New:
+					{
+						var ex = func(expr);
+						if (ex.Stop || ex.Expression != expr)
+							return ex.Expression;
+
+						var e = expr as NewExpression;
+						var a = Convert2(e.Arguments, func);
+
+						return a != e.Arguments ?
+							e.Members == null ?
+								Expression.New(e.Constructor, a) :
+								Expression.New(e.Constructor, a, e.Members) :
+							expr;
+					}
+
+				case ExpressionType.NewArrayBounds:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as NewArrayExpression;
+						var ex = Convert2(e.Expressions, func);
+
+						return ex != e.Expressions ? Expression.NewArrayBounds(e.Type, ex) : expr;
+					}
+
+				case ExpressionType.NewArrayInit:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as NewArrayExpression;
+						var ex = Convert2(e.Expressions, func);
+
+						return ex != e.Expressions ?
+							Expression.NewArrayInit(e.Type.GetElementType(), ex) :
+							expr;
+					}
+
+				case ExpressionType.TypeIs:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as TypeBinaryExpression;
+						var ex = Convert2(e.Expression, func);
+
+						return ex != e.Expression ? Expression.TypeIs(ex, e.Type) : expr;
+					}
+
+				case ExpressionType.Constant : return func(expr).Expression;
+				case ExpressionType.Parameter: return func(expr).Expression;
+
+				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as ChangeTypeExpression;
+						var ex = Convert2(e.Expression, func);
+
+						if (ex == e.Expression)
+							return expr;
+
+						if (ex.Type == e.Type)
+							return ex;
+
+						return new ChangeTypeExpression(ex, e.Type);
+					}
 			}
 
 			throw new InvalidOperationException();

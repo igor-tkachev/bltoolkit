@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class SqlCeSqlProvider : BasicSqlProvider
 	{
@@ -14,6 +14,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override bool IsTakeSupported           { get { return false; } }
 		public override bool IsSubQueryTakeSupported   { get { return false; } }
 		public override bool IsSubQueryColumnSupported { get { return false; } }
+		public override bool IsApplyJoinSupported      { get { return true;  } }
 
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
@@ -113,153 +114,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (element.ElementType == QueryElementType.SqlParameter)
 					((SqlParameter)element).IsQueryParameter = false;
 			});
-
-			new QueryVisitor().Visit(sqlQuery, element =>
-			{
-				if (element.ElementType != QueryElementType.SqlQuery)
-					return;
-
-				var query = (SqlQuery)element;
-
-				for (var i = 0; i < query.Select.Columns.Count; i++)
-				{
-					var col = query.Select.Columns[i];
-
-					if (col.Expression.ElementType == QueryElementType.SqlQuery)
-					{
-						var subQuery = (SqlQuery)col.Expression;
-						var tables   = new Dictionary<ISqlTableSource,object>();
-
-						new QueryVisitor().Visit(subQuery, e =>
-						{
-							if (e is ISqlTableSource && subQuery.From.IsChild((ISqlTableSource)e))
-								tables.Add((ISqlTableSource)e, null);
-						});
-
-						var refersParent = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
-						{
-							switch (e.ElementType)
-							{
-								case QueryElementType.SqlField : return !tables.ContainsKey(((SqlField)e).Table);
-								case QueryElementType.Column   : return !tables.ContainsKey(((SqlQuery.Column)e).Parent);
-							}
-							return false;
-						});
-
-						if (!refersParent)
-							continue;
-
-						var join = SqlQuery.LeftJoin(subQuery);
-
-						query.From.Tables[0].Joins.Add(join.JoinedTable);
-
-						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
-
-						var isAggregated = null != new QueryVisitor().Find(subQuery, delegate(IQueryElement e)
-						{
-							if (e.ElementType == QueryElementType.SqlFunction)
-								switch (((SqlFunction)e).Name)
-								{
-									case "Min"     :
-									case "Max"     :
-									case "Count"   :
-									case "Sum"     :
-									case "Average" : return true;
-								}
-							return false;
-						});
-
-						var allAnd = true;
-
-						for (var j = 0; allAnd && j < subQuery.Where.SearchCondition.Conditions.Count - 1; j++)
-						{
-							var cond = subQuery.Where.SearchCondition.Conditions[j];
-
-							if (cond.IsOr)
-								allAnd = false;
-						}
-
-						if (!allAnd)
-							continue;
-
-						var modified = false;
-
-						for (var j = 0; j < subQuery.Where.SearchCondition.Conditions.Count; j++)
-						{
-							var cond = subQuery.Where.SearchCondition.Conditions[j];
-
-							var hasParentRef = null != new QueryVisitor().Find(cond, delegate(IQueryElement e)
-							{
-								switch (e.ElementType)
-								{
-									case QueryElementType.SqlField : return !tables.ContainsKey(((SqlField)e).Table);
-									case QueryElementType.Column   : return !tables.ContainsKey(((SqlQuery.Column)e).Parent);
-								}
-								return false;
-							});
-
-							if (!hasParentRef)
-								continue;
-
-							var replaced = new Dictionary<IQueryElement,IQueryElement>();
-
-							var nc = new QueryVisitor().Convert(cond, delegate(IQueryElement e)
-							{
-								var ne = e;
-
-								switch (e.ElementType)
-								{
-									case QueryElementType.SqlField :
-										if (replaced.TryGetValue(e, out ne))
-											return ne;
-
-										if (tables.ContainsKey(((SqlField)e).Table))
-										{
-											if (isAggregated)
-												subQuery.GroupBy.Expr((SqlField)e);
-											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlField)e)];
-											break;
-										}
-
-										break;
-									case QueryElementType.Column   :
-										if (replaced.TryGetValue(e, out ne))
-											return ne;
-
-										if (tables.ContainsKey(((SqlQuery.Column)e).Parent))
-										{
-											if (isAggregated)
-												subQuery.GroupBy.Expr((SqlQuery.Column)e);
-											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlQuery.Column)e)];
-											break;
-										}
-
-										break;
-								}
-
-								if (!ReferenceEquals(e, ne))
-									replaced.Add(e, ne);
-
-								return ne;
-							});
-
-							if (nc != null && !ReferenceEquals(nc, cond))
-							{
-								modified = true;
-
-								join.JoinedTable.Condition.Conditions.Add(nc);
-								subQuery.Where.SearchCondition.Conditions.RemoveAt(j);
-								j--;
-							}
-						}
-
-						if (modified)
-							query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
-					}
-				}
-			});
-
-			sqlQuery = base.Finalize(sqlQuery);
 
 			switch (sqlQuery.QueryType)
 			{

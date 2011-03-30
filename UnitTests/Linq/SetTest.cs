@@ -56,12 +56,26 @@ namespace Data.Linq
 		{
 			var expected =
 				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000}).
+				(from c in Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000 }).
 				Where(c => c.ChildID != 1032));
 
 			ForEachProvider(db => AreEqual(expected, 
 				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000})).
+				(from c in db.Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000 })).
+				Where(c => c.ChildID != 1032)));
+		}
+
+		[Test]
+		public void Concat401()
+		{
+			var expected =
+				(from c in Child where c.ParentID == 1 select c).Concat(
+				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000, ParentID = c.ParentID }).
+				Where(c => c.ChildID != 1032));
+
+			ForEachProvider(db => AreEqual(expected, 
+				(from c in db.Child where c.ParentID == 1 select c).Concat(
+				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000, ParentID = c.ParentID })).
 				Where(c => c.ChildID != 1032)));
 		}
 
@@ -70,13 +84,27 @@ namespace Data.Linq
 		{
 			var expected =
 				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000}).
+				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 }).
 				Where(c => c.ChildID != 1032));
 
 			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
 				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000})).
+				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 })).
 				Where(c => c.ChildID != 1032)));
+		}
+
+		[Test]
+		public void Concat501()
+		{
+			var expected =
+				(from c in Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
+				(from c in Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 }).
+				Where(c => c.ParentID == 1));
+
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
+				(from c in db.Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
+				(from c in db.Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 })).
+				Where(c => c.ParentID == 1)));
 		}
 
 		[Test]
@@ -436,7 +464,7 @@ namespace Data.Linq
 		[Test]
 		public void Contains8()
 		{
-			var arr = new[] { GrandChild[0], GrandChild[1] };
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
 
 			ForEachProvider(db => AreEqual(
 				from p in Parent
@@ -454,7 +482,27 @@ namespace Data.Linq
 		[Test]
 		public void Contains801()
 		{
-			var arr = new[] { GrandChild[0], GrandChild[1] };
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
+
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join ch in Child      on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				select new GrandChild { ParentID = 2, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID } into gc
+				where arr.Contains(gc)
+				select gc,
+				from p in db.Parent
+				join ch in db.Child      on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				select new GrandChild { ParentID = 2, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID } into gc
+				where arr.Contains(gc)
+				select gc));
+		}
+
+		[Test]
+		public void Contains802()
+		{
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
 
 			ForEachProvider(db => AreEqual(
 				from p in Parent
@@ -466,6 +514,24 @@ namespace Data.Linq
 				join ch in db.Child on p.ParentID equals ch.ParentID
 				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
 				where arr.Contains(new GrandChild { ParentID = p.ParentID, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p));
+		}
+
+		[Test]
+		public void Contains803()
+		{
+			var arr = new[] { GrandChild.ElementAt(0), GrandChild.ElementAt(1) };
+
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join ch in Child on p.ParentID equals ch.ParentID
+				join gc in GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = 1, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
+				select p,
+				from p in db.Parent
+				join ch in db.Child on p.ParentID equals ch.ParentID
+				join gc in db.GrandChild on ch.ChildID equals gc.ChildID
+				where arr.Contains(new GrandChild { ParentID = 1, ChildID = ch.ChildID, GrandChildID = gc.GrandChildID })
 				select p));
 		}
 

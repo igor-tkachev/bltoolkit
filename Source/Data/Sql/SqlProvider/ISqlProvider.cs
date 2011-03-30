@@ -31,5 +31,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		bool             IsSubQueryColumnSupported   { get; }
 		bool             IsCountSubQuerySupported    { get; }
 		bool             IsIdentityParameterRequired { get; }
+		bool             IsApplyJoinSupported        { get; }
 	}
 }

@@ -62,6 +62,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsNestedJoinSupported           { get { return true;  } }
 		public virtual bool IsNestedJoinParenthesisRequired { get { return false; } }
 		public virtual bool IsIdentityParameterRequired     { get { return false; } }
+		public virtual bool IsApplyJoinSupported            { get { return false; } }
 
 		#endregion
 
@@ -455,12 +456,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_indent++;
 			AppendIndent(sb);
 
-			switch (join.JoinType)
-			{
-				case SqlQuery.JoinType.Inner : sb.Append("INNER JOIN "); break;
-				case SqlQuery.JoinType.Left  : sb.Append("LEFT JOIN ");  break;
-				default: throw new InvalidOperationException();
-			}
+			var buildOn = BuildJoinType(sb, join);
 
 			if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
 				sb.Append('(');
@@ -475,17 +471,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
 					sb.Append(')');
 
-				sb.AppendLine();
-				AppendIndent(sb);
-				sb.Append("ON ");
+				if (buildOn)
+				{
+					sb.AppendLine();
+					AppendIndent(sb);
+					sb.Append("ON ");
+				}
 			}
-			else
+			else if (buildOn)
 				sb.Append(" ON ");
 
-			if (join.Condition.Conditions.Count != 0)
-				BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
-			else
-				sb.Append("1=1");
+			if (buildOn)
+			{
+				if (join.Condition.Conditions.Count != 0)
+					BuildSearchCondition(sb, Precedence.Unknown, join.Condition);
+				else
+					sb.Append("1=1");
+			}
 
 			if (joinCounter > 0)
 			{
@@ -498,6 +500,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					BuildJoinTable(sb, jt, ref joinCounter);
 
 			_indent--;
+		}
+
+		protected virtual bool BuildJoinType(StringBuilder sb, SqlQuery.JoinedTable join)
+		{
+			switch (join.JoinType)
+			{
+				case SqlQuery.JoinType.Inner      : sb.Append("INNER JOIN ");  return true;
+				case SqlQuery.JoinType.Left       : sb.Append("LEFT JOIN ");   return true;
+				case SqlQuery.JoinType.CrossApply : sb.Append("CROSS APPLY "); return false;
+				case SqlQuery.JoinType.OuterApply : sb.Append("OUTER APPLY "); return false;
+				default: throw new InvalidOperationException();
+			}
 		}
 
 		#endregion
@@ -1080,7 +1094,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								var ts = _sqlQuery.GetTableSource(field.Table);
 
 								if (ts == null)
+								{
+#if DEBUG
+									_sqlQuery.GetTableSource(field.Table);
+#endif
+
 									throw new SqlException(string.Format("Table {0} not found.", field.Table));
+								}
 
 								var table = GetTableAlias(ts);
 
@@ -1120,7 +1140,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						var table = _sqlQuery.GetTableSource(column.Parent);
 
 						if (table == null)
+						{
+#if DEBUG
+							table = _sqlQuery.GetTableSource(column.Parent);
+#endif
+
 							throw new SqlException(string.Format("Table not found for '{0}'.", column));
+						}
 
 						var tableAlias = GetTableAlias(table) ?? GetTablePhysicalName(column.Parent, null);
 
@@ -2834,7 +2860,208 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			sqlQuery.FinalizeAndValidate();
+			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
+
+			if (!IsCountSubQuerySupported || !IsSubQueryColumnSupported)
+			{
+				sqlQuery = MoveCount(sqlQuery);
+				sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
+			}
+
+			return sqlQuery;
+		}
+
+		SqlQuery MoveCount(SqlQuery sqlQuery)
+		{
+			var dic = new Dictionary<IQueryElement,IQueryElement>();
+
+			new QueryVisitor().Visit(sqlQuery, element =>
+			{
+				if (element.ElementType != QueryElementType.SqlQuery)
+					return;
+
+				var query = (SqlQuery)element;
+
+				for (var i = 0; i < query.Select.Columns.Count; i++)
+				{
+					var col = query.Select.Columns[i];
+
+					if (col.Expression.ElementType == QueryElementType.SqlQuery)
+					{
+						var subQuery    = (SqlQuery)col.Expression;
+						var allTables   = new HashSet<ISqlTableSource>();
+						var levelTables = new HashSet<ISqlTableSource>();
+
+						Func<IQueryElement,bool> checkTable = e =>
+						{
+							switch (e.ElementType)
+							{
+								case QueryElementType.SqlField : return !allTables.Contains(((SqlField)e).Table);
+								case QueryElementType.Column   : return !allTables.Contains(((SqlQuery.Column)e).Parent);
+							}
+							return false;
+						};
+
+						new QueryVisitor().Visit(subQuery, e =>
+						{
+							if (e is ISqlTableSource /*&& subQuery.From.IsChild((ISqlTableSource)e)*/)
+								allTables.Add((ISqlTableSource)e);
+						});
+
+						new QueryVisitor().Visit(subQuery, e =>
+						{
+							if (e is ISqlTableSource && subQuery.From.IsChild((ISqlTableSource)e))
+								levelTables.Add((ISqlTableSource)e);
+						});
+
+						if (IsSubQueryColumnSupported && new QueryVisitor().Find(subQuery, checkTable) == null)
+							continue;
+
+						var join = SqlQuery.LeftJoin(subQuery);
+
+						query.From.Tables[0].Joins.Add(join.JoinedTable);
+
+						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
+
+						var isCount      = false;
+						var isAggregated = false;
+						
+						if (subQuery.Select.Columns.Count == 1)
+						{
+							var subCol = subQuery.Select.Columns[0];
+
+							if (subCol.Expression.ElementType == QueryElementType.SqlFunction)
+							{
+								switch (((SqlFunction)subCol.Expression).Name)
+								{
+									case "Min"     :
+									case "Max"     :
+									case "Sum"     :
+									case "Average" : isAggregated = true;                 break;
+									case "Count"   : isAggregated = true; isCount = true; break;
+								}
+							}
+						}
+
+						if (IsSubQueryColumnSupported && !isCount)
+							continue;
+
+						var allAnd = true;
+
+						for (var j = 0; allAnd && j < subQuery.Where.SearchCondition.Conditions.Count - 1; j++)
+						{
+							var cond = subQuery.Where.SearchCondition.Conditions[j];
+
+							if (cond.IsOr)
+								allAnd = false;
+						}
+
+						if (!allAnd)
+							continue;
+
+						var modified = false;
+
+						for (var j = 0; j < subQuery.Where.SearchCondition.Conditions.Count; j++)
+						{
+							var cond = subQuery.Where.SearchCondition.Conditions[j];
+
+							if (new QueryVisitor().Find(cond, checkTable) == null)
+								continue;
+
+							var replaced = new Dictionary<IQueryElement,IQueryElement>();
+
+							var nc = new QueryVisitor().Convert(cond, delegate(IQueryElement e)
+							{
+								var ne = e;
+
+								switch (e.ElementType)
+								{
+									case QueryElementType.SqlField :
+										if (replaced.TryGetValue(e, out ne))
+											return ne;
+
+										if (levelTables.Contains(((SqlField)e).Table))
+										{
+											if (isAggregated)
+												subQuery.GroupBy.Expr((SqlField)e);
+											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlField)e)];
+											break;
+										}
+
+										break;
+
+									case QueryElementType.Column   :
+										if (replaced.TryGetValue(e, out ne))
+											return ne;
+
+										if (levelTables.Contains(((SqlQuery.Column)e).Parent))
+										{
+											if (isAggregated)
+												subQuery.GroupBy.Expr((SqlQuery.Column)e);
+											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlQuery.Column)e)];
+											break;
+										}
+
+										break;
+								}
+
+								if (!ReferenceEquals(e, ne))
+									replaced.Add(e, ne);
+
+								return ne;
+							});
+
+							if (nc != null && !ReferenceEquals(nc, cond))
+							{
+								modified = true;
+
+								join.JoinedTable.Condition.Conditions.Add(nc);
+								subQuery.Where.SearchCondition.Conditions.RemoveAt(j);
+								j--;
+							}
+						}
+
+						if (modified || isAggregated)
+						{
+							if (isCount && !query.GroupBy.IsEmpty)
+							{
+								var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
+
+								subQuery.Select.Columns.RemoveAt(0);
+
+								query.Select.Columns[i] = new SqlQuery.Column(
+									query,
+									new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[0]));
+							}
+							else if (isAggregated && !query.GroupBy.IsEmpty)
+							{
+								var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
+
+								subQuery.Select.Columns.RemoveAt(0);
+
+								var idx = subQuery.Select.Add(oldFunc.Parameters[0]);
+
+								query.Select.Columns[i] = new SqlQuery.Column(
+									query,
+									new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[idx]));
+							}
+							else
+							{
+								query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
+							}
+
+							dic.Add(col, query.Select.Columns[i]);
+						}
+					}
+				}
+			});
+
+			sqlQuery = new QueryVisitor().Convert(sqlQuery, e =>
+			{
+				IQueryElement ne;
+				return dic.TryGetValue(e, out ne) ? ne : e;
+			});
+
 			return sqlQuery;
 		}
 

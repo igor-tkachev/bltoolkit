@@ -29,11 +29,12 @@ namespace Data.Linq
 			{
 				string assembly;
 
-				     if (args.Name.IndexOf("Sybase.AdoNet2.AseClient") >= 0) assembly = @"Sybase\Sybase.AdoNet2.AseClient.dll";
-				else if (args.Name.IndexOf("Oracle.DataAccess")        >= 0) assembly = @"Oracle\Oracle.DataAccess.dll";
-				else if (args.Name.IndexOf("IBM.Data.DB2")             >= 0) assembly = @"IBM\IBM.Data.DB2.dll";
-				else if (args.Name.IndexOf("Npgsql")                   >= 0) assembly = @"PostgreSql\Npgsql.dll";
-				else if (args.Name.IndexOf("Mono.Security")            >= 0) assembly = @"PostgreSql\Mono.Security.dll";
+				     if (args.Name.IndexOf("Sybase.AdoNet2.AseClient")  >= 0) assembly = @"Sybase\Sybase.AdoNet2.AseClient.dll";
+				else if (args.Name.IndexOf("Oracle.DataAccess")         >= 0) assembly = @"Oracle\Oracle.DataAccess.dll";
+				else if (args.Name.IndexOf("IBM.Data.DB2")              >= 0) assembly = @"IBM\IBM.Data.DB2.dll";
+				else if (args.Name.IndexOf("Npgsql")                    >= 0) assembly = @"PostgreSql\Npgsql.dll";
+				else if (args.Name.IndexOf("Mono.Security")             >= 0) assembly = @"PostgreSql\Mono.Security.dll";
+				else if (args.Name.IndexOf("System.Data.SqlServerCe,")  >= 0) assembly = @"SqlCe\System.Data.SqlServerCe.dll";
 				else
 					return null;
 
@@ -192,11 +193,11 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
-				var dx = new TestServiceModelDataContext(ip);
+				//var dx = new TestServiceModelDataContext(ip);
 
-				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+				//Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
-				yield return dx;
+				//yield return dx;
 			}
 		}
 
@@ -350,8 +351,8 @@ namespace Data.Linq
 
 		#region Parent/Child Model
 
-		private   List<Parent> _parent;
-		protected List<Parent>  Parent
+		private          List<Parent> _parent;
+		protected IEnumerable<Parent>  Parent
 		{
 			get
 			{
@@ -369,7 +370,8 @@ namespace Data.Linq
 						}
 					}
 
-				return _parent;
+				foreach (var parent in _parent)
+					yield return parent;
 			}
 		}
 
@@ -408,16 +410,20 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<ParentInheritanceBase> _parentInheritance;
-		protected List<ParentInheritanceBase>  ParentInheritance
+		private          List<ParentInheritanceBase> _parentInheritance;
+		protected IEnumerable<ParentInheritanceBase>  ParentInheritance
 		{
 			get
 			{
-				return _parentInheritance ?? (_parentInheritance = Parent.Select(p =>
-					p.Value1       == null ? new ParentInheritanceNull  { ParentID = p.ParentID } :
-					p.Value1.Value == 1    ? new ParentInheritance1     { ParentID = p.ParentID, Value1 = p.Value1.Value } :
-					 (ParentInheritanceBase) new ParentInheritanceValue { ParentID = p.ParentID, Value1 = p.Value1.Value }
-				).ToList());
+				if (_parentInheritance == null)
+					_parentInheritance = Parent.Select(p =>
+						p.Value1       == null ? new ParentInheritanceNull  { ParentID = p.ParentID } :
+						p.Value1.Value == 1    ? new ParentInheritance1     { ParentID = p.ParentID, Value1 = p.Value1.Value } :
+						 (ParentInheritanceBase) new ParentInheritanceValue { ParentID = p.ParentID, Value1 = p.Value1.Value }
+					).ToList();
+
+				foreach (var item in _parentInheritance)
+					yield return item;
 			}
 		}
 
@@ -455,8 +461,8 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<Child> _child;
-		protected List<Child>  Child
+		private          List<Child> _child;
+		protected IEnumerable<Child>  Child
 		{
 			get
 			{
@@ -475,12 +481,13 @@ namespace Data.Linq
 						}
 					}
 
-				return _child;
+				foreach (var child in _child)
+					yield return child;
 			}
 		}
 
-		private   List<GrandChild> _grandChild;
-		protected List<GrandChild>  GrandChild
+		private          List<GrandChild> _grandChild;
+		protected IEnumerable<GrandChild>  GrandChild
 		{
 			get
 			{
@@ -494,7 +501,8 @@ namespace Data.Linq
 							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
 					}
 
-				return _grandChild;
+				foreach (var grandChild in _grandChild)
+					yield return grandChild;
 			}
 		}
 
@@ -697,11 +705,11 @@ namespace Data.Linq
 
 		protected void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)
 		{
-			var expectedList = expected.ToList();
 			var resultList   = result.  ToList();
+			var expectedList = expected.ToList();
 
 			Assert.AreNotEqual(0, expectedList.Count);
-			Assert.AreEqual(expectedList.Count, resultList.Count);
+			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
 			var exceptExpected = resultList.  Except(expectedList).Count();
 			var exceptResult   = expectedList.Except(resultList).  Count();
@@ -729,6 +737,17 @@ namespace Data.Linq
 					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
 
 			Assert.IsTrue(b);
+		}
+
+		protected void CompareSql(string result, string expected)
+		{
+			var ss = expected.Trim('\r', '\n').Split('\n');
+
+			while (ss.All(_ => _.Length > 0 && _[0] == '\t'))
+				for (var i = 0; i < ss.Length; i++)
+					ss[i] = ss[i].Substring(1);
+
+			Assert.AreEqual(string.Join("\n", ss), result.Trim('\r', '\n'));
 		}
 	}
 }

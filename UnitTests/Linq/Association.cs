@@ -15,8 +15,9 @@ namespace Data.Linq
 		//[Test]
 		public void Test1()
 		{
-			var expected = from p in Parent select p.Children;
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent select p.Children));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent select p.Children,
+				from p in db.Parent select p.Children));
 		}
 
 		//[Test]
@@ -140,10 +141,10 @@ namespace Data.Linq
 				db.Parent.SelectMany(p => db.Child.Select(ch => p))));
 		}
 
-		//[Test]
+		[Test]
 		public void SelectMany3()
 		{
-			ForEachProvider(db => AreEqual(
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				Child
 					.GroupBy(ch => ch.Parent)
 					.Where(g => g.Count() > 2)
@@ -154,16 +155,14 @@ namespace Data.Linq
 					.SelectMany(g => g.Select(ch => ch.Parent))));
 		}
 
-		//[Test]
+		[Test]
 		public void SelectMany4()
 		{
-			var expected =
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
 				Child
 					.GroupBy(ch => ch.Parent)
 					.Where(g => g.Count() > 2)
-					.SelectMany(g => g.Select(ch => ch.Parent.ParentID));
-
-			ForEachProvider(db => AreEqual(expected,
+					.SelectMany(g => g.Select(ch => ch.Parent.ParentID)),
 				db.Child
 					.GroupBy(ch => ch.Parent)
 					.Where(g => g.Count() > 2)
@@ -224,14 +223,6 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in    Types group p by p.DateTimeValue.Year into g select g.Key,
 				from p in db.Types group p by p.DateTimeValue.Year into g select g.Key));
-		}
-
-		[Test]
-		public void Count1()
-		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
-				from p in    Parent where p.Children.Count > 2 select p,
-				from p in db.Parent where p.Children.Count > 2 select p));
 		}
 
 		[Test]

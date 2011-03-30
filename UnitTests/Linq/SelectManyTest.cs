@@ -15,6 +15,123 @@ namespace Data.Linq
 	public class SelectManyTest : TestBase
 	{
 		[Test]
+		public void Basic1()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child),
+				db.Parent.SelectMany(p => db.Child)));
+		}
+
+		[Test]
+		public void Basic1_1()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.SelectMany(t =>    GrandChild)),
+				db.Parent.SelectMany(p => db.Child.SelectMany(t => db.GrandChild))));
+		}
+
+		[Test]
+		public void Basic2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(_ => _.ParentID + 1)),
+				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1))));
+		}
+
+		[Test]
+		public void Basic3()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(_ => _.ParentID + 1).Where(_ => _ > 1)),
+				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1).Where(_ => _ > 1))));
+		}
+
+		[Test]
+		public void Basic4()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p =>    Child.Select(_ => _.ParentID + 1).Where(_ => p.ParentID == _)),
+				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1).Where(_ => p.ParentID == _))));
+		}
+
+		[Test]
+		public void Basic5()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				   Child.SelectMany(t => t.Parent.GrandChildren),
+				db.Child.SelectMany(t => t.Parent.GrandChildren)));
+		}
+
+		[Test]
+		public void Basic6()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1)),
+				db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1))));
+		}
+
+		[Test]
+		public void Basic61()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1 || _ > 2)).Where(_ => _ > 0 || _ > 3),
+				db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1 || _ > 2)).Where(_ => _ > 0 || _ > 3)));
+		}
+
+		[Test]
+		public void Basic62()
+		{
+			ForEachProvider(new[] { ProviderName.Access },
+				db => AreEqual(
+					   Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + p.ParentID).Where(_ => _ > 1)),
+					db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + p.ParentID).Where(_ => _ > 1))));
+		}
+
+		[Test]
+		public void Basic7()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children),
+				db.Parent.SelectMany(p => p.Children)));
+		}
+
+		[Test]
+		public void Basic8()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.SelectMany(t => t.GrandChildren)),
+				db.Parent.SelectMany(p => p.Children.SelectMany(t => t.GrandChildren))));
+		}
+
+		[Test]
+		public void Basic9()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.SelectMany(p => p.Children.SelectMany(t => p.GrandChildren)),
+				db.Parent.SelectMany(p => p.Children.SelectMany(t => p.GrandChildren))));
+		}
+
+		[Test]
+		public void Basic10()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				   Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent)),
+				db.Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent))));
+		}
+
+		[Test]
+		public void Basic11()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
+				   Child
+					.GroupBy(o => o.ParentID2)
+					.SelectMany(g => g.Select(o => o.ParentID)),
+				db.Child
+					.GroupBy(o => o.ParentID2)
+					.SelectMany(g => db.Child.Where(o => o.ParentID2 == g.Key).Select(o => o.ParentID))));
+		}
+
+		[Test]
 		public void Test1()
 		{
 			TestJohn(db =>
@@ -289,15 +406,15 @@ namespace Data.Linq
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
 				(from p in Parent
-				from g in p.GrandChildren
-				from t in Person
-				let c = g.Child
-				select c).Count(),
+				 from g in p.GrandChildren
+				 from t in Person
+				 let c = g.Child
+				 select c).Count(),
 				(from p in db.Parent
-				from g in p.GrandChildren
-				from t in db.Person
-				let c = g.Child
-				select c).Count()));
+				 from g in p.GrandChildren
+				 from t in db.Person
+				 let c = g.Child
+				 select c).Count()));
 		}
 
 		[Test]
@@ -436,6 +553,45 @@ namespace Data.Linq
 
 				q3.ToList();
 			});
+		}
+
+		[Test]
+		public void Test91()
+		{
+			ForEachProvider(new[] { ProviderName.Access }, db =>
+			{
+				var q2 =
+					from p in db.Parent
+					join c in db.GrandChild on p.ParentID equals c.ParentID
+					where p.ParentID == 1
+					select p;
+
+				q2 = q2.Distinct();
+
+				var q3 =
+					from p in q2
+					from g in p.GrandChildren
+					let r = g.Child
+					where
+						p.ParentID == g.ParentID
+					select r;
+
+				q3.ToList();
+			});
+		}
+
+		/////[Test]
+		public void Test92()
+		{
+			ForEachProvider(db => AreEqual(
+				db.Parent
+					.SelectMany(c => c.Children, (c, p) => new { c, p, })
+					.Select(_ => new { _.c, p = new Child { ParentID = _.c.ParentID, ChildID = _.p.ChildID } })
+					.SelectMany(ch => ch.p.GrandChildren, (ch, t) => new { t, ch }),
+				db.Parent
+					.SelectMany(c => c.Children, (c, p) => new { c, p, })
+					.Select(_ => new { _.c, p = new Child { ParentID = _.c.ParentID, ChildID = _.p.ChildID } })
+					.SelectMany(ch => ch.p.GrandChildren, (ch, t) => new { t, ch })));
 		}
 
 		void Foo(Expression<Func<object[],object>> func)

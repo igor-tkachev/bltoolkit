@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Reflection;
-
+using System.Text;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql;
 
 namespace Data.Linq
 {
@@ -43,6 +44,30 @@ namespace Data.Linq
 		public Table<Parent> GetParentByID(int? id)
 		{
 			return GetTable<Parent>(this, (MethodInfo)(MethodBase.GetCurrentMethod()), id);
+		}
+
+		public string GetSqlText(SqlQuery sql)
+		{
+			var provider = ((IDataContext)this).CreateSqlProvider();
+
+			//provider.SqlQuery = sql;
+
+			sql = provider.Finalize(sql);
+
+			var cc = provider.CommandCount(sql);
+			var sb = new StringBuilder();
+
+			var commands = new string[cc];
+
+			for (var i = 0; i < cc; i++)
+			{
+				sb.Length = 0;
+
+				provider.BuildSql(i, sql, sb, 0, 0, false);
+				commands[i] = sb.ToString();
+			}
+
+			return string.Join("\n\n", commands);
 		}
 	}
 }

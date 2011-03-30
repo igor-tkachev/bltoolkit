@@ -4,9 +4,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 using BLToolkit.Data.Linq;
-using BLToolkit.Data.Linq.Parser;
+using BLToolkit.Data.Linq.Builder;
 using BLToolkit.Data.Sql;
+
 using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -16,7 +18,7 @@ namespace Data.Linq
 	{
 		static ParserTest()
 		{
-			ExpressionParser.AddParser(new ContextParser());
+			ExpressionBuilder.AddBuilder(new ContextParser());
 		}
 
 		#region IsExpressionTable
@@ -552,7 +554,7 @@ namespace Data.Linq
 
 		#endregion
 
-		#region ConvertToIndexScalar
+		#region ConvertToIndex
 
 		[Test]
 		public void ConvertToIndexScalar1()
@@ -611,12 +613,62 @@ namespace Data.Linq
 			}
 		}
 
-		#endregion
+		[Test]
+		public void ConvertToIndexJoin1()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q2 =
+					from gc1 in db.GrandChild
+						join max in
+							from gch in db.GrandChild
+							group gch by gch.ChildID into g
+							select g.Max(c => c.GrandChildID)
+						on gc1.GrandChildID equals max
+					select gc1;
 
-		#region ConvertToIndexSelect
+				var result =
+					from ch in db.Child
+						join p   in db.Parent on ch.ParentID equals p.ParentID
+						join gc2 in q2        on p.ParentID  equals gc2.ParentID into g
+						from gc3 in g.DefaultIfEmpty()
+				select gc3;
+
+				var ctx = result.GetContext();
+				var idx = ctx.ConvertToIndex(null, 0, ConvertFlags.Key);
+
+				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
+			}
+		}
 
 		[Test]
-		public void ConvertToIndexSelect1()
+		public void ConvertToIndexJoin2()
+		{
+			using (var db = new TestDbManager())
+			{
+				var result =
+					from ch in db.Child
+						join gc2 in db.GrandChild on ch.ParentID  equals gc2.ParentID into g
+						from gc3 in g.DefaultIfEmpty()
+					select gc3;
+
+				var ctx = result.GetContext();
+				var idx = ctx.ConvertToIndex(null, 0, ConvertFlags.Key);
+
+				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
+
+				idx = ctx.ConvertToIndex(null, 0, ConvertFlags.All);
+
+				Assert.AreEqual(new[] { 0, 1, 2 }, idx.Select(_ => _.Index).ToArray());
+			}
+		}
+
+		#endregion
+
+		#region ConvertToSql
+
+		[Test]
+		public void ConvertToSql1()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -634,7 +686,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect2()
+		public void ConvertToSql2()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -651,7 +703,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect3()
+		public void ConvertToSql3()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -669,7 +721,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect4()
+		public void ConvertToSql4()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -687,7 +739,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToIndexSelect5()
+		public void ConvertToSql5()
 		{
 			using (var db = new TestDbManager())
 			{
@@ -705,109 +757,177 @@ namespace Data.Linq
 			}
 		}
 
+		#endregion
+
+		#region SqlTest
+
 		[Test]
-		public void ConvertToIndexSelect9()
+		public void Join1()
 		{
 			using (var db = new TestDbManager())
 			{
-				var ctx = db.GrandChild
-					.Select    (p => new { p, p.Child })
-					.Select    (p => new { p.Child.Parent.ParentID, p.p.ChildID })
-					.Select    (p => p.ParentID)
-					.GetContext();
+				var q =
+					from t in
+						from ch in db.Child
+							join p in db.Parent on ch.ParentID equals p.ParentID
+						select ch.ParentID + p.ParentID
+					where t > 2
+					select t;
 
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(1, ctx.SqlQuery.Select.Columns.Count);
 			}
 		}
 
 		[Test]
-		public void ConvertToIndexSelect10()
+		public void Join2()
 		{
 			using (var db = new TestDbManager())
 			{
-				var ctx = db.Parent
-					.Select    (p => p.Children.Max(c => (int?)c.ChildID) ?? p.Value1)
-					.Select    (p => p)
-					.GetContext();
+				var q =
+					from t in
+						from ch in db.Child
+							join p in db.Parent on ch.ParentID equals p.ParentID
+						select new { ID = ch.ParentID + p.ParentID }
+					where t.ID > 2
+					select t;
 
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Expression));
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(2, ctx.SqlQuery.Select.Columns.Count);
+			}
+		}
+
+		public class MyClass
+		{
+			public int ID;
+		}
+
+		[Test]
+		public void Join3()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from p in db.Parent
+					join j in db.Child on p.ParentID equals j.ParentID
+					select p;
+
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(2, ctx.SqlQuery.Select.Columns.Count);
 			}
 		}
 
 		[Test]
-		public void ConvertToIndexJoin1()
+		public void Join4()
 		{
 			using (var db = new TestDbManager())
 			{
-				var ctx = db.Parent
-					.Join  (db.Child, p => p.ParentID, c => c.ParentID, (p, c) => new { p, c })
-					.Where (t => t.c.ChildID > 20)
-					.Select(t => t.p)
-					.Select(p => p.ParentID)
-					.GetContext();
+				var q =
+					from p in db.Parent
+					select new { ID = new MyClass { ID = p.ParentID } }
+					into p
+					join j in
+						from c in db.Child
+						select new { ID = new MyClass { ID = c.ParentID } }
+						on p.ID.ID equals j.ID.ID
+					where p.ID.ID == 1
+					select p;
 
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsFalse (ctx.IsExpression(null, 0, RequestFor.Expression));
+				var ctx = q.GetContext();
+				ctx.BuildExpression(null, 0);
+
+				Assert.AreEqual(1, ctx.SqlQuery.Select.Columns.Count);
 			}
 		}
 
 		[Test]
-		public void ConvertToIndexJoin2()
+		public void Join5()
 		{
 			using (var db = new TestDbManager())
 			{
-				var ctx = db.Parent
-					.Join  (db.Child, p => p.ParentID, c => c.ParentID, (p, c) => c)
-					.Select(t => t)
-					.Select(p => p.ParentID)
-					.GetContext();
+				var q =
+					from p in db.Parent
+						join c in db.Child      on p.ParentID equals c.ParentID
+						join g in db.GrandChild on p.ParentID equals g.ParentID
+					select new { p, c, g } into x
+					select x.c.ParentID;
 
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Association));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Object));
-				Assert.IsTrue (ctx.IsExpression(null, 0, RequestFor.Field));
-				Assert.IsFalse(ctx.IsExpression(null, 0, RequestFor.Expression));
+				var ctx = q.GetContext();
+				var sql = ctx.ConvertToSql(null, 0, ConvertFlags.All);
+
+				Assert.AreEqual(1, sql.Length);
+			}
+		}
+
+		[Test]
+		public void Join6()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from g in db.GrandChild
+					join p in db.Parent4 on g.Child.ParentID equals p.ParentID
+					select g;
+
+				var ctx = q.GetContext();
+
+				ctx.BuildExpression(null, 0);
+
+				var sql = db.GetSqlText(ctx.SqlQuery);
+
+				CompareSql(sql, @"
+					SELECT
+						[g].[ParentID],
+						[g].[ChildID],
+						[g].[GrandChildID]
+					FROM
+						[GrandChild] [g]
+							LEFT JOIN [Child] [t1] ON [g].[ParentID] = [t1].[ParentID] AND [g].[ChildID] = [t1].[ChildID]
+							INNER JOIN [Parent] [p] ON [t1].[ParentID] = [p].[ParentID]");
 			}
 		}
 
 		#endregion
 	}
 
-	class ContextParser : ISequenceParser
+	class ContextParser : ISequenceBuilder
 	{
-		public int ParsingCounter { get; set; }
+		public int BuildCounter { get; set; }
 
-		public bool CanParse(ExpressionParser parser, Expression expression, SqlQuery sqlQuery)
+		public bool CanBuild(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			var call = expression as MethodCallExpression;
+			var call = buildInfo.Expression as MethodCallExpression;
 			return call != null && call.Method.Name == "GetContext";
 		}
 
-		public IParseContext ParseSequence(ExpressionParser parser, IParseContext parent, Expression expression, SqlQuery sqlQuery)
+		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			var call = (MethodCallExpression)expression;
-			return new Context(parser.ParseSequence(parent, call.Arguments[0], sqlQuery));
+			var call = (MethodCallExpression)buildInfo.Expression;
+			return new Context(builder.BuildSequence(new BuildInfo(buildInfo, call.Arguments[0])));
 		}
 
-		public class Context : IParseContext
+		public class Context : IBuildContext
 		{
-			public Context(IParseContext sequence)
+			public Context(IBuildContext sequence)
 			{
 				Sequence = sequence;
 			}
 
-			public IParseContext    Sequence   { get; set; }
-			public ExpressionParser Parser     { get { return Sequence.Parser; } }
+#if DEBUG
+			public string _sqlQueryText { get { return Sequence._sqlQueryText; } }
+#endif
+
+			public IBuildContext    Sequence   { get; set; }
+			public ExpressionBuilder Builder     { get { return Sequence.Builder; } }
 			public Expression       Expression { get; set; }
 			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } set { Sequence.SqlQuery = value; } }
-			public IParseContext    Parent     { get; set; }
+			public IBuildContext    Parent     { get; set; }
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
@@ -834,18 +954,23 @@ namespace Data.Linq
 				return Sequence.IsExpression(null,  0, requestFlag);
 			}
 
-			public IParseContext GetContext(Expression expression, int level, SqlQuery currentSql)
+			public IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				return Sequence.GetContext(expression, level, currentSql);
+				return Sequence.GetContext(expression, level, buildInfo);
 			}
 
-			public int ConvertToParentIndex(int index, IParseContext context)
+			public int ConvertToParentIndex(int index, IBuildContext context)
 			{
 				return Sequence.ConvertToParentIndex(index, context);
 			}
 
 			public void SetAlias(string alias)
 			{
+			}
+
+			public ISqlExpression GetSubQuery(IBuildContext context)
+			{
+				return null;
 			}
 		}
 	}

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
+
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
-using BLToolkit.Linq;
 
 using NUnit.Framework;
 
@@ -410,7 +410,7 @@ namespace Update
 							.Types
 							.Select(_ => Math.Floor(_.ID / 3.0))
 							.Distinct()
-							.Insert(db.Types, _ => new LinqDataTypes()
+							.Insert(db.Types, _ => new LinqDataTypes
 							{
 								ID        = (int)(_ + 1001),
 								GuidValue = Sql.NewGuid(),

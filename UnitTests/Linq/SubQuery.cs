@@ -183,84 +183,6 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TestCount()
-		{
-			ForEachProvider(db => AreEqual(
-				from p in Parent
-				where p.ParentID != 5
-				select new { p.ParentID, Count = p.Children.Where(c => c.ParentID == p.ParentID && c.ChildID != 0m).Count() },
-				from p in db.Parent
-				where p.ParentID != 5
-				select new { p.ParentID, Count = p.Children.Where(c => c.ParentID == p.ParentID && c.ChildID != 0m).Count() }));
-		}
-
-		[Test]
-		public void TestCount2()
-		{
-			ForEachProvider(db => AreEqual(
-				from p in Parent
-				where p.ParentID != 5
-				select new { Count = p.Value1 == null ? p.Children.Count : p.Children.Count(c => c.ParentID == p.ParentID) },
-				from p in db.Parent
-				where p.ParentID != 5
-				select new { Count = p.Value1 == null ? p.Children.Count : p.Children.Count(c => c.ParentID == p.ParentID) }));
-		}
-
-		[Test]
-		public void TestCount3()
-		{
-			ForEachProvider(db => AreEqual(
-				from p in Parent
-				where p.ParentID != 5
-				select new { Count = p.Value1 == null ? p.Children.Count() : p.Children.Count(c => c.ParentID == p.ParentID) },
-				from p in db.Parent
-				where p.ParentID != 5
-				select new { Count = p.Value1 == null ? p.Children.Count() : p.Children.Count(c => c.ParentID == p.ParentID) }));
-		}
-
-		[Test]
-		public void TestCount4()
-		{
-			ForEachProvider(db => AreEqual(
-				from p in    Parent select new { Count =    Parent.Count(p1 => p1.ParentID == p.ParentID) },
-				from p in db.Parent select new { Count = db.Parent.Count(p1 => p1.ParentID == p.ParentID) }));
-		}
-
-		[Test]
-		public void TestCount5()
-		{
-			ForEachProvider(db => AreEqual(
-				from p in    Parent select new { Count =    Parent.Where(p1 => p1.ParentID == p.ParentID).Count() },
-				from p in db.Parent select new { Count = db.Parent.Where(p1 => p1.ParentID == p.ParentID).Count() }));
-		}
-
-		//[Test]
-		public void TestCount6()
-		{
-			ForEachProvider(db => AreEqual(
-				   Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count()),
-				db.Parent.Take(5).OrderByDescending(p => p.ParentID).Select(p => p.Children.Count())));
-		}
-
-		[Test]
-		public void TestCount7()
-		{
-			ForEachProvider(
-				new[] { ProviderName.SqlCe }, // Fix It
-				db => AreEqual(
-					from p in    Parent select    Child.Count(c => c.Parent == p),
-					from p in db.Parent select db.Child.Count(c => c.Parent == p)));
-		}
-
-		//[Test]
-		public void TestMaxCount()
-		{
-			ForEachProvider(db => Assert.AreEqual(
-				   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
-				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
-		}
-
-		[Test]
 		public void LetTest1()
 		{
 			ForEachProvider(db => AreEqual(
@@ -296,6 +218,268 @@ namespace Data.Linq
 				from p in db.Parent
 				where (from p1 in db.Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
 				select p));
+		}
+
+		[Test]
+		public void Contains2()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase }, db => AreEqual(
+				from p in Parent
+				where (from p1 in Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
+				select p,
+				from p in db.Parent
+				where (from p1 in db.Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
+				select p));
+		}
+
+		[Test]
+		public void SubSub1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p1 in
+					from p2 in Parent
+					select new { p2, ID = p2.ParentID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.Children
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				},
+				from p1 in
+					from p2 in db.Parent
+					select new { p2, ID = p2.ParentID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.Children
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				}));
+		}
+
+		[Test]
+		public void SubSub2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p1 in
+					from p2 in Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Children
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).FirstOrDefault()
+				},
+				from p1 in
+					from p2 in db.Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Children
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).FirstOrDefault()
+				}));
+		}
+
+		[Test]
+		public void SubSub21()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.DB2, "Oracle", ProviderName.MySql, ProviderName.Sybase, ProviderName.Access },
+				db => AreEqual(
+				from p1 in
+					from p2 in Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Children
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				},
+				from p1 in
+					from p2 in db.Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Children
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				}));
+		}
+
+		[Test]
+		public void SubSub211()
+		{
+			ForEachProvider(db => AreEqual(
+				from p1 in
+					from p2 in Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Children
+						from g in c.GrandChildren
+						select new { g, ID = g.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.g, ID = c.g.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				},
+				from p1 in
+					from p2 in db.Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Children
+						from g in c.GrandChildren
+						select new { g, ID = g.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.g, ID = c.g.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				}));
+		}
+
+		[Test]
+		public void SubSub212()
+		{
+			ForEachProvider(db => AreEqual(
+				from p1 in
+					from p2 in Child
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Parent.GrandChildren
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				},
+				from p1 in
+					from p2 in db.Child
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in p1.p2.p2.Parent.GrandChildren
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				}));
+		}
+
+		[Test]
+		public void SubSub22()
+		{
+			ForEachProvider(db => AreEqual(
+				from p1 in
+					from p2 in Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in Child
+						where p1.p2.p2.ParentID == c.ParentID
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				},
+				from p1 in
+					from p2 in db.Parent
+					select new { p2, ID = p2.ParentID + 1 } into p3
+					where p3.ID > 0
+					select new { p2 = p3, ID = p3.ID + 1 }
+				where p1.ID > 0
+				select new
+				{
+					Count =
+					(
+						from c in db.Child
+						where p1.p2.p2.ParentID == c.ParentID
+						select new { c, ID = c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select new { c.c, ID = c.c.ParentID + 1 } into c
+						where c.ID < p1.ID
+						select c
+					).Count()
+				}));
 		}
 	}
 }
