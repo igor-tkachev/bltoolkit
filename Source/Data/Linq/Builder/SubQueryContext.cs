@@ -168,12 +168,6 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 					}
 
-					var k = unionSql.Count - subSql.Count;
-
-					if (k > 0)
-						for (var i = 0; i < k; i++)
-							sub.Add(new SqlQuery.Column(SubQuery.SqlQuery, new SqlValue(null)));
-
 					if (reorder)
 					{
 						var cols = union.ToList();
@@ -189,11 +183,8 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 					}
 
-					k = subSql.Count - unionSql.Count;
-
-					if (k > 0)
-						for (var i = 0; i < k; i++)
-							union.Add(new SqlQuery.Column(Union.SqlQuery, new SqlValue(null)));
+					while (sub.Count < union.Count) sub.  Add(new SqlQuery.Column(SubQuery.SqlQuery, new SqlValue(null)));
+					while (union.Count < sub.Count) union.Add(new SqlQuery.Column(Union.   SqlQuery, new SqlValue(null)));
 				}
 
 				idx = SqlQuery.Select.Add(column);

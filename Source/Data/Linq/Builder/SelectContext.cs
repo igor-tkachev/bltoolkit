@@ -387,8 +387,9 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						ni = new SqlInfo
 						{
-							Query = SqlQuery,
-							Index = SqlQuery.Select.Add(ni.Query.Select.Columns[ni.Index])
+							Query  = SqlQuery,
+							Member = ni.Member,
+							Index  = SqlQuery.Select.Add(ni.Query.Select.Columns[ni.Index])
 						};
 					}
 
