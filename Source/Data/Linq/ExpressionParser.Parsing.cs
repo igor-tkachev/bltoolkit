@@ -1069,7 +1069,7 @@ namespace BLToolkit.Data.Linq
 
 		static void CheckExplicitCtor(Expression expr)
 		{
-			if (expr.NodeType == ExpressionType	.MemberInit)
+			if (expr.NodeType == ExpressionType.MemberInit)
 			{
 				var mi        = (MemberInitExpression)expr;
 				var throwExpr = false;

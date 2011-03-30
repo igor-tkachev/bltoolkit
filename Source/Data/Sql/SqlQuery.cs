@@ -167,7 +167,7 @@ namespace BLToolkit.Data.Sql
 
 			public bool Equals(Column other)
 			{
-				return (_alias == other._alias || other._alias == null) && Expression.Equals(other.Expression);
+				return Expression.Equals(other.Expression);
 			}
 
 #if OVERRIDETOSTRING

@@ -959,19 +959,12 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var expr = (MemberInitExpression)newExpression;
 
-						foreach (var binding in expr.Bindings)
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>())
 						{
-							if (binding is MemberAssignment)
-							{
-								var ma = (MemberAssignment)binding;
-
-								if (me.Member == binding.Member)
-									return levelExpresion == expression ?
-										ma.Expression.Unwrap() :
-										GetMemberExpression(ma.Expression.Unwrap(), expression, level + 1);
-							}
-							else
-								throw new InvalidOperationException();
+							if (me.Member == binding.Member)
+								return levelExpresion == expression ?
+									binding.Expression.Unwrap() :
+									GetMemberExpression(binding.Expression.Unwrap(), expression, level + 1);
 						}
 
 						throw new LinqException("Invalid expression {0}", expression);

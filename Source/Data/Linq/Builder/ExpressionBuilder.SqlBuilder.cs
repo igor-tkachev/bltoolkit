@@ -663,10 +663,14 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberInit :
 					{
 						var expr = (MemberInitExpression)expression;
+						var dic  = TypeAccessor.GetAccessor(expr.Type)
+							.Select((m,i) => new { m, i })
+							.ToDictionary(_ => _.m.MemberInfo, _ => _.i);
 
 						return expr.Bindings
 							.Where(b => b is MemberAssignment)
 							.Cast<MemberAssignment>()
+							.OrderBy(b => dic[b.Member])
 							.Select(a =>
 							{
 								var sql = ConvertToSql(context, a.Expression);
@@ -2558,20 +2562,16 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberInit :
 					{
 						var expr = (MemberInitExpression)expression;
+						var dic = TypeAccessor.GetAccessor(expr.Type)
+							.Select((m,i) => new { m, i })
+							.ToDictionary(_ => _.m.MemberInfo, _ => _.i);
 
-						foreach (var binding in expr.Bindings)
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member]))
 						{
-							if (binding is MemberAssignment)
-							{
-								var ma = (MemberAssignment)binding;
+							members.Add(binding.Member, binding.Expression);
 
-								members.Add(binding.Member, ma.Expression);
-
-								if (binding.Member is MethodInfo)
-									members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)binding.Member), ma.Expression);
-							}
-							else
-								throw new InvalidOperationException();
+							if (binding.Member is MethodInfo)
+								members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)binding.Member), binding.Expression);
 						}
 
 						return true;

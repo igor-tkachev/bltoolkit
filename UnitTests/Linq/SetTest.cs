@@ -56,12 +56,26 @@ namespace Data.Linq
 		{
 			var expected =
 				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000}).
+				(from c in Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000 }).
 				Where(c => c.ChildID != 1032));
 
 			ForEachProvider(db => AreEqual(expected, 
 				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000})).
+				(from c in db.Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000 })).
+				Where(c => c.ChildID != 1032)));
+		}
+
+		[Test]
+		public void Concat401()
+		{
+			var expected =
+				(from c in Child where c.ParentID == 1 select c).Concat(
+				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000, ParentID = c.ParentID }).
+				Where(c => c.ChildID != 1032));
+
+			ForEachProvider(db => AreEqual(expected, 
+				(from c in db.Child where c.ParentID == 1 select c).Concat(
+				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000, ParentID = c.ParentID })).
 				Where(c => c.ChildID != 1032)));
 		}
 
@@ -70,13 +84,27 @@ namespace Data.Linq
 		{
 			var expected =
 				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000}).
+				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 }).
 				Where(c => c.ChildID != 1032));
 
 			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
 				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000})).
+				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 })).
 				Where(c => c.ChildID != 1032)));
+		}
+
+		[Test]
+		public void Concat501()
+		{
+			var expected =
+				(from c in Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
+				(from c in Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 }).
+				Where(c => c.ParentID == 1));
+
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
+				(from c in db.Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
+				(from c in db.Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 })).
+				Where(c => c.ParentID == 1)));
 		}
 
 		[Test]
