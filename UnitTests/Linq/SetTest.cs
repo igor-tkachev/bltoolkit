@@ -545,6 +545,26 @@ namespace Data.Linq
 				from p in db.Parent1 where arr.Contains(p) select p));
 		}
 
+					using (var db = new Northwind())
+			{
+				var arr = new[]
+				{
+					new LinqTestBLToolkit.Order { OrderID = 11000 },
+					new LinqTestBLToolkit.Order { OrderID = 11001 },
+					new LinqTestBLToolkit.Order { OrderID = 11002 }
+				};
+
+				var q =
+					from e in db.Employees
+					from o in e.Orders
+					where arr.Contains<LinqTestBLToolkit.Order>(o)
+					select new
+					{
+						e.FirstName,
+						o.OrderID,
+					}
+					;
+
 		[Test]
 		public void Union1()
 		{
