@@ -14,7 +14,7 @@ private void LoadServerMetadata()
 	{
 		string schemasToSkip = "'information_schema', 'cr_debug', 'mysql'";
 		
-		// Load tables & vies.
+		// Load tables & views.
 		//
 		
 		cmd.CommandText = "SELECT DATABASE()";
@@ -44,11 +44,12 @@ private void LoadServerMetadata()
 					ID    = Convert.ToString(rd[0]),
 					Table = new Table
 					{
-						Owner         = "",
-						TableName     = rd[2].ToString(),
-						ClassName     = rd[2].ToString(),
-						IsView        = rd[3].ToString() == "VIEW",
-						BaseClassName = BaseEntityClass,
+						Owner         			= null, // there is no concept of table owner in MySql
+						TableName     			= rd[2].ToString(),
+						ClassName     			= rd[2].ToString(),
+						DataContextPropertyName	= rd[2].ToString(),
+						IsView        			= rd[3].ToString() == "VIEW",
+						BaseClassName 			= BaseEntityClass,
 					}
 				};
 
@@ -276,15 +277,8 @@ private void LoadServerMetadata()
 		foreach (var col in from col in c.gr orderby col.Column.ID select col.Column)
 			c.Table.Columns.Add(col.ColumnName, col);
 
-		if (c.Table.Owner == "dbo")
-		{
-			c.Table.Owner = null;
-			Tables.Add(c.Table.TableName, c.Table);
-		}
-		else
-		{
-			Tables.Add(c.Table.Owner + "." + c.Table.TableName, c.Table);
-		}
+		// there is no concept of table owner in MySql so we just use table name
+		Tables.Add(c.Table.TableName, c.Table);
 	}
 }
 

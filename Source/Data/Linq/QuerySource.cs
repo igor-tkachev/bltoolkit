@@ -341,7 +341,8 @@ namespace BLToolkit.Data.Linq
 
 								name = ma.Member.Name + '.' + name;
 
-								if (ma.Expression.Type == ObjectType)
+								if (ma.Expression.Type == ObjectType ||
+									(InheritanceMapping != null && InheritanceMapping.Any(im => im.Type == ma.Expression.Type)))
 								{
 									Column col;
 									if (_columns.TryGetValue(name, out col))

@@ -3,11 +3,13 @@
 //
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 
 using BLToolkit.Aspects;
@@ -1456,6 +1458,93 @@ namespace BLToolkit.Data.DataProvider
 					_oracleParameter.Value = value;
 				}
 			}
+		}
+
+		#endregion
+
+		#region InsertBatch
+
+		public override int InsertBatch<T>(
+			DbManager      db,
+			string         insertText,
+			IEnumerable<T> collection,
+			MemberMapper[] members,
+			int            maxBatchSize,
+			DbManager.ParameterProvider<T> getParameters)
+		{
+			var sb  = new StringBuilder();
+			var sp  = new OracleSqlProvider();
+			var n   = 0;
+			var cnt = 0;
+			var str = "\t" + insertText
+				.Substring(0, insertText.IndexOf(") VALUES ("))
+				.Substring(7)
+				.Replace("\r", "")
+				.Replace("\n", "")
+				.Replace("\t", " ")
+				.Replace("( ", "(")
+				//.Replace("  ", " ")
+				+ ") VALUES (";
+
+			foreach (var item in collection)
+			{
+				if (sb.Length == 0)
+					sb.AppendLine("INSERT ALL");
+
+				sb.Append(str);
+
+				foreach (var member in members)
+				{
+					var value = member.GetValue(item);
+
+					if (value is Nullable<DateTime>)
+						value = ((DateTime?)value).Value;
+
+					if (value is DateTime)
+					{
+						var dt = (DateTime)value;
+						sb.Append(string.Format("to_date('{0:dd.MM.yyyy HH:mm:ss}', 'DD.MM.YYYY HH24:MI:SS' )", dt));
+					}
+					else
+						sp.BuildValue(sb, value);
+
+					sb.Append(", ");
+				}
+
+				sb.Length -= 2;
+				sb.AppendLine(")");
+
+				n++;
+
+				if (n >= maxBatchSize)
+				{
+					sb.AppendLine("SELECT * FROM dual");
+
+					var sql = sb.ToString();
+
+					if (DbManager.TraceSwitch.TraceInfo)
+						DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+
+					cnt += db.SetCommand(sql).ExecuteNonQuery();
+
+					n = 0;
+					sb.Length = 0;
+				}
+			}
+
+			if (n > 0)
+			{
+				sb.AppendLine("SELECT * FROM dual");
+
+				var sql = sb.ToString();
+
+				if (DbManager.TraceSwitch.TraceInfo)
+					DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+
+				cnt += db.SetCommand(sql).ExecuteNonQuery();
+			}
+
+			return cnt;
 		}
 
 		#endregion

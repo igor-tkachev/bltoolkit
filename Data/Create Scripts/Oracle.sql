@@ -593,7 +593,8 @@ CREATE TABLE LinqDataTypes
 	BoolValue     smallint,
 	GuidValue     raw(16),
 	BinaryValue   blob,
-	SmallIntValue smallint
+	SmallIntValue smallint,
+	IntValue      int NULL
 )
 /
 
@@ -611,3 +612,14 @@ CREATE TABLE SequenceTest
 )
 /
 
+CREATE TABLE "STG_TRADE_INFORMATION"
+(
+	"STG_TRADE_ID"          NUMBER NOT NULL ENABLE,
+	"STG_TRADE_VERSION"     NUMBER NOT NULL ENABLE,
+	"INFORMATION_TYPE_ID"   NUMBER NOT NULL ENABLE,
+	"INFORMATION_TYPE_NAME" VARCHAR2(50 BYTE),
+	"VALUE"                 VARCHAR2(4000 BYTE),
+	"VALUE_AS_INTEGER"      NUMBER,
+	"VALUE_AS_DATE"         DATE
+)
+/
