@@ -106,7 +106,7 @@ namespace Data.Linq
 				db.Child.Except(db.Child.Where(p => p.ParentID == 3))));
 		}
 
-		//[Test]
+		[Test]
 		public void Except2()
 		{
 			var ids = new[] { 1, 2 };
