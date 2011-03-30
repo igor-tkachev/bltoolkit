@@ -9,9 +9,25 @@ namespace Data.Linq
     [TestFixture]
     public class IdlTest : TestBase
     {
-        public class ObjectID
+        public struct StationObjectId
         {
-            public int Value { get; set; }
+            public StationObjectId(int value)
+            {
+                m_value = value;
+            }
+
+            private int m_value;
+
+            public int Value
+            {
+                get { return m_value; }
+                set { m_value = value; }
+            }
+
+            public static implicit operator int(StationObjectId val)
+            {
+                return val.m_value;
+            }
         }
 
         private void TestJoin(Action<ITestDataContext> func)
@@ -25,79 +41,68 @@ namespace Data.Linq
                     }, func);
         }
 
-        // fail
+        // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' cannot be converted to SQL.
         [Test]
         public void Join1()
         {
-            TestJoin(db =>
+            TestJoin(
+                db =>
                     {
-                        var query1 = from p1 in db.Person
-                                     join p2 in db.Person on p1.ID equals p2.ID
-                                     select new
-                                         {
-                                             ID1 = new ObjectID { Value = p1.ID },
-                                             ID2 = new ObjectID { Value = p2.ID },
-                                             FirstName1 = p1.FirstName,
-                                             FirstName2 = p2.FirstName,
-                                             Gender1 = p1.Gender,
-                                             Gender2 = p2.Gender
-                                         };
+                        var dbm = db;
 
-                        var query2 = from p1 in query1
-                                     select p1.ID1.Value;
+                        var allEquities = from child in dbm.GrandChild
+                                          select
+                                              new
+                                              {
+                                                  NullableId =
+                                                      child.ChildID == null
+                                                          ? (StationObjectId?)null
+                                                          : new StationObjectId { Value = child.ChildID.Value }
+                                              };
 
-                        var result = query2.ToArray();
+                        var query = from e in allEquities where e.NullableId == 1 select e;
+
+                        var result = query.ToArray();
+                        Assert.That(result, Is.Not.Null);
                     });
         }
 
-        // fail
+        // failed with System.NullReferenceException : Object reference not set to an instance of an object.
         [Test]
         public void Join2()
         {
-            TestJoin(db =>
-            {
-                var query1 = from p1 in db.Person
-                             join p2 in db.Person on p1.ID equals p2.ID
-                             select new
-                             {
-                                 ID1 = new ObjectID { Value = p1.ID },
-                                 ID2 = new ObjectID { Value = p2.ID },
-                                 FirstName1 = p1.FirstName,
-                                 FirstName2 = p2.FirstName,
-                                 Gender1 = p1.Gender,
-                                 Gender2 = p2.Gender
-                             };
+            TestJoin(
+                db =>
+                    {
+                        var objects = from obj in db.Person select new { Id = obj.ID, };
 
-                var query2 = from p1 in query1
-                             select p1.ID1;
+                        double? @p1 = null;
 
-                var result = query2.ToArray();
-            });
+                        var r = from c in objects where @p1 != null select c;
+
+                        Assert.That(r.ToArray(), Is.Not.Null);
+                    });
         }
 
-        // success
+        // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than the size of the collection.
+        // Parameter name: index
         [Test]
         public void Join3()
         {
-            TestJoin(db =>
-            {
-                var query1 = from p1 in db.Person
-                             join p2 in db.Person on p1.ID equals p2.ID
-                             select new
-                             {
-                                 ID1 = new ObjectID { Value = p1.ID },
-                                 ID2 = new ObjectID { Value = p2.ID },
-                                 FirstName1 = p1.FirstName,
-                                 FirstName2 = p2.FirstName,
-                                 Gender1 = p1.Gender,
-                                 Gender2 = p2.Gender
-                             };
+            TestJoin(
+                db =>
+                    {
+                        var source = from p1 in db.Person
+                                     join p2 in db.Person on p1.ID equals p2.ID
+                                     select
+                                         new { ID1 = new StationObjectId { Value = p1.ID }, FirstName2 = p2.FirstName, };
 
-                var query2 = from p1 in query1
-                             select p1;
+                        var query = from p1 in source
+                                    select p1.ID1.Value;
 
-                var result = query2.ToArray();
-            });
+                        var result = query.ToArray();
+                        Assert.That(result, Is.Not.Null);
+                    });
         }
     }
 }
