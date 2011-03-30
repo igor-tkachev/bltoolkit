@@ -545,25 +545,94 @@ namespace Data.Linq
 				from p in db.Parent1 where arr.Contains(p) select p));
 		}
 
-					using (var db = new Northwind())
+		[Test]
+		public void Contains10()
+		{
+			using (var db = new NorthwindDB())
 			{
 				var arr = new[]
 				{
-					new LinqTestBLToolkit.Order { OrderID = 11000 },
-					new LinqTestBLToolkit.Order { OrderID = 11001 },
-					new LinqTestBLToolkit.Order { OrderID = 11002 }
+					new Northwind.Order { OrderID = 11000 },
+					new Northwind.Order { OrderID = 11001 },
+					new Northwind.Order { OrderID = 11002 }
 				};
 
 				var q =
-					from e in db.Employees
+					from e in db.Employee
 					from o in e.Orders
-					where arr.Contains<LinqTestBLToolkit.Order>(o)
+					where arr.Contains(o)
 					select new
 					{
 						e.FirstName,
 						o.OrderID,
-					}
-					;
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Contains1002()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from e in db.EmployeeTerritory
+					group e by e.Employee into g
+					where g.Key.EmployeeTerritories.Count() > 1
+					select new
+					{
+						g.Key.LastName,
+						cnt = g.Where(t => t.Employee.FirstName.Contains("an")).Count(),
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Contains1003()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from e in db.EmployeeTerritory
+					group e by e.Employee into g
+					where g.Key.EmployeeTerritories.Count() > 1 && g.Count() > 2
+					select new
+					{
+						g.Key.LastName,
+						cnt = g.Where(t => t.Employee.FirstName.Contains("an")).Count(),
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Contains1001()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var arr = new[]
+				{
+					new Northwind.EmployeeTerritory { EmployeeID = 1, TerritoryID = "01581" },
+					new Northwind.EmployeeTerritory { EmployeeID = 1, TerritoryID = "02116" },
+					new Northwind.EmployeeTerritory { EmployeeID = 1, TerritoryID = "31406" }
+				};
+
+				var q =
+					from e in db.EmployeeTerritory
+					group e by e.EmployeeID into g
+					select new
+					{
+						g.Key,
+						cnt = g.Count(t => arr.Contains(t)),
+					};
+
+				q.ToList();
+			}
+		}
 
 		[Test]
 		public void Union1()
