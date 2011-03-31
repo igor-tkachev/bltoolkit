@@ -224,19 +224,17 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			var sequence = GetSubQuery(context, expression);
+			var subSql   = sequence.GetSubQuery(context);
+
+			if (subSql != null)
+				return subSql;
 
 			var query    = context.SqlQuery;
 			var subQuery = sequence.SqlQuery;
 
-			if (query == subQuery && sequence is CountBuilder.CountContext)
-			{
-				var col = query.Select.Columns[query.Select.Columns.Count - 1];
-
-				query.Select.Columns.RemoveAt(query.Select.Columns.Count - 1);
-
-				return col.Expression;
-			}
-			else if (!query.GroupBy.IsEmpty && !subQuery.Where.IsEmpty)
+			// This code should be moved to context.
+			//
+			if (!query.GroupBy.IsEmpty && !subQuery.Where.IsEmpty)
 			{
 				var fromGroupBy = sequence.SqlQuery.Properties
 					.OfType<System.Tuple<string,SqlQuery>>()
@@ -246,15 +244,15 @@ namespace BLToolkit.Data.Linq.Builder
 				if (fromGroupBy)
 				{
 					if (subQuery.Select.Columns.Count == 1 &&
-						subQuery.Select.Columns[0].Expression.ElementType == QueryElementType.SqlFunction &&
-						subQuery.GroupBy.IsEmpty && !subQuery.Select.HasModifier && !subQuery.HasUnion &&
-						subQuery.Where.SearchCondition.Conditions.Count == 1)
+					    subQuery.Select.Columns[0].Expression.ElementType == QueryElementType.SqlFunction &&
+					    subQuery.GroupBy.IsEmpty && !subQuery.Select.HasModifier && !subQuery.HasUnion &&
+					    subQuery.Where.SearchCondition.Conditions.Count == 1)
 					{
 						var cond = subQuery.Where.SearchCondition.Conditions[0];
 
 						if (cond.Predicate.ElementType == QueryElementType.ExprExprPredicate && query.GroupBy.Items.Count == 1 ||
-							cond.Predicate.ElementType == QueryElementType.SearchCondition &&
-							query.GroupBy.Items.Count == ((SqlQuery.SearchCondition)cond.Predicate).Conditions.Count)
+						    cond.Predicate.ElementType == QueryElementType.SearchCondition &&
+						    query.GroupBy.Items.Count == ((SqlQuery.SearchCondition)cond.Predicate).Conditions.Count)
 						{
 							var func = (SqlFunction)subQuery.Select.Columns[0].Expression;
 
@@ -665,10 +663,14 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberInit :
 					{
 						var expr = (MemberInitExpression)expression;
+						var dic  = TypeAccessor.GetAccessor(expr.Type)
+							.Select((m,i) => new { m, i })
+							.ToDictionary(_ => _.m.MemberInfo, _ => _.i);
 
 						return expr.Bindings
 							.Where(b => b is MemberAssignment)
 							.Cast<MemberAssignment>()
+							.OrderBy(b => dic[b.Member])
 							.Select(a =>
 							{
 								var sql = ConvertToSql(context, a.Expression);
@@ -1863,9 +1865,31 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var e        = expression;
 			var argIndex = e.Object != null ? 0 : 1;
+			var arr      = e.Object ?? e.Arguments[0];
+			var arg      = e.Arguments[argIndex];
 
-			var expr = ConvertToSql(context, e.Arguments[argIndex]);
-			var arr  = e.Object ?? e.Arguments[0];
+			ISqlExpression expr = null;
+
+			var ctx = GetContext(context, arg);
+
+			if (ctx is TableBuilder.TableContext &&
+			    ctx.SqlQuery != context.SqlQuery &&
+			    ctx.IsExpression(arg, 0, RequestFor.Object))
+			{
+				expr = ctx.SqlQuery;
+			}
+
+			if (expr == null)
+			{
+				var sql = ConvertExpressions(context, arg, ConvertFlags.Key);
+
+				if (sql.Length == 1 && sql[0].Member == null)
+					expr = sql[0].Sql; //expr = ConvertToSql(context, arg);
+				else
+					expr = new SqlExpression(
+						'\x1' + string.Join(",", sql.Select(s => s.Member.Name).ToArray()),
+						sql.Select(s => s.Sql).ToArray());
+			}
 
 			switch (arr.NodeType)
 			{
@@ -2054,7 +2078,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		void BuildSearchCondition(IBuildContext context, Expression expression, List<SqlQuery.Condition> conditions)
 		{
-			if (IsSubQuery(context, expression))
+			/*if (IsSubQuery(context, expression))
 			{
 				var cond = BuildConditionSubQuery(context, expression);
 
@@ -2063,7 +2087,7 @@ namespace BLToolkit.Data.Linq.Builder
 					conditions.Add(cond);
 					return;
 				}
-			}
+			}*/
 
 			switch (expression.NodeType)
 			{
@@ -2538,20 +2562,16 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberInit :
 					{
 						var expr = (MemberInitExpression)expression;
+						var dic = TypeAccessor.GetAccessor(expr.Type)
+							.Select((m,i) => new { m, i })
+							.ToDictionary(_ => _.m.MemberInfo, _ => _.i);
 
-						foreach (var binding in expr.Bindings)
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member]))
 						{
-							if (binding is MemberAssignment)
-							{
-								var ma = (MemberAssignment)binding;
+							members.Add(binding.Member, binding.Expression);
 
-								members.Add(binding.Member, ma.Expression);
-
-								if (binding.Member is MethodInfo)
-									members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)binding.Member), ma.Expression);
-							}
-							else
-								throw new InvalidOperationException();
+							if (binding.Member is MethodInfo)
+								members.Add(TypeHelper.GetPropertyByMethod((MethodInfo)binding.Member), binding.Expression);
 						}
 
 						return true;

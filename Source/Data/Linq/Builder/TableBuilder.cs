@@ -562,7 +562,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (expression == null)
 				{
-					if (buildInfo.IsSubQuery)
+					if (buildInfo != null && buildInfo.IsSubQuery)
 					{
 						var table = new TableContext(
 							Builder,
@@ -579,7 +579,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
-					if (buildInfo.IsSubQuery)
+					if (buildInfo != null && buildInfo.IsSubQuery)
 					{
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
@@ -650,6 +650,11 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			#endregion
+
+			public ISqlExpression GetSubQuery(IBuildContext context)
+			{
+				return null;
+			}
 
 			#region Helpers
 

@@ -37,13 +37,31 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				return;
 			}
 
-			if (SqlQuery.From.Tables.Count == 0 && SqlQuery.Select.Columns.Count == 1 && SqlQuery.Select.Columns[0].Expression is SqlFunction)
+			if (SqlQuery.From.Tables.Count == 0 && SqlQuery.Select.Columns.Count == 1)
 			{
-				var func = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
-
-				if (func.Name == "Iif" && func.Parameters.Length == 3 && func.Parameters[0] is SqlQuery.SearchCondition)
+				if (SqlQuery.Select.Columns[0].Expression is SqlFunction)
 				{
-					var sc = (SqlQuery.SearchCondition)func.Parameters[0];
+					var func = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
+
+					if (func.Name == "Iif" && func.Parameters.Length == 3 && func.Parameters[0] is SqlQuery.SearchCondition)
+					{
+						var sc = (SqlQuery.SearchCondition)func.Parameters[0];
+
+						if (sc.Conditions.Count == 1 && sc.Conditions[0].Predicate is SqlQuery.Predicate.FuncLike)
+						{
+							var p = (SqlQuery.Predicate.FuncLike)sc.Conditions[0].Predicate;
+
+							if (p.Function.Name == "EXISTS")
+							{
+								BuildAnyAsCount(sb);
+								return;
+							}
+						}
+					}
+				}
+				else if (SqlQuery.Select.Columns[0].Expression is SqlQuery.SearchCondition)
+				{
+					var sc = (SqlQuery.SearchCondition)SqlQuery.Select.Columns[0].Expression;
 
 					if (sc.Conditions.Count == 1 && sc.Conditions[0].Predicate is SqlQuery.Predicate.FuncLike)
 					{
@@ -65,8 +83,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		void BuildAnyAsCount(StringBuilder sb)
 		{
-			var func  = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
-			var cond  = (SqlQuery.SearchCondition)func.Parameters[0];
+			SqlQuery.SearchCondition cond;
+
+			if (SqlQuery.Select.Columns[0].Expression is SqlFunction)
+			{
+				var func  = (SqlFunction)SqlQuery.Select.Columns[0].Expression;
+				cond  = (SqlQuery.SearchCondition)func.Parameters[0];
+			}
+			else
+			{
+				cond  = (SqlQuery.SearchCondition)SqlQuery.Select.Columns[0].Expression;
+			}
+
 			var exist = ((SqlQuery.Predicate.FuncLike)cond.Conditions[0].Predicate).Function;
 			var query = (SqlQuery)exist.Parameters[0];
 

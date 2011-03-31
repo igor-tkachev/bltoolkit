@@ -278,6 +278,10 @@ namespace BLToolkit.Data.Linq.Builder
 											if (!_sql.TryGetValue(member, out sql))
 											{
 												sql = ConvertExpressions(Members[member], flags);
+
+												if (sql.Length == 1)
+													sql[0].Member = member;
+
 												_sql.Add(member, sql);
 											}
 
@@ -332,7 +336,12 @@ namespace BLToolkit.Data.Linq.Builder
 					return new[] { new SqlInfo { Sql = sql.Sql, Member = member, Query = sql.Query } };
 			}
 
-			return ConvertExpressions(expression, flags);
+			var exprs =  ConvertExpressions(expression, flags);
+
+			if (exprs.Length == 1)
+				exprs[0].Member = member;
+
+			return exprs;
 		}
 
 		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
@@ -378,8 +387,9 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						ni = new SqlInfo
 						{
-							Query = SqlQuery,
-							Index = SqlQuery.Select.Add(ni.Query.Select.Columns[ni.Index])
+							Query  = SqlQuery,
+							Member = ni.Member,
+							Index  = SqlQuery.Select.Add(ni.Query.Select.Columns[ni.Index])
 						};
 					}
 
@@ -659,6 +669,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public virtual IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 		{
+			if (expression == null)
+				return this;
+
 			if (IsScalar)
 			{
 				return ProcessScalar(
@@ -737,6 +750,11 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		#endregion
+
+		public ISqlExpression GetSubQuery(IBuildContext context)
+		{
+			return null;
+		}
 
 		#region Helpers
 
@@ -942,19 +960,12 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var expr = (MemberInitExpression)newExpression;
 
-						foreach (var binding in expr.Bindings)
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>())
 						{
-							if (binding is MemberAssignment)
-							{
-								var ma = (MemberAssignment)binding;
-
-								if (me.Member == binding.Member)
-									return levelExpresion == expression ?
-										ma.Expression.Unwrap() :
-										GetMemberExpression(ma.Expression.Unwrap(), expression, level + 1);
-							}
-							else
-								throw new InvalidOperationException();
+							if (me.Member == binding.Member)
+								return levelExpresion == expression ?
+									binding.Expression.Unwrap() :
+									GetMemberExpression(binding.Expression.Unwrap(), expression, level + 1);
 						}
 
 						throw new LinqException("Invalid expression {0}", expression);
