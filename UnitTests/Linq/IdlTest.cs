@@ -36,9 +36,7 @@ namespace Data.Linq
             ForMySqlProvider(
                 db =>
                 {
-                    var dbm = db;
-
-                    var allEquities = from child in dbm.GrandChild
+                    var source = from child in db.GrandChild
                                       select
                                           new
                                           {
@@ -48,7 +46,7 @@ namespace Data.Linq
                                                       : new ObjectId { Value = child.ChildID.Value }
                                           };
 
-                    var query = from e in allEquities where e.NullableId == 1 select e;
+                    var query = from e in source where e.NullableId == 1 select e;
 
                     var result = query.ToArray();
                     Assert.That(result, Is.Not.Null);
@@ -83,13 +81,13 @@ namespace Data.Linq
             ForMySqlProvider(
                 db =>
                 {
-                    var objects = from obj in db.Person select new { Id = obj.ID, };
+                    var source = from obj in db.Person select new { Id = obj.ID, };
 
                     // fails for bool?, double?, int32?, int64?, string
                     // works for byte?, int16?, DateTime? 
                     double? @p1 = null;
 
-                    var r = from c in objects where @p1 != null select c;
+                    var r = from c in source where @p1 != null select c;
 
                     Assert.That(r.ToArray(), Is.Not.Null);
                 });
