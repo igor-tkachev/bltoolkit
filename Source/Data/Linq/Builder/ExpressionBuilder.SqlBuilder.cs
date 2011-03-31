@@ -1602,7 +1602,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var ctx = GetContext(context, left);
 
-					if (ctx.IsExpression(left, 0, RequestFor.Object) ||
+					if (ctx != null && ctx.IsExpression(left, 0, RequestFor.Object) ||
 						left.NodeType == ExpressionType.Parameter && ctx.IsExpression(left, 0, RequestFor.Field))
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));

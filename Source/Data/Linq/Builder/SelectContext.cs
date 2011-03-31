@@ -116,8 +116,7 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 			else
 			{
-				var sequence  = GetSequence(expression, level);
-				var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+				var sequence = GetSequence(expression, level);
 
 				if (level == 0)
 					return levelExpression == expression ?
@@ -174,9 +173,15 @@ namespace BLToolkit.Data.Linq.Builder
 							switch (memberExpression.NodeType)
 							{
 								case ExpressionType.Parameter  :
-									if (memberExpression == parameter)
-										return sequence.BuildExpression(expression, level + 1);
-									break;
+									{
+										var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+										
+										if (memberExpression == parameter)
+											return sequence.BuildExpression(expression, level + 1);
+
+										break;
+										
+									}
 
 								case ExpressionType.New        :
 								case ExpressionType.MemberInit :
