@@ -44,6 +44,9 @@ namespace BLToolkit.Data.Linq.Builder
 			new UpdateBuilder        (),
 			new UpdateBuilder.Set    (),
 			new DeleteBuilder        (),
+			new ContainsBuilder      (),
+			new AllAnyBuilder        (),
+			new ConcatUnionBuilder   (),
 		};
 
 		public static void AddBuilder(ISequenceBuilder builder)

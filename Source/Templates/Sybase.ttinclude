@@ -213,10 +213,11 @@ private void LoadServerMetadata()
 		{
 			while (rd.Read())
 			{
-				var id    = Convert.ToInt32(rd["id"]);
-				var colid = Convert.ToInt32(rd["colid"]);
+				var id      = Convert.ToInt32 (rd["id"]);
+				var colid   = Convert.ToInt32 (rd["colid"]);
+				var colname = Convert.ToString(rd["colname"]);
 
-				columns.Single(_ => _.ID == id && _.Column.ID == colid).Column.PKIndex = colid;
+				columns.Single(_ => _.ID == id && _.Column.ColumnName == colname).Column.PKIndex = colid;
 			}
 		}
 

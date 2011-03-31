@@ -161,7 +161,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		//[Test]
 		public void Contains4()
 		{
 			var q1 =

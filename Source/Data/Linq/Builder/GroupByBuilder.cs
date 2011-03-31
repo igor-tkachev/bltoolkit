@@ -532,7 +532,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				if (expression == null)
+				if (expression == null && buildInfo != null)
 				{
 					if (buildInfo.Parent is SelectManyBuilder.SelectManyContext)
 					{
@@ -566,6 +566,23 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 
 					//return this;
+				}
+
+				if (level != 0)
+				{
+					var levelExpression = expression.GetLevelExpression(level);
+
+					if (levelExpression.NodeType == ExpressionType.MemberAccess)
+					{
+						var ma = (MemberExpression)levelExpression;
+
+						if (ma.Member.Name == "Key" && ma.Member.DeclaringType == _groupingType)
+						{
+							return levelExpression == expression ?
+								_key.GetContext(null,       0,         buildInfo) :
+								_key.GetContext(expression, level + 1, buildInfo);
+						}
+					}
 				}
 
 				throw new NotImplementedException();
