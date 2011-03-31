@@ -54,7 +54,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var isHaving       = false;
 			var isWhere        = false;
 
-			expression.Find(expr =>
+			expression.Visit(expr =>
 			{
 				if (IsSubQuery(context, expr))
 					return isWhere = true;
@@ -116,7 +116,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 				}
 
-				return stopWalking;
+				return !stopWalking;
 			});
 
 			makeHaving = isHaving && !isWhere;

@@ -572,7 +572,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains1002()
+		public void Contains11()
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -591,14 +591,14 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains1003()
+		public void Contains12()
 		{
 			using (var db = new NorthwindDB())
 			{
 				var q =
 					from e in db.EmployeeTerritory
 					group e by e.Employee into g
-					where g.Key.EmployeeTerritories.Count() > 1 && g.Count() > 2
+					where /*g.Key.EmployeeTerritories.Count() > 1 && */g.Count() > 2
 					select new
 					{
 						g.Key.LastName,
@@ -610,7 +610,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains1001()
+		public void Contains13()
 		{
 			using (var db = new NorthwindDB())
 			{
