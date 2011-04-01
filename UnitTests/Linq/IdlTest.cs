@@ -2,6 +2,9 @@
 using System.Linq;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using Data.Linq.Model;
 using NUnit.Framework;
 
@@ -10,6 +13,78 @@ namespace Data.Linq
     [TestFixture]
     public class IdlTest : TestBase
     {
+        #region PersonWithId
+
+        public interface IHasID
+        {
+            int ID { get; set; }
+        }
+
+        [TableName(Name = "Person")]
+        public class PersonWithId : IHasID
+        {
+            public PersonWithId()
+            {
+            }
+
+            public PersonWithId(int id)
+            {
+                ID = id;
+            }
+
+            public PersonWithId(int id, string firstName)
+            {
+                ID = id;
+                FirstName = firstName;
+            }
+
+            [Identity, PrimaryKey]
+            //[SequenceName("PostgreSQL", "Seq")]
+            [SequenceName("Firebird", "PersonID")]
+            [MapField("PersonID")]
+            public int ID { get; set; }
+            public string FirstName { get; set; }
+            public string LastName;
+            [Nullable]
+            public string MiddleName;
+            public Gender Gender;
+
+            [MapIgnore]
+            public string Name { get { return FirstName + " " + LastName; } }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as PersonWithId);
+            }
+
+            public bool Equals(PersonWithId other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return
+                    other.ID == ID &&
+                    Equals(other.LastName, LastName) &&
+                    Equals(other.MiddleName, MiddleName) &&
+                    other.Gender == Gender &&
+                    Equals(other.FirstName, FirstName);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    var result = ID;
+                    result = (result * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
+                    result = (result * 397) ^ (MiddleName != null ? MiddleName.GetHashCode() : 0);
+                    result = (result * 397) ^ Gender.GetHashCode();
+                    result = (result * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
+                    return result;
+                }
+            }
+        }
+        #endregion
+
+        #region ObjectId
         public struct ObjectId
         {
             public ObjectId(int value)
@@ -30,6 +105,7 @@ namespace Data.Linq
                 return val.m_value;
             }
         }
+        #endregion
 
         [Test]
         public void TestComplexExpression()
@@ -95,46 +171,17 @@ namespace Data.Linq
                 });
         }
 
-        // success
         [Test]
-        public void TestWhereExpression1()
+        public void TestWithInterface()
         {
             ForMySqlProvider(db =>
                 {
-                    int id = 1;
-                    var r = db.GetTable<Person>().Where(obj => obj.ID == id).SingleOrDefault();
+                    var r = GetById<PersonWithId>(db,1).SingleOrDefault();
                     Assert.That(r, Is.Not.Null);
                 });
         }
 
-        // success
-        [Test]
-        public void TestWhereExpression2()
-        {
-            ForMySqlProvider(db =>
-            {
-                var r = GetPersonById(db,1).SingleOrDefault();
-                Assert.That(r, Is.Not.Null);
-            });
-        }
-
-        // failed
-        [Test]
-        public void TestWhereExpression3()
-        {
-            ForMySqlProvider(db =>
-                {
-                    var r = GetById<Person>(db,1).SingleOrDefault();
-                    Assert.That(r, Is.Not.Null);
-                });
-        }
-
-        private IQueryable<Person> GetPersonById(ITestDataContext db, int id)
-        {
-            return db.GetTable<Person>().Where(obj => obj.ID == id);
-        }
-
-        private IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHaseID
+        private IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
         }
