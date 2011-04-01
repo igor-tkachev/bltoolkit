@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
+using Data.Linq.Model;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -91,6 +93,50 @@ namespace Data.Linq
 
                     Assert.That(r.ToArray(), Is.Not.Null);
                 });
+        }
+
+        // success
+        [Test]
+        public void TestWhereExpression1()
+        {
+            ForMySqlProvider(db =>
+                {
+                    int id = 1;
+                    var r = db.GetTable<Person>().Where(obj => obj.ID == id).SingleOrDefault();
+                    Assert.That(r, Is.Not.Null);
+                });
+        }
+
+        // success
+        [Test]
+        public void TestWhereExpression2()
+        {
+            ForMySqlProvider(db =>
+            {
+                var r = GetPersonById(db,1).SingleOrDefault();
+                Assert.That(r, Is.Not.Null);
+            });
+        }
+
+        // failed
+        [Test]
+        public void TestWhereExpression3()
+        {
+            ForMySqlProvider(db =>
+                {
+                    var r = GetById<Person>(db,1).SingleOrDefault();
+                    Assert.That(r, Is.Not.Null);
+                });
+        }
+
+        private IQueryable<Person> GetPersonById(ITestDataContext db, int id)
+        {
+            return db.GetTable<Person>().Where(obj => obj.ID == id);
+        }
+
+        private IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHaseID
+        {
+            return db.GetTable<T>().Where(obj => obj.ID == id);
         }
 
         private void ForMySqlProvider(Action<ITestDataContext> func)

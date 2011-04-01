@@ -6,7 +6,11 @@ using BLToolkit.DataAccess;
 
 namespace Data.Linq.Model
 {
-	public class Person
+    public interface IHaseID
+    {
+        int ID { get; set; }
+    }
+	public class Person : IHaseID
 	{
 		public Person()
 		{
@@ -23,10 +27,10 @@ namespace Data.Linq.Model
 			FirstName = firstName;
 		}
 
-		[Identity, PrimaryKey]
-		//[SequenceName("PostgreSQL", "Seq")]
-		[SequenceName("Firebird",   "PersonID")]
-		[MapField("PersonID")] public int    ID;
+	    [Identity, PrimaryKey]
+	    //[SequenceName("PostgreSQL", "Seq")]
+	    [SequenceName("Firebird", "PersonID")]
+	    [MapField("PersonID")] public int    ID { get; set; }
 		                       public string FirstName { get; set; }
 		                       public string LastName;
 		[Nullable]             public string MiddleName;
