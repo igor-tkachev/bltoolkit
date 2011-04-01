@@ -209,6 +209,9 @@ namespace Data.Linq
 			{
 				try
 				{
+					if (db is DbManager)
+						((DbManager)db).BeginTransaction();
+
 					func(db);
 				}
 				catch (Exception e)
