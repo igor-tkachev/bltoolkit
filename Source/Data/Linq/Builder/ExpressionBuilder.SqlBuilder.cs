@@ -54,7 +54,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var isHaving       = false;
 			var isWhere        = false;
 
-			expression.Find(expr =>
+			expression.Visit(expr =>
 			{
 				if (IsSubQuery(context, expr))
 					return isWhere = true;
@@ -116,7 +116,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 				}
 
-				return stopWalking;
+				return !stopWalking;
 			});
 
 			makeHaving = isHaving && !isWhere;
@@ -908,23 +908,29 @@ namespace BLToolkit.Data.Linq.Builder
 						var e = (MethodCallExpression)expression;
 
 						if (e.IsQueryable())
-							return SubQueryToSql(context, expression);
-
-						if (e.Method.DeclaringType == typeof(Enumerable))
 						{
-							var ctx = GetContext(context, expression);
-
-							if (ctx != null)
+							switch (e.Method.Name)
 							{
-								var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
+								case "Count"     :
+								case "LongCount" :
+									{
+										var ctx = GetContext(context, expression);
 
-								if (sql.Length != 1)
-									throw new InvalidOperationException();
+										if (ctx != null)
+										{
+											var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
 
-								return sql[0].Sql;
+											if (sql.Length != 1)
+												throw new InvalidOperationException();
+
+											return sql[0].Sql;
+										}
+
+										break;
+									}
 							}
 
-							return ConvertEnumerable(context, e);
+							return SubQueryToSql(context, expression);
 						}
 
 						var attr = GetFunctionAttribute(e.Method);
@@ -1602,7 +1608,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var ctx = GetContext(context, left);
 
-					if (ctx.IsExpression(left, 0, RequestFor.Object) ||
+					if (ctx != null && ctx.IsExpression(left, 0, RequestFor.Object) ||
 						left.NodeType == ExpressionType.Parameter && ctx.IsExpression(left, 0, RequestFor.Field))
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));

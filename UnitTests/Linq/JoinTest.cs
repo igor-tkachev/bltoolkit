@@ -349,5 +349,19 @@ namespace Data.Linq
 				join c3 in db.GrandChild on c2.ParentID equals c3.ParentID
 				select new { p, c1Key = c1.ChildID, c2Key = c2.GrandChildID, c3Key = c3.GrandChildID }));
 		}
+
+		[Test]
+		public void ProjectionTest1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p1 in Person
+				join p2 in Person on p1.ID equals p2.ID
+				select new { ID1 = new { Value = p1.ID }, FirstName2 = p2.FirstName, } into p1
+				select p1.ID1.Value,
+				from p1 in db.Person
+				join p2 in db.Person on p1.ID equals p2.ID
+				select new { ID1 = new { Value = p1.ID }, FirstName2 = p2.FirstName, } into p1
+				select p1.ID1.Value));
+		}
 	}
 }

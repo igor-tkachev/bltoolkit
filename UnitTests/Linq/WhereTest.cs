@@ -607,8 +607,29 @@ namespace Data.Linq
 		[Test]
 		public void CheckNull1()
 		{
-			var expected = from p in Parent where p != null select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p != null select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where p != null select p,
+				from p in db.Parent where p != null select p));
+		}
+
+		[Test]
+		public void CheckNull2()
+		{
+			int? n = null;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where n != null || p.ParentID > 1 select p,
+				from p in db.Parent where n != null || p.ParentID > 1 select p));
+		}
+
+		[Test]
+		public void CheckNull3()
+		{
+			int? n = 1;
+
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Firebird }, db => AreEqual(
+				from p in    Parent where n != null || p.ParentID > 1 select p,
+				from p in db.Parent where n != null || p.ParentID > 1 select p));
 		}
 
 		[Test]
