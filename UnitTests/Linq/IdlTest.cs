@@ -188,14 +188,7 @@ namespace Data.Linq
 
         private void ForMySqlProvider(Action<ITestDataContext> func)
         {
-            ForEachProvider(
-                new[]
-                    {
-                        "Sql2008", "Sql2005", ProviderName.SqlCe, ProviderName.DB2, ProviderName.Informix,
-                        ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.SQLite,
-                        ProviderName.Sybase, ProviderName.Access
-                    },
-                func);
+            ForEachProvider(_providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),func);
         }
     }
 }
