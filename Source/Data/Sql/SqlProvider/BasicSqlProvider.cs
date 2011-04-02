@@ -2860,15 +2860,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
+			if (!IsCountSubQuerySupported)  sqlQuery = MoveCountSubQuery (sqlQuery);
+			if (!IsSubQueryColumnSupported) sqlQuery = MoveSubQueryColumn(sqlQuery);
+
 			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
-
-			if (!IsCountSubQuerySupported || !IsSubQueryColumnSupported)
-			{
-				if (!IsCountSubQuerySupported)  sqlQuery = MoveCountSubQuery (sqlQuery);
-				if (!IsSubQueryColumnSupported) sqlQuery = MoveSubQueryColumn(sqlQuery);
-
-				sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
-			}
 
 			return sqlQuery;
 		}
@@ -2891,6 +2886,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					if (col.Expression.ElementType == QueryElementType.SqlQuery)
 					{
 						var subQuery    = (SqlQuery)col.Expression;
+
+
+
+
+
+
+
+
+
 						var allTables   = new HashSet<ISqlTableSource>();
 						var levelTables = new HashSet<ISqlTableSource>();
 

@@ -356,14 +356,18 @@ namespace BLToolkit.Data.Linq.Builder
 
 					case ExpressionType.Call :
 						{
-							var me = (MethodCallExpression)expr;
+							var call = (MethodCallExpression)expr;
 
-							if (me.IsQueryable()) switch (me.Method.Name)
+							if (call.IsQueryable()) switch (call.Method.Name)
 							{
-								case "GroupBy"    : return ConvertGroupBy   (me);
-								case "SelectMany" : return ConvertSelectMany(me);
-								case "LongCount"  :
-								case "Count"      : return ConvertCount     (me);
+								case "GroupBy"         : return ConvertGroupBy   (call);
+								case "SelectMany"      : return ConvertSelectMany(call);
+								case "LongCount"       :
+								case "Count"           :
+								case "Single"          :
+								case "SingleOrDefault" :
+								case "First"           :
+								case "FirstOrDefault"  : return ConvertPredicate (call);
 							}
 
 							break;
@@ -766,7 +770,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertCount
 
-		Expression ConvertCount(MethodCallExpression method)
+		Expression ConvertPredicate(MethodCallExpression method)
 		{
 			if (method.Arguments.Count != 2)
 				return method;

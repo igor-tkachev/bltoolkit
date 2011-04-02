@@ -306,7 +306,7 @@ namespace BLToolkit.Data.Linq.Builder
 							var arg = call.Arguments[0];
 
 							if (arg.NodeType == ExpressionType.Call)
-								return IsSubQuery(context, arg);
+								return true; //IsSubQuery(context, arg);
 
 							if (IsSubQuerySource(context, arg))
 								return true;
@@ -342,14 +342,11 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var ma = (MemberExpression)expression;
 
-						if (IsSubQueryMember(expression) && IsSubQuerySource(context, ma.Expression))
-							return !CanBeCompiled(expression);
+						//if (!ignoreMembers && IsIEnumerableType(expression))
+						//	return !CanBeCompiled(expression);
 
-						if (!ignoreMembers && IsIEnumerableType(expression))
-							return !CanBeCompiled(expression);
-
-						if (ma.Expression != null)
-							return IsSubQuery(context, ma.Expression, true);
+						//if (ma.Expression != null)
+						//	return IsSubQuery(context, ma.Expression, true);
 
 						break;
 					}
@@ -378,20 +375,6 @@ namespace BLToolkit.Data.Linq.Builder
 				expr = ((MemberExpression)expr).Expression;
 
 			return expr != null && expr.NodeType == ExpressionType.Constant;
-		}
-
-		static bool IsSubQueryMember(Expression expr)
-		{
-			switch (expr.NodeType)
-			{
-				case ExpressionType.Call :
-					break;
-
-				case ExpressionType.MemberAccess :
-					break;
-			}
-
-			return false;
 		}
 
 		static bool IsIEnumerableType(Expression expr)
