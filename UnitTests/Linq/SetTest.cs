@@ -546,6 +546,95 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Contains10()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var arr = new[]
+				{
+					new Northwind.Order { OrderID = 11000 },
+					new Northwind.Order { OrderID = 11001 },
+					new Northwind.Order { OrderID = 11002 }
+				};
+
+				var q =
+					from e in db.Employee
+					from o in e.Orders
+					where arr.Contains(o)
+					select new
+					{
+						e.FirstName,
+						o.OrderID,
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Contains11()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from e in db.EmployeeTerritory
+					group e by e.Employee into g
+					where g.Key.EmployeeTerritories.Count() > 1
+					select new
+					{
+						g.Key.LastName,
+						cnt = g.Where(t => t.Employee.FirstName.Contains("an")).Count(),
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Contains12()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from e in db.EmployeeTerritory
+					group e by e.Employee into g
+					where g.Key.EmployeeTerritories.Count() > 1 && g.Count() > 2
+					select new
+					{
+						g.Key.LastName,
+						//cnt = g.Where(t => t.Employee.FirstName.Contains("an")).Count(),
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Contains13()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var arr = new[]
+				{
+					new Northwind.EmployeeTerritory { EmployeeID = 1, TerritoryID = "01581" },
+					new Northwind.EmployeeTerritory { EmployeeID = 1, TerritoryID = "02116" },
+					new Northwind.EmployeeTerritory { EmployeeID = 1, TerritoryID = "31406" }
+				};
+
+				var q =
+					from e in db.EmployeeTerritory
+					group e by e.EmployeeID into g
+					select new
+					{
+						g.Key,
+						cnt = g.Count(t => arr.Contains(t)),
+					};
+
+				q.ToList();
+			}
+		}
+
+		[Test]
 		public void Union1()
 		{
 			ForEachProvider(db => AreEqual(
