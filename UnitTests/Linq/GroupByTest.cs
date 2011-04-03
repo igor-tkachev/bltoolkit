@@ -531,10 +531,10 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Aggregates()
+		public void Aggregates1()
 		{
-			var expected =
-				from ch in Child
+			ForEachProvider(db => AreEqual(
+				from  ch in Child
 				group ch by ch.ParentID into g
 				select new
 				{
@@ -543,18 +543,66 @@ namespace Data.Linq
 					Max = g.Max(c => c.ChildID),
 					Avg = (int)g.Average(c => c.ChildID),
 					Cnt = g.Count()
-				};
+				},
+				from  ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Sum(c => c.ChildID),
+					Min = g.Min(c => c.ChildID),
+					Max = g.Max(c => c.ChildID),
+					Avg = (int)g.Average(c => c.ChildID),
+					Cnt = g.Count()
+				}));
+		}
 
-			ForEachProvider(db => AreEqual(expected,
-				from ch in db.Child
+		[Test]
+		public void Aggregates2()
+		{
+			ForEachProvider(db => AreEqual(
+				from  ch in Child
 				group ch by ch.ParentID into g
 				select new
 				{
-					Sum = g.Sum(c => c.ChildID),
-					Min = g.Min(c => c.ChildID),
-					Max = g.Max(c => c.ChildID),
-					Avg = (int)g.Average(c => c.ChildID),
+					Sum = g.Select(c => c.ChildID).Sum(),
+					Min = g.Select(c => c.ChildID).Min(),
+					Max = g.Select(c => c.ChildID).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Average(),
 					Cnt = g.Count()
+				},
+				from  ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Select(c => c.ChildID).Sum(),
+					Min = g.Select(c => c.ChildID).Min(),
+					Max = g.Select(c => c.ChildID).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Average(),
+					Cnt = g.Count()
+				}));
+		}
+
+		[Test]
+		public void Aggregates3()
+		{
+			ForEachProvider(db => AreEqual(
+				from  ch in Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
+					Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
+					Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
+				},
+				from  ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
+					Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
+					Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
 				}));
 		}
 
@@ -655,9 +703,9 @@ namespace Data.Linq
 		[Test]
 		public void Average1()
 		{
-			var expected = Child.Average(c => c.ChildID);
-			Assert.AreNotEqual(0, expected);
-			ForEachProvider(db => Assert.AreEqual((int)expected, (int)db.Child.Average(c => c.ChildID)));
+			ForEachProvider(db => Assert.AreEqual(
+				(int)   Child.Average(c => c.ChildID),
+				(int)db.Child.Average(c => c.ChildID)));
 		}
 
 		[Test]

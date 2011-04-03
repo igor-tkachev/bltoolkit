@@ -326,12 +326,8 @@ namespace BLToolkit.Data.Linq.Builder
 								var isList = typeof(ICollection).IsAssignableFrom(me.Member.DeclaringType);
 
 								if (!isList)
-									foreach (var t in me.Member.DeclaringType.GetInterfaces())
-										if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>))
-										{
-											isList = true;
-											break;
-										}
+									isList = me.Member.DeclaringType.GetInterfaces()
+										.Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>));
 
 								if (isList)
 								{
@@ -368,6 +364,10 @@ namespace BLToolkit.Data.Linq.Builder
 								case "SingleOrDefault" :
 								case "First"           :
 								case "FirstOrDefault"  : return ConvertPredicate (call);
+								case "Sum"             :
+								case "Min"             :
+								case "Max"             :
+								case "Average"         : return ConvertSelector  (call);
 							}
 
 							return ConvertSubquery(expr);
@@ -841,6 +841,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (method.Arguments.Count != 2)
 				return method;
 
+			var cm = GetQueriableMethodInfo(method, m => m.Name == method.Method.Name && m.GetParameters().Length == 1);
 			var wm = method.Method.DeclaringType == typeof(Enumerable) ?
 				EnumerableMethods
 					.Where(m => m.Name == "Where" && m.GetParameters().Length == 2)
@@ -849,9 +850,6 @@ namespace BLToolkit.Data.Linq.Builder
 					.Where(m => m.Name == "Where" && m.GetParameters().Length == 2)
 					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
 
-			var cm = GetQueriableMethodInfo(method, m =>
-				m.Name == method.Method.Name && m.GetParameters().Length == 1);
-
 			var argType = method.Method.GetGenericArguments()[0];
 
 			wm = wm.MakeGenericMethod(argType);
@@ -859,6 +857,42 @@ namespace BLToolkit.Data.Linq.Builder
 
 			return Expression.Call(null, cm,
 				Expression.Call(null, wm,
+					OptimizeExpression(method.Arguments[0]),
+					OptimizeExpression(method.Arguments[1])));
+		}
+
+		#endregion
+
+		#region ConvertSelector
+
+		Expression ConvertSelector(MethodCallExpression method)
+		{
+			if (method.Arguments.Count != 2)
+				return method;
+
+			var types = method.Method.DeclaringType == typeof(Enumerable) ?
+				method.Method.GetParameters()[1].ParameterType.GetGenericArguments() :
+				method.Method.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments();
+
+			var cm = GetQueriableMethodInfo(method, m =>
+				m.Name                   == method.Method.Name &&
+				m.GetParameters().Length == 1 &&
+				m.GetParameters()[0].ParameterType.GetGenericArguments()[0] == types[1]);
+
+			var sm = method.Method.DeclaringType == typeof(Enumerable) ?
+				EnumerableMethods
+					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
+				QueryableMethods
+					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
+
+			var argType = types[0];
+
+			sm = sm.MakeGenericMethod(argType, types[1]);
+
+			return Expression.Call(null, cm,
+				Expression.Call(null, sm,
 					OptimizeExpression(method.Arguments[0]),
 					OptimizeExpression(method.Arguments[1])));
 		}

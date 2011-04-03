@@ -56,8 +56,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			expression.Visit(expr =>
 			{
-				if (IsSubQuery(context, expr))
-					return isWhere = true;
+				//if (IsSubQuery(context, expr))
+				//	return isWhere = true;
 
 				var stopWalking = false;
 
@@ -176,7 +176,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region SubQueryToSql
 
-		public IBuildContext GetSubQuery(IBuildContext context, Expression expr)
+		public IBuildContext GetSubQuery(IBuildContext context, MethodCallExpression expr)
 		{
 			var info = new BuildInfo(context, expr, new SqlQuery { ParentSql = context.SqlQuery });
 			var ctx  = BuildSequence(info);
@@ -191,38 +191,8 @@ namespace BLToolkit.Data.Linq.Builder
 			return ctx;
 		}
 
-		ISqlExpression SubQueryToSql(IBuildContext context, Expression expression)
+		ISqlExpression SubQueryToSql(IBuildContext context, MethodCallExpression expression)
 		{
-			if (expression.NodeType == ExpressionType.MemberAccess)
-			{
-				var ma = (MemberExpression)expression;
-
-				if (ma.Expression != null)
-				{
-					switch (ma.Expression.NodeType)
-					{
-						case ExpressionType.Call         :
-						case ExpressionType.MemberAccess :
-						case ExpressionType.Parameter    :
-							{
-								var ctx = GetSubQuery(context, ma.Expression);
-
-								var ex  = expression.Convert(e => e == ma.Expression ? Expression.Constant(null, ma.Expression.Type) : e);
-								var sql = ctx.ConvertToSql(ex, 0, ConvertFlags.Field);
-
-								if (sql.Length != 1)
-									throw new NotImplementedException();
-
-								ctx.SqlQuery.Select.Add(sql[0].Sql);
-
-								var idx = context.SqlQuery.Select.Add(ctx.SqlQuery);
-
-								return context.SqlQuery.Select.Columns[idx];
-							}
-					}
-				}
-			}
-
 			var sequence = GetSubQuery(context, expression);
 			var subSql   = sequence.GetSubQuery(context);
 
@@ -283,73 +253,12 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region IsSubquery
 
-		bool IsSubQuery(IBuildContext context, Expression expression)
+		bool IsSubQuery(IBuildContext context, MethodCallExpression call)
 		{
-			return IsSubQuery(context, expression, false);
-		}
-
-		bool IsSubQuery(IBuildContext context, Expression expression, bool ignoreMembers)
-		{
-			/////if (queries.Length > 0 &&
-			/////	queries[0] is QuerySource.SubQuerySourceColumn &&
-			/////	((QuerySource.SubQuerySourceColumn)queries[0]).SourceColumn is QuerySource.GroupBy)
-			/////	return false;
-
-			switch (expression.NodeType)
+			if (call.IsQueryable())
 			{
-				case ExpressionType.Call:
-					{
-						var call = (MethodCallExpression)expression;
-
-						if (call.IsQueryable())
-						{
-							var arg = call.Arguments[0];
-
-							if (arg.NodeType == ExpressionType.Call)
-								return true; //IsSubQuery(context, arg);
-
-							if (IsSubQuerySource(context, arg))
-								return true;
-						}
-
-						/*
-						if (call.Method.DeclaringType == typeof(Queryable) || call.Method.DeclaringType == typeof(Enumerable))
-						{
-							var arg = call.Arguments[0];
-
-							if (arg.NodeType == ExpressionType.Call)
-								return IsSubQuery(context, arg);
-
-							// *
-							var qs = queries;
-
-							if (queries.Length > 0 && queries[0].GetType() == typeof(QuerySource.Expr))
-								qs = new[] { queries[0].BaseQuery }.Concat(queries).ToArray();
-
-							if (IsSubQuerySource(arg, qs))
-								return true;
-							* /
-						}
-						*/
-
-						//if (IsIEnumerableType(expression))
-						//	return !CanBeCompiled(expression);
-					}
-
-					break;
-
-				case ExpressionType.MemberAccess:
-					{
-						var ma = (MemberExpression)expression;
-
-						//if (!ignoreMembers && IsIEnumerableType(expression))
-						//	return !CanBeCompiled(expression);
-
-						//if (ma.Expression != null)
-						//	return IsSubQuery(context, ma.Expression, true);
-
-						break;
-					}
+				var arg = call.Arguments[0];
+				return arg.NodeType == ExpressionType.Call || IsSubQuerySource(context, arg);
 			}
 
 			return false;
@@ -703,9 +612,6 @@ namespace BLToolkit.Data.Linq.Builder
 			if (CanBeCompiled(expression))
 				return BuildParameter(expression).SqlParameter;
 
-			if (IsSubQuery(context, expression))
-				return SubQueryToSql(context, expression);
-
 			switch (expression.NodeType)
 			{
 				case ExpressionType.AndAlso:
@@ -892,6 +798,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (e.IsQueryable())
 						{
+							if (IsSubQuery(context, e))
+								return SubQueryToSql(context, e);
+
 							switch (e.Method.Name)
 							{
 								case "Count"     :
@@ -913,7 +822,7 @@ namespace BLToolkit.Data.Linq.Builder
 									}
 							}
 
-							return SubQueryToSql(context, expression);
+							return SubQueryToSql(context, e);
 						}
 
 						var attr = GetFunctionAttribute(e.Method);
@@ -2198,7 +2107,7 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								var param  = Expression.Parameter(ex.Type, ex.NodeType == ExpressionType.Parameter ? ((ParameterExpression)ex).Name : "t");
 								var lambda = Expression.Lambda(Expression.Equal(param, ex), param);
-								return BuildAnyCondition(context, SetType.In, seq, lambda, ex);
+								return BuildAnyCondition(context, SetType.In, (MethodCallExpression)seq, lambda, ex);
 							};
 						}
 						else
@@ -2242,7 +2151,7 @@ namespace BLToolkit.Data.Linq.Builder
 		enum SetType { Any, All, In }
 
 		SqlQuery.Condition BuildAnyCondition(
-			IBuildContext context, SetType setType, Expression expr, LambdaExpression lambda, Expression inExpr)
+			IBuildContext context, SetType setType, MethodCallExpression expr, LambdaExpression lambda, Expression inExpr)
 		{
 			/*
 			var sql = context.SqlQuery;
