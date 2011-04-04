@@ -39,7 +39,6 @@ namespace Data.Linq
             }
 
             [Identity, PrimaryKey]
-            //[SequenceName("PostgreSQL", "Seq")]
             [SequenceName("Firebird", "PersonID")]
             [MapField("PersonID")]
             public int ID { get; set; }
@@ -85,22 +84,23 @@ namespace Data.Linq
         #endregion
 
         #region ObjectId
+
         public struct ObjectId
         {
-            public ObjectId(int value)
+            public ObjectId(int? value)
             {
                 m_value = value;
             }
 
-            private int m_value;
+            private int? m_value;
 
-            public int Value
+            public int? Value
             {
                 get { return m_value; }
                 set { m_value = value; }
             }
 
-            public static implicit operator int(ObjectId val)
+            public static implicit operator int?(ObjectId val)
             {
                 return val.m_value;
             }
@@ -131,16 +131,17 @@ namespace Data.Linq
         [Test]
         public void TestComplexExpression()
         {
-            // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' cannot be converted to SQL.
+            // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' 
+            //   cannot be converted to SQL.
             ForMySqlProvider(
                 db =>
                 {
                     var source = from child in db.GrandChild
-                                      select
-                                          new
-                                          {
+                                 select
+                                     new
+                                     {
                                               NullableId = new NullableObjectId { Value = child.ChildID }
-                                          };
+                                     };
 
                     var query = from e in source where e.NullableId == 1 select e;
 
@@ -153,7 +154,8 @@ namespace Data.Linq
         [Test]
         public void TestJoin()
         {
-            // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than the size of the collection.
+            // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than 
+            //   the size of the collection.
             // Parameter name: index
             ForMySqlProvider(
                 db =>
@@ -190,16 +192,17 @@ namespace Data.Linq
         }
 
         [Test]
-        public void TestWithInterface()
+        public void TestLookupWithInterfaceProperty()
         {
-            ForMySqlProvider(db =>
-                {
-                    var r = GetById<PersonWithId>(db,1).SingleOrDefault();
-                    Assert.That(r, Is.Not.Null);
-                });
+            ForMySqlProvider(
+                db =>
+                    {
+                        var r = GetById<PersonWithId>(db, 1).SingleOrDefault();
+                        Assert.That(r, Is.Not.Null);
+                    });
         }
 
-        private IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
+        private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
         }
