@@ -105,6 +105,27 @@ namespace Data.Linq
                 return val.m_value;
             }
         }
+
+        public struct NullableObjectId
+        {
+            public NullableObjectId(int? value)
+            {
+                m_value = value;
+            }
+
+            private int? m_value;
+
+            public int? Value
+            {
+                get { return m_value; }
+                set { m_value = value; }
+            }
+
+            public static implicit operator int?(NullableObjectId val)
+            {
+                return val.m_value;
+            }
+        }
         #endregion
 
         [Test]
@@ -118,10 +139,7 @@ namespace Data.Linq
                                       select
                                           new
                                           {
-                                              NullableId =
-                                                  child.ChildID == null
-                                                      ? (ObjectId?)null
-                                                      : new ObjectId { Value = child.ChildID.Value }
+                                              NullableId = new NullableObjectId { Value = child.ChildID }
                                           };
 
                     var query = from e in source where e.NullableId == 1 select e;
