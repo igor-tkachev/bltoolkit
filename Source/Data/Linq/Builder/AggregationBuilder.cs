@@ -19,6 +19,11 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
+			if (sequence.SqlQuery != buildInfo.SqlQuery)
+			{
+				
+			}
+
 			if (sequence.SqlQuery.Select.IsDistinct ||
 				sequence.SqlQuery.Select.TakeValue != null ||
 				sequence.SqlQuery.Select.SkipValue != null)
@@ -37,6 +42,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (methodCall.Arguments.Count == 2)
 			{
+				throw new InvalidOperationException();
+
 				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 				var context = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
 				var expr    = builder.ConvertToSql(context, lambda.Body.Unwrap());
@@ -129,7 +136,8 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Root : return Lambda != null && expression == Lambda.Parameters[0];
+					case RequestFor.Root       : return Lambda != null && expression == Lambda.Parameters[0];
+					case RequestFor.Expression : return true;
 				}
 
 				return false;
@@ -138,6 +146,11 @@ namespace BLToolkit.Data.Linq.Builder
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				throw new NotImplementedException();
+			}
+
+			public override ISqlExpression GetSubQuery(IBuildContext context)
+			{
+				return base.GetSubQuery(context);
 			}
 		}
 	}

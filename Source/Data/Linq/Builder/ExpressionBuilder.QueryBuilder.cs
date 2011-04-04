@@ -18,9 +18,6 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					case ExpressionType.MemberAccess:
 						{
-							if (IsSubQuery(context, pi))
-								return BuildSubQuery(context, pi);
-
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
 								return BuildSql(context, pi);
 
@@ -96,8 +93,8 @@ namespace BLToolkit.Data.Linq.Builder
 								if (ce.Method.GetCustomAttributes(typeof(MethodExpressionAttribute), true).Length != 0)
 									return BuildExpression(context, cm);
 
-							if (IsSubQuery(context, pi))
-								return BuildSubQuery(context, pi);
+							if (IsSubQuery(context, ce))
+								return GetSubQuery(context, ce).BuildExpression(null, 0);
 
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
 								return BuildSql(context, pi);
@@ -130,47 +127,6 @@ namespace BLToolkit.Data.Linq.Builder
 		static bool EnforceServerSide(IBuildContext context)
 		{
 			return context.SqlQuery.Select.IsDistinct;
-		}
-
-		#endregion
-
-		#region BuildSubQuery
-
-		Expression BuildSubQuery(IBuildContext context, Expression expression)
-		{
-			if (expression.NodeType == ExpressionType.MemberAccess)
-			{
-				var ma = (MemberExpression)expression;
-
-				if (ma.Expression != null)
-				{
-					switch (ma.Expression.NodeType)
-					{
-						case ExpressionType.Call         :
-						case ExpressionType.MemberAccess :
-						case ExpressionType.Parameter    :
-							{
-								var ctx = GetSubQuery(context, ma.Expression);
-								var ex  = expression.Convert(e => e == ma.Expression ? Expression.Constant(null, ma.Expression.Type) : e);
-								var sql = ctx.ConvertToSql(ex, 0, ConvertFlags.Field);
-
-								if (sql.Length != 1)
-									throw new NotImplementedException();
-
-								//ctx.SqlQuery.Select.Columns.Clear();
-								ctx.SqlQuery.Select.Add(sql[0].Sql);
-
-								var idx = context.SqlQuery.Select.Add(ctx.SqlQuery);
-
-								return BuildSql(expression.Type, idx);
-							}
-					}
-				}
-			}
-
-			var sequence = GetSubQuery(context, expression);
-
-			return sequence.BuildExpression(null, 0);
 		}
 
 		#endregion

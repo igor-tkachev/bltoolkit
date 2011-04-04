@@ -14,6 +14,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override bool IsTakeSupported           { get { return false; } }
 		public override bool IsSubQueryTakeSupported   { get { return false; } }
 		public override bool IsSubQueryColumnSupported { get { return false; } }
+		public override bool IsCountSubQuerySupported  { get { return false; } }
 		public override bool IsApplyJoinSupported      { get { return true;  } }
 
 		public override int CommandCount(SqlQuery sqlQuery)

@@ -11,22 +11,15 @@ namespace BLToolkit.Data.Linq.Builder
 	{
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("First", "FirstOrDefault", "Single", "SingleOrDefault");
+			return 
+				methodCall.IsQueryable("First", "FirstOrDefault", "Single", "SingleOrDefault") &&
+				methodCall.Arguments.Count == 1;
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
-
-			if (methodCall.Arguments.Count == 2)
-			{
-				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-
-				sequence = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
-				sequence.SetAlias(condition.Parameters[0].Name);
-			}
-
-			var take = 0;
+			var take     = 0;
 
 			if (!buildInfo.IsSubQuery || builder.SqlProvider.IsSubQueryTakeSupported)
 				switch (methodCall.Method.Name)
@@ -40,30 +33,30 @@ namespace BLToolkit.Data.Linq.Builder
 					case "SingleOrDefault" :
 						if (!buildInfo.IsSubQuery)
 							take = 2;
-							break;
+						break;
 				}
 
 			if (take != 0)
 				builder.BuildTake(sequence, new SqlValue(take));
 
-			return new FirstSingleContext(buildInfo.Parent, sequence, methodCall.Method.Name);
+			return new FirstSingleContext(buildInfo.Parent, sequence, methodCall);
 		}
 
 		class FirstSingleContext : SequenceContextBase
 		{
-			public FirstSingleContext(IBuildContext parent, IBuildContext sequence, string methodName)
+			public FirstSingleContext(IBuildContext parent, IBuildContext sequence, MethodCallExpression methodCall)
 				: base(parent, sequence, null)
 			{
-				_methodName = methodName;
+				_methodCall = methodCall;
 			}
 
-			readonly string _methodName;
+			readonly MethodCallExpression _methodCall;
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				Sequence.BuildQuery(query, queryParameter);
 
-				switch (_methodName)
+				switch (_methodCall.Method.Name)
 				{
 					case "First"           : query.GetElement = (ctx, db, expr, ps) => query.GetIEnumerable(ctx, db, expr, ps).First();           break;
 					case "FirstOrDefault"  : query.GetElement = (ctx, db, expr, ps) => query.GetIEnumerable(ctx, db, expr, ps).FirstOrDefault();  break;
@@ -74,6 +67,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
+				if (expression == null)
+					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+
 				throw new NotImplementedException();
 				//return Sequence.BuildExpression(expression, level + 1);
 			}
