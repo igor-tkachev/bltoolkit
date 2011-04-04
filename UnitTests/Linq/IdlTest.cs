@@ -84,26 +84,28 @@ namespace Data.Linq
         #endregion
 
         #region ObjectId
+
         public struct ObjectId
         {
-            public ObjectId(int value)
+            public ObjectId(int? value)
             {
                 m_value = value;
             }
 
-            private int m_value;
+            private int? m_value;
 
-            public int Value
+            public int? Value
             {
                 get { return m_value; }
                 set { m_value = value; }
             }
 
-            public static implicit operator int(ObjectId val)
+            public static implicit operator int?(ObjectId val)
             {
                 return val.m_value;
             }
         }
+
         #endregion
 
         [Test]
@@ -118,10 +120,7 @@ namespace Data.Linq
                                  select
                                      new
                                      {
-                                         NullableId =
-                                             child.ChildID == null
-                                                 ? (ObjectId?)null
-                                                 : new ObjectId { Value = child.ChildID.Value }
+                                         NullableId = new ObjectId { Value = child.ChildID }
                                      };
 
                     var query = from e in source where e.NullableId == 1 select e;
@@ -130,7 +129,6 @@ namespace Data.Linq
                     Assert.That(result, Is.Not.Null);
                 });
         }
-
 
         [Test]
         public void TestJoin()
