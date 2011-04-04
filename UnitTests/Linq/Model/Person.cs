@@ -23,9 +23,10 @@ namespace Data.Linq.Model
 			FirstName = firstName;
 		}
 
-	    [Identity, PrimaryKey] //[SequenceName("PostgreSQL", "Seq")]
-	    [SequenceName("Firebird", "PersonID")] 
-        [MapField("PersonID")] public int    ID;
+		[Identity, PrimaryKey]
+		//[SequenceName("PostgreSQL", "Seq")]
+		[SequenceName("Firebird",   "PersonID")]
+		[MapField("PersonID")] public int    ID;
 		                       public string FirstName { get; set; }
 		                       public string LastName;
 		[Nullable]             public string MiddleName;
