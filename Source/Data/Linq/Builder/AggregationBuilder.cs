@@ -21,14 +21,14 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (sequence.SqlQuery != buildInfo.SqlQuery)
 			{
-				
+				throw new NotImplementedException();
 			}
 
-			if (sequence.SqlQuery.Select.IsDistinct ||
-				sequence.SqlQuery.Select.TakeValue != null ||
-				sequence.SqlQuery.Select.SkipValue != null)
+			if (sequence.SqlQuery.Select.IsDistinct        ||
+			    sequence.SqlQuery.Select.TakeValue != null ||
+			    sequence.SqlQuery.Select.SkipValue != null ||
+			   !sequence.SqlQuery.GroupBy.IsEmpty)
 			{
-				//sequence.ConvertToIndex(null, 0, ConvertFlags.All);
 				sequence = new SubQueryContext(sequence);
 			}
 
@@ -39,6 +39,8 @@ namespace BLToolkit.Data.Linq.Builder
 				else
 					sequence = new SubQueryContext(sequence);
 			}
+
+			var index = sequence.ConvertToIndex(null, 0, ConvertFlags.Field);
 
 			if (methodCall.Arguments.Count == 2)
 			{
