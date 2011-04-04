@@ -542,7 +542,8 @@ CREATE TABLE LinqDataTypes
 	BoolValue     char(1),
 	GuidValue     char(38),
 	BinaryValue   blob,
-	SmallIntValue smallint
+	SmallIntValue smallint,
+	IntValue      int NULL
 )
 COMMIT;
 
