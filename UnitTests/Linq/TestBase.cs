@@ -144,7 +144,7 @@ namespace Data.Linq
 				host.Close();
 		}
 
-		class ProviderInfo
+	    protected class ProviderInfo
 		{
 			public ProviderInfo(string name, string assembly, string type)
 			{
@@ -159,7 +159,7 @@ namespace Data.Linq
 			public          bool   Loaded;
 		}
 
-		static readonly List<ProviderInfo> _providers = new List<ProviderInfo>
+		protected static readonly List<ProviderInfo> _providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
 			//new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
