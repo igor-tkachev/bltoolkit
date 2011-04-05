@@ -44,13 +44,10 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
-			{
-				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
-				sequence = new SubQueryContext(sequence);
-			}
-
-			if (!sequence.SqlQuery.GroupBy.IsEmpty)
+			if (sequence.SqlQuery.Select.IsDistinct        ||
+			    sequence.SqlQuery.Select.TakeValue != null ||
+			    sequence.SqlQuery.Select.SkipValue != null ||
+			   !sequence.SqlQuery.GroupBy.IsEmpty)
 			{
 				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
 				sequence = new SubQueryContext(sequence);

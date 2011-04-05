@@ -412,8 +412,7 @@ namespace BLToolkit.Data.Linq.Builder
 													.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
 													.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
 
-											call = (MethodCallExpression)OptimizeExpression(call);
-
+											call   = (MethodCallExpression)OptimizeExpression(call);
 											select = select.MakeGenericMethod(call.Type, expr.Type);
 											method = method.MakeGenericMethod(expr.Type);
 

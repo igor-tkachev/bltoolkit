@@ -538,21 +538,21 @@ namespace Data.Linq
 				group ch by ch.ParentID into g
 				select new
 				{
+					Cnt = g.Count(),
 					Sum = g.Sum(c => c.ChildID),
 					Min = g.Min(c => c.ChildID),
 					Max = g.Max(c => c.ChildID),
 					Avg = (int)g.Average(c => c.ChildID),
-					Cnt = g.Count()
 				},
 				from  ch in db.Child
 				group ch by ch.ParentID into g
 				select new
 				{
+					Cnt = g.Count(),
 					Sum = g.Sum(c => c.ChildID),
 					Min = g.Min(c => c.ChildID),
 					Max = g.Max(c => c.ChildID),
 					Avg = (int)g.Average(c => c.ChildID),
-					Cnt = g.Count()
 				}));
 		}
 

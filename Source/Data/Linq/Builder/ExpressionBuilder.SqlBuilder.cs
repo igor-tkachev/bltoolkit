@@ -258,6 +258,20 @@ namespace BLToolkit.Data.Linq.Builder
 			if (call.IsQueryable())
 			{
 				var arg = call.Arguments[0];
+
+				switch (call.Method.Name)
+				{
+					case "Sum"             :
+					case "Min"             :
+					case "Max"             :
+					case "Average"         :
+						{
+							while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression)arg).Method.Name == "Select")
+								arg = ((MethodCallExpression)arg).Arguments[0];
+							break;
+						}
+				}
+
 				return arg.NodeType == ExpressionType.Call || IsSubQuerySource(context, arg);
 			}
 
@@ -271,14 +285,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var ctx = GetContext(context, expr);
 
-			if (ctx != null)
-			{
-				//while (source is QuerySource.SubQuerySourceColumn)
-				//	source = ((QuerySource.SubQuerySourceColumn)source).SourceColumn;
-
-				if (ctx.IsExpression(expr, 0, RequestFor.Object))
-					return true;
-			}
+			if (ctx != null && ctx.IsExpression(expr, 0, RequestFor.Object))
+				return true;
 
 			while (expr != null && expr.NodeType == ExpressionType.MemberAccess)
 				expr = ((MemberExpression)expr).Expression;
@@ -803,6 +811,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 							switch (e.Method.Name)
 							{
+								case "Sum"       :
+								case "Min"       :
+								case "Max"       :
+								case "Average"   :
 								case "Count"     :
 								case "LongCount" :
 									{
