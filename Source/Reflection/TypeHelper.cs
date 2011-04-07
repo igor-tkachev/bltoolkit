@@ -1504,11 +1504,32 @@ namespace BLToolkit.Reflection
 			if (ReferenceEquals(member1, member2))
 				return true;
 
-			return
-				member1 != null &&
-				member2 != null &&
-				member1.DeclaringType == member2.DeclaringType &&
-				member1.Name          == member2.Name;
+			if (member1 == null || member2 == null)
+				return false;
+
+			if (member1.Name == member2.Name)
+			{
+				if (member1.DeclaringType == member2.DeclaringType)
+					return true;
+
+				var isSubclass = IsSameOrParent(member1.DeclaringType, member2.DeclaringType);
+
+				if (!isSubclass && IsSameOrParent(member2.DeclaringType, member1.DeclaringType))
+				{
+					isSubclass = true;
+
+					var member = member1;
+					member1 = member2;
+					member2 = member;
+				}
+
+				if (isSubclass)
+				{
+					return member1 is PropertyInfo;
+				}
+			}
+
+			return false;
 		}
 
 		#endregion
