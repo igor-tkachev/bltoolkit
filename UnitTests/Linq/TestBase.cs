@@ -162,16 +162,16 @@ namespace Data.Linq
 		protected static readonly List<ProviderInfo> _providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
-			//new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
+			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
 			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",      "BLToolkit.Data.DataProvider.SqlCeDataProvider"),
-			//new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",        "BLToolkit.Data.DataProvider.DB2DataProvider"),
-			//new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
-			//new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",   "BLToolkit.Data.DataProvider.FdpDataProvider"),
-			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
-			//new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL", "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
-			//new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",      "BLToolkit.Data.DataProvider.MySqlDataProvider"),
+			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",        "BLToolkit.Data.DataProvider.DB2DataProvider"),
+			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
+			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",   "BLToolkit.Data.DataProvider.FdpDataProvider"),
+			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
+			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL", "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
+			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",      "BLToolkit.Data.DataProvider.MySqlDataProvider"),
 			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
-			//new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
+			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
 			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
 		};
 
