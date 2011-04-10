@@ -214,6 +214,38 @@ namespace Data.Linq
                 });
         }
 
+        [Test]
+        public void TestWithSubsequence()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        var r = from parent in db.Parent
+                                select new
+                                    {
+                                        parent.ParentID,
+                                        childrenIds = parent.Children.Select(c => new ObjectId { Value = c.ChildID })
+                                    };
+                        Assert.That(r.ToArray(), Is.Not.Null);
+                    });
+        }
+
+        [Test]
+        public void TestWithSubsequenceToArray()
+        {
+            ForMySqlProvider(
+                db =>
+                {
+                    var r = from parent in db.Parent
+                             select new
+                             {
+                                 parent.ParentID,
+                                 childrenIds = parent.Children.Select(c => new ObjectId { Value = c.ChildID }).ToArray()
+                             };
+                    Assert.That(r.ToArray(), Is.Not.Null);
+                });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
