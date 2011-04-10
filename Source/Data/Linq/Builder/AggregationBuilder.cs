@@ -40,7 +40,7 @@ namespace BLToolkit.Data.Linq.Builder
 					sequence = new SubQueryContext(sequence);
 			}
 
-			var index = sequence.ConvertToIndex(null, 0, ConvertFlags.Field);
+			//var index = sequence.ConvertToIndex(null, 0, ConvertFlags.Field);
 
 			if (methodCall.Arguments.Count == 2)
 			{
