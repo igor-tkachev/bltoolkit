@@ -202,6 +202,18 @@ namespace Data.Linq
                     });
         }
 
+        [Test]
+        public void TestWithSubset()
+        {
+            ForMySqlProvider(db =>
+                {
+                    var r = from parent in db.Parent
+                                join c in db.Child on parent.ParentID equals c.ParentID into children
+                                select new { parent, children };
+                    Assert.That(r.ToArray(), Is.Not.Null);
+                });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
