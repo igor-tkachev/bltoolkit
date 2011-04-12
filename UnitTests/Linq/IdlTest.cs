@@ -253,7 +253,7 @@ namespace Data.Linq
 
         private void ForMySqlProvider(Action<ITestDataContext> func)
         {
-            ForEachProvider(_providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),func);
+            ForEachProvider(Providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),func);
         }
     }
 }
