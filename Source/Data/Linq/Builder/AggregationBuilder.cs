@@ -10,9 +10,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 	class AggregationBuilder : MethodCallBuilder
 	{
+		public static string[] MethodNames = new[] { "Average", "Min", "Max", "Sum" };
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Average", "Min", "Max", "Sum");
+			return methodCall.IsQueryable(MethodNames);
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
@@ -42,45 +44,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 			//var index = sequence.ConvertToIndex(null, 0, ConvertFlags.Field);
 
-			if (methodCall.Arguments.Count == 2)
-			{
-				throw new InvalidOperationException();
+			var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
 
-				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-				var context = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
-				var expr    = builder.ConvertToSql(context, lambda.Body.Unwrap());
+			context.FieldIndex = context.SqlQuery.Select.Add(
+				new SqlFunction(
+					methodCall.Type,
+					methodCall.Method.Name,
+					sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
 
-				if (expr.ElementType == QueryElementType.SqlQuery && expr != buildInfo.SqlQuery)
-				{
-					expr     = sequence.SqlQuery.Select.Columns[sequence.SqlQuery.Select.Add(expr)];
-					sequence = new SubQueryContext(sequence);
-					context  = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
-				}
-				else
-				{
-					expr = builder.ConvertSearchCondition(context, expr);
-				}
-
-				context.FieldIndex = context.SqlQuery.Select.Add(
-					new SqlFunction(
-						methodCall.Type,
-						methodCall.Method.Name,
-						expr));
-
-				return context;
-			}
-			else
-			{
-				var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
-
-				context.FieldIndex = context.SqlQuery.Select.Add(
-					new SqlFunction(
-						methodCall.Type,
-						methodCall.Method.Name,
-						sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
-
-				return context;
-			}
+			return context;
 		}
 
 		class AggregationContext : SequenceContextBase

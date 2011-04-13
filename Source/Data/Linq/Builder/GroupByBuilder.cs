@@ -294,13 +294,19 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			ISqlExpression ConvertEnumerable(MethodCallExpression expr)
+			ISqlExpression ConvertEnumerable(MethodCallExpression call)
 			{
-				var args = new ISqlExpression[expr.Arguments.Count - 1];
+				var expr = call;
 
-				if (expr.Arguments[0].NodeType == ExpressionType.Call)
+
+				//	if (AggregationBuilder.MethodNames.Contains(expr.Method.Name))
+				//		while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression)arg).Method.Name == "Select")
+				//			arg = ((MethodCallExpression)arg).Arguments[0];
+
+
+				if (call.Arguments[0].NodeType == ExpressionType.Call)
 				{
-					var ctx = Builder.GetSubQuery(this, expr);
+					var ctx = Builder.GetSubQuery(this, call);
 
 					if (Builder.SqlProvider.IsSubQueryColumnSupported)
 						return ctx.SqlQuery;
@@ -312,12 +318,16 @@ namespace BLToolkit.Data.Linq.Builder
 					return ctx.SqlQuery.Select.Columns[0];
 				}
 
-				if (expr.Method.Name == "Count")
+				var args = new ISqlExpression[call.Arguments.Count - 1];
+
+				if (CountBuilder.MethodNames.Contains(call.Method.Name))
 				{
 					if (args.Length > 0)
 					{
+						throw new InvalidOperationException();
+
 						var ctx = _element;
-						var l   = (LambdaExpression)expr.Arguments[1].Unwrap();
+						var l   = (LambdaExpression)call.Arguments[1].Unwrap();
 						var cnt = Builder.BuildWhere(Parent, ctx, l, false);
 						var sql = cnt.SqlQuery.Clone((_ => !(_ is SqlParameter)));
 
@@ -339,7 +349,7 @@ namespace BLToolkit.Data.Linq.Builder
 							}
 
 							sql.GroupBy.Items.Clear();
-							sql.Select.Expr(SqlFunction.CreateCount(expr.Type, sql));
+							sql.Select.Expr(SqlFunction.CreateCount(call.Type, sql));
 
 							return sql;
 						}
@@ -358,17 +368,17 @@ namespace BLToolkit.Data.Linq.Builder
 							join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
 						}
 
-						return new SqlFunction(expr.Type, "Count", sql.Select.Columns[0]);
+						return new SqlFunction(call.Type, "Count", sql.Select.Columns[0]);
 					}
 
-					return SqlFunction.CreateCount(expr.Type, SqlQuery);
+					return SqlFunction.CreateCount(call.Type, SqlQuery);
 				}
 
-				if (expr.Arguments.Count > 1)
+				if (call.Arguments.Count > 1)
 				{
-					for (var i = 1; i < expr.Arguments.Count; i++)
+					for (var i = 1; i < call.Arguments.Count; i++)
 					{
-						var ex = expr.Arguments[i].Unwrap();
+						var ex = call.Arguments[i].Unwrap();
 
 						if (ex is LambdaExpression)
 						{
@@ -391,7 +401,7 @@ namespace BLToolkit.Data.Linq.Builder
 					args = _element.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
 				}
 
-				return new SqlFunction(expr.Type, expr.Method.Name, args);
+				return new SqlFunction(call.Type, call.Method.Name, args);
 			}
 
 			PropertyInfo _keyProperty;
