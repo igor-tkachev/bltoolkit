@@ -1,10 +1,16 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using BLToolkit.Data.Sql;
+using SqlException = System.Data.SqlClient.SqlException;
+using SqlParameter = System.Data.SqlClient.SqlParameter;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Mapping;
 	using Sql.SqlProvider;
 
 	/// <summary>
@@ -174,7 +180,7 @@ namespace BLToolkit.Data.DataProvider
 
 		#region GetDataReader
 
-		public override IDataReader GetDataReader(Mapping.MappingSchema schema, IDataReader dataReader)
+		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{
 			return dataReader is SqlDataReader?
 				new SqlDataReaderEx((SqlDataReader)dataReader):
@@ -194,5 +200,159 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		#endregion
+
+		public override int InsertBatch<T>(
+			DbManager                      db,
+			string                         insertText,
+			IEnumerable<T>                 collection,
+			MemberMapper[]                 members,
+			int                            maxBatchSize,
+			DbManager.ParameterProvider<T> getParameters)
+		{
+			//return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
+
+			var idx = insertText.IndexOf('\n');
+			var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
+			var rd  = new BulkCopyReader(members, collection);
+			var bc  = new SqlBulkCopy((SqlConnection)db.Connection)
+			{
+				BatchSize            = maxBatchSize,
+				DestinationTableName = tbl,
+			};
+
+			bc.WriteToServer(rd);
+
+			return rd.Count;
+		}
+
+		class BulkCopyReader : IDataReader
+		{
+			readonly MemberMapper[] _members;
+			readonly IEnumerable    _collection;
+			readonly IEnumerator    _enumerator;
+
+			public int Count;
+
+			public BulkCopyReader(MemberMapper[] members, IEnumerable collection)
+			{
+				_members    = members;
+				_collection = collection;
+				_enumerator = _collection.GetEnumerator();
+			}
+
+			#region Implementation of IDisposable
+
+			public void Dispose()
+			{
+			}
+
+			#endregion
+
+			#region Implementation of IDataRecord
+
+			public string GetName(int i)
+			{
+				return _members[i].Name;
+			}
+
+			public Type GetFieldType(int i)
+			{
+				return _members[i].Type;
+			}
+
+			public object GetValue(int i)
+			{
+				return _members[i].GetValue(_enumerator.Current);
+			}
+
+			public int FieldCount
+			{
+				get { return _members.Length; }
+			}
+
+			public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+			{
+				throw new NotImplementedException();
+			}
+
+			public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
+			{
+				throw new NotImplementedException();
+			}
+
+			public string      GetDataTypeName(int i)           { throw new NotImplementedException(); }
+			public int         GetValues      (object[] values) { throw new NotImplementedException(); }
+			public int         GetOrdinal     (string name)     { throw new NotImplementedException(); }
+			public bool        GetBoolean     (int i)           { throw new NotImplementedException(); }
+			public byte        GetByte        (int i)           { throw new NotImplementedException(); }
+			public char        GetChar        (int i)           { throw new NotImplementedException(); }
+			public Guid        GetGuid        (int i)           { throw new NotImplementedException(); }
+			public short       GetInt16       (int i)           { throw new NotImplementedException(); }
+			public int         GetInt32       (int i)           { throw new NotImplementedException(); }
+			public long        GetInt64       (int i)           { throw new NotImplementedException(); }
+			public float       GetFloat       (int i)           { throw new NotImplementedException(); }
+			public double      GetDouble      (int i)           { throw new NotImplementedException(); }
+			public string      GetString      (int i)           { throw new NotImplementedException(); }
+			public decimal     GetDecimal     (int i)           { throw new NotImplementedException(); }
+			public DateTime    GetDateTime    (int i)           { throw new NotImplementedException(); }
+			public IDataReader GetData        (int i)           { throw new NotImplementedException(); }
+			public bool        IsDBNull       (int i)           { throw new NotImplementedException(); }
+
+			object IDataRecord.this[int i]
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			object IDataRecord.this[string name]
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			#endregion
+
+			#region Implementation of IDataReader
+
+			public void Close()
+			{
+				throw new NotImplementedException();
+			}
+
+			public DataTable GetSchemaTable()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool NextResult()
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool Read()
+			{
+				var b = _enumerator.MoveNext();
+
+				if (b)
+					Count++;
+
+				return b;
+			}
+
+			public int Depth
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public bool IsClosed
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			public int RecordsAffected
+			{
+				get { throw new NotImplementedException(); }
+			}
+
+			#endregion
+		}
 	}
 }
