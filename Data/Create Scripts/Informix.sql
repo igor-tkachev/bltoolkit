@@ -46,6 +46,6 @@ CREATE TABLE LinqDataTypes
 	GuidValue     char(36),
 	BinaryValue   byte,
 	SmallIntValue smallint,
-	IntValue      int NULL
+	IntValue      int
 )
 GO

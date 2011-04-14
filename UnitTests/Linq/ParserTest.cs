@@ -13,6 +13,7 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
+#if NEW_PARSER
 	[TestFixture]
 	public class ParserTest : TestBase
 	{
@@ -1003,4 +1004,5 @@ namespace Data.Linq
 			return ex;
 		}
 	}
+#endif
 }
