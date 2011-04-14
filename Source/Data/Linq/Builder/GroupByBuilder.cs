@@ -326,6 +326,7 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						throw new InvalidOperationException();
 
+						/*
 						var ctx = _element;
 						var l   = (LambdaExpression)call.Arguments[1].Unwrap();
 						var cnt = Builder.BuildWhere(Parent, ctx, l, false);
@@ -369,6 +370,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 
 						return new SqlFunction(call.Type, "Count", sql.Select.Columns[0]);
+						*/
 					}
 
 					return SqlFunction.CreateCount(call.Type, SqlQuery);
