@@ -74,7 +74,7 @@ namespace BLToolkit.ComponentModel.Design
 			this.addNewLinkLabel.Size = new System.Drawing.Size(100, 13);
 			this.addNewLinkLabel.TabIndex = 1;
 			this.addNewLinkLabel.TabStop = true;
-			this.addNewLinkLabel.Text = "Add Project Type…";
+			this.addNewLinkLabel.Text = "Add Project Type...";
 			this.addNewLinkLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.addNewLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.addNewLinkLabel_LinkClicked);
 			// 

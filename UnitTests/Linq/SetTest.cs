@@ -598,11 +598,11 @@ namespace Data.Linq
 				var q =
 					from e in db.EmployeeTerritory
 					group e by e.Employee into g
-					where /*g.Key.EmployeeTerritories.Count() > 1 && */g.Count() > 2
+					where g.Key.EmployeeTerritories.Count() > 1 && g.Count() > 2
 					select new
 					{
 						g.Key.LastName,
-						cnt = g.Where(t => t.Employee.FirstName.Contains("an")).Count(),
+						//cnt = g.Where(t => t.Employee.FirstName.Contains("an")).Count(),
 					};
 
 				q.ToList();
