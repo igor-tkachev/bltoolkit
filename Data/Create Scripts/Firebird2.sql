@@ -543,7 +543,7 @@ CREATE TABLE LinqDataTypes
 	GuidValue     char(38),
 	BinaryValue   blob,
 	SmallIntValue smallint,
-	IntValue      int
+	IntValue      int NULL
 )
 COMMIT;
 
