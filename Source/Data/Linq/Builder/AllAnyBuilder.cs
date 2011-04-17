@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -23,7 +24,11 @@ namespace BLToolkit.Data.Linq.Builder
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
 				if (methodCall.Method.Name == "All")
+#if FW4
 					condition = Expression.Lambda(Expression.Not(condition.Body), condition.Name, condition.Parameters);
+#else
+					condition = Expression.Lambda(Expression.Not(condition.Body), condition.Parameters.ToArray());
+#endif
 
 				sequence = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
 				sequence.SetAlias(condition.Parameters[0].Name);

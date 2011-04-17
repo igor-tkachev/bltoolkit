@@ -80,6 +80,7 @@ namespace Create
 					new Parent { ParentID = 4, Value1 = null },
 					new Parent { ParentID = 5, Value1 = 5    },
 					new Parent { ParentID = 6, Value1 = 6    },
+					new Parent { ParentID = 7, Value1 = 1    },
 				});
 
 				db.InsertBatch(new[]
@@ -100,6 +101,7 @@ namespace Create
 					new Child { ParentID = 6, ChildID = 64 },
 					new Child { ParentID = 6, ChildID = 65 },
 					new Child { ParentID = 6, ChildID = 66 },
+					new Child { ParentID = 7, ChildID = 77 },
 				});
 
 				db.InsertBatch(new[]
@@ -130,17 +132,17 @@ namespace Create
 			}
 		}
 
-		//[Test] public void DB2       () { RunScript(ProviderName.DB2,              "\nGO\n",  "DB2");        }
-		//[Test] public void Informix  () { RunScript(ProviderName.Informix,         "\nGO\n",  "Informix");   }
-		//[Test] public void Oracle    () { RunScript("Oracle",                      "\n/\n",   "Oracle");     }
-		//[Test] public void Firebird  () { RunScript(ProviderName.Firebird,         "COMMIT;", "Firebird2");  }
-		//[Test] public void PostgreSQL() { RunScript(ProviderName.PostgreSQL,       "\nGO\n",  "PostgreSQL"); }
-		//[Test] public void MySql     () { RunScript(ProviderName.MySql,            "\nGO\n",  "MySql");      }
+		[Test] public void DB2       () { RunScript(ProviderName.DB2,              "\nGO\n",  "DB2");        }
+		[Test] public void Informix  () { RunScript(ProviderName.Informix,         "\nGO\n",  "Informix");   }
+		[Test] public void Oracle    () { RunScript("Oracle",                      "\n/\n",   "Oracle");     }
+		[Test] public void Firebird  () { RunScript(ProviderName.Firebird,         "COMMIT;", "Firebird2");  }
+		[Test] public void PostgreSQL() { RunScript(ProviderName.PostgreSQL,       "\nGO\n",  "PostgreSQL"); }
+		[Test] public void MySql     () { RunScript(ProviderName.MySql,            "\nGO\n",  "MySql");      }
 		[Test] public void Sql2008   () { RunScript("Sql2008",                     "\nGO\n",  "MsSql");      }
-		//[Test] public void Sql2005   () { RunScript("Sql2005",                     "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2005   () { RunScript("Sql2005",                     "\nGO\n",  "MsSql");      }
 		[Test] public void SqlCe     () { RunScript(ProviderName.SqlCe,            "\nGO\n",  "SqlCe");      }
 		[Test] public void SqlCeData () { RunScript(ProviderName.SqlCe + ".Data",  "\nGO\n",  "SqlCe");      }
-		//[Test] public void Sybase    () { RunScript(ProviderName.Sybase,           "\nGO\n",  "Sybase");     }
+		[Test] public void Sybase    () { RunScript(ProviderName.Sybase,           "\nGO\n",  "Sybase");     }
 		[Test] public void SQLite    () { RunScript(ProviderName.SQLite,           "\nGO\n",  "SQLite");     }
 		[Test] public void SQLiteData() { RunScript(ProviderName.SQLite + ".Data", "\nGO\n",  "SQLite");     }
 		[Test] public void Access    () { RunScript(ProviderName.Access,           "\nGO\n",  "Access");     }

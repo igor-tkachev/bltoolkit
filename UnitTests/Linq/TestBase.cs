@@ -144,7 +144,7 @@ namespace Data.Linq
 				host.Close();
 		}
 
-	    protected class ProviderInfo
+		protected class ProviderInfo
 		{
 			public ProviderInfo(string name, string assembly, string type)
 			{

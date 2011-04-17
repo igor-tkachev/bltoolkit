@@ -226,11 +226,8 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							var func = (SqlFunction)subQuery.Select.Columns[0].Expression;
 
-							switch (func.Name)
-							{
-								case "Count"     :
-								case "LongCount" : return SqlFunction.CreateCount(func.SystemType, query);
-							}
+							if (CountBuilder.MethodNames.Contains(func.Name))
+								return SqlFunction.CreateCount(func.SystemType, query);
 						}
 					}
 				}
@@ -259,18 +256,9 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				var arg = call.Arguments[0];
 
-				switch (call.Method.Name)
-				{
-					case "Sum"             :
-					case "Min"             :
-					case "Max"             :
-					case "Average"         :
-						{
-							while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression)arg).Method.Name == "Select")
-								arg = ((MethodCallExpression)arg).Arguments[0];
-							break;
-						}
-				}
+				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
+					while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
+						arg = ((MethodCallExpression) arg).Arguments[0];
 
 				return arg.NodeType == ExpressionType.Call || IsSubQuerySource(context, arg);
 			}
@@ -809,29 +797,21 @@ namespace BLToolkit.Data.Linq.Builder
 							if (IsSubQuery(context, e))
 								return SubQueryToSql(context, e);
 
-							switch (e.Method.Name)
+							if (CountBuilder.MethodNames.Concat(AggregationBuilder.MethodNames).Contains(e.Method.Name))
 							{
-								case "Sum"       :
-								case "Min"       :
-								case "Max"       :
-								case "Average"   :
-								case "Count"     :
-								case "LongCount" :
-									{
-										var ctx = GetContext(context, expression);
+								var ctx = GetContext(context, expression);
 
-										if (ctx != null)
-										{
-											var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
+								if (ctx != null)
+								{
+									var sql = ctx.ConvertToSql(expression, 0, ConvertFlags.Field);
 
-											if (sql.Length != 1)
-												throw new InvalidOperationException();
+									if (sql.Length != 1)
+										throw new InvalidOperationException();
 
-											return sql[0].Sql;
-										}
+									return sql[0].Sql;
+								}
 
-										break;
-									}
+								break;
 							}
 
 							return SubQueryToSql(context, e);
@@ -915,14 +895,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (e.Method.DeclaringType == typeof(Enumerable))
 						{
-							switch (e.Method.Name)
-							{
-								case "Count"   :
-								case "Average" :
-								case "Min"     :
-								case "Max"     :
-								case "Sum"     : return IsQueryMember(e.Arguments[0]);
-							}
+							if (CountBuilder.MethodNames.Concat(AggregationBuilder.MethodNames).Contains(e.Method.Name))
+								return IsQueryMember(e.Arguments[0]);
 						}
 						else if (e.Method.DeclaringType == typeof(Queryable))
 						{

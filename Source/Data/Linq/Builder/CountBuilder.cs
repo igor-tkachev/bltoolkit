@@ -9,9 +9,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 	class CountBuilder : MethodCallBuilder
 	{
+		public static string[] MethodNames = new[] { "Count", "LongCount" };
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Count", "LongCount");
+			return methodCall.IsQueryable(MethodNames);
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
