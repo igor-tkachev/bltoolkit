@@ -548,5 +548,85 @@ namespace Data.Linq
 					Count1 = gc.Count() + gc.Count(),
 				}));
 		}
+
+		[Test]
+		public void Aggregates1()
+		{
+			var expected =
+				from ch in Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Sum(c => c.ChildID),
+					Min = g.Min(c => c.ChildID),
+					Max = g.Max(c => c.ChildID),
+					Avg = (int)g.Average(c => c.ChildID),
+					Cnt = g.Count()
+				};
+
+			ForEachProvider(db => AreEqual(expected,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Sum(c => c.ChildID),
+					Min = g.Min(c => c.ChildID),
+					Max = g.Max(c => c.ChildID),
+					Avg = (int)g.Average(c => c.ChildID),
+					Cnt = g.Count()
+				}));
+		}
+
+		[Test]
+		public void Aggregates2()
+		{
+			ForEachProvider(db => AreEqual(
+				from  ch in Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Select(c => c.ChildID).Sum(),
+					Min = g.Select(c => c.ChildID).Min(),
+					Max = g.Select(c => c.ChildID).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Average(),
+					Cnt = g.Count()
+				},
+				from  ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Select(c => c.ChildID).Sum(),
+					Min = g.Select(c => c.ChildID).Min(),
+					Max = g.Select(c => c.ChildID).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Average(),
+					Cnt = g.Count()
+				}));
+		}
+
+		[Test]
+		public void Aggregates3()
+		{
+			ForEachProvider(db => AreEqual(
+				from  ch in Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Select(c => c.ChildID).Sum(),
+					Min = g.Select(c => c.ChildID).Min(),
+					Max = g.Select(c => c.ChildID).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Average(),
+					Cnt = g.Count()
+				},
+				from  ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum = g.Select(c => c.ChildID).Where(_ => _ > 0).Sum(),
+					Min = g.Select(c => c.ChildID).Min(),
+					Max = g.Select(c => c.ChildID).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Average(),
+					Cnt = g.Count()
+				}));
+		}
 	}
 }

@@ -2860,18 +2860,218 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
+			if (!IsCountSubQuerySupported)  sqlQuery = MoveCountSubQuery (sqlQuery);
+			if (!IsSubQueryColumnSupported) sqlQuery = MoveSubQueryColumn(sqlQuery);
 
-			if (!IsCountSubQuerySupported || !IsSubQueryColumnSupported)
-			{
-				sqlQuery = MoveCount(sqlQuery);
-				sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
-			}
+			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
 
 			return sqlQuery;
 		}
 
-		SqlQuery MoveCount(SqlQuery sqlQuery)
+		SqlQuery MoveCountSubQuery(SqlQuery sqlQuery)
+		{
+			var dic = new Dictionary<IQueryElement,IQueryElement>();
+
+			new QueryVisitor().Visit(sqlQuery, element =>
+			{
+				if (element.ElementType != QueryElementType.SqlQuery)
+					return;
+
+				var query = (SqlQuery)element;
+
+				for (var i = 0; i < query.Select.Columns.Count; i++)
+				{
+					var col = query.Select.Columns[i];
+
+					if (col.Expression.ElementType == QueryElementType.SqlQuery)
+					{
+						var subQuery    = (SqlQuery)col.Expression;
+
+
+
+
+
+
+
+
+
+						var allTables   = new HashSet<ISqlTableSource>();
+						var levelTables = new HashSet<ISqlTableSource>();
+
+						Func<IQueryElement,bool> checkTable = e =>
+						{
+							switch (e.ElementType)
+							{
+								case QueryElementType.SqlField : return !allTables.Contains(((SqlField)e).Table);
+								case QueryElementType.Column   : return !allTables.Contains(((SqlQuery.Column)e).Parent);
+							}
+							return false;
+						};
+
+						new QueryVisitor().Visit(subQuery, e =>
+						{
+							if (e is ISqlTableSource /*&& subQuery.From.IsChild((ISqlTableSource)e)*/)
+								allTables.Add((ISqlTableSource)e);
+						});
+
+						new QueryVisitor().Visit(subQuery, e =>
+						{
+							if (e is ISqlTableSource && subQuery.From.IsChild((ISqlTableSource)e))
+								levelTables.Add((ISqlTableSource)e);
+						});
+
+						if (IsSubQueryColumnSupported && new QueryVisitor().Find(subQuery, checkTable) == null)
+							continue;
+
+						var join = SqlQuery.LeftJoin(subQuery);
+
+						query.From.Tables[0].Joins.Add(join.JoinedTable);
+
+						SqlQuery.OptimizeSearchCondition(subQuery.Where.SearchCondition);
+
+						var isCount      = false;
+						var isAggregated = false;
+						
+						if (subQuery.Select.Columns.Count == 1)
+						{
+							var subCol = subQuery.Select.Columns[0];
+
+							if (subCol.Expression.ElementType == QueryElementType.SqlFunction)
+							{
+								switch (((SqlFunction)subCol.Expression).Name)
+								{
+									case "Min"     :
+									case "Max"     :
+									case "Sum"     :
+									case "Average" : isAggregated = true;                 break;
+									case "Count"   : isAggregated = true; isCount = true; break;
+								}
+							}
+						}
+
+						if (IsSubQueryColumnSupported && !isCount)
+							continue;
+
+						var allAnd = true;
+
+						for (var j = 0; allAnd && j < subQuery.Where.SearchCondition.Conditions.Count - 1; j++)
+						{
+							var cond = subQuery.Where.SearchCondition.Conditions[j];
+
+							if (cond.IsOr)
+								allAnd = false;
+						}
+
+						if (!allAnd)
+							continue;
+
+						var modified = false;
+
+						for (var j = 0; j < subQuery.Where.SearchCondition.Conditions.Count; j++)
+						{
+							var cond = subQuery.Where.SearchCondition.Conditions[j];
+
+							if (new QueryVisitor().Find(cond, checkTable) == null)
+								continue;
+
+							var replaced = new Dictionary<IQueryElement,IQueryElement>();
+
+							var nc = new QueryVisitor().Convert(cond, delegate(IQueryElement e)
+							{
+								var ne = e;
+
+								switch (e.ElementType)
+								{
+									case QueryElementType.SqlField :
+										if (replaced.TryGetValue(e, out ne))
+											return ne;
+
+										if (levelTables.Contains(((SqlField)e).Table))
+										{
+											if (isAggregated)
+												subQuery.GroupBy.Expr((SqlField)e);
+											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlField)e)];
+											break;
+										}
+
+										break;
+
+									case QueryElementType.Column   :
+										if (replaced.TryGetValue(e, out ne))
+											return ne;
+
+										if (levelTables.Contains(((SqlQuery.Column)e).Parent))
+										{
+											if (isAggregated)
+												subQuery.GroupBy.Expr((SqlQuery.Column)e);
+											ne = subQuery.Select.Columns[subQuery.Select.Add((SqlQuery.Column)e)];
+											break;
+										}
+
+										break;
+								}
+
+								if (!ReferenceEquals(e, ne))
+									replaced.Add(e, ne);
+
+								return ne;
+							});
+
+							if (nc != null && !ReferenceEquals(nc, cond))
+							{
+								modified = true;
+
+								join.JoinedTable.Condition.Conditions.Add(nc);
+								subQuery.Where.SearchCondition.Conditions.RemoveAt(j);
+								j--;
+							}
+						}
+
+						if (modified || isAggregated)
+						{
+							if (isCount && !query.GroupBy.IsEmpty)
+							{
+								var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
+
+								subQuery.Select.Columns.RemoveAt(0);
+
+								query.Select.Columns[i] = new SqlQuery.Column(
+									query,
+									new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[0]));
+							}
+							else if (isAggregated && !query.GroupBy.IsEmpty)
+							{
+								var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
+
+								subQuery.Select.Columns.RemoveAt(0);
+
+								var idx = subQuery.Select.Add(oldFunc.Parameters[0]);
+
+								query.Select.Columns[i] = new SqlQuery.Column(
+									query,
+									new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[idx]));
+							}
+							else
+							{
+								query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
+							}
+
+							dic.Add(col, query.Select.Columns[i]);
+						}
+					}
+				}
+			});
+
+			sqlQuery = new QueryVisitor().Convert(sqlQuery, e =>
+			{
+				IQueryElement ne;
+				return dic.TryGetValue(e, out ne) ? ne : e;
+			});
+
+			return sqlQuery;
+		}
+
+		SqlQuery MoveSubQueryColumn(SqlQuery sqlQuery)
 		{
 			var dic = new Dictionary<IQueryElement,IQueryElement>();
 

@@ -24,6 +24,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return new InformixSqlProvider();
 		}
 
+		public override int BuildSql(int commandNumber, SqlQuery sqlQuery, StringBuilder sb, int indent, int nesting, bool skipAlias)
+		{
+			var n = base.BuildSql(commandNumber, sqlQuery, sb, indent, nesting, skipAlias);
+
+			sb
+				.Replace("NULL IS NOT NULL", "1=0")
+				.Replace("NULL IS NULL",     "1=1");
+
+			return n;
+		}
+
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
 			if (SqlQuery.From.Tables.Count == 0)

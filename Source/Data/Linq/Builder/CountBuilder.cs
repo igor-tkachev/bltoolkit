@@ -9,9 +9,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 	class CountBuilder : MethodCallBuilder
 	{
+		public static string[] MethodNames = new[] { "Count", "LongCount" };
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Count", "LongCount");
+			return methodCall.IsQueryable(MethodNames);
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
@@ -19,22 +21,15 @@ namespace BLToolkit.Data.Linq.Builder
 			var returnType = methodCall.Method.ReturnType;
 			var sequence   = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
-			if (methodCall.Arguments.Count == 2)
-			{
-				throw new InvalidOperationException();
-				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-
-				sequence = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
-				sequence.SetAlias(condition.Parameters[0].Name);
-			}
-
 			if (sequence.SqlQuery != buildInfo.SqlQuery)
 			{
 				if (sequence is JoinBuilder.GroupJoinSubQueryContext)
 				{
-					var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
+					var ctx = new CountContext(buildInfo.Parent, sequence, returnType)
+					{
+						SqlQuery = ((JoinBuilder.GroupJoinSubQueryContext)sequence).GetCounter(methodCall)
+					};
 
-					ctx.SqlQuery   = ((JoinBuilder.GroupJoinSubQueryContext)sequence).GetCounter(methodCall);
 					ctx.Sql        = ctx.SqlQuery;
 					ctx.FieldIndex = ctx.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, ctx.SqlQuery), "cnt");
 
@@ -43,86 +38,18 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (sequence is GroupByBuilder.GroupByContext)
 				{
-					if (methodCall.Arguments.Count == 2)
+					return new CountContext(buildInfo.Parent, sequence, returnType)
 					{
-						throw new InvalidOperationException();
-						var groupBy = (GroupByBuilder.GroupByContext)sequence;
-						var sql     = groupBy.SqlQuery.Clone(o => !(o is SqlParameter));
-
-						groupBy.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(groupBy.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
-
-						sql.Select.Columns.Clear();
-
-						if (builder.SqlProvider.IsSubQueryColumnSupported && builder.SqlProvider.IsCountSubQuerySupported)
-						{
-							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-							{
-								var item1 = sql.GroupBy.Items[i];
-								var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-								var pr    = builder.Convert(sequence, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
-
-								sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
-							}
-
-							sql.GroupBy.Items.Clear();
-							sql.ParentSql = groupBy.SqlQuery;
-
-							var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
-
-							ctx.SqlQuery   = sql;
-							ctx.Sql        = sql;
-							ctx.FieldIndex = sql.Select.Add(SqlFunction.CreateCount(returnType, sql), "cnt");
-
-							return ctx;
-						}
-						else
-						{
-							var join = sql.WeakLeftJoin();
-
-							groupBy.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
-
-							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-							{
-								var item1 = sql.GroupBy.Items[i];
-								var item2 = groupBy.SqlQuery.GroupBy.Items[i];
-								var col   = sql.Select.Columns[sql.Select.Add(item1)];
-								var pr    = builder.Convert(sequence, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
-
-								join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
-							}
-
-							sql.ParentSql = groupBy.SqlQuery;
-
-							var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
-
-							ctx.SqlQuery   = sql;
-							ctx.Sql        = new SqlFunction(returnType, "Count", sql.Select.Columns[0]);
-							ctx.FieldIndex = -1;
-
-							return ctx;
-						}
-					}
-					else
-					{
-						var ctx = new CountContext(buildInfo.Parent, sequence, returnType);
-
-						ctx.Sql        = SqlFunction.CreateCount(returnType, sequence.SqlQuery);
-						ctx.FieldIndex = -1;
-
-						return ctx;
-					}
+						Sql        = SqlFunction.CreateCount(returnType, sequence.SqlQuery),
+						FieldIndex = -1
+					};
 				}
-
-				//throw new NotImplementedException();
 			}
 
-			if (sequence.SqlQuery.Select.IsDistinct || sequence.SqlQuery.Select.TakeValue != null || sequence.SqlQuery.Select.SkipValue != null)
-			{
-				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
-				sequence = new SubQueryContext(sequence);
-			}
-
-			if (!sequence.SqlQuery.GroupBy.IsEmpty)
+			if (sequence.SqlQuery.Select.IsDistinct        ||
+			    sequence.SqlQuery.Select.TakeValue != null ||
+			    sequence.SqlQuery.Select.SkipValue != null ||
+			   !sequence.SqlQuery.GroupBy.IsEmpty)
 			{
 				sequence.ConvertToIndex(null, 0, ConvertFlags.Key);
 				sequence = new SubQueryContext(sequence);
@@ -142,15 +69,6 @@ namespace BLToolkit.Data.Linq.Builder
 			context.FieldIndex = context.SqlQuery.Select.Add(SqlFunction.CreateCount(returnType, context.SqlQuery), "cnt");
 
 			return context;
-		}
-
-		static bool IsParent(IBuildContext sequence, IBuildContext parent)
-		{
-			for (; sequence != null; sequence = sequence.Parent)
-				if (sequence == parent)
-					return true;
-
-			return false;
 		}
 
 		internal class CountContext : SequenceContextBase

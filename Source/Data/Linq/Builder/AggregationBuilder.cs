@@ -10,20 +10,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 	class AggregationBuilder : MethodCallBuilder
 	{
+		public static string[] MethodNames = new[] { "Average", "Min", "Max", "Sum" };
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Average", "Min", "Max", "Sum");
+			return methodCall.IsQueryable(MethodNames);
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
-			if (sequence.SqlQuery.Select.IsDistinct ||
-				sequence.SqlQuery.Select.TakeValue != null ||
-				sequence.SqlQuery.Select.SkipValue != null)
+			if (sequence.SqlQuery != buildInfo.SqlQuery)
 			{
-				//sequence.ConvertToIndex(null, 0, ConvertFlags.All);
+				throw new NotImplementedException();
+			}
+
+			if (sequence.SqlQuery.Select.IsDistinct        ||
+			    sequence.SqlQuery.Select.TakeValue != null ||
+			    sequence.SqlQuery.Select.SkipValue != null ||
+			   !sequence.SqlQuery.GroupBy.IsEmpty)
+			{
 				sequence = new SubQueryContext(sequence);
 			}
 
@@ -35,43 +42,17 @@ namespace BLToolkit.Data.Linq.Builder
 					sequence = new SubQueryContext(sequence);
 			}
 
-			if (methodCall.Arguments.Count == 2)
-			{
-				var lambda  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-				var context = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
-				var expr    = builder.ConvertToSql(context, lambda.Body.Unwrap());
+			//var index = sequence.ConvertToIndex(null, 0, ConvertFlags.Field);
 
-				if (expr.ElementType == QueryElementType.SqlQuery && expr != buildInfo.SqlQuery)
-				{
-					expr     = sequence.SqlQuery.Select.Columns[sequence.SqlQuery.Select.Add(expr)];
-					sequence = new SubQueryContext(sequence);
-					context  = new AggregationContext(buildInfo.Parent, sequence, lambda, methodCall.Method.ReturnType);
-				}
-				else
-				{
-					expr = builder.ConvertSearchCondition(context, expr);
-				}
+			var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
 
-				context.FieldIndex = context.SqlQuery.Select.Add(
-					new SqlFunction(
-						methodCall.Type,
-						methodCall.Method.Name,
-						expr));
+			context.FieldIndex = context.SqlQuery.Select.Add(
+				new SqlFunction(
+					methodCall.Type,
+					methodCall.Method.Name,
+					sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
 
-				return context;
-			}
-			else
-			{
-				var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
-
-				context.FieldIndex = context.SqlQuery.Select.Add(
-					new SqlFunction(
-						methodCall.Type,
-						methodCall.Method.Name,
-						sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
-
-				return context;
-			}
+			return context;
 		}
 
 		class AggregationContext : SequenceContextBase
@@ -129,7 +110,8 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Root : return Lambda != null && expression == Lambda.Parameters[0];
+					case RequestFor.Root       : return Lambda != null && expression == Lambda.Parameters[0];
+					case RequestFor.Expression : return true;
 				}
 
 				return false;
@@ -138,6 +120,11 @@ namespace BLToolkit.Data.Linq.Builder
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				throw new NotImplementedException();
+			}
+
+			public override ISqlExpression GetSubQuery(IBuildContext context)
+			{
+				return base.GetSubQuery(context);
 			}
 		}
 	}

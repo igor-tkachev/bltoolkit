@@ -60,8 +60,7 @@ namespace BLToolkit.ComponentModel.Design
 			if (context == null)
 				return UITypeEditorEditStyle.DropDown;
 
-			DataSourceProviderService dspService =
-				(DataSourceProviderService)context.GetService(typeof(DataSourceProviderService));
+			var dspService = (DataSourceProviderService)context.GetService(typeof(DataSourceProviderService));
 
 			return dspService == null || !dspService.SupportsAddNewDataSource?
 				UITypeEditorEditStyle.Modal: UITypeEditorEditStyle.DropDown;

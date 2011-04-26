@@ -52,7 +52,7 @@ namespace Data.Linq
 
 			var path = Path.GetDirectoryName(typeof(DbManager).Assembly.CodeBase.Replace("file:///", ""));
 
-			foreach (var info in _providers)
+			foreach (var info in Providers)
 			{
 				try
 				{
@@ -105,7 +105,7 @@ namespace Data.Linq
 
 			var ip = StartIP;
 
-			foreach (var info in _providers)
+			foreach (var info in Providers)
 			{
 				ip++;
 
@@ -144,7 +144,7 @@ namespace Data.Linq
 				host.Close();
 		}
 
-		class ProviderInfo
+		protected class ProviderInfo
 		{
 			public ProviderInfo(string name, string assembly, string type)
 			{
@@ -159,7 +159,8 @@ namespace Data.Linq
 			public          bool   Loaded;
 		}
 
-		static readonly List<ProviderInfo> _providers = new List<ProviderInfo>
+		[CLSCompliant(false)]
+		protected static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
 			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
@@ -179,7 +180,7 @@ namespace Data.Linq
 		{
 			var ip = StartIP;
 
-			foreach (var info in _providers)
+			foreach (var info in Providers)
 			{
 				ip++;
 
@@ -209,6 +210,9 @@ namespace Data.Linq
 			{
 				try
 				{
+					if (db is DbManager)
+						((DbManager)db).BeginTransaction();
+
 					func(db);
 				}
 				catch (Exception e)

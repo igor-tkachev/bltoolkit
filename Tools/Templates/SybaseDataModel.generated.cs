@@ -22,7 +22,6 @@ namespace SybaseDataModel
 		public Table<Doctor>          Doctor          { get { return this.GetTable<Doctor>();          } }
 		public Table<GrandChild>      GrandChild      { get { return this.GetTable<GrandChild>();      } }
 		public Table<LinqDataTypes>   LinqDataTypes   { get { return this.GetTable<LinqDataTypes>();   } }
-		public Table<MyTable>         MyTable         { get { return this.GetTable<MyTable>();         } }
 		public Table<Parent>          Parent          { get { return this.GetTable<Parent>();          } }
 		public Table<Patient>         Patient         { get { return this.GetTable<Patient>();         } }
 		public Table<Person>          Person          { get { return this.GetTable<Person>();          } }
@@ -64,7 +63,7 @@ namespace SybaseDataModel
 		[Nullable                                ] public byte?     SByte_     { get; set; } // tinyint(1)
 		[Nullable                                ] public float?    Single_    { get; set; } // real(4)
 		[Nullable                                ] public byte[]    Stream_    { get; set; } // varbinary(50)
-		[Nullable,                MaxLength(50)  ] public string    String_    { get; set; } // nvarchar(50)
+		[Nullable,                MaxLength(  50)] public string    String_    { get; set; } // nvarchar(50)
 		[Nullable                                ] public short?    UInt16_    { get; set; } // smallint(2)
 		[Nullable                                ] public int?      UInt32_    { get; set; } // int(4)
 		[Nullable                                ] public long?     UInt64_    { get; set; } // bigint(8)
@@ -100,12 +99,6 @@ namespace SybaseDataModel
 		[Nullable, MaxLength(36)] public string    GuidValue     { get; set; } // char(36)
 		[Nullable               ] public byte[]    BinaryValue   { get; set; } // binary(500)
 		[Nullable               ] public short?    SmallIntValue { get; set; } // smallint(2)
-	}
-
-	[TableName(Name="MyTable")]
-	public partial class MyTable
-	{
-		[Nullable] public int? MyID { get; set; } // my_int_type(4)
 	}
 
 	[TableName(Name="Parent")]

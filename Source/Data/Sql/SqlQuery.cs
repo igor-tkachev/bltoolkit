@@ -3605,11 +3605,10 @@ namespace BLToolkit.Data.Sql
 			if (expr is SqlFunction)
 				switch (((SqlFunction)expr).Name)
 				{
-					case "Average":
-					case "Min":
-					case "Max":
-					case "Sum":
-						return true;
+					case "Average" :
+					case "Min"     :
+					case "Max"     :
+					case "Sum"     : return true;
 				}
 
 			return false;

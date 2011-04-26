@@ -1503,7 +1503,7 @@ namespace BLToolkit.Data.DataProvider
 					if (value is DateTime)
 					{
 						var dt = (DateTime)value;
-						sb.Append(string.Format("to_date('{0:dd.MM.yyyy HH:mm:ss}', 'DD.MM.YYYY HH24:MI:SS' )", dt));
+						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
 					}
 					else
 						sp.BuildValue(sb, value);

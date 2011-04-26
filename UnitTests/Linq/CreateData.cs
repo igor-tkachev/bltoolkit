@@ -80,6 +80,7 @@ namespace Create
 					new Parent { ParentID = 4, Value1 = null },
 					new Parent { ParentID = 5, Value1 = 5    },
 					new Parent { ParentID = 6, Value1 = 6    },
+					new Parent { ParentID = 7, Value1 = 1    },
 				});
 
 				db.InsertBatch(new[]
@@ -100,6 +101,7 @@ namespace Create
 					new Child { ParentID = 6, ChildID = 64 },
 					new Child { ParentID = 6, ChildID = 65 },
 					new Child { ParentID = 6, ChildID = 66 },
+					new Child { ParentID = 7, ChildID = 77 },
 				});
 
 				db.InsertBatch(new[]

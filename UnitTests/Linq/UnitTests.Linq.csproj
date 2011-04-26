@@ -138,6 +138,7 @@
     <Compile Include="DataContextTest.cs" />
     <Compile Include="Exceptions\Common.cs" />
     <Compile Include="ExtensionTests.cs" />
+    <Compile Include="IdlTest.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="ProviderSpecific\Firebird.cs" />
