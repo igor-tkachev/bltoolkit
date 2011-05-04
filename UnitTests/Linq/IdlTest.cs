@@ -246,6 +246,35 @@ namespace Data.Linq
                 });
         }
 
+        #region ObjectExt
+
+        public abstract class ObjectWithId
+        {
+            public ObjectId Id;
+        }
+
+        public class ParentEx : ObjectWithId
+        {
+            public int? Value1;
+        }
+
+        #endregion
+
+        [Test]
+        public void TestForObjectExt()
+        {
+            ForMySqlProvider(db =>
+                {
+                    var r = from p in db.Parent
+                                select new ParentEx
+                                {
+                                    Id = new ObjectId { Value = p.ParentID },
+                                    Value1 = p.Value1,
+                                };
+                    Assert.That(r.ToArray(), Is.Not.Null);
+                });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
