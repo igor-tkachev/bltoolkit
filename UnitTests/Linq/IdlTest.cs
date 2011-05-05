@@ -202,50 +202,6 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestWithSubset()
-        {
-            ForMySqlProvider(db =>
-                {
-                    var r = from parent in db.Parent
-                                join c in db.Child on parent.ParentID equals c.ParentID into children
-                                select new { parent, children };
-                    Assert.That(r.ToArray(), Is.Not.Null);
-                });
-        }
-
-        [Test]
-        public void TestWithSubsequence()
-        {
-            ForMySqlProvider(
-                db =>
-                    {
-                        var r = from parent in db.Parent
-                                select new
-                                    {
-                                        parent.ParentID,
-                                        childrenIds = parent.Children.Select(c => new ObjectId { Value = c.ChildID })
-                                    };
-                        Assert.That(r.ToArray(), Is.Not.Null);
-                    });
-        }
-
-        [Test]
-        public void TestWithSubsequenceToArray()
-        {
-            ForMySqlProvider(
-                db =>
-                {
-                    var r = from parent in db.Parent
-                             select new
-                             {
-                                 parent.ParentID,
-                                 childrenIds = parent.Children.Select(c => new ObjectId { Value = c.ChildID }).ToArray()
-                             };
-                    Assert.That(r.ToArray(), Is.Not.Null);
-                });
-        }
-
         #region ObjectExt
 
         public abstract class ObjectWithId
