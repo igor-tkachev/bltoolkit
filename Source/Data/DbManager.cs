@@ -852,7 +852,8 @@ namespace BLToolkit.Data
 
 					var discoveredParameters = new IDbDataParameter[cmd.Parameters.Count];
 
-					cmd.Parameters.CopyTo(discoveredParameters, 0);
+					for (var i = 0; i < cmd.Parameters.Count; i++)
+						discoveredParameters[i] = (IDbDataParameter)cmd.Parameters[i];
 
 					return discoveredParameters;
 				}
