@@ -2446,11 +2446,11 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberInit :
 					{
 						var expr = (MemberInitExpression)expression;
-						var dic = TypeAccessor.GetAccessor(expr.Type)
+						var dic  = TypeAccessor.GetAccessor(expr.Type)
 							.Select((m,i) => new { m, i })
-							.ToDictionary(_ => _.m.MemberInfo, _ => _.i);
+							.ToDictionary(_ => _.m.MemberInfo.Name, _ => _.i);
 
-						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member]))
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member.Name]))
 						{
 							members.Add(binding.Member, binding.Expression);
 
