@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
@@ -228,6 +229,41 @@ namespace Data.Linq
                                     Value1 = p.Value1,
                                 };
                     Assert.That(r.ToArray(), Is.Not.Null);
+                });
+        }
+
+        private void getData(ITestDataContext db, IEnumerable<int?> d, IEnumerable<int?> compareWith)
+        {
+            var r1 = db.GrandChild
+                .Where(x => d.Contains(x.ParentID))
+                .GroupBy(x => x.ChildID, x => x.GrandChildID)
+                .ToList();
+            foreach (var group in r1)
+            {
+                Assert.That(compareWith.Any(x => group.Contains(x)), Is.True);
+            }
+        }
+
+        [Test]
+        public void TestForGroupBy()
+        {
+            ForMySqlProvider(db =>
+                {
+                    /* no error in first call */
+                    getData(db, new List<int?> { 2 }, new List<int?> { 211, 212, 221, 222 });
+
+                    /* error in second and more calls */
+                    /*
+                     * GROUP BY select clause is correct
+                        SELECT x.ChildID FROM GrandChild x WHERE x.ParentID IN (3) GROUP BY x.ChildID
+
+                     * But next SELECT clause contains "x.ParentID IN (2)" instead "x.ParentID IN (3)"
+                        -- DECLARE ?p1 Int32
+                        -- SET ?p1 = 31
+                        SELECT x.GrandChildID FROM GrandChild x WHERE x.ParentID IN (2) AND x.ChildID = ?p1
+                     */
+                    getData(db, new List<int?> { 3 }, new List<int?> { 311, 312, 313, 321 });
+
                 });
         }
 
