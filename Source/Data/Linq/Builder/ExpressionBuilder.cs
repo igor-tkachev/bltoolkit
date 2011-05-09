@@ -364,10 +364,10 @@ namespace BLToolkit.Data.Linq.Builder
 								case "SingleOrDefault" :
 								case "First"           :
 								case "FirstOrDefault"  : return ConvertPredicate (call);
-								case "Sum"             :
 								case "Min"             :
-								case "Max"             :
-								case "Average"         : return ConvertSelector  (call);
+								case "Max"             : return ConvertSelector  (call, true);
+								case "Sum"             :
+								case "Average"         : return ConvertSelector  (call, false);
 							}
 
 							return ConvertSubquery(expr);
@@ -864,19 +864,35 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertSelector
 
-		Expression ConvertSelector(MethodCallExpression method)
+		Expression ConvertSelector(MethodCallExpression method, bool isGeneric)
 		{
 			if (method.Arguments.Count != 2)
 				return method;
+
+			isGeneric = isGeneric && method.Method.DeclaringType == typeof(Queryable);
 
 			var types = method.Method.DeclaringType == typeof(Enumerable) ?
 				method.Method.GetParameters()[1].ParameterType.GetGenericArguments() :
 				method.Method.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments();
 
 			var cm = GetQueriableMethodInfo(method, m =>
-				m.Name                   == method.Method.Name &&
-				m.GetParameters().Length == 1 &&
-				m.GetParameters()[0].ParameterType.GetGenericArguments()[0] == types[1]);
+			{
+				if (m.Name == method.Method.Name)
+				{
+					var ps = m.GetParameters();
+
+					if (ps.Length == 1)
+					{
+						if (isGeneric)
+							return true;
+
+						var ts = ps[0].ParameterType.GetGenericArguments();
+						return ts[0] == types[1];
+					}
+				}
+
+				return false;
+			});
 
 			var sm = method.Method.DeclaringType == typeof(Enumerable) ?
 				EnumerableMethods
@@ -889,6 +905,9 @@ namespace BLToolkit.Data.Linq.Builder
 			var argType = types[0];
 
 			sm = sm.MakeGenericMethod(argType, types[1]);
+
+			if (cm.IsGenericMethodDefinition)
+				cm = cm.MakeGenericMethod(types[1]);
 
 			return Expression.Call(null, cm,
 				Expression.Call(null, sm,

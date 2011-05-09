@@ -162,10 +162,35 @@ namespace BLToolkit.Data
 
 			SetCommand(pq.Commands[0], pq.Parameters);
 
-			return ExecuteNonQuery();
+			var now = default(DateTime);
+
+			if (TraceSwitch.TraceInfo)
+				now = DateTime.Now;
+
+			var n = ExecuteNonQuery();
+
+			if (TraceSwitch.TraceInfo)
+				WriteTraceLine(string.Format("Execution time: {0}. Records affected: {1}.\r\n", DateTime.Now - now, n), TraceSwitch.DisplayName);
+
+			return n;
 		}
 
 		object IDataContext.ExecuteScalar(object query)
+		{
+			var now = default(DateTime);
+
+			if (TraceSwitch.TraceInfo)
+				now = DateTime.Now;
+
+			var ret = ExecuteScalarInternal(query);
+
+			if (TraceSwitch.TraceInfo)
+				WriteTraceLine(string.Format("Execution time: {0}\r\n", DateTime.Now - now), TraceSwitch.DisplayName);
+
+			return ret;
+		}
+
+		object ExecuteScalarInternal(object query)
 		{
 			var pq = (PreparedQuery)query;
 
@@ -208,7 +233,17 @@ namespace BLToolkit.Data
 
 			SetCommand(pq.Commands[0], pq.Parameters);
 
-			return ExecuteReader();
+			var now = default(DateTime);
+
+			if (TraceSwitch.TraceInfo)
+				now = DateTime.Now;
+
+			var ret = ExecuteReader();
+
+			if (TraceSwitch.TraceInfo)
+				WriteTraceLine(string.Format("Execution time: {0}\r\n", DateTime.Now - now), TraceSwitch.DisplayName);
+
+			return ret;
 		}
 
 		void IDataContext.ReleaseQuery(object query)
@@ -269,6 +304,11 @@ namespace BLToolkit.Data
 
 			foreach (var command in pq.Commands)
 				sb.AppendLine(command);
+
+			while (sb[sb.Length - 1] == '\n' || sb[sb.Length - 1] == '\r')
+				sb.Length--;
+
+			sb.AppendLine();
 
 			return sb.ToString();
 		}

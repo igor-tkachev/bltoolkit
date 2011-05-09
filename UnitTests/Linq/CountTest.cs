@@ -174,14 +174,12 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy23()
 		{
-			var expected =
+			ForEachProvider(new[] { ProviderName.SqlCe, "Oracle", ProviderName.Sybase, ProviderName.Access }, db => AreEqual(
 				from p in
 					from p in Parent select new { ParentID = p.ParentID + 1, p.Value1 }
 				where p.ParentID + 1 > 1
 				group p by new { p.Value1 } into g
-				select g.Count(p => p.ParentID < 3);
-
-			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(expected,
+				select g.Count(p => p.ParentID < 3),
 				from p in
 					from p in db.Parent select new { ParentID = p.ParentID + 1, p.Value1 }
 				where p.ParentID + 1 > 1
@@ -227,6 +225,58 @@ namespace Data.Linq
 				var result = db.Child.Count();
 				Assert.AreEqual(expected, result);
 			});
+		}
+
+		[Test]
+		public void GroupBy5()
+		{
+			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					ID1 = g.Max  (ch => ch.ChildID),
+					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
+					ID3 = g.Count(ch => ch.ChildID > 20),
+					ID4 = g.Count(ch => ch.ChildID > 10),
+				},
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					ID1 = g.Max  (ch => ch.ChildID),
+					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
+					ID3 = g.Count(ch => ch.ChildID > 20),
+					ID4 = g.Count(ch => ch.ChildID > 10),
+				}));
+		}
+
+		[Test]
+		public void GroupBy6()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				(from ch in    Child group ch by ch.ParentID).Count(),
+				(from ch in db.Child group ch by ch.ParentID).Count()));
+		}
+
+		[Test]
+		public void GroupBy7()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					ID1 = g.Count(),
+					ID2 = g.Max  (ch => ch.ChildID),
+				},
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select new
+				{
+					ID1 = g.Count(),
+					ID2 = g.Max  (ch => ch.ChildID),
+				}));
 		}
 
 		[Test]
@@ -356,38 +406,6 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupBy5()
-		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
-				from ch in Child
-				group ch by ch.ParentID into g
-				select new
-				{
-					ID1 = g.Max  (ch => ch.ChildID),
-					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
-					ID3 = g.Count(ch => ch.ChildID > 20),
-					ID4 = g.Count(ch => ch.ChildID > 10),
-				},
-				from ch in db.Child
-				group ch by ch.ParentID into g
-				select new
-				{
-					ID1 = g.Max  (ch => ch.ChildID),
-					ID2 = g.Count(ch => ch.ChildID > 20) + 1,
-					ID3 = g.Count(ch => ch.ChildID > 20),
-					ID4 = g.Count(ch => ch.ChildID > 10),
-				}));
-		}
-
-		[Test]
-		public void GroupBy6()
-		{
-			ForEachProvider(db => Assert.AreEqual(
-				(from ch in    Child group ch by ch.ParentID).Count(),
-				(from ch in db.Child group ch by ch.ParentID).Count()));
-		}
-
-		[Test]
 		public void SubQuery1()
 		{
 			ForEachProvider(db => AreEqual(
@@ -451,7 +469,7 @@ namespace Data.Linq
 		public void SubQuery7()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe }, // Fix It
+				new[] { ProviderName.SqlCe, "Oracle", ProviderName.Sybase, ProviderName.Access }, ///// Fix It
 				db => AreEqual(
 					from p in    Parent select    Child.Count(c => c.Parent == p),
 					from p in db.Parent select db.Child.Count(c => c.Parent == p)));
@@ -460,9 +478,11 @@ namespace Data.Linq
 		[Test]
 		public void SubQueryMax()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => Assert.AreEqual(
-				   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
-				db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => Assert.AreEqual(
+					   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
+					db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
 		}
 
 		[Test]

@@ -236,7 +236,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 // ReSharper restore AssignNullToNotNullAttribute
 
-					var lambda = Expression.Lambda<Func<IDataContext,TKey,IQueryable<TElement>>>(
+					var lambda = Expression.Lambda<Func<IDataContext,TKey,object[],IQueryable<TElement>>>(
 						Expression.Convert(expr, typeof(IQueryable<TElement>)),
 						Expression.Parameter(typeof(IDataContext), "ctx"),
 						keyParam,
@@ -327,13 +327,34 @@ namespace BLToolkit.Data.Linq.Builder
 
 			ISqlExpression ConvertEnumerable(MethodCallExpression call)
 			{
-				var expr = call;
+				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
+				{
+					if (call.Arguments[0].NodeType == ExpressionType.Call)
+					{
+						var arg = (MethodCallExpression)call.Arguments[0];
 
+						if (arg.Method.Name == "Select")
+						{
+							if (arg.Arguments[0].NodeType != ExpressionType.Call)
+							{
+								var l     = (LambdaExpression)arg.Arguments[1].Unwrap();
+								var largs = l.Type.GetGenericArguments();
 
-				//	if (AggregationBuilder.MethodNames.Contains(expr.Method.Name))
-				//		while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression)arg).Method.Name == "Select")
-				//			arg = ((MethodCallExpression)arg).Arguments[0];
+								if (largs.Length == 2)
+								{
+									var p   = _element.Parent;
+									var ctx = new ExpressionContext(Parent, _element, l);
 
+									_element.Parent = p;
+
+									var sql = Builder.ConvertToSql(ctx, l.Body.Unwrap());
+
+									return new SqlFunction(call.Type, call.Method.Name, sql);
+								}
+							}
+						}
+					}
+				}
 
 				if (call.Arguments[0].NodeType == ExpressionType.Call)
 				{
@@ -406,6 +427,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return SqlFunction.CreateCount(call.Type, SqlQuery);
 				}
+
+				//throw new NotImplementedException();
 
 				if (call.Arguments.Count > 1)
 				{
