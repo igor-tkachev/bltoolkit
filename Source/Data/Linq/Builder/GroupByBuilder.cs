@@ -188,14 +188,32 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				public Expression GetGrouping(GroupByContext context)
 				{
-					var keyParam = Expression.Parameter(typeof(TKey), "key");
+					var parameters = context.Builder.CurrentSqlParameters.ToDictionary(_ => _.Expression);
+					var keyParam   = Expression.Parameter(typeof(TKey), "key");
+
+					var groupExpression = context._sequenceExpr.Convert(e =>
+					{
+						ParameterAccessor pa;
+
+						if (parameters.TryGetValue(e, out pa))
+						{
+							return
+								Expression.Convert(
+									Expression.PropertyOrField(
+										Expression.Constant(pa.SqlParameter),
+										"Value"),
+									e.Type);
+						}
+
+						return e;
+					});
 
 // ReSharper disable AssignNullToNotNullAttribute
 
 					var expr = Expression.Call(
 						null,
 						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TSource,bool>>)null)),
-						context._sequenceExpr,
+						groupExpression,
 						Expression.Lambda<Func<TSource,bool>>(
 							Expression.Equal(context._key.Lambda.Body, keyParam),
 							new[] { context._key.Lambda.Parameters[0] }));

@@ -262,7 +262,7 @@ namespace Data.Linq
                         -- SET ?p1 = 31
                         SELECT x.GrandChildID FROM GrandChild x WHERE x.ParentID IN (2) AND x.ChildID = ?p1
                      */
-                    getData(db, new List<int?> { 3 }, new List<int?> { 311, 312, 313, 321 });
+                    getData(db, new List<int?> { 3 }, new List<int?> { 311, 312, 313, 321, 333 });
 
                 });
         }

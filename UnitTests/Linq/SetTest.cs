@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using BLToolkit.Data.DataProvider;
@@ -632,6 +633,28 @@ namespace Data.Linq
 
 				q.ToList();
 			}
+		}
+
+		static void GetData(ITestDataContext db, IEnumerable<int?> d)
+		{
+			var r1 = db.GrandChild
+				.Where(x => d.Contains(x.ParentID))
+				.ToList();
+
+			foreach (var g in r1)
+			{
+				Assert.AreEqual(d.First().Value, g.ParentID);
+			}
+		}
+
+		[Test]
+		public void TestForGroupBy()
+		{
+			ForEachProvider(db =>
+			{
+				GetData(db, new List<int?> { 2 });
+				GetData(db, new List<int?> { 3 });
+			});
 		}
 
 		[Test]

@@ -1069,7 +1069,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region Build Parameter
 
-		readonly Dictionary<Expression,ParameterAccessor> _parameters   = new Dictionary<Expression, ParameterAccessor>();
+		readonly Dictionary<Expression,ParameterAccessor> _parameters = new Dictionary<Expression, ParameterAccessor>();
 
 		public readonly HashSet<Expression> AsParameters = new HashSet<Expression>();
 
