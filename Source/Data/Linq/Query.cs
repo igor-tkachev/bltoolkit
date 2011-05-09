@@ -431,7 +431,7 @@ namespace BLToolkit.Data.Linq
 		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, IDataContextInfo dataContextInfo, Expression expr, object[] ps, Mapper<T> mapper)
 		{
 			if (context == null)
-				context = new QueryContext { RootDataContext = dataContextInfo };
+				context = new QueryContext(dataContextInfo, expr, ps);
 
 			foreach (var dr in data)
 			{
@@ -1123,7 +1123,7 @@ namespace BLToolkit.Data.Linq
 			Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
 		{
 			if (queryContext == null)
-				queryContext = new QueryContext { RootDataContext = dataContextInfo };
+				queryContext = new QueryContext(dataContextInfo, expr, ps);
 
 			foreach (var dr in data)
 				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);

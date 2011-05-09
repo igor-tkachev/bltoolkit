@@ -129,46 +129,54 @@ namespace BLToolkit.Data.Linq.Builder
 
 			class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
 			{
-
-				public Grouping(TKey key, QueryContext queryContext, Func<IDataContext,TKey,IQueryable<TElement>> itemReader)
+				public Grouping(
+					TKey                    key,
+					QueryContext            queryContext,
+					List<ParameterAccessor> parameters,
+					Func<IDataContext,TKey,object[],IQueryable<TElement>> itemReader)
 				{
 					Key = key;
 
+					_queryContext = queryContext;
+					_parameters   = parameters;
+					_itemReader   = itemReader;
+
 					if (Common.Configuration.Linq.PreloadGroups)
 					{
-						_items = GetItems(queryContext, itemReader);
-					}
-					else
-					{
-						_queryContext = queryContext;
-						_itemReader   = itemReader;
+						_items = GetItems();
 					}
 				}
 
-				private  IList<TElement>                              _items;
-				readonly QueryContext                                 _queryContext;
-				readonly Func<IDataContext,TKey,IQueryable<TElement>> _itemReader;
+				private  IList<TElement>                                       _items;
+				readonly QueryContext                                          _queryContext;
+				readonly List<ParameterAccessor>                               _parameters;
+				readonly Func<IDataContext,TKey,object[],IQueryable<TElement>> _itemReader;
 
 				public TKey Key { get; private set; }
 
-				List<TElement> GetItems(QueryContext queryContext, Func<IDataContext,TKey,IQueryable<TElement>> elementReader)
+				List<TElement> GetItems()
 				{
-					var db = queryContext.GetDataContext();
+					var db = _queryContext.GetDataContext();
 
 					try
 					{
-						return elementReader(db.DataContextInfo.DataContext, Key).ToList();
+						var ps = new object[_parameters.Count];
+
+						for (var i = 0; i < ps.Length; i++)
+							ps[i] = _parameters[i].Accessor(_queryContext.Expression, _queryContext.CompiledParameters);
+
+						return _itemReader(db.DataContextInfo.DataContext, Key, ps).ToList();
 					}
 					finally
 					{
-						queryContext.ReleaseDataContext(db);
+						_queryContext.ReleaseDataContext(db);
 					}
 				}
 
 				public IEnumerator<TElement> GetEnumerator()
 				{
 					if (_items == null)
-						_items = GetItems(_queryContext, _itemReader);
+						_items = GetItems();
 
 					return _items.GetEnumerator();
 				}
@@ -188,25 +196,27 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				public Expression GetGrouping(GroupByContext context)
 				{
-					var parameters = context.Builder.CurrentSqlParameters.ToDictionary(_ => _.Expression);
-					var keyParam   = Expression.Parameter(typeof(TKey), "key");
+					var parameters = context.Builder.CurrentSqlParameters
+						.Select((p,i) => new { p, i })
+						.ToDictionary(_ => _.p.Expression, _ => _.i);
+					var paramArray = Expression.Parameter(typeof(object[]), "ps");
 
 					var groupExpression = context._sequenceExpr.Convert(e =>
 					{
-						ParameterAccessor pa;
+						int idx;
 
-						if (parameters.TryGetValue(e, out pa))
+						if (parameters.TryGetValue(e, out idx))
 						{
 							return
 								Expression.Convert(
-									Expression.PropertyOrField(
-										Expression.Constant(pa.SqlParameter),
-										"Value"),
+									Expression.ArrayIndex(paramArray, Expression.Constant(idx)),
 									e.Type);
 						}
 
 						return e;
 					});
+
+					var keyParam = Expression.Parameter(typeof(TKey), "key");
 
 // ReSharper disable AssignNullToNotNullAttribute
 
@@ -229,7 +239,8 @@ namespace BLToolkit.Data.Linq.Builder
 					var lambda = Expression.Lambda<Func<IDataContext,TKey,IQueryable<TElement>>>(
 						Expression.Convert(expr, typeof(IQueryable<TElement>)),
 						Expression.Parameter(typeof(IDataContext), "ctx"),
-						keyParam);
+						keyParam,
+						paramArray);
 
 					var itemReader = CompiledQuery.Compile(lambda);
 					var keyExpr    = context._key.BuildExpression(null, 0);
@@ -246,12 +257,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return Expression.Call(
 						null,
-						ReflectionHelper.Expressor<object>.MethodExpressor(_ => GetGrouping(null, null, null, null, null, null, null)),
+						ReflectionHelper.Expressor<object>.MethodExpressor(_ => GetGrouping(null, null, null, null, null, null, null, null)),
 						new Expression[]
 						{
 							ExpressionBuilder.ContextParam,
 							ExpressionBuilder.DataContextParam,
 							ExpressionBuilder.DataReaderParam,
+							Expression.Constant(context.Builder.CurrentSqlParameters),
 							ExpressionBuilder.ExpressionParam,
 							ExpressionBuilder.ParametersParam,
 							Expression.Constant(keyReader.Compile()),
@@ -263,13 +275,14 @@ namespace BLToolkit.Data.Linq.Builder
 					QueryContext             context,
 					IDataContext             dataContext,
 					IDataReader              dataReader,
+					List<ParameterAccessor>  parameterAccessor,
 					Expression               expr,
 					object[]                 ps,
 					Func<QueryContext,IDataContext,IDataReader,Expression,object[],TKey> keyReader,
-					Func<IDataContext,TKey,IQueryable<TElement>>                         itemReader)
+					Func<IDataContext,TKey,object[],IQueryable<TElement>>                itemReader)
 				{
 					var key = keyReader(context, dataContext, dataReader, expr, ps);
-					return new Grouping<TKey,TElement>(key, context, itemReader);
+					return new Grouping<TKey,TElement>(key, context, parameterAccessor, itemReader);
 				}
 			}
 
