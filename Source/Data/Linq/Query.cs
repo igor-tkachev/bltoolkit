@@ -926,8 +926,9 @@ namespace BLToolkit.Data.Linq
 						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
 
 						if (fields.Count == 0)
-							throw new LinqException(
-								string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
+							return 0;
+							//throw new LinqException(
+							//	string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
 
 						foreach (var field in fields)
 						{
