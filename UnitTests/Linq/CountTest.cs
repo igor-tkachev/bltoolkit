@@ -476,13 +476,21 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SubQueryMax()
+		public void SubQueryMax1()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe },
 				db => Assert.AreEqual(
 					   Parent.Max(p =>    Child.Count(c => c.Parent.ParentID == p.ParentID)),
 					db.Parent.Max(p => db.Child.Count(c => c.Parent.ParentID == p.ParentID))));
+		}
+
+		[Test]
+		public void SubQueryMax2()
+		{
+			ForEachProvider(
+				db => Assert.AreEqual(
+					   Parent.Max(p => p.Children.Count()),
+					db.Parent.Max(p => p.Children.Count())));
 		}
 
 		[Test]

@@ -22,9 +22,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
 			if (sequence.SqlQuery != buildInfo.SqlQuery)
-			{
 				throw new NotImplementedException();
-			}
 
 			if (sequence.SqlQuery.Select.IsDistinct        ||
 			    sequence.SqlQuery.Select.TakeValue != null ||
@@ -46,11 +44,22 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
 
+			var sql = sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
+
+			if (sql.Length == 1 && sql[0] is SqlQuery)
+			{
+				var query = (SqlQuery)sql[0];
+
+				if (query.Select.Columns.Count == 1)
+				{
+					var join = SqlQuery.OuterApply(query);
+					context.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+					sql[0] = query.Select.Columns[0];
+				}
+			}
+
 			context.FieldIndex = context.SqlQuery.Select.Add(
-				new SqlFunction(
-					methodCall.Type,
-					methodCall.Method.Name,
-					sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray()));
+				new SqlFunction(methodCall.Type, methodCall.Method.Name, sql));
 
 			return context;
 		}
