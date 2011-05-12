@@ -4,14 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.ServiceModel;
-using System.ServiceModel.Description;
 using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
-using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
-using BLToolkit.ServiceModel;
 using Mono.Model;
 using NUnit.Framework;
 
@@ -64,7 +60,7 @@ namespace Mono
                         var fileName = info.Assembly + ".3.dll";
 #endif
 
-                        var assembly = Assembly.LoadFile(Path.Combine(Path.DirectorySeparatorChar + path, fileName));
+                        var assembly = Assembly.LoadFile(Path.Combine(path, fileName));
 
                         type = assembly.GetType(info.Type, true);
                     }
@@ -73,76 +69,11 @@ namespace Mono
 
                     info.Loaded = true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     info.Loaded = false;
                 }
             }
-        }
-
-        readonly List<ServiceHost> _hosts = new List<ServiceHost>();
-
-        const int StartIP = 12345;
-
-        [TestFixtureSetUp]
-        public void SetUp()
-        {
-            LinqService.TypeResolver = str =>
-            {
-                switch (str)
-                {
-                    case "Data.Linq.Model.Gender": return typeof(Gender);
-                    case "Data.Linq.Model.Person": return typeof(Person);
-                    default: return null;
-                }
-            };
-
-            var ip = StartIP;
-
-            foreach (var info in Providers)
-            {
-                ip++;
-
-                if (!info.Loaded)
-                    continue;
-				/*
-                var host = new ServiceHost(new LinqService(info.Name) { AllowUpdates = true }, new Uri("net.tcp://localhost:" + ip));
-
-                host.Description.Behaviors.Add(new ServiceMetadataBehavior());
-                host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
-                host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "mex");
-                host.AddServiceEndpoint(
-                    typeof(ILinqService),
-                    new NetTcpBinding(SecurityMode.None)
-                    {
-                        MaxReceivedMessageSize = 10000000,
-                        MaxBufferPoolSize = 10000000,
-                        MaxBufferSize = 10000000,
-                        CloseTimeout = new TimeSpan(00, 01, 00),
-                        OpenTimeout = new TimeSpan(00, 01, 00),
-                        ReceiveTimeout = new TimeSpan(00, 10, 00),
-                        SendTimeout = new TimeSpan(00, 10, 00),
-                    },
-                    "LinqOverWCF");
-				
-				try {
-                	host.Open();
-				} catch (Exception ex)
-				{
-					Console.WriteLine(ex.ToString());
-					throw ex;
-				}
-
-                _hosts.Add(host);
-                */
-            }
-        }
-
-        [TestFixtureTearDown]
-        public void TearDown()
-        {
-            foreach (var host in _hosts)
-                host.Close();
         }
 
         protected class ProviderInfo
@@ -167,12 +98,8 @@ namespace Mono
 
         static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
         {
-            var ip = StartIP;
-
             foreach (var info in Providers)
             {
-                ip++;
-
                 if (exceptList.Contains(info.Name))
                     continue;
 
@@ -182,12 +109,6 @@ namespace Mono
                     continue;
 
                 yield return new TestDbManager(info.Name);
-
-                //var dx = new TestServiceModelDataContext(ip);
-
-                //Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
-
-                //yield return dx;
             }
         }
 
@@ -241,7 +162,7 @@ namespace Mono
             ForEachProvider(db => Assert.Less(0, func(db)));
         }
 
-        protected void TestPerson(int id, string firstName, Func<ITestDataContext, System.Linq.IQueryable<Person>> func)
+        protected void TestPerson(int id, string firstName, Func<ITestDataContext, IQueryable<Person>> func)
         {
             ForEachProvider(db =>
             {
@@ -252,12 +173,12 @@ namespace Mono
             });
         }
 
-        protected void TestJohn(Func<ITestDataContext, System.Linq.IQueryable<Person>> func)
+        protected void TestJohn(Func<ITestDataContext, IQueryable<Person>> func)
         {
             TestPerson(1, "John", func);
         }
 
-        protected void TestOnePerson(string[] exceptList, int id, string firstName, Func<ITestDataContext, System.Linq.IQueryable<Person>> func)
+        protected void TestOnePerson(string[] exceptList, int id, string firstName, Func<ITestDataContext, IQueryable<Person>> func)
         {
             ForEachProvider(exceptList, db =>
             {
@@ -272,17 +193,17 @@ namespace Mono
             });
         }
 
-        protected void TestOnePerson(int id, string firstName, Func<ITestDataContext, System.Linq.IQueryable<Person>> func)
+        protected void TestOnePerson(int id, string firstName, Func<ITestDataContext, IQueryable<Person>> func)
         {
             TestOnePerson(Array<string>.Empty, id, firstName, func);
         }
 
-        protected void TestOneJohn(string[] exceptList, Func<ITestDataContext, System.Linq.IQueryable<Person>> func)
+        protected void TestOneJohn(string[] exceptList, Func<ITestDataContext, IQueryable<Person>> func)
         {
             TestOnePerson(exceptList, 1, "John", func);
         }
 
-        protected void TestOneJohn(Func<ITestDataContext, System.Linq.IQueryable<Person>> func)
+        protected void TestOneJohn(Func<ITestDataContext, IQueryable<Person>> func)
         {
             TestOnePerson(Array<string>.Empty, 1, "John", func);
         }

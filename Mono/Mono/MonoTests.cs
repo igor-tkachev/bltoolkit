@@ -11,359 +11,356 @@ using NUnit.Framework;
 
 namespace Mono
 {
-    public class MonoTests
+    [TestFixture]
+    public class IdlTest : TestBase
     {
-        [TestFixture]
-        public class IdlTest : TestBase
+        #region PersonWithId
+
+        public interface IHasID
         {
-            #region PersonWithId
+            int ID { get; set; }
+        }
 
-            public interface IHasID
+        [TableName(Name = "Person")]
+        public class PersonWithId : IHasID
+        {
+            public PersonWithId()
             {
-                int ID { get; set; }
             }
 
-            [TableName(Name = "Person")]
-            public class PersonWithId : IHasID
+            public PersonWithId(int id)
             {
-                public PersonWithId()
-                {
-                }
-
-                public PersonWithId(int id)
-                {
-                    ID = id;
-                }
-
-                public PersonWithId(int id, string firstName)
-                {
-                    ID = id;
-                    FirstName = firstName;
-                }
-
-                [Identity, PrimaryKey]
-                [SequenceName("Firebird", "PersonID")]
-                [MapField("PersonID")]
-                public int ID { get; set; }
-                public string FirstName { get; set; }
-                public string LastName;
-                [Nullable]
-                public string MiddleName;
-                public Gender Gender;
-
-                [MapIgnore]
-                public string Name { get { return FirstName + " " + LastName; } }
-
-                public override bool Equals(object obj)
-                {
-                    return Equals(obj as PersonWithId);
-                }
-
-                public bool Equals(PersonWithId other)
-                {
-                    if (ReferenceEquals(null, other)) return false;
-                    if (ReferenceEquals(this, other)) return true;
-                    return
-                        other.ID == ID &&
-                        Equals(other.LastName, LastName) &&
-                        Equals(other.MiddleName, MiddleName) &&
-                        other.Gender == Gender &&
-                        Equals(other.FirstName, FirstName);
-                }
-
-                public override int GetHashCode()
-                {
-                    unchecked
-                    {
-                        var result = ID;
-                        result = (result * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
-                        result = (result * 397) ^ (MiddleName != null ? MiddleName.GetHashCode() : 0);
-                        result = (result * 397) ^ Gender.GetHashCode();
-                        result = (result * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
-                        return result;
-                    }
-                }
-            }
-            #endregion
-
-            #region ObjectId
-
-            public struct ObjectId
-            {
-                public ObjectId(int value)
-                {
-                    m_value = value;
-                }
-
-                private int m_value;
-
-                public int Value
-                {
-                    get { return m_value; }
-                    set { m_value = value; }
-                }
-
-                public static implicit operator int(ObjectId val)
-                {
-                    return val.m_value;
-                }
-
-				public bool Equals(ObjectId other)
-                {
-                    if (ReferenceEquals(null, other)) return false;
-                    if (ReferenceEquals(this, other)) return true;
-                    return
-                        other.Value == Value;
-                }
-
-                public override int GetHashCode()
-                {
-                    unchecked
-                    {
-                        return Value;
-                    }
-                }
+                ID = id;
             }
 
-            public struct NullableObjectId
+            public PersonWithId(int id, string firstName)
             {
-                public NullableObjectId(int? value)
+                ID = id;
+                FirstName = firstName;
+            }
+
+            [Identity, PrimaryKey]
+            [SequenceName("Firebird", "PersonID")]
+            [MapField("PersonID")]
+            public int ID { get; set; }
+            public string FirstName { get; set; }
+            public string LastName;
+            [Nullable]
+            public string MiddleName;
+            public Gender Gender;
+
+            [MapIgnore]
+            public string Name { get { return FirstName + " " + LastName; } }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as PersonWithId);
+            }
+
+            public bool Equals(PersonWithId other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return
+                    other.ID == ID &&
+                    Equals(other.LastName, LastName) &&
+                    Equals(other.MiddleName, MiddleName) &&
+                    other.Gender == Gender &&
+                    Equals(other.FirstName, FirstName);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
                 {
-                    m_value = value;
+                    var result = ID;
+                    result = (result * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
+                    result = (result * 397) ^ (MiddleName != null ? MiddleName.GetHashCode() : 0);
+                    result = (result * 397) ^ Gender.GetHashCode();
+                    result = (result * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
+                    return result;
                 }
+            }
+        }
+        #endregion
 
-                private int? m_value;
+        #region ObjectId
 
-                public int? Value
+        public struct ObjectId
+        {
+            public ObjectId(int value)
+            {
+                m_value = value;
+            }
+
+            private int m_value;
+
+            public int Value
+            {
+                get { return m_value; }
+                set { m_value = value; }
+            }
+
+            public static implicit operator int(ObjectId val)
+            {
+                return val.m_value;
+            }
+
+			public bool Equals(ObjectId other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return
+                    other.Value == Value;
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
                 {
-                    get { return m_value; }
-                    set { m_value = value; }
+                    return Value;
                 }
+            }
+        }
 
-                public static implicit operator int?(NullableObjectId val)
+        public struct NullableObjectId
+        {
+            public NullableObjectId(int? value)
+            {
+                m_value = value;
+            }
+
+            private int? m_value;
+
+            public int? Value
+            {
+                get { return m_value; }
+                set { m_value = value; }
+            }
+
+            public static implicit operator int?(NullableObjectId val)
+            {
+                return val.m_value;
+            }
+        }
+        #endregion
+
+        [Test]
+        public void TestComplexExpression()
+        {
+            // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' 
+            //   cannot be converted to SQL.
+            ForMySqlProvider(
+                db =>
                 {
-                    return val.m_value;
-                }
-            }
-            #endregion
+                    var source = from child in db.GrandChild
+                                    select
+                                        new
+                                        {
+                                            NullableId = new NullableObjectId { Value = child.ChildID }
+                                        };
 
-            [Test]
-            public void TestComplexExpression()
-            {
-                // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' 
-                //   cannot be converted to SQL.
-                ForMySqlProvider(
-                    db =>
-                    {
-                        var source = from child in db.GrandChild
-                                     select
-                                         new
-                                         {
-                                             NullableId = new NullableObjectId { Value = child.ChildID }
-                                         };
+                    var query = from e in source 
+							where e.NullableId.Value == 1 select e;
 
-                        var query = from e in source 
-								where e.NullableId.Value == 1 select e;
-
-                        var result = query.ToArray();
-                        Assert.That(result, Is.Not.Null);
-                    });
-            }
+                    var result = query.ToArray();
+                    Assert.That(result, Is.Not.Null);
+                });
+        }
 
 
-            [Test]
-            public void TestJoin()
-            {
-                // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than 
-                //   the size of the collection.
-                // Parameter name: index
-                ForMySqlProvider(
-                    db =>
-                    {
-                        var source = from p1 in db.Person
-                                     join p2 in db.Person on p1.ID equals p2.ID
-                                     select
-                                         new { ID1 = new ObjectId { Value = p1.ID }, FirstName2 = p2.FirstName, };
-
-                        var query = from p1 in source select p1.ID1.Value;
-
-                        var result = query.ToArray();
-                        Assert.That(result, Is.Not.Null);
-                    });
-            }
-
-            [Test]
-            public void TestNullableExpression()
-            {
-                // failed with System.NullReferenceException : Object reference not set to an instance of an object.
-                ForMySqlProvider(
-                    db =>
-                    {
-                        var source = from obj in db.Person select new { Id = obj.ID, };
-
-                        // fails for bool?, double?, int32?, int64?, string
-                        // works for byte?, int16?, DateTime? 
-                        double? @p1 = null;
-
-                        var r = from c in source where @p1 != null select c;
-
-                        Assert.That(r.ToArray(), Is.Not.Null);
-                    });
-            }
-
-            [Test]
-            public void TestLookupWithInterfaceProperty()
-            {
-                ForMySqlProvider(
-                    db =>
-                    {
-                        var r = GetById<PersonWithId>(db, 1).SingleOrDefault();
-                        Assert.That(r, Is.Not.Null);
-                    });
-            }
-
-            #region ObjectExt
-
-            public abstract class ObjectWithId
-            {
-                public ObjectId Id;
-            }
-
-            public class ParentEx : ObjectWithId
-            {
-                public int? Value1;
-            }
-
-            #endregion
-
-            [Test]
-            public void TestForObjectExt()
-            {
-                ForMySqlProvider(db =>
+        [Test]
+        public void TestJoin()
+        {
+            // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than 
+            //   the size of the collection.
+            // Parameter name: index
+            ForMySqlProvider(
+                db =>
                 {
-                    var r = from p in db.Parent
-                            select new ParentEx
-                            {
-                                Id = new ObjectId { Value = p.ParentID },
-                                Value1 = p.Value1,
-                            };
+                    var source = from p1 in db.Person
+                                    join p2 in db.Person on p1.ID equals p2.ID
+                                    select
+                                        new { ID1 = new ObjectId { Value = p1.ID }, FirstName2 = p2.FirstName, };
+
+                    var query = from p1 in source select p1.ID1.Value;
+
+                    var result = query.ToArray();
+                    Assert.That(result, Is.Not.Null);
+                });
+        }
+
+        [Test]
+        public void TestNullableExpression()
+        {
+            // failed with System.NullReferenceException : Object reference not set to an instance of an object.
+            ForMySqlProvider(
+                db =>
+                {
+                    var source = from obj in db.Person select new { Id = obj.ID, };
+
+                    // fails for bool?, double?, int32?, int64?, string
+                    // works for byte?, int16?, DateTime? 
+                    double? @p1 = null;
+
+                    var r = from c in source where @p1 != null select c;
+
                     Assert.That(r.ToArray(), Is.Not.Null);
                 });
-            }
+        }
 
-            private void getData(ITestDataContext db, IEnumerable<int?> d, IEnumerable<int?> compareWith)
-            {
-                var r1 = db.GrandChild
-                    .Where(x => d.Contains(x.ParentID))
-                    .GroupBy(x => x.ChildID, x => x.GrandChildID)
-                    .ToList();
-                foreach (var group in r1)
+        [Test]
+        public void TestLookupWithInterfaceProperty()
+        {
+            ForMySqlProvider(
+                db =>
                 {
-                    Assert.That(compareWith.Any(x => group.Contains(x)), Is.True);
-                }
-            }
-
-            [Test]
-            public void TestForGroupBy()
-            {
-                ForMySqlProvider(db =>
-                {
-                    /* no error in first call */
-                    getData(db, new List<int?> { 2 }, new List<int?> { 211, 212, 221, 222 });
-
-                    /* error in second and more calls */
-                    /*
-                     * GROUP BY select clause is correct
-                        SELECT x.ChildID FROM GrandChild x WHERE x.ParentID IN (3) GROUP BY x.ChildID
-
-                     * But next SELECT clause contains "x.ParentID IN (2)" instead "x.ParentID IN (3)"
-                        -- DECLARE ?p1 Int32
-                        -- SET ?p1 = 31
-                        SELECT x.GrandChildID FROM GrandChild x WHERE x.ParentID IN (2) AND x.ChildID = ?p1
-                     */
-                    getData(db, new List<int?> { 3 }, new List<int?> { 311, 312, 313, 321, 333 });
-
+                    var r = GetById<PersonWithId>(db, 1).SingleOrDefault();
+                    Assert.That(r, Is.Not.Null);
                 });
-            }
-			
-			public class ClassPerson
-			{
-				public ObjectId Id;
-				public string Name;
-			}
-			
-			public class ClassParent
-			{
-				public ObjectId Id;
-				public int? Value1;
-			}
-			
-			public class TestDataSource 
-			{
-				private ITestDataContext m_db;
-				
-				public TestDataSource(ITestDataContext db)
-				{
-					m_db = db;
-				}
-				
-				public IQueryable<ClassParent> Parent 
-				{ 
-					get {
-						var query = from p in m_db.Parent 
-							select new ClassParent 
-							{ 
-								Id = new ObjectId { Value = p.ParentID },
-								Value1 = p.Value1,
-							};
-						return query;
-					}
-				}
+        }
 
-				public IQueryable<ClassPerson> Person 
-				{ 
-					get {
-						var query = from p in m_db.Person 
-							select new ClassPerson 
-							{
-								Id = new ObjectId { Value = p.ID },
-								Name = p.FirstName,
-							};
-						return query;
-					}
+        #region ObjectExt
+
+        public abstract class ObjectWithId
+        {
+            public ObjectId Id;
+        }
+
+        public class ParentEx : ObjectWithId
+        {
+            public int? Value1;
+        }
+
+        #endregion
+
+        [Test]
+        public void TestForObjectExt()
+        {
+            ForMySqlProvider(db =>
+            {
+                var r = from p in db.Parent
+                        select new ParentEx
+                        {
+                            Id = new ObjectId { Value = p.ParentID },
+                            Value1 = p.Value1,
+                        };
+                Assert.That(r.ToArray(), Is.Not.Null);
+            });
+        }
+
+        private void getData(ITestDataContext db, IEnumerable<int?> d, IEnumerable<int?> compareWith)
+        {
+            var r1 = db.GrandChild
+                .Where(x => d.Contains(x.ParentID))
+                .GroupBy(x => x.ChildID, x => x.GrandChildID)
+                .ToList();
+            foreach (var group in r1)
+            {
+                Assert.That(compareWith.Any(x => group.Contains(x)), Is.True);
+            }
+        }
+
+        [Test]
+        public void TestForGroupBy()
+        {
+            ForMySqlProvider(db =>
+            {
+                /* no error in first call */
+                getData(db, new List<int?> { 2 }, new List<int?> { 211, 212, 221, 222 });
+
+                /* error in second and more calls */
+                /*
+                    * GROUP BY select clause is correct
+                    SELECT x.ChildID FROM GrandChild x WHERE x.ParentID IN (3) GROUP BY x.ChildID
+
+                    * But next SELECT clause contains "x.ParentID IN (2)" instead "x.ParentID IN (3)"
+                    -- DECLARE ?p1 Int32
+                    -- SET ?p1 = 31
+                    SELECT x.GrandChildID FROM GrandChild x WHERE x.ParentID IN (2) AND x.ChildID = ?p1
+                    */
+                getData(db, new List<int?> { 3 }, new List<int?> { 311, 312, 313, 321, 333 });
+
+            });
+        }
+			
+		public class ClassPerson
+		{
+			public ObjectId Id;
+			public string Name;
+		}
+			
+		public class ClassParent
+		{
+			public ObjectId Id;
+			public int? Value1;
+		}
+			
+		public class TestDataSource 
+		{
+			private ITestDataContext m_db;
+				
+			public TestDataSource(ITestDataContext db)
+			{
+				m_db = db;
+			}
+				
+			public IQueryable<ClassParent> Parent 
+			{ 
+				get {
+					var query = from p in m_db.Parent 
+						select new ClassParent 
+						{ 
+							Id = new ObjectId { Value = p.ParentID },
+							Value1 = p.Value1,
+						};
+					return query;
 				}
+			}
+
+			public IQueryable<ClassPerson> Person 
+			{ 
+				get {
+					var query = from p in m_db.Person 
+						select new ClassPerson 
+						{
+							Id = new ObjectId { Value = p.ID },
+							Name = p.FirstName,
+						};
+					return query;
+				}
+			}
 }
 			
-			[Test]
-			public void TestJoin1()
-			{
-                ForMySqlProvider(db =>
-                {
-					var src = new TestDataSource(db);
-	                var allParents = src.Parent;
-	                var allPersons = src.Person;
+		[Test]
+		public void TestJoin1()
+		{
+            ForMySqlProvider(db =>
+            {
+				var src = new TestDataSource(db);
+	            var allParents = src.Parent;
+	            var allPersons = src.Person;
 	
-	                var @p1 = "a";
-	                var query = from e in allParents
-	                            join c in allPersons on e.Id equals c.Id
-	                            where c.Name.StartsWith(@p1)
-	                            orderby c.Name
-	                            select e;
-					Assert.Pass(query.ToString());
-					var result = query.ToArray();
-	                Assert.That(result, Is.Not.Null);
-				});
-			}
+	            var @p1 = "a";
+	            var query = from e in allParents
+	                        join c in allPersons on e.Id equals c.Id
+	                        where c.Name.StartsWith(@p1)
+	                        orderby c.Name
+	                        select e;
+				Assert.Pass(query.ToString());
+				var result = query.ToArray();
+	            Assert.That(result, Is.Not.Null);
+			});
+		}
 
-            private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
-            {
-                return db.GetTable<T>().Where(obj => obj.ID == id);
-            }
+        private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
+        {
+            return db.GetTable<T>().Where(obj => obj.ID == id);
+        }
 
-            private void ForMySqlProvider(Action<ITestDataContext> func)
-            {
-                ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
-            }
+        private void ForMySqlProvider(Action<ITestDataContext> func)
+        {
+            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
         }
     }
 }
