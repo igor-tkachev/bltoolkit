@@ -200,6 +200,51 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConverLetSubqueries
 
+		static void LetExpressionWalker(Expression ex, Dictionary<MemberInfo,Expression> dic)
+		{
+			{
+				if (ex.NodeType == ExpressionType.Call)
+				{
+					var me = (MethodCallExpression)ex;
+			
+					LambdaInfo lambda = null;
+			
+					if (me.Method.Name == "Select" &&
+					    (me.IsQueryableMethod((_, l) => { lambda = l; return true; }) ||
+					     me.IsQueryableMethod(null, 2, _ => { }, l => lambda = l)))
+					{
+						lambda.Body.Visit(e =>
+						{
+							if (e.NodeType == ExpressionType.New)
+							{
+								var ne = (NewExpression)e;
+			
+								if (ne.Members == null || ne.Arguments.Count != ne.Members.Count)
+								{
+								}
+								else
+								{
+									var args = ne.Arguments.Zip(ne.Members, (a,m) => new { a, m }).ToList();
+			
+									var q =
+										from a in args
+										where
+											a.a.NodeType == ExpressionType.Call &&
+											a.a.Type != typeof(string) &&
+											!a.a.Type.IsArray &&
+											TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
+										select a;
+			
+									foreach (var item in q)
+										dic.Add(item.m, item.a);
+								}
+							}
+						});
+					}
+				}
+			}
+		}
+		
 		static Expression ConverLetSubqueries(Expression expression)
 		{
 			var result = expression;
@@ -212,55 +257,7 @@ namespace BLToolkit.Data.Linq.Builder
 				//
 				var dic = new Dictionary<MemberInfo,Expression>();
 
-				expression.Visit(ex =>
-				{
-					switch (ex.NodeType)
-					{
-						case ExpressionType.Call:
-							{
-								var me = (MethodCallExpression)ex;
-
-								LambdaInfo lambda = null;
-
-								if (me.Method.Name == "Select" &&
-								    (me.IsQueryableMethod((_, l) => { lambda = l; return true; }) ||
-								     me.IsQueryableMethod(null, 2, _ => { }, l => lambda = l)))
-								{
-									lambda.Body.Visit(e =>
-									{
-										switch (e.NodeType)
-										{
-											case ExpressionType.New:
-												{
-													var ne = (NewExpression)e;
-
-													if (ne.Members == null || ne.Arguments.Count != ne.Members.Count)
-														break;
-
-													var args = ne.Arguments.Zip(ne.Members, (a,m) => new { a, m }).ToList();
-
-													var q =
-														from a in args
-														where
-															a.a.NodeType == ExpressionType.Call &&
-															a.a.Type != typeof(string) &&
-															!a.a.Type.IsArray &&
-															TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
-														select a;
-
-													foreach (var item in q)
-														dic.Add(item.m, item.a);
-												}
-
-												break;
-										}
-									});
-								}
-							}
-
-							break;
-					}
-				});
+				expression.Visit(ex => LetExpressionWalker(ex, dic));
 
 				if (dic.Count == 0)
 					return expression;

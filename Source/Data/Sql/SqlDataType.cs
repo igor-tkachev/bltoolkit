@@ -183,11 +183,15 @@ namespace BLToolkit.Data.Sql
 			new TypeInfo(SqlDbType.Real,                        4,                     7,                     7,               7 + 2 + 4),
 
 			new TypeInfo(SqlDbType.DateTime,                    8,                    -1,                    -1,                      23),
+#if !MONO
 			new TypeInfo(SqlDbType.DateTime2,                   8,                    -1,                    -1,                      27),
+#endif				
 			new TypeInfo(SqlDbType.SmallDateTime,               4,                    -1,                    -1,                      19),
 			new TypeInfo(SqlDbType.Date,                        3,                    -1,                    -1,                      10),
 			new TypeInfo(SqlDbType.Time,                        5,                    -1,                    -1,                      16),
+#if !MONO
 			new TypeInfo(SqlDbType.DateTimeOffset,             10,                    -1,                    -1,                      34),
+#endif
 
 			new TypeInfo(SqlDbType.Char,                     8000,                    -1,                    -1,                    8000),
 			new TypeInfo(SqlDbType.VarChar,                  8000,                    -1,                    -1,                    8000),
@@ -205,8 +209,10 @@ namespace BLToolkit.Data.Sql
 
 			new TypeInfo(SqlDbType.Variant,                    -1,                    -1,                    -1,                      -1),
 			new TypeInfo(SqlDbType.Xml,                        -1,                    -1,                    -1,                      -1),
-			new TypeInfo(SqlDbType.Udt,                        -1,                    -1,                    -1,                      -1),
-			new TypeInfo(SqlDbType.Structured,                 -1,                    -1,                    -1,                      -1)
+#if !MONO
+			new TypeInfo(SqlDbType.Structured,                 -1,                    -1,                    -1,                      -1),
+#endif
+			new TypeInfo(SqlDbType.Udt,                        -1,                    -1,                    -1,                      -1)
 		);
 
 		public static int GetMaxLength     (SqlDbType dbType) { return _typeInfo[(int)dbType].MaxLength;      }
@@ -246,7 +252,9 @@ namespace BLToolkit.Data.Sql
 					if (underlyingType == typeof(byte[]))         return ByteArray;
 					if (underlyingType == typeof(System.Data.Linq.Binary)) return LinqBinary;
 					if (underlyingType == typeof(char[]))         return CharArray;
+#if !MONO
 					if (underlyingType == typeof(DateTimeOffset)) return DateTimeOffset;
+#endif
 					if (underlyingType == typeof(TimeSpan))       return TimeSpan;
 					break;
 
@@ -311,11 +319,15 @@ namespace BLToolkit.Data.Sql
 				case SqlDbType.Xml              : return DbXml;
 #endif
 				case SqlDbType.Udt              : return DbUdt;
+#if !MONO
 				case SqlDbType.Structured       : return DbStructured;
+#endif
 				case SqlDbType.Date             : return DbDate;
 				case SqlDbType.Time             : return DbTime;
+#if !MONO
 				case SqlDbType.DateTime2        : return DbDateTime2;
 				case SqlDbType.DateTimeOffset   : return DbDateTimeOffset;
+#endif
 			}
 
 			throw new InvalidOperationException();
@@ -367,11 +379,17 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType DbReal             = new SqlDataType(SqlDbType.Real,             typeof(Single),                 0,               0,  0);
 
 		public static readonly SqlDataType DbDateTime         = new SqlDataType(SqlDbType.DateTime,         typeof(DateTime),               0,               0,  0);
+#if !MONO
 		public static readonly SqlDataType DbDateTime2        = new SqlDataType(SqlDbType.DateTime2,        typeof(DateTime),               0,               0,  0);
+#else		
+		public static readonly SqlDataType DbDateTime2        = new SqlDataType(SqlDbType.DateTime,         typeof(DateTime),               0,               0,  0);
+#endif		
 		public static readonly SqlDataType DbSmallDateTime    = new SqlDataType(SqlDbType.SmallDateTime,    typeof(DateTime),               0,               0,  0);
 		public static readonly SqlDataType DbDate             = new SqlDataType(SqlDbType.Date,             typeof(DateTime),               0,               0,  0);
 		public static readonly SqlDataType DbTime             = new SqlDataType(SqlDbType.Time,             typeof(TimeSpan),               0,               0,  0);
+#if !MONO
 		public static readonly SqlDataType DbDateTimeOffset   = new SqlDataType(SqlDbType.DateTimeOffset,   typeof(DateTimeOffset),         0,               0,  0);
+#endif
 
 		public static readonly SqlDataType DbChar             = new SqlDataType(SqlDbType.Char,             typeof(String),      GetMaxLength,               0,  0);
 		public static readonly SqlDataType DbVarChar          = new SqlDataType(SqlDbType.VarChar,          typeof(String),      GetMaxLength,               0,  0);
@@ -392,7 +410,9 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType DbXml              = new SqlDataType(SqlDbType.Xml,              typeof(SqlXml),                 0,               0,  0);
 #endif
 		public static readonly SqlDataType DbUdt              = new SqlDataType(SqlDbType.Udt,              typeof(Object),                 0,               0,  0);
+#if !MONO
 		public static readonly SqlDataType DbStructured       = new SqlDataType(SqlDbType.Structured,       typeof(Object),                 0,               0,  0);
+#endif
 
 		public static readonly SqlDataType Boolean            = DbBit;
 		public static readonly SqlDataType Char               = new SqlDataType(SqlDbType.Char,             typeof(Char),                   1,               0,  0);
@@ -413,7 +433,9 @@ namespace BLToolkit.Data.Sql
 		public static readonly SqlDataType ByteArray          = DbVarBinary;
 		public static readonly SqlDataType LinqBinary         = DbVarBinary;
 		public static readonly SqlDataType CharArray          = new SqlDataType(SqlDbType.NVarChar,         typeof(Char[]),      GetMaxLength,               0,  0);
+#if !MONO
 		public static readonly SqlDataType DateTimeOffset     = DbDateTimeOffset;
+#endif
 		public static readonly SqlDataType TimeSpan           = DbTime;
 
 #if !SILVERLIGHT

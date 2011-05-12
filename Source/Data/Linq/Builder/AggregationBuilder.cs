@@ -21,8 +21,8 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
 
-			if (sequence.SqlQuery != buildInfo.SqlQuery)
-				throw new NotImplementedException();
+			//if (sequence.SqlQuery != buildInfo.SqlQuery)
+			//	throw new NotImplementedException();
 
 			if (sequence.SqlQuery.Select.IsDistinct        ||
 			    sequence.SqlQuery.Select.TakeValue != null ||

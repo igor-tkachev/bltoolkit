@@ -63,10 +63,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (type.SqlDbType)
 			{
+#if !MONO
 				case SqlDbType.DateTimeOffset :
+				case SqlDbType.DateTime2      :
+#endif
 				case SqlDbType.Time           :
-				case SqlDbType.Date           :
-				case SqlDbType.DateTime2      : sb.Append("DateTime");        break;
+				case SqlDbType.Date           : sb.Append("DateTime");        break;
 				default                       : base.BuildDataType(sb, type); break;
 			}
 		}

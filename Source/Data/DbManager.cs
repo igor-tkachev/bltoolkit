@@ -710,7 +710,7 @@ namespace BLToolkit.Data
 			{
 				// Assign the provided values to the parameters based on parameter order.
 				//
-				AssignParameterValues(spParameters, parameterValues);
+				AssignParameterValues(spName, spParameters, parameterValues);
 			}
 
 			return spParameters;
@@ -923,9 +923,10 @@ namespace BLToolkit.Data
 		/// <summary>
 		/// This method assigns an array of values to an array of parameters.
 		/// </summary>
+		/// <param name="spName"></param>
 		/// <param name="commandParameters">array of IDbDataParameters to be assigned values</param>
 		/// <param name="parameterValues">array of objects holding the values to be assigned</param>
-		private void AssignParameterValues(IEnumerable<IDbDataParameter> commandParameters, object[] parameterValues)
+		private void AssignParameterValues(string spName, IDbDataParameter[] commandParameters, object[] parameterValues)
 		{
 			if (commandParameters == null || parameterValues == null)
 			{
@@ -939,21 +940,66 @@ namespace BLToolkit.Data
 			// Iterate through the parameters, assigning the values from 
 			// the corresponding position in the value array.
 			//
-			foreach (var parameter in commandParameters)
+			for (var index = 0; index < commandParameters.Length; index++)
+			{
+				var parameter = commandParameters[index];
+
 				if (_dataProvider.IsValueParameter(parameter))
 				{
 					if (nValues >= parameterValues.Length)
-						throw new ArgumentException(Resources.DbManager_MismatchParameterCount);
+						throw new ArgumentException(string.Format("Parsing for {0} failed: {1}", spName, GetMissedColumnNames(index, commandParameters)));
 
 					var value = parameterValues[nValues++];
 
 					_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 				}
+			}
 
 			// We must have the same number of values as we pave parameters to put them in.
 			//
 			if (nValues != parameterValues.Length)
-				throw new ArgumentException(Resources.DbManager_MismatchParameterCount);
+				throw new ArgumentException(string.Format("Parsing for {0} failed: {1}", spName, GetExceedParameters(nValues, parameterValues)));
+		}
+
+		string GetMissedColumnNames(int startIndex, IDbDataParameter[] commandParameters)
+		{
+			var columnNames = new List<string>();
+
+			for (var index = startIndex; index < commandParameters.Length; index++)
+			{
+				var parameter = commandParameters[index];
+
+				if (_dataProvider.IsValueParameter(parameter))
+				{
+					columnNames.Add(string.Format("{0} {{{1}}}", parameter.ParameterName, parameter.DbType));
+				}
+			}
+
+#if FW4
+			return "Missed columns: " + string.Join(", ", columnNames);
+#else
+			return "Missed columns: " + string.Join(", ", columnNames.ToArray());
+#endif
+		}
+
+		static string GetExceedParameters(int startIndex, object[] parameterValues)
+		{
+			var columnNames = new List<string>();
+
+			for (var index = startIndex; index < parameterValues.Length; index++)
+			{
+				var parameter = parameterValues[index];
+				columnNames.Add(
+					parameter == null
+						? "<null>"
+						: string.Format("{0} {{{1}}}", parameter, parameter.GetType().Name));
+			}
+
+#if FW4
+			return "Exceed parameters: " + string.Join(", ", columnNames);
+#else
+			return "Exceed parameters: " + string.Join(", ", columnNames.ToArray());
+#endif
 		}
 
 		/// <overloads>
