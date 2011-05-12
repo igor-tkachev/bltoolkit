@@ -107,6 +107,22 @@ namespace Mono
                 {
                     return val.m_value;
                 }
+
+				public bool Equals(ObjectId other)
+                {
+                    if (ReferenceEquals(null, other)) return false;
+                    if (ReferenceEquals(this, other)) return true;
+                    return
+                        other.Value == Value;
+                }
+
+                public override int GetHashCode()
+                {
+                    unchecked
+                    {
+                        return Value;
+                    }
+                }
             }
 
             public struct NullableObjectId
@@ -269,6 +285,75 @@ namespace Mono
 
                 });
             }
+			
+			public class ClassPerson
+			{
+				public ObjectId Id;
+				public string Name;
+			}
+			
+			public class ClassParent
+			{
+				public ObjectId Id;
+				public int? Value1;
+			}
+			
+			public class TestDataSource 
+			{
+				private ITestDataContext m_db;
+				
+				public TestDataSource(ITestDataContext db)
+				{
+					m_db = db;
+				}
+				
+				public IQueryable<ClassParent> Parent 
+				{ 
+					get {
+						var query = from p in m_db.Parent 
+							select new ClassParent 
+							{ 
+								Id = new ObjectId { Value = p.ParentID },
+								Value1 = p.Value1,
+							};
+						return query;
+					}
+				}
+
+				public IQueryable<ClassPerson> Person 
+				{ 
+					get {
+						var query = from p in m_db.Person 
+							select new ClassPerson 
+							{
+								Id = new ObjectId { Value = p.ID },
+								Name = p.FirstName,
+							};
+						return query;
+					}
+				}
+}
+			
+			[Test]
+			public void TestJoin1()
+			{
+                ForMySqlProvider(db =>
+                {
+					var src = new TestDataSource(db);
+	                var allParents = src.Parent;
+	                var allPersons = src.Person;
+	
+	                var @p1 = "a";
+	                var query = from e in allParents
+	                            join c in allPersons on e.Id equals c.Id
+	                            where c.Name.StartsWith(@p1)
+	                            orderby c.Name
+	                            select e;
+					Assert.Pass(query.ToString());
+					var result = query.ToArray();
+	                Assert.That(result, Is.Not.Null);
+				});
+			}
 
             private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
             {

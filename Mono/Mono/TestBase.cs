@@ -105,7 +105,7 @@ namespace Mono
 
                 if (!info.Loaded)
                     continue;
-
+				/*
                 var host = new ServiceHost(new LinqService(info.Name) { AllowUpdates = true }, new Uri("net.tcp://localhost:" + ip));
 
                 host.Description.Behaviors.Add(new ServiceMetadataBehavior());
@@ -134,6 +134,7 @@ namespace Mono
 				}
 
                 _hosts.Add(host);
+                */
             }
         }
 
