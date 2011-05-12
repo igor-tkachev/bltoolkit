@@ -1,4 +1,5 @@
 
+Binary file: E:\Projects\Git\BLToolkit\.gitignore (Detected)
 #ignore thumbnails created by windows
 Thumbs.db
 #Ignore files build by Visual Studio
@@ -32,3 +33,5 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 BLToolkit.2010.opensdf
+BLToolkit.2010.sdf
+BLToolkit.2010.userprefs
