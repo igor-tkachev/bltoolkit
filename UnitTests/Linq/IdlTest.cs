@@ -267,6 +267,17 @@ namespace Data.Linq
                 });
         }
 
+        [Test]
+        public void TestLinqMax()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        Assert.That(db.Patient.Max(x => (int?)x.PersonID), Is.Null);
+                        Assert.Catch<Exception>(() => db.Patient.Max(x => x.PersonID));
+                    });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
