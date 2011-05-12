@@ -12,6 +12,7 @@
 /_ReSharper.BLToolkit.2008
 /*.resharper
 /*.user
+/*.pidb
 /BLToolkit.2008.sln.cache
 /_UpgradeReport_Files
 /_ReSharper.BLToolkit.2010
