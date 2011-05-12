@@ -273,8 +273,9 @@ namespace Data.Linq
             ForMySqlProvider(
                 db =>
                     {
-                        Assert.That(db.Patient.Max(x => (int?)x.PersonID), Is.Null);
-                        Assert.Catch<Exception>(() => db.Patient.Max(x => x.PersonID));
+                        Assert.That(db.Patient.Where(x => x.PersonID < 0).Max(x => (int?)x.PersonID), Is.Null);
+                        Assert.That(db.Patient.Where(x => x.PersonID < 0).Max(x => x.PersonID), Is.EqualTo(0));
+                        Assert.That(db.Patient.Where(x => x.PersonID < 0).Select(x => x.PersonID).Max(), Is.EqualTo(0));
                     });
         }
 
