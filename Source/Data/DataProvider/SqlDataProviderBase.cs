@@ -62,7 +62,8 @@ namespace BLToolkit.Data.DataProvider
 		public override bool DeriveParameters(IDbCommand command)
 		{
 			SqlCommandBuilder.DeriveParameters((SqlCommand)command);
-
+			
+#if !MONO
 			foreach (SqlParameter p in command.Parameters)
 			{
 				// We have to clear UDT type names.
@@ -77,6 +78,7 @@ namespace BLToolkit.Data.DataProvider
 						p.TypeName = p.TypeName.Substring(firstDot + 1);
 				}
 			}
+#endif
 
 			return true;
 		}
@@ -116,10 +118,14 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void SetUserDefinedType(IDbDataParameter parameter, string typeName)
 		{
+#if !MONO
 			if (!(parameter is SqlParameter))
 				throw new ArgumentException("SqlParameter expected.", "parameter");
 
 			((SqlParameter)parameter).TypeName = typeName;
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -195,7 +201,11 @@ namespace BLToolkit.Data.DataProvider
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{
+#if !MONO
 				return DataReader.GetDateTimeOffset(i);
+#else
+				throw new NotSupportedException();
+#endif
 			}
 		}
 

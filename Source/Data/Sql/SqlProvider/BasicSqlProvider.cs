@@ -2960,8 +2960,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						query.From.Tables[0].Joins.Add(join.JoinedTable);
 
-						var modified = false;
-
 						for (var j = 0; j < subQuery.Where.SearchCondition.Conditions.Count; j++)
 						{
 							var cond = subQuery.Where.SearchCondition.Conditions[j];
@@ -3012,8 +3010,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							if (nc != null && !ReferenceEquals(nc, cond))
 							{
-								modified = true;
-
 								join.JoinedTable.Condition.Conditions.Add(nc);
 								subQuery.Where.SearchCondition.Conditions.RemoveAt(j);
 								j--;

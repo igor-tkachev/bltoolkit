@@ -2101,7 +2101,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 						break;
 
-						throw new NotImplementedException();
 						/*
 						Expression s = null;
 						call.IsQueryableMethod2("Contains", seq => s = seq, ex =>
