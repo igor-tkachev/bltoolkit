@@ -275,7 +275,8 @@ namespace Data.Linq
                     {
                         Assert.That(db.Patient.Where(x => x.PersonID < 0).Select(x => (int?)x.PersonID).Max(), Is.Null);
                         Assert.That(db.Patient.Where(x => x.PersonID < 0).Max(x => (int?)x.PersonID), Is.Null);
-                        Assert.That(db.Patient.Where(x => x.PersonID < 0).Select(x => x.PersonID).Max(), Is.EqualTo(0));
+                        Assert.Catch<InvalidOperationException>(
+                            () => db.Patient.Where(x => x.PersonID < 0).Select(x => x.PersonID).Max());
                         Assert.Catch<InvalidOperationException>(
                             () => db.Patient.Where(x => x.PersonID < 0).Max(x => x.PersonID));
                     });
