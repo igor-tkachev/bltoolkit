@@ -920,77 +920,77 @@ namespace BLToolkit.Data
 			return CloneParameters(cachedParameters);
 		}
 
-	    /// <summary>
-	    /// This method assigns an array of values to an array of parameters.
-	    /// </summary>
-	    /// <param name="spName"></param>
-	    /// <param name="commandParameters">array of IDbDataParameters to be assigned values</param>
-	    /// <param name="parameterValues">array of objects holding the values to be assigned</param>
-	    private void AssignParameterValues(string spName, IDbDataParameter[] commandParameters, object[] parameterValues)
-        {
-            if (commandParameters == null || parameterValues == null)
-            {
-                // Do nothing if we get no data.
-                //
-                return;
-            }
+		/// <summary>
+		/// This method assigns an array of values to an array of parameters.
+		/// </summary>
+		/// <param name="spName"></param>
+		/// <param name="commandParameters">array of IDbDataParameters to be assigned values</param>
+		/// <param name="parameterValues">array of objects holding the values to be assigned</param>
+		private void AssignParameterValues(string spName, IDbDataParameter[] commandParameters, object[] parameterValues)
+		{
+			if (commandParameters == null || parameterValues == null)
+			{
+				// Do nothing if we get no data.
+				//
+				return;
+			}
 
-            var nValues = 0;
+			var nValues = 0;
 
-            // Iterate through the parameters, assigning the values from 
-            // the corresponding position in the value array.
-            //
-            for (int index = 0; index < commandParameters.Length; index++)
-            {
-                var parameter = commandParameters[index];
-                if (_dataProvider.IsValueParameter(parameter))
-                {
-                    if (nValues >= parameterValues.Length)
-                    {
-                        throw new ArgumentException(string.Format("Parsing for {0} failed: {1}", spName, GetMissedColumnNames(index, commandParameters)));
-                    }
+			// Iterate through the parameters, assigning the values from 
+			// the corresponding position in the value array.
+			//
+			for (var index = 0; index < commandParameters.Length; index++)
+			{
+				var parameter = commandParameters[index];
 
-                    var value = parameterValues[nValues++];
+				if (_dataProvider.IsValueParameter(parameter))
+				{
+					if (nValues >= parameterValues.Length)
+						throw new ArgumentException(string.Format("Parsing for {0} failed: {1}", spName, GetMissedColumnNames(index, commandParameters)));
 
-                    _dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
-                }
-            }
+					var value = parameterValues[nValues++];
 
-            // We must have the same number of values as we pave parameters to put them in.
-            //
-            if (nValues != parameterValues.Length)
-                throw new ArgumentException(string.Format("Parsing for {0} failed: {1}", spName, GetExceedParameters(nValues, parameterValues)));
-        }
+					_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
+				}
+			}
 
-        private string GetMissedColumnNames(int startIndex, IDbDataParameter[] commandParameters)
-        {
-            var columnNames = new List<string>();
-            for (int index = startIndex; index < commandParameters.Length; index++)
-            {
-                var parameter = commandParameters[index];
-                if (_dataProvider.IsValueParameter(parameter))
-                {
-                    columnNames.Add(string.Format("{0} {{{1}}}", parameter.ParameterName, parameter.DbType));
-                }
-            }
+			// We must have the same number of values as we pave parameters to put them in.
+			//
+			if (nValues != parameterValues.Length)
+				throw new ArgumentException(string.Format("Parsing for {0} failed: {1}", spName, GetExceedParameters(nValues, parameterValues)));
+		}
 
-            return "Missed columns: " + string.Join(", ", columnNames);
-        }
+		string GetMissedColumnNames(int startIndex, IDbDataParameter[] commandParameters)
+		{
+			var columnNames = new List<string>();
 
-        private static string GetExceedParameters(int startIndex, object[] parameterValues)
-        {
-            var columnNames = new List<string>();
-            for (int index = startIndex; index < parameterValues.Length; index++)
-            {
-                var parameter = parameterValues[index];
-                columnNames.Add(
-                    parameter == null
-                        ? "<null>"
-                        : string.Format("{0} {{{1}}}", parameter, parameter.GetType().Name));
-            }
+			for (var index = startIndex; index < commandParameters.Length; index++)
+			{
+				var parameter = commandParameters[index];
+				if (_dataProvider.IsValueParameter(parameter))
+				{
+					columnNames.Add(string.Format("{0} {{{1}}}", parameter.ParameterName, parameter.DbType));
+				}
+			}
 
-            return "Exceed parameters: " + string.Join(", ", columnNames);
-        }
+			return "Missed columns: " + string.Join(", ", columnNames);
+		}
+
+		static string GetExceedParameters(int startIndex, object[] parameterValues)
+		{
+			var columnNames = new List<string>();
+			for (var index = startIndex; index < parameterValues.Length; index++)
+			{
+				var parameter = parameterValues[index];
+				columnNames.Add(
+					parameter == null
+						? "<null>"
+						: string.Format("{0} {{{1}}}", parameter, parameter.GetType().Name));
+			}
+
+			return "Exceed parameters: " + string.Join(", ", columnNames);
+		}
 
 		/// <overloads>
 		/// Assigns a business object to command parameters.
