@@ -87,8 +87,7 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MySql.Data, Version=6.2.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="MySql.Data, Version=6.3.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\Redist\MySql\MySql.Data.dll</HintPath>
       <Private>False</Private>
     </Reference>

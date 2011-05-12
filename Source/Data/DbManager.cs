@@ -968,18 +968,24 @@ namespace BLToolkit.Data
 			for (var index = startIndex; index < commandParameters.Length; index++)
 			{
 				var parameter = commandParameters[index];
+
 				if (_dataProvider.IsValueParameter(parameter))
 				{
 					columnNames.Add(string.Format("{0} {{{1}}}", parameter.ParameterName, parameter.DbType));
 				}
 			}
 
+#if FW4
 			return "Missed columns: " + string.Join(", ", columnNames);
+#else
+			return "Missed columns: " + string.Join(", ", columnNames.ToArray());
+#endif
 		}
 
 		static string GetExceedParameters(int startIndex, object[] parameterValues)
 		{
 			var columnNames = new List<string>();
+
 			for (var index = startIndex; index < parameterValues.Length; index++)
 			{
 				var parameter = parameterValues[index];
@@ -989,7 +995,11 @@ namespace BLToolkit.Data
 						: string.Format("{0} {{{1}}}", parameter, parameter.GetType().Name));
 			}
 
+#if FW4
 			return "Exceed parameters: " + string.Join(", ", columnNames);
+#else
+			return "Exceed parameters: " + string.Join(", ", columnNames.ToArray());
+#endif
 		}
 
 		/// <overloads>
