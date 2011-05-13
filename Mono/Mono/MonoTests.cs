@@ -106,7 +106,7 @@ namespace Mono
                 return val.m_value;
             }
 
-			public bool Equals(ObjectId other)
+            public bool Equals(ObjectId other)
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
@@ -154,14 +154,15 @@ namespace Mono
                 db =>
                 {
                     var source = from child in db.GrandChild
-                                    select
-                                        new
-                                        {
-                                            NullableId = new NullableObjectId { Value = child.ChildID }
-                                        };
+                                 select
+                                     new
+                                     {
+                                         NullableId = new NullableObjectId { Value = child.ChildID }
+                                     };
 
-                    var query = from e in source 
-							where e.NullableId.Value == 1 select e;
+                    var query = from e in source
+                                where e.NullableId.Value == 1
+                                select e;
 
                     var result = query.ToArray();
                     Assert.That(result, Is.Not.Null);
@@ -179,9 +180,9 @@ namespace Mono
                 db =>
                 {
                     var source = from p1 in db.Person
-                                    join p2 in db.Person on p1.ID equals p2.ID
-                                    select
-                                        new { ID1 = new ObjectId { Value = p1.ID }, FirstName2 = p2.FirstName, };
+                                 join p2 in db.Person on p1.ID equals p2.ID
+                                 select
+                                     new { ID1 = new ObjectId { Value = p1.ID }, FirstName2 = p2.FirstName, };
 
                     var query = from p1 in source select p1.ID1.Value;
 
@@ -283,75 +284,78 @@ namespace Mono
 
             });
         }
-			
-		public class ClassPerson
-		{
-			public ObjectId Id;
-			public string Name;
-		}
-			
-		public class ClassParent
-		{
-			public ObjectId Id;
-			public int? Value1;
-		}
-			
-		public class TestDataSource 
-		{
-			private ITestDataContext m_db;
-				
-			public TestDataSource(ITestDataContext db)
-			{
-				m_db = db;
-			}
-				
-			public IQueryable<ClassParent> Parent 
-			{ 
-				get {
-					var query = from p in m_db.Parent 
-						select new ClassParent 
-						{ 
-							Id = new ObjectId { Value = p.ParentID },
-							Value1 = p.Value1,
-						};
-					return query;
-				}
-			}
 
-			public IQueryable<ClassPerson> Person 
-			{ 
-				get {
-					var query = from p in m_db.Person 
-						select new ClassPerson 
-						{
-							Id = new ObjectId { Value = p.ID },
-							Name = p.FirstName,
-						};
-					return query;
-				}
-			}
-}
-			
-		[Test]
-		public void TestJoin1()
-		{
+        public class ClassPerson
+        {
+            public int Id;
+//            public ObjectId Id;
+            public string Name;
+        }
+
+        public class ClassParent
+        {
+            public int Id;
+//            public ObjectId Id;
+            public int? Value1;
+        }
+
+        public class TestDataSource
+        {
+            private ITestDataContext m_db;
+
+            public TestDataSource(ITestDataContext db)
+            {
+                m_db = db;
+            }
+
+            public IQueryable<ClassParent> Parent
+            {
+                get
+                {
+                    var query = from p in m_db.Parent
+                                select new ClassParent
+                                {
+                                    Id = p.ParentID,
+                                    Value1 = p.Value1,
+                                };
+                    return query;
+                }
+            }
+
+            public IQueryable<ClassPerson> Person
+            {
+                get
+                {
+                    var query = from p in m_db.Person
+                                select new ClassPerson
+                                {
+                                    Id = p.ID,
+                                    Name = p.FirstName,
+                                };
+                    return query;
+                }
+            }
+        }
+
+        [Test]
+        public void TestJoin1()
+        {
             ForMySqlProvider(db =>
             {
-				var src = new TestDataSource(db);
-	            var allParents = src.Parent;
-	            var allPersons = src.Person;
-	
-	            var @p1 = "a";
-	            var query = from e in allParents
-	                        join c in allPersons on e.Id equals c.Id
-	                        where c.Name.StartsWith(@p1)
-	                        orderby c.Name
-	                        select e;
-				Assert.Pass(query.ToString());
-				var result = query.ToArray();
-	            Assert.That(result, Is.Not.Null);
-			});
-		}
+                var src = new TestDataSource(db);
+                var allParents = src.Parent;
+                var allPersons = src.Person;
+
+                var @p1 = "a";
+                var query = from e in allParents
+                            join c in allPersons on e.Id equals c.Id
+                            where c.Name.StartsWith(@p1)
+                            orderby c.Name
+                            select e;
+                var result = query.ToArray();
+                Assert.That(result, Is.Not.Null);
+            });
+        }
 
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
