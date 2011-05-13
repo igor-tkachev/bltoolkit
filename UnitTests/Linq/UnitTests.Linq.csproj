@@ -169,6 +169,7 @@
     <Compile Include="CountTest.cs" />
     <Compile Include="DataContextTest.cs" />
     <Compile Include="Exceptions\Common.cs" />
+    <Compile Include="Exceptions\Aggregation.cs" />
     <Compile Include="ExtensionTests.cs" />
     <Compile Include="IdlTest.cs" />
     <Compile Include="L2SAttributes.cs" />
