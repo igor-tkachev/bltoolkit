@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D7784C2D-AD55-4C4C-B257-FA187214D927}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono</AssemblyName>
@@ -30,9 +30,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Mono.MainProgram</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility">
       <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="nunit.core">
+      <HintPath>libs\nunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.core.interfaces">
+      <HintPath>libs\nunit.core.interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ITestDataContext.cs" />
+    <Compile Include="MainProgram.cs" />
     <Compile Include="Model\BinaryData.cs" />
     <Compile Include="Model\DataTypeTest.cs" />
     <Compile Include="Model\Doctor.cs" />
