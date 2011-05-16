@@ -142,8 +142,13 @@ namespace BLToolkit.Data.Linq.Builder
 			return field;
 		}
 
-		public Expression BuildSql(Type type, int idx)
+		public Expression BuildSql(Type type, int idx, MethodInfo checkNullFunction, Expression context)
 		{
+			var expr = Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx));
+
+			if (checkNullFunction != null)
+				expr = Expression.Call(null, checkNullFunction, expr, context);
+
 			Expression mapper;
 
 			if (type.IsEnum)
@@ -153,7 +158,7 @@ namespace BLToolkit.Data.Linq.Builder
 						Expression.Call(
 							Expression.Constant(MappingSchema),
 							ReflectionHelper.MapSchema.MapValueToEnum,
-								Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx)),
+								expr,
 								Expression.Constant(type)),
 						type);
 			}
@@ -164,13 +169,15 @@ namespace BLToolkit.Data.Linq.Builder
 				if (!ReflectionHelper.MapSchema.Converters.TryGetValue(type, out mi))
 					throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
 
-				mapper = Expression.Call(
-					Expression.Constant(MappingSchema),
-					mi,
-					Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx)));
+				mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
 			}
 
 			return mapper;
+		}
+
+		public Expression BuildSql(Type type, int idx)
+		{
+			return BuildSql(type, idx, null, null);
 		}
 
 		#endregion

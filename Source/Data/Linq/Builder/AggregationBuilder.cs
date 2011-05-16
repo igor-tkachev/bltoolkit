@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -42,7 +43,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			//var index = sequence.ConvertToIndex(null, 0, ConvertFlags.Field);
 
-			var context = new AggregationContext(buildInfo.Parent, sequence, null, methodCall.Method.ReturnType);
+			var context = new AggregationContext(buildInfo.Parent, sequence, methodCall);
 
 			var sql = sequence.ConvertToSql(null, 0, ConvertFlags.Field).Select(_ => _.Sql).ToArray();
 
@@ -66,19 +67,29 @@ namespace BLToolkit.Data.Linq.Builder
 
 		class AggregationContext : SequenceContextBase
 		{
-			public AggregationContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda, Type returnType)
-				: base(parent, sequence, lambda)
+			public AggregationContext(IBuildContext parent, IBuildContext sequence, MethodCallExpression methodCall)
+				: base(parent, sequence, null)
 			{
-				_returnType = returnType;
+				_returnType = methodCall.Method.ReturnType;
+				_methodName = methodCall.Method.Name;
 			}
 
-			readonly Type _returnType;
+			readonly Type   _returnType;
+			readonly string _methodName;
 
 			public int FieldIndex;
 
+			static object CheckNullValue(object value, object context)
+			{
+				if (value == null || value is DBNull)
+					throw new InvalidOperationException(string.Format("Function {0} returns non-nullable value, but result is NULL. Use nullable version of the function instead.", context));
+
+				return value;
+			}
+
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = Expression.Convert(Builder.BuildSql(_returnType, FieldIndex), typeof(object));
+				var expr = Expression.Convert(BuildExpression(null, 0), typeof(object));
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
 					expr, new []
@@ -95,7 +106,22 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				return Builder.BuildSql(_returnType, FieldIndex);
+				Expression expr;
+
+				if (_returnType.IsClass || TypeHelper.IsNullableType(_returnType))
+				{
+					expr = Builder.BuildSql(_returnType, FieldIndex);
+				}
+				else
+				{
+					expr = Builder.BuildSql(
+						_returnType,
+						FieldIndex, 
+						ReflectionHelper.Expressor<object>.MethodExpressor(o => CheckNullValue(o, o)),
+						Expression.Constant(_methodName));
+				}
+
+				return expr;
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
