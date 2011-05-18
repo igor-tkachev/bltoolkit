@@ -22,6 +22,8 @@ namespace Test
 							orderby c.Name
 							select e;
 
+				Console.WriteLine(query.Expression.ToString());
+				Console.WriteLine();
 				Console.WriteLine(query);
 
 				var result = query.ToArray();

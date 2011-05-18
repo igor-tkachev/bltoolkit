@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
-	class ExpressionQuery<T> : Table<T>
+	class ExpressionQuery<T> : Table<T>, IExpressionQuery
 	{
 		public ExpressionQuery(IDataContextInfo dataContext, Expression expression)
 			: base(dataContext, expression)

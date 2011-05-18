@@ -111,7 +111,7 @@ namespace BLToolkit.Data.Linq.Builder
 		internal Query<T> Build<T>()
 		{
 			var sequence = BuildSequence(new BuildInfo((IBuildContext)null, Expression, new SqlQuery()));
-
+			
 			if (_reorder)
 				lock (_sync)
 				{
@@ -353,7 +353,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (call.IsQueryable()) switch (call.Method.Name)
 							{
-								case "Where"           : return ConvertWhere     (call);
+								//case "Where"           : return ConvertWhere     (call);
 								case "GroupBy"         : return ConvertGroupBy   (call);
 								case "SelectMany"      : return ConvertSelectMany(call);
 								case "LongCount"       :
@@ -369,6 +369,18 @@ namespace BLToolkit.Data.Linq.Builder
 							}
 
 							return ConvertSubquery(expr);
+						}
+
+					case ExpressionType.Constant :
+						{
+							var c = (ConstantExpression)expr;
+
+							// Fix Mono behaviour.
+							//
+							if (c.Value is IExpressionQuery)
+								return ((IQueryable)c.Value).Expression;
+
+							break;
 						}
 				}
 

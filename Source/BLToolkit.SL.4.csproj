@@ -163,6 +163,7 @@
     <Compile Include="Data\Linq\FieldIndex.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
+    <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\IQueryContext.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
