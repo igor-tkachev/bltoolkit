@@ -57,7 +57,7 @@ string OneToManyAssociationType = "IEnumerable<{0}>";
 
 bool   RenderField          = false;
 bool   RenderBackReferences = true;
-bool   RenderForeignKeys = true;
+bool   RenderForeignKeys    = true;
 
 bool   IsMetadataLoaded;
 
