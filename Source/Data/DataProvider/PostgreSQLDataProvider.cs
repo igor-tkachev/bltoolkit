@@ -10,6 +10,23 @@ namespace BLToolkit.Data.DataProvider
 
 	public class PostgreSQLDataProvider : DataProviderBase
 	{
+		#region Configurable
+		public static bool QuoteIdentifiers
+		{
+			get { return PostgreSQLSqlProvider.QuoteIdentifiers; }
+			set { PostgreSQLSqlProvider.QuoteIdentifiers = value; }
+		}
+
+		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
+		{
+			var quoteIdentifiers = attributes["QuoteIdentifiers"];
+			if (quoteIdentifiers != null)
+				QuoteIdentifiers = Common.Convert.ToBoolean(quoteIdentifiers);
+
+			base.Configure(attributes);
+		}
+		#endregion
+
 		public override IDbConnection CreateConnectionObject()
 		{
 			return new NpgsqlConnection();
