@@ -519,7 +519,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Aggregates()
+		public void Aggregates1()
 		{
 			var expected =
 				from ch in Child
@@ -543,6 +543,32 @@ namespace Data.Linq
 					Max = g.Max(c => c.ChildID),
 					Avg = (int)g.Average(c => c.ChildID),
 					Cnt = g.Count()
+				}));
+		}
+
+		[Test]
+		public void Aggregates3()
+		{
+			ForEachProvider(db => AreEqual(
+				from  ch in Child
+				where ch.ChildID > 30
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
+					Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
+					Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
+				},
+				from  ch in db.Child
+				where ch.ChildID > 30
+				group ch by ch.ParentID into g
+				select new
+				{
+					Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
+					Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
+					Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
+					Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
 				}));
 		}
 
@@ -879,6 +905,21 @@ namespace Data.Linq
 				from ch in db.GrandChild1
 				group ch by ch.Parent into g
 				where g.Count() > 2
+				select g.Key.Value1));
+		}
+
+		[Test]
+		public void GrooupByAssociation102()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where g.Count(_ => _.ChildID >= 20) > 2
+				select g.Key.Value1
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where g.Count(_ => _.ChildID >= 20) > 2
 				select g.Key.Value1));
 		}
 
