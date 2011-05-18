@@ -25,6 +25,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override bool IsCountSubQuerySupported { get { return false; } }
 		public override bool IsNestedJoinSupported    { get { return false; } }
 
+		public override bool ConvertCountSubQuery(SqlQuery subQuery)
+		{
+			return !subQuery.Where.IsEmpty;
+		}
+
 		#region Skip / Take Support
 
 		protected override string FirstFormat { get { return "TOP {0}"; } }

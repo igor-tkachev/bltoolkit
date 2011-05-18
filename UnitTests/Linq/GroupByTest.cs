@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -585,25 +585,51 @@ namespace Data.Linq
 		[Test]
 		public void Aggregates3()
 		{
-			ForEachProvider(db => AreEqual(
-				from  ch in Child
-				group ch by ch.ParentID into g
-				select new
-				{
-					Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
-					Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
-					Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
-					Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
-				},
-				from  ch in db.Child
-				group ch by ch.ParentID into g
-				select new
-				{
-					Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
-					Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
-					Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
-					Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
-				}));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from  ch in Child
+					where ch.ChildID > 30
+					group ch by ch.ParentID into g
+					select new
+					{
+						Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
+						Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
+						Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
+						Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
+					},
+					from  ch in db.Child
+					where ch.ChildID > 30
+					group ch by ch.ParentID into g
+					select new
+					{
+						Sum =      g.Select(c => c.ChildID).Where(_ => _ > 30).Sum(),
+						Min =      g.Select(c => c.ChildID).Where(_ => _ > 30).Min(),
+						Max =      g.Select(c => c.ChildID).Where(_ => _ > 30).Max(),
+						Avg = (int)g.Select(c => c.ChildID).Where(_ => _ > 30).Average(),
+					}));
+		}
+
+		[Test]
+		public void Aggregates4()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from  ch in Child
+					group ch by ch.ParentID into g
+					select new
+					{
+						Count = g.Count(_ => _.ChildID > 30),
+						Sum   = g.Where(_ => _.ChildID > 30).Sum(c => c.ChildID),
+					},
+					from  ch in db.Child
+					group ch by ch.ParentID into g
+					select new
+					{
+						Count = g.Count(_ => _.ChildID > 30),
+						Sum   = g.Where(_ => _.ChildID > 30).Sum(c => c.ChildID),
+					}));
 		}
 
 		[Test]
@@ -704,8 +730,8 @@ namespace Data.Linq
 		public void Average1()
 		{
 			ForEachProvider(db => Assert.AreEqual(
-				(int)   Child.Average(c => c.ChildID),
-				(int)db.Child.Average(c => c.ChildID)));
+				(int)db.Child.Average(c => c.ChildID),
+				(int)   Child.Average(c => c.ChildID)));
 		}
 
 		[Test]

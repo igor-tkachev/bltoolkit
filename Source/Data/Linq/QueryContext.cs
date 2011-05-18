@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
 {
@@ -11,8 +12,17 @@ namespace BLToolkit.Data.Linq
 			public bool             InUse;
 		}
 
-		public IDataContextInfo RootDataContext;
-		public int              Counter;
+		public QueryContext(IDataContextInfo dataContext, Expression expr, object[] compiledParameters)
+		{
+			RootDataContext    = dataContext;
+			Expression         = expr;
+			CompiledParameters = compiledParameters;
+		}
+
+		public IDataContextInfo        RootDataContext;
+		public Expression              Expression;
+		public object[]                CompiledParameters;
+		public int                     Counter;
 
 		List<DataContextContext> _contexts;
 

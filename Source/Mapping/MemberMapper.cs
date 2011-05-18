@@ -127,11 +127,13 @@ namespace BLToolkit.Mapping
 				case SqlDbType.Variant          : return DbType.Object;
 				case SqlDbType.Xml              : return DbType.Xml;
 				case SqlDbType.Udt              : return DbType.Binary;
-				case SqlDbType.Structured       : return DbType.Binary;
 				case SqlDbType.Date             : return DbType.Date;
 				case SqlDbType.Time             : return DbType.Time;
+#if !MONO
+				case SqlDbType.Structured       : return DbType.Binary;
 				case SqlDbType.DateTime2        : return DbType.DateTime2;
 				case SqlDbType.DateTimeOffset   : return DbType.DateTimeOffset;
+#endif
 			}
 
 			return DbType.Object;
@@ -182,11 +184,13 @@ namespace BLToolkit.Mapping
 				case SqlDbType.Variant          : return 0;
 				case SqlDbType.Xml              : return 0;
 				case SqlDbType.Udt              : return 0;
-				case SqlDbType.Structured       : return 0;
 				case SqlDbType.Date             : return 0;
 				case SqlDbType.Time             : return 0;
+#if !MONO
+				case SqlDbType.Structured       : return 0;
 				case SqlDbType.DateTime2        : return 0;
 				case SqlDbType.DateTimeOffset   : return 0;
+#endif
 			}
 
 			return 0;

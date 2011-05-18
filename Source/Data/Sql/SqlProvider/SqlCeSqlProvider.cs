@@ -138,10 +138,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case SqlDbType.Char          : base.BuildDataType(sb, new SqlDataType(SqlDbType.NChar,    type.Length)); break;
 				case SqlDbType.VarChar       : base.BuildDataType(sb, new SqlDataType(SqlDbType.NVarChar, type.Length)); break;
 				case SqlDbType.SmallMoney    : sb.Append("Decimal(10,4)");   break;
+#if !MONO
+				case SqlDbType.DateTime2     :
+#endif
 				case SqlDbType.Time          :
 				case SqlDbType.Date          :
-				case SqlDbType.SmallDateTime :
-				case SqlDbType.DateTime2     : sb.Append("DateTime");        break;
+				case SqlDbType.SmallDateTime : sb.Append("DateTime");        break;
 				default                      : base.BuildDataType(sb, type); break;
 			}
 		}

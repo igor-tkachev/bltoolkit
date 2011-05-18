@@ -79,8 +79,8 @@ namespace BLToolkit.Data.Linq.Builder
 				_returnType = returnType;
 			}
 
-			private  SqlInfo[] _index;
 			readonly Type      _returnType;
+			private  SqlInfo[] _index;
 
 			public int            FieldIndex;
 			public ISqlExpression Sql;

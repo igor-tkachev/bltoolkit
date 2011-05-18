@@ -3016,7 +3016,7 @@ namespace BLToolkit.Data.Sql
 			return null;
 		}
 
-		static ISqlExpression GetColumn(QueryData data, SqlField field)
+		static ISqlExpression GetColumn(QueryData data, SqlField field, bool addToGroupBy)
 		{
 			foreach (var query in data.Queries)
 			{
@@ -3025,19 +3025,28 @@ namespace BLToolkit.Data.Sql
 					var t = FindField(field, table);
 
 					if (t != null)
-						return query.Query.Select.Columns[query.Query.Select.Add(field)];
+					{
+						var n   = query.Query.Select.Columns.Count;
+						var idx = query.Query.Select.Add(field);
+
+						if (addToGroupBy && n != query.Query.Select.Columns.Count)
+							query.Query.GroupBy.Items.Add(field);
+
+						return query.Query.Select.Columns[idx];
+					}
 				}
 			}
 
 			return null;
 		}
 
-		static void ResolveFields(QueryData data)
+		void ResolveFields(QueryData data)
 		{
 			if (data.Queries.Count == 0)
 				return;
 
-			var dic = new Dictionary<ISqlExpression,ISqlExpression>();
+			var dic     = new Dictionary<ISqlExpression,ISqlExpression>();
+			var isGroup = !GroupBy.IsEmpty || Select.Columns.Exists(c => IsAggregationFunction(c.Expression));
 
 			foreach (SqlField field in data.Fields)
 			{
@@ -3056,7 +3065,7 @@ namespace BLToolkit.Data.Sql
 
 				if (!found)
 				{
-					var expr = GetColumn(data, field);
+					var expr = GetColumn(data, field, isGroup);
 
 					if (expr != null)
 						dic.Add(field, expr);
@@ -3605,6 +3614,7 @@ namespace BLToolkit.Data.Sql
 			if (expr is SqlFunction)
 				switch (((SqlFunction)expr).Name)
 				{
+					case "Count"   :
 					case "Average" :
 					case "Min"     :
 					case "Max"     :
@@ -3624,9 +3634,10 @@ namespace BLToolkit.Data.Sql
 
 			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
 			{
-				var sql = (SqlQuery)joinSource.Source;
+				var sql   = (SqlQuery)joinSource.Source;
+				var isAgg = sql.Select.Columns.Exists(c => IsAggregationFunction(c.Expression));
 
-				if (sql.Select.Columns.Exists(c => IsAggregationFunction(c.Expression)))
+				if (isAgg && isApplySupported)
 					return;
 
 				var searchCondition = new List<Condition>(sql.Where.SearchCondition.Conditions);
