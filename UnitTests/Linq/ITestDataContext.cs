@@ -1,10 +1,11 @@
 ﻿using System;
 
 using BLToolkit.Data.Linq;
-using Data.Linq.Model;
 
 namespace Data.Linq
 {
+	using Model;
+
 	public interface ITestDataContext : IDataContext
 	{
 		Table<Person>                 Person                 { get; }

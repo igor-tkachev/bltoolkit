@@ -353,6 +353,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (call.IsQueryable()) switch (call.Method.Name)
 							{
+								case "Where"           : return ConvertWhere     (call);
 								case "GroupBy"         : return ConvertGroupBy   (call);
 								case "SelectMany"      : return ConvertSelectMany(call);
 								case "LongCount"       :
@@ -431,6 +432,20 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return expr;
+		}
+
+		#endregion
+
+		#region ConvertWhere
+
+		Expression ConvertWhere(MethodCallExpression method)
+		{
+			var sequence  = OptimizeExpression(method.Arguments[0]);
+			var predicate = OptimizeExpression(method.Arguments[1]);
+
+
+
+			return method;
 		}
 
 		#endregion
