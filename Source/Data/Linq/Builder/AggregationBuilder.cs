@@ -59,6 +59,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
+			context.Sql        = context.SqlQuery;
 			context.FieldIndex = context.SqlQuery.Select.Add(
 				new SqlFunction(methodCall.Type, methodCall.Method.Name, sql));
 
@@ -74,10 +75,12 @@ namespace BLToolkit.Data.Linq.Builder
 				_methodName = methodCall.Method.Name;
 			}
 
-			readonly Type   _returnType;
 			readonly string _methodName;
+			readonly Type   _returnType;
+			private  SqlInfo[] _index;
 
-			public int FieldIndex;
+			public int            FieldIndex;
+			public ISqlExpression Sql;
 
 			static object CheckNullValue(object value, object context)
 			{
@@ -89,7 +92,23 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = Expression.Convert(BuildExpression(null, 0), typeof(object));
+				//var expr = Expression.Convert(BuildExpression(null, 0), typeof(object));
+				Expression expr;
+
+				if (_returnType.IsClass || TypeHelper.IsNullableType(_returnType))
+				{
+					expr = Builder.BuildSql(_returnType, FieldIndex);
+				}
+				else
+				{
+					expr = Builder.BuildSql(
+						_returnType,
+						FieldIndex, 
+						ReflectionHelper.Expressor<object>.MethodExpressor(o => CheckNullValue(o, o)),
+						Expression.Constant(_methodName));
+				}
+
+				expr = Expression.Convert(expr, typeof(object));
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
 					expr, new []
@@ -106,22 +125,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				Expression expr;
-
-				if (_returnType.IsClass || TypeHelper.IsNullableType(_returnType))
-				{
-					expr = Builder.BuildSql(_returnType, FieldIndex);
-				}
-				else
-				{
-					expr = Builder.BuildSql(
-						_returnType,
-						FieldIndex, 
-						ReflectionHelper.Expressor<object>.MethodExpressor(o => CheckNullValue(o, o)),
-						Expression.Constant(_methodName));
-				}
-
-				return expr;
+				return Builder.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -131,6 +135,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case ConvertFlags.All   :
 					case ConvertFlags.Key   :
 					case ConvertFlags.Field : return Sequence.ConvertToSql(expression, level + 1, flags);
+					//case ConvertFlags.Field : return new[] { new SqlInfo { Query = Parent.SqlQuery, Sql = Sql } };
 				}
 
 				throw new NotImplementedException();
@@ -138,6 +143,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
+				switch (flags)
+				{
+					case ConvertFlags.Field :
+						return _index ?? (_index = new[]
+						{
+							new SqlInfo { Query = Parent.SqlQuery, Index = Parent.SqlQuery.Select.Add(Sql), Sql = Sql, }
+						});
+				}
+
 				throw new NotImplementedException();
 			}
 
