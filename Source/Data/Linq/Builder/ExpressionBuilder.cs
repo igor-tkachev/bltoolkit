@@ -62,6 +62,7 @@ namespace BLToolkit.Data.Linq.Builder
 		readonly List<ISequenceBuilder>            _builders = _sequenceBuilders;
 		private  bool                              _reorder;
 		readonly Dictionary<Expression,Expression> _expressionAccessors;
+		private  HashSet<Expression>               _subQueryExpressions;
 
 		readonly public List<ParameterAccessor>    CurrentSqlParameters = new List<ParameterAccessor>();
 
@@ -353,7 +354,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (call.IsQueryable()) switch (call.Method.Name)
 							{
-								//case "Where"           : return ConvertWhere     (call);
+								case "Where"           : return ConvertWhere     (call);
 								case "GroupBy"         : return ConvertGroupBy   (call);
 								case "SelectMany"      : return ConvertSelectMany(call);
 								case "LongCount"       :
@@ -450,12 +451,121 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertWhere
 
+		class ExprHoder<TP,TE>
+		{
+			public TP p;
+			public TE ex;
+		}
+
 		Expression ConvertWhere(MethodCallExpression method)
 		{
 			var sequence  = OptimizeExpression(method.Arguments[0]);
 			var predicate = OptimizeExpression(method.Arguments[1]);
+			var lambda    = (LambdaExpression)predicate.Unwrap();
+			var lparam    = lambda.Parameters[0];
+			var lbody     = lambda.Body;
 
+			if (lambda.Parameters.Count > 1)
+				return method;
 
+			var exprs     = new List<Expression>();
+
+			lbody.Visit(ex =>
+			{
+				if (ex.NodeType == ExpressionType.Call)
+				{
+					var call = (MethodCallExpression)ex;
+					var arg = call.Arguments[0];
+
+					if (call.IsQueryable(AggregationBuilder.MethodNames))
+					{
+						while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
+							arg = ((MethodCallExpression) arg).Arguments[0];
+
+						if (arg.NodeType == ExpressionType.Call)
+							exprs.Add(ex);
+					}
+					else if (call.IsQueryable(CountBuilder.MethodNames))
+					{
+						//while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
+						//	arg = ((MethodCallExpression) arg).Arguments[0];
+
+						if (arg.NodeType == ExpressionType.Call)
+							exprs.Add(ex);
+					}
+				}
+			});
+
+			Expression expr = null;
+
+			if (exprs.Count > 0)
+			{
+				expr = lparam;
+
+				foreach (var ex in exprs)
+				{
+					var type   = typeof(ExprHoder<,>).MakeGenericType(expr.Type, ex.Type);
+					var fields = type.GetFields();
+
+					expr = Expression.MemberInit(
+						Expression.New(type),
+						Expression.Bind(fields[0], expr),
+						Expression.Bind(fields[1], ex));
+				}
+
+				var dic  = new Dictionary<Expression, Expression>();
+				var parm = Expression.Parameter(expr.Type, lparam.Name);
+
+				for (var i = 0; i < exprs.Count; i++)
+				{
+					Expression ex = parm;
+
+					for (var j = i; j < exprs.Count - 1; j++)
+						ex = Expression.PropertyOrField(ex, "p");
+
+					ex = Expression.PropertyOrField(ex, "ex");
+
+					dic.Add(exprs[i], ex);
+
+					if (_subQueryExpressions == null)
+						_subQueryExpressions = new HashSet<Expression>();
+					_subQueryExpressions.Add(ex);
+				}
+
+				var newBody = lbody.Convert(ex =>
+				{
+					Expression e;
+					return dic.TryGetValue(ex, out e) ? e : ex;
+				});
+
+				predicate = Expression.Lambda(newBody, parm);
+
+				var methodInfo = GetMethodInfo(method, "Select");
+
+				methodInfo = methodInfo.MakeGenericMethod(lparam.Type, expr.Type);
+				sequence   = Expression.Call(methodInfo, sequence, Expression.Lambda(expr, lparam));
+			}
+
+			if (sequence != method.Arguments[0] || predicate != method.Arguments[1])
+			{
+				var methodInfo  = method.Method.GetGenericMethodDefinition();
+				var genericType = sequence.Type.GetGenericArguments()[0];
+				var newMethod   = methodInfo.MakeGenericMethod(genericType);
+
+				method = Expression.Call(newMethod, sequence, predicate);
+
+				if (exprs.Count > 0)
+				{
+					var parameter = Expression.Parameter(expr.Type, lparam.Name);
+
+					methodInfo = GetMethodInfo(method, "Select");
+					methodInfo = methodInfo.MakeGenericMethod(expr.Type, lparam.Type);
+					method     = Expression.Call(methodInfo, method,
+						Expression.Lambda(
+							exprs.Aggregate((Expression)parameter, (current,_) => Expression.PropertyOrField(current, "p")),
+							parameter));
+				}
+			}
 
 			return method;
 		}
@@ -859,19 +969,24 @@ namespace BLToolkit.Data.Linq.Builder
 				QueryableMethods. First(predicate);
 		}
 
+		MethodInfo GetMethodInfo(MethodCallExpression method, string name)
+		{
+			return method.Method.DeclaringType == typeof(Enumerable) ?
+				EnumerableMethods
+					.Where(m => m.Name == name && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
+				QueryableMethods
+					.Where(m => m.Name == name && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
+		}
+
 		Expression ConvertPredicate(MethodCallExpression method)
 		{
 			if (method.Arguments.Count != 2)
 				return method;
 
 			var cm = GetQueriableMethodInfo(method, m => m.Name == method.Method.Name && m.GetParameters().Length == 1);
-			var wm = method.Method.DeclaringType == typeof(Enumerable) ?
-				EnumerableMethods
-					.Where(m => m.Name == "Where" && m.GetParameters().Length == 2)
-					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
-				QueryableMethods
-					.Where(m => m.Name == "Where" && m.GetParameters().Length == 2)
-					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
+			var wm = GetMethodInfo(method, "Where");
 
 			var argType = method.Method.GetGenericArguments()[0];
 
@@ -899,6 +1014,7 @@ namespace BLToolkit.Data.Linq.Builder
 				method.Method.GetParameters()[1].ParameterType.GetGenericArguments() :
 				method.Method.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments();
 
+			var sm = GetMethodInfo(method, "Select");
 			var cm = GetQueriableMethodInfo(method, m =>
 			{
 				if (m.Name == method.Method.Name)
@@ -917,14 +1033,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 				return false;
 			});
-
-			var sm = method.Method.DeclaringType == typeof(Enumerable) ?
-				EnumerableMethods
-					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
-					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
-				QueryableMethods
-					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
-					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
 
 			var argType = types[0];
 

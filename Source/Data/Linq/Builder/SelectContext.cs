@@ -807,6 +807,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return action(this, newExpression, 0);
 				}
+
+				//return action(GetSequence(expression, level), expression, level);
 			}
 
 			throw new NotImplementedException();

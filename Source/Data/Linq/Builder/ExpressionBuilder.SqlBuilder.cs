@@ -56,6 +56,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 			expression.Visit(expr =>
 			{
+				if (_subQueryExpressions != null && _subQueryExpressions.Contains(expr))
+				{
+					makeSubQuery = true;
+					isWhere      = true;
+					return false;
+				}
+
 				//if (IsSubQuery(context, expr))
 				//	return isWhere = true;
 

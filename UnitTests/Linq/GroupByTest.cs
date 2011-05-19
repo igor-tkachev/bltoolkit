@@ -787,6 +787,65 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void GrooupByAssociation1022()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
+				select g.Key.Value1
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
+				select g.Key.Value1));
+		}
+
+		[Test]
+		public void GrooupByAssociation1023()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where
+					g.Count(_ => _.ChildID >= 20) > 2 &&
+					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0
+				select g.Key.Value1
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where
+					g.Count(_ => _.ChildID >= 20) > 2 &&
+					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0
+				select g.Key.Value1));
+		}
+
+		[Test]
+		public void GrooupByAssociation1024()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in GrandChild1
+				group ch by ch.Parent into g
+				where
+					g.Count(_ => _.ChildID >= 20) > 2 &&
+					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0 &&
+					g.Where(_ => _.ChildID >= 18).Max(p => p.ParentID) > 0
+				select g.Key.Value1
+				,
+				from ch in db.GrandChild1
+				group ch by ch.Parent into g
+				where
+					g.Count(_ => _.ChildID >= 20) > 2 &&
+					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0 &&
+					g.Where(_ => _.ChildID >= 18).Max(p => p.ParentID) > 0
+				select g.Key.Value1));
+		}
+
+		[Test]
 		public void GrooupByAssociation2()
 		{
 			ForEachProvider(db => AreEqual(
