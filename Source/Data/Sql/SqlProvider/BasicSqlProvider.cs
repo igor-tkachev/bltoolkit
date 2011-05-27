@@ -2865,6 +2865,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
+			if (!IsCountSubQuerySupported || !IsSubQueryColumnSupported)
+			{
+				
+			}
+
 			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
 
 			if (!IsCountSubQuerySupported)  sqlQuery = MoveCountSubQuery (sqlQuery);
@@ -3033,16 +3038,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						subQuery.Select.Columns.RemoveAt(0);
 
-						query.Select.Columns[i] = new SqlQuery.Column(
-							query,
-							new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[0]));
+						query.Select.Columns[i].Expression = 
+							new SqlFunction(oldFunc.SystemType, oldFunc.Name, subQuery.Select.Columns[0]);
 					}
 					else
 					{
-						query.Select.Columns[i] = new SqlQuery.Column(query, subQuery.Select.Columns[0]);
+						query.Select.Columns[i].Expression = subQuery.Select.Columns[0];
 					}
 
-					dic.Add(col, query.Select.Columns[i]);
+					//dic.Add(col, query.Select.Columns[i]);
 				}
 			}
 		}

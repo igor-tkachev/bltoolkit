@@ -453,8 +453,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 		class ExprHoder<TP,TE>
 		{
+#pragma warning disable 649
 			public TP p;
 			public TE ex;
+#pragma warning restore 649
 		}
 
 		Expression ConvertWhere(MethodCallExpression method)
