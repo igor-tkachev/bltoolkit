@@ -540,6 +540,10 @@ namespace BLToolkit.Data.Linq.Builder
 					return dic.TryGetValue(ex, out e) ? e : ex;
 				});
 
+				var nparm = exprs.Aggregate<Expression,Expression>(parm, (c,t) => Expression.PropertyOrField(c, "p"));
+
+				newBody = newBody.Convert(ex => ex == lparam ? nparm : ex);
+
 				predicate = Expression.Lambda(newBody, parm);
 
 				var methodInfo = GetMethodInfo(method, "Select");
