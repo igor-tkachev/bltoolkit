@@ -477,23 +477,27 @@ namespace BLToolkit.Data.Linq.Builder
 				if (ex.NodeType == ExpressionType.Call)
 				{
 					var call = (MethodCallExpression)ex;
-					var arg = call.Arguments[0];
 
-					if (call.IsQueryable(AggregationBuilder.MethodNames))
+					if (call.Arguments.Count > 0)
 					{
-						while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
-							arg = ((MethodCallExpression) arg).Arguments[0];
+						var arg = call.Arguments[0];
 
-						if (arg.NodeType == ExpressionType.Call)
-							exprs.Add(ex);
-					}
-					else if (call.IsQueryable(CountBuilder.MethodNames))
-					{
-						//while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
-						//	arg = ((MethodCallExpression) arg).Arguments[0];
+						if (call.IsQueryable(AggregationBuilder.MethodNames))
+						{
+							while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
+								arg = ((MethodCallExpression) arg).Arguments[0];
 
-						if (arg.NodeType == ExpressionType.Call)
-							exprs.Add(ex);
+							if (arg.NodeType == ExpressionType.Call)
+								exprs.Add(ex);
+						}
+						else if (call.IsQueryable(CountBuilder.MethodNames))
+						{
+							//while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
+							//	arg = ((MethodCallExpression) arg).Arguments[0];
+
+							if (arg.NodeType == ExpressionType.Call)
+								exprs.Add(ex);
+						}
 					}
 				}
 			});
