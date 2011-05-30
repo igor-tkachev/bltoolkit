@@ -3032,7 +3032,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						}
 					}
 
-					if (!query.GroupBy.IsEmpty)
+					if (!query.GroupBy.IsEmpty/* && subQuery.Select.Columns.Count > 1*/)
 					{
 						var oldFunc = (SqlFunction)subQuery.Select.Columns[0].Expression;
 
