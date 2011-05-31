@@ -23,7 +23,7 @@ namespace Data.Linq
 					from ch in db.Child
 					group ch by ch.ParentID;
 
-				var list = q.ToList().Where(n => n.Key != 6).OrderBy(n => n.Key).ToList();
+				var list = q.ToList().Where(n => n.Key < 6).OrderBy(n => n.Key).ToList();
 
 				Assert.AreEqual(4, list.Count);
 
@@ -68,7 +68,7 @@ namespace Data.Linq
 					group ch by ch.ParentID into g
 					select g.Key;
 
-				var list = q.ToList().Where(n => n != 6).OrderBy(n => n).ToList();
+				var list = q.ToList().Where(n => n < 6).OrderBy(n => n).ToList();
 
 				Assert.AreEqual(4, list.Count);
 				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i]);
@@ -86,7 +86,7 @@ namespace Data.Linq
 					orderby g.Key
 					select g.Key;
 
-				var list = q.ToList().Where(n => n != 6).ToList();
+				var list = q.ToList().Where(n => n < 6).ToList();
 
 				Assert.AreEqual(4, list.Count);
 				for (var i = 0; i < list.Count; i++) Assert.AreEqual(i + 1, list[i]);
@@ -495,13 +495,15 @@ namespace Data.Linq
 		[Test]
 		public void Sum3()
 		{
-			ForEachProvider(db => AreEqual(
-				from ch in Child
-				group ch by ch.Parent into g
-				select g.Key.Children.Sum(p => p.ChildID),
-				from ch in db.Child
-				group ch by ch.Parent into g
-				select g.Key.Children.Sum(p => p.ChildID)));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from ch in Child
+					group ch by ch.Parent into g
+					select g.Key.Children.Sum(p => p.ChildID),
+					from ch in db.Child
+					group ch by ch.Parent into g
+					select g.Key.Children.Sum(p => p.ChildID)));
 		}
 
 		[Test]
@@ -699,6 +701,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Max12()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Child.Max(c => (bool?)(c.ChildID > 20)),
+				db.Child.Max(c => (bool?)(c.ChildID > 20))));
+		}
+
+		[Test]
 		public void Max2()
 		{
 			var expected =
@@ -774,75 +784,83 @@ namespace Data.Linq
 		[Test]
 		public void GrooupByAssociation102()
 		{
-			ForEachProvider(db => AreEqual(
-				from ch in GrandChild1
-				group ch by ch.Parent into g
-				where g.Count(_ => _.ChildID >= 20) > 2
-				select g.Key.Value1
-				,
-				from ch in db.GrandChild1
-				group ch by ch.Parent into g
-				where g.Count(_ => _.ChildID >= 20) > 2
-				select g.Key.Value1));
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					from ch in GrandChild1
+					group ch by ch.Parent into g
+					where g.Count(_ => _.ChildID >= 20) > 2
+					select g.Key.Value1
+					,
+					from ch in db.GrandChild1
+					group ch by ch.Parent into g
+					where g.Count(_ => _.ChildID >= 20) > 2
+					select g.Key.Value1));
 		}
 
 		[Test]
 		public void GrooupByAssociation1022()
 		{
-			ForEachProvider(db => AreEqual(
-				from ch in GrandChild1
-				group ch by ch.Parent into g
-				where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
-				select g.Key.Value1
-				,
-				from ch in db.GrandChild1
-				group ch by ch.Parent into g
-				where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
-				select g.Key.Value1));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.Informix }, // Can be fixed.
+					db => AreEqual(
+					from ch in GrandChild1
+					group ch by ch.Parent into g
+					where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
+					select g.Key.Value1
+					,
+					from ch in db.GrandChild1
+					group ch by ch.Parent into g
+					where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
+					select g.Key.Value1));
 		}
 
 		[Test]
 		public void GrooupByAssociation1023()
 		{
-			ForEachProvider(db => AreEqual(
-				from ch in GrandChild1
-				group ch by ch.Parent into g
-				where
-					g.Count(_ => _.ChildID >= 20) > 2 &&
-					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
-					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0
-				select g.Key.Value1
-				,
-				from ch in db.GrandChild1
-				group ch by ch.Parent into g
-				where
-					g.Count(_ => _.ChildID >= 20) > 2 &&
-					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
-					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0
-				select g.Key.Value1));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.Informix }, // Can be fixed.
+				db => AreEqual(
+					from ch in GrandChild1
+					group ch by ch.Parent into g
+					where
+						g.Count(_ => _.ChildID >= 20) > 2 &&
+						g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+						g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0
+					select g.Key.Value1
+					,
+					from ch in db.GrandChild1
+					group ch by ch.Parent into g
+					where
+						g.Count(_ => _.ChildID >= 20) > 2 &&
+						g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+						g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0
+					select g.Key.Value1));
 		}
 
 		[Test]
 		public void GrooupByAssociation1024()
 		{
-			ForEachProvider(db => AreEqual(
-				from ch in GrandChild1
-				group ch by ch.Parent into g
-				where
-					g.Count(_ => _.ChildID >= 20) > 2 &&
-					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
-					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0 &&
-					g.Where(_ => _.ChildID >= 18).Max(p => p.ParentID) > 0
-				select g.Key.Value1
-				,
-				from ch in db.GrandChild1
-				group ch by ch.Parent into g
-				where
-					g.Count(_ => _.ChildID >= 20) > 2 &&
-					g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
-					g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0 &&
-					g.Where(_ => _.ChildID >= 18).Max(p => p.ParentID) > 0
-				select g.Key.Value1));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.Informix }, // Can be fixed.
+				db => AreEqual(
+					from ch in GrandChild1
+					group ch by ch.Parent into g
+					where
+						g.Count(_ => _.ChildID >= 20) > 2 &&
+						g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+						g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0 &&
+						g.Where(_ => _.ChildID >= 18).Max(p => p.ParentID) > 0
+					select g.Key.Value1
+					,
+					from ch in db.GrandChild1
+					group ch by ch.Parent into g
+					where
+						g.Count(_ => _.ChildID >= 20) > 2 &&
+						g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0 &&
+						g.Where(_ => _.ChildID >= 19).Max(p => p.ParentID) > 0 &&
+						g.Where(_ => _.ChildID >= 18).Max(p => p.ParentID) > 0
+					select g.Key.Value1));
 		}
 
 		[Test]
@@ -1038,39 +1056,60 @@ namespace Data.Linq
 		[Test]
 		public void Scalar3()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
-				(from ch in Child
-				 group ch by ch.ParentID into g
-				 select g.Select(ch => ch.ChildID).Where(id => id > 0).Max()),
-				(from ch in db.Child
-				 group ch by ch.ParentID into g
-				 select g.Select(ch => ch.ChildID).Where(id => id > 0).Max())));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					(from ch in Child
+					 group ch by ch.ParentID into g
+					 select g.Select(ch => ch.ChildID).Where(id => id > 0).Max()),
+					(from ch in db.Child
+					 group ch by ch.ParentID into g
+					 select g.Select(ch => ch.ChildID).Where(id => id > 0).Max())));
 		}
 
 		[Test]
 		public void Scalar4()
 		{
-			ForEachProvider(db => AreEqual(
-				(from ch in Child
-				 group ch by ch.ParentID into g
-				 where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
-				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()),
-				(from ch in db.Child
-				 group ch by ch.ParentID into g
-				 where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
-				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min())));
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					from ch in Child
+					group ch by ch.ParentID into g
+					where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+					select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()
+					,
+					from ch in db.Child
+					group ch by ch.ParentID into g
+					where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+					select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()));
 		}
 
 		[Test]
 		public void Scalar5()
 		{
 			ForEachProvider(db => AreEqual(
-				(from ch in Child
-				 group ch by ch.ParentID into g
-				 select g.Max()),
-				(from ch in db.Child
-				 group ch by ch.ParentID into g
-				 select g.Max())));
+				from ch in Child
+				select ch.ParentID into id
+				group id by id into g
+				select g.Max()
+				,
+				from ch in db.Child
+				select ch.ParentID into id
+				group id by id into g
+				select g.Max()));
+		}
+
+		//[Test]
+		public void Scalar51()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by ch.ParentID into g
+				select g.Max()
+				,
+				from ch in db.Child
+				group ch by ch.ParentID into g
+				select g.Max()));
 		}
 
 		[Test]

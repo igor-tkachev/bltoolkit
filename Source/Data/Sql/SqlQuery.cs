@@ -2422,7 +2422,7 @@ namespace BLToolkit.Data.Sql
 			static bool CheckChild(IEnumerable<JoinedTable> joins, ISqlTableSource table)
 			{
 				foreach (var j in joins)
-					if (j.Table == table || CheckChild(j.Table.Joins, table))
+					if (j.Table.Source == table || CheckChild(j.Table.Joins, table))
 						return true;
 				return false;
 			}

@@ -44,10 +44,17 @@ namespace BLToolkit.Data.Linq
 		readonly Dictionary<Expression,Func<Expression,IQueryable>> _queryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
 		readonly List<Func<Expression,IQueryable>>                  _queryableAccessorList = new List<Func<Expression,IQueryable>>();
 
-		public int AddQueryableAccessors(Expression expr, Func<Expression,IQueryable> qe)
+		public int AddQueryableAccessors(Expression expr, Expression<Func<Expression,IQueryable>> qe)
 		{
-			_queryableAccessorDic. Add(expr, qe);
-			_queryableAccessorList.Add(qe);
+			Func<Expression,IQueryable> e;
+
+			if (_queryableAccessorDic.TryGetValue(expr, out e))
+				return _queryableAccessorList.IndexOf(e);
+
+			e = qe.Compile();
+
+			_queryableAccessorDic. Add(expr, e);
+			_queryableAccessorList.Add(e);
 
 			return _queryableAccessorList.Count - 1;
 		}

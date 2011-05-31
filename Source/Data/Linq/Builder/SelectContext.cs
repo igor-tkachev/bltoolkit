@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
-	using Reflection;
+	//using Reflection;
 
 	// This class implements double functionality (scalar and member type selects)
 	// and could be implemented as two different classes.
@@ -769,6 +769,11 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (Body.NodeType == ExpressionType.Parameter)
 				{
+					//if (Sequence.Length == 2 && Sequence[1] is GroupByBuilder.KeyContext && expression == Body)
+					//{
+					//	return action(Sequence[1], null, 0);
+					//}
+
 					var sequence = GetSequence(Body, 0);
 
 					return expression == Body ?

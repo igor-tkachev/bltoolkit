@@ -33,7 +33,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.Replace("NULL IS NULL",     "1=1");
 
 			return n;
-		}
+		}
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{

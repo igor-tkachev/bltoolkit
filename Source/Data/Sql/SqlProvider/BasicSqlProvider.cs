@@ -2524,8 +2524,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							case "$Convert$": return ConvertConvertion(func);
 							case "Average"  : return new SqlFunction(func.SystemType, "Avg", func.Parameters);
+							case "Max"      :
+							case "Min"      :
+								{
+									if (func.SystemType == typeof(bool) || func.SystemType == typeof(bool?))
+									{
+										return new SqlFunction(typeof(int), func.Name,
+											new SqlFunction(func.SystemType, "CASE", func.Parameters[0], new SqlValue(1), new SqlValue(0)));
+									}
 
-							case "CASE":
+									break;
+								}
+
+							case "CASE"     :
 								{
 									var parms = func.Parameters;
 									var len   = parms.Length;
@@ -2865,11 +2876,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			if (!IsCountSubQuerySupported || !IsSubQueryColumnSupported)
-			{
-				
-			}
-
 			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
 
 			if (!IsCountSubQuerySupported)  sqlQuery = MoveCountSubQuery (sqlQuery);
@@ -2883,20 +2889,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		SqlQuery MoveCountSubQuery(SqlQuery sqlQuery)
 		{
-			var dic = new Dictionary<IQueryElement,IQueryElement>();
-
-			new QueryVisitor().Visit(sqlQuery, element => MoveCountSubQuery(dic, element));
-
-			sqlQuery = new QueryVisitor().Convert(sqlQuery, e =>
-			{
-				IQueryElement ne;
-				return dic.TryGetValue(e, out ne) ? ne : e;
-			});
-
+			new QueryVisitor().Visit(sqlQuery, MoveCountSubQuery);
 			return sqlQuery;
 		}
 
-		void MoveCountSubQuery(IDictionary<IQueryElement,IQueryElement> dic, IQueryElement element)
+		void MoveCountSubQuery(IQueryElement element)
 		{
 			if (element.ElementType != QueryElementType.SqlQuery)
 				return;
@@ -3045,8 +3042,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						query.Select.Columns[i].Expression = subQuery.Select.Columns[0];
 					}
-
-					//dic.Add(col, query.Select.Columns[i]);
 				}
 			}
 		}
