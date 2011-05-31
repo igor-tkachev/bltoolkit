@@ -57,6 +57,7 @@ string OneToManyAssociationType = "IEnumerable<{0}>";
 
 bool   RenderField          = false;
 bool   RenderBackReferences = true;
+bool   RenderForeignKeys    = true;
 
 bool   IsMetadataLoaded;
 
@@ -160,7 +161,7 @@ static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key
 		tt.WriteLine(" { get; set; }");
 };
 
-static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
+static Action<GeneratedTextTransformation,Table, bool> RenderTable = (tt,t, renderForeignKeys) =>
 {
 	if (t.IsView)
 	{
@@ -202,7 +203,7 @@ static Action<GeneratedTextTransformation,Table> RenderTable = (tt,t) =>
 		}
 	}
 
-	if (t.ForeignKeys.Count > 0)
+	if (renderForeignKeys && t.ForeignKeys.Count > 0)
 	{
 		foreach (var key in t.ForeignKeys.Values.Where(k => tt.RenderBackReferences || k.BackReference != null))
 		{
@@ -319,7 +320,7 @@ void GenerateModel()
 	foreach (var t in tlist)
 	{
 		WriteLine("");
-		RenderTable(this, t);
+		RenderTable(this, t, RenderForeignKeys);
 	}
 
 	PopIndent();

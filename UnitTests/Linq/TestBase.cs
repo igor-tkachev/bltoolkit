@@ -10,7 +10,6 @@ using System.ServiceModel.Description;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
-using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
 using BLToolkit.ServiceModel;
@@ -510,8 +509,8 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<GrandChild1> _grandChild1;
-		protected List<GrandChild1>  GrandChild1
+		private          List<GrandChild1> _grandChild1;
+		protected IEnumerable<GrandChild1>  GrandChild1
 		{
 			get
 			{
@@ -527,7 +526,8 @@ namespace Data.Linq
 						}
 					}
 
-				return _grandChild1;
+				foreach (var grandChild in _grandChild1)
+					yield return grandChild;
 			}
 		}
 

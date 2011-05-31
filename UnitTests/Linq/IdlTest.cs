@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
@@ -202,48 +203,83 @@ namespace Data.Linq
                     });
         }
 
+        #region ObjectExt
+
+        public abstract class ObjectWithId
+        {
+            public ObjectId Id;
+        }
+
+        public class ParentEx : ObjectWithId
+        {
+            public int? Value1;
+        }
+
+        #endregion
+
         [Test]
-        public void TestWithSubset()
+        public void TestForObjectExt()
         {
             ForMySqlProvider(db =>
                 {
-                    var r = from parent in db.Parent
-                                join c in db.Child on parent.ParentID equals c.ParentID into children
-                                select new { parent, children };
+                    var r = from p in db.Parent
+                                select new ParentEx
+                                {
+                                    Id = new ObjectId { Value = p.ParentID },
+                                    Value1 = p.Value1,
+                                };
                     Assert.That(r.ToArray(), Is.Not.Null);
                 });
         }
 
+        private void getData(ITestDataContext db, IEnumerable<int?> d, IEnumerable<int?> compareWith)
+        {
+            var r1 = db.GrandChild
+                .Where(x => d.Contains(x.ParentID))
+                .GroupBy(x => x.ChildID, x => x.GrandChildID)
+                .ToList();
+            foreach (var group in r1)
+            {
+                Assert.That(compareWith.Any(x => group.Contains(x)), Is.True);
+            }
+        }
+
         [Test]
-        public void TestWithSubsequence()
+        public void TestForGroupBy()
+        {
+            ForMySqlProvider(db =>
+                {
+                    /* no error in first call */
+                    getData(db, new List<int?> { 2 }, new List<int?> { 211, 212, 221, 222 });
+
+                    /* error in second and more calls */
+                    /*
+                     * GROUP BY select clause is correct
+                        SELECT x.ChildID FROM GrandChild x WHERE x.ParentID IN (3) GROUP BY x.ChildID
+
+                     * But next SELECT clause contains "x.ParentID IN (2)" instead "x.ParentID IN (3)"
+                        -- DECLARE ?p1 Int32
+                        -- SET ?p1 = 31
+                        SELECT x.GrandChildID FROM GrandChild x WHERE x.ParentID IN (2) AND x.ChildID = ?p1
+                     */
+                    getData(db, new List<int?> { 3 }, new List<int?> { 311, 312, 313, 321, 333 });
+
+                });
+        }
+
+        [Test]
+        public void TestLinqMax()
         {
             ForMySqlProvider(
                 db =>
                     {
-                        var r = from parent in db.Parent
-                                select new
-                                    {
-                                        parent.ParentID,
-                                        childrenIds = parent.Children.Select(c => new ObjectId { Value = c.ChildID })
-                                    };
-                        Assert.That(r.ToArray(), Is.Not.Null);
+                        Assert.That(db.Patient.Where(x => x.PersonID < 0).Select(x => (int?)x.PersonID).Max(), Is.Null);
+                        Assert.That(db.Patient.Where(x => x.PersonID < 0).Max(x => (int?)x.PersonID), Is.Null);
+                        Assert.Catch<InvalidOperationException>(
+                            () => db.Patient.Where(x => x.PersonID < 0).Select(x => x.PersonID).Max());
+                        Assert.Catch<InvalidOperationException>(
+                            () => db.Patient.Where(x => x.PersonID < 0).Max(x => x.PersonID));
                     });
-        }
-
-        [Test]
-        public void TestWithSubsequenceToArray()
-        {
-            ForMySqlProvider(
-                db =>
-                {
-                    var r = from parent in db.Parent
-                             select new
-                             {
-                                 parent.ParentID,
-                                 childrenIds = parent.Children.Select(c => new ObjectId { Value = c.ChildID }).ToArray()
-                             };
-                    Assert.That(r.ToArray(), Is.Not.Null);
-                });
         }
 
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
@@ -253,7 +289,7 @@ namespace Data.Linq
 
         private void ForMySqlProvider(Action<ITestDataContext> func)
         {
-            ForEachProvider(/*Providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),*/func);
+            ForEachProvider(Providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),func);
         }
     }
 }

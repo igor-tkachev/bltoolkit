@@ -31,7 +31,9 @@ namespace Data.Linq.Model
 		public Table<Northwind.Shipper>             Shipper             { get { return GetTable<Northwind.Shipper>();             } }
 		public Table<Northwind.Supplier>            Supplier            { get { return GetTable<Northwind.Supplier>();            } }
 		public Table<Northwind.Territory>           Territory           { get { return GetTable<Northwind.Territory>();           } }
-
+		
+#if !MONO
+		
 		public class FreeTextKey<T>
 		{
 			public T   Key;
@@ -110,5 +112,7 @@ namespace Data.Linq.Model
 				fieldSelector,
 				text);
 		}
+		
+#endif		
 	}
 }

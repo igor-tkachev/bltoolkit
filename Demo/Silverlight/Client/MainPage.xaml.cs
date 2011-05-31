@@ -21,7 +21,7 @@ namespace Client
 						orderby c.CategoryName
 						select  c.CategoryName;
 
-					var text = string.Join("\n", q.ToList().ToArray());
+					var text = string.Join("\n", q.ToArray());
 
 					Dispatcher.BeginInvoke(() => OutputText.Text = text);
 				}

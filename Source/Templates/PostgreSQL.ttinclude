@@ -14,7 +14,7 @@ private void LoadServerMetadata()
 		cmd.CommandText = @"
 			SELECT 
 				pg_class.oid,
-				pg_user.usename,
+				pg_namespace.nspname,
 				pg_class.relname,
 				pg_class.relkind
 			FROM 

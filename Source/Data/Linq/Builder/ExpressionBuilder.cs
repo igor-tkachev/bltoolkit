@@ -111,7 +111,7 @@ namespace BLToolkit.Data.Linq.Builder
 		internal Query<T> Build<T>()
 		{
 			var sequence = BuildSequence(new BuildInfo((IBuildContext)null, Expression, new SqlQuery()));
-
+			
 			if (_reorder)
 				lock (_sync)
 				{
@@ -200,6 +200,51 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConverLetSubqueries
 
+		static void LetExpressionWalker(Expression ex, Dictionary<MemberInfo,Expression> dic)
+		{
+			{
+				if (ex.NodeType == ExpressionType.Call)
+				{
+					var me = (MethodCallExpression)ex;
+			
+					LambdaInfo lambda = null;
+			
+					if (me.Method.Name == "Select" &&
+					    (me.IsQueryableMethod((_, l) => { lambda = l; return true; }) ||
+					     me.IsQueryableMethod(null, 2, _ => { }, l => lambda = l)))
+					{
+						lambda.Body.Visit(e =>
+						{
+							if (e.NodeType == ExpressionType.New)
+							{
+								var ne = (NewExpression)e;
+			
+								if (ne.Members == null || ne.Arguments.Count != ne.Members.Count)
+								{
+								}
+								else
+								{
+									var args = ne.Arguments.Zip(ne.Members, (a,m) => new { a, m }).ToList();
+			
+									var q =
+										from a in args
+										where
+											a.a.NodeType == ExpressionType.Call &&
+											a.a.Type != typeof(string) &&
+											!a.a.Type.IsArray &&
+											TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
+										select a;
+			
+									foreach (var item in q)
+										dic.Add(item.m, item.a);
+								}
+							}
+						});
+					}
+				}
+			}
+		}
+		
 		static Expression ConverLetSubqueries(Expression expression)
 		{
 			var result = expression;
@@ -212,55 +257,7 @@ namespace BLToolkit.Data.Linq.Builder
 				//
 				var dic = new Dictionary<MemberInfo,Expression>();
 
-				expression.Visit(ex =>
-				{
-					switch (ex.NodeType)
-					{
-						case ExpressionType.Call:
-							{
-								var me = (MethodCallExpression)ex;
-
-								LambdaInfo lambda = null;
-
-								if (me.Method.Name == "Select" &&
-								    (me.IsQueryableMethod((_, l) => { lambda = l; return true; }) ||
-								     me.IsQueryableMethod(null, 2, _ => { }, l => lambda = l)))
-								{
-									lambda.Body.Visit(e =>
-									{
-										switch (e.NodeType)
-										{
-											case ExpressionType.New:
-												{
-													var ne = (NewExpression)e;
-
-													if (ne.Members == null || ne.Arguments.Count != ne.Members.Count)
-														break;
-
-													var args = ne.Arguments.Zip(ne.Members, (a,m) => new { a, m }).ToList();
-
-													var q =
-														from a in args
-														where
-															a.a.NodeType == ExpressionType.Call &&
-															a.a.Type != typeof(string) &&
-															!a.a.Type.IsArray &&
-															TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
-														select a;
-
-													foreach (var item in q)
-														dic.Add(item.m, item.a);
-												}
-
-												break;
-										}
-									});
-								}
-							}
-
-							break;
-					}
-				});
+				expression.Visit(ex => LetExpressionWalker(ex, dic));
 
 				if (dic.Count == 0)
 					return expression;
@@ -356,6 +353,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (call.IsQueryable()) switch (call.Method.Name)
 							{
+								//case "Where"           : return ConvertWhere     (call);
 								case "GroupBy"         : return ConvertGroupBy   (call);
 								case "SelectMany"      : return ConvertSelectMany(call);
 								case "LongCount"       :
@@ -364,13 +362,25 @@ namespace BLToolkit.Data.Linq.Builder
 								case "SingleOrDefault" :
 								case "First"           :
 								case "FirstOrDefault"  : return ConvertPredicate (call);
-								case "Sum"             :
 								case "Min"             :
-								case "Max"             :
-								case "Average"         : return ConvertSelector  (call);
+								case "Max"             : return ConvertSelector  (call, true);
+								case "Sum"             :
+								case "Average"         : return ConvertSelector  (call, false);
 							}
 
 							return ConvertSubquery(expr);
+						}
+
+					case ExpressionType.Constant :
+						{
+							var c = (ConstantExpression)expr;
+
+							// Fix Mono behaviour.
+							//
+							if (c.Value is IExpressionQuery)
+								return ((IQueryable)c.Value).Expression;
+
+							break;
 						}
 				}
 
@@ -434,6 +444,20 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return expr;
+		}
+
+		#endregion
+
+		#region ConvertWhere
+
+		Expression ConvertWhere(MethodCallExpression method)
+		{
+			var sequence  = OptimizeExpression(method.Arguments[0]);
+			var predicate = OptimizeExpression(method.Arguments[1]);
+
+
+
+			return method;
 		}
 
 		#endregion
@@ -864,19 +888,35 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertSelector
 
-		Expression ConvertSelector(MethodCallExpression method)
+		Expression ConvertSelector(MethodCallExpression method, bool isGeneric)
 		{
 			if (method.Arguments.Count != 2)
 				return method;
+
+			isGeneric = isGeneric && method.Method.DeclaringType == typeof(Queryable);
 
 			var types = method.Method.DeclaringType == typeof(Enumerable) ?
 				method.Method.GetParameters()[1].ParameterType.GetGenericArguments() :
 				method.Method.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments();
 
 			var cm = GetQueriableMethodInfo(method, m =>
-				m.Name                   == method.Method.Name &&
-				m.GetParameters().Length == 1 &&
-				m.GetParameters()[0].ParameterType.GetGenericArguments()[0] == types[1]);
+			{
+				if (m.Name == method.Method.Name)
+				{
+					var ps = m.GetParameters();
+
+					if (ps.Length == 1)
+					{
+						if (isGeneric)
+							return true;
+
+						var ts = ps[0].ParameterType.GetGenericArguments();
+						return ts[0] == types[1];
+					}
+				}
+
+				return false;
+			});
 
 			var sm = method.Method.DeclaringType == typeof(Enumerable) ?
 				EnumerableMethods
@@ -889,6 +929,9 @@ namespace BLToolkit.Data.Linq.Builder
 			var argType = types[0];
 
 			sm = sm.MakeGenericMethod(argType, types[1]);
+
+			if (cm.IsGenericMethodDefinition)
+				cm = cm.MakeGenericMethod(types[1]);
 
 			return Expression.Call(null, cm,
 				Expression.Call(null, sm,

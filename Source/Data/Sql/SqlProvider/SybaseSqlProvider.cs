@@ -107,7 +107,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (type.SqlDbType)
 			{
+#if !MONO
 				case SqlDbType.DateTime2 : sb.Append("DateTime");        break;
+#endif
 				default                  : base.BuildDataType(sb, type); break;
 			}
 		}

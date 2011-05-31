@@ -431,7 +431,7 @@ namespace BLToolkit.Data.Linq
 		IEnumerable<T> Map(IEnumerable<IDataReader> data, QueryContext context, IDataContextInfo dataContextInfo, Expression expr, object[] ps, Mapper<T> mapper)
 		{
 			if (context == null)
-				context = new QueryContext { RootDataContext = dataContextInfo };
+				context = new QueryContext(dataContextInfo, expr, ps);
 
 			foreach (var dr in data)
 			{
@@ -926,9 +926,13 @@ namespace BLToolkit.Data.Linq
 						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
 
 						if (fields.Count == 0)
-							return 0;
-							//throw new LinqException(
-							//	string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
+						{
+							if (Configuration.Linq.IgnoreEmptyUpdate)
+								return 0;
+
+							throw new LinqException(
+								string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
+						}
 
 						foreach (var field in fields)
 						{
@@ -1119,7 +1123,7 @@ namespace BLToolkit.Data.Linq
 			Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
 		{
 			if (queryContext == null)
-				queryContext = new QueryContext { RootDataContext = dataContextInfo };
+				queryContext = new QueryContext(dataContextInfo, expr, ps);
 
 			foreach (var dr in data)
 				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
