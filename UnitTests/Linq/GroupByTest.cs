@@ -493,6 +493,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Sum3()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by ch.Parent into g
+				select g.Key.Children.Sum(p => p.ChildID),
+				from ch in db.Child
+				group ch by ch.Parent into g
+				select g.Key.Children.Sum(p => p.ChildID)));
+		}
+
+		[Test]
 		public void SumSubQuery1()
 		{
 			var n = 1;
@@ -894,6 +906,32 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Scalar4()
+		{
+			ForEachProvider(db => AreEqual(
+				(from ch in Child
+				 group ch by ch.ParentID into g
+				 where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()),
+				(from ch in db.Child
+				 group ch by ch.ParentID into g
+				 where g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+				 select g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min())));
+		}
+
+		[Test]
+		public void Scalar5()
+		{
+			ForEachProvider(db => AreEqual(
+				(from ch in Child
+				 group ch by ch.ParentID into g
+				 select g.Max()),
+				(from ch in db.Child
+				 group ch by ch.ParentID into g
+				 select g.Max())));
+		}
+
+		[Test]
 		public void GrooupByAssociation1()
 		{
 			ForEachProvider(db => AreEqual(
@@ -911,15 +949,32 @@ namespace Data.Linq
 		[Test]
 		public void GrooupByAssociation102()
 		{
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					from ch in GrandChild1
+					group ch by ch.Parent into g
+					where g.Count(_ => _.ChildID >= 20) > 2
+					select g.Key.Value1
+					,
+					from ch in db.GrandChild1
+					group ch by ch.Parent into g
+					where g.Count(_ => _.ChildID >= 20) > 2
+					select g.Key.Value1));
+		}
+
+		[Test]
+		public void GrooupByAssociation1022()
+		{
 			ForEachProvider(db => AreEqual(
 				from ch in GrandChild1
 				group ch by ch.Parent into g
-				where g.Count(_ => _.ChildID >= 20) > 2
+				where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
 				select g.Key.Value1
 				,
 				from ch in db.GrandChild1
 				group ch by ch.Parent into g
-				where g.Count(_ => _.ChildID >= 20) > 2
+				where g.Count(_ => _.ChildID >= 20) > 2 && g.Where(_ => _.ChildID >= 19).Sum(p => p.ParentID) > 0
 				select g.Key.Value1));
 		}
 
