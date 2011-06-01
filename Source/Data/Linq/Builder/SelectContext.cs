@@ -284,7 +284,7 @@ namespace BLToolkit.Data.Linq.Builder
 											{
 												sql = ConvertExpressions(Members[member], flags);
 
-												if (sql.Length == 1)
+												if (sql.Length == 1 && flags != ConvertFlags.Key)
 													sql[0].Member = member;
 
 												_sql.Add(member, sql);

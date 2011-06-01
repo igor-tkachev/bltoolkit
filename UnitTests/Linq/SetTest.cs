@@ -539,7 +539,7 @@ namespace Data.Linq
 		[Test]
 		public void Contains9()
 		{
-			var arr = new[] { Parent1[0], Parent1[1] };
+			var arr = Parent1.Take(2).ToArray();
 
 			ForEachProvider(db => AreEqual(
 				from p in    Parent1 where arr.Contains(p) select p,

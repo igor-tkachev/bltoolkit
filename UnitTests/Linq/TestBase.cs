@@ -382,12 +382,16 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<Parent1> _parent1;
-		protected List<Parent1>  Parent1
+		private          List<Parent1> _parent1;
+		protected IEnumerable<Parent1>  Parent1
 		{
 			get
 			{
-				return _parent1 ?? (_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList());
+				if (_parent1 == null)
+					_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList();
+
+				foreach (var parent in _parent1)
+					yield return parent;
 			}
 		}
 
