@@ -354,7 +354,7 @@ namespace Data.Linq
 						(m, i) =>
 							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0, i)).ToArray();
 
-				Assert.AreEqual("6.66.True.0", lines[0]);
+				Assert.AreEqual("7.77.True.0", lines[0]);
 			});
 		}
 

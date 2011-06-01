@@ -265,9 +265,52 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
 					while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
-						arg = ((MethodCallExpression) arg).Arguments[0];
+						arg = ((MethodCallExpression)arg).Arguments[0];
+
+				var mc = arg as MethodCallExpression;
+
+				while (mc != null)
+				{
+					if (!mc.IsQueryable())
+						return false;
+
+					mc = mc.Arguments[0] as MethodCallExpression;
+				}
 
 				return arg.NodeType == ExpressionType.Call || IsSubQuerySource(context, arg);
+			}
+
+			return false;
+		}
+
+		bool IsSubQuery1(IBuildContext context, MethodCallExpression call)
+		{
+			if (call.IsQueryable())
+			{
+				var expr = call.Arguments[0];
+
+				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
+					while (expr.NodeType == ExpressionType.Call && ((MethodCallExpression) expr).Method.Name == "Select")
+						expr = ((MethodCallExpression)expr).Arguments[0];
+
+				while (expr.NodeType == ExpressionType.Call)
+				{
+					var c = (MethodCallExpression)expr;
+
+					if (!c.IsQueryable())
+						break;
+
+					expr = c.Arguments[0];
+				}
+
+				if (expr.NodeType == ExpressionType.Call)
+					return ((MethodCallExpression)expr).IsQueryable();
+
+				if (IsSubQuerySource(context, expr))
+					return true;
+
+				//if (IsIEnumerableType(expr))
+				//	return !CanBeCompiled(expr);
 			}
 
 			return false;
@@ -299,8 +342,7 @@ namespace BLToolkit.Data.Linq.Builder
 				&& TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
 
 			if (res && expr.NodeType == ExpressionType.MemberAccess)
-				return false;
-				//res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
+				res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
 
 			return res;
 		}
