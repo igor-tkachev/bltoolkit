@@ -706,7 +706,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (levelExpression == memberExpression)
 							foreach (var field in SqlTable.Fields.Values)
-								if (TypeHelper.Equals(field.MemberMapper.MemberAccessor.MemberInfo, memberExpression.Member))
+								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
 									return field;
 					}
 				}
