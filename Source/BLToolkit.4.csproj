@@ -208,6 +208,7 @@
     <Compile Include="Data\Linq\Builder\ConcatUnionBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
