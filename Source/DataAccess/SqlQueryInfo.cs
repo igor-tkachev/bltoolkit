@@ -65,7 +65,7 @@ namespace BLToolkit.DataAccess
 				var mmi = info.MemberMapper.MapMemberInfo;
 				var val = info.MemberMapper.GetValue(obj);
 
-				if (val == null && mmi.Nullable && mmi.NullValue == null)
+				if (val == null && mmi.Nullable/* && mmi.NullValue == null*/)
 				{
 					//replace value with DbNull
 					val = DBNull.Value;
