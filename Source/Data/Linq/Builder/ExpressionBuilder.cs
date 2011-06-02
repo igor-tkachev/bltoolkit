@@ -164,7 +164,7 @@ namespace BLToolkit.Data.Linq.Builder
 		Expression ConvertExpressionTree(Expression expression)
 		{
 			expression = ConvertParameters  (expression);
-			expression = ConverLetSubqueries(expression);
+			//expression = ConverLetSubqueries(expression);
 
 			return OptimizeExpression(expression);
 		}
@@ -273,10 +273,13 @@ namespace BLToolkit.Data.Linq.Builder
 								var me     = (MemberExpression)ex;
 								var member = me.Member;
 
+								Expression arg;
+
+								if (dic.TryGetValue(member, out arg))
+									return arg;
+
 								if (member is PropertyInfo)
 									member = ((PropertyInfo)member).GetGetMethod();
-
-								Expression arg;
 
 								if (dic.TryGetValue(member, out arg))
 									return arg;
