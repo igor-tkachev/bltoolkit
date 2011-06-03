@@ -55,7 +55,7 @@ cmd /c $rar
 cd Source
 
 $comp = "$env:windir\Microsoft.NET\Framework\v3.5\MSBuild.exe BLToolkit.3.csproj /property:Configuration=Release"
-cmd /c $comp -ErrorAction Stop
+cmd /c $comp
 $comp = "$env:windir\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.4.csproj /property:Configuration=Release"
 cmd /c $comp
 $comp = "$env:windir\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.SL.4.csproj /property:Configuration=Release"
