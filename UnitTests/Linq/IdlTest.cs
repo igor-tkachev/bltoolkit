@@ -354,7 +354,7 @@ namespace Data.Linq
 
     public static class IdlPersonConverterExtensions
     {
-        public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IQueryable<IdlPatient> list, IdlPatientSource source)
+        public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IEnumerable<IdlPatient> list, IdlPatientSource source)
         {
             return from x in list
                    join person in source.Persons() on x.Id equals person.Id
