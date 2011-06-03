@@ -282,6 +282,25 @@ namespace Data.Linq
                     });
         }
 
+        [Test]
+        public void TestConvertFunction()
+        {
+            ForMySqlProvider(
+                db =>
+                {
+                    var ds = new IdlPatientSource(db);
+                    var r1 = ds.Patients().ToList();
+                    var r2 = ds.Persons().ToList();
+
+                    Assert.That(r1, Is.Not.Empty);
+                    Assert.That(r2, Is.Not.Empty);
+
+                    var r3 = ds.Patients().ToIdlPatientEx(ds);
+                    var r4 = r3.ToList();
+                    Assert.That(r4, Is.Not.Empty);
+                });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
@@ -289,7 +308,74 @@ namespace Data.Linq
 
         private void ForMySqlProvider(Action<ITestDataContext> func)
         {
-            ForEachProvider(Providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),func);
+            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
         }
     }
+
+    #region TestConvertFunction classes
+
+    public class IdlPatient
+    {
+        public IdlTest.ObjectId Id { get; set; }
+    }
+
+    public class IdlPerson
+    {
+        public IdlTest.ObjectId Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class IdlPatientEx : IdlPatient
+    {
+        public IdlPerson Person { get; set; }
+    }
+
+    public class IdlPatientSource
+    {
+        private readonly ITestDataContext m_dc;
+
+        public IdlPatientSource(ITestDataContext dc)
+        {
+            m_dc = dc;
+        }
+
+        public IQueryable<IdlPatient> Patients()
+        {
+            return m_dc.Patient.ToIdlPatient();
+        }
+
+        public IQueryable<IdlPerson> Persons()
+        {
+            return m_dc.Person.ToIdlPerson();
+        }
+    }
+
+    public static class IdlPersonConverterExtensions
+    {
+        public static IQueryable<IdlPatient> ToIdlPatient(this IQueryable<Patient> list)
+        {
+            return from p in list
+                   select new IdlPatient { Id = new IdlTest.ObjectId { Value = p.PersonID }, };
+        }
+
+        public static IQueryable<IdlPerson> ToIdlPerson(this IQueryable<Person> list)
+        {
+            return from p in list
+                   select new IdlPerson { Id = new IdlTest.ObjectId { Value = p.ID }, Name = p.FirstName, };
+        }
+
+        public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IQueryable<IdlPatient> list, IdlPatientSource source)
+        {
+            return from x in list
+                   join person in source.Persons() on x.Id equals person.Id
+                   select new IdlPatientEx
+                       {
+                           Id = x.Id,
+                           Person = new IdlPerson { Id = person.Id, Name = person.Name, },
+                       };
+        }
+    }
+
+    #endregion
+
 }
