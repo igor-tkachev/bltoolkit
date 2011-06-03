@@ -354,14 +354,14 @@ namespace Data.Linq
 
     public static class IdlPersonConverterExtensions
     {
-        public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IEnumerable<IdlPatient> list, IdlPatientSource source)
+        public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IQueryable<IdlPatient> list, IdlPatientSource source)
         {
             return from x in list
-                   join person in source.Persons() on x.Id equals person.Id
+                   join person in source.Persons() on x.Id.Value equals person.Id.Value
                    select new IdlPatientEx
                        {
                            Id = x.Id,
-                           Person = new IdlPerson { Id = person.Id, Name = person.Name, },
+                           Person = new IdlPerson { Id = new IdlTest.ObjectId { Value = person.Id }, Name = person.Name,},
                        };
         }
     }
