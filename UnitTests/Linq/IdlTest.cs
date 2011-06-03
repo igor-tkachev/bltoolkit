@@ -341,29 +341,19 @@ namespace Data.Linq
 
         public IQueryable<IdlPatient> Patients()
         {
-            return m_dc.Patient.ToIdlPatient();
+            return m_dc.Patient.Select(x => new IdlPatient { Id = new IdlTest.ObjectId { Value = x.PersonID }, });
         }
 
         public IQueryable<IdlPerson> Persons()
         {
-            return m_dc.Person.ToIdlPerson();
+            return
+                m_dc.Person.Select(
+                    x => new IdlPerson { Id = new IdlTest.ObjectId { Value = x.ID }, Name = x.FirstName, });
         }
     }
 
     public static class IdlPersonConverterExtensions
     {
-        public static IQueryable<IdlPatient> ToIdlPatient(this IQueryable<Patient> list)
-        {
-            return from p in list
-                   select new IdlPatient { Id = new IdlTest.ObjectId { Value = p.PersonID }, };
-        }
-
-        public static IQueryable<IdlPerson> ToIdlPerson(this IQueryable<Person> list)
-        {
-            return from p in list
-                   select new IdlPerson { Id = new IdlTest.ObjectId { Value = p.ID }, Name = p.FirstName, };
-        }
-
         public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IQueryable<IdlPatient> list, IdlPatientSource source)
         {
             return from x in list
@@ -377,5 +367,4 @@ namespace Data.Linq
     }
 
     #endregion
-
 }
