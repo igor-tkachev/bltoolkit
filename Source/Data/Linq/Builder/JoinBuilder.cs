@@ -124,7 +124,13 @@ namespace BLToolkit.Data.Linq.Builder
 				return new GroupJoinContext(buildInfo.Parent, selector, context, inner);
 			}
 
-			return new JoinContext(buildInfo.Parent, selector, context, innerContext);
+			return new JoinContext(buildInfo.Parent, selector, context, innerContext)
+#if DEBUG
+			{
+				MethodCall = methodCall
+			}
+#endif
+				;
 		}
 
 		static void BuildJoin(

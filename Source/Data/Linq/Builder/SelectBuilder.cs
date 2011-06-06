@@ -47,9 +47,15 @@ namespace BLToolkit.Data.Linq.Builder
 					break;
 			}
 
-			return selector.Parameters.Count == 1 ?
+			var context = selector.Parameters.Count == 1 ?
 				new SelectContext (buildInfo.Parent, selector, sequence) :
 				new SelectContext2(buildInfo.Parent, selector, sequence);
+
+#if DEBUG
+			context.MethodCall = methodCall;
+#endif
+
+			return context;
 		}
 
 		static IBuildContext CheckSubQueryForSelect(IBuildContext context)

@@ -23,6 +23,8 @@ namespace BLToolkit.Data.Linq.Builder
 #if DEBUG
 		[CLSCompliant(false)]
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+
+		public MethodCallExpression MethodCall;
 #endif
 
 		public IBuildContext[]  Sequence { get; set; }
@@ -141,16 +143,20 @@ namespace BLToolkit.Data.Linq.Builder
 											{
 												if (e != memberExpression)
 												{
-													if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
-													    !sequence.IsExpression(e, 0, RequestFor.Field))
+													switch (e.NodeType)
 													{
-														var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
-														var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
+														case ExpressionType.MemberAccess :
+															if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
+																!sequence.IsExpression(e, 0, RequestFor.Field))
+															{
+																var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
+																var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
-														return Builder.BuildSql(e.Type, idx);
+																return Builder.BuildSql(e.Type, idx);
+															}
+
+															return Builder.BuildExpression(this, e);
 													}
-
-													return Builder.BuildExpression(this, e);
 												}
 
 												return e;
