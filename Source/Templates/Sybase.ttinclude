@@ -1,6 +1,9 @@
-﻿<#
+<#
 	ConnectionType = "Sybase.Data.AseClient.AseConnection, Sybase.AdoNet2.AseClient";
 #><#+
+
+bool GenerateSybaseSystemTables = false;
+
 private void LoadServerMetadata()
 {
 	var tables  = CreateList(new { ID = 0, Table  = new Table()  });
@@ -325,5 +328,117 @@ private void LoadServerMetadata()
 			Tables.Add(c.Table.Owner + "." + c.Table.TableName, c.Table);
 		}
 	}
+
+	if (GenerateSybaseSystemTables)
+	{
+		Tables.Add("sysobjects", new Table
+		{
+			TableName     = "sysobjects",
+			ClassName     = "SysObject",
+			BaseClassName = BaseEntityClass,
+			Columns       =
+			{
+				{ "name",      new VarCharColumn  { ColumnName = "name", Length = 255 }},
+				{ "id",        new IntColumn      { ColumnName = "id"  }},
+				{ "uid",       new IntColumn      { ColumnName = "uid" }},
+				{ "type",      new Column {
+					ColumnName = "type",
+					Type       = "string",
+					ColumnType = "char",
+					DbType     = DbType.AnsiStringFixedLength,
+					SqlDbType  = SqlDbType.Char,
+					Length     = 2,
+				}},
+				{ "userstat",  new SmallIntColumn { ColumnName = "userstat"  }},
+				{ "sysstat",   new SmallIntColumn { ColumnName = "sysstat"   }},
+				{ "indexdel",  new SmallIntColumn { ColumnName = "indexdel"  }},
+				{ "schemacnt", new SmallIntColumn { ColumnName = "schemacnt" }},
+				{ "sysstat2",  new IntColumn      { ColumnName = "sysstat2"  }},
+				{ "crdate",    new DateTimeColumn { ColumnName = "crdate"    }},
+				{ "expdate",   new DateTimeColumn { ColumnName = "expdate"   }},
+				{ "deltrig",   new IntColumn      { ColumnName = "deltrig"   }},
+				{ "instrig",   new IntColumn      { ColumnName = "instrig"   }},
+				{ "updtrig",   new IntColumn      { ColumnName = "updtrig"   }},
+				{ "seltrig",   new IntColumn      { ColumnName = "seltrig"   }},
+				{ "ckfirst",   new IntColumn      { ColumnName = "ckfirst"   }},
+				{ "cache",     new SmallIntColumn { ColumnName = "cache"     }},
+				{ "audflags",  new IntColumn      { ColumnName = "audflags", IsNullable = true }},
+				{ "objspare",  new IntColumn      { ColumnName = "objspare"  }},
+				{ "versionts", new Column {
+					ColumnName = "versionts",
+					IsNullable = true,
+					Type       = "byte[]",
+					ColumnType = "binary",
+					IsClass    = true,
+					DbType     = DbType.Binary,
+					SqlDbType  = SqlDbType.Binary,
+					Length     = 6,
+				}},
+				{ "loginame", new VarCharColumn   { ColumnName = "loginame", Length = 30 }},
+			}
+		});
+
+		int n = 1;
+
+		foreach (var col in Tables["sysobjects"].Columns)
+		{
+			var c = col.Value;
+
+			c.ID         = n++;
+			c.MemberName = c.ColumnName;
+
+			if (c.IsNullable && !c.IsClass)
+				c.Type = c.Type + "?";
+		}
+	}
 }
+
+class VarCharColumn : Column
+{
+	public VarCharColumn()
+	{
+		Type       = "string";
+		ColumnType = "varchar";
+		IsClass    = true;
+		DbType     = DbType.AnsiString;
+		SqlDbType  = SqlDbType.VarChar;
+	}
+}
+
+class IntColumn : Column
+{
+	public IntColumn()
+	{
+		Type       = "int";
+		ColumnType = "int";
+		DbType     = DbType.Int32;
+		SqlDbType  = SqlDbType.Int;
+		Length     = 4;
+	}
+}
+
+class SmallIntColumn : Column
+{
+	public SmallIntColumn()
+	{
+		Type       = "short";
+		ColumnType = "smallint";
+		DbType     = DbType.Int16;
+		SqlDbType  = SqlDbType.SmallInt;
+		Length     = 2;
+	}
+}
+
+class DateTimeColumn : Column
+{
+	public DateTimeColumn()
+	{
+		Type       = "DateTime";
+		ColumnType = "datetime";
+		DbType     = DbType.DateTime;
+		SqlDbType  = SqlDbType.DateTime;
+		Length     = 8;
+	}
+}
+
 #>
