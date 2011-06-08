@@ -1,4 +1,4 @@
-<#
+﻿<#
 	ConnectionType = "Sybase.Data.AseClient.AseConnection, Sybase.AdoNet2.AseClient";
 #><#+
 
