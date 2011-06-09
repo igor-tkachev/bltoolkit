@@ -2368,7 +2368,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return attr;
 		}
 
-		TableFunctionAttribute GetTableFunctionAttribute(ICustomAttributeProvider member)
+		internal TableFunctionAttribute GetTableFunctionAttribute(ICustomAttributeProvider member)
 		{
 			var attrs = member.GetCustomAttributes(typeof(TableFunctionAttribute), true);
 

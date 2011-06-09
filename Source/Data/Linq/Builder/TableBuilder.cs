@@ -43,6 +43,11 @@ namespace BLToolkit.Data.Linq.Builder
 							if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(Table<>))
 								return action(2, null);
 
+						var attr = builder.GetTableFunctionAttribute(mc.Method);
+
+						if (attr != null)
+							return action(5, null);
+
 						break;
 					}
 
@@ -94,6 +99,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case 2 :
 					case 3 : return new TableContext(builder, buildInfo, buildInfo.Expression.Type.GetGenericArguments()[0]);
 					case 4 : return ctx.GetContext(buildInfo.Expression, 0, buildInfo);
+					case 5 : return new TableContext(builder, buildInfo);
 				}
 
 				throw new InvalidOperationException();
@@ -145,6 +151,31 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Builder  = builder;
 				SqlQuery = sqlQuery;
+			}
+
+			public TableContext(ExpressionBuilder builder, BuildInfo buildInfo)
+			{
+				Builder    = builder;
+				Parent     = buildInfo.Parent;
+				Expression = buildInfo.Expression;
+				SqlQuery   = buildInfo.SqlQuery;
+
+				var mc   = (MethodCallExpression)Expression;
+				var attr = builder.GetTableFunctionAttribute(mc.Method);
+
+				if (!mc.Method.ReturnType.IsGenericType || mc.Method.ReturnType.GetGenericTypeDefinition() != typeof(Table<>))
+					throw new LinqException("Table function has to return Table<T>.");
+
+				OriginalType = mc.Method.ReturnType.GetGenericArguments()[0];
+				ObjectType   = GetObjectType();
+				SqlTable     = new SqlTable(builder.MappingSchema, ObjectType);
+				ObjectMapper = Builder.MappingSchema.GetObjectMapper(ObjectType);
+
+				SqlQuery.From.Table(SqlTable);
+
+				var args = mc.Arguments.Select(a => builder.ConvertToSql(this, a));
+
+				attr.SetTable(SqlTable, mc.Method, mc.Arguments, args);
 			}
 
 			protected Type GetObjectType()

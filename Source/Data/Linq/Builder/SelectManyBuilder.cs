@@ -67,7 +67,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (collection is TableBuilder.TableContext)
 			{
-				var join = leftJoin ? SqlQuery.LeftJoin(sql) : SqlQuery.InnerJoin(sql);
+				var table = (TableBuilder.TableContext)collection;
+
+				var join = table.SqlTable.TableArguments != null && table.SqlTable.TableArguments.Length > 0 ?
+					leftJoin ? SqlQuery.OuterApply(sql) : SqlQuery.CrossApply(sql) :
+					leftJoin ? SqlQuery.LeftJoin  (sql) : SqlQuery.InnerJoin (sql);
 
 				join.JoinedTable.Condition.Conditions.AddRange(sql.Where.SearchCondition.Conditions);
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
@@ -113,6 +114,6 @@ namespace Data.Linq.Model
 				text);
 		}
 		
-#endif		
+#endif
 	}
 }

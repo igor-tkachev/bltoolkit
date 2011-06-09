@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -32,6 +34,20 @@ namespace Data.Linq
 				var q =
 					from c in db.Child
 					from p in db.GetParentByID(2)
+					select p;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Func3()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from c in db.Child
+					from p in db.GetParentByID(c.ParentID)
 					select p;
 
 				q.ToList();

@@ -84,7 +84,7 @@ namespace Update
 		[Test]
 		public void Delete4()
 		{
-			ForEachProvider(db =>
+			ForEachProvider(new[] { ProviderName.Informix }, db =>
 			{
 				db.GrandChild1.Delete(gc => new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value));
 
