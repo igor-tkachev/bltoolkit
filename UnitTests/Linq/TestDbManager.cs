@@ -44,7 +44,7 @@ namespace Data.Linq
 		[TableFunction(Name="GetParentByID")]
 		public Table<Parent> GetParentByID(int? id)
 		{
-			return GetTable<Parent>(this, (MethodInfo)(MethodBase.GetCurrentMethod()), id);
+			return GetTable<Parent>(this, (MethodInfo)MethodBase.GetCurrentMethod(), id);
 		}
 
 		public string GetSqlText(SqlQuery sql)

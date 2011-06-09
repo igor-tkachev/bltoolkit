@@ -291,7 +291,8 @@ namespace Data.Linq
 		[Test]
 		public void Coalesce5()
 		{
-			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 10 select p).ToList().Count));
+			ForEachProvider(db => Assert.AreEqual(2,
+				(from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 10 select p).ToList().Count));
 		}
 
 		[Test]
@@ -403,13 +404,13 @@ namespace Data.Linq
 		[Test]
 		public void Value()
 		{
-			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1.Value == 1 select p).ToList().Count));
+			ForEachProvider(db => Assert.AreEqual(2, (from p in db.Parent where p.Value1.Value == 1 select p).ToList().Count));
 		}
 
 		[Test]
 		public void CompareNullable1()
 		{
-			ForEachProvider(db => Assert.AreEqual(1, (from p in db.Parent where p.Value1 == 1 select p).ToList().Count));
+			ForEachProvider(db => Assert.AreEqual(2, (from p in db.Parent where p.Value1 == 1 select p).ToList().Count));
 		}
 
 		[Test]

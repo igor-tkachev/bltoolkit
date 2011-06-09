@@ -358,20 +358,22 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (call.IsQueryable()) switch (call.Method.Name)
 							{
-								case "Where"           : return ConvertWhere     (call);
-								case "GroupBy"         : return ConvertGroupBy   (call);
-								case "SelectMany"      : return ConvertSelectMany(call);
-								case "Select"          : return ConvertSelect    (call);
-								case "LongCount"       :
-								case "Count"           :
-								case "Single"          :
-								case "SingleOrDefault" :
-								case "First"           :
-								case "FirstOrDefault"  : return ConvertPredicate (call);
-								case "Min"             :
-								case "Max"             : return ConvertSelector  (call, true);
-								case "Sum"             :
-								case "Average"         : return ConvertSelector  (call, false);
+								case "Where"              : return ConvertWhere     (call);
+								case "GroupBy"            : return ConvertGroupBy   (call);
+								case "SelectMany"         : return ConvertSelectMany(call);
+								case "Select"             : return ConvertSelect    (call);
+								case "LongCount"          :
+								case "Count"              :
+								case "Single"             :
+								case "SingleOrDefault"    :
+								case "First"              :
+								case "FirstOrDefault"     : return ConvertPredicate (call);
+								case "Min"                :
+								case "Max"                : return ConvertSelector  (call, true);
+								case "Sum"                :
+								case "Average"            : return ConvertSelector  (call, false);
+								case "ElementAt"          :
+								case "ElementAtOrDefault" : return ConvertElementAt (call);
 							}
 
 							return ConvertSubquery(expr);
@@ -1110,6 +1112,38 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			throw new InvalidOperationException();
+		}
+
+		#endregion
+
+		#region ConvertElementAt
+
+		Expression ConvertElementAt(MethodCallExpression method)
+		{
+			var sequence   = OptimizeExpression(method.Arguments[0]);
+			var index      = OptimizeExpression(method.Arguments[1]).Unwrap();
+			var sourceType = method.Method.GetGenericArguments()[0];
+
+			MethodInfo skipMethod;
+
+			if (index.NodeType == ExpressionType.Lambda)
+			{
+				skipMethod = ReflectionHelper.Expressor<object>.MethodExpressor(o => LinqExtensions.Skip<object>(null, null));
+				skipMethod = skipMethod.GetGenericMethodDefinition();
+			}
+			else
+			{
+				skipMethod = GetQueriableMethodInfo(method, mi => mi.Name == "Skip");
+			}
+
+			skipMethod = skipMethod.MakeGenericMethod(sourceType);
+
+			var methodName  = method.Method.Name == "ElementAt" ? "First" : "FirstOrDefault";
+			var firstMethod = GetQueriableMethodInfo(method, mi => mi.Name == methodName && mi.GetParameters().Length == 1);
+
+			firstMethod = firstMethod.MakeGenericMethod(sourceType);
+
+			return Expression.Call(null, firstMethod, Expression.Call(null, skipMethod, sequence, index));
 		}
 
 		#endregion
