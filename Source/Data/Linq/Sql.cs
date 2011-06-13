@@ -615,6 +615,7 @@ namespace BLToolkit.Data.Linq
 
 		[CLSCompliant(false)]
 		[SqlFunction]
+		[SqlFunction("MySql", "TIMESTAMPDIFF")]
 		//[DatePart("Informix",   "{0}",                                      0, 1)]
 		//[DatePart("MySql",      "Extract({0} from {{0}})",           true,  0, 1)]
 		//[DatePart("PostgreSQL", "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "DOY",     null,   null,   "DOW",       null,   null,   null,   null   }, 0, 1)]
