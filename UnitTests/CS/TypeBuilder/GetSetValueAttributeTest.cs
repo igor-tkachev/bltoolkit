@@ -111,7 +111,7 @@ namespace TypeBuilder
 		{
 			private T _value;
 
-			[GetValue] public T    GetValue([Parent] object parent, [PropertyInfo] PropertyInfo pi)               { return _value;  }
+			[GetValue] public T    GetValue([Parent] object parent, [PropertyInfo] PropertyInfo pi) { return _value; }
 			[SetValue] public void SetValue(T value, [PropertyInfo] PropertyInfo pi) { _value = value; }
 		}
 

@@ -198,7 +198,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return ctx;
 		}
 
-		ISqlExpression SubQueryToSql(IBuildContext context, MethodCallExpression expression)
+		internal ISqlExpression SubQueryToSql(IBuildContext context, MethodCallExpression expression)
 		{
 			var sequence = GetSubQuery(context, expression);
 			var subSql   = sequence.GetSubQuery(context);
@@ -624,11 +624,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var ctx = GetContext(context, expression);
 
-			if (ctx != null)
-			{
-				if (ctx.IsExpression(expression, 0, RequestFor.Object))
-					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
-			}
+			if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Object))
+				return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 
 			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression) } };
 		}

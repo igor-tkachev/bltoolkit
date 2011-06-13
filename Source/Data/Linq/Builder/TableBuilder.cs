@@ -414,11 +414,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (table.Field != null)
 								return new[]
 								{
-									new SqlInfo
-									{
-										Sql    = table.Field,
-										Member = table.Field.MemberMapper.MemberAccessor.MemberInfo
-									}
+									new SqlInfo { Sql = table.Field, Member = table.Field.MemberMapper.MemberAccessor.MemberInfo }
 								};
 
 							break;
