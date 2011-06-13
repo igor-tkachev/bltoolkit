@@ -207,8 +207,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				if (expression == null)
-					return BuildJoin();
+				//if (expression == null)
+				//	return BuildJoin();
 
 				return base.BuildExpression(expression, level);
 			}

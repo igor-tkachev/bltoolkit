@@ -257,13 +257,11 @@ namespace Data.Linq
 		[Test]
 		public void LeftJoin2()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from p in Parent
 					join ch in Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
-				select new { p, ch };
-
-			ForEachProvider(db => AreEqual(expected,
+				select new { p, ch },
 				from p in db.Parent
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
@@ -369,7 +367,7 @@ namespace Data.Linq
 		{
 			// Reproduces the problem described here: http://rsdn.ru/forum/prj.rfd/4221837.flat.aspx
 			ForEachProvider(
-				Providers.Select(p => p.Name).Except(new[] { ProviderName.SQLite }).ToArray(),
+				//Providers.Select(p => p.Name).Except(new[] { ProviderName.SQLite }).ToArray(),
 				db =>
 				{
 					var q = 
