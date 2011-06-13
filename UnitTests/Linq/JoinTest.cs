@@ -363,5 +363,24 @@ namespace Data.Linq
 				select new { ID1 = new { Value = p1.ID }, FirstName2 = p2.FirstName, } into p1
 				select p1.ID1.Value));
 		}
+
+		[Test]
+		public void LeftJoinTest()
+		{
+			// Reproduces the problem described here: http://rsdn.ru/forum/prj.rfd/4221837.flat.aspx
+			ForEachProvider(
+				Providers.Select(p => p.Name).Except(new[] { ProviderName.SQLite }).ToArray(),
+				db =>
+				{
+					var q = 
+						from p1 in db.Person
+						join p2 in db.Person on p1.ID equals p2.ID into g
+						from p2 in g.DefaultIfEmpty() // yes I know the join will always succeed and it'll never be null, but just for test's sake :)
+						select new { p1, p2 };
+
+					q.ToArray(); // NotImplementedException? :(
+				});
+		}
+
 	}
 }
