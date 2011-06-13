@@ -203,13 +203,41 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LetTest3()
+		{
+			ForEachProvider(db => AreEqual(
+				Parent
+					.Select(p => new { children1 = p.Children. Where(c => c.ParentID > 1)  })
+					.Select(t => new { children2 = t.children1.Where(c => c.ParentID < 10) })
+					.Select(t => t.children2.Sum(c => c.ChildID)),
+				db.Parent
+					.Select(p => new { children1 = p.Children. Where(c => c.ParentID > 1)  })
+					.Select(t => new { children2 = t.children1.Where(c => c.ParentID < 10) })
+					.Select(t => t.children2.Sum(c => c.ChildID))));
+		}
+
+		[Test]
+		public void LetTest4()
+		{
+			ForEachProvider(db => AreEqual(
+				Parent
+					.Select(p => p.Children. Where(c => c.ParentID > 1))
+					.Select(t => t.Where(c => c.ParentID < 10))
+					.Select(t => t.Sum(c => c.ChildID)),
+				db.Parent
+					.Select(p => p.Children. Where(c => c.ParentID > 1))
+					.Select(t => t.Where(c => c.ParentID < 10))
+					.Select(t => t.Sum(c => c.ChildID))));
+		}
+
+		[Test]
 		public void Contains1()
 		{
 			ForEachProvider(
 				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase },
 				db => AreEqual(
 					from p in Parent
-					where (from p1 in Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
+					where (from p1 in    Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
 					select p,
 					from p in db.Parent
 					where (from p1 in db.Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
@@ -223,7 +251,7 @@ namespace Data.Linq
 				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase },
 				db => AreEqual(
 					from p in Parent
-					where (from p1 in Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
+					where (from p1 in    Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
 					select p,
 					from p in db.Parent
 					where (from p1 in db.Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)

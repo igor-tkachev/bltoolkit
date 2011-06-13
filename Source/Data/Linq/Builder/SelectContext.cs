@@ -27,13 +27,13 @@ namespace BLToolkit.Data.Linq.Builder
 		public MethodCallExpression MethodCall;
 #endif
 
-		public IBuildContext[]  Sequence { get; set; }
-		public LambdaExpression Lambda   { get; set; }
-		public Expression       Body     { get; set; }
-		public ExpressionBuilder Builder   { get; private set; }
-		public SqlQuery         SqlQuery { get; set; }
-		public IBuildContext    Parent   { get; set; }
-		public bool             IsScalar { get; private set; }
+		public IBuildContext[]   Sequence { get; set; }
+		public LambdaExpression  Lambda   { get; set; }
+		public Expression        Body     { get; set; }
+		public ExpressionBuilder Builder  { get; private set; }
+		public SqlQuery          SqlQuery { get; set; }
+		public IBuildContext     Parent   { get; set; }
+		public bool              IsScalar { get; private set; }
 
 		Expression IBuildContext.Expression { get { return Lambda; } }
 
@@ -221,6 +221,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public virtual SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
+			if (expression != null && level > 0 && expression.NodeType == ExpressionType.Call)
+			{
+				var e = (MethodCallExpression)expression;
+
+				if (e.Method.DeclaringType == typeof(Enumerable))
+				{
+					return new[] { new SqlInfo { Sql = Builder.SubQueryToSql(this, e) } };
+				}
+			}
+
 			if (IsScalar)
 			{
 				if (expression == null)

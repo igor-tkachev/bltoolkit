@@ -2,12 +2,12 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	class AggregationBuilder : MethodCallBuilder
 	{
