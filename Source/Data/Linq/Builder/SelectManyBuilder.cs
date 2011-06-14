@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				// Association.
 				//
-				if (collectionParent != null && collectionInfo.IsAssociationBuilе)
+				if (collectionParent != null && collectionInfo.IsAssociationBuilt)
 				{
 					var ts = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
 					{

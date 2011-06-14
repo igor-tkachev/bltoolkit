@@ -619,7 +619,7 @@ namespace BLToolkit.Data.Linq.Builder
 								var helper = (IAssociationHelper)Activator.CreateInstance(atype);
 								var expr   = helper.GetExpression(ma.Expression, association);
 
-								buildInfo.IsAssociationBuilе = true;
+								buildInfo.IsAssociationBuilt = true;
 
 								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 							}

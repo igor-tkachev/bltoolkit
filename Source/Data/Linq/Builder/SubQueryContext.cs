@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq.Builder
 				.ToArray();
 		}
 
-		public bool IsExpression(Expression expression, int level, RequestFor testFlag)
+		public virtual bool IsExpression(Expression expression, int level, RequestFor testFlag)
 		{
 			switch (testFlag)
 			{

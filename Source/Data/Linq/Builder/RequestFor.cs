@@ -15,6 +15,11 @@ namespace BLToolkit.Data.Linq.Builder
 		Object,
 
 		/// <summary>
+		/// Checks the sequence if the expression is a group join.
+		/// </summary>
+		GroupJoin,
+
+		/// <summary>
 		/// Checks the sequence if the expression is a field or single value expression.
 		/// </summary>
 		//Scalar,

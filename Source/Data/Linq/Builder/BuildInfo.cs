@@ -34,7 +34,7 @@ namespace BLToolkit.Data.Linq.Builder
 		public bool          IsSubQuery   { get { return Parent != null; } }
 
 		private bool _isAssociationBuilt;
-		public  bool  IsAssociationBuilе
+		public  bool  IsAssociationBuilt
 		{
 			get { return _isAssociationBuilt; }
 			set
@@ -42,7 +42,7 @@ namespace BLToolkit.Data.Linq.Builder
 				_isAssociationBuilt = value;
 
 				if (SequenceInfo != null)
-					SequenceInfo.IsAssociationBuilе = value;
+					SequenceInfo.IsAssociationBuilt = value;
 			}
 		}
 	}

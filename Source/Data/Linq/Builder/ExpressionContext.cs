@@ -74,6 +74,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case RequestFor.Association :
 				case RequestFor.Object      :
+				case RequestFor.GroupJoin   :
 				case RequestFor.Field       :
 				case RequestFor.Expression  :
 					{

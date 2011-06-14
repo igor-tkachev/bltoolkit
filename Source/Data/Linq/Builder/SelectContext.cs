@@ -9,7 +9,6 @@ namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
-	//using Reflection;
 
 	// This class implements double functionality (scalar and member type selects)
 	// and could be implemented as two different classes.
@@ -45,7 +44,7 @@ namespace BLToolkit.Data.Linq.Builder
 			Sequence = sequences;
 			Builder  = sequences[0].Builder;
 			Lambda   = lambda;
-			Body     = lambda.Body;//.Unwrap();
+			Body     = lambda.Body;
 			SqlQuery = sequences[0].SqlQuery;
 
 			foreach (var context in Sequence)
@@ -585,8 +584,8 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.SubQuery    : return false;
-				case RequestFor.Root        :
+				case RequestFor.SubQuery : return false;
+				case RequestFor.Root     :
 					return Sequence.Length == 1 ?
 						expression == Lambda.Parameters[0] :
 						Lambda.Parameters.Any(p => p == expression);
@@ -603,7 +602,8 @@ namespace BLToolkit.Data.Linq.Builder
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
-					case RequestFor.Object       :
+					case RequestFor.Object      :
+					case RequestFor.GroupJoin   :
 						return ProcessScalar(
 							expression,
 							level,
@@ -619,7 +619,8 @@ namespace BLToolkit.Data.Linq.Builder
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
-					case RequestFor.Object       :
+					case RequestFor.Object      :
+					case RequestFor.GroupJoin   :
 						{
 							if (expression == null)
 							{

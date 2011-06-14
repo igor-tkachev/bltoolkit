@@ -68,7 +68,10 @@ namespace BLToolkit.Data.Linq.Builder
 			public override Expression BuildExpression(Expression expression, int level)
 			{
 				if (expression == null)
-					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+					//if (Sequence.IsExpression(expression, level, RequestFor.Object))
+					//	return Sequence.BuildExpression(expression, level);
+					//else
+						return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 
 				throw new NotImplementedException();
 				//return Sequence.BuildExpression(expression, level + 1);

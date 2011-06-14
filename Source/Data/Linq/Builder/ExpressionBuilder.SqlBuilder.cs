@@ -63,9 +63,6 @@ namespace BLToolkit.Data.Linq.Builder
 					return false;
 				}
 
-				//if (IsSubQuery(context, expr))
-				//	return isWhere = true;
-
 				var stopWalking = false;
 
 				switch (expr.NodeType)
@@ -283,39 +280,6 @@ namespace BLToolkit.Data.Linq.Builder
 			return false;
 		}
 
-		bool IsSubQuery1(IBuildContext context, MethodCallExpression call)
-		{
-			if (call.IsQueryable())
-			{
-				var expr = call.Arguments[0];
-
-				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
-					while (expr.NodeType == ExpressionType.Call && ((MethodCallExpression) expr).Method.Name == "Select")
-						expr = ((MethodCallExpression)expr).Arguments[0];
-
-				while (expr.NodeType == ExpressionType.Call)
-				{
-					var c = (MethodCallExpression)expr;
-
-					if (!c.IsQueryable())
-						break;
-
-					expr = c.Arguments[0];
-				}
-
-				if (expr.NodeType == ExpressionType.Call)
-					return ((MethodCallExpression)expr).IsQueryable();
-
-				if (IsSubQuerySource(context, expr))
-					return true;
-
-				//if (IsIEnumerableType(expr))
-				//	return !CanBeCompiled(expr);
-			}
-
-			return false;
-		}
-
 		bool IsSubQuerySource(IBuildContext context, Expression expr)
 		{
 			if (expr == null)
@@ -330,6 +294,21 @@ namespace BLToolkit.Data.Linq.Builder
 				expr = ((MemberExpression)expr).Expression;
 
 			return expr != null && expr.NodeType == ExpressionType.Constant;
+		}
+
+		bool IsGroupJoinSource(IBuildContext context, MethodCallExpression call)
+		{
+			if (!call.IsQueryable() || CountBuilder.MethodNames.Contains(call.Method.Name))
+				return false;
+
+			Expression expr = call;
+
+			while (expr.NodeType == ExpressionType.Call)
+				expr = ((MethodCallExpression)expr).Arguments[0];
+
+			var ctx = GetContext(context, expr);
+
+			return ctx != null && ctx.IsExpression(expr, 0, RequestFor.GroupJoin);
 		}
 
 		static bool IsIEnumerableType(Expression expr)
@@ -638,16 +617,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression)
 		{
-			/*
-			var qlen = queries.Length;
-
-			if (expression.NodeType == ExpressionType.Parameter && qlen == 1 && queries[0] is QuerySource.Scalar)
-			{
-				var ma = (QuerySource.Scalar)queries[0];
-				return ConvertToSql(ma.Lambda, ma.Lambda.Body, ma.Sources);
-			}
-			*/
-
 			if (CanBeConstant(expression))
 				return BuildConstant(expression);
 
@@ -1610,8 +1579,8 @@ namespace BLToolkit.Data.Linq.Builder
 				isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
 				lcols  =
 					(from m in lmembers
-					select new { sql = leftContext.ConvertToSql(m.Value, 0, ConvertFlags.Field)[0], member = m.Key } into mm
-					select new SqlInfo { Sql = mm.sql.Sql, Member = mm.member }).ToArray();
+					select new { sql = ConvertToSql(leftContext, m.Value), member = m.Key } into mm
+					select new SqlInfo { Sql = mm.sql, Member = mm.member }).ToArray();
 			}
 			else
 			{
@@ -2008,17 +1977,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		void BuildSearchCondition(IBuildContext context, Expression expression, List<SqlQuery.Condition> conditions)
 		{
-			/*if (IsSubQuery(context, expression))
-			{
-				var cond = BuildConditionSubQuery(context, expression);
-
-				if (cond != null)
-				{
-					conditions.Add(cond);
-					return;
-				}
-			}*/
-
 			switch (expression.NodeType)
 			{
 				case ExpressionType.AndAlso:

@@ -198,6 +198,7 @@ namespace Data.Linq
 
 				Assert.AreEqual(2, list.Count);
 				Assert.AreEqual(2, list[0].p.ParentID);
+				Assert.AreEqual(2, list[0].lj1.lj1.Count());
 			});
 		}
 
@@ -218,6 +219,7 @@ namespace Data.Linq
 
 				Assert.AreEqual(3, list.Count);
 				Assert.AreEqual(3, list[0].p.ParentID);
+				Assert.AreEqual(3, list[0].lj1.Count());
 			});
 		}
 
@@ -233,6 +235,128 @@ namespace Data.Linq
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 				where p.ParentID == 1
 				select lj1.First()));
+		}
+
+		[Test]
+		public void GroupJoin51()
+		{
+			var expected =
+			(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select new { p1 = lj1, p2 = lj1.First() }
+			).ToList();
+
+			ForEachProvider(db =>
+			{
+				var result =
+				(
+					from p in db.Parent
+						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					where p.ParentID == 1
+					select new { p1 = lj1, p2 = lj1.First() }
+				).ToList();
+
+				Assert.AreEqual(expected.Count, result.Count);
+				AreEqual(expected[0].p1, result[0].p1);
+			});
+		}
+
+		[Test]
+		public void GroupJoin52()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.First().ParentID,
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.First().ParentID));
+		}
+
+		[Test]
+		public void GroupJoin53()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.Select(_ => _.ParentID).First(),
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.Select(_ => _.ParentID).First()));
+		}
+
+		[Test]
+		public void GroupJoin54()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select new { p1 = lj1.Count(), p2 = lj1.First() },
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select new { p1 = lj1.Count(), p2 = lj1.First() }));
+		}
+
+		[Test]
+		public void GroupJoin6()
+		{
+			var n = 1;
+
+			ForEachProvider(db =>
+			{
+				var q = 
+					from p in db.Parent
+						join c in db.Child on p.ParentID + n equals c.ParentID into lj
+					where p.ParentID == 1
+					select new { p, lj };
+
+				var list = q.ToList();
+
+				Assert.AreEqual(2, list.Count);
+				Assert.AreEqual(1, list[0].p.ParentID);
+				Assert.AreEqual(2, list[0].lj.Count());
+
+				var ch = list[0].lj.ToList();
+
+				Assert.AreEqual( 2, ch[0].ParentID);
+				Assert.AreEqual(21, ch[0].ChildID);
+			});
+		}
+
+		[Test]
+		public void GroupJoin7()
+		{
+			var n = 1;
+
+			ForEachProvider(
+				new[] { ProviderName.Firebird },
+				db =>
+				{
+					var q = 
+						from p in db.Parent
+							join c in db.Child on new { id = p.ParentID } equals new { id = c.ParentID - n } into j
+						where p.ParentID == 1
+						select new { p, j };
+
+					var list = q.ToList();
+
+					Assert.AreEqual(2, list.Count);
+					Assert.AreEqual(1, list[0].p.ParentID);
+					Assert.AreEqual(2, list[0].j.Count());
+
+					var ch = list[0].j.ToList();
+
+					Assert.AreEqual( 2, ch[0].ParentID);
+					Assert.AreEqual(21, ch[0].ChildID);
+				});
 		}
 
 		[Test]

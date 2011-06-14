@@ -133,7 +133,7 @@ namespace BLToolkit.Data.Linq.Builder
 			readonly SelectContext _element;
 			readonly Type          _groupingType;
 
-			class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
+			internal class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
 			{
 				public Grouping(
 					TKey                    key,
