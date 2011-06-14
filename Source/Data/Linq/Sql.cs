@@ -41,7 +41,6 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction  ("Oracle",    "Sys_Guid", ServerSideOnly=true)]
 		[SqlFunction  ("Firebird",  "Gen_Uuid", ServerSideOnly=true)]
 		[SqlFunction  ("MySql",     "Uuid",     ServerSideOnly=true)]
-		//[SqlFunction  ("SQLite",    "Uuid",     ServerSideOnly=true)]
 		[SqlExpression("Sybase",    "NewID(1)", ServerSideOnly=true)]
 		[SqlFunction  (             "NewID",    ServerSideOnly=true)]
 		public static Guid NewGuid()
@@ -616,13 +615,6 @@ namespace BLToolkit.Data.Linq
 		[CLSCompliant(false)]
 		[SqlFunction]
 		[SqlFunction("MySql", "TIMESTAMPDIFF")]
-		//[DatePart("Informix",   "{0}",                                      0, 1)]
-		//[DatePart("MySql",      "Extract({0} from {{0}})",           true,  0, 1)]
-		//[DatePart("PostgreSQL", "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "DOY",     null,   null,   "DOW",       null,   null,   null,   null   }, 0, 1)]
-		//[DatePart("Firebird",   "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "YearDay", null,   null,   null,        null,   null,   null,   null   }, 0, 1)]
-		//[DatePart("Oracle",     "To_Number(To_Char({{0}}, {0}))",    true,  new[] { "'YYYY'", "'Q'", "'MM'", "'DDD'",   "'DD'", "'WW'", "'D'",       "'HH'", "'MI'", "'SS'", "'FF'" }, 0, 1)]
-		//[DatePart("SQLite",     "Cast(StrFTime({0}, {{0}}) as int)", true,  new[] { "'%Y'",   null,  "'%m'", "'%j'",    "'%d'", "'%W'", "'%w'",      "'%H'", "'%M'", "'%S'", "'%f'" }, 0, 1)]
-		//[DatePart("Access",     "DatePart({0}, {{0}})",              true,  new[] { "'yyyy'", "'q'", "'m'",  "'y'",     "'d'",  "'ww'", "'w'",       "'h'",  "'n'",  "'s'",  null   }, 0, 1)]
 		public static int? DateDiff(DateParts part, DateTime? startDate, DateTime? endDate)
 		{
 			if (startDate == null || endDate == null)

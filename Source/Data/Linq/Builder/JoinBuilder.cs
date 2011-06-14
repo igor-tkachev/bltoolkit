@@ -184,6 +184,16 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				innerContext.GroupJoin = this;
 			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				if (expression == Lambda.Parameters[1])
+				{
+					return Expression.Constant(null, Lambda.Parameters[1].Type);
+				}
+
+				return base.BuildExpression(expression, level);
+			}
 		}
 
 		internal class GroupJoinSubQueryContext : SubQueryContext
@@ -198,19 +208,6 @@ namespace BLToolkit.Data.Linq.Builder
 				: base(subQuery)
 			{
 				_methodCall = methodCall;
-			}
-
-			Expression BuildJoin()
-			{
-				throw new NotImplementedException();
-			}
-
-			public override Expression BuildExpression(Expression expression, int level)
-			{
-				//if (expression == null)
-				//	return BuildJoin();
-
-				return base.BuildExpression(expression, level);
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
