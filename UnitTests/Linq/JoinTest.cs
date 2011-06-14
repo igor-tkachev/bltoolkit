@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 using BLToolkit.Data.DataProvider;
 
@@ -376,7 +375,30 @@ namespace Data.Linq
 						from p2 in g.DefaultIfEmpty() // yes I know the join will always succeed and it'll never be null, but just for test's sake :)
 						select new { p1, p2 };
 
-					q.ToArray(); // NotImplementedException? :(
+					var list = q.ToList(); // NotImplementedException? :(
+					Assert.That(list, Is.Not.Empty);
+				});
+		}
+
+		[Test]
+		public void LeftJoinTest2()
+		{
+			// THIS TEST MUST BE RUN IN RELEASE CONFIGURATION (BECAUSE IT PASSES UNDER DEBUG CONFIGURATION)
+			// Reproduces the problem described here: http://rsdn.ru/forum/prj.rfd/4221837.flat.aspx
+
+			ForEachProvider(
+				Providers.Select(p => p.Name).Except(new[] { ProviderName.SQLite }).ToArray(),
+				db =>
+				{
+					var q =
+						from p1 in db.Patient
+						join p2 in db.Patient on p1.Diagnosis equals p2.Diagnosis into g
+						from p2 in g.DefaultIfEmpty() // yes I know the join will always succeed and it'll never be null, but just for test's sake :)
+						join p3 in db.Person on p2.PersonID equals p3.ID
+						select new { p1, p2, p3 };
+
+					var arr = q.ToArray(); // NotImplementedException? :(
+					Assert.That(arr, Is.Not.Empty);
 				});
 		}
 
