@@ -134,10 +134,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public TableContext(ExpressionBuilder builder, BuildInfo buildInfo, Type originalType)
 			{
-				Builder    = builder;
-				Parent     = buildInfo.Parent;
-				Expression = buildInfo.Expression;
-				SqlQuery   = buildInfo.SqlQuery;
+				Builder      = builder;
+				Parent       = buildInfo.Parent;
+				Expression   = buildInfo.Expression;
+				SqlQuery     = buildInfo.SqlQuery;
 
 				OriginalType = originalType;
 				ObjectType   = GetObjectType();
@@ -145,6 +145,8 @@ namespace BLToolkit.Data.Linq.Builder
 				ObjectMapper = Builder.MappingSchema.GetObjectMapper(ObjectType);
 
 				SqlQuery.From.Table(SqlTable);
+
+				Init();
 			}
 
 			protected TableContext(ExpressionBuilder builder, SqlQuery sqlQuery)
@@ -176,6 +178,8 @@ namespace BLToolkit.Data.Linq.Builder
 				var args = mc.Arguments.Select(a => builder.ConvertToSql(this, a));
 
 				attr.SetTable(SqlTable, mc.Method, mc.Arguments, args);
+
+				Init();
 			}
 
 			protected Type GetObjectType()
@@ -190,6 +194,47 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				return OriginalType;
+			}
+
+			public List<InheritanceMappingAttribute> InheritanceMapping;
+			public List<string>                      InheritanceDiscriminators;
+
+			protected void Init()
+			{
+				InheritanceMapping = ObjectMapper.InheritanceMapping;
+
+				if (InheritanceMapping.Count > 0)
+				{
+					InheritanceDiscriminators = new List<string>(InheritanceMapping.Count);
+
+					foreach (var mapping in InheritanceMapping)
+					{
+						string discriminator = null;
+
+						foreach (MemberMapper mm in Builder.MappingSchema.GetObjectMapper(mapping.Type))
+						{
+							if (mm.MapMemberInfo.SqlIgnore == false && !SqlTable.Fields.Any(f => f.Value.Name == mm.MemberName))
+							{
+								var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null, mm);
+								SqlTable.Fields.Add(field);
+
+								if (mm.MapMemberInfo.IsInheritanceDiscriminator)
+									discriminator = mm.MapMemberInfo.MemberName;
+							}
+						}
+
+						InheritanceDiscriminators.Add(discriminator);
+					}
+
+					var dname = InheritanceDiscriminators.FirstOrDefault(s => s != null);
+
+					if (dname == null)
+						throw new LinqException("Inheritance Discriminator is not defined for the '{0}' hierarchy.", ObjectType);
+
+					for (var i = 0; i < InheritanceDiscriminators.Count; i++)
+						if (InheritanceDiscriminators[i] == null)
+							InheritanceDiscriminators[i] = dname;
+				}
 			}
 
 			#endregion
@@ -331,7 +376,12 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				Expression expr = null;
+
+				if (InheritanceMapping.Count > 0 && OriginalType != typeof(T))
+					expr = new InheritanceExpression(typeof(T));
+
+				expr = BuildExpression(expr, 0);
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					expr, new []
@@ -678,10 +728,14 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#endregion
 
+			#region GetSubQuery
+
 			public ISqlExpression GetSubQuery(IBuildContext context)
 			{
 				return null;
 			}
+
+			#endregion
 
 			#region Helpers
 
@@ -859,8 +913,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 				psrc.Joins.Add(join.JoinedTable);
 
-				//Init(mappingSchema);
-
 				for (var i = 0; i < association.ThisKey.Length; i++)
 				{
 					SqlField field1;
@@ -875,6 +927,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 					join.Field(field1).Equal.Field(field2);
 				}
+
+				Init();
 			}
 		}
 

@@ -1912,10 +1912,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region MakeIsPredicate
 
-		ISqlPredicate MakeIsPredicate(IBuildContext context, QuerySource.Table table, Type typeOperand)
+		internal ISqlPredicate MakeIsPredicate(TableBuilder.TableContext table, Type typeOperand)
 		{
 			if (typeOperand == table.ObjectType && table.InheritanceMapping.Count(m => m.Type == typeOperand) == 0)
-				return Convert(context, new SqlQuery.Predicate.Expr(new SqlValue(true)));
+				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
 			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
 
@@ -1930,9 +1930,9 @@ namespace BLToolkit.Data.Linq.Builder
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false, 
-									Convert(context,
+									Convert(table,
 										new SqlQuery.Predicate.ExprExpr(
-											table.Columns[table.InheritanceDiscriminators[m.i]].Field,
+											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.NotEqual,
 											new SqlValue(m.m.Code)))));
 						}
@@ -1941,9 +1941,9 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 
 				case 1:
-					return Convert(context,
+					return Convert(table,
 						new SqlQuery.Predicate.ExprExpr(
-							table.Columns[table.InheritanceDiscriminators[mapping[0].i]].Field,
+							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
 							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(mapping[0].m.Code)));
 
@@ -1956,9 +1956,9 @@ namespace BLToolkit.Data.Linq.Builder
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false,
-									Convert(context,
+									Convert(table,
 										new SqlQuery.Predicate.ExprExpr(
-											table.Columns[table.InheritanceDiscriminators[m.i]].Field,
+											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.Equal,
 											new SqlValue(m.m.Code))),
 									true));
