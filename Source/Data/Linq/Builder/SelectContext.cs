@@ -162,8 +162,10 @@ namespace BLToolkit.Data.Linq.Builder
 											});
 									}
 
-									if (!sequence.IsExpression(memberExpression, 0, RequestFor.Object) &&
-									    !sequence.IsExpression(memberExpression, 0, RequestFor.Field))
+									var me = memberExpression.NodeType == ExpressionType.Parameter ? null : memberExpression;
+
+									if (!sequence.IsExpression(me, 0, RequestFor.Object) &&
+									    !sequence.IsExpression(me, 0, RequestFor.Field))
 									{
 										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
