@@ -301,6 +301,44 @@ namespace Data.Linq
                 });
         }
 
+        [Test]
+        public void TestJoinOrder()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        var source = new IdlPatientSource(db);
+
+                        // Success when use result from second JOIN
+                        var query1 = from p1 in source.GrandChilds()
+                                     join p2 in source.Persons() on p1.ParentID equals p2.Id
+                                     join p3 in source.Persons() on p1.ChildID equals p3.Id
+                                     select
+                                         new
+                                             {
+                                                 p1.ChildID, 
+                                                 p1.ParentID,
+                                                 //Parent = p2,
+                                                 Child = p3,
+                                             };
+                        var data1 = query1.ToList();
+
+                        // Fail when use result from first JOIN
+                        var query2 = from p1 in source.GrandChilds()
+                                    join p2 in source.Persons() on p1.ParentID equals p2.Id
+                                    join p3 in source.Persons() on p1.ChildID equals p3.Id
+                                    select
+                                        new
+                                        {
+                                            p1.ChildID,
+                                            p1.ParentID,
+                                            Parent = p2,
+                                            //Child = p3,
+                                        };
+                        var data2 = query2.ToList();
+                    });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
@@ -325,6 +363,13 @@ namespace Data.Linq
         public string Name { get; set; }
     }
 
+    public class IdlGrandChild
+    {
+        public IdlTest.ObjectId ParentID { get; set; }
+        public IdlTest.ObjectId ChildID { get; set; }
+        public IdlTest.ObjectId GrandChildID { get; set; }
+    }
+
     public class IdlPatientEx : IdlPatient
     {
         public IdlPerson Person { get; set; }
@@ -337,6 +382,16 @@ namespace Data.Linq
         public IdlPatientSource(ITestDataContext dc)
         {
             m_dc = dc;
+        }
+
+        public IQueryable<IdlGrandChild> GrandChilds()
+        {
+                return m_dc.GrandChild.Select(x => new IdlGrandChild
+                    {
+                        ChildID = new IdlTest.ObjectId {Value = x.ChildID.Value},
+                        GrandChildID = new IdlTest.ObjectId { Value = x.GrandChildID.Value },
+                        ParentID = new IdlTest.ObjectId { Value = x.ParentID.Value }
+                    });
         }
 
         public IQueryable<IdlPatient> Patients()
