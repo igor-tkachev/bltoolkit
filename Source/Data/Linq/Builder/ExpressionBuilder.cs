@@ -48,6 +48,8 @@ namespace BLToolkit.Data.Linq.Builder
 			new AllAnyBuilder        (),
 			new ConcatUnionBuilder   (),
 			new IntersectBuilder     (),
+			new OfTypeBuilder        (),
+			new CastBuilder          (),
 		};
 
 		public static void AddBuilder(ISequenceBuilder builder)
