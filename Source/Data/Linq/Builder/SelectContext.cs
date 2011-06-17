@@ -601,6 +601,7 @@ namespace BLToolkit.Data.Linq.Builder
 				switch (requestFlag)
 				{
 					default                     : return false;
+					case RequestFor.Table       :
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
@@ -618,6 +619,7 @@ namespace BLToolkit.Data.Linq.Builder
 				switch (requestFlag)
 				{
 					default                     : return false;
+					case RequestFor.Table       :
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :

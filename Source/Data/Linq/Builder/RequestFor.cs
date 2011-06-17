@@ -5,12 +5,17 @@ namespace BLToolkit.Data.Linq.Builder
 	public enum RequestFor
 	{
 		/// <summary>
+		/// Checks the sequence if the expression is a table or an association.
+		/// </summary>
+		Table,
+
+		/// <summary>
 		/// Checks the sequence if the expression is an association.
 		/// </summary>
 		Association,
 
 		/// <summary>
-		/// Checks the sequence if the expression is a table, association, new {}, or new MyClass {}.
+		/// Checks the sequence if the expression is a table, an association, new {}, or new MyClass {}.
 		/// </summary>
 		Object,
 

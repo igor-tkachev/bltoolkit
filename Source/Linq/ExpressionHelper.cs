@@ -2155,7 +2155,7 @@ namespace BLToolkit.Linq
 
 			switch (expr.NodeType)
 			{
-				case ExpressionType.Call:
+				case ExpressionType.Call         :
 					{
 						var e = (MethodCallExpression)expr;
 
@@ -2168,12 +2168,12 @@ namespace BLToolkit.Linq
 						break;
 					}
 
-				case ExpressionType.MemberAccess:
+				case ExpressionType.MemberAccess :
 					{
-						var e = ((MemberExpression)expr);
+						var e = (MemberExpression)expr;
 
 						if (e.Expression != null)
-							return GetRootObject(e.Expression);
+							return GetRootObject(e.Expression.Unwrap());
 
 						break;
 					}
@@ -2235,7 +2235,7 @@ namespace BLToolkit.Linq
 
 						if (e.Expression != null)
 						{
-							var expr = FindLevel(e.Expression, level, ref current);
+							var expr = FindLevel(e.Expression.Unwrap(), level, ref current);
 
 							if (level == current)
 								return expr;

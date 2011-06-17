@@ -72,6 +72,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				case RequestFor.Root        : return expression == Lambda.Parameters[0];
 
+				case RequestFor.Table       :
 				case RequestFor.Association :
 				case RequestFor.Object      :
 				case RequestFor.GroupJoin   :

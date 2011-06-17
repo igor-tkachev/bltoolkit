@@ -1277,17 +1277,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case ExpressionType.TypeIs:
 					{
-						throw new NotImplementedException();
+						var e   = (TypeBinaryExpression)expression;
+						var ctx = GetContext(context, e.Expression);
 
-						/*
-						var e     = expression as TypeBinaryExpression;
-						var table = GetSource(lambda, e.Expression, queries) as QuerySource.Table;
-
-						if (table != null && table.InheritanceMapping.Count > 0)
-							return MakeIsPredicate(table, e.TypeOperand);
+						if (ctx != null && ctx.IsExpression(e.Expression, 0, RequestFor.Table))
+							return MakeIsPredicate(ctx, e);
 
 						break;
-						*/
 					}
 			}
 
@@ -1914,7 +1910,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		internal ISqlPredicate MakeIsPredicate(TableBuilder.TableContext table, Type typeOperand)
 		{
-			if (typeOperand == table.ObjectType && table.InheritanceMapping.Count(m => m.Type == typeOperand) == 0)
+			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
 				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
 			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
@@ -1938,6 +1934,68 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 
 						return cond;
+					}
+
+				case 1:
+					return Convert(table,
+						new SqlQuery.Predicate.ExprExpr(
+							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
+							SqlQuery.Predicate.Operator.Equal,
+							new SqlValue(mapping[0].m.Code)));
+
+				default:
+					{
+						var cond = new SqlQuery.SearchCondition();
+
+						foreach (var m in mapping)
+						{
+							cond.Conditions.Add(
+								new SqlQuery.Condition(
+									false,
+									Convert(table,
+										new SqlQuery.Predicate.ExprExpr(
+											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
+											SqlQuery.Predicate.Operator.Equal,
+											new SqlValue(m.m.Code))),
+									true));
+						}
+
+						return cond;
+					}
+			}
+		}
+
+		ISqlPredicate MakeIsPredicate(IBuildContext context, TypeBinaryExpression expression)
+		{
+			var typeOperand = expression.TypeOperand;
+			var table       = new TableBuilder.TableContext(this, new BuildInfo((IBuildContext)null, Expression.Constant(null), new SqlQuery()), typeOperand);
+
+			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
+				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
+
+			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
+
+			switch (mapping.Count)
+			{
+				case 0:
+					{
+						var obj  = Expression.Convert(expression.Expression, typeOperand);
+						var expr = (Expression)null;
+
+						foreach (var m in table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
+						{
+							var        left  = Expression.PropertyOrField(obj, table.InheritanceDiscriminators[m.i]);
+							Expression right = Expression.Constant(m.m.Code);
+
+							if (left.Type != right.Type)
+								right = Expression.Convert(right, left.Type);
+
+							var e = Expression.NotEqual(left, right);
+
+							expr = expr != null ? Expression.AndAlso(expr, e) : e;
+						}
+
+						return ConvertPredicate(context, expr);
 					}
 
 				case 1:

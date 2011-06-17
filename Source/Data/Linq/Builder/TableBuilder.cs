@@ -709,6 +709,7 @@ namespace BLToolkit.Data.Linq.Builder
 							return table != null && table.Field != null;
 						}
 
+					case RequestFor.Table       :
 					case RequestFor.Object      :
 						{
 							var table = FindTable(expression, level);
