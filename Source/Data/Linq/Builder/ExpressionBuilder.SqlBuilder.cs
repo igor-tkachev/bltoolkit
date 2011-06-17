@@ -1369,7 +1369,7 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			var l = ConvertToSql(context, left);
-			var r = ConvertToSql(context, right);
+			var r = ConvertToSql(context, right.Unwrap());
 
 			switch (nodeType)
 			{
@@ -1384,17 +1384,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (l is SqlQuery.SearchCondition)
 				l = Convert(context, new SqlFunction(typeof(bool), "CASE", l, new SqlValue(true), new SqlValue(false)));
-			//l = Convert(new SqlFunction("CASE",
-			//	l, new SqlValue(true),
-			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)l) }), new SqlValue(false),
-			//	new SqlValue(false)));
 
 			if (r is SqlQuery.SearchCondition)
 				r = Convert(context, new SqlFunction(typeof(bool), "CASE", r, new SqlValue(true), new SqlValue(false)));
-			//r = Convert(new SqlFunction("CASE",
-			//	r, new SqlValue(true),
-			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)r) }), new SqlValue(false),
-			//	new SqlValue(false)));
 
 			return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 		}
@@ -1502,21 +1494,6 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
 					}
-
-					/*
-					var field = GetField(lambda, left, queries);
-
-					if (field is QuerySource.GroupJoin)
-					{
-						var join = (QuerySource.GroupJoin)field;
-						var expr = join.CheckNullField.GetExpressions(this)[0];
-
-						return Convert(context, new SqlQuery.Predicate.IsNull(expr, !isEqual));
-					}
-
-					if (field is QuerySource || field == null && left.NodeType == ExpressionType.Parameter)
-						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
-					*/
 				}
 			}
 
@@ -1974,57 +1951,31 @@ namespace BLToolkit.Data.Linq.Builder
 				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
 			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
+			var isEqual = true;
 
-			switch (mapping.Count)
+			if (mapping.Count == 0)
 			{
-				case 0:
-					{
-						var obj  = Expression.Convert(expression.Expression, typeOperand);
-						var expr = (Expression)null;
-
-						foreach (var m in table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
-						{
-							var        left  = Expression.PropertyOrField(obj, table.InheritanceDiscriminators[m.i]);
-							Expression right = Expression.Constant(m.m.Code);
-
-							if (left.Type != right.Type)
-								right = Expression.Convert(right, left.Type);
-
-							var e = Expression.NotEqual(left, right);
-
-							expr = expr != null ? Expression.AndAlso(expr, e) : e;
-						}
-
-						return ConvertPredicate(context, expr);
-					}
-
-				case 1:
-					return Convert(table,
-						new SqlQuery.Predicate.ExprExpr(
-							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
-							SqlQuery.Predicate.Operator.Equal,
-							new SqlValue(mapping[0].m.Code)));
-
-				default:
-					{
-						var cond = new SqlQuery.SearchCondition();
-
-						foreach (var m in mapping)
-						{
-							cond.Conditions.Add(
-								new SqlQuery.Condition(
-									false,
-									Convert(table,
-										new SqlQuery.Predicate.ExprExpr(
-											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
-											SqlQuery.Predicate.Operator.Equal,
-											new SqlValue(m.m.Code))),
-									true));
-						}
-
-						return cond;
-					}
+				mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault).ToList();
+				isEqual = false;
 			}
+
+			var obj  = Expression.Convert(expression.Expression, typeOperand);
+			var expr = (Expression)null;
+
+			foreach (var m in mapping)
+			{
+				var        left  = Expression.PropertyOrField(obj, table.InheritanceDiscriminators[m.i]);
+				Expression right = Expression.Constant(m.m.Code);
+
+				if (left.Type != right.Type)
+					right = Expression.Convert(right, left.Type);
+
+				var e = isEqual ? Expression.Equal(left, right) : Expression.NotEqual(left, right);
+
+				expr = expr != null ? Expression.AndAlso(expr, e) : e;
+			}
+
+			return ConvertPredicate(context, expr);
 		}
 
 		#endregion

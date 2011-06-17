@@ -961,8 +961,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (levelExpression == memberExpression)
 							foreach (var field in SqlTable.Fields.Values)
+							{
 								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
 									return field;
+
+								if (InheritanceMapping.Count > 0 && field.Name == memberExpression.Member.Name)
+									foreach (var mapping in InheritanceMapping)
+										foreach (MemberMapper mm in Builder.MappingSchema.GetObjectMapper(mapping.Type))
+											if (TypeHelper.Equals(mm.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
+												return field;
+							}
 					}
 				}
 
