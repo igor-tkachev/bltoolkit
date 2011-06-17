@@ -1959,12 +1959,18 @@ namespace BLToolkit.Data.Linq.Builder
 				isEqual = false;
 			}
 
-			var obj  = Expression.Convert(expression.Expression, typeOperand);
-			var expr = (Expression)null;
+			Expression expr = null;
 
 			foreach (var m in mapping)
 			{
-				var        left  = Expression.PropertyOrField(obj, table.InheritanceDiscriminators[m.i]);
+				var field = table.SqlTable.Fields[table.InheritanceDiscriminators[m.i]];
+				var ttype = field.MemberMapper.MemberAccessor.TypeAccessor.OriginalType;
+				var obj   = expression.Expression;
+
+				if (obj.Type != ttype)
+					obj = Expression.Convert(expression.Expression, ttype);
+
+				var        left  = Expression.PropertyOrField(obj, field.Name);
 				Expression right = Expression.Constant(m.m.Code);
 
 				if (left.Type != right.Type)
