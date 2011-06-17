@@ -367,7 +367,8 @@ namespace Data.Linq.Model
 
 		public override bool Equals(object obj)
 		{
-			return base.Equals(obj) && Equals((ParentInheritance1)obj);
+			var ret = base.Equals(obj) && Equals((ParentInheritance1)obj);
+			return ret;
 		}
 
 		public bool Equals(ParentInheritance1 other)

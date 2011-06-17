@@ -18,8 +18,6 @@ namespace BLToolkit.Data.Linq
 		IDataReader        ExecuteReader   (object query);
 		void               ReleaseQuery    (object query);
 
-		object             CreateInstance  (InitContext context);
-
 		string             GetSqlText      (object query);
 		IDataContext       Clone           ();
 

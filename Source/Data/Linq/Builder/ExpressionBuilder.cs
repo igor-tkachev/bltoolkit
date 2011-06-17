@@ -36,7 +36,7 @@ namespace BLToolkit.Data.Linq.Builder
 			new AggregationBuilder   (),
 			new ScalarSelectBuilder  (),
 			new CountBuilder         (),
-			new AsQueryableBuilder   (),
+			new PassThroughBuilder   (),
 			new TableAttributeBuilder(),
 			new InsertBuilder        (),
 			new InsertBuilder.Into   (),
@@ -49,7 +49,6 @@ namespace BLToolkit.Data.Linq.Builder
 			new ConcatUnionBuilder   (),
 			new IntersectBuilder     (),
 			new OfTypeBuilder        (),
-			new CastBuilder          (),
 		};
 
 		public static void AddBuilder(ISequenceBuilder builder)

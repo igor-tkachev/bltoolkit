@@ -508,7 +508,7 @@ namespace BLToolkit.Data.Linq
 				ObjectMapper  = dest
 			};
 
-			var destObject = dataContext.CreateInstance(initContext) ?? dest.CreateInstance(initContext);
+			var destObject = /*dataContext.CreateInstance(initContext) ??*/ dest.CreateInstance(initContext);
 
 			if (initContext.StopMapping)
 				return destObject;

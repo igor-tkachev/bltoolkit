@@ -106,11 +106,6 @@ namespace BLToolkit.Data.Linq
 			ReleaseQuery();
 		}
 
-		object IDataContext.CreateInstance(InitContext context)
-		{
-			return null;
-		}
-
 		string IDataContext.GetSqlText(object query)
 		{
 			var q = (IQueryContext)query;

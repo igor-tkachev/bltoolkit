@@ -729,8 +729,11 @@ namespace Data.Linq
 			Assert.AreNotEqual(0, expectedList.Count);
 			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
-			var exceptExpected = resultList.  Except(expectedList).Count();
-			var exceptResult   = expectedList.Except(resultList).  Count();
+			var exceptExpectedList = resultList.  Except(expectedList).ToList();
+			var exceptResultList   = expectedList.Except(resultList).  ToList();
+
+			var exceptExpected = exceptExpectedList.Count;
+			var exceptResult   = exceptResultList.  Count;
 
 			if (exceptResult != 0 || exceptExpected != 0)
 				for (var i = 0; i < resultList.Count; i++)
