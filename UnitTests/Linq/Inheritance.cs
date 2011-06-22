@@ -138,6 +138,19 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void TypeCastAsTest11()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					   DiscontinuedProduct.ToList()
+						.Select(p => new { p = p as Northwind.Product })
+						.Select(p => p.p == null ? "NULL" : p.p.ProductName),
+					db.DiscontinuedProduct
+						.Select(p => new { p = p as Northwind.Product })
+						.Select(p => p.p == null ? "NULL" : p.p.ProductName));
+		}
+
+		[Test]
 		public void TypeCastAsTest2()
 		{
 			using (var db = new NorthwindDB())
