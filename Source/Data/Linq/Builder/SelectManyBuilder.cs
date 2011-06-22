@@ -42,6 +42,14 @@ namespace BLToolkit.Data.Linq.Builder
 				e.ElementType == QueryElementType.SqlField && sequenceTable == ((SqlField)e).Table ||
 				e.ElementType == QueryElementType.Column   && sequenceTable == ((SqlQuery.Column)e).Parent);
 
+			if (collection is JoinBuilder.GroupJoinSubQueryContext)
+			{
+				var groupJoin = ((JoinBuilder.GroupJoinSubQueryContext)collection).GroupJoin;
+
+				groupJoin.SqlQuery.From.Tables[0].Joins[0].JoinType = SqlQuery.JoinType.Inner;
+				groupJoin.SqlQuery.From.Tables[0].Joins[0].IsWeak   = false;
+			}
+
 			if (!newQuery)
 			{
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);

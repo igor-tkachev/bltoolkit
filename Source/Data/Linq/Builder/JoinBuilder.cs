@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Linq.Builder
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext, methodCall) : new SubQueryContext(innerContext);
 			countContext = new SubQueryContext(countContext);
 
-			var join = innerContext.SqlQuery.InnerJoin();
+			var join = isGroup ? innerContext.SqlQuery.WeakLeftJoin() : innerContext.SqlQuery.InnerJoin();
 			var sql  = context.SqlQuery;
 
 			sql.From.Tables[0].Joins.Add(join.JoinedTable);

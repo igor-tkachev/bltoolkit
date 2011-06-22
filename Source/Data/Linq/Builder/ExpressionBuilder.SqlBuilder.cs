@@ -2265,15 +2265,29 @@ namespace BLToolkit.Data.Linq.Builder
 							var attr = GetFunctionAttribute(ma.Member);
 
 							if (attr == null && !TypeHelper.IsNullableValueMember(ma.Member))
-								goto case ExpressionType.Parameter;
+								if (canBeCompiled && GetContext(context, pi) == null)
+									return !CanBeCompiled(pi);;
 
 							break;
 						}
 
 					case ExpressionType.Parameter:
 						{
-							if (canBeCompiled && GetContext(context, pi) == null)
-								return !CanBeCompiled(pi);
+							var ctx = GetContext(context, pi);
+
+							if (ctx == null)
+							{
+								if (canBeCompiled)
+									return !CanBeCompiled(pi);
+							}
+							else
+							{
+								if (pi.NodeType == ExpressionType.Parameter)
+								{
+									
+								}
+							}
+
 							break;
 						}
 
@@ -2292,7 +2306,8 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
-					case ExpressionType.New: return true;
+					case ExpressionType.TypeAs :
+					case ExpressionType.New    : return true;
 				}
 
 				return false;
