@@ -158,16 +158,53 @@ namespace BLToolkit.Data.Linq.Builder
 			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", buildInfo.Expression);
 		}
 
+		public SequenceConvertInfo ConvertSequence(BuildInfo buildInfo)
+		{
+			buildInfo.Expression = buildInfo.Expression.Unwrap();
+
+			var n = _builders[0].BuildCounter;
+
+			foreach (var builder in _builders)
+			{
+				if (builder.CanBuild(this, buildInfo))
+				{
+					var info = builder.Convert(this, buildInfo);
+
+					lock (builder)
+						builder.BuildCounter++;
+
+					_reorder = _reorder || n < builder.BuildCounter;
+
+					return info;
+				}
+
+				n = builder.BuildCounter;
+			}
+
+			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", buildInfo.Expression);
+		}
+
 		#endregion
 
 		#region ConvertExpression
 
 		Expression ConvertExpressionTree(Expression expression)
 		{
-			expression = ConvertParameters  (expression);
-			//expression = ConverLetSubqueries(expression);
+			var expr = ConvertParameters(expression);
 
-			return OptimizeExpression(expression);
+			expr = OptimizeExpression(expr);
+
+			var sequence = ConvertSequence(new BuildInfo((IBuildContext)null, expr, new SqlQuery()));
+
+			if (sequence != null)
+			{
+				expr = sequence.Expression;
+
+				if (sequence.NewType != null)
+					throw new InvalidOperationException();
+			}
+
+			return expr;
 		}
 
 		#region ConvertParameters

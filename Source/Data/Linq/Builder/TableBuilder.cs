@@ -106,6 +106,11 @@ namespace BLToolkit.Data.Linq.Builder
 			});
 		}
 
+		public SequenceConvertInfo Convert(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		#endregion
 
 		#region TableContext

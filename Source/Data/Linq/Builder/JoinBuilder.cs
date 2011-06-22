@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -134,6 +133,11 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 #endif
 				;
+		}
+
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
 		}
 
 		static void BuildJoin(

@@ -20,6 +20,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return new ContainsContext(buildInfo.Parent, methodCall, sequence);
 		}
 
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		class ContainsContext : SequenceContextBase
 		{
 			readonly MethodCallExpression _methodCall;

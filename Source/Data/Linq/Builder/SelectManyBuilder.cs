@@ -122,6 +122,11 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 		}
 
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		public class SelectManyContext : SelectContext
 		{
 			public SelectManyContext(IBuildContext parent, LambdaExpression lambda, IBuildContext sequence)

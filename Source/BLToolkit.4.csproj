@@ -210,6 +210,7 @@
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\SequenceConvertInfo.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />

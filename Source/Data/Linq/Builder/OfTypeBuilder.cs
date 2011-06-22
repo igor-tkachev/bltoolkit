@@ -35,5 +35,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 			return sequence;
 		}
+
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
 	}
 }

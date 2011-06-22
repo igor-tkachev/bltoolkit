@@ -42,6 +42,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return new FirstSingleContext(buildInfo.Parent, sequence, methodCall);
 		}
 
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		class FirstSingleContext : SequenceContextBase
 		{
 			public FirstSingleContext(IBuildContext parent, IBuildContext sequence, MethodCallExpression methodCall)

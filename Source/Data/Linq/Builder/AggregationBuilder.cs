@@ -66,6 +66,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return context;
 		}
 
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		class AggregationContext : SequenceContextBase
 		{
 			public AggregationContext(IBuildContext parent, IBuildContext sequence, MethodCallExpression methodCall)

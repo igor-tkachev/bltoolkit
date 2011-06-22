@@ -58,6 +58,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return context;
 		}
 
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		static IBuildContext CheckSubQueryForSelect(IBuildContext context)
 		{
 			if (/*_parsingMethod[0] != ParsingMethod.OrderBy &&*/ context.SqlQuery.Select.IsDistinct)

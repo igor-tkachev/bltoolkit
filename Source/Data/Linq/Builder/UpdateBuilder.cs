@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	class UpdateBuilder : MethodCallBuilder
 	{
@@ -70,6 +70,11 @@ namespace BLToolkit.Data.Linq.Builder
 			sequence.SqlQuery.QueryType = QueryType.Update;
 
 			return new UpdateContext(buildInfo.Parent, sequence);
+		}
+
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
 		}
 
 		#endregion
@@ -253,6 +258,11 @@ namespace BLToolkit.Data.Linq.Builder
 					ParseSet(builder, buildInfo, extract, update, sequence);
 
 				return sequence;
+			}
+
+			protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+			{
+				return null;
 			}
 		}
 

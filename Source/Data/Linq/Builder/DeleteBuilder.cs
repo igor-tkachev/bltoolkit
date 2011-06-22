@@ -25,6 +25,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return new DeleteContext(buildInfo.Parent, sequence);
 		}
 
+		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		class DeleteContext : SequenceContextBase
 		{
 			public DeleteContext(IBuildContext parent, IBuildContext sequence)

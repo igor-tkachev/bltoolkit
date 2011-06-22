@@ -912,6 +912,11 @@ namespace Data.Linq
 			return new Context(builder.BuildSequence(new BuildInfo(buildInfo, call.Arguments[0])));
 		}
 
+		public SequenceConvertInfo Convert(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return null;
+		}
+
 		public class Context : IBuildContext
 		{
 			public Context(IBuildContext sequence)
