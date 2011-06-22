@@ -79,6 +79,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			CompiledParameters = compiledParameters;
 			DataContextInfo    = dataContext;
+			OriginalExpression = expression;
 			Expression         = ConvertExpressionTree(expression);
 		}
 
@@ -87,6 +88,7 @@ namespace BLToolkit.Data.Linq.Builder
 		#region Public Members
 
 		public readonly IDataContextInfo      DataContextInfo;
+		public readonly Expression            OriginalExpression;
 		public readonly Expression            Expression;
 		public readonly ParameterExpression[] CompiledParameters;
 

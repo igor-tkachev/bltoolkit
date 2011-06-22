@@ -85,7 +85,7 @@ namespace BLToolkit.Data.Linq
 			ContextID         = parseContext.Builder.DataContextInfo.ContextID;
 			MappingSchema     = parseContext.Builder.MappingSchema;
 			CreateSqlProvider = parseContext.Builder.DataContextInfo.CreateSqlProvider;
-			Expression        = parseContext.Builder.Expression;
+			Expression        = parseContext.Builder.OriginalExpression;
 			//Parameters        = parameters;
 		}
 
