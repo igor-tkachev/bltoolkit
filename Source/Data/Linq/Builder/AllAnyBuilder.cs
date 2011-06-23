@@ -37,7 +37,8 @@ namespace BLToolkit.Data.Linq.Builder
 			return new AllAnyContext(buildInfo.Parent, methodCall, sequence);
 		}
 
-		protected override SequenceConvertInfo Convert(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
 			return null;
 		}

@@ -19,13 +19,13 @@ namespace BLToolkit.Data.Linq.Builder
 			return BuildMethodCall(builder, (MethodCallExpression)buildInfo.Expression, buildInfo);
 		}
 
-		public SequenceConvertInfo Convert(ExpressionBuilder builder, BuildInfo buildInfo)
+		public SequenceConvertInfo Convert(ExpressionBuilder builder, BuildInfo buildInfo, ParameterExpression param)
 		{
-			return Convert(builder, (MethodCallExpression)buildInfo.Expression, buildInfo);
+			return Convert(builder, (MethodCallExpression)buildInfo.Expression, buildInfo, param);
 		}
 
 		protected abstract bool                CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
 		protected abstract IBuildContext       BuildMethodCall   (ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
-		protected abstract SequenceConvertInfo Convert           (ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
+		protected abstract SequenceConvertInfo Convert           (ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param);
 	}
 }
