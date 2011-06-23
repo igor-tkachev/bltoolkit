@@ -2499,7 +2499,6 @@ namespace BLToolkit.Data.Linq.Builder
 				default                        :
 					return false;
 			}
-
 		}
 
 		#endregion
