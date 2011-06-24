@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq.Builder
 {
-	[DebuggerDisplay("Path = {Path}; Expr = {Expr}; Level = {Level}")]
+	[DebuggerDisplay("Path = {Path}, Expr = {Expr}, Level = {Level}")]
 	public class SequenceConvertPath
 	{
 		[NotNull] public Expression Path;

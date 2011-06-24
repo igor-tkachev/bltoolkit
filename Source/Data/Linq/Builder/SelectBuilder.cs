@@ -276,11 +276,11 @@ namespace BLToolkit.Data.Linq.Builder
 				//
 				case ExpressionType.Parameter  :
 					if (expression == param)
-						yield return new SequenceConvertPath { Path = path, Expr = expression, Level = 0 };
+						yield return new SequenceConvertPath { Path = path, Expr = expression, Level = level };
 					break;
 
 				case ExpressionType.TypeAs     :
-					yield return new SequenceConvertPath { Path = path, Expr = expression };
+					yield return new SequenceConvertPath { Path = path, Expr = expression, Level = level };
 					break;
 
 				// Queriable method.
