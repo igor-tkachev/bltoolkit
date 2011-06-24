@@ -166,7 +166,7 @@ namespace BLToolkit.Data.Linq.Builder
 					if (plist.Count > 1)
 						list = list.Except(plist.Skip(1)).ToList();
 
-					var p = plist.Count == 0 ? null : plist[0];
+					var p = plist.FirstOrDefault();
 
 					if (p == null)
 					{
@@ -176,16 +176,17 @@ namespace BLToolkit.Data.Linq.Builder
 						var fields = btype.GetFields();
 						var pold   = selector.Parameters[0];
 						var psel   = Expression.Parameter(types[0], selector.Parameters[0].Name);
-						var body   = Expression.MemberInit(
-							Expression.New(btype),
-							Expression.Bind(fields[0], psel),
-							Expression.Bind(fields[1], selector.Body));
 
 						methodCall = Expression.Call(
 							methodCall.Object,
 							mgen.MakeGenericMethod(types[0], btype),
 							methodCall.Arguments[0],
-							Expression.Lambda(body, psel));
+							Expression.Lambda(
+								Expression.MemberInit(
+									Expression.New(btype),
+									Expression.Bind(fields[0], psel),
+									Expression.Bind(fields[1], selector.Body)),
+								psel));
 
 						selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 						param    = Expression.Parameter(selector.Body.Type, param.Name);
