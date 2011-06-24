@@ -235,6 +235,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LetTest23()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				let children1 = p.Children.Where(c => c.ParentID > 1)
+				let children2 = children1.Where(c => c.ParentID < 10)
+				where children2.Any()
+				select children2.Sum(c => c.ChildID),
+				from p in db.Parent
+				let children1 = p.Children.Where(c => c.ParentID > 1)
+				let children2 = children1.Where(c => c.ParentID < 10)
+				where children2.Any()
+				select children2.Sum(c => c.ChildID)));
+		}
+
+		[Test]
 		public void LetTest3()
 		{
 			ForEachProvider(db => AreEqual(

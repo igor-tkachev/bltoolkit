@@ -6,8 +6,8 @@ namespace BLToolkit.Data.Linq.Builder
 {
 	public class SequenceConvertInfo
 	{
+		public ParameterExpression                Parameter;
 		public Expression                         Expression;
-		public Type                               NewType;
 		public Dictionary<Expression, Expression> ExpressionsToReplace;
 	}
 }

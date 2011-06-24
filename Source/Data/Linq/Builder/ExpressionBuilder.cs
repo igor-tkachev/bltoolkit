@@ -192,7 +192,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				expr = sequence.Expression;
 
-				if (sequence.NewType != null)
+				if (sequence.Parameter.Type != SequenceParameter.Type)
 					throw new InvalidOperationException();
 			}
 
@@ -488,14 +488,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertWhere
 
-		class ExprHoder<TP,TE>
-		{
-#pragma warning disable 649
-			public TP p;
-			public TE ex;
-#pragma warning restore 649
-		}
-
 		Expression ConvertWhere(MethodCallExpression method)
 		{
 			var sequence  = OptimizeExpression(method.Arguments[0]);
@@ -547,7 +539,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				foreach (var ex in exprs)
 				{
-					var type   = typeof(ExprHoder<,>).MakeGenericType(expr.Type, ex.Type);
+					var type   = typeof(ExpressionHoder<,>).MakeGenericType(expr.Type, ex.Type);
 					var fields = type.GetFields();
 
 					expr = Expression.MemberInit(

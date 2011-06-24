@@ -150,53 +150,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (info != null)
 			{
-				methodCall = (MethodCallExpression)methodCall.Convert(ex =>
-				{
-					if (ex == methodCall.Arguments[0])
-						return info.Expression;
-
-					switch (ex.NodeType)
-					{
-						case ExpressionType.Parameter :
-
-							foreach (var item in info.ExpressionsToReplace)
-								if (ex == item.Key)
-									return item.Value;
-
-							break;
-
-						case ExpressionType.MemberAccess :
-
-							foreach (var item in info.ExpressionsToReplace)
-							{
-								var ex1 = ex;
-								var ex2 = item.Key;
-
-								while (ex1.NodeType == ex2.NodeType)
-								{
-									if (ex1.NodeType == ExpressionType.Parameter)
-										return ex1 == ex2 ? item.Value : ex;
-
-									if (ex2.NodeType != ExpressionType.MemberAccess)
-										return ex;
-
-									var ma1 = (MemberExpression)ex1;
-									var ma2 = (MemberExpression)ex2;
-
-									if (ma1.Member != ma2.Member)
-										return ex;
-
-									ex1 = ma1.Expression;
-									ex2 = ma2.Expression;
-								}
-							}
-
-							break;
-					}
-					return ex;
-				});
-
-				selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				methodCall = (MethodCallExpression)methodCall.Convert(
+					ex => ConvertMethod(methodCall, 0, info, selector.Parameters[0], ex));
+				selector   = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			}
 
 			if (param != builder.SequenceParameter)
@@ -209,13 +165,47 @@ namespace BLToolkit.Data.Linq.Builder
 
 					if (p == null)
 					{
-						return null;
+						var types  = methodCall.Method.GetGenericArguments();
+						var mgen   = methodCall.Method.GetGenericMethodDefinition();
+						var btype  = typeof(ExpressionHoder<,>).MakeGenericType(types[0], selector.Body.Type);
+						var fields = btype.GetFields();
+						var pold   = selector.Parameters[0];
+						var psel   = Expression.Parameter(types[0], selector.Parameters[0].Name);
+						var body   = Expression.MemberInit(
+							Expression.New(btype),
+							Expression.Bind(fields[0], psel),
+							Expression.Bind(fields[1], selector.Body));
+
+						methodCall = Expression.Call(
+							methodCall.Object,
+							mgen.MakeGenericMethod(types[0], btype),
+							methodCall.Arguments[0],
+							Expression.Lambda(body, psel));
+
+						selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+						param    = Expression.Parameter(selector.Body.Type, param.Name);
+
+						list.Add(new ExprInfo { Path = param, Expr = Expression.MakeMemberAccess(param, fields[1]) });
+
+						var expr = Expression.MakeMemberAccess(param, fields[0]);
+
+						foreach (var t in list)
+							t.Expr = t.Expr.Convert(ex => ex == pold ? expr : ex);
+
+						return new SequenceConvertInfo
+						{
+							Parameter            = param,
+							Expression           = methodCall,
+							ExpressionsToReplace = list.ToDictionary(e => e.Path, e => e.Expr)
+						};
 					}
-					else if (list.Count > 1)
+
+					if (list.Count > 1)
 					{
 						return new SequenceConvertInfo
 						{
-							Expression = methodCall,
+							Parameter            = param,
+							Expression           = methodCall,
 							ExpressionsToReplace = list
 								.Where (e => e != p)
 								.Select(ei =>
@@ -230,9 +220,95 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			if (methodCall != originalMethodCall)
-				return new SequenceConvertInfo { Expression = methodCall, };
+				return new SequenceConvertInfo
+				{
+					Parameter  = param,
+					Expression = methodCall,
+				};
 
 			return null;
+		}
+
+		static Expression ConvertMethod(
+			MethodCallExpression methodCall,
+			int                  sourceTypeNumber,
+			SequenceConvertInfo  info,
+			ParameterExpression  param,
+			Expression           expression)
+		{
+			if (expression == methodCall && param.Type != info.Parameter.Type)
+			{
+				var types = methodCall.Method.GetGenericArguments();
+				var mgen  = methodCall.Method.GetGenericMethodDefinition();
+
+				types[sourceTypeNumber] = info.Parameter.Type;
+
+				var args = methodCall.Arguments.ToArray();
+
+				args[0] = info.Expression;
+
+				for (var i = 1; i < args.Length; i++)
+				{
+					var arg = args[i].Unwrap();
+
+					if (arg.NodeType == ExpressionType.Lambda)
+					{
+						var l = (LambdaExpression)arg;
+
+						if (l.Parameters.Any(a => a == param))
+						{
+							args[i] = Expression.Lambda(
+								l.Body.Convert(ex => ConvertMethod(methodCall, sourceTypeNumber, info, param, ex)),
+								info.Parameter);
+
+							return Expression.Call(methodCall.Object, mgen.MakeGenericMethod(types), args);
+						}
+					}
+				}
+			}
+
+			if (expression == methodCall.Arguments[0])
+				return info.Expression;
+
+			switch (expression.NodeType)
+			{
+				case ExpressionType.Parameter :
+
+					foreach (var item in info.ExpressionsToReplace)
+						if (expression == item.Key || expression == param && item.Key.NodeType == ExpressionType.Parameter)
+							return item.Value;
+					break;
+
+				case ExpressionType.MemberAccess :
+
+					foreach (var item in info.ExpressionsToReplace)
+					{
+						var ex1 = expression;
+						var ex2 = item.Key;
+
+						while (ex1.NodeType == ex2.NodeType)
+						{
+							if (ex1.NodeType == ExpressionType.Parameter)
+								return ex1 == ex2 || info.Parameter == ex2? item.Value : expression;
+
+							if (ex2.NodeType != ExpressionType.MemberAccess)
+								return expression;
+
+							var ma1 = (MemberExpression)ex1;
+							var ma2 = (MemberExpression)ex2;
+
+							if (ma1.Member != ma2.Member)
+								return expression;
+
+							ex1 = ma1.Expression;
+							ex2 = ma2.Expression;
+						}
+					}
+
+					break;
+			}
+
+			return expression;
 		}
 
 		static IEnumerable<ExprInfo> GetExpressions(Expression path, Expression expression)
