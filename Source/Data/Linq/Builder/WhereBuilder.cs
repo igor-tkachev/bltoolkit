@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -24,69 +25,31 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		protected override SequenceConvertInfo Convert(
-			ExpressionBuilder builder, MethodCallExpression originalMethodCall, BuildInfo buildInfo, ParameterExpression param)
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
-			var methodCall = originalMethodCall;
-			var predicate  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
-			var info       = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
+			var predicate = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+			var info      = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
 
 			if (info != null)
 			{
-				methodCall = (MethodCallExpression)methodCall.Convert(ex =>
-				{
-					if (ex == methodCall.Arguments[0])
-						return info.Expression;
+				info.Expression = methodCall.Convert(ex => ConvertMethod(methodCall, 0, info, predicate.Parameters[0], ex));
 
-					switch (ex.NodeType)
+				if (param.Type != info.Parameter.Type)
+					param = Expression.Parameter(info.Parameter.Type, param.Name);
+
+				var q =
+					from ex in info.ExpressionsToReplace
+					select new
 					{
-						case ExpressionType.Parameter :
+						Key   = ex.Key.  Convert(e => e == info.Parameter ? param : e),
+						Value = ex.Value.Convert(e => e == info.Parameter ? param : e)
+					};
 
-							foreach (var item in info.ExpressionsToReplace)
-								if (ex == item.Key)
-									return item.Value;
+				info.Parameter = param;
+				info.ExpressionsToReplace = q.ToDictionary(e => e.Key, e => e.Value);
 
-							break;
-
-						case ExpressionType.MemberAccess :
-
-							foreach (var item in info.ExpressionsToReplace)
-							{
-								var ex1 = ex;
-								var ex2 = item.Key;
-
-								while (ex1.NodeType == ex2.NodeType)
-								{
-									if (ex1.NodeType == ExpressionType.Parameter)
-										return ex1 == ex2 ? item.Value : ex;
-
-									if (ex2.NodeType != ExpressionType.MemberAccess)
-										return ex;
-
-									var ma1 = (MemberExpression)ex1;
-									var ma2 = (MemberExpression)ex2;
-
-									if (ma1.Member != ma2.Member)
-										return ex;
-
-									ex1 = ma1.Expression;
-									ex2 = ma2.Expression;
-								}
-							}
-
-							break;
-					}
-					return ex;
-				});
-
-				predicate = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				return info;
 			}
-
-			if (methodCall != originalMethodCall)
-				return new SequenceConvertInfo
-				{
-					Parameter  = param,
-					Expression = methodCall,
-				};
 
 			return null;
 		}

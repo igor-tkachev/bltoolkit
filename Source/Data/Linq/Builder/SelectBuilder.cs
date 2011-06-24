@@ -157,11 +157,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (param != builder.SequenceParameter)
 			{
-				var list = GetExpressions(param, selector.Body.Unwrap()).ToList();
+				var list = GetExpressions(selector.Parameters[0], param, selector.Body.Unwrap()).ToList();
 
 				if (list.Count > 0)
 				{
-					var p = list.FirstOrDefault(e => e.Expr == selector.Parameters[0]);
+					var plist = list.Where(e => e.Expr == selector.Parameters[0]).ToList();
+
+					if (plist.Count > 1)
+						list = list.Except(plist.Skip(1)).ToList();
+
+					var p = plist.Count == 0 ? null : plist[0];
 
 					if (p == null)
 					{
@@ -229,89 +234,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
-		static Expression ConvertMethod(
-			MethodCallExpression methodCall,
-			int                  sourceTypeNumber,
-			SequenceConvertInfo  info,
-			ParameterExpression  param,
-			Expression           expression)
-		{
-			if (expression == methodCall && param.Type != info.Parameter.Type)
-			{
-				var types = methodCall.Method.GetGenericArguments();
-				var mgen  = methodCall.Method.GetGenericMethodDefinition();
-
-				types[sourceTypeNumber] = info.Parameter.Type;
-
-				var args = methodCall.Arguments.ToArray();
-
-				args[0] = info.Expression;
-
-				for (var i = 1; i < args.Length; i++)
-				{
-					var arg = args[i].Unwrap();
-
-					if (arg.NodeType == ExpressionType.Lambda)
-					{
-						var l = (LambdaExpression)arg;
-
-						if (l.Parameters.Any(a => a == param))
-						{
-							args[i] = Expression.Lambda(
-								l.Body.Convert(ex => ConvertMethod(methodCall, sourceTypeNumber, info, param, ex)),
-								info.Parameter);
-
-							return Expression.Call(methodCall.Object, mgen.MakeGenericMethod(types), args);
-						}
-					}
-				}
-			}
-
-			if (expression == methodCall.Arguments[0])
-				return info.Expression;
-
-			switch (expression.NodeType)
-			{
-				case ExpressionType.Parameter :
-
-					foreach (var item in info.ExpressionsToReplace)
-						if (expression == item.Key || expression == param && item.Key.NodeType == ExpressionType.Parameter)
-							return item.Value;
-					break;
-
-				case ExpressionType.MemberAccess :
-
-					foreach (var item in info.ExpressionsToReplace)
-					{
-						var ex1 = expression;
-						var ex2 = item.Key;
-
-						while (ex1.NodeType == ex2.NodeType)
-						{
-							if (ex1.NodeType == ExpressionType.Parameter)
-								return ex1 == ex2 || info.Parameter == ex2? item.Value : expression;
-
-							if (ex2.NodeType != ExpressionType.MemberAccess)
-								return expression;
-
-							var ma1 = (MemberExpression)ex1;
-							var ma2 = (MemberExpression)ex2;
-
-							if (ma1.Member != ma2.Member)
-								return expression;
-
-							ex1 = ma1.Expression;
-							ex2 = ma2.Expression;
-						}
-					}
-
-					break;
-			}
-
-			return expression;
-		}
-
-		static IEnumerable<ExprInfo> GetExpressions(Expression path, Expression expression)
+		static IEnumerable<ExprInfo> GetExpressions(ParameterExpression param, Expression path, Expression expression)
 		{
 			switch (expression.NodeType)
 			{
@@ -323,7 +246,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (expr.Members != null) for (var i = 0; i < expr.Members.Count; i++)
 						{
-							var q = GetExpressions(Expression.MakeMemberAccess(path, expr.Members[i]), expr.Arguments[i]);
+							var q = GetExpressions(param, Expression.MakeMemberAccess(path, expr.Members[i]), expr.Arguments[i]);
 							foreach (var e in q)
 								yield return e;
 						}
@@ -342,7 +265,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member.Name]))
 						{
-							var q = GetExpressions(Expression.MakeMemberAccess(path, binding.Member), binding.Expression);
+							var q = GetExpressions(param, Expression.MakeMemberAccess(path, binding.Member), binding.Expression);
 							foreach (var e in q)
 								yield return e;
 						}
@@ -353,16 +276,20 @@ namespace BLToolkit.Data.Linq.Builder
 				// parameter
 				//
 				case ExpressionType.Parameter  :
-					yield return new ExprInfo { Path = path, Expr = expression };
+					if (expression == param)
+						yield return new ExprInfo { Path = path, Expr = expression };
 					break;
 
 				// everything else
 				//
-				default                        :
+				case ExpressionType.Call       :
 					{
-						if (TypeHelper.IsSameOrParent(typeof(IEnumerable), expression.Type) ||
-						    TypeHelper.IsSameOrParent(typeof(IQueryable),  expression.Type))
-							yield return new ExprInfo { Path = path, Expr = expression };
+						var call = (MethodCallExpression)expression;
+
+						if (call.IsQueryable())
+							if (TypeHelper.IsSameOrParent(typeof(IEnumerable), call.Type) ||
+							    TypeHelper.IsSameOrParent(typeof(IQueryable),  call.Type))
+								yield return new ExprInfo { Path = path, Expr = expression };
 
 						break;
 					}
