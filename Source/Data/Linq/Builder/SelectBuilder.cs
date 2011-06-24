@@ -281,7 +281,11 @@ namespace BLToolkit.Data.Linq.Builder
 						yield return new ExprInfo { Path = path, Expr = expression };
 					break;
 
-				// everything else
+				case ExpressionType.TypeAs     :
+					yield return new ExprInfo { Path = path, Expr = expression };
+					break;
+
+				// Queriable method.
 				//
 				case ExpressionType.Call       :
 					{
