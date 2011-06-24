@@ -37,16 +37,14 @@ namespace BLToolkit.Data.Linq.Builder
 				if (param.Type != info.Parameter.Type)
 					param = Expression.Parameter(info.Parameter.Type, param.Name);
 
-				var q =
-					from ex in info.ExpressionsToReplace
-					select new
+				if (info.ExpressionsToReplace != null)
+					foreach (var path in info.ExpressionsToReplace)
 					{
-						Key   = ex.Key.  Convert(e => e == info.Parameter ? param : e),
-						Value = ex.Value.Convert(e => e == info.Parameter ? param : e)
-					};
+						path.Path = path.Path.Convert(e => e == info.Parameter ? param : e);
+						path.Expr = path.Expr.Convert(e => e == info.Parameter ? param : e);
+					}
 
 				info.Parameter = param;
-				info.ExpressionsToReplace = q.ToDictionary(e => e.Key, e => e.Value);
 
 				return info;
 			}

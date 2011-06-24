@@ -77,8 +77,8 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Parameter :
 
 					foreach (var item in info.ExpressionsToReplace)
-						if (expression == item.Key || expression == param && item.Key.NodeType == ExpressionType.Parameter)
-							return item.Value;
+						if (expression == item.Path || expression == param && item.Path.NodeType == ExpressionType.Parameter)
+							return item.Expr;
 					break;
 
 				case ExpressionType.MemberAccess :
@@ -86,12 +86,12 @@ namespace BLToolkit.Data.Linq.Builder
 					foreach (var item in info.ExpressionsToReplace)
 					{
 						var ex1 = expression;
-						var ex2 = item.Key;
+						var ex2 = item.Path;
 
 						while (ex1.NodeType == ex2.NodeType)
 						{
 							if (ex1.NodeType == ExpressionType.Parameter)
-								return ex1 == ex2 || info.Parameter == ex2? item.Value : expression;
+								return ex1 == ex2 || info.Parameter == ex2? item.Expr : expression;
 
 							if (ex2.NodeType != ExpressionType.MemberAccess)
 								return expression;

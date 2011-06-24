@@ -134,13 +134,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region Convert
 
-		[DebuggerDisplay("Path = {Path}; Expr = {Expr}")]
-		class ExprInfo
-		{
-			public Expression Path;
-			public Expression Expr;
-		}
-
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression originalMethodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
@@ -157,7 +150,12 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (param != builder.SequenceParameter)
 			{
-				var list = GetExpressions(selector.Parameters[0], param, selector.Body.Unwrap()).ToList();
+				var list =
+					(
+						from path in GetExpressions(selector.Parameters[0], param, 0, selector.Body.Unwrap())
+						orderby path.Level descending
+						select path
+					).ToList();
 
 				if (list.Count > 0)
 				{
@@ -191,7 +189,7 @@ namespace BLToolkit.Data.Linq.Builder
 						selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 						param    = Expression.Parameter(selector.Body.Type, param.Name);
 
-						list.Add(new ExprInfo { Path = param, Expr = Expression.MakeMemberAccess(param, fields[1]) });
+						list.Add(new SequenceConvertPath { Path = param, Expr = Expression.MakeMemberAccess(param, fields[1]), Level = 1 });
 
 						var expr = Expression.MakeMemberAccess(param, fields[0]);
 
@@ -202,7 +200,7 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							Parameter            = param,
 							Expression           = methodCall,
-							ExpressionsToReplace = list.ToDictionary(e => e.Path, e => e.Expr)
+							ExpressionsToReplace = list
 						};
 					}
 
@@ -219,7 +217,7 @@ namespace BLToolkit.Data.Linq.Builder
 									ei.Expr = ei.Expr.Convert(e => e == p.Expr ? p.Path : e);
 									return ei;
 								})
-								.ToDictionary(e => e.Path, e => e.Expr)
+								.ToList()
 						};
 					}
 				}
@@ -235,7 +233,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
-		static IEnumerable<ExprInfo> GetExpressions(ParameterExpression param, Expression path, Expression expression)
+		static IEnumerable<SequenceConvertPath> GetExpressions(ParameterExpression param, Expression path, int level, Expression expression)
 		{
 			switch (expression.NodeType)
 			{
@@ -247,7 +245,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (expr.Members != null) for (var i = 0; i < expr.Members.Count; i++)
 						{
-							var q = GetExpressions(param, Expression.MakeMemberAccess(path, expr.Members[i]), expr.Arguments[i]);
+							var q = GetExpressions(param, Expression.MakeMemberAccess(path, expr.Members[i]), level + 1, expr.Arguments[i]);
 							foreach (var e in q)
 								yield return e;
 						}
@@ -266,7 +264,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member.Name]))
 						{
-							var q = GetExpressions(param, Expression.MakeMemberAccess(path, binding.Member), binding.Expression);
+							var q = GetExpressions(param, Expression.MakeMemberAccess(path, binding.Member), level + 1, binding.Expression);
 							foreach (var e in q)
 								yield return e;
 						}
@@ -278,11 +276,11 @@ namespace BLToolkit.Data.Linq.Builder
 				//
 				case ExpressionType.Parameter  :
 					if (expression == param)
-						yield return new ExprInfo { Path = path, Expr = expression };
+						yield return new SequenceConvertPath { Path = path, Expr = expression, Level = 0 };
 					break;
 
 				case ExpressionType.TypeAs     :
-					yield return new ExprInfo { Path = path, Expr = expression };
+					yield return new SequenceConvertPath { Path = path, Expr = expression };
 					break;
 
 				// Queriable method.
@@ -294,7 +292,7 @@ namespace BLToolkit.Data.Linq.Builder
 						if (call.IsQueryable())
 							if (TypeHelper.IsSameOrParent(typeof(IEnumerable), call.Type) ||
 							    TypeHelper.IsSameOrParent(typeof(IQueryable),  call.Type))
-								yield return new ExprInfo { Path = path, Expr = expression };
+								yield return new SequenceConvertPath { Path = path, Expr = expression };
 
 						break;
 					}
