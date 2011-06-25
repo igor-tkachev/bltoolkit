@@ -204,6 +204,26 @@ namespace BLToolkit.Data.Linq.Builder
 						};
 					}
 
+					if (info != null)
+					{
+						//if (param.Type != info.Parameter.Type)
+						//	param = Expression.Parameter(info.Parameter.Type, param.Name);
+
+						if (info.ExpressionsToReplace != null)
+						{
+							foreach (var path in info.ExpressionsToReplace)
+							{
+								path.Path = path.Path.Convert(e => e == info.Parameter ? p.Path : e);
+								path.Expr = path.Expr.Convert(e => e == info.Parameter ? p.Path : e);
+								path.Level += p.Level;
+
+								list.Add(path);
+							}
+
+							list = list.OrderByDescending(path => path.Level).ToList();
+						}
+					}
+
 					if (list.Count > 1)
 					{
 						return new SequenceConvertInfo
@@ -292,7 +312,7 @@ namespace BLToolkit.Data.Linq.Builder
 						if (call.IsQueryable())
 							if (TypeHelper.IsSameOrParent(typeof(IEnumerable), call.Type) ||
 							    TypeHelper.IsSameOrParent(typeof(IQueryable),  call.Type))
-								yield return new SequenceConvertPath { Path = path, Expr = expression };
+								yield return new SequenceConvertPath { Path = path, Expr = expression, Level = level };
 
 						break;
 					}

@@ -94,13 +94,13 @@ namespace BLToolkit.Data.Linq.Builder
 								return ex1 == ex2 || info.Parameter == ex2? item.Expr : expression;
 
 							if (ex2.NodeType != ExpressionType.MemberAccess)
-								return expression;
+								break;
 
 							var ma1 = (MemberExpression)ex1;
 							var ma2 = (MemberExpression)ex2;
 
 							if (ma1.Member != ma2.Member)
-								return expression;
+								break;
 
 							ex1 = ma1.Expression;
 							ex2 = ma2.Expression;
