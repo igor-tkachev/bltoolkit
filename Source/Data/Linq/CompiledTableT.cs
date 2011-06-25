@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq
 
 						if (query == null)
 						{
-#if NEW_PARSER
+#if !OLD_PARSER
 							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, _expression, _lambda.Parameters.ToArray())
 								.Build<T>();
 #else

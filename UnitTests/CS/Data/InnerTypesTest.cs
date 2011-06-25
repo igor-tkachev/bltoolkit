@@ -7,6 +7,8 @@ using BLToolkit.Reflection;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 
+#pragma warning disable 0252
+
 namespace Data
 {
 	[TestFixture]

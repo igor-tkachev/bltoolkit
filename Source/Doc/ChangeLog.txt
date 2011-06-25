@@ -1,8 +1,15 @@
-v 4.0
+v 4.1
 
 Bug fixes
 
 - 
+
+Enhancement
+
+- New Linq converter.
+
+
+v 4.0
 
 Enhancement
 
@@ -12,6 +19,7 @@ Enhancement
 - Silverlight support.
 - New attributes TableFunction & TableExpression to support table-valued UDF, hints,
   and other around table decorations.
+- Linq DML support.
 
 
 v 3.2

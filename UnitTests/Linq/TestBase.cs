@@ -10,6 +10,7 @@ using System.ServiceModel.Description;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
+using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
 using BLToolkit.ServiceModel;
@@ -196,11 +197,11 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
-				//var dx = new TestServiceModelDataContext(ip);
+				var dx = new TestServiceModelDataContext(ip);
 
-				//Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
-				//yield return dx;
+				yield return dx;
 			}
 		}
 
