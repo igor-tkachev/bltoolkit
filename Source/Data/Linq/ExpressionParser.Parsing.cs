@@ -591,8 +591,7 @@ namespace BLToolkit.Data.Linq
 				var exas = expression.GetExpressionAccessors(p);
 				var expr = ReplaceParameter(exas, expression, _ => {});
 				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
-				var qe   = l.Compile();
-				var n    = _info.AddQueryableAccessors(expression, qe);
+				var n    = _info.AddQueryableAccessors(expression, l);
 
 				Expression accessor;
 
@@ -604,7 +603,7 @@ namespace BLToolkit.Data.Linq
 						Expressor<Query<T>>.MethodExpressor(a => a.GetIQueryable(0, null)),
 						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
 
-				var qex  = qe(expression).Expression;
+				var qex  = _info.GetIQueryable(n, expression);
 
 				foreach (var a in qex.GetExpressionAccessors(path))
 					if (!ExpressionAccessors.ContainsKey(a.Key))

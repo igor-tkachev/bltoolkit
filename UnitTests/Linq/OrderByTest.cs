@@ -270,7 +270,7 @@ namespace Data.Linq
 		[Test]
 		public void Min3()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Informix }, db => Assert.AreEqual(
 				   Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID),
 				db.Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID)));
 		}

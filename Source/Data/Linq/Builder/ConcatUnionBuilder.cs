@@ -10,7 +10,7 @@ namespace BLToolkit.Data.Linq.Builder
 	{
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Concat", "Union") && methodCall.Arguments.Count == 2;
+			return methodCall.Arguments.Count == 2 && methodCall.IsQueryable("Concat", "Union");
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
@@ -28,6 +28,12 @@ namespace BLToolkit.Data.Linq.Builder
 			sq.Union = sequence2;
 
 			return sq;
+		}
+
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
 		}
 	}
 }

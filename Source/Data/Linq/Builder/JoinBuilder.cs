@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -44,7 +45,7 @@ namespace BLToolkit.Data.Linq.Builder
 			innerContext = isGroup ? new GroupJoinSubQueryContext(innerContext, methodCall) : new SubQueryContext(innerContext);
 			countContext = new SubQueryContext(countContext);
 
-			var join = innerContext.SqlQuery.InnerJoin();
+			var join = isGroup ? innerContext.SqlQuery.WeakLeftJoin() : innerContext.SqlQuery.InnerJoin();
 			var sql  = context.SqlQuery;
 
 			sql.From.Tables[0].Joins.Add(join.JoinedTable);
@@ -121,10 +122,23 @@ namespace BLToolkit.Data.Linq.Builder
 
 				inner.Join       = join.JoinedTable;
 				inner.CounterSql = counterSql;
-				return new GroupJoinContext(buildInfo.Parent, selector, context, inner);
+				return new GroupJoinContext(
+					buildInfo.Parent, selector, context, inner, methodCall.Arguments[1], outerKeyLambda, innerKeyLambda);
 			}
 
-			return new JoinContext(buildInfo.Parent, selector, context, innerContext);
+			return new JoinContext(buildInfo.Parent, selector, context, innerContext)
+#if DEBUG
+			{
+				MethodCall = methodCall
+			}
+#endif
+				;
+		}
+
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
 		}
 
 		static void BuildJoin(
@@ -173,10 +187,126 @@ namespace BLToolkit.Data.Linq.Builder
 				IBuildContext            parent,
 				LambdaExpression         lambda,
 				IBuildContext            outerContext,
-				GroupJoinSubQueryContext innerContext)
+				GroupJoinSubQueryContext innerContext,
+				Expression               innerExpression,
+				LambdaExpression         outerKeyLambda,
+				LambdaExpression         innerKeyLambda)
 				: base(parent, lambda, outerContext, innerContext)
 			{
+				_innerExpression = innerExpression;
+				_outerKeyLambda  = outerKeyLambda;
+				_innerKeyLambda  = innerKeyLambda;
+
 				innerContext.GroupJoin = this;
+			}
+
+			readonly Expression       _innerExpression;
+			readonly LambdaExpression _outerKeyLambda;
+			readonly LambdaExpression _innerKeyLambda;
+			private  Expression       _groupExpression;
+
+			interface IGroupJoinHelper
+			{
+				Expression GetGroupJoin(GroupJoinContext context);
+			}
+
+			class GroupJoinHelper<TKey,TElement> : IGroupJoinHelper
+			{
+				public Expression GetGroupJoin(GroupJoinContext context)
+				{
+					// Convert outer condition.
+					//
+					var outerParam = Expression.Parameter(context._outerKeyLambda.Body.Type, "o");
+					var outerKey   = context._outerKeyLambda.Body.Convert(
+						e => e == context._outerKeyLambda.Parameters[0] ? context.Lambda.Parameters[0] : e);
+
+					outerKey = context.Builder.BuildExpression(context, outerKey);
+
+					// Convert inner condition.
+					//
+					var parameters = context.Builder.CurrentSqlParameters
+						.Select((p,i) => new { p, i })
+						.ToDictionary(_ => _.p.Expression, _ => _.i);
+					var paramArray = Expression.Parameter(typeof(object[]), "ps");
+
+					var innerKey = context._innerKeyLambda.Body.Convert(e =>
+					{
+						int idx;
+
+						if (parameters.TryGetValue(e, out idx))
+						{
+							return
+								Expression.Convert(
+									Expression.ArrayIndex(paramArray, Expression.Constant(idx)),
+									e.Type);
+						}
+
+						return e;
+					});
+
+					// Item reader.
+					//
+// ReSharper disable AssignNullToNotNullAttribute
+
+					var expr = Expression.Call(
+						null,
+						ReflectionHelper.Expressor<object>.MethodExpressor(_ => Queryable.Where(null, (Expression<Func<TElement,bool>>)null)),
+						context._innerExpression,
+						Expression.Lambda<Func<TElement,bool>>(
+							Expression.Equal(innerKey, outerParam),
+							new[] { context._innerKeyLambda.Parameters[0] }));
+
+// ReSharper restore AssignNullToNotNullAttribute
+
+					var lambda = Expression.Lambda<Func<IDataContext,TKey,object[],IQueryable<TElement>>>(
+						Expression.Convert(expr, typeof(IQueryable<TElement>)),
+						Expression.Parameter(typeof(IDataContext), "ctx"),
+						outerParam,
+						paramArray);
+
+					var itemReader = CompiledQuery.Compile(lambda);
+
+					return Expression.Call(
+						null,
+						ReflectionHelper.Expressor<object>.MethodExpressor(_ => GetGrouping(null, null, default(TKey), null)),
+						new[]
+						{
+							ExpressionBuilder.ContextParam,
+							Expression.Constant(context.Builder.CurrentSqlParameters),
+							outerKey,
+							Expression.Constant(itemReader),
+						});
+				}
+
+				static IEnumerable<TElement> GetGrouping(
+					QueryContext             context,
+					List<ParameterAccessor>  parameterAccessor,
+					TKey                     key,
+					Func<IDataContext,TKey,object[],IQueryable<TElement>> itemReader)
+				{
+					return new GroupByBuilder.GroupByContext.Grouping<TKey,TElement>(key, context, parameterAccessor, itemReader);
+				}
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				if (expression == Lambda.Parameters[1])
+				{
+					if (_groupExpression == null)
+					{
+						var gtype  = typeof(GroupJoinHelper<,>).MakeGenericType(
+							_innerKeyLambda.Body.Type,
+							_innerKeyLambda.Parameters[0].Type);
+
+						var helper = (IGroupJoinHelper)Activator.CreateInstance(gtype);
+
+						_groupExpression = helper.GetGroupJoin(this);
+					}
+
+					return _groupExpression;
+				}
+
+				return base.BuildExpression(expression, level);
 			}
 		}
 
@@ -192,19 +322,6 @@ namespace BLToolkit.Data.Linq.Builder
 				: base(subQuery)
 			{
 				_methodCall = methodCall;
-			}
-
-			Expression BuildJoin()
-			{
-				throw new NotImplementedException();
-			}
-
-			public override Expression BuildExpression(Expression expression, int level)
-			{
-				if (expression == null)
-					return BuildJoin();
-
-				return base.BuildExpression(expression, level);
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
@@ -232,6 +349,14 @@ namespace BLToolkit.Data.Linq.Builder
 					});
 
 				return base.ConvertToIndex(expression, level, flags);
+			}
+
+			public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+			{
+				if (testFlag == RequestFor.GroupJoin && expression == null)
+					return true;
+
+				return base.IsExpression(expression, level, testFlag);
 			}
 
 			public SqlQuery GetCounter(Expression expr)

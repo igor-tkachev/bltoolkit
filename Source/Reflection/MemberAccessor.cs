@@ -13,23 +13,14 @@ namespace BLToolkit.Reflection
 	{
 		protected MemberAccessor(TypeAccessor typeAccessor, MemberInfo memberInfo)
 		{
-			_typeAccessor = typeAccessor;
-			_memberInfo   = memberInfo;
+			TypeAccessor = typeAccessor;
+			MemberInfo   = memberInfo;
 		}
 
 		#region Public Properties
 
-		private readonly MemberInfo _memberInfo;
-		public           MemberInfo  MemberInfo
-		{
-			get { return _memberInfo; }
-		}
-
-		private readonly TypeAccessor _typeAccessor;
-		public           TypeAccessor  TypeAccessor
-		{
-			get { return _typeAccessor; }
-		}
+		public MemberInfo   MemberInfo   { get; private set; }
+		public TypeAccessor TypeAccessor { get; private set; }
 
 #if !SILVERLIGHT
 
@@ -39,7 +30,7 @@ namespace BLToolkit.Reflection
 			get
 			{
 				if (_propertyDescriptor == null)
-					_propertyDescriptor = new MemberPropertyDescriptor(_typeAccessor.OriginalType, Name);
+					_propertyDescriptor = new MemberPropertyDescriptor(TypeAccessor.OriginalType, Name);
 
 				return _propertyDescriptor;
 			}
@@ -54,27 +45,21 @@ namespace BLToolkit.Reflection
 		{
 			get
 			{
-				return _memberInfo is PropertyInfo?
-					((PropertyInfo)_memberInfo).PropertyType:
-					((FieldInfo)   _memberInfo).FieldType;
+				return MemberInfo is PropertyInfo?
+					((PropertyInfo)MemberInfo).PropertyType:
+					((FieldInfo)   MemberInfo).FieldType;
 			}
 		}
 
 		public string Name
 		{
-			get { return _memberInfo.Name; }
+			get { return MemberInfo.Name; }
 		}
 
 		private Type _underlyingType;
 		public  Type  UnderlyingType
 		{
-			get
-			{
-				if (_underlyingType == null)
-					_underlyingType = TypeHelper.GetUnderlyingType(Type);
-
-				return _underlyingType;
-			}
+			get { return _underlyingType ?? (_underlyingType = TypeHelper.GetUnderlyingType(Type)); }
 		}
 
 		#endregion
@@ -83,20 +68,20 @@ namespace BLToolkit.Reflection
 
 		public bool IsDefined<T>() where T : Attribute
 		{
-			return _memberInfo.IsDefined(typeof(T), true);
+			return MemberInfo.IsDefined(typeof(T), true);
 		}
 
 		[Obsolete("Use generic version instead")]
 		public Attribute GetAttribute(Type attributeType)
 		{
-			var attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+			var attrs = MemberInfo.GetCustomAttributes(attributeType, true);
 
 			return attrs.Length > 0? (Attribute)attrs[0]: null;
 		}
 
 		public T GetAttribute<T>() where T : Attribute
 		{
-			var attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
+			var attrs = MemberInfo.GetCustomAttributes(typeof(T), true);
 
 			return attrs.Length > 0? (T)attrs[0]: null;
 		}
@@ -104,28 +89,28 @@ namespace BLToolkit.Reflection
 		[Obsolete("Use generic version instead")]
 		public object[] GetAttributes(Type attributeType)
 		{
-			var attrs = _memberInfo.GetCustomAttributes(attributeType, true);
+			var attrs = MemberInfo.GetCustomAttributes(attributeType, true);
 
 			return attrs.Length > 0? attrs: null;
 		}
 
 		public T[] GetAttributes<T>() where T : Attribute
 		{
-			Array attrs = _memberInfo.GetCustomAttributes(typeof(T), true);
+			Array attrs = MemberInfo.GetCustomAttributes(typeof(T), true);
 
 			return attrs.Length > 0? (T[])attrs: null;
 		}
 
 		public object[] GetAttributes()
 		{
-			var attrs = _memberInfo.GetCustomAttributes(true);
+			var attrs = MemberInfo.GetCustomAttributes(true);
 
 			return attrs.Length > 0? attrs: null;
 		}
 
 		public object[] GetTypeAttributes(Type attributeType)
 		{
-			return TypeHelper.GetAttributes(_typeAccessor.OriginalType, attributeType);
+			return TypeHelper.GetAttributes(TypeAccessor.OriginalType, attributeType);
 		}
 
 		#endregion

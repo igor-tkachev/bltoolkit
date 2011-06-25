@@ -42,6 +42,12 @@ namespace BLToolkit.Data.Linq.Builder
 			return new FirstSingleContext(buildInfo.Parent, sequence, methodCall);
 		}
 
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
+		}
+
 		class FirstSingleContext : SequenceContextBase
 		{
 			public FirstSingleContext(IBuildContext parent, IBuildContext sequence, MethodCallExpression methodCall)
@@ -68,7 +74,10 @@ namespace BLToolkit.Data.Linq.Builder
 			public override Expression BuildExpression(Expression expression, int level)
 			{
 				if (expression == null)
-					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+					//if (Sequence.IsExpression(expression, level, RequestFor.Object))
+					//	return Sequence.BuildExpression(expression, level);
+					//else
+						return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 
 				throw new NotImplementedException();
 				//return Sequence.BuildExpression(expression, level + 1);

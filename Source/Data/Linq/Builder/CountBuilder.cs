@@ -71,6 +71,12 @@ namespace BLToolkit.Data.Linq.Builder
 			return context;
 		}
 
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
+		}
+
 		internal class CountContext : SequenceContextBase
 		{
 			public CountContext(IBuildContext parent, IBuildContext sequence, Type returnType)

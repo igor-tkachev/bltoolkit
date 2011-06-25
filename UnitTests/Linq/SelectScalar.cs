@@ -118,7 +118,7 @@ namespace Data.Linq
 		{
 			var expected =
 				from p in Person
-				select new {p1 = p, p2 = p}
+				select new { p1 = p, p2 = p }
 				into p1
 					where p1.p1.ID == 1 && p1.p2.ID == 1
 					select p1;
@@ -127,7 +127,7 @@ namespace Data.Linq
 			{
 				var result =
 					from p in db.Person
-					select new {p1 = p, p2 = p}
+					select new { p1 = p, p2 = p }
 					into p1
 						where p1.p1.ID == 1 && p1.p2.ID == 1
 						select p1;

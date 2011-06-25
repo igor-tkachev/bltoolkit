@@ -56,8 +56,12 @@ namespace BLToolkit.Data.Linq.Builder
 
 			expression.Visit(expr =>
 			{
-				//if (IsSubQuery(context, expr))
-				//	return isWhere = true;
+				if (_subQueryExpressions != null && _subQueryExpressions.Contains(expr))
+				{
+					makeSubQuery = true;
+					isWhere      = true;
+					return false;
+				}
 
 				var stopWalking = false;
 
@@ -191,7 +195,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return ctx;
 		}
 
-		ISqlExpression SubQueryToSql(IBuildContext context, MethodCallExpression expression)
+		internal ISqlExpression SubQueryToSql(IBuildContext context, MethodCallExpression expression)
 		{
 			var sequence = GetSubQuery(context, expression);
 			var subSql   = sequence.GetSubQuery(context);
@@ -258,7 +262,17 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
 					while (arg.NodeType == ExpressionType.Call && ((MethodCallExpression) arg).Method.Name == "Select")
-						arg = ((MethodCallExpression) arg).Arguments[0];
+						arg = ((MethodCallExpression)arg).Arguments[0];
+
+				var mc = arg as MethodCallExpression;
+
+				while (mc != null)
+				{
+					if (!mc.IsQueryable())
+						return false;
+
+					mc = mc.Arguments[0] as MethodCallExpression;
+				}
 
 				return arg.NodeType == ExpressionType.Call || IsSubQuerySource(context, arg);
 			}
@@ -282,6 +296,21 @@ namespace BLToolkit.Data.Linq.Builder
 			return expr != null && expr.NodeType == ExpressionType.Constant;
 		}
 
+		bool IsGroupJoinSource(IBuildContext context, MethodCallExpression call)
+		{
+			if (!call.IsQueryable() || CountBuilder.MethodNames.Contains(call.Method.Name))
+				return false;
+
+			Expression expr = call;
+
+			while (expr.NodeType == ExpressionType.Call)
+				expr = ((MethodCallExpression)expr).Arguments[0];
+
+			var ctx = GetContext(context, expr);
+
+			return ctx != null && ctx.IsExpression(expr, 0, RequestFor.GroupJoin);
+		}
+
 		static bool IsIEnumerableType(Expression expr)
 		{
 			var type = expr.Type;
@@ -292,8 +321,7 @@ namespace BLToolkit.Data.Linq.Builder
 				&& TypeHelper.IsSameOrParent(typeof(IEnumerable), type);
 
 			if (res && expr.NodeType == ExpressionType.MemberAccess)
-				return false;
-				//res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
+				res = TypeHelper.GetAttributes(type, typeof(IgnoreIEnumerableAttribute)).Length == 0;
 
 			return res;
 		}
@@ -575,11 +603,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var ctx = GetContext(context, expression);
 
-			if (ctx != null)
-			{
-				if (ctx.IsExpression(expression, 0, RequestFor.Object))
-					return ctx.ConvertToSql(expression, 0, queryConvertFlag);
-			}
+			if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Object))
+				return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 
 			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression) } };
 		}
@@ -592,16 +617,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression)
 		{
-			/*
-			var qlen = queries.Length;
-
-			if (expression.NodeType == ExpressionType.Parameter && qlen == 1 && queries[0] is QuerySource.Scalar)
-			{
-				var ma = (QuerySource.Scalar)queries[0];
-				return ConvertToSql(ma.Lambda, ma.Lambda.Body, ma.Sources);
-			}
-			*/
-
 			if (CanBeConstant(expression))
 				return BuildConstant(expression);
 
@@ -1262,17 +1277,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case ExpressionType.TypeIs:
 					{
-						throw new NotImplementedException();
+						var e   = (TypeBinaryExpression)expression;
+						var ctx = GetContext(context, e.Expression);
 
-						/*
-						var e     = expression as TypeBinaryExpression;
-						var table = GetSource(lambda, e.Expression, queries) as QuerySource.Table;
-
-						if (table != null && table.InheritanceMapping.Count > 0)
-							return MakeIsPredicate(table, e.TypeOperand);
+						if (ctx != null && ctx.IsExpression(e.Expression, 0, RequestFor.Table))
+							return MakeIsPredicate(ctx, e);
 
 						break;
-						*/
 					}
 			}
 
@@ -1358,7 +1369,7 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			var l = ConvertToSql(context, left);
-			var r = ConvertToSql(context, right);
+			var r = ConvertToSql(context, right.Unwrap());
 
 			switch (nodeType)
 			{
@@ -1373,17 +1384,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (l is SqlQuery.SearchCondition)
 				l = Convert(context, new SqlFunction(typeof(bool), "CASE", l, new SqlValue(true), new SqlValue(false)));
-			//l = Convert(new SqlFunction("CASE",
-			//	l, new SqlValue(true),
-			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)l) }), new SqlValue(false),
-			//	new SqlValue(false)));
 
 			if (r is SqlQuery.SearchCondition)
 				r = Convert(context, new SqlFunction(typeof(bool), "CASE", r, new SqlValue(true), new SqlValue(false)));
-			//r = Convert(new SqlFunction("CASE",
-			//	r, new SqlValue(true),
-			//	new SqlQuery.SearchCondition(new[] { new SqlQuery.Condition(true, (SqlQuery.SearchCondition)r) }), new SqlValue(false),
-			//	new SqlValue(false)));
 
 			return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 		}
@@ -1491,21 +1494,6 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
 					}
-
-					/*
-					var field = GetField(lambda, left, queries);
-
-					if (field is QuerySource.GroupJoin)
-					{
-						var join = (QuerySource.GroupJoin)field;
-						var expr = join.CheckNullField.GetExpressions(this)[0];
-
-						return Convert(context, new SqlQuery.Predicate.IsNull(expr, !isEqual));
-					}
-
-					if (field is QuerySource || field == null && left.NodeType == ExpressionType.Parameter)
-						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
-					*/
 				}
 			}
 
@@ -1564,8 +1552,8 @@ namespace BLToolkit.Data.Linq.Builder
 				isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
 				lcols  =
 					(from m in lmembers
-					select new { sql = leftContext.ConvertToSql(m.Value, 0, ConvertFlags.Field)[0], member = m.Key } into mm
-					select new SqlInfo { Sql = mm.sql.Sql, Member = mm.member }).ToArray();
+					select new { sql = ConvertToSql(leftContext, m.Value), member = m.Key } into mm
+					select new SqlInfo { Sql = mm.sql, Member = mm.member }).ToArray();
 			}
 			else
 			{
@@ -1897,10 +1885,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region MakeIsPredicate
 
-		ISqlPredicate MakeIsPredicate(IBuildContext context, QuerySource.Table table, Type typeOperand)
+		internal ISqlPredicate MakeIsPredicate(TableBuilder.TableContext table, Type typeOperand)
 		{
-			if (typeOperand == table.ObjectType && table.InheritanceMapping.Count(m => m.Type == typeOperand) == 0)
-				return Convert(context, new SqlQuery.Predicate.Expr(new SqlValue(true)));
+			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
+				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
 			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
 
@@ -1915,9 +1903,9 @@ namespace BLToolkit.Data.Linq.Builder
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false, 
-									Convert(context,
+									Convert(table,
 										new SqlQuery.Predicate.ExprExpr(
-											table.Columns[table.InheritanceDiscriminators[m.i]].Field,
+											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.NotEqual,
 											new SqlValue(m.m.Code)))));
 						}
@@ -1926,9 +1914,9 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 
 				case 1:
-					return Convert(context,
+					return Convert(table,
 						new SqlQuery.Predicate.ExprExpr(
-							table.Columns[table.InheritanceDiscriminators[mapping[0].i]].Field,
+							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
 							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(mapping[0].m.Code)));
 
@@ -1941,9 +1929,9 @@ namespace BLToolkit.Data.Linq.Builder
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false,
-									Convert(context,
+									Convert(table,
 										new SqlQuery.Predicate.ExprExpr(
-											table.Columns[table.InheritanceDiscriminators[m.i]].Field,
+											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.Equal,
 											new SqlValue(m.m.Code))),
 									true));
@@ -1954,6 +1942,48 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 		}
 
+		ISqlPredicate MakeIsPredicate(IBuildContext context, TypeBinaryExpression expression)
+		{
+			var typeOperand = expression.TypeOperand;
+			var table       = new TableBuilder.TableContext(this, new BuildInfo((IBuildContext)null, Expression.Constant(null), new SqlQuery()), typeOperand);
+
+			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
+				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
+
+			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
+			var isEqual = true;
+
+			if (mapping.Count == 0)
+			{
+				mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault).ToList();
+				isEqual = false;
+			}
+
+			Expression expr = null;
+
+			foreach (var m in mapping)
+			{
+				var field = table.SqlTable.Fields[table.InheritanceDiscriminators[m.i]];
+				var ttype = field.MemberMapper.MemberAccessor.TypeAccessor.OriginalType;
+				var obj   = expression.Expression;
+
+				if (obj.Type != ttype)
+					obj = Expression.Convert(expression.Expression, ttype);
+
+				var        left  = Expression.PropertyOrField(obj, field.Name);
+				Expression right = Expression.Constant(m.m.Code);
+
+				if (left.Type != right.Type)
+					right = Expression.Convert(right, left.Type);
+
+				var e = isEqual ? Expression.Equal(left, right) : Expression.NotEqual(left, right);
+
+				expr = expr != null ? Expression.AndAlso(expr, e) : e;
+			}
+
+			return ConvertPredicate(context, expr);
+		}
+
 		#endregion
 
 		#endregion
@@ -1962,17 +1992,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		void BuildSearchCondition(IBuildContext context, Expression expression, List<SqlQuery.Condition> conditions)
 		{
-			/*if (IsSubQuery(context, expression))
-			{
-				var cond = BuildConditionSubQuery(context, expression);
-
-				if (cond != null)
-				{
-					conditions.Add(cond);
-					return;
-				}
-			}*/
-
 			switch (expression.NodeType)
 			{
 				case ExpressionType.AndAlso:
@@ -2246,15 +2265,29 @@ namespace BLToolkit.Data.Linq.Builder
 							var attr = GetFunctionAttribute(ma.Member);
 
 							if (attr == null && !TypeHelper.IsNullableValueMember(ma.Member))
-								goto case ExpressionType.Parameter;
+								if (canBeCompiled && GetContext(context, pi) == null)
+									return !CanBeCompiled(pi);;
 
 							break;
 						}
 
 					case ExpressionType.Parameter:
 						{
-							if (canBeCompiled && GetContext(context, pi) == null)
-								return !CanBeCompiled(pi);
+							var ctx = GetContext(context, pi);
+
+							if (ctx == null)
+							{
+								if (canBeCompiled)
+									return !CanBeCompiled(pi);
+							}
+							else
+							{
+								if (pi.NodeType == ExpressionType.Parameter)
+								{
+									
+								}
+							}
+
 							break;
 						}
 
@@ -2273,7 +2306,8 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
-					case ExpressionType.New: return true;
+					case ExpressionType.TypeAs :
+					case ExpressionType.New    : return true;
 				}
 
 				return false;
@@ -2319,7 +2353,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return attr;
 		}
 
-		TableFunctionAttribute GetTableFunctionAttribute(ICustomAttributeProvider member)
+		internal TableFunctionAttribute GetTableFunctionAttribute(ICustomAttributeProvider member)
 		{
 			var attrs = member.GetCustomAttributes(typeof(TableFunctionAttribute), true);
 
@@ -2465,7 +2499,6 @@ namespace BLToolkit.Data.Linq.Builder
 				default                        :
 					return false;
 			}
-
 		}
 
 		#endregion

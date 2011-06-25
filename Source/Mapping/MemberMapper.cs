@@ -20,15 +20,15 @@ namespace BLToolkit.Mapping
 		{
 			if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
 
-			MapMemberInfo         = mapMemberInfo;
-			Name                  = mapMemberInfo.Name;
-			MemberName            = mapMemberInfo.MemberName;
-			Storage               = mapMemberInfo.Storage;
-			DbType                = mapMemberInfo.DbType;
+			MapMemberInfo          = mapMemberInfo;
+			Name                   = mapMemberInfo.Name;
+			MemberName             = mapMemberInfo.MemberName;
+			Storage                = mapMemberInfo.Storage;
+			DbType                 = mapMemberInfo.DbType;
 			_type                  = mapMemberInfo.Type;
-			MemberAccessor        = mapMemberInfo.MemberAccessor;
+			MemberAccessor         = mapMemberInfo.MemberAccessor;
 			_complexMemberAccessor = mapMemberInfo.ComplexMemberAccessor;
-			MappingSchema         = mapMemberInfo.MappingSchema;
+			MappingSchema          = mapMemberInfo.MappingSchema;
 
 			if (Storage != null)
 				MemberAccessor = ExprMemberAccessor.GetMemberAccessor(MemberAccessor.TypeAccessor, Storage);

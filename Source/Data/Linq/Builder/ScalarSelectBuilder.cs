@@ -29,16 +29,21 @@ namespace BLToolkit.Data.Linq.Builder
 			};
 		}
 
+		public SequenceConvertInfo Convert(ExpressionBuilder builder, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
+		}
+
 		class ScalarSelectContext : IBuildContext
 		{
 #if DEBUG
 			public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-			public ExpressionBuilder Builder     { get; set; }
-			public Expression       Expression { get; set; }
-			public SqlQuery         SqlQuery   { get; set; }
-			public IBuildContext    Parent     { get; set; }
+			public ExpressionBuilder Builder    { get; set; }
+			public Expression        Expression { get; set; }
+			public SqlQuery          SqlQuery   { get; set; }
+			public IBuildContext     Parent     { get; set; }
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{

@@ -68,6 +68,12 @@ namespace BLToolkit.Data.Linq.Builder
 			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Set.WithIdentity);
 		}
 
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
+		}
+
 		#endregion
 
 		#region InsertContext
@@ -153,6 +159,12 @@ namespace BLToolkit.Data.Linq.Builder
 
 				return sequence;
 			}
+
+			protected override SequenceConvertInfo Convert(
+				ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+			{
+				return null;
+			}
 		}
 
 		#endregion
@@ -184,6 +196,12 @@ namespace BLToolkit.Data.Linq.Builder
 					UpdateBuilder.ParseSet(builder, buildInfo, extract, update, sequence);
 
 				return sequence;
+			}
+
+			protected override SequenceConvertInfo Convert(
+				ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+			{
+				return null;
 			}
 		}
 

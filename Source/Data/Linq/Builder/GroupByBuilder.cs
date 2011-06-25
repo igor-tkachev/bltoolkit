@@ -87,10 +87,16 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			});
 
-			var element = new SelectContext (buildInfo.Parent, elementSelector, sequence);
+			var element = new SelectContext (buildInfo.Parent, elementSelector, sequence/*, key*/);
 			var groupBy = new GroupByContext(buildInfo.Parent, sequenceExpr, groupingType, sequence, key, element);
 
 			return groupBy;
+		}
+
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
 		}
 
 		#endregion
@@ -111,7 +117,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 		internal class GroupByContext : SequenceContextBase
 		{
-			public GroupByContext(IBuildContext parent, Expression sequenceExpr, Type groupingType, IBuildContext sequence, KeyContext key, SelectContext element)
+			public GroupByContext(
+				IBuildContext parent,
+				Expression   sequenceExpr,
+				Type          groupingType,
+				IBuildContext sequence,
+				KeyContext    key,
+				SelectContext element)
 				: base(parent, sequence, null)
 			{
 				_sequenceExpr = sequenceExpr;
@@ -127,7 +139,7 @@ namespace BLToolkit.Data.Linq.Builder
 			readonly SelectContext _element;
 			readonly Type          _groupingType;
 
-			class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
+			internal class Grouping<TKey,TElement> : IGrouping<TKey,TElement>
 			{
 				public Grouping(
 					TKey                    key,

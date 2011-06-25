@@ -967,13 +967,13 @@ namespace BLToolkit.ServiceModel
 				var idx  = ReadInt(); Pos++;
 				var type = ReadInt(); Pos++;
 
-				switch (type)
+				switch ((QueryElementType)type)
 				{
-					case _paramIndex     : obj = _parameters = ReadArray<SqlParameter>(); break;
-					case _typeIndex      : obj = ResolveType(ReadString());               break;
-					case _typeArrayIndex : obj = GetArrayType(Read<Type>());              break;
+					case (QueryElementType)_paramIndex     : obj = _parameters = ReadArray<SqlParameter>(); break;
+					case (QueryElementType)_typeIndex      : obj = ResolveType(ReadString());               break;
+					case (QueryElementType)_typeArrayIndex : obj = GetArrayType(Read<Type>());              break;
 
-					case (int)QueryElementType.SqlField :
+					case QueryElementType.SqlField :
 						{
 							var systemType       = Read<Type>();
 							var name             = ReadString();
@@ -1003,7 +1003,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlFunction :
+					case QueryElementType.SqlFunction :
 						{
 							var systemType = Read<Type>();
 							var name       = ReadString();
@@ -1015,7 +1015,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlParameter :
+					case QueryElementType.SqlParameter :
 						{
 							var name             = ReadString();
 							var isQueryParameter = ReadBool();
@@ -1060,7 +1060,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlExpression :
+					case QueryElementType.SqlExpression :
 						{
 							var systemType = Read<Type>();
 							var expr       = ReadString();
@@ -1072,7 +1072,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlBinaryExpression :
+					case QueryElementType.SqlBinaryExpression :
 						{
 							var systemType = Read<Type>();
 							var expr1      = Read<ISqlExpression>();
@@ -1085,7 +1085,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlValue :
+					case QueryElementType.SqlValue :
 						{
 							var systemType = Read<Type>();
 							var value      = ReadValue(systemType);
@@ -1095,7 +1095,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlDataType :
+					case QueryElementType.SqlDataType :
 						{
 							var dbType     = (SqlDbType)ReadInt();
 							var systemType = Read<Type>();
@@ -1108,7 +1108,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SqlTable :
+					case QueryElementType.SqlTable :
 						{
 							var sourceID           = ReadInt();
 							var name               = ReadString();
@@ -1146,7 +1146,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.ExprPredicate :
+					case QueryElementType.ExprPredicate :
 						{
 							var expr1      = Read<ISqlExpression>();
 							var precedence = ReadInt();
@@ -1156,7 +1156,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.NotExprPredicate :
+					case QueryElementType.NotExprPredicate :
 						{
 							var expr1      = Read<ISqlExpression>();
 							var isNot      = ReadBool();
@@ -1167,7 +1167,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.ExprExprPredicate :
+					case QueryElementType.ExprExprPredicate :
 						{
 							var expr1     = Read<ISqlExpression>();
 							var @operator = (SqlQuery.Predicate.Operator)ReadInt();
@@ -1178,7 +1178,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.LikePredicate :
+					case QueryElementType.LikePredicate :
 						{
 							var expr1  = Read<ISqlExpression>();
 							var isNot  = ReadBool();
@@ -1190,7 +1190,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.BetweenPredicate :
+					case QueryElementType.BetweenPredicate :
 						{
 							var expr1 = Read<ISqlExpression>();
 							var isNot = ReadBool();
@@ -1202,7 +1202,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.IsNullPredicate :
+					case QueryElementType.IsNullPredicate :
 						{
 							var expr1 = Read<ISqlExpression>();
 							var isNot = ReadBool();
@@ -1212,7 +1212,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.InSubQueryPredicate :
+					case QueryElementType.InSubQueryPredicate :
 						{
 							var expr1    = Read<ISqlExpression>();
 							var isNot    = ReadBool();
@@ -1223,7 +1223,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.InListPredicate :
+					case QueryElementType.InListPredicate :
 						{
 							var expr1  = Read<ISqlExpression>();
 							var isNot  = ReadBool();
@@ -1234,14 +1234,14 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.FuncLikePredicate :
+					case QueryElementType.FuncLikePredicate :
 						{
 							var func = Read<SqlFunction>();
 							obj = new SqlQuery.Predicate.FuncLike(func);
 							break;
 						}
 
-					case (int)QueryElementType.SqlQuery :
+					case QueryElementType.SqlQuery :
 						{
 							var sid                = ReadInt();
 							var queryType          = (QueryType)ReadInt();
@@ -1276,7 +1276,12 @@ namespace BLToolkit.ServiceModel
 							_queries.Add(sid, _query);
 
 							if (parentSql != 0)
-								_actions.Add(() => query.ParentSql = _queries[parentSql]);
+								_actions.Add(() =>
+								{
+									SqlQuery sql;
+									if (_queries.TryGetValue(parentSql, out sql))
+										query.ParentSql = sql;
+								});
 
 							query.All = Read<SqlField>();
 
@@ -1285,7 +1290,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.Column :
+					case QueryElementType.Column :
 						{
 							var sid        = ReadInt();
 							var expression = Read<ISqlExpression>();
@@ -1300,15 +1305,15 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SearchCondition :
+					case QueryElementType.SearchCondition :
 						obj = new SqlQuery.SearchCondition(ReadArray<SqlQuery.Condition>());
 						break;
 
-					case (int)QueryElementType.Condition :
+					case QueryElementType.Condition :
 						obj = new SqlQuery.Condition(ReadBool(), Read<ISqlPredicate>(), ReadBool());
 						break;
 
-					case (int)QueryElementType.TableSource :
+					case QueryElementType.TableSource :
 						{
 							var source = Read<ISqlTableSource>();
 							var alias  = ReadString();
@@ -1319,7 +1324,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.JoinedTable :
+					case QueryElementType.JoinedTable :
 						{
 							var joinType  = (SqlQuery.JoinType)ReadInt();
 							var table     = Read<SqlQuery.TableSource>();
@@ -1331,7 +1336,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SelectClause :
+					case QueryElementType.SelectClause :
 						{
 							var isDistinct = ReadBool();
 							var skipValue  = Read<ISqlExpression>();
@@ -1343,7 +1348,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SetClause :
+					case QueryElementType.SetClause :
 						{
 							var items = ReadArray<SqlQuery.SetExpression>();
 							var into  = Read<SqlTable>();
@@ -1357,13 +1362,13 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.SetExpression : obj = new SqlQuery.SetExpression(Read<ISqlExpression>(), Read<ISqlExpression>()); break;
-					case (int)QueryElementType.FromClause    : obj = new SqlQuery.FromClause(ReadArray<SqlQuery.TableSource>());                 break;
-					case (int)QueryElementType.WhereClause   : obj = new SqlQuery.WhereClause(Read<SqlQuery.SearchCondition>());                 break;
-					case (int)QueryElementType.GroupByClause : obj = new SqlQuery.GroupByClause(ReadArray<ISqlExpression>());                    break;
-					case (int)QueryElementType.OrderByClause : obj = new SqlQuery.OrderByClause(ReadArray<SqlQuery.OrderByItem>());              break;
+					case QueryElementType.SetExpression : obj = new SqlQuery.SetExpression(Read<ISqlExpression>(), Read<ISqlExpression>()); break;
+					case QueryElementType.FromClause    : obj = new SqlQuery.FromClause(ReadArray<SqlQuery.TableSource>());                 break;
+					case QueryElementType.WhereClause   : obj = new SqlQuery.WhereClause(Read<SqlQuery.SearchCondition>());                 break;
+					case QueryElementType.GroupByClause : obj = new SqlQuery.GroupByClause(ReadArray<ISqlExpression>());                    break;
+					case QueryElementType.OrderByClause : obj = new SqlQuery.OrderByClause(ReadArray<SqlQuery.OrderByItem>());              break;
 
-					case (int)QueryElementType.OrderByItem :
+					case QueryElementType.OrderByItem :
 						{
 							var expression   = Read<ISqlExpression>();
 							var isDescending = ReadBool();
@@ -1373,7 +1378,7 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case (int)QueryElementType.Union :
+					case QueryElementType.Union :
 						{
 							var sqlQuery = Read<SqlQuery>();
 							var isAll    = ReadBool();

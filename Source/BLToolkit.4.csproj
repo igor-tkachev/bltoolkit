@@ -50,7 +50,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW4;OVERRIDETOSTRING</DefineConstants>
+    <DefineConstants>TRACE;FW4;OVERRIDETOSTRING;NEW_PARSER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRules>
@@ -207,6 +207,11 @@
     <Compile Include="Data\Linq\Builder\ConcatUnionBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
+    <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\SequenceConvertInfo.cs" />
+    <Compile Include="Data\Linq\Builder\SequenceConvertPath.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
@@ -215,7 +220,7 @@
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs" />
     <Compile Include="Data\Linq\DefaultDataContextInfo.cs" />
-    <Compile Include="Data\Linq\Builder\AsQueryableBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\PassThroughBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ChangeTypeExpression.cs" />
     <Compile Include="Data\Linq\Builder\DefaultIfEmptyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\InsertBuilder.cs" />

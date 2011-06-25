@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -75,13 +77,14 @@ namespace Data.Linq
 		[Test]
 		public void Test9()
 		{
-			ForEachProvider(db => AreEqual(
-				ParentInheritance
-					.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
-					.OfType<ParentInheritanceNull>(),
-				db.ParentInheritance
-					.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
-					.OfType<ParentInheritanceNull>()));
+			ForEachProvider(db =>
+				AreEqual(
+					   ParentInheritance
+						.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
+						.OfType<ParentInheritanceNull>(),
+					db.ParentInheritance
+						.Where(p => p.ParentID == 1 || p.ParentID == 2 || p.ParentID == 4)
+						.OfType<ParentInheritanceNull>()));
 		}
 
 		[Test]
@@ -122,17 +125,42 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TypeCastAsTest()
+		public void TypeCastAsTest1()
 		{
-			var expected =
-				DiscontinuedProduct.ToList()
-					.Select(p => p as Northwind.Product)
-					.Select(p => p == null ? "NULL" : p.ProductName);
+			using (var db = new NorthwindDB())
+				AreEqual(
+					   DiscontinuedProduct.ToList()
+						.Select(p => p as Northwind.Product)
+						.Select(p => p == null ? "NULL" : p.ProductName),
+					db.DiscontinuedProduct
+						.Select(p => p as Northwind.Product)
+						.Select(p => p == null ? "NULL" : p.ProductName));
+		}
 
-			using (var db = new NorthwindDB()) AreEqual(expected, 
-				db.DiscontinuedProduct
-					.Select(p => p as Northwind.Product)
-					.Select(p => p == null ? "NULL" : p.ProductName));
+		[Test]
+		public void TypeCastAsTest11()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					   DiscontinuedProduct.ToList()
+						.Select(p => new { p = p as Northwind.Product })
+						.Select(p => p.p == null ? "NULL" : p.p.ProductName),
+					db.DiscontinuedProduct
+						.Select(p => new { p = p as Northwind.Product })
+						.Select(p => p.p == null ? "NULL" : p.p.ProductName));
+		}
+
+		[Test]
+		public void TypeCastAsTest2()
+		{
+			using (var db = new NorthwindDB())
+				AreEqual(
+					   Product.ToList()
+						.Select(p => p as Northwind.DiscontinuedProduct)
+						.Select(p => p == null ? "NULL" : p.ProductName),
+					db.Product
+						.Select(p => p as Northwind.DiscontinuedProduct)
+						.Select(p => p == null ? "NULL" : p.ProductName));
 		}
 
 		[Test]

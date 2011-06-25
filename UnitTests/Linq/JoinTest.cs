@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 using BLToolkit.Data.DataProvider;
 
@@ -183,31 +182,54 @@ namespace Data.Linq
 		[Test]
 		public void GroupJoin3()
 		{
+			var q1 = Parent
+				.GroupJoin(
+					Child,
+					p  => p.ParentID,
+					ch => ch.ParentID,
+					(p, lj1) => new { p, lj1 = new { lj1 } }
+				)
+				.Where (t => t.p.ParentID == 2)
+				.Select(t => new { t.p, t.lj1 });
+
+			var list1 = q1.ToList();
+
 			ForEachProvider(db =>
 			{
-				var q = db.Parent
+				var q2 = db.Parent
 					.GroupJoin(
 						db.Child,
-						p => p.ParentID,
+						p  => p.ParentID,
 						ch => ch.ParentID,
 						(p, lj1) => new { p, lj1 = new { lj1 } }
 					)
 					.Where (t => t.p.ParentID == 2)
 					.Select(t => new { t.p, t.lj1 });
 
-				var list = q.ToList();
+				var list2 = q2.ToList();
 
-				Assert.AreEqual(2, list.Count);
-				Assert.AreEqual(2, list[0].p.ParentID);
+				Assert.AreEqual(list1.Count,              list2.Count);
+				Assert.AreEqual(list1[0].p.ParentID,      list2[0].p.ParentID);
+				Assert.AreEqual(list1[0].lj1.lj1.Count(), list2[0].lj1.lj1.Count());
 			});
 		}
 
 		[Test]
 		public void GroupJoin4()
 		{
+			var q1 =
+				from p in Parent
+					join ch in
+						from c in Child select new { c.ParentID, c.ChildID }
+					on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 3
+				select new { p, lj1 };
+
+			var list1 = q1.ToList();
+
 			ForEachProvider(db =>
 			{
-				var q = 
+				var q2 =
 					from p in db.Parent
 						join ch in
 							from c in db.Child select new { c.ParentID, c.ChildID }
@@ -215,10 +237,11 @@ namespace Data.Linq
 					where p.ParentID == 3
 					select new { p, lj1 };
 
-				var list = q.ToList();
+				var list2 = q2.ToList();
 
-				Assert.AreEqual(3, list.Count);
-				Assert.AreEqual(3, list[0].p.ParentID);
+				Assert.AreEqual(list1.Count,          list2.Count);
+				Assert.AreEqual(list1[0].p.ParentID,  list2[0].p.ParentID);
+				Assert.AreEqual(list1[0].lj1.Count(), list2[0].lj1.Count());
 			});
 		}
 
@@ -234,6 +257,165 @@ namespace Data.Linq
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 				where p.ParentID == 1
 				select lj1.First()));
+		}
+
+		[Test]
+		public void GroupJoin51()
+		{
+			var expected =
+			(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select new { p1 = lj1, p2 = lj1.First() }
+			).ToList();
+
+			ForEachProvider(db =>
+			{
+				var result =
+				(
+					from p in db.Parent
+						join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+					where p.ParentID == 1
+					select new { p1 = lj1, p2 = lj1.First() }
+				).ToList();
+
+				Assert.AreEqual(expected.Count, result.Count);
+				AreEqual(expected[0].p1, result[0].p1);
+			});
+		}
+
+		[Test]
+		public void GroupJoin52()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.First().ParentID,
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.First().ParentID));
+		}
+
+		[Test]
+		public void GroupJoin53()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.Select(_ => _.ParentID).First(),
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select lj1.Select(_ => _.ParentID).First()));
+		}
+
+		[Test]
+		public void GroupJoin54()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join ch in Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select new { p1 = lj1.Count(), p2 = lj1.First() },
+				from p in db.Parent
+					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
+				where p.ParentID == 1
+				select new { p1 = lj1.Count(), p2 = lj1.First() }));
+		}
+
+		[Test]
+		public void GroupJoin6()
+		{
+			var n = 1;
+
+			var q1 =
+				from p in Parent
+					join c in Child on p.ParentID + n equals c.ParentID into lj
+				where p.ParentID == 1
+				select new { p, lj };
+
+			var list1 = q1.ToList();
+			var ch1   = list1[0].lj.ToList();
+
+			ForEachProvider(db =>
+			{
+				var q2 =
+					from p in db.Parent
+						join c in db.Child on p.ParentID + n equals c.ParentID into lj
+					where p.ParentID == 1
+					select new { p, lj };
+
+				var list2 = q2.ToList();
+
+				Assert.AreEqual(list1.Count,         list2.Count);
+				Assert.AreEqual(list1[0].p.ParentID, list2[0].p.ParentID);
+				Assert.AreEqual(list1[0].lj.Count(), list2[0].lj.Count());
+
+				var ch2 = list2[0].lj.ToList();
+
+				Assert.AreEqual(ch1[0].ParentID, ch2[0].ParentID);
+				Assert.AreEqual(ch1[0].ChildID,  ch2[0].ChildID);
+			});
+		}
+
+		[Test]
+		public void GroupJoin7()
+		{
+			var n = 1;
+
+			var q1 = 
+				from p in Parent
+					join c in Child on new { id = p.ParentID } equals new { id = c.ParentID - n } into j
+				where p.ParentID == 1
+				select new { p, j };
+
+			var list1 = q1.ToList();
+			var ch1   = list1[0].j.ToList();
+
+			ForEachProvider(
+				new[] { ProviderName.Firebird },
+				db =>
+				{
+					var q2 = 
+						from p in db.Parent
+							join c in db.Child on new { id = p.ParentID } equals new { id = c.ParentID - n } into j
+						where p.ParentID == 1
+						select new { p, j };
+
+					var list2 = q2.ToList();
+
+					Assert.AreEqual(list1.Count,         list2.Count);
+					Assert.AreEqual(list1[0].p.ParentID, list2[0].p.ParentID);
+					Assert.AreEqual(list1[0].j.Count(),  list2[0].j.Count());
+
+					var ch2 = list2[0].j.ToList();
+
+					Assert.AreEqual(ch1[0].ParentID, ch2[0].ParentID);
+					Assert.AreEqual(ch1[0].ChildID,  ch2[0].ChildID);
+				});
+		}
+
+		[Test]
+		public void GroupJoin8()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID into g
+				select new
+				{
+					Child = g.FirstOrDefault()
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID into g
+				select new
+				{
+					Child = g.FirstOrDefault()
+				}
+				));
 		}
 
 		[Test]
@@ -257,13 +439,11 @@ namespace Data.Linq
 		[Test]
 		public void LeftJoin2()
 		{
-			var expected =
+			ForEachProvider(db => AreEqual(
 				from p in Parent
 					join ch in Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
-				select new { p, ch };
-
-			ForEachProvider(db => AreEqual(expected,
+				select new { p, ch },
 				from p in db.Parent
 					join ch in db.Child on p.ParentID equals ch.ParentID into lj1
 					from ch in lj1.DefaultIfEmpty()
@@ -363,5 +543,47 @@ namespace Data.Linq
 				select new { ID1 = new { Value = p1.ID }, FirstName2 = p2.FirstName, } into p1
 				select p1.ID1.Value));
 		}
+
+		[Test]
+		public void LeftJoinTest()
+		{
+			// Reproduces the problem described here: http://rsdn.ru/forum/prj.rfd/4221837.flat.aspx
+			ForEachProvider(
+				//Providers.Select(p => p.Name).Except(new[] { ProviderName.SQLite }).ToArray(),
+				db =>
+				{
+					var q = 
+						from p1 in db.Person
+						join p2 in db.Person on p1.ID equals p2.ID into g
+						from p2 in g.DefaultIfEmpty() // yes I know the join will always succeed and it'll never be null, but just for test's sake :)
+						select new { p1, p2 };
+
+					var list = q.ToList(); // NotImplementedException? :(
+					Assert.That(list, Is.Not.Empty);
+				});
+		}
+
+		[Test]
+		public void LeftJoinTest2()
+		{
+			// THIS TEST MUST BE RUN IN RELEASE CONFIGURATION (BECAUSE IT PASSES UNDER DEBUG CONFIGURATION)
+			// Reproduces the problem described here: http://rsdn.ru/forum/prj.rfd/4221837.flat.aspx
+
+			ForEachProvider(
+				Providers.Select(p => p.Name).Except(new[] { ProviderName.SQLite }).ToArray(),
+				db =>
+				{
+					var q =
+						from p1 in db.Patient
+						join p2 in db.Patient on p1.Diagnosis equals p2.Diagnosis into g
+						from p2 in g.DefaultIfEmpty() // yes I know the join will always succeed and it'll never be null, but just for test's sake :)
+						join p3 in db.Person on p2.PersonID equals p3.ID
+						select new { p1, p2, p3 };
+
+					var arr = q.ToArray(); // NotImplementedException? :(
+					Assert.That(arr, Is.Not.Empty);
+				});
+		}
+
 	}
 }

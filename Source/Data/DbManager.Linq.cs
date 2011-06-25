@@ -337,11 +337,6 @@ namespace BLToolkit.Data
 			get { return GetCreateSqlProvider(DataProvider); }
 		}
 
-		object IDataContext.CreateInstance(InitContext context)
-		{
-			return null;
-		}
-
 		#endregion
 	}
 }

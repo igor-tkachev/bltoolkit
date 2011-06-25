@@ -2,12 +2,12 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	class AggregationBuilder : MethodCallBuilder
 	{
@@ -64,6 +64,12 @@ namespace BLToolkit.Data.Linq.Builder
 				new SqlFunction(methodCall.Type, methodCall.Method.Name, sql));
 
 			return context;
+		}
+
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
 		}
 
 		class AggregationContext : SequenceContextBase

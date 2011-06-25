@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public IBuildContext Union;
 
-		public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+		public virtual void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
 			SubQuery.BuildQuery(query, queryParameter);
 		}
@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq.Builder
 				.ToArray();
 		}
 
-		public bool IsExpression(Expression expression, int level, RequestFor testFlag)
+		public virtual bool IsExpression(Expression expression, int level, RequestFor testFlag)
 		{
 			switch (testFlag)
 			{

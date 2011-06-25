@@ -223,11 +223,6 @@ namespace BLToolkit.ServiceModel
 			((IDisposable)ctx.Client).Dispose();
 		}
 
-		object IDataContext.CreateInstance(InitContext context)
-		{
-			return null;
-		}
-
 		string IDataContext.GetSqlText(object query)
 		{
 			var ctx         = (QueryContext)query;

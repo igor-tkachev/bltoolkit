@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -10,16 +12,21 @@ namespace BLToolkit.Data.Linq.Builder
 	{
 		#region BuildExpression
 
+		readonly HashSet<Expression> _skippedExpressions = new HashSet<Expression>();
+
 		public Expression BuildExpression(IBuildContext context, Expression expression)
 		{
-			var newExpr = expression.Convert(pi =>
+			var newExpr = expression.Convert2(pi =>
 			{
+				if (_skippedExpressions.Contains(pi))
+					return new ExpressionHelper.ConvertInfo(pi, true);
+
 				switch (pi.NodeType)
 				{
 					case ExpressionType.MemberAccess:
 						{
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
-								return BuildSql(context, pi);
+								return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
 
 							var ma = (MemberExpression)pi;
 
@@ -29,7 +36,7 @@ namespace BLToolkit.Data.Linq.Builder
 							var ctx = GetContext(context, pi);
 
 							if (ctx != null)
-								return ctx.BuildExpression(pi, 0);
+								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(pi, 0));
 
 							var ex = ma.Expression;
 
@@ -38,7 +45,8 @@ namespace BLToolkit.Data.Linq.Builder
 								// field = localVariable
 								//
 								var c = _expressionAccessors[ex];
-								return Expression.MakeMemberAccess(Expression.Convert(c, ex.Type), ma.Member);
+								return new ExpressionHelper.ConvertInfo(
+									Expression.MakeMemberAccess(Expression.Convert(c, ex.Type), ma.Member));
 							}
 
 							break;
@@ -52,7 +60,7 @@ namespace BLToolkit.Data.Linq.Builder
 							var ctx = GetContext(context, pi);
 
 							if (ctx != null)
-								return ctx.BuildExpression(pi, 0);
+								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(pi, 0));
 
 							throw new NotImplementedException();
 						}
@@ -63,7 +71,7 @@ namespace BLToolkit.Data.Linq.Builder
 								break;
 
 							if (_expressionAccessors.ContainsKey(pi))
-								return Expression.Convert(_expressionAccessors[pi], pi.Type);
+								return new ExpressionHelper.ConvertInfo(Expression.Convert(_expressionAccessors[pi], pi.Type));
 
 							throw new NotImplementedException();
 						}
@@ -71,17 +79,17 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.Coalesce:
 
 						if (pi.Type == typeof(string) && MappingSchema.GetDefaultNullValue<string>() != null)
-							return BuildSql(context, pi);
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
 
 						if (CanBeTranslatedToSql(context, ConvertExpression(pi), true))
-							return BuildSql(context, pi);
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
 
 						break;
 
 					case ExpressionType.Conditional:
 
 						if (CanBeTranslatedToSql(context, ConvertExpression(pi), true))
-							return BuildSql(context, pi);
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
 						break;
 
 					case ExpressionType.Call:
@@ -91,13 +99,22 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (cm != null)
 								if (ce.Method.GetCustomAttributes(typeof(MethodExpressionAttribute), true).Length != 0)
-									return BuildExpression(context, cm);
+									return new ExpressionHelper.ConvertInfo(BuildExpression(context, cm));
+
+							if (IsGroupJoinSource(context, ce))
+							{
+								foreach (var arg in ce.Arguments.Skip(1))
+									if (!_skippedExpressions.Contains(arg))
+										_skippedExpressions.Add(arg);
+
+								break;
+							}
 
 							if (IsSubQuery(context, ce))
-								return GetSubQuery(context, ce).BuildExpression(null, 0);
+								return new ExpressionHelper.ConvertInfo(GetSubQuery(context, ce).BuildExpression(null, 0));
 
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
-								return BuildSql(context, pi);
+								return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
 						}
 
 						break;
@@ -114,11 +131,11 @@ namespace BLToolkit.Data.Linq.Builder
 						default:
 							if (CanBeCompiled(pi))
 								break;
-							return BuildSql(context, pi);
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
 					}
 				}
 
-				return pi;
+				return new ExpressionHelper.ConvertInfo(pi);
 			});
 
 			return newExpr;

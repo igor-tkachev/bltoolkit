@@ -33,6 +33,12 @@ namespace BLToolkit.Data.Linq.Builder
 			return new DefaultIfEmptyContext(buildInfo.Parent, sequence, defaultValue);
 		}
 
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
+		}
+
 		public class DefaultIfEmptyContext : SequenceContextBase
 		{
 			public DefaultIfEmptyContext(IBuildContext parent, IBuildContext sequence, Expression defaultValue) 

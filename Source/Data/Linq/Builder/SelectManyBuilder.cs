@@ -42,6 +42,14 @@ namespace BLToolkit.Data.Linq.Builder
 				e.ElementType == QueryElementType.SqlField && sequenceTable == ((SqlField)e).Table ||
 				e.ElementType == QueryElementType.Column   && sequenceTable == ((SqlQuery.Column)e).Parent);
 
+			if (collection is JoinBuilder.GroupJoinSubQueryContext)
+			{
+				var groupJoin = ((JoinBuilder.GroupJoinSubQueryContext)collection).GroupJoin;
+
+				groupJoin.SqlQuery.From.Tables[0].Joins[0].JoinType = SqlQuery.JoinType.Inner;
+				groupJoin.SqlQuery.From.Tables[0].Joins[0].IsWeak   = false;
+			}
+
 			if (!newQuery)
 			{
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
@@ -67,7 +75,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (collection is TableBuilder.TableContext)
 			{
-				var join = leftJoin ? SqlQuery.LeftJoin(sql) : SqlQuery.InnerJoin(sql);
+				var table = (TableBuilder.TableContext)collection;
+
+				var join = table.SqlTable.TableArguments != null && table.SqlTable.TableArguments.Length > 0 ?
+					leftJoin ? SqlQuery.OuterApply(sql) : SqlQuery.CrossApply(sql) :
+					leftJoin ? SqlQuery.LeftJoin  (sql) : SqlQuery.InnerJoin (sql);
 
 				join.JoinedTable.Condition.Conditions.AddRange(sql.Where.SearchCondition.Conditions);
 
@@ -77,7 +89,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				// Association.
 				//
-				if (collectionParent != null && collectionInfo.IsAssociationBuilе)
+				if (collectionParent != null && collectionInfo.IsAssociationBuilt)
 				{
 					var ts = (SqlQuery.TableSource)new QueryVisitor().Find(sequence.SqlQuery.From, e =>
 					{
@@ -108,6 +120,12 @@ namespace BLToolkit.Data.Linq.Builder
 				context.Collection = new SubQueryContext(collection, sequence.SqlQuery, false);
 				return new SelectContext(buildInfo.Parent, resultSelector, sequence, context);
 			}
+		}
+
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
 		}
 
 		public class SelectManyContext : SelectContext

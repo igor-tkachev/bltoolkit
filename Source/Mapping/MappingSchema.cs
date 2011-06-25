@@ -1669,7 +1669,7 @@ namespace BLToolkit.Mapping
 
 			if (mapValues != null)
 			{
-				IComparable comp = (IComparable)value;
+				var comp = (IComparable)value;
 
 				foreach (MapValue mv in mapValues)
 				foreach (object mapValue in mv.MapValues)

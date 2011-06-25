@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 
 				if (methodCall.Method.Name == "All")
-#if FW4
+#if FW4 || SILVERLIGHT
 					condition = Expression.Lambda(Expression.Not(condition.Body), condition.Name, condition.Parameters);
 #else
 					condition = Expression.Lambda(Expression.Not(condition.Body), condition.Parameters.ToArray());
@@ -35,6 +35,12 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return new AllAnyContext(buildInfo.Parent, methodCall, sequence);
+		}
+
+		protected override SequenceConvertInfo Convert(
+			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
+		{
+			return null;
 		}
 
 		class AllAnyContext : SequenceContextBase

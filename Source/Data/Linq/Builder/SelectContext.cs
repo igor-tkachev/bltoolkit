@@ -9,7 +9,6 @@ namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
-	using Reflection;
 
 	// This class implements double functionality (scalar and member type selects)
 	// and could be implemented as two different classes.
@@ -23,15 +22,17 @@ namespace BLToolkit.Data.Linq.Builder
 #if DEBUG
 		[CLSCompliant(false)]
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
+
+		public MethodCallExpression MethodCall;
 #endif
 
-		public IBuildContext[]  Sequence { get; set; }
-		public LambdaExpression Lambda   { get; set; }
-		public Expression       Body     { get; set; }
-		public ExpressionBuilder Builder   { get; private set; }
-		public SqlQuery         SqlQuery { get; set; }
-		public IBuildContext    Parent   { get; set; }
-		public bool             IsScalar { get; private set; }
+		public IBuildContext[]   Sequence { get; set; }
+		public LambdaExpression  Lambda   { get; set; }
+		public Expression        Body     { get; set; }
+		public ExpressionBuilder Builder  { get; private set; }
+		public SqlQuery          SqlQuery { get; set; }
+		public IBuildContext     Parent   { get; set; }
+		public bool              IsScalar { get; private set; }
 
 		Expression IBuildContext.Expression { get { return Lambda; } }
 
@@ -43,7 +44,7 @@ namespace BLToolkit.Data.Linq.Builder
 			Sequence = sequences;
 			Builder  = sequences[0].Builder;
 			Lambda   = lambda;
-			Body     = lambda.Body;//.Unwrap();
+			Body     = lambda.Body;
 			SqlQuery = sequences[0].SqlQuery;
 
 			foreach (var context in Sequence)
@@ -141,24 +142,30 @@ namespace BLToolkit.Data.Linq.Builder
 											{
 												if (e != memberExpression)
 												{
-													if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
-													    !sequence.IsExpression(e, 0, RequestFor.Field))
+													switch (e.NodeType)
 													{
-														var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
-														var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
+														case ExpressionType.MemberAccess :
+															if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
+																!sequence.IsExpression(e, 0, RequestFor.Field))
+															{
+																var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
+																var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
-														return Builder.BuildSql(e.Type, idx);
+																return Builder.BuildSql(e.Type, idx);
+															}
+
+															return Builder.BuildExpression(this, e);
 													}
-
-													return Builder.BuildExpression(this, e);
 												}
 
 												return e;
 											});
 									}
 
-									if (!sequence.IsExpression(memberExpression, 0, RequestFor.Object) &&
-									    !sequence.IsExpression(memberExpression, 0, RequestFor.Field))
+									var me = memberExpression.NodeType == ExpressionType.Parameter ? null : memberExpression;
+
+									if (!sequence.IsExpression(me, 0, RequestFor.Object) &&
+									    !sequence.IsExpression(me, 0, RequestFor.Field))
 									{
 										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
@@ -215,6 +222,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public virtual SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
+			if (expression != null && level > 0 && expression.NodeType == ExpressionType.Call)
+			{
+				var e = (MethodCallExpression)expression;
+
+				if (e.Method.DeclaringType == typeof(Enumerable))
+				{
+					return new[] { new SqlInfo { Sql = Builder.SubQueryToSql(this, e) } };
+				}
+			}
+
 			if (IsScalar)
 			{
 				if (expression == null)
@@ -284,7 +301,7 @@ namespace BLToolkit.Data.Linq.Builder
 											{
 												sql = ConvertExpressions(Members[member], flags);
 
-												if (sql.Length == 1)
+												if (sql.Length == 1 && flags != ConvertFlags.Key)
 													sql[0].Member = member;
 
 												_sql.Add(member, sql);
@@ -569,8 +586,8 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.SubQuery    : return false;
-				case RequestFor.Root        :
+				case RequestFor.SubQuery : return false;
+				case RequestFor.Root     :
 					return Sequence.Length == 1 ?
 						expression == Lambda.Parameters[0] :
 						Lambda.Parameters.Any(p => p == expression);
@@ -584,10 +601,12 @@ namespace BLToolkit.Data.Linq.Builder
 				switch (requestFlag)
 				{
 					default                     : return false;
+					case RequestFor.Table       :
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
-					case RequestFor.Object       :
+					case RequestFor.Object      :
+					case RequestFor.GroupJoin   :
 						return ProcessScalar(
 							expression,
 							level,
@@ -600,10 +619,12 @@ namespace BLToolkit.Data.Linq.Builder
 				switch (requestFlag)
 				{
 					default                     : return false;
+					case RequestFor.Table       :
 					case RequestFor.Association :
 					case RequestFor.Field       :
 					case RequestFor.Expression  :
-					case RequestFor.Object       :
+					case RequestFor.Object      :
+					case RequestFor.GroupJoin   :
 						{
 							if (expression == null)
 							{
@@ -769,6 +790,11 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (Body.NodeType == ExpressionType.Parameter)
 				{
+					//if (Sequence.Length == 2 && Sequence[1] is GroupByBuilder.KeyContext && expression == Body)
+					//{
+					//	return action(Sequence[1], null, 0);
+					//}
+
 					var sequence = GetSequence(Body, 0);
 
 					return expression == Body ?
@@ -807,6 +833,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return action(this, newExpression, 0);
 				}
+
+				//return action(GetSequence(expression, level), expression, level);
 			}
 
 			throw new NotImplementedException();
@@ -983,4 +1011,3 @@ namespace BLToolkit.Data.Linq.Builder
 		#endregion
 	}
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

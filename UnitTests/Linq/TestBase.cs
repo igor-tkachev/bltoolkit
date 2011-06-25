@@ -162,17 +162,20 @@ namespace Data.Linq
 		protected static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
-			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
 			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",      "BLToolkit.Data.DataProvider.SqlCeDataProvider"),
+			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
+			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
+
+#if !MOBILE
+			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
 			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",        "BLToolkit.Data.DataProvider.DB2DataProvider"),
 			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
 			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",   "BLToolkit.Data.DataProvider.FdpDataProvider"),
 			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
 			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL", "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
 			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",      "BLToolkit.Data.DataProvider.MySqlDataProvider"),
-			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
 			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
-			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
+#endif
 		};
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
@@ -205,6 +208,8 @@ namespace Data.Linq
 		{
 			Exception ex = null;
 
+			var executedForAtLeastOneProvider = false;
+
 			foreach (var db in GetProviders(exceptList))
 			{
 				try
@@ -213,6 +218,7 @@ namespace Data.Linq
 						((DbManager)db).BeginTransaction();
 
 					func(db);
+					executedForAtLeastOneProvider = true;
 				}
 				catch (Exception e)
 				{
@@ -229,6 +235,9 @@ namespace Data.Linq
 
 			if (ex != null)
 				throw ex;
+			
+			if(!executedForAtLeastOneProvider)
+				throw new ApplicationException("Delegate function has not been executed.");
 		}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
@@ -378,12 +387,16 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<Parent1> _parent1;
-		protected List<Parent1>  Parent1
+		private          List<Parent1> _parent1;
+		protected IEnumerable<Parent1>  Parent1
 		{
 			get
 			{
-				return _parent1 ?? (_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList());
+				if (_parent1 == null)
+					_parent1 = Parent.Select(p => new Parent1 { ParentID = p.ParentID, Value1 = p.Value1 }).ToList();
+
+				foreach (var parent in _parent1)
+					yield return parent;
 			}
 		}
 
@@ -715,8 +728,11 @@ namespace Data.Linq
 			Assert.AreNotEqual(0, expectedList.Count);
 			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
-			var exceptExpected = resultList.  Except(expectedList).Count();
-			var exceptResult   = expectedList.Except(resultList).  Count();
+			var exceptExpectedList = resultList.  Except(expectedList).ToList();
+			var exceptResultList   = expectedList.Except(resultList).  ToList();
+
+			var exceptExpected = exceptExpectedList.Count;
+			var exceptResult   = exceptResultList.  Count;
 
 			if (exceptResult != 0 || exceptExpected != 0)
 				for (var i = 0; i < resultList.Count; i++)

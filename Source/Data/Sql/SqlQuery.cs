@@ -131,12 +131,21 @@ namespace BLToolkit.Data.Sql
 				Parent     = parent;
 				Expression = expression;
 				_alias      = alias;
+
+#if DEBUG
+				_columnNumber = ++_columnCounter;
+#endif
 			}
 
 			public Column(SqlQuery builder, ISqlExpression expression)
 				: this(builder, expression, null)
 			{
 			}
+
+#if DEBUG
+			readonly int _columnNumber;
+			static   int _columnCounter;
+#endif
 
 			public ISqlExpression Expression { get; set; }
 
@@ -268,6 +277,10 @@ namespace BLToolkit.Data.Sql
 					.Append(Parent.SourceID)
 					.Append(".");
 
+#if DEBUG
+				sb.Append('[').Append(_columnNumber).Append(']');
+#endif
+
 				if (Expression is SqlQuery)
 				{
 					sb
@@ -276,7 +289,7 @@ namespace BLToolkit.Data.Sql
 					Expression.ToString(sb, dic).Replace("\n", "\n\t\t", len, sb.Length - len);
 					sb.Append("\n\t)");
 				}
-				else if (Expression is Column)
+				/*else if (Expression is Column)
 				{
 					var col = (Column)Expression;
 					sb
@@ -284,7 +297,7 @@ namespace BLToolkit.Data.Sql
 						.Append(col.Parent.SourceID)
 						.Append(".")
 						.Append(col.Alias ?? "c" + (col.Parent.Select.Columns.IndexOf(col) + 1));
-				}
+				}*/
 				else
 				{
 					Expression.ToString(sb, dic);
@@ -2409,7 +2422,7 @@ namespace BLToolkit.Data.Sql
 			static bool CheckChild(IEnumerable<JoinedTable> joins, ISqlTableSource table)
 			{
 				foreach (var j in joins)
-					if (j.Table == table || CheckChild(j.Table.Joins, table))
+					if (j.Table.Source == table || CheckChild(j.Table.Joins, table))
 						return true;
 				return false;
 			}

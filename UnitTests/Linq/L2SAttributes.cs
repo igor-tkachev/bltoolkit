@@ -40,6 +40,8 @@ namespace Data.Linq
 		{
 			using (var db = new TestDbManager("Sql2008"))
 			{
+				db.BeginTransaction();
+
 				var id = db.InsertWithIdentity(new L2SPersons
 				{
 					FirstName = "Test",

@@ -282,6 +282,63 @@ namespace Data.Linq
                     });
         }
 
+        [Test]
+        public void TestConvertFunction()
+        {
+            ForMySqlProvider(
+                db =>
+                {
+                    var ds = new IdlPatientSource(db);
+                    var r1 = ds.Patients().ToList();
+                    var r2 = ds.Persons().ToList();
+
+                    Assert.That(r1, Is.Not.Empty);
+                    Assert.That(r2, Is.Not.Empty);
+
+                    var r3 = ds.Patients().ToIdlPatientEx(ds);
+                    var r4 = r3.ToList();
+                    Assert.That(r4, Is.Not.Empty);
+                });
+        }
+
+        [Test]
+        public void TestJoinOrder()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        var source = new IdlPatientSource(db);
+
+                        // Success when use result from second JOIN
+                        var query1 = from p1 in source.GrandChilds()
+                                     join p2 in source.Persons() on p1.ParentID equals p2.Id
+                                     join p3 in source.Persons() on p1.ChildID equals p3.Id
+                                     select
+                                         new
+                                             {
+                                                 p1.ChildID, 
+                                                 p1.ParentID,
+                                                 //Parent = p2,
+                                                 Child = p3,
+                                             };
+                        var data1 = query1.ToList();
+
+                        // Fail when use result from first JOIN
+                        var query2 = from p1 in source.GrandChilds()
+                                    join p2 in source.Persons() on p1.ParentID equals p2.Id
+                                    join p3 in source.Persons() on p1.ChildID equals p3.Id
+                                    select
+                                        new
+                                        {
+                                            p1.ChildID,
+                                            p1.ParentID,
+                                            Parent = p2,
+                                            //Child = p3,
+                                        };
+                        var data2 = query2.ToList();
+                    });
+        }
+
         private static IQueryable<T> GetById<T>(ITestDataContext db, int id) where T : class, IHasID
         {
             return db.GetTable<T>().Where(obj => obj.ID == id);
@@ -289,7 +346,80 @@ namespace Data.Linq
 
         private void ForMySqlProvider(Action<ITestDataContext> func)
         {
-            ForEachProvider(Providers.Select(p => p.Name).Except(new [] {ProviderName.MySql}).ToArray(),func);
+            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
         }
     }
+
+    #region TestConvertFunction classes
+
+    public class IdlPatient
+    {
+        public IdlTest.ObjectId Id { get; set; }
+    }
+
+    public class IdlPerson
+    {
+        public IdlTest.ObjectId Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class IdlGrandChild
+    {
+        public IdlTest.ObjectId ParentID { get; set; }
+        public IdlTest.ObjectId ChildID { get; set; }
+        public IdlTest.ObjectId GrandChildID { get; set; }
+    }
+
+    public class IdlPatientEx : IdlPatient
+    {
+        public IdlPerson Person { get; set; }
+    }
+
+    public class IdlPatientSource
+    {
+        private readonly ITestDataContext m_dc;
+
+        public IdlPatientSource(ITestDataContext dc)
+        {
+            m_dc = dc;
+        }
+
+        public IQueryable<IdlGrandChild> GrandChilds()
+        {
+                return m_dc.GrandChild.Select(x => new IdlGrandChild
+                    {
+                        ChildID = new IdlTest.ObjectId {Value = x.ChildID.Value},
+                        GrandChildID = new IdlTest.ObjectId { Value = x.GrandChildID.Value },
+                        ParentID = new IdlTest.ObjectId { Value = x.ParentID.Value }
+                    });
+        }
+
+        public IQueryable<IdlPatient> Patients()
+        {
+            return m_dc.Patient.Select(x => new IdlPatient { Id = new IdlTest.ObjectId { Value = x.PersonID }, });
+        }
+
+        public IQueryable<IdlPerson> Persons()
+        {
+            return
+                m_dc.Person.Select(
+                    x => new IdlPerson { Id = new IdlTest.ObjectId { Value = x.ID }, Name = x.FirstName, });
+        }
+    }
+
+    public static class IdlPersonConverterExtensions
+    {
+        public static IEnumerable<IdlPatientEx> ToIdlPatientEx(this IQueryable<IdlPatient> list, IdlPatientSource source)
+        {
+            return from x in list
+                   join person in source.Persons() on x.Id.Value equals person.Id.Value
+                   select new IdlPatientEx
+                       {
+                           Id = x.Id,
+                           Person = new IdlPerson { Id = new IdlTest.ObjectId { Value = person.Id }, Name = person.Name,},
+                       };
+        }
+    }
+
+    #endregion
 }
