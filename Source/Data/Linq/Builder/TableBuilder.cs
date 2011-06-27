@@ -965,6 +965,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 
 						if (levelExpression == memberExpression)
+						{
 							foreach (var field in SqlTable.Fields.Values)
 							{
 								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
@@ -976,6 +977,13 @@ namespace BLToolkit.Data.Linq.Builder
 											if (TypeHelper.Equals(mm.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
 												return field;
 							}
+
+							if (ObjectMapper != null && ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
+							{
+								throw new LinqException("Member '{0}.{1}' is not a table column.",
+									memberExpression.Member.Name, memberExpression.Member.Name);
+							}
+						}
 					}
 				}
 
