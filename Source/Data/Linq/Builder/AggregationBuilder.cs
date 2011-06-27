@@ -98,23 +98,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				//var expr = Expression.Convert(BuildExpression(null, 0), typeof(object));
-				Expression expr;
-
-				if (_returnType.IsClass || TypeHelper.IsNullableType(_returnType))
-				{
-					expr = Builder.BuildSql(_returnType, FieldIndex);
-				}
-				else
-				{
-					expr = Builder.BuildSql(
-						_returnType,
-						FieldIndex, 
-						ReflectionHelper.Expressor<object>.MethodExpressor(o => CheckNullValue(o, o)),
-						Expression.Constant(_methodName));
-				}
-
-				expr = Expression.Convert(expr, typeof(object));
+				var expr = Expression.Convert(BuildExpression(FieldIndex), typeof(object));
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
 					expr, new []
@@ -131,7 +115,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				return Builder.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
+				return BuildExpression(ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
+			}
+
+			Expression BuildExpression(int fieldIndex)
+			{
+				Expression expr;
+
+				if (_returnType.IsClass || _methodName == "Sum" || TypeHelper.IsNullableType(_returnType))
+				{
+					expr = Builder.BuildSql(_returnType, fieldIndex);
+				}
+				else
+				{
+					expr = Builder.BuildSql(
+						_returnType,
+						fieldIndex, 
+						ReflectionHelper.Expressor<object>.MethodExpressor(o => CheckNullValue(o, o)),
+						Expression.Constant(_methodName));
+				}
+
+				return expr;
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)

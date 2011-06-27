@@ -36,11 +36,11 @@ namespace Data.Exceptions
 		}
 
 		[Test, ExpectedException(typeof(InvalidOperationException))]
-		public void NonNullableSum()
+		public void NonNullableAverage()
 		{
 			ForEachProvider(typeof(InvalidOperationException), db =>
 			{
-				var value = db.Parent.Where(_ => _.ParentID < 0).Sum(_ => _.ParentID);
+				var value = db.Parent.Where(_ => _.ParentID < 0).Average(_ => _.ParentID);
 			});
 		}
 	}
