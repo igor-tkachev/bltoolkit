@@ -410,10 +410,15 @@ namespace BLToolkit.Data.Linq.Builder
 							}
 							else if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
 							{
-								var ex = ConvertIQueriable(expr);
+								var attr = GetTableFunctionAttribute(call.Method);
 
-								if (ex != expr)
-									return ConvertExpressionTree(ex);
+								if (attr == null)
+								{
+									var ex = ConvertIQueriable(expr);
+
+									if (ex != expr)
+										return ConvertExpressionTree(ex);
+								}
 							}
 
 							return ConvertSubquery(expr);
