@@ -88,12 +88,12 @@ namespace BLToolkit.DataAccess
 
 		public MemberMapper[] GetMemberMappers()
 		{
-			var memberss = new MemberMapper[_parameters.Count];
+			var members = new MemberMapper[_parameters.Count];
 
 			for (var i = 0; i < _parameters.Count; i++)
-				memberss[i] = _parameters[i].MemberMapper;
+				members[i] = _parameters[i].MemberMapper;
 
-			return memberss;
+			return members;
 		}
 	}
 }
