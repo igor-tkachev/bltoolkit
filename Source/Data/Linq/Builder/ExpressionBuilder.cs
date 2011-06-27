@@ -386,24 +386,34 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							var call = (MethodCallExpression)expr;
 
-							if (call.IsQueryable()) switch (call.Method.Name)
+							if (call.IsQueryable())
 							{
-								case "Where"              : return ConvertWhere     (call);
-								case "GroupBy"            : return ConvertGroupBy   (call);
-								case "SelectMany"         : return ConvertSelectMany(call);
-								case "Select"             : return ConvertSelect    (call);
-								case "LongCount"          :
-								case "Count"              :
-								case "Single"             :
-								case "SingleOrDefault"    :
-								case "First"              :
-								case "FirstOrDefault"     : return ConvertPredicate (call);
-								case "Min"                :
-								case "Max"                : return ConvertSelector  (call, true);
-								case "Sum"                :
-								case "Average"            : return ConvertSelector  (call, false);
-								case "ElementAt"          :
-								case "ElementAtOrDefault" : return ConvertElementAt (call);
+								switch (call.Method.Name)
+								{
+									case "Where"              : return ConvertWhere     (call);
+									case "GroupBy"            : return ConvertGroupBy   (call);
+									case "SelectMany"         : return ConvertSelectMany(call);
+									case "Select"             : return ConvertSelect    (call);
+									case "LongCount"          :
+									case "Count"              :
+									case "Single"             :
+									case "SingleOrDefault"    :
+									case "First"              :
+									case "FirstOrDefault"     : return ConvertPredicate (call);
+									case "Min"                :
+									case "Max"                : return ConvertSelector  (call, true);
+									case "Sum"                :
+									case "Average"            : return ConvertSelector  (call, false);
+									case "ElementAt"          :
+									case "ElementAtOrDefault" : return ConvertElementAt (call);
+								}
+							}
+							else if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
+							{
+								var ex = ConvertIQueriable(expr);
+
+								if (ex != expr)
+									return ConvertExpressionTree(ex);
 							}
 
 							return ConvertSubquery(expr);
@@ -1125,6 +1135,15 @@ namespace BLToolkit.Data.Linq.Builder
 						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
 
 				var qex = _query.GetIQueryable(n, expression);
+
+				if (expression.NodeType == ExpressionType.Call && qex.NodeType == ExpressionType.Call)
+				{
+					var m1 = (MethodCallExpression)expression;
+					var m2 = (MethodCallExpression)qex;
+
+					if (m1.Method == m2.Method)
+						return expression;
+				}
 
 				foreach (var a in qex.GetExpressionAccessors(path))
 					if (!_expressionAccessors.ContainsKey(a.Key))

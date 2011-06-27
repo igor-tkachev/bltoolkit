@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using BLToolkit.Data;
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -204,6 +206,54 @@ namespace Data.Linq
 				on p.ID.ID equals j.ID.ID
 				where p.ID.ID == 1
 				select p));
+		}
+
+		public Table<Person> People2(DbManager db)
+		{
+			return db.GetTable<Person>();
+		}
+
+		[Test]
+		public void TableAsMethod()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from d in db.Patient
+					from p in People2(db)
+					select p;
+
+				q.ToList();
+
+				q =
+					from d in db.Patient
+					from p in People2(db)
+					select p;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void TableAsExtensionMethod()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from d in db.Patient
+					from p in db.People()
+					select p;
+
+				q.ToList();
+			}
+		}
+	}
+
+	static class Extender
+	{
+		public static Table<Person> People(this DbManager db)
+		{
+			return db.GetTable<Person>();
 		}
 	}
 }
