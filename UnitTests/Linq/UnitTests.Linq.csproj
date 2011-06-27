@@ -162,6 +162,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BatchTest.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ConvertTest.cs" />
     <Compile Include="CompileTest.cs" />
