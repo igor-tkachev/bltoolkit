@@ -582,7 +582,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				// Build table.
 				//
-				var table = FindTable(expression, level);
+				var table = FindTable(expression, level, false);
 
 				if (table.Field == null)
 					return table.Table.BuildQuery();
@@ -605,7 +605,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					case ConvertFlags.All   :
 						{
-							var table = FindTable(expression, level);
+							var table = FindTable(expression, level, false);
 
 							if (table.Field == null)
 								return table.Table.SqlTable.Fields.Values
@@ -617,7 +617,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					case ConvertFlags.Key   :
 						{
-							var table = FindTable(expression, level);
+							var table = FindTable(expression, level, false);
 
 							if (table.Field == null)
 							{
@@ -637,7 +637,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					case ConvertFlags.Field :
 						{
-							var table = FindTable(expression, level);
+							var table = FindTable(expression, level, true);
 
 							if (table.Field != null)
 								return new[]
@@ -710,14 +710,14 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					case RequestFor.Field      :
 						{
-							var table = FindTable(expression, level);
+							var table = FindTable(expression, level, false);
 							return table != null && table.Field != null;
 						}
 
 					case RequestFor.Table       :
 					case RequestFor.Object      :
 						{
-							var table = FindTable(expression, level);
+							var table = FindTable(expression, level, false);
 							return
 								table       != null &&
 								table.Field == null &&
@@ -737,7 +737,7 @@ namespace BLToolkit.Data.Linq.Builder
 								case ExpressionType.Parameter    :
 								case ExpressionType.Call         :
 
-									var table = FindTable(expression, level);
+									var table = FindTable(expression, level, false);
 									return table == null;
 							}
 
@@ -748,7 +748,7 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							if (ObjectMapper.Associations.Count > 0)
 							{
-								var table = FindTable(expression, level);
+								var table = FindTable(expression, level, false);
 								return
 									table       != null &&
 									table.Table is AssociatedTableContext &&
@@ -918,7 +918,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#region Helpers
 
-			SqlField GetField(Expression expression, int level)
+			SqlField GetField(Expression expression, int level, bool throwException)
 			{
 				if (expression.NodeType == ExpressionType.MemberAccess)
 				{
@@ -978,7 +978,9 @@ namespace BLToolkit.Data.Linq.Builder
 												return field;
 							}
 
-							if (ObjectMapper != null && ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
+							if (throwException &&
+								ObjectMapper != null &&
+								ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
 							{
 								throw new LinqException("Member '{0}.{1}' is not a table column.",
 									memberExpression.Member.Name, memberExpression.Member.Name);
@@ -1000,7 +1002,7 @@ namespace BLToolkit.Data.Linq.Builder
 				public int          Level;
 			}
 
-			TableLevel FindTable(Expression expression, int level)
+			TableLevel FindTable(Expression expression, int level, bool throwException)
 			{
 				if (expression == null)
 					return new TableLevel { Table = this };
@@ -1012,7 +1014,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.MemberAccess :
 					case ExpressionType.Parameter    :
 						{
-							var field = GetField(expression, level);
+							var field = GetField(expression, level, throwException);
 
 							if (field != null || (level == 0 && levelExpression == expression))
 								return new TableLevel { Table = this, Field = field, Level = level };
@@ -1058,7 +1060,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (al != null)
 								return al;
 
-							var field = tableAssociation.GetField(expression, level + 1);
+							var field = tableAssociation.GetField(expression, level + 1, false);
 
 							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1 };
 						}
