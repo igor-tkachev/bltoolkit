@@ -38,7 +38,7 @@ namespace BLToolkit.Data.Linq.Builder
 			ParameterExpression  param,
 			Expression           expression)
 		{
-			if (expression == methodCall && param.Type != info.Parameter.Type)
+			if (expression == methodCall && param != null && param.Type != info.Parameter.Type)
 			{
 				var types = methodCall.Method.GetGenericArguments();
 				var mgen  = methodCall.Method.GetGenericMethodDefinition();

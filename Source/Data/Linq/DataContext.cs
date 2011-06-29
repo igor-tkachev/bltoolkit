@@ -7,7 +7,6 @@ namespace BLToolkit.Data.Linq
 	using Data.Sql.SqlProvider;
 	using DataProvider;
 	using Mapping;
-	using Reflection;
 
 	public class DataContext : IDataContext
 	{

@@ -34,15 +34,18 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				info.Expression = methodCall.Convert(ex => ConvertMethod(methodCall, 0, info, predicate.Parameters[0], ex));
 
-				if (param.Type != info.Parameter.Type)
-					param = Expression.Parameter(info.Parameter.Type, param.Name);
+				if (param != null)
+				{
+					if (param.Type != info.Parameter.Type)
+						param = Expression.Parameter(info.Parameter.Type, param.Name);
 
-				if (info.ExpressionsToReplace != null)
-					foreach (var path in info.ExpressionsToReplace)
-					{
-						path.Path = path.Path.Convert(e => e == info.Parameter ? param : e);
-						path.Expr = path.Expr.Convert(e => e == info.Parameter ? param : e);
-					}
+					if (info.ExpressionsToReplace != null)
+						foreach (var path in info.ExpressionsToReplace)
+						{
+							path.Path = path.Path.Convert(e => e == info.Parameter ? param : e);
+							path.Expr = path.Expr.Convert(e => e == info.Parameter ? param : e);
+						}
+				}
 
 				info.Parameter = param;
 
