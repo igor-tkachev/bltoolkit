@@ -62,7 +62,7 @@ namespace Data.Linq.ProviderSpecific
 			[MapField("value_as_date")]         public DateTime? ValueAsDate    { get; set; }
 		}
 
-		//[Test]
+		[Test]
 		public void InsertBatch1()
 		{
 			var data = new[]
