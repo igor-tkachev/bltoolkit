@@ -1234,7 +1234,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, name, null)
+				SqlParameter = new SqlParameter(expr.Type, name, null, (MappingSchema)null)
 			};
 
 			_parameters.Add(expr, p);
@@ -2776,7 +2776,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, member.Name, null)
+				SqlParameter = new SqlParameter(expr.Type, member.Name, null, (MappingSchema)null)
 			};
 
 			_parameters.Add(expr, p);

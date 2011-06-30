@@ -777,7 +777,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(field.SystemType, field.Name, null)
+				SqlParameter = new SqlParameter(field.SystemType, field.Name, null, dataContext.MappingSchema)
 			};
 
 			if (field.SystemType.IsEnum)

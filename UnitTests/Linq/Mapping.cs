@@ -1,12 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
+
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 using NUnit.Framework;
+
+#pragma warning disable 0649
 
 namespace Data.Linq
 {
@@ -25,8 +26,19 @@ namespace Data.Linq
 		[Test]
 		public void Enum2()
 		{
-			var expected = from p in Person where p.Gender == Gender.Male select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.Person where p.Gender == Gender.Male select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.Gender == Gender.Male select p,
+				from p in db.Person where p.Gender == Gender.Male select p));
+		}
+
+		[Test]
+		public void Enum21()
+		{
+			var gender = Gender.Male;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.Gender == gender select p,
+				from p in db.Person where p.Gender == gender select p));
 		}
 
 		[Test]
@@ -72,6 +84,31 @@ namespace Data.Linq
 			var v1 = TypeValue.Value1;
 
 			ForEachProvider(db => db.Parent4.Update(p => p.Value1 == v1, p => new Parent4 { Value1 = v1 }));
+		}
+
+		enum TestValue
+		{
+			Value1 = 1,
+		}
+
+		[TableName("Parent")]
+		class TestParent
+		{
+			public int       ParentID;
+			public TestValue Value1;
+		}
+
+		[Test]
+		public void Enum81()
+		{
+			ForEachProvider(db => db.GetTable<TestParent>().Where(p => p.Value1 == TestValue.Value1).ToList());
+		}
+
+		[Test]
+		public void Enum82()
+		{
+			var testValue = TestValue.Value1;
+			ForEachProvider(db => db.GetTable<TestParent>().Where(p => p.Value1 == testValue).ToList());
 		}
 
 		[Test]
