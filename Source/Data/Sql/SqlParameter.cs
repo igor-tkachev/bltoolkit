@@ -8,23 +8,28 @@ namespace BLToolkit.Data.Sql
 
 	public class SqlParameter : ISqlExpression, IValueContainer
 	{
-		public SqlParameter(Type systemType, string name, object value)
+		public SqlParameter(Type systemType, string name, object value, MappingSchema mappingSchema)
 		{
 			IsQueryParameter = true;
 			Name             = name;
 			SystemType       = systemType;
 			_value           = value;
+
+			if (systemType != null && mappingSchema != null && systemType.IsEnum)
+			{
+				
+			}
 		}
 
 		public SqlParameter(Type systemType, string name, object value, Converter<object,object> valueConverter)
-			: this(systemType, name, value)
+			: this(systemType, name, value, (MappingSchema)null)
 		{
 			_valueConverter = valueConverter;
 		}
 
 		[Obsolete]
 		public SqlParameter(string name, object value)
-			: this(value == null ? null : value.GetType(), name, value)
+			: this(value == null ? null : value.GetType(), name, value, (MappingSchema)null)
 		{
 		}
 

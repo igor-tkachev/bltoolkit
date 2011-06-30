@@ -1106,7 +1106,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, name, null)
+				SqlParameter = new SqlParameter(expr.Type, name, null, MappingSchema)
 			};
 
 			_parameters.Add(expr, p);
@@ -1431,9 +1431,6 @@ namespace BLToolkit.Data.Linq.Builder
 					if (!dic.ContainsKey(mv.OrigValue))
 						dic.Add(mv.OrigValue, mv.MapValues[0]);
 
-			if (dic.Count == 0)
-				return null;
-
 			switch (value.NodeType)
 			{
 				case ExpressionType.Constant:
@@ -1691,7 +1688,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, member.Name, null)
+				SqlParameter = new SqlParameter(expr.Type, member.Name, null, MappingSchema)
 			};
 
 			_parameters.Add(expr, p);
