@@ -917,65 +917,15 @@ namespace Data.Linq
 			return null;
 		}
 
-		public class Context : IBuildContext
+		public class Context : PassThroughContext
 		{
-			public Context(IBuildContext sequence)
+			public Context(IBuildContext context) : base(context)
 			{
-				Sequence = sequence;
 			}
 
-#if DEBUG
-			public string _sqlQueryText { get { return Sequence._sqlQueryText; } }
-#endif
-
-			public IBuildContext    Sequence   { get; set; }
-			public ExpressionBuilder Builder     { get { return Sequence.Builder; } }
-			public Expression       Expression { get; set; }
-			public SqlQuery         SqlQuery   { get { return Sequence.SqlQuery; } set { Sequence.SqlQuery = value; } }
-			public IBuildContext    Parent     { get; set; }
-
-			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				query.GetElement = (ctx,db,expr,ps) => this;
-			}
-
-			public Expression BuildExpression(Expression expression, int level)
-			{
-				return Sequence.BuildExpression(expression, level);
-			}
-
-			public SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
-			{
-				return Sequence.ConvertToSql(expression, level, flags);
-			}
-
-			public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
-			{
-				return Sequence.ConvertToIndex(expression, level, flags);
-			}
-
-			public bool IsExpression(Expression expression, int level, RequestFor requestFlag)
-			{
-				return Sequence.IsExpression(null,  0, requestFlag);
-			}
-
-			public IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
-			{
-				return Sequence.GetContext(expression, level, buildInfo);
-			}
-
-			public int ConvertToParentIndex(int index, IBuildContext context)
-			{
-				return Sequence.ConvertToParentIndex(index, context);
-			}
-
-			public void SetAlias(string alias)
-			{
-			}
-
-			public ISqlExpression GetSubQuery(IBuildContext context)
-			{
-				return null;
 			}
 		}
 	}

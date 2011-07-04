@@ -237,22 +237,12 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			/*
-			if (expr.NodeType == ExpressionType.Call)
-			{
-				var call = (MethodCallExpression)expr;
-
-				if (call.Method.Name == "Any" && (call.Method.DeclaringType == typeof(Queryable) || call.Method.DeclaringType == typeof(Enumerable)))
-					return ((SqlQuery.Predicate.FuncLike) result.Where.SearchCondition.Conditions[0].Predicate).Function;
-			}
-			*/
-
 			return sequence.SqlQuery;
 		}
 
 		#endregion
 
-		#region IsSubquery
+		#region IsSubQuery
 
 		bool IsSubQuery(IBuildContext context, MethodCallExpression call)
 		{
@@ -584,10 +574,10 @@ namespace BLToolkit.Data.Linq.Builder
 							.ToDictionary(_ => _.m.MemberInfo, _ => _.i);
 
 						return expr.Bindings
-							.Where(b => b is MemberAssignment)
+							.Where  (b => b is MemberAssignment)
 							.Cast<MemberAssignment>()
 							.OrderBy(b => dic[b.Member])
-							.Select(a =>
+							.Select (a =>
 							{
 								var sql = ConvertToSql(context, a.Expression);
 								var mi  = a.Member;

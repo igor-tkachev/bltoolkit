@@ -6,11 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using BLToolkit.Reflection;
+
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Sql
 {
+	using Reflection;
+
 	using FJoin = SqlQuery.FromClause.Join;
 
 	[DebuggerDisplay("SQL = {SqlText}")]

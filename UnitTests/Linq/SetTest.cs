@@ -682,5 +682,15 @@ namespace Data.Linq
 				join child in db.Child on r equals child.ChildID
 				select child));
 		}
+
+		[Test]
+		public void Union3()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p  in    Parent select new { id = p.ParentID,  val = true }).Union(
+				(from ch in    Child  select new { id = ch.ParentID, val = false })),
+				(from p  in db.Parent select new { id = p.ParentID,  val = true }).Union(
+				(from ch in db.Child  select new { id = ch.ParentID, val = false }))));
+		}
 	}
 }

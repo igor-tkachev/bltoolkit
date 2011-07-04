@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq.Expressions;
 using BLToolkit.Data.Sql;
 
@@ -27,13 +28,47 @@ namespace BLToolkit.Data.Linq.Builder
 			sq.SubQuery.SqlQuery.Unions.Add(union);
 			sq.Union = sequence2;
 
-			return sq;
+			return new UnionContext(sq);
 		}
 
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
 			return null;
+		}
+
+		class UnionContext : PassThroughContext
+		{
+			public UnionContext(IBuildContext context) : base(context)
+			{
+			}
+
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			{
+				var expr = BuildExpression(null, 0);
+
+				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
+					expr, new []
+					{
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
+					});
+
+				query.SetQuery(mapper.Compile());
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				if (expression == null)
+				{
+					var sql = Context.ConvertToSql(null, level, ConvertFlags.All);
+				}
+
+				return base.BuildExpression(expression, level);
+			}
 		}
 	}
 }
