@@ -732,8 +732,50 @@ namespace Data.Linq
 		[Test]
 		public void Max3()
 		{
-			var expected = Child.Select(c => c.ChildID).Max();
-			ForEachProvider(db => Assert.AreEqual(expected, db.Child.Select(c => c.ChildID).Max()));
+			ForEachProvider(db => Assert.AreEqual(
+				Child.Select(c => c.ChildID).Max(),
+				db.Child.Select(c => c.ChildID).Max()));
+		}
+
+		[Test]
+		public void Max4()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				from t1 in Types
+				join t2 in
+					from sub in Types
+					where
+						sub.ID == 1 &&
+						sub.DateTimeValue <= DateTime.Today
+					group sub by new
+					{
+						sub.ID
+					} into g
+					select new
+					{
+						g.Key.ID,
+						DateTimeValue = g.Max( p => p.DateTimeValue )
+					}
+				on new { t1.ID, t1.DateTimeValue } equals new { t2.ID, t2.DateTimeValue }
+				select t1.MoneyValue,
+				from t1 in db.Types
+				join t2 in
+					from sub in db.Types
+					where
+						sub.ID == 1 &&
+						sub.DateTimeValue <= DateTime.Today
+					group sub by new
+					{
+						sub.ID
+					} into g
+					select new
+					{
+						g.Key.ID,
+						DateTimeValue = g.Max( p => p.DateTimeValue )
+					}
+				on new { t1.ID, t1.DateTimeValue } equals new { t2.ID, t2.DateTimeValue }
+				select t1.MoneyValue
+				));
 		}
 
 		[Test]

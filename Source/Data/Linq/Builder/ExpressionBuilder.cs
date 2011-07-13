@@ -466,7 +466,7 @@ namespace BLToolkit.Data.Linq.Builder
 										{
 											var param    = Expression.Parameter(call.Type, "p");
 											var selector = expr.Convert(e => e == call ? param : e);
-											var method   = GetQueriableMethodInfo(call, m => m.Name == call.Method.Name && m.GetParameters().Length == 1);
+											var method   = GetQueriableMethodInfo(call, (m,_) => m.Name == call.Method.Name && m.GetParameters().Length == 1);
 											var select   = call.Method.DeclaringType == typeof(Enumerable) ?
 												EnumerableMethods
 													.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
@@ -1021,7 +1021,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (method.Arguments.Count != 2)
 				return method;
 
-			var cm = GetQueriableMethodInfo(method, m => m.Name == method.Method.Name && m.GetParameters().Length == 1);
+			var cm = GetQueriableMethodInfo(method, (m,_) => m.Name == method.Method.Name && m.GetParameters().Length == 1);
 			var wm = GetMethodInfo(method, "Where");
 
 			var argType = method.Method.GetGenericArguments()[0];
@@ -1048,7 +1048,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var types = GetMethodGenericTypes(method);
 			var sm    = GetMethodInfo(method, "Select");
-			var cm    = GetQueriableMethodInfo(method, m =>
+			var cm    = GetQueriableMethodInfo(method, (m,isDefault) =>
 			{
 				if (m.Name == method.Method.Name)
 				{
@@ -1060,7 +1060,7 @@ namespace BLToolkit.Data.Linq.Builder
 							return true;
 
 						var ts = ps[0].ParameterType.GetGenericArguments();
-						return ts[0] == types[1];
+						return ts[0] == types[1] || isDefault && ts[0].IsGenericParameter;
 					}
 				}
 
@@ -1179,13 +1179,13 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 			else
 			{
-				skipMethod = GetQueriableMethodInfo(method, mi => mi.Name == "Skip");
+				skipMethod = GetQueriableMethodInfo(method, (mi,_) => mi.Name == "Skip");
 			}
 
 			skipMethod = skipMethod.MakeGenericMethod(sourceType);
 
 			var methodName  = method.Method.Name == "ElementAt" ? "First" : "FirstOrDefault";
-			var firstMethod = GetQueriableMethodInfo(method, mi => mi.Name == methodName && mi.GetParameters().Length == 1);
+			var firstMethod = GetQueriableMethodInfo(method, (mi,_) => mi.Name == methodName && mi.GetParameters().Length == 1);
 
 			firstMethod = firstMethod.MakeGenericMethod(sourceType);
 
@@ -1196,11 +1196,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region Helpers
 
-		MethodInfo GetQueriableMethodInfo(MethodCallExpression method, Func<MethodInfo,bool> predicate)
+		MethodInfo GetQueriableMethodInfo(MethodCallExpression method, Func<MethodInfo,bool,bool> predicate)
 		{
 			return method.Method.DeclaringType == typeof(Enumerable) ?
-				EnumerableMethods.First(predicate) :
-				QueryableMethods. First(predicate);
+				EnumerableMethods.FirstOrDefault(m => predicate(m, false)) ?? EnumerableMethods.First(m => predicate(m, true)):
+				QueryableMethods. FirstOrDefault(m => predicate(m, false)) ?? QueryableMethods. First(m => predicate(m, true));
 		}
 
 		MethodInfo GetMethodInfo(MethodCallExpression method, string name)
