@@ -117,12 +117,14 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 			else
 			{
-				var sequence = GetSequence(expression, level);
-
 				if (level == 0)
+				{
+					var sequence = GetSequence(expression, level);
+
 					return levelExpression == expression ?
 						sequence.BuildExpression(null,       0) :
 						sequence.BuildExpression(expression, level + 1);
+				}
 
 				switch (levelExpression.NodeType)
 				{
@@ -138,34 +140,37 @@ namespace BLToolkit.Data.Linq.Builder
 									{
 										case ExpressionType.New        :
 										case ExpressionType.MemberInit :
-											return memberExpression.Convert(e =>
 											{
-												if (e != memberExpression)
+												var sequence = GetSequence(memberExpression, 0);
+
+												return memberExpression.Convert(e =>
 												{
-													switch (e.NodeType)
+													if (e != memberExpression)
 													{
-														case ExpressionType.MemberAccess :
-															if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
-																!sequence.IsExpression(e, 0, RequestFor.Field))
-															{
-																var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
-																var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
+														switch (e.NodeType)
+														{
+															case ExpressionType.MemberAccess :
+																if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
+																	!sequence.IsExpression(e, 0, RequestFor.Field))
+																{
+																	var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
+																	var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
 
-																return Builder.BuildSql(e.Type, idx);
-															}
+																	return Builder.BuildSql(e.Type, idx);
+																}
 
-															return Builder.BuildExpression(this, e);
+																return Builder.BuildExpression(this, e);
+														}
 													}
-												}
 
-												return e;
-											});
+													return e;
+												});
+											}
 									}
 
 									var me = memberExpression.NodeType == ExpressionType.Parameter ? null : memberExpression;
 
-									if (!sequence.IsExpression(me, 0, RequestFor.Object) &&
-									    !sequence.IsExpression(me, 0, RequestFor.Field))
+									if (!IsExpression(me, 0, RequestFor.Object) && !IsExpression(me, 0, RequestFor.Field))
 									{
 										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
@@ -177,30 +182,34 @@ namespace BLToolkit.Data.Linq.Builder
 								return Builder.BuildExpression(this, memberExpression);
 							}
 
-							switch (memberExpression.NodeType)
 							{
-								case ExpressionType.Parameter  :
-									{
-										var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
-										
-										if (memberExpression == parameter)
-											return sequence.BuildExpression(expression, level + 1);
+								var sequence = GetSequence(expression, level);
 
-										break;
+								switch (memberExpression.NodeType)
+								{
+									case ExpressionType.Parameter  :
+										{
+											var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
 										
-									}
+											if (memberExpression == parameter)
+												return sequence.BuildExpression(expression, level + 1);
 
-								case ExpressionType.New        :
-								case ExpressionType.MemberInit :
-									{
-										var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
-										return BuildExpression(mmExpresion, 0);
-									}
+											break;
+										
+										}
+
+									case ExpressionType.New        :
+									case ExpressionType.MemberInit :
+										{
+											var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
+											return BuildExpression(mmExpresion, 0);
+										}
+								}
+
+								var expr = expression.Convert(ex => ex == levelExpression ? memberExpression : ex);
+
+								return sequence.BuildExpression(expr, 1);
 							}
-
-							var expr = expression.Convert(ex => ex == levelExpression ? memberExpression : ex);
-
-							return sequence.BuildExpression(expr, 1);
 						}
 
 					case ExpressionType.Parameter :
@@ -889,25 +898,23 @@ namespace BLToolkit.Data.Linq.Builder
 			if (Sequence.Length == 1)
 				return Sequence[0];
 
-			var levelExpression = expression.GetLevelExpression(level);
+			Expression root = null;
 
 			if (IsScalar)
 			{
-				var root =  expression.GetRootObject();
-
-				if (root.NodeType == ExpressionType.Parameter)
-					for (var i = 0; i < Lambda.Parameters.Count; i++)
-						if (root == Lambda.Parameters[i])
-							return Sequence[i];
+				root =  expression.GetRootObject();
 			}
 			else
 			{
+				var levelExpression = expression.GetLevelExpression(level);
+
 				switch (levelExpression.NodeType)
 				{
 					case ExpressionType.MemberAccess :
 						{
 							var memberExpression = Members[((MemberExpression)levelExpression).Member];
-							var root             =  memberExpression.GetRootObject();
+
+							root =  memberExpression.GetRootObject();
 
 							if (root.NodeType != ExpressionType.Parameter)
 								return null;
@@ -921,19 +928,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 					case ExpressionType.Parameter :
 						{
-							var root =  expression.GetRootObject();
-
-							if (levelExpression == root)
-							{
-								for (var i = 0; i < Lambda.Parameters.Count; i++)
-									if (levelExpression == Lambda.Parameters[i])
-										return Sequence[i];
-							}
-
+							root = expression.GetRootObject();
 							break;
 						}
 				}
 			}
+
+			if (root != null)
+				for (var i = 0; i < Lambda.Parameters.Count; i++)
+					if (root == Lambda.Parameters[i])
+						return Sequence[i];
 
 			throw new NotImplementedException();
 		}
