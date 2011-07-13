@@ -38,11 +38,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var body = selector.Body.Unwrap();
 
-			// .Select(p => p)
-			//
-			if (body == selector.Parameters[0])
-				return sequence;
-
 			switch (body.NodeType)
 			{
 				case ExpressionType.Parameter : break;
