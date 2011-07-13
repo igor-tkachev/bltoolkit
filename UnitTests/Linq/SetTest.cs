@@ -704,5 +704,79 @@ namespace Data.Linq
 				(from ch in db.Child  select new { id = ch.ParentID, val = false }))
 				.Select(p => new { p.id, p.val })));
 		}
+
+		[Test]
+		public void Union41()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p  in    Parent select new { id = p.ParentID,  val = true }).Union(
+				(from ch in    Child  select new { id = ch.ParentID, val = false }))
+				.Select(p => p),
+				(from p  in db.Parent select new { id = p.ParentID,  val = true }).Union(
+				(from ch in db.Child  select new { id = ch.ParentID, val = false }))
+				.Select(p => p)));
+		}
+
+		[Test]
+		public void Union42()
+		{
+			ForEachProvider(db => AreEqual(
+				(from p  in    Parent select new { id = p.ParentID,  val = true }).Union(
+				(from ch in    Child  select new { id = ch.ParentID, val = false }))
+				.Select(p => p.val),
+				(from p  in db.Parent select new { id = p.ParentID,  val = true }).Union(
+				(from ch in db.Child  select new { id = ch.ParentID, val = false }))
+				.Select(p => p.val)));
+		}
+
+		[Test]
+		public void Union5()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select p1).Union(
+					(from p2 in    Parent select new Parent { ParentID = p2.ParentID }))
+					.Select(p => new Parent { ParentID = p.ParentID, Value1 = p.Value1 }),
+					(from p1 in db.Parent select p1).Union(
+					(from p2 in db.Parent select new Parent { ParentID = p2.ParentID }))
+					.Select(p => new Parent { ParentID = p.ParentID, Value1 = p.Value1 })));
+		}
+
+		[Test]
+		public void Union51()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					(from p1  in   Parent select p1).Union(
+					(from p2 in    Parent select new Parent { ParentID = p2.ParentID })),
+					(from p1 in db.Parent select p1).Union(
+					(from p2 in db.Parent select new Parent { ParentID = p2.ParentID }))));
+		}
+
+		[Test]
+		public void Union52()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in    Parent select p2)),
+					(from p1 in db.Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in db.Parent select p2))));
+		}
+
+		[Test]
+		public void Union53()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in    Parent select new Parent { Value1   = p2.Value1   })),
+					(from p1 in db.Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in db.Parent select new Parent { Value1   = p2.Value1   }))));
+		}
 	}
 }

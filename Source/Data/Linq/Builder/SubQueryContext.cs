@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 
 	class SubQueryContext : IBuildContext
@@ -41,7 +43,7 @@ namespace BLToolkit.Data.Linq.Builder
 		public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif
 
-		public ExpressionBuilder   Builder    { get { return SubQuery.Builder;     } }
+		public ExpressionBuilder   Builder    { get { return SubQuery.Builder;    } }
 		public Expression          Expression { get { return SubQuery.Expression; } }
 		public SqlQuery            SqlQuery   { get; set; }
 		public IBuildContext       Parent     { get; set; }
@@ -50,11 +52,74 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public virtual void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
-			SubQuery.BuildQuery(query, queryParameter);
+			if (Union == null)
+			{
+				SubQuery.BuildQuery(query, queryParameter);
+			}
+			else
+			{
+				var expr = BuildExpression(null, 0);
+
+				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
+					expr, new []
+					{
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
+					});
+
+				query.SetQuery(mapper.Compile());
+			}
 		}
 
 		public virtual Expression BuildExpression(Expression expression, int level)
 		{
+			if (Union == null)
+				return SubQuery.BuildExpression(expression, level);
+
+			/*
+			if (SubQuery.IsExpression(expression, level, RequestFor.Object) ||
+				Union.   IsExpression(expression, level, RequestFor.Object) )
+			{
+				var sidx   = SubQuery.ConvertToIndex(expression, level, ConvertFlags.All);
+				var uidx   = Union.   ConvertToIndex(expression, level, ConvertFlags.All);
+				var lambda = (LambdaExpression)Expression;
+				var type   = lambda.Body.Type;
+				var parm   = Expression.Parameter(type, "p");
+
+				var nctor = (NewExpression)Expression.Find(e =>
+				{
+					if (e.NodeType == ExpressionType.New && e.Type == type)
+					{
+						var ne = (NewExpression)e;
+						return ne.Arguments != null && ne.Arguments.Count > 0;
+					}
+
+					return false;
+				});
+
+				var expr = nctor != null ?
+					Expression.New(
+						nctor.Constructor,
+						nctor.Members.Select(m => Expression.PropertyOrField(parm, m.Name)),
+						nctor.Members) as Expression:
+					Expression.MemberInit(
+						Expression.New(type),
+						sidx.Union(uidx)
+							.Select(i => i.Member.Name)
+							.Distinct()
+							.Select(n =>
+							{
+								var m = Expression.PropertyOrField(parm, n);
+								return Expression.Bind(m.Member, m);
+							}));
+
+				return Builder.BuildExpression(this, expr);
+			}
+			 */
+
 			return SubQuery.BuildExpression(expression, level);
 		}
 
@@ -183,8 +248,31 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 					}
 
-					while (sub.Count < union.Count) sub.  Add(new SqlQuery.Column(SubQuery.SqlQuery, new SqlValue(null)));
-					while (union.Count < sub.Count) union.Add(new SqlQuery.Column(Union.   SqlQuery, new SqlValue(null)));
+					while (sub.Count < union.Count)
+					{
+						var type = (Type)null;//union[sub.Count].SystemType;
+
+						var func = type == null ?
+							new SqlValue(null) :
+							Builder.Convert(
+							this,
+							new SqlFunction(type, "Convert", SqlDataType.GetDataType(type), new SqlValue(null)));
+
+						sub.  Add(new SqlQuery.Column(SubQuery.SqlQuery, func));
+					}
+
+					while (union.Count < sub.Count)
+					{
+						var type = (Type)null;//sub[union.Count].SystemType;
+
+						var func = type == null ?
+							new SqlValue(null) :
+							Builder.Convert(
+							this,
+							new SqlFunction(type, "Convert", SqlDataType.GetDataType(type), new SqlValue(null)));
+
+						union.Add(new SqlQuery.Column(Union.   SqlQuery, func));
+					}
 				}
 
 				idx = SqlQuery.Select.Add(column);
