@@ -635,6 +635,21 @@ namespace Data.Linq
 			}
 		}
 
+		void TestContains(ITestDataContext db, Parent1 parent)
+		{
+			Assert.AreEqual(
+				   Parent1.Where(p => p.ParentID == 1).Contains(parent),
+				db.Parent1.Where(p => p.ParentID == 1).Contains(parent));
+		}
+
+		[Test]
+		public void Contains14()
+		{
+			var ps = Parent1.OrderBy(p => p.ParentID).Take(2).ToArray();
+
+			ForEachProvider(db => Array.ForEach(ps, p => TestContains(db, p)));
+		}
+
 		static void GetData(ITestDataContext db, IEnumerable<int?> d)
 		{
 			var r1 = db.GrandChild
