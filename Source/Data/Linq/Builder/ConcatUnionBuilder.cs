@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			sequence1.SqlQuery.Unions.Add(union);
 
-			return new UnionContext(sequence1, sequence2);
+			return new UnionContext(sequence1, sequence2, methodCall);
 		}
 
 		protected override SequenceConvertInfo Convert(
@@ -34,14 +34,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 		sealed class UnionContext : SubQueryContext
 		{
-			public UnionContext(IBuildContext sequence1, IBuildContext sequence2)
+			public UnionContext(IBuildContext sequence1, IBuildContext sequence2, MethodCallExpression methodCall)
 				: base(sequence1)
 			{
 				_union = sequence2;
+				_methodCall = methodCall;
 			}
 
-			readonly IBuildContext _union;
-			private  bool          _checkUnion;
+			readonly IBuildContext        _union;
+			readonly MethodCallExpression _methodCall;
+			private  bool                 _checkUnion;
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
@@ -60,50 +62,73 @@ namespace BLToolkit.Data.Linq.Builder
 				query.SetQuery(mapper.Compile());
 			}
 
+			ParameterExpression _unionParameter;
+
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				/*
-				if (SubQuery.IsExpression(expression, level, RequestFor.Object) ||
-					Union.   IsExpression(expression, level, RequestFor.Object) )
+				if (expression == null)
 				{
-					var sidx   = SubQuery.ConvertToIndex(expression, level, ConvertFlags.All);
-					var uidx   = Union.   ConvertToIndex(expression, level, ConvertFlags.All);
-					var lambda = (LambdaExpression)Expression;
-					var type   = lambda.Body.Type;
-					var parm   = Expression.Parameter(type, "p");
-
-					var nctor = (NewExpression)Expression.Find(e =>
+					if (SubQuery.IsExpression(expression, level, RequestFor.Object) ||
+						_union.  IsExpression(expression, level, RequestFor.Object) )
 					{
-						if (e.NodeType == ExpressionType.New && e.Type == type)
+						if (!SubQuery.IsExpression(expression, level, RequestFor.Table) ||
+							!_union.  IsExpression(expression, level, RequestFor.Table))
 						{
-							var ne = (NewExpression)e;
-							return ne.Arguments != null && ne.Arguments.Count > 0;
-						}
-
-						return false;
-					});
-
-					var expr = nctor != null ?
-						Expression.New(
-							nctor.Constructor,
-							nctor.Members.Select(m => Expression.PropertyOrField(parm, m.Name)),
-							nctor.Members) as Expression:
-						Expression.MemberInit(
-							Expression.New(type),
-							sidx.Union(uidx)
-								.Select(i => i.Member.Name)
-								.Distinct()
-								.Select(n =>
+							var sidx   = SubQuery.ConvertToIndex(expression, level, ConvertFlags.All);
+							var uidx   = _union.  ConvertToIndex(expression, level, ConvertFlags.All);
+							var type   = _methodCall.Method.GetGenericArguments()[0];
+							var nctor  = (NewExpression)Expression.Find(e =>
+							{
+								if (e.NodeType == ExpressionType.New && e.Type == type)
 								{
-									var m = Expression.PropertyOrField(parm, n);
-									return Expression.Bind(m.Member, m);
-								}));
+									var ne = (NewExpression)e;
+									return ne.Arguments != null && ne.Arguments.Count > 0;
+								}
 
-					return Builder.BuildExpression(this, expr);
+								return false;
+							});
+
+							_unionParameter = Expression.Parameter(type, "t");
+
+							var expr = nctor != null ?
+								Expression.New(
+									nctor.Constructor,
+									nctor.Members.Select(m => Expression.PropertyOrField(_unionParameter, m.Name)),
+									nctor.Members) as Expression:
+								Expression.MemberInit(
+									Expression.New(type),
+									sidx.Union(uidx)
+										.Select(i => i.Member.Name)
+										.Distinct()
+										.Select(n =>
+										{
+											var m = Expression.PropertyOrField(_unionParameter, n);
+											return Expression.Bind(m.Member, m);
+										}));
+
+							var ex = Builder.BuildExpression(this, expr);
+
+							_unionParameter = null;
+
+							return ex;
+						}
+					}
 				}
-				*/
+				else
+				{
+					if (_unionParameter != null && level == 0)
+						level = 1;
+				}
 
 				return base.BuildExpression(expression, level);
+			}
+
+			public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+			{
+				if (testFlag == RequestFor.Root && expression == _unionParameter)
+					return true;
+
+				return base.IsExpression(expression, level, testFlag);
 			}
 
 			protected override int GetIndex(SqlQuery.Column column)

@@ -777,7 +777,7 @@ namespace Data.Linq
 		public void Union52()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Access, ProviderName.Informix },
+				//new[] { ProviderName.Access, ProviderName.Informix },
 				db => AreEqual(
 					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
 					(from p2 in    Parent select p2)),
@@ -789,12 +789,38 @@ namespace Data.Linq
 		public void Union53()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Access, ProviderName.Informix },
+				//new[] { ProviderName.Access, ProviderName.Informix },
 				db => AreEqual(
 					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
 					(from p2 in    Parent select new Parent { Value1   = p2.Value1   })),
 					(from p1 in db.Parent select new Parent { ParentID = p1.ParentID }).Union(
 					(from p2 in db.Parent select new Parent { Value1   = p2.Value1   }))));
+		}
+
+		[Test]
+		public void Union54()
+		{
+			ForEachProvider(
+				//new[] { ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select new { ParentID = p1.ParentID,    p = p1,           ch = (Child)null }).Union(
+					(from p2 in    Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() })),
+					(from p1 in db.Parent select new { ParentID = p1.ParentID,    p = p1,           ch = (Child)null }).Union(
+					(from p2 in db.Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() }))));
+		}
+
+		[Test]
+		public void Union541()
+		{
+			ForEachProvider(
+				//new[] { ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select new { ParentID = p1.ParentID,    p = p1,           ch = (Child)null }).Union(
+					(from p2 in    Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() }))
+					.Select(p => new { p.ParentID, p.p, p.ch }),
+					(from p1 in db.Parent select new { ParentID = p1.ParentID,    p = p1,           ch = (Child)null }).Union(
+					(from p2 in db.Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() }))
+					.Select(p => new { p.ParentID, p.p, p.ch })));
 		}
 	}
 }

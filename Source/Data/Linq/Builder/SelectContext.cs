@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -130,7 +131,16 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					case ExpressionType.MemberAccess :
 						{
-							var memberExpression = Members[((MemberExpression)levelExpression).Member];
+							Expression memberExpression;
+
+							var member = ((MemberExpression)levelExpression).Member;
+							
+							if (!Members.TryGetValue(member, out memberExpression))
+							{
+								if (levelExpression == expression && TypeHelper.IsSameOrParent(member.DeclaringType, Body.Type))
+									return Expression.Constant(TypeHelper.GetDefaultValue(expression.Type), expression.Type);
+								throw new InvalidOperationException();
+							}
 
 							if (levelExpression == expression)
 							{

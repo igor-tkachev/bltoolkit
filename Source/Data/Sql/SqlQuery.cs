@@ -3240,7 +3240,7 @@ namespace BLToolkit.Data.Sql
 
 				var union = (SqlQuery)table.Source;
 
-				if (!union.HasUnion)
+				if (!union.HasUnion || sql.Select.Columns.Count != union.Select.Columns.Count)
 					return;
 
 				exprs.Add(union, sql);
