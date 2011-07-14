@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class SetTest : TestBase
 	{

@@ -110,7 +110,7 @@ namespace Data.Linq
 				select children2.Sum(c => c.ChildID)));
 		}
 
-		[Test]
+		//[Test]
 		public void Where4()
 		{
 			ForEachProvider(db => AreEqual(
@@ -122,7 +122,7 @@ namespace Data.Linq
 					.Where (t => t.children1.Any())));
 		}
 
-		[Test]
+		//[Test]
 		public void Where5()
 		{
 			ForEachProvider(db => AreEqual(
@@ -134,7 +134,7 @@ namespace Data.Linq
 					.Where (t => t.children1.Any())));
 		}
 
-		[Test]
+		//[Test]
 		public void Where6()
 		{
 			ForEachProvider(db => AreEqual(
@@ -184,7 +184,7 @@ namespace Data.Linq
 					.Any()));
 		}
 
-		[Test]
+		//[Test]
 		public void Any4()
 		{
 			ForEachProvider(db => Assert.AreEqual(
