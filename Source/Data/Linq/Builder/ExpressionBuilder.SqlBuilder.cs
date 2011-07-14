@@ -23,8 +23,8 @@ namespace BLToolkit.Data.Linq.Builder
 			var makeHaving = false;
 			var prevParent = sequence.Parent;
 
-			var  ctx  = new ExpressionContext(parent, sequence, condition);
-			var  expr = ConvertExpression(condition.Body.Unwrap());
+			var ctx  = new ExpressionContext(parent, sequence, condition);
+			var expr = ConvertExpression(condition.Body.Unwrap());
 
 			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
 			{

@@ -113,7 +113,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			new QueryVisitor().Visit(sqlQuery.Select, element =>
 			{
 				if (element.ElementType == QueryElementType.SqlParameter)
+				{
 					((SqlParameter)element).IsQueryParameter = false;
+					sqlQuery.ParameterDependent = true;
+				}
 			});
 
 			switch (sqlQuery.QueryType)
