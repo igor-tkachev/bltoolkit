@@ -161,6 +161,7 @@
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\OrderByBuilder.cs" />
     <Compile Include="Data\Linq\Builder\PassThroughBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\PassThroughContext.cs" />
     <Compile Include="Data\Linq\Builder\RequestFor.cs" />
     <Compile Include="Data\Linq\Builder\ScalarSelectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\SelectBuilder.cs" />

@@ -165,12 +165,15 @@ namespace BLToolkit.Data.Linq.Builder
 						var expr = nctor != null ?
 							Expression.New(
 								nctor.Constructor,
-								nctor.Members.Select(m => Expression.PropertyOrField(_unionParameter, m.Name)),
+								nctor.Members
+									.Select(m => Expression.PropertyOrField(_unionParameter, m.Name))
+									.Cast<Expression>(),
 								nctor.Members) as Expression:
 							Expression.MemberInit(
 								Expression.New(type),
-								_members.Select(
-									m => Expression.Bind(m.Value.MemberExpression.Member, m.Value.MemberExpression)));
+								_members
+									.Select(m => Expression.Bind(m.Value.MemberExpression.Member, m.Value.MemberExpression))
+									.Cast<MemberBinding>());
 
 						var ex = Builder.BuildExpression(this, expr);
 
