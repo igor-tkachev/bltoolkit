@@ -754,24 +754,39 @@ namespace BLToolkit.Data.Linq
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
 		}
 
-		/**/ public /**/ static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
+		static object ConvertNullable<TT>(TT value, TT defaultValue)
+			where TT : struct
+		{
+			return value.Equals(defaultValue) ? null : (object)value;
+		}
+
+		static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
 		{
 			var exprParam = Expression.Parameter(typeof(Expression), "expr");
-			var mapper    = Expression.Lambda<Func<Expression,object[],object>>(
+			var getter    = (Expression)Expression.PropertyOrField(
 				Expression.Convert(
-					Expression.PropertyOrField(
-						Expression.Convert(
-							Expression.Property(
-								Expression.Convert(exprParam, typeof(ConstantExpression)),
-								ReflectionHelper.Constant.Value),
-							typeof(T)),
-						field.Name),
-					typeof(object)),
-				new []
-					{
-						exprParam,
-						Expression.Parameter(typeof(object[]), "ps")
-					});
+					Expression.Property(
+						Expression.Convert(exprParam, typeof(ConstantExpression)),
+						ReflectionHelper.Constant.Value),
+					typeof(T)),
+				field.Name);
+
+			var mm = field.MemberMapper;
+
+			if (!mm.Type.IsClass && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
+			{
+				var method = ReflectionHelper.Expressor<int>.MethodExpressor(_ => ConvertNullable(0, 0))
+					.GetGenericMethodDefinition()
+					.MakeGenericMethod(mm.Type);
+
+				getter = Expression.Call(null, method, getter, Expression.Constant(mm.MapMemberInfo.NullValue));
+			}
+			else
+				getter = Expression.Convert(getter, typeof(object));
+
+			var mapper    = Expression.Lambda<Func<Expression,object[],object>>(
+				getter,
+				new [] { exprParam, Expression.Parameter(typeof(object[]), "ps") });
 
 			var param = new ParameterAccessor
 			{

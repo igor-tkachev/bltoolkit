@@ -4,7 +4,7 @@ using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
-
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 using Data.Linq;
@@ -977,54 +977,26 @@ namespace Update
 			});
 		}
 
-		private class  NullableFieldTestObject
+		[TableName("Parent")]
+		public class  NullableFieldTestObject
 		{
-			public int? NullabeInt;
-			[BLToolkit.Mapping.Nullable] public int IntAsNullable;
+			public int ParentID;
+			[BLToolkit.Mapping.Nullable] public int Value1;
 		}
 
 		[Test]
 		public void NullableFieldTest()
 		{
-			/*
-			 * The bug is: [Nullable] attribute is ignored for Query<T>.InsertWithIdentity method
-			 * sample:
--- DECLARE @NullabeInt DBNull
--- DECLARE @IntAsNullable Int32
-
--- SET @NullabeInt = 
--- SET @IntAsNullable = 0
-
-INSERT INTO [NullableFieldTestObject] 
-(
-    [NullabeInt],
-    [IntAsNullable]
-)
-VALUES
-(
-    @NullabeInt,
-    @IntAsNullable
-)
-			 */
-
-			using (var db = new DbManager())
+			ForEachProvider(db =>
 			{
-				var o = new NullableFieldTestObject();
-				var t = new BLToolkit.Data.Sql.SqlTable<NullableFieldTestObject>(db.MappingSchema);
+				db.Parent.Delete(p => p.ParentID == 1100);
 
-				//db.InsertWithIdentity(o);
+				db.Insert(new NullableFieldTestObject { ParentID = 1100 });
 
-				foreach (var sqlField in t.Fields)
-				{
-					// Made public to make oppotunity to write the test
-					var pa = Query<NullableFieldTestObject>.GetParameter<int>(db, sqlField.Value);
+				var parent = db.Parent.Single(p => p.ParentID == 1100);
 
-					//Query<T>.SetParameters(...)
-					Assert.IsNull(pa.Accessor(System.Linq.Expressions.Expression.Constant(o), new object[] { }), sqlField.Value.Name);
-
-				}
-			}
-
+				Assert.IsNull(parent.Value1);
+			});
 		}
 	}
 }
