@@ -131,22 +131,10 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					case ExpressionType.MemberAccess :
 						{
-							Expression memberExpression;
-
-							var member = ((MemberExpression)levelExpression).Member;
-							
-							if (!Members.TryGetValue(member, out memberExpression))
-							{
-								if (levelExpression == expression && TypeHelper.IsSameOrParent(member.DeclaringType, Body.Type))
-								{
-									memberExpression = Expression.Constant(
-										TypeHelper.GetDefaultValue(levelExpression.Type), levelExpression.Type);
-
-									Members.Add(member, memberExpression);
-								}
-								else
-									throw new InvalidOperationException();
-							}
+							var memberExpression = GetMemberExpression(
+								((MemberExpression)levelExpression).Member,
+								levelExpression == expression,
+								levelExpression.Type);
 
 							if (levelExpression == expression)
 							{
@@ -324,7 +312,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 											if (!_sql.TryGetValue(member, out sql))
 											{
-												sql = ConvertExpressions(Members[member], flags);
+												var memberExpression = GetMemberExpression(
+													member, levelExpression == expression, levelExpression.Type);
+
+												sql = ConvertExpressions(memberExpression, flags);
 
 												if (sql.Length == 1 && flags != ConvertFlags.Key)
 													sql[0].Member = member;
@@ -1030,6 +1021,26 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return expression;
+		}
+
+		Expression GetMemberExpression(MemberInfo member, bool add, Type type)
+		{
+			Expression memberExpression;
+
+			if (!Members.TryGetValue(member, out memberExpression))
+			{
+				if (add && TypeHelper.IsSameOrParent(member.DeclaringType, Body.Type))
+				{
+					memberExpression = Expression.Constant(
+						TypeHelper.GetDefaultValue(type), type);
+
+					Members.Add(member, memberExpression);
+				}
+				else
+					throw new InvalidOperationException();
+			}
+
+			return memberExpression;
 		}
 
 		#endregion

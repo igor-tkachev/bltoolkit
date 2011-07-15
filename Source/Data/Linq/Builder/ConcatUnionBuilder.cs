@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -10,6 +12,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 	class ConcatUnionBuilder : MethodCallBuilder
 	{
+		#region Builder
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.Arguments.Count == 2 && methodCall.IsQueryable("Concat", "Union");
@@ -32,28 +36,96 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
+		#endregion
+
+		#region Context
+
 		sealed class UnionContext : SubQueryContext
 		{
 			public UnionContext(IBuildContext sequence1, IBuildContext sequence2, MethodCallExpression methodCall)
 				: base(sequence1)
 			{
-				_union      = sequence2;
 				_methodCall = methodCall;
 
 				_isObject =
 					sequence1.IsExpression(null, 0, RequestFor.Object) ||
 					sequence2.IsExpression(null, 0, RequestFor.Object);
 
-				_isTable = _isObject &&
-					sequence1.IsExpression(null, 0, RequestFor.Table) &&
-					sequence2.IsExpression(null, 0, RequestFor.Table);
+				if (_isObject)
+				{
+					var type = _methodCall.Method.GetGenericArguments()[0];
+					_unionParameter = Expression.Parameter(type, "t");
+				}
+
+				Init(sequence1, sequence2);
 			}
 
-			readonly bool                 _isObject;
-			readonly bool                 _isTable;
-			readonly IBuildContext        _union;
-			readonly MethodCallExpression _methodCall;
-			private  bool                 _checkUnion;
+			readonly bool                          _isObject;
+			readonly MethodCallExpression          _methodCall;
+			readonly ParameterExpression           _unionParameter;
+			readonly Dictionary<MemberInfo,Member> _members = new Dictionary<MemberInfo,Member>();
+
+			class Member
+			{
+				public SqlInfo          SequenceInfo;
+				public SqlInfo          SqlQueryInfo;
+				public MemberExpression MemberExpression;
+			}
+
+			void Init(IBuildContext sequence1, IBuildContext sequence2)
+			{
+				var idx1 = sequence1.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
+
+				if (_isObject)
+				{
+					foreach (var info in idx1)
+					{
+						if (info.Member == null)
+							throw new InvalidOperationException();
+
+						CheckAndAddMember(sequence1, sequence2, info);
+					}
+
+					var idx2 = sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
+
+					if (idx1.Count != idx2.Count)
+					{
+						for (var i = 0; i < idx2.Count; i++)
+						{
+							if (i < idx1.Count)
+							{
+								if (idx1[i].Index != idx2[i].Index)
+									throw new InvalidOperationException();
+							}
+							else
+							{
+								CheckAndAddMember(sequence2, sequence1, idx2[i]);
+							}
+						}
+					}
+				}
+				else
+					sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
+			}
+
+			void CheckAndAddMember(IBuildContext sequence1, IBuildContext sequence2, SqlInfo info)
+			{
+				var member = new Member
+				{
+					SequenceInfo     = info,
+					MemberExpression = Expression.PropertyOrField(_unionParameter, info.Member.Name)
+				};
+
+				if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object))
+					throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
+
+				var idx = sequence2.ConvertToIndex(member.MemberExpression, 1, ConvertFlags.Field);
+
+				if (idx[0].Index != member.SequenceInfo.Index)
+					throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
+
+				_members.Add(member.MemberExpression.Member, member);
+			}
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
@@ -72,62 +144,51 @@ namespace BLToolkit.Data.Linq.Builder
 				query.SetQuery(mapper.Compile());
 			}
 
-			ParameterExpression _unionParameter;
-
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				if (expression == null)
+				if (_isObject)
 				{
-					if (SubQuery.IsExpression(expression, level, RequestFor.Object) ||
-						_union.  IsExpression(expression, level, RequestFor.Object) )
+					if (expression == null)
 					{
-						if (!SubQuery.IsExpression(expression, level, RequestFor.Table) ||
-							!_union.  IsExpression(expression, level, RequestFor.Table))
+						var type   = _methodCall.Method.GetGenericArguments()[0];
+						var nctor  = (NewExpression)Expression.Find(e =>
 						{
-							var sidx   = SubQuery.ConvertToIndex(expression, level, ConvertFlags.All);
-							var uidx   = _union.  ConvertToIndex(expression, level, ConvertFlags.All);
-							var type   = _methodCall.Method.GetGenericArguments()[0];
-							var nctor  = (NewExpression)Expression.Find(e =>
+							if (e.NodeType == ExpressionType.New && e.Type == type)
 							{
-								if (e.NodeType == ExpressionType.New && e.Type == type)
-								{
-									var ne = (NewExpression)e;
-									return ne.Arguments != null && ne.Arguments.Count > 0;
-								}
+								var ne = (NewExpression)e;
+								return ne.Arguments != null && ne.Arguments.Count > 0;
+							}
 
-								return false;
-							});
+							return false;
+						});
 
-							_unionParameter = Expression.Parameter(type, "t");
+						var expr = nctor != null ?
+							Expression.New(
+								nctor.Constructor,
+								nctor.Members.Select(m => Expression.PropertyOrField(_unionParameter, m.Name)),
+								nctor.Members) as Expression:
+							Expression.MemberInit(
+								Expression.New(type),
+								_members.Select(
+									m => Expression.Bind(m.Value.MemberExpression.Member, m.Value.MemberExpression)));
 
-							var expr = nctor != null ?
-								Expression.New(
-									nctor.Constructor,
-									nctor.Members.Select(m => Expression.PropertyOrField(_unionParameter, m.Name)),
-									nctor.Members) as Expression:
-								Expression.MemberInit(
-									Expression.New(type),
-									sidx.Union(uidx)
-										.Select(i => i.Member.Name)
-										.Distinct()
-										.Select(n =>
-										{
-											var m = Expression.PropertyOrField(_unionParameter, n);
-											return Expression.Bind(m.Member, m);
-										}));
+						var ex = Builder.BuildExpression(this, expr);
 
-							var ex = Builder.BuildExpression(this, expr);
+						return ex;
+					}
 
-							_unionParameter = null;
+					if (level == 0 || level == 1)
+					{
+						var levelExpression = expression.GetLevelExpression(1);
 
-							return ex;
+						if (expression == levelExpression)
+						{
+							var idx = ConvertToIndex(expression, level, ConvertFlags.Field);
+							return Builder.BuildSql(expression.Type, idx[0].Index);
 						}
 					}
-				}
-				else
-				{
-					if (_unionParameter != null && level == 0)
-						level = 1;
+
+					throw new InvalidOperationException();
 				}
 
 				return base.BuildExpression(expression, level);
@@ -143,133 +204,74 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
+				if (_isObject)
+				{
+					return ConvertToSql(expression, level, flags)
+						.Select(idx =>
+						{
+							if (idx.Index < 0)
+								idx.Index = SqlQuery.Select.Add(idx.Sql);
+							return idx;
+						})
+						.ToArray();
+				}
+
 				return base.ConvertToIndex(expression, level, flags);
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				return base.ConvertToSql(expression, level, flags);
-			}
-
-			protected override int GetIndex(SqlQuery.Column column)
-			{
-				int idx;
-
-				if (!ColumnIndexes.TryGetValue(column, out idx))
+				if (_isObject)
 				{
-					if (!_checkUnion)
+					switch (flags)
 					{
-						_checkUnion = true;
+						case ConvertFlags.All   :
+						case ConvertFlags.Key   :
 
-						var subSql   = SubQuery.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
-						var unionSql = _union.  ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
-						var sub      = SubQuery.SqlQuery.Select.Columns;
-						var union    = _union.  SqlQuery.Select.Columns;
-
-						for (var i = 0; i < sub.Count; i++)
-						{
-							if (i >= subSql.Count || subSql[i].Index != i)
+							if (expression == null)
 							{
-								if (i < subSql.Count && subSql[i].Index < i)
-									throw new InvalidOperationException();
-								subSql.Insert(i, new SqlInfo { Index = i, Sql = sub[i].Expression });
+								return _members.Values
+									.Select(m => ConvertToSql(m.MemberExpression, 0, ConvertFlags.Field)[0])
+									.ToArray();
 							}
-						}
 
-						for (var i = 0; i < union.Count; i++)
-						{
-							if (i >= unionSql.Count || unionSql[i].Index != i)
+							break;
+
+						case ConvertFlags.Field :
+
+							if (expression != null && (level == 0 || level == 1) && expression.NodeType == ExpressionType.MemberAccess)
 							{
-								if (i < unionSql.Count && unionSql[i].Index < i)
-									throw new InvalidOperationException();
-								unionSql.Insert(i, new SqlInfo { Index = i, Sql = union[i].Expression });
-							}
-						}
+								var levelExpression = expression.GetLevelExpression(1);
 
-						var reorder = false;
-
-						for (var i = 0; i < subSql.Count && i < unionSql.Count; i++)
-						{
-							if (subSql[i].Member != unionSql[i].Member)
-							{
-								reorder = true;
-
-								var sm = subSql[i].Member;
-
-								if (sm != null)
+								if (expression == levelExpression)
 								{
-									var um = unionSql.Select((s,n) => new { s, n }).Where(_ => _.s.Member == sm).FirstOrDefault();
+									var ma     = (MemberExpression)expression;
+									var member = _members[ma.Member];
 
-									if (um != null)
+									if (member.SqlQueryInfo == null)
 									{
-										unionSql.RemoveAt(um.n);
-										unionSql.Insert(i, um.s);
+										member.SqlQueryInfo = new SqlInfo
+										{
+											Sql    = SubQuery.SqlQuery.Select.Columns[member.SequenceInfo.Index],
+											Query  = SqlQuery,
+											Member = member.MemberExpression.Member,
+										};
 									}
-									else
-									{
-										if (unionSql[i].Member != null)
-											unionSql.Insert(i, new SqlInfo());
-									}
-								}
-								else
-								{
-									if (unionSql[i].Member != null)
-										unionSql.Insert(i, new SqlInfo());
+
+									return new[] { member.SqlQueryInfo };
 								}
 							}
-						}
 
-						if (reorder)
-						{
-							var cols = union.ToList();
-
-							union.Clear();
-
-							foreach (var info in unionSql)
-							{
-								if (info.Index < 0)
-									union.Add(new SqlQuery.Column(_union.SqlQuery, new SqlValue(null)));
-								else
-									union.Add(cols[info.Index]);
-							}
-						}
-
-						while (sub.Count < union.Count)
-						{
-							var type = (Type)null;//union[sub.Count].SystemType;
-
-							var func = type == null ?
-								new SqlValue(null) :
-								Builder.Convert(
-								this,
-								new SqlFunction(type, "Convert", SqlDataType.GetDataType(type), new SqlValue(null)));
-
-							sub.  Add(new SqlQuery.Column(SubQuery.SqlQuery, func));
-						}
-
-						while (union.Count < sub.Count)
-						{
-							var type = (Type)null;//sub[union.Count].SystemType;
-
-							var func = type == null ?
-								new SqlValue(null) :
-								Builder.Convert(
-								this,
-								new SqlFunction(type, "Convert", SqlDataType.GetDataType(type), new SqlValue(null)));
-
-							union.Add(new SqlQuery.Column(_union.   SqlQuery, func));
-						}
+							break;
 					}
 
-					idx = SqlQuery.Select.Add(column);
-					ColumnIndexes.Add(column, idx);
-
-					while (SubQuery.SqlQuery.Select.Columns.Count < _union.SqlQuery.Select.Columns.Count)
-						_union.SqlQuery.Select.Columns.Add(new SqlQuery.Column(_union.SqlQuery, new SqlValue(null)));
+					throw new InvalidOperationException();
 				}
 
-				return idx;
+				return base.ConvertToSql(expression, level, flags);
 			}
 		}
+
+		#endregion
 	}
 }

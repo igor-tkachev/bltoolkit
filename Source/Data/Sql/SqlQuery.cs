@@ -3243,6 +3243,15 @@ namespace BLToolkit.Data.Sql
 				if (!union.HasUnion)
 					return;
 
+				for (var i = 0; i < sql.Select.Columns.Count; i++)
+				{
+					var scol = sql.  Select.Columns[i];
+					var ucol = union.Select.Columns[i];
+
+					if (scol.Expression != ucol)
+						return;
+				}
+
 				exprs.Add(union, sql);
 
 				for (var i = 0; i < sql.Select.Columns.Count; i++)
