@@ -52,7 +52,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>MSSqlDataModel.tt</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="PostgreSQLDataModel.generated.cs">
       <AutoGen>True</AutoGen>

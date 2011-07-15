@@ -2,14 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
+	using Reflection;
 
 	class SelectBuilder : MethodCallBuilder
 	{
@@ -39,11 +38,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var body = selector.Body.Unwrap();
 
-			// .Select(p => p)
-			//
-			//if (body == selector.Parameters[0])
-			//	return sequence;
-
 			switch (body.NodeType)
 			{
 				case ExpressionType.Parameter : break;
@@ -65,10 +59,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		static IBuildContext CheckSubQueryForSelect(IBuildContext context)
 		{
-			if (/*_parsingMethod[0] != ParsingMethod.OrderBy &&*/ context.SqlQuery.Select.IsDistinct)
-				return new SubQueryContext(context);
-
-			return context;
+			return context.SqlQuery.Select.IsDistinct ? new SubQueryContext(context) : context;
 		}
 
 		#endregion
@@ -206,9 +197,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 					if (info != null)
 					{
-						//if (param.Type != info.Parameter.Type)
-						//	param = Expression.Parameter(info.Parameter.Type, param.Name);
-
 						if (info.ExpressionsToReplace != null)
 						{
 							foreach (var path in info.ExpressionsToReplace)

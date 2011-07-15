@@ -426,16 +426,16 @@ namespace BLToolkit.Data.Linq.Builder
 			static readonly MethodInfo _mapperMethod1 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(      null, null));
 			static readonly MethodInfo _mapperMethod2 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(null, null, null));
 
-			Expression BuildTableExpression(Type objectType, int[] index)
+			static Expression BuildTableExpression(ExpressionBuilder builder, Type objectType, int[] index)
 			{
 				var data = new MappingData
 				{
-					MappingSchema = Builder.MappingSchema,
-					ObjectMapper  = Builder.MappingSchema.GetObjectMapper(objectType),
+					MappingSchema = builder.MappingSchema,
+					ObjectMapper  = builder.MappingSchema.GetObjectMapper(objectType),
 					Index         = index
 				};
 
-				if (Builder.DataContextInfo.DataContext == null ||
+				if (builder.DataContextInfo.DataContext == null ||
 					TypeHelper.IsSameOrParent(typeof(ISupportMapping), objectType))
 				{
 					return Expression.Convert(
@@ -477,7 +477,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var index = info.Select(idx => ConvertToParentIndex(idx.Index, null)).ToArray();
 
 				if (InheritanceMapping.Count == 0)
-					return BuildTableExpression(ObjectType, index);
+					return BuildTableExpression(Builder, ObjectType, index);
 
 				Expression expr;
 
@@ -486,7 +486,7 @@ namespace BLToolkit.Data.Linq.Builder
 				if (defaultMapping != null)
 				{
 					expr = Expression.Convert(
-						BuildTableExpression(defaultMapping.Type, BuildIndex(index, defaultMapping.Type)),
+						BuildTableExpression(Builder, defaultMapping.Type, BuildIndex(index, defaultMapping.Type)),
 						ObjectType);
 				}
 				else
@@ -547,7 +547,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					expr = Expression.Condition(
 						testExpr,
-						Expression.Convert(BuildTableExpression(mapping.m.Type, BuildIndex(index, mapping.m.Type)), ObjectType),
+						Expression.Convert(BuildTableExpression(Builder, mapping.m.Type, BuildIndex(index, mapping.m.Type)), ObjectType),
 						expr);
 				}
 

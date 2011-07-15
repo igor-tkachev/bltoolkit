@@ -3702,7 +3702,7 @@ namespace BLToolkit.Mapping
 
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy)
 		{
-			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy}.GetMapper();
+			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy }.GetMapper();
 		}
 
 		#endregion

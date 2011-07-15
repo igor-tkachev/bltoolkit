@@ -6,11 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using BLToolkit.Reflection;
+
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Sql
 {
+	using Reflection;
+
 	using FJoin = SqlQuery.FromClause.Join;
 
 	[DebuggerDisplay("SQL = {SqlText}")]
@@ -3241,6 +3243,15 @@ namespace BLToolkit.Data.Sql
 				if (!union.HasUnion)
 					return;
 
+				for (var i = 0; i < sql.Select.Columns.Count; i++)
+				{
+					var scol = sql.  Select.Columns[i];
+					var ucol = union.Select.Columns[i];
+
+					if (scol.Expression != ucol)
+						return;
+				}
+
 				exprs.Add(union, sql);
 
 				for (var i = 0; i < sql.Select.Columns.Count; i++)
@@ -3253,6 +3264,9 @@ namespace BLToolkit.Data.Sql
 
 					exprs.Add(ucol, scol);
 				}
+
+				for (var i = sql.Select.Columns.Count; i < union.Select.Columns.Count; i++)
+					sql.Select.Expr(union.Select.Columns[i].Expression);
 
 				sql.From.Tables.Clear();
 				sql.From.Tables.AddRange(union.From.Tables);

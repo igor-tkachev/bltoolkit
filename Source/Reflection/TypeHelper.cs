@@ -1532,6 +1532,27 @@ namespace BLToolkit.Reflection
 			return false;
 		}
 
+		interface IGetDefaultValueHelper
+		{
+			object GetDefaultValue();
+		}
+
+		class GetDefaultValueHelper<T> : IGetDefaultValueHelper
+		{
+			public object GetDefaultValue()
+			{
+				return default(T);
+			}
+		}
+
+		public static object GetDefaultValue(Type type)
+		{
+			var dtype  = typeof(GetDefaultValueHelper<>).MakeGenericType(type);
+			var helper = (IGetDefaultValueHelper)Activator.CreateInstance(dtype);
+
+			return helper.GetDefaultValue();
+		}
+
 		#endregion
 	}
 }

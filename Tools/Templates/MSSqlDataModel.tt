@@ -11,6 +11,7 @@
 	//ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
 	//ConnectionString = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
 
+	BaseDataContextClass = "DataContext";
 	Namespace = "MSSQLDataModel";
 
 	LoadMetadata();

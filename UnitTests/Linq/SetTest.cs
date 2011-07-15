@@ -2,131 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Data.DataProvider;
+
 using BLToolkit.Data.Linq;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class SetTest : TestBase
 	{
-		[Test]
-		public void Concat1()
-		{
-			var expected =
-				(from p in Parent where p.ParentID == 1 select p).Concat(
-				(from p in Parent where p.ParentID == 2 select p));
-
-			ForEachProvider(db => AreEqual(expected, 
-				(from p in db.Parent where p.ParentID == 1 select p).Concat(
-				(from p in db.Parent where p.ParentID == 2 select p))));
-		}
-
-		[Test]
-		public void Concat2()
-		{
-			var expected =
-				(from p in Parent where p.ParentID == 1 select p).Concat(
-				(from p in Parent where p.ParentID == 2 select p)).Concat(
-				(from p in Parent where p.ParentID == 4 select p));
-
-			ForEachProvider(db => AreEqual(expected, 
-				(from p in db.Parent where p.ParentID == 1 select p).Concat(
-				(from p in db.Parent where p.ParentID == 2 select p)).Concat(
-				(from p in db.Parent where p.ParentID == 4 select p))));
-		}
-
-		[Test]
-		public void Concat3()
-		{
-			var expected =
-				(from p in Parent where p.ParentID == 1 select p).Concat(
-				(from p in Parent where p.ParentID == 2 select p).Concat(
-				(from p in Parent where p.ParentID == 4 select p)));
-
-			ForEachProvider(db => AreEqual(expected, 
-				(from p in db.Parent where p.ParentID == 1 select p).Concat(
-				(from p in db.Parent where p.ParentID == 2 select p).Concat(
-				(from p in db.Parent where p.ParentID == 4 select p)))));
-		}
-
-		[Test]
-		public void Concat4()
-		{
-			var expected =
-				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000 }).
-				Where(c => c.ChildID != 1032));
-
-			ForEachProvider(db => AreEqual(expected, 
-				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ParentID = c.ParentID, ChildID = c.ChildID + 1000 })).
-				Where(c => c.ChildID != 1032)));
-		}
-
-		[Test]
-		public void Concat401()
-		{
-			var expected =
-				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000, ParentID = c.ParentID }).
-				Where(c => c.ChildID != 1032));
-
-			ForEachProvider(db => AreEqual(expected, 
-				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000, ParentID = c.ParentID })).
-				Where(c => c.ChildID != 1032)));
-		}
-
-		[Test]
-		public void Concat5()
-		{
-			var expected =
-				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 }).
-				Where(c => c.ChildID != 1032));
-
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
-				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 })).
-				Where(c => c.ChildID != 1032)));
-		}
-
-		[Test]
-		public void Concat501()
-		{
-			var expected =
-				(from c in Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 }).
-				Where(c => c.ParentID == 1));
-
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
-				(from c in db.Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 })).
-				Where(c => c.ParentID == 1)));
-		}
-
-		[Test]
-		public void Concat6()
-		{
-			var expected =
-				Child.Where(c => c.GrandChildren.Count == 2).Concat(Child.Where(c => c.GrandChildren.Count() == 3));
-
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected, 
-				db.Child.Where(c => c.GrandChildren.Count == 2).Concat(db.Child.Where(c => c.GrandChildren.Count() == 3))));
-		}
-
-		[Test]
-		public void Concat7()
-		{
-			using (var db = new NorthwindDB())
-				AreEqual(
-					   Customer.Where(c => c.Orders.Count <= 1).Concat(   Customer.Where(c => c.Orders.Count > 1)),
-					db.Customer.Where(c => c.Orders.Count <= 1).Concat(db.Customer.Where(c => c.Orders.Count > 1)));
-		}
-
 		[Test]
 		public void Except1()
 		{
@@ -670,32 +557,6 @@ namespace Data.Linq
 				GetData(db, new List<int?> { 2 });
 				GetData(db, new List<int?> { 3 });
 			});
-		}
-
-		[Test]
-		public void Union1()
-		{
-			ForEachProvider(db => AreEqual(
-				(from g  in    GrandChild join ch in    Child  on g.ChildID   equals ch.ChildID select ch).Union(
-				(from ch in    Child      join p  in    Parent on ch.ParentID equals p.ParentID select ch)),
-				(from g  in db.GrandChild join ch in db.Child  on g.ChildID   equals ch.ChildID select ch).Union(
-				(from ch in db.Child      join p  in db.Parent on ch.ParentID equals p.ParentID select ch))));
-		}
-
-		[Test]
-		public void Union2()
-		{
-			ForEachProvider(db => AreEqual(
-				from r  in
-					(from g  in GrandChild join ch in Child  on g.ChildID   equals ch.ChildID select ch.ChildID).Union(
-					(from ch in Child      join p  in Parent on ch.ParentID equals p.ParentID select ch.ChildID))
-				join child in Child on r equals child.ChildID
-				select child,
-				from r in
-					(from g  in db.GrandChild join ch in db.Child  on g.ChildID   equals ch.ChildID select ch.ChildID).Union(
-					(from ch in db.Child      join p  in db.Parent on ch.ParentID equals p.ParentID select ch.ChildID))
-				join child in db.Child on r equals child.ChildID
-				select child));
 		}
 	}
 }

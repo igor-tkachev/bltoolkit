@@ -23,7 +23,7 @@ using BLToolkit.Validation;
 
 namespace MSSQLDataModel
 {
-	public partial class MSSqlDataModel : DbManager
+	public partial class MSSqlDataModel : DataContext
 	{
 		public Table<AlphabeticalListOfProduct>  AlphabeticalListOfProducts   { get { return this.GetTable<AlphabeticalListOfProduct>();  } }
 		public Table<Category>                   Categories                   { get { return this.GetTable<Category>();                   } }
