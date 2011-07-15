@@ -754,7 +754,7 @@ namespace BLToolkit.Data.Linq
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
 		}
 
-		static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
+		/**/ public /**/ static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
 		{
 			var exprParam = Expression.Parameter(typeof(Expression), "expr");
 			var mapper    = Expression.Lambda<Func<Expression,object[],object>>(

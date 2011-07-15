@@ -976,5 +976,55 @@ namespace Update
 				}
 			});
 		}
+
+		private class  NullableFieldTestObject
+		{
+			public int? NullabeInt;
+			[BLToolkit.Mapping.Nullable] public int IntAsNullable;
+		}
+
+		[Test]
+		public void NullableFieldTest()
+		{
+			/*
+			 * The bug is: [Nullable] attribute is ignored for Query<T>.InsertWithIdentity method
+			 * sample:
+-- DECLARE @NullabeInt DBNull
+-- DECLARE @IntAsNullable Int32
+
+-- SET @NullabeInt = 
+-- SET @IntAsNullable = 0
+
+INSERT INTO [NullableFieldTestObject] 
+(
+    [NullabeInt],
+    [IntAsNullable]
+)
+VALUES
+(
+    @NullabeInt,
+    @IntAsNullable
+)
+			 */
+
+			using (var db = new DbManager())
+			{
+				var o = new NullableFieldTestObject();
+				var t = new BLToolkit.Data.Sql.SqlTable<NullableFieldTestObject>(db.MappingSchema);
+
+				//db.InsertWithIdentity(o);
+
+				foreach (var sqlField in t.Fields)
+				{
+					// Made public to make oppotunity to write the test
+					var pa = Query<NullableFieldTestObject>.GetParameter<int>(db, sqlField.Value);
+
+					//Query<T>.SetParameters(...)
+					Assert.IsNull(pa.Accessor(System.Linq.Expressions.Expression.Constant(o), new object[] { }), sqlField.Value.Name);
+
+				}
+			}
+
+		}
 	}
 }
