@@ -3240,7 +3240,7 @@ namespace BLToolkit.Data.Sql
 
 				var union = (SqlQuery)table.Source;
 
-				if (!union.HasUnion || sql.Select.Columns.Count != union.Select.Columns.Count)
+				if (!union.HasUnion)
 					return;
 
 				exprs.Add(union, sql);
@@ -3255,6 +3255,9 @@ namespace BLToolkit.Data.Sql
 
 					exprs.Add(ucol, scol);
 				}
+
+				for (var i = sql.Select.Columns.Count; i < union.Select.Columns.Count; i++)
+					sql.Select.Expr(union.Select.Columns[i].Expression);
 
 				sql.From.Tables.Clear();
 				sql.From.Tables.AddRange(union.From.Tables);

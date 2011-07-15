@@ -138,8 +138,14 @@ namespace BLToolkit.Data.Linq.Builder
 							if (!Members.TryGetValue(member, out memberExpression))
 							{
 								if (levelExpression == expression && TypeHelper.IsSameOrParent(member.DeclaringType, Body.Type))
-									return Expression.Constant(TypeHelper.GetDefaultValue(expression.Type), expression.Type);
-								throw new InvalidOperationException();
+								{
+									memberExpression = Expression.Constant(
+										TypeHelper.GetDefaultValue(levelExpression.Type), levelExpression.Type);
+
+									Members.Add(member, memberExpression);
+								}
+								else
+									throw new InvalidOperationException();
 							}
 
 							if (levelExpression == expression)
@@ -796,10 +802,14 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#endregion
 
+		#region GetSubQuery
+
 		public ISqlExpression GetSubQuery(IBuildContext context)
 		{
 			return null;
 		}
+
+		#endregion
 
 		#region Helpers
 

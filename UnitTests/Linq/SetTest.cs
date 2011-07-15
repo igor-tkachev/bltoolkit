@@ -100,15 +100,14 @@ namespace Data.Linq
 		[Test]
 		public void Concat501()
 		{
-			var expected =
-				(from c in Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 }).
-				Where(c => c.ParentID == 1));
-
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
-				(from c in db.Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 })).
-				Where(c => c.ParentID == 1)));
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix },
+				db => AreEqual(
+					(from c in    Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
+					(from c in    Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 }).
+					Where(c => c.ParentID == 1)),
+					(from c in db.Child where c.ParentID == 1 select new Child { ParentID = c.ParentID }).Concat(
+					(from c in db.Child where c.ParentID == 3 select new Child { ChildID  = c.ChildID + 1000 })).
+					Where(c => c.ParentID == 1)));
 		}
 
 		[Test]
@@ -777,7 +776,7 @@ namespace Data.Linq
 		public void Union52()
 		{
 			ForEachProvider(
-				//new[] { ProviderName.Access, ProviderName.Informix },
+				new[] { ProviderName.Access, ProviderName.Informix },
 				db => AreEqual(
 					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
 					(from p2 in    Parent select p2)),
@@ -786,10 +785,24 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Union521()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in    Parent select p2))
+					.Select(p => p.Value1),
+					(from p1 in db.Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in db.Parent select p2))
+					.Select(p => p.Value1)));
+		}
+
+		[Test]
 		public void Union53()
 		{
 			ForEachProvider(
-				//new[] { ProviderName.Access, ProviderName.Informix },
+				new[] { ProviderName.Access, ProviderName.Informix },
 				db => AreEqual(
 					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
 					(from p2 in    Parent select new Parent { Value1   = p2.Value1   })),
@@ -797,7 +810,7 @@ namespace Data.Linq
 					(from p2 in db.Parent select new Parent { Value1   = p2.Value1   }))));
 		}
 
-		[Test]
+		//[Test]
 		public void Union54()
 		{
 			ForEachProvider(
@@ -809,7 +822,7 @@ namespace Data.Linq
 					(from p2 in db.Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() }))));
 		}
 
-		[Test]
+		//[Test]
 		public void Union541()
 		{
 			ForEachProvider(

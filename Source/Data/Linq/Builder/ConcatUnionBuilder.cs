@@ -37,10 +37,20 @@ namespace BLToolkit.Data.Linq.Builder
 			public UnionContext(IBuildContext sequence1, IBuildContext sequence2, MethodCallExpression methodCall)
 				: base(sequence1)
 			{
-				_union = sequence2;
+				_union      = sequence2;
 				_methodCall = methodCall;
+
+				_isObject =
+					sequence1.IsExpression(null, 0, RequestFor.Object) ||
+					sequence2.IsExpression(null, 0, RequestFor.Object);
+
+				_isTable = _isObject &&
+					sequence1.IsExpression(null, 0, RequestFor.Table) &&
+					sequence2.IsExpression(null, 0, RequestFor.Table);
 			}
 
+			readonly bool                 _isObject;
+			readonly bool                 _isTable;
 			readonly IBuildContext        _union;
 			readonly MethodCallExpression _methodCall;
 			private  bool                 _checkUnion;
@@ -129,6 +139,16 @@ namespace BLToolkit.Data.Linq.Builder
 					return true;
 
 				return base.IsExpression(expression, level, testFlag);
+			}
+
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			{
+				return base.ConvertToIndex(expression, level, flags);
+			}
+
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				return base.ConvertToSql(expression, level, flags);
 			}
 
 			protected override int GetIndex(SqlQuery.Column column)
