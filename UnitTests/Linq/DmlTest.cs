@@ -4,7 +4,7 @@ using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
-
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 using Data.Linq;
@@ -974,6 +974,28 @@ namespace Update
 
 					db.Types2.Delete(_ => _.ID > 1000);
 				}
+			});
+		}
+
+		[TableName("Parent")]
+		public class  NullableFieldTestObject
+		{
+			public int ParentID;
+			[BLToolkit.Mapping.Nullable] public int Value1;
+		}
+
+		[Test]
+		public void NullableFieldTest()
+		{
+			ForEachProvider(db =>
+			{
+				db.Parent.Delete(p => p.ParentID == 1100);
+
+				db.Insert(new NullableFieldTestObject { ParentID = 1100 });
+
+				var parent = db.Parent.Single(p => p.ParentID == 1100);
+
+				Assert.IsNull(parent.Value1);
 			});
 		}
 	}
