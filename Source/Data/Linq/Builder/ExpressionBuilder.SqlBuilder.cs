@@ -473,15 +473,16 @@ namespace BLToolkit.Data.Linq.Builder
 		Expression ConvertMethod(MethodCallExpression pi)
 		{
 			var l = ConvertMember(pi.Method);
+			return l == null ? null : ConvertMethod(pi, l);
+		}
 
-			if (l == null)
-				return null;
-
-			var ef    = l.Body.Unwrap();
-			var parms = new Dictionary<string,int>(l.Parameters.Count);
+		static Expression ConvertMethod(MethodCallExpression pi, LambdaExpression lambda)
+		{
+			var ef    = lambda.Body.Unwrap();
+			var parms = new Dictionary<string,int>(lambda.Parameters.Count);
 			var pn    = pi.Method.IsStatic ? 0 : -1;
 
-			foreach (var p in l.Parameters)
+			foreach (var p in lambda.Parameters)
 				parms.Add(p.Name, pn++);
 
 			var pie = ef.Convert(wpi =>
@@ -2470,7 +2471,7 @@ namespace BLToolkit.Data.Linq.Builder
 							.Select((m,i) => new { m, i })
 							.ToDictionary(_ => _.m.MemberInfo.Name, _ => _.i);
 
-						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member.Name]))
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic.ContainsKey(b.Member.Name) ? dic[b.Member.Name] : 1000000))
 						{
 							members.Add(binding.Member, binding.Expression);
 

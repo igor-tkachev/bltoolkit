@@ -207,6 +207,7 @@
     <Compile Include="Data\Linq\Builder\ConcatUnionBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />

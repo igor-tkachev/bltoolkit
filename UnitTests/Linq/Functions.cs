@@ -194,6 +194,27 @@ namespace Data.Linq
 				   Child.Sum(c => c.ParentID),
 				db.Child.Sum(c => c.ParentID)));
 		}
+
+		[MethodExpression("ChildCountExpression")]
+		public static int ChildCount(Parent parent)
+		{
+			throw new NotSupportedException();
+		}
+
+		static Expression ChildCountExpression()
+		{
+			return
+				(Expression<Func<Parent, int>>)
+				(p => p.Children.Where(c => c.ParentID > 2).Sum(c => c.ParentID * c.ChildID));
+		}
+
+		[Test]
+		public void Sum2()
+		{
+			ForEachProvider(db => AreEqual(
+				   Parent.Select(p => p.Children.Where(c => c.ParentID > 2).Sum(c => c.ParentID * c.ChildID)),
+				db.Parent.Select(p => ChildCount(p))));
+		}
 	}
 
 	public static class PersonExtension
