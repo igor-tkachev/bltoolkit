@@ -197,13 +197,11 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
-				/*
 				var dx = new TestServiceModelDataContext(ip);
 
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
 				yield return dx;
-				*/
 			}
 		}
 
