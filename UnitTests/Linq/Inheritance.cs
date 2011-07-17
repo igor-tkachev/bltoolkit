@@ -173,11 +173,30 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Cast()
+		public void Cast1()
 		{
 			ForEachProvider(db => AreEqual(
 				   ParentInheritance.OfType<ParentInheritance1>().Cast<ParentInheritanceBase>(),
 				db.ParentInheritance.OfType<ParentInheritance1>().Cast<ParentInheritanceBase>()));
+		}
+
+		class ParentEx : Parent
+		{
+			[MapIgnore]
+			protected bool Field1;
+
+			public static void Test(Inheritance inheritance)
+			{
+			inheritance.ForEachProvider(db => inheritance.AreEqual(
+				inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
+				         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
+			}
+		}
+
+		[Test]
+		public void Cast2()
+		{
+			ParentEx.Test(this);
 		}
 
 		[TableName("Person")]

@@ -74,7 +74,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (TypeHelper.IsNullableValueMember(ma.Member))
 								break;
 
-							if (ConvertMember(ma.Member) == null)
+							if (SqlProvider.ConvertMember(ma.Member) == null)
 							{
 								var ctx = GetContext(context, expr);
 
@@ -365,7 +365,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.MemberAccess:
 						{
 							var ma = (MemberExpression)e;
-							var l  = ConvertMember(ma.Member);
+							var l  = SqlProvider.ConvertMember(ma.Member);
 
 							if (l != null)
 							{
@@ -433,55 +433,19 @@ namespace BLToolkit.Data.Linq.Builder
 			});
 		}
 
-		LambdaExpression ConvertMember(MemberInfo mi)
-		{
-			var lambda = SqlProvider.ConvertMember(mi);
-
-			if (lambda == null)
-			{
-				var attrs = mi.GetCustomAttributes(typeof(MethodExpressionAttribute), true);
-
-				if (attrs.Length == 0)
-					return null;
-
-				MethodExpressionAttribute attr = null;
-
-				foreach (MethodExpressionAttribute a in attrs)
-				{
-					if (a.SqlProvider == SqlProvider.Name)
-					{
-						attr = a;
-						break;
-					}
-
-					if (a.SqlProvider == null)
-						attr = a;
-				}
-
-				if (attr != null)
-				{
-					var call = Expression.Lambda<Func<LambdaExpression>>(
-						Expression.Convert(Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty), typeof(LambdaExpression)));
-
-					lambda = call.Compile()();
-				}
-			}
-
-			return lambda;
-		}
-
 		Expression ConvertMethod(MethodCallExpression pi)
 		{
-			var l = ConvertMember(pi.Method);
+			var l = SqlProvider.ConvertMember(pi.Method);
+			return l == null ? null : ConvertMethod(pi, l);
+		}
 
-			if (l == null)
-				return null;
-
-			var ef    = l.Body.Unwrap();
-			var parms = new Dictionary<string,int>(l.Parameters.Count);
+		static Expression ConvertMethod(MethodCallExpression pi, LambdaExpression lambda)
+		{
+			var ef    = lambda.Body.Unwrap();
+			var parms = new Dictionary<string,int>(lambda.Parameters.Count);
 			var pn    = pi.Method.IsStatic ? 0 : -1;
 
-			foreach (var p in l.Parameters)
+			foreach (var p in lambda.Parameters)
 				parms.Add(p.Name, pn++);
 
 			var pie = ef.Convert(wpi =>
@@ -504,7 +468,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression ConvertNew(NewExpression pi)
 		{
-			var lambda = ConvertMember(pi.Constructor);
+			var lambda = SqlProvider.ConvertMember(pi.Constructor);
 
 			if (lambda != null)
 			{
@@ -885,7 +849,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberAccess:
 					{
 						var ex = (MemberExpression)expr;
-						var l  = ConvertMember(ex.Member);
+						var l  = SqlProvider.ConvertMember(ex.Member);
 
 						if (l != null)
 							return IsServerSideOnly(l.Body.Unwrap());
@@ -914,7 +878,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 						else
 						{
-							var l = ConvertMember(e.Method);
+							var l = SqlProvider.ConvertMember(e.Method);
 
 							if (l != null)
 								return l.Body.Unwrap().Find(IsServerSideOnly) != null;
@@ -2470,7 +2434,7 @@ namespace BLToolkit.Data.Linq.Builder
 							.Select((m,i) => new { m, i })
 							.ToDictionary(_ => _.m.MemberInfo.Name, _ => _.i);
 
-						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic[b.Member.Name]))
+						foreach (var binding in expr.Bindings.Cast<MemberAssignment>().OrderBy(b => dic.ContainsKey(b.Member.Name) ? dic[b.Member.Name] : 1000000))
 						{
 							members.Add(binding.Member, binding.Expression);
 

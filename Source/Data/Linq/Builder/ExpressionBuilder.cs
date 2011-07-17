@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Common;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -48,6 +49,7 @@ namespace BLToolkit.Data.Linq.Builder
 			new AllAnyBuilder        (),
 			new ConcatUnionBuilder   (),
 			new IntersectBuilder     (),
+			new CastBuilder          (),
 			new OfTypeBuilder        (),
 		};
 
@@ -230,103 +232,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#endregion
 
-		#region ConverLetSubqueries
-
-		static void LetExpressionWalker(Expression ex, Dictionary<MemberInfo,Expression> dic)
-		{
-			{
-				if (ex.NodeType == ExpressionType.Call)
-				{
-					var me = (MethodCallExpression)ex;
-			
-					LambdaInfo lambda = null;
-			
-					if (me.Method.Name == "Select" &&
-					    (me.IsQueryableMethod((_, l) => { lambda = l; return true; }) ||
-					     me.IsQueryableMethod(null, 2, _ => { }, l => lambda = l)))
-					{
-						lambda.Body.Visit(e =>
-						{
-							if (e.NodeType == ExpressionType.New)
-							{
-								var ne = (NewExpression)e;
-			
-								if (ne.Members == null || ne.Arguments.Count != ne.Members.Count)
-								{
-								}
-								else
-								{
-									var args = ne.Arguments.Zip(ne.Members, (a,m) => new { a, m }).ToList();
-			
-									var q =
-										from a in args
-										where
-											a.a.NodeType == ExpressionType.Call &&
-											a.a.Type != typeof(string) &&
-											!a.a.Type.IsArray &&
-											TypeHelper.GetGenericType(typeof(IEnumerable<>), a.a.Type) != null
-										select a;
-			
-									foreach (var item in q)
-										dic.Add(item.m, item.a);
-								}
-							}
-						});
-					}
-				}
-			}
-		}
-		
-		static Expression ConverLetSubqueries(Expression expression)
-		{
-			var result = expression;
-
-			do
-			{
-				expression = result;
-
-				// Find let subqueries.
-				//
-				var dic = new Dictionary<MemberInfo,Expression>();
-
-				expression.Visit(ex => LetExpressionWalker(ex, dic));
-
-				if (dic.Count == 0)
-					return expression;
-
-				result = expression.Convert(ex =>
-				{
-					switch (ex.NodeType)
-					{
-						case ExpressionType.MemberAccess:
-							{
-								var me     = (MemberExpression)ex;
-								var member = me.Member;
-
-								Expression arg;
-
-								if (dic.TryGetValue(member, out arg))
-									return arg;
-
-								if (member is PropertyInfo)
-									member = ((PropertyInfo)member).GetGetMethod();
-
-								if (dic.TryGetValue(member, out arg))
-									return arg;
-							}
-
-							break;
-					}
-
-					return ex;
-				});
-			} while (result != expression);
-
-			return expression;
-		}
-
-		#endregion
-
 		#region OptimizeExpression
 
 		private MethodInfo[] _enumerableMethods;
@@ -379,6 +284,19 @@ namespace BLToolkit.Data.Linq.Builder
 									return ConvertExpressionTree(ex);
 							}
 
+							var l = ConvertMethodExpression(me.Member);
+
+							if (l != null)
+							{
+								var body = l.Body.Unwrap();
+								var ex = body.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? me.Expression : wpi);
+
+								if (ex.Type != expr.Type)
+									ex = new ChangeTypeExpression(ex, expr.Type);
+
+								return OptimizeExpression(ex);
+							}
+
 							return ConvertSubquery(expr);
 						}
 
@@ -408,16 +326,24 @@ namespace BLToolkit.Data.Linq.Builder
 									case "ElementAtOrDefault" : return ConvertElementAt (call);
 								}
 							}
-							else if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
+							else
 							{
-								var attr = GetTableFunctionAttribute(call.Method);
+								var l = ConvertMethodExpression(call.Method);
 
-								if (attr == null)
+								if (l != null)
+									return OptimizeExpression(ConvertMethod(call, l));
+
+								if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
 								{
-									var ex = ConvertIQueriable(expr);
+									var attr = GetTableFunctionAttribute(call.Method);
 
-									if (ex != expr)
-										return ConvertExpressionTree(ex);
+									if (attr == null)
+									{
+										var ex = ConvertIQueriable(expr);
+
+										if (ex != expr)
+											return ConvertExpressionTree(ex);
+									}
 								}
 							}
 
@@ -439,6 +365,38 @@ namespace BLToolkit.Data.Linq.Builder
 
 				return expr;
 			});
+		}
+
+		LambdaExpression ConvertMethodExpression(MemberInfo mi)
+		{
+			var attrs = mi.GetCustomAttributes(typeof(MethodExpressionAttribute), true);
+
+			if (attrs.Length == 0)
+				return null;
+
+			MethodExpressionAttribute attr = null;
+
+			foreach (MethodExpressionAttribute a in attrs)
+			{
+				if (a.SqlProvider == SqlProvider.Name)
+				{
+					attr = a;
+					break;
+				}
+
+				if (a.SqlProvider == null)
+					attr = a;
+			}
+
+			if (attr != null)
+			{
+				var call = Expression.Lambda<Func<LambdaExpression>>(
+					Expression.Convert(Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty), typeof(LambdaExpression)));
+
+				return call.Compile()();
+			}
+
+			return null;
 		}
 
 		Expression ConvertSubquery(Expression expr)
@@ -1137,7 +1095,7 @@ namespace BLToolkit.Data.Linq.Builder
 					Expression.Call(
 						Expression.Constant(_query),
 						ReflectionHelper.Expressor<Query>.MethodExpressor(a => a.GetIQueryable(0, null)),
-						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null) });
+						new[] { Expression.Constant(n), accessor ?? Expression.Constant(null, typeof(Expression)) });
 
 				var qex = _query.GetIQueryable(n, expression);
 

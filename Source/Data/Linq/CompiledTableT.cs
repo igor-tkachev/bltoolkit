@@ -62,17 +62,8 @@ namespace BLToolkit.Data.Linq
 
 						if (query == null)
 						{
-#if !OLD_PARSER
 							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, _expression, _lambda.Parameters.ToArray())
 								.Build<T>();
-#else
-							query = new ExpressionParserOld<T>().Parse(
-								contextID,
-								mappingSchema,
-								dataContextInfo.CreateSqlProvider,
-								_expression,
-								_lambda.Parameters.ToArray());
-#endif
 
 							_infos.Add(key, query);
 

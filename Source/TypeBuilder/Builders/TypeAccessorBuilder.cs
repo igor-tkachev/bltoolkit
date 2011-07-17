@@ -35,11 +35,11 @@ namespace BLToolkit.TypeBuilder.Builders
 
 		public string GetTypeName()
 		{
- 			// It's a bad idea to use '.TypeAccessor' here since we got
- 			// a class and a namespace with the same full name.
- 			// The sgen utility fill fail in such case.
- 			//
- 			return _type.FullName.Replace('+', '.') + "$TypeAccessor";
+			// It's a bad idea to use '.TypeAccessor' here since we got
+			// a class and a namespace with the same full name.
+			// The sgen utility fill fail in such case.
+			//
+			return _type.FullName.Replace('+', '.') + "$TypeAccessor";
 		}
 
 		public Type GetBuildingType()
@@ -228,7 +228,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			foreach (MemberInfo mi in members.Values)
+			foreach (var mi in members.Values)
 				BuildMember(mi);
 		}
 

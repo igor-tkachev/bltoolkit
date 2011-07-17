@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -162,18 +163,29 @@ namespace BLToolkit.Data.Linq.Builder
 							return false;
 						});
 
-						var expr = nctor != null ?
-							Expression.New(
+						Expression expr;
+
+						if (nctor != null)
+						{
+							var members = nctor.Members
+								.Select(m => m is MethodInfo ? TypeHelper.GetPropertyByMethod((MethodInfo)m) : m)
+								.ToList();
+
+							expr = Expression.New(
 								nctor.Constructor,
-								nctor.Members
+								members
 									.Select(m => Expression.PropertyOrField(_unionParameter, m.Name))
 									.Cast<Expression>(),
-								nctor.Members) as Expression:
-							Expression.MemberInit(
+								members);
+						}
+						else
+						{
+							expr = Expression.MemberInit(
 								Expression.New(type),
 								_members
 									.Select(m => Expression.Bind(m.Value.MemberExpression.Member, m.Value.MemberExpression))
 									.Cast<MemberBinding>());
+						}
 
 						var ex = Builder.BuildExpression(this, expr);
 
