@@ -74,7 +74,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (TypeHelper.IsNullableValueMember(ma.Member))
 								break;
 
-							if (ConvertMember(ma.Member) == null)
+							if (SqlProvider.ConvertMember(ma.Member) == null)
 							{
 								var ctx = GetContext(context, expr);
 
@@ -365,7 +365,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.MemberAccess:
 						{
 							var ma = (MemberExpression)e;
-							var l  = ConvertMember(ma.Member);
+							var l  = SqlProvider.ConvertMember(ma.Member);
 
 							if (l != null)
 							{
@@ -433,46 +433,9 @@ namespace BLToolkit.Data.Linq.Builder
 			});
 		}
 
-		LambdaExpression ConvertMember(MemberInfo mi)
-		{
-			var lambda = SqlProvider.ConvertMember(mi);
-
-			if (lambda == null)
-			{
-				var attrs = mi.GetCustomAttributes(typeof(MethodExpressionAttribute), true);
-
-				if (attrs.Length == 0)
-					return null;
-
-				MethodExpressionAttribute attr = null;
-
-				foreach (MethodExpressionAttribute a in attrs)
-				{
-					if (a.SqlProvider == SqlProvider.Name)
-					{
-						attr = a;
-						break;
-					}
-
-					if (a.SqlProvider == null)
-						attr = a;
-				}
-
-				if (attr != null)
-				{
-					var call = Expression.Lambda<Func<LambdaExpression>>(
-						Expression.Convert(Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty), typeof(LambdaExpression)));
-
-					lambda = call.Compile()();
-				}
-			}
-
-			return lambda;
-		}
-
 		Expression ConvertMethod(MethodCallExpression pi)
 		{
-			var l = ConvertMember(pi.Method);
+			var l = SqlProvider.ConvertMember(pi.Method);
 			return l == null ? null : ConvertMethod(pi, l);
 		}
 
@@ -505,7 +468,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression ConvertNew(NewExpression pi)
 		{
-			var lambda = ConvertMember(pi.Constructor);
+			var lambda = SqlProvider.ConvertMember(pi.Constructor);
 
 			if (lambda != null)
 			{
@@ -886,7 +849,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberAccess:
 					{
 						var ex = (MemberExpression)expr;
-						var l  = ConvertMember(ex.Member);
+						var l  = SqlProvider.ConvertMember(ex.Member);
 
 						if (l != null)
 							return IsServerSideOnly(l.Body.Unwrap());
@@ -915,7 +878,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 						else
 						{
-							var l = ConvertMember(e.Method);
+							var l = SqlProvider.ConvertMember(e.Method);
 
 							if (l != null)
 								return l.Body.Unwrap().Find(IsServerSideOnly) != null;

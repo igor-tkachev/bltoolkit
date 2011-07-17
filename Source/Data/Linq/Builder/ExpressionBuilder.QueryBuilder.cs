@@ -30,7 +30,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							var ma = (MemberExpression)pi;
 
-							if (ConvertMember(ma.Member) != null)
+							if (SqlProvider.ConvertMember(ma.Member) != null)
 								break;
 
 							var ctx = GetContext(context, pi);
@@ -95,11 +95,6 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.Call:
 						{
 							var ce = (MethodCallExpression)pi;
-							var cm = ConvertMethod(ce);
-
-							if (cm != null)
-								if (ce.Method.GetCustomAttributes(typeof(MethodExpressionAttribute), true).Length != 0)
-									return new ExpressionHelper.ConvertInfo(BuildExpression(context, cm));
 
 							if (IsGroupJoinSource(context, ce))
 							{
@@ -208,7 +203,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberAccess:
 					{
 						var pi = (MemberExpression)expr;
-						var l  = ConvertMember(pi.Member);
+						var l  = SqlProvider.ConvertMember(pi.Member);
 
 						if (l != null)
 						{
@@ -228,7 +223,7 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var pi = (MethodCallExpression)expr;
 						var e  = pi;
-						var l  = ConvertMember(e.Method);
+						var l  = SqlProvider.ConvertMember(e.Method);
 
 						if (l != null)
 							return l.Body.Unwrap().Find(PreferServerSide) != null;
