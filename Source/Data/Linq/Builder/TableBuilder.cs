@@ -427,19 +427,15 @@ namespace BLToolkit.Data.Linq.Builder
 			static readonly MethodInfo _mapperMethod2 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(null, null, null));
 
 #if FW4 || SILVERLIGHT
-
 			ParameterExpression _variable;
 			static int _varIndex;
-
 #endif
 
 			Expression BuildTableExpression(bool buildBlock, Type objectType, int[] index)
 			{
 #if FW4 || SILVERLIGHT
-
 				if (buildBlock && _variable != null)
 					return _variable;
-
 #endif
 
 				var data = new MappingData
@@ -470,6 +466,8 @@ namespace BLToolkit.Data.Linq.Builder
 						objectType);
 				}
 
+				expr = ProcessExpression(expr);
+
 #if FW4 || SILVERLIGHT
 
 				if (!buildBlock)
@@ -483,6 +481,11 @@ namespace BLToolkit.Data.Linq.Builder
 #else
 				return expr;
 #endif
+			}
+
+			protected virtual Expression ProcessExpression(Expression expression)
+			{
+				return expression;
 			}
 
 			int[] BuildIndex(int[] index, Type objectType)
@@ -690,6 +693,30 @@ namespace BLToolkit.Data.Linq.Builder
 
 			readonly Dictionary<ISqlExpression,SqlInfo> _indexes = new Dictionary<ISqlExpression,SqlInfo>();
 
+			protected SqlInfo GetIndex(SqlInfo expr)
+			{
+				SqlInfo n;
+
+				if (_indexes.TryGetValue(expr.Sql, out n))
+					return n;
+
+				if (expr.Sql is SqlField)
+				{
+					var field = (SqlField)expr.Sql;
+					expr.Index = SqlQuery.Select.Add(field, field.Alias);
+				}
+				else
+				{
+					expr.Index = SqlQuery.Select.Add(expr.Sql);
+				}
+
+				expr.Query = SqlQuery;
+
+				_indexes.Add(expr.Sql, expr);
+
+				return expr;
+			}
+
 			public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
@@ -701,30 +728,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var info = ConvertToSql(expression, level, flags);
 
 						for (var i = 0; i < info.Length; i++)
-						{
-							var expr = info[i];
-							
-							SqlInfo n;
-
-							if (_indexes.TryGetValue(expr.Sql, out n))
-								info[i] = n;
-							else
-							{
-								if (expr.Sql is SqlField)
-								{
-									var field = (SqlField)expr.Sql;
-									expr.Index = SqlQuery.Select.Add(field, field.Alias);
-								}
-								else
-								{
-									expr.Index = SqlQuery.Select.Add(expr.Sql);
-								}
-
-								expr.Query = SqlQuery;
-
-								_indexes.Add(expr.Sql, expr);
-							}
-						}
+							info[i] = GetIndex(info[i]);
 
 						return info;
 				}
@@ -1157,6 +1161,70 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				Init();
+			}
+
+			protected override Expression ProcessExpression(Expression expression)
+			{
+				if (ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
+				    ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply)
+				{
+					Expression cond = null;
+
+					var checkNullOnly = true; //SqlQuery.Select.IsDistinct || SqlQuery.GroupBy.Items.Count > 0;
+
+					if (checkNullOnly)
+					{
+						checkNullOnly = false;
+
+						foreach (var c in ParentAssociationJoin.Condition.Conditions)
+						{
+							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+							var f  = (SqlField)ee.Expr1;
+
+							checkNullOnly = SqlQuery.Select.Columns.FirstOrDefault(col => col.Expression == f) == null;
+
+							if (checkNullOnly)
+								break;
+						}
+					}
+
+					foreach (var c in ParentAssociationJoin.Condition.Conditions)
+					{
+						var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+
+						var field2  = (SqlField)ee.Expr2;
+						var info2   = GetIndex(new SqlInfo { Sql = field2, Member = field2.MemberMapper.MemberAccessor.MemberInfo });
+						var index2  = ConvertToParentIndex(info2.Index, null);
+
+						Expression e;
+
+						if (checkNullOnly)
+						{
+							e = Expression.Call(
+								ExpressionBuilder.DataReaderParam,
+								ReflectionHelper.DataReader.IsDBNull,
+								Expression.Constant(index2));
+						}
+						else
+						{
+							var field1  = (SqlField)ee.Expr1;
+							var info1   = GetIndex(new SqlInfo { Sql = field1, Member = field1.MemberMapper.MemberAccessor.MemberInfo });
+							var index1  = ConvertToParentIndex(info1.Index, null);
+
+							e =
+								Expression.AndAlso(
+									Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index2)),
+									Expression.Not(
+										Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index1))));
+						}
+
+						cond = cond == null ? e : Expression.AndAlso(cond, e);
+					}
+
+					expression = Expression.Condition(cond, Expression.Constant(null, ObjectType), expression);
+				}
+
+				return expression;
 			}
 		}
 
