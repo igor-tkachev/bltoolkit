@@ -58,29 +58,29 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override bool   SkipFirst   { get { return false;       } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
-        public override bool IsIdentityParameterRequired { get { return true; } }
+		public override bool IsIdentityParameterRequired { get { return true; } }
 
-        protected override void BuildGetIdentity(StringBuilder sb)
-        {
-            var identityField = SqlQuery.Set.Into.GetIdentityField();
+		protected override void BuildGetIdentity(StringBuilder sb)
+		{
+			var identityField = SqlQuery.Set.Into.GetIdentityField();
 
-            if (identityField == null)
-                throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
+			if (identityField == null)
+				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
 
-            AppendIndent(sb).AppendLine("RETURNING");
-            AppendIndent(sb).Append("\t");
-            BuildExpression(sb, identityField, false, true);
-        }
+			AppendIndent(sb).AppendLine("RETURNING");
+			AppendIndent(sb).Append("\t");
+			BuildExpression(sb, identityField, false, true);
+		}
 
-        public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
-        {
-            if (table.SequenceAttributes != null)
-                return new SqlExpression("GEN_ID(" + table.SequenceAttributes[0].SequenceName + ", 1)", Precedence.Primary);
+		public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
+		{
+			if (table.SequenceAttributes != null)
+				return new SqlExpression("GEN_ID(" + table.SequenceAttributes[0].SequenceName + ", 1)", Precedence.Primary);
 
-            return base.GetIdentityExpression(table, identityField, forReturning);
-        }
+			return base.GetIdentityExpression(table, identityField, forReturning);
+		}
 
-        public override ISqlExpression ConvertExpression(ISqlExpression expr)
+		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
 
@@ -205,13 +205,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
 		{
-			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
-				sb.Append("CASE WHEN ");
+			var wrap = false;
 
+			if (col.SystemType == typeof(bool))
+			{
+				if (col.Expression is SqlQuery.SearchCondition)
+					wrap = true;
+				else
+				{
+					var ex = col.Expression as SqlExpression;
+					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
+				}
+			}
+
+			if (wrap) sb.Append("CASE WHEN ");
 			base.BuildColumn(sb, col, ref addAlias);
-
-			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
-				sb.Append(" THEN 1 ELSE 0 END");
+			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 
 		public static bool QuoteIdentifiers = false;

@@ -114,6 +114,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void BoolResult3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select Sql.AsSql(p.ID == 1),
+				from p in db.Person select Sql.AsSql(p.ID == 1)));
+		}
+
+		[Test]
 		public void GuidNew()
 		{
 			ForEachProvider(db => AreEqual(

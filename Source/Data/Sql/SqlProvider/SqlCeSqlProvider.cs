@@ -159,13 +159,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
 		{
-			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
-				sb.Append("CASE WHEN ");
+			var wrap = false;
 
+			if (col.SystemType == typeof(bool))
+			{
+				if (col.Expression is SqlQuery.SearchCondition)
+					wrap = true;
+				else
+				{
+					var ex = col.Expression as SqlExpression;
+					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
+				}
+			}
+
+			if (wrap) sb.Append("CASE WHEN ");
 			base.BuildColumn(sb, col, ref addAlias);
-
-			if (col.SystemType == typeof(bool) && col.Expression is SqlQuery.SearchCondition)
-				sb.Append(" THEN 1 ELSE 0 END");
+			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 
 		public override object Convert(object value, ConvertType convertType)
