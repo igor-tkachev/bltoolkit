@@ -157,6 +157,16 @@ namespace BLToolkit.Data.Linq
 			public static MethodInfo Bindings = PropertyExpressor(e => e.Bindings);
 		}
 
+#if FW4 || SILVERLIGHT
+
+		public class Block : Expressor<BlockExpression>
+		{
+			public static MethodInfo Expressions = PropertyExpressor(e => e.Expressions);
+			public static MethodInfo Variables   = PropertyExpressor(e => e.Variables);
+		}
+
+#endif
+
 		public static MethodInfo ExprItem  = IndexExpressor<Expression>         .Item;
 		public static MethodInfo ParamItem = IndexExpressor<ParameterExpression>.Item;
 		public static MethodInfo ElemItem  = IndexExpressor<ElementInit>        .Item;

@@ -375,5 +375,23 @@ namespace Data.Linq
 				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID },
 				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID }));
 		}
+
+		[Test]
+		public void ProjectionTest2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select p.Patient,
+				from p in db.Person select p.Patient));
+		}
+
+		[Test]
+		public void EqualTest1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (from p in db.Parent select new { p1 = p, p2 = p }).First();
+				Assert.AreSame(q.p1, q.p2);
+			});
+		}
 	}
 }

@@ -305,9 +305,16 @@ namespace BLToolkit.Data.Linq.Builder
 					_element.Lambda.Body.Type,
 					_key.Lambda.Parameters[0].Type);
 
-				var helper = (IGroupByHelper)Activator.CreateInstance(gtype);
+				var isBlockDisable = Builder.IsBlockDisable;
 
-				return helper.GetGrouping(this);
+				Builder.IsBlockDisable = true;
+
+				var helper = (IGroupByHelper)Activator.CreateInstance(gtype);
+				var expr   = helper.GetGrouping(this);
+
+				Builder.IsBlockDisable = isBlockDisable;
+
+				return expr;
 			}
 
 			public override Expression BuildExpression(Expression expression, int level)

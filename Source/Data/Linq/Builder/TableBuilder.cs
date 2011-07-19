@@ -426,31 +426,66 @@ namespace BLToolkit.Data.Linq.Builder
 			static readonly MethodInfo _mapperMethod1 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(      null, null));
 			static readonly MethodInfo _mapperMethod2 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(null, null, null));
 
-			static Expression BuildTableExpression(ExpressionBuilder builder, Type objectType, int[] index)
+#if FW4 || SILVERLIGHT
+			ParameterExpression _variable;
+			static int _varIndex;
+#endif
+
+			Expression BuildTableExpression(bool buildBlock, Type objectType, int[] index)
 			{
+#if FW4 || SILVERLIGHT
+				if (buildBlock && _variable != null)
+					return _variable;
+#endif
+
 				var data = new MappingData
 				{
-					MappingSchema = builder.MappingSchema,
-					ObjectMapper  = builder.MappingSchema.GetObjectMapper(objectType),
+					MappingSchema = Builder.MappingSchema,
+					ObjectMapper  = Builder.MappingSchema.GetObjectMapper(objectType),
 					Index         = index
 				};
 
-				if (builder.DataContextInfo.DataContext == null ||
+				Expression expr;
+
+				if (Builder.DataContextInfo.DataContext == null ||
 					TypeHelper.IsSameOrParent(typeof(ISupportMapping), objectType))
 				{
-					return Expression.Convert(
+					expr = Expression.Convert(
 						Expression.Call(null, _mapperMethod2,
 							ExpressionBuilder.DataContextParam,
 							ExpressionBuilder.DataReaderParam,
 							Expression.Constant(data)),
 						objectType);
 				}
+				else
+				{
+					expr = Expression.Convert(
+						Expression.Call(null, _mapperMethod1,
+							ExpressionBuilder.DataReaderParam,
+							Expression.Constant(data)),
+						objectType);
+				}
 
-				return Expression.Convert(
-					Expression.Call(null, _mapperMethod1,
-						ExpressionBuilder.DataReaderParam,
-						Expression.Constant(data)),
-					objectType);
+				expr = ProcessExpression(expr);
+
+#if FW4 || SILVERLIGHT
+
+				if (!buildBlock)
+					return expr;
+
+				Builder.BlockVariables.  Add(_variable = Expression.Variable(expr.Type, expr.Type.Name + _varIndex++));
+				Builder.BlockExpressions.Add(Expression.Assign(_variable, expr));
+
+				return _variable;
+
+#else
+				return expr;
+#endif
+			}
+
+			protected virtual Expression ProcessExpression(Expression expression)
+			{
+				return expression;
 			}
 
 			int[] BuildIndex(int[] index, Type objectType)
@@ -462,7 +497,7 @@ namespace BLToolkit.Data.Linq.Builder
 					if (mm.MapMemberInfo.SqlIgnore == false)
 						names.Add(mm.MemberName, n++);
 
-				var q = 
+				var q =
 					from r in SqlTable.Fields.Values.Select((f,i) => new { f, i })
 					where names.ContainsKey(r.f.Name)
 					orderby names[r.f.Name]
@@ -477,7 +512,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var index = info.Select(idx => ConvertToParentIndex(idx.Index, null)).ToArray();
 
 				if (InheritanceMapping.Count == 0)
-					return BuildTableExpression(Builder, ObjectType, index);
+					return BuildTableExpression(!Builder.IsBlockDisable, ObjectType, index);
 
 				Expression expr;
 
@@ -486,7 +521,7 @@ namespace BLToolkit.Data.Linq.Builder
 				if (defaultMapping != null)
 				{
 					expr = Expression.Convert(
-						BuildTableExpression(Builder, defaultMapping.Type, BuildIndex(index, defaultMapping.Type)),
+						BuildTableExpression(false, defaultMapping.Type, BuildIndex(index, defaultMapping.Type)),
 						ObjectType);
 				}
 				else
@@ -509,7 +544,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				foreach (var mapping in InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m != defaultMapping))
 				{
-					var dindex          =
+					var dindex =
 						(
 							from f in SqlTable.Fields.Values
 							where f.Name == InheritanceDiscriminators[mapping.i]
@@ -547,7 +582,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					expr = Expression.Condition(
 						testExpr,
-						Expression.Convert(BuildTableExpression(Builder, mapping.m.Type, BuildIndex(index, mapping.m.Type)), ObjectType),
+						Expression.Convert(BuildTableExpression(false, mapping.m.Type, BuildIndex(index, mapping.m.Type)), ObjectType),
 						expr);
 				}
 
@@ -562,7 +597,7 @@ namespace BLToolkit.Data.Linq.Builder
 					expr = Expression.Convert(expr, typeof(T));
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					expr, new []
+					Builder.BuildBlock(expr), new []
 					{
 						ExpressionBuilder.ContextParam,
 						ExpressionBuilder.DataContextParam,
@@ -658,6 +693,30 @@ namespace BLToolkit.Data.Linq.Builder
 
 			readonly Dictionary<ISqlExpression,SqlInfo> _indexes = new Dictionary<ISqlExpression,SqlInfo>();
 
+			protected SqlInfo GetIndex(SqlInfo expr)
+			{
+				SqlInfo n;
+
+				if (_indexes.TryGetValue(expr.Sql, out n))
+					return n;
+
+				if (expr.Sql is SqlField)
+				{
+					var field = (SqlField)expr.Sql;
+					expr.Index = SqlQuery.Select.Add(field, field.Alias);
+				}
+				else
+				{
+					expr.Index = SqlQuery.Select.Add(expr.Sql);
+				}
+
+				expr.Query = SqlQuery;
+
+				_indexes.Add(expr.Sql, expr);
+
+				return expr;
+			}
+
 			public SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
 				switch (flags)
@@ -669,30 +728,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var info = ConvertToSql(expression, level, flags);
 
 						for (var i = 0; i < info.Length; i++)
-						{
-							var expr = info[i];
-							
-							SqlInfo n;
-
-							if (_indexes.TryGetValue(expr.Sql, out n))
-								info[i] = n;
-							else
-							{
-								if (expr.Sql is SqlField)
-								{
-									var field = (SqlField)expr.Sql;
-									expr.Index = SqlQuery.Select.Add(field, field.Alias);
-								}
-								else
-								{
-									expr.Index = SqlQuery.Select.Add(expr.Sql);
-								}
-
-								expr.Query = SqlQuery;
-
-								_indexes.Add(expr.Sql, expr);
-							}
-						}
+							info[i] = GetIndex(info[i]);
 
 						return info;
 				}
@@ -1087,8 +1123,7 @@ namespace BLToolkit.Data.Linq.Builder
 				: base(builder, parent.SqlQuery)
 			{
 				var type = TypeHelper.GetMemberType(association.MemberAccessor.MemberInfo);
-
-				var left   = association.CanBeNull;
+				var left = association.CanBeNull;
 
 				if (TypeHelper.IsSameOrParent(typeof(IEnumerable), type))
 				{
@@ -1126,6 +1161,70 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				Init();
+			}
+
+			protected override Expression ProcessExpression(Expression expression)
+			{
+				if (ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
+				    ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply)
+				{
+					Expression cond = null;
+
+					var checkNullOnly = true; //SqlQuery.Select.IsDistinct || SqlQuery.GroupBy.Items.Count > 0;
+
+					if (checkNullOnly)
+					{
+						checkNullOnly = false;
+
+						foreach (var c in ParentAssociationJoin.Condition.Conditions)
+						{
+							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+							var f  = (SqlField)ee.Expr1;
+
+							checkNullOnly = SqlQuery.Select.Columns.FirstOrDefault(col => col.Expression == f) == null;
+
+							if (checkNullOnly)
+								break;
+						}
+					}
+
+					foreach (var c in ParentAssociationJoin.Condition.Conditions)
+					{
+						var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
+
+						var field2  = (SqlField)ee.Expr2;
+						var info2   = GetIndex(new SqlInfo { Sql = field2, Member = field2.MemberMapper.MemberAccessor.MemberInfo });
+						var index2  = ConvertToParentIndex(info2.Index, null);
+
+						Expression e;
+
+						if (checkNullOnly)
+						{
+							e = Expression.Call(
+								ExpressionBuilder.DataReaderParam,
+								ReflectionHelper.DataReader.IsDBNull,
+								Expression.Constant(index2));
+						}
+						else
+						{
+							var field1  = (SqlField)ee.Expr1;
+							var info1   = GetIndex(new SqlInfo { Sql = field1, Member = field1.MemberMapper.MemberAccessor.MemberInfo });
+							var index1  = ConvertToParentIndex(info1.Index, null);
+
+							e =
+								Expression.AndAlso(
+									Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index2)),
+									Expression.Not(
+										Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index1))));
+						}
+
+						cond = cond == null ? e : Expression.AndAlso(cond, e);
+					}
+
+					expression = Expression.Condition(cond, Expression.Constant(null, ObjectType), expression);
+				}
+
+				return expression;
 			}
 		}
 

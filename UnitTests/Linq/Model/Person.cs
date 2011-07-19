@@ -34,6 +34,9 @@ namespace Data.Linq.Model
 
 		[MapIgnore]            public string Name { get { return FirstName + " " + LastName; }}
 
+		[Association(ThisKey = "ID", OtherKey = "PersonID", CanBeNull = true)]
+		public Patient Patient;
+
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as Person);

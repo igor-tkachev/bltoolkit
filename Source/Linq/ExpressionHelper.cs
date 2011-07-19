@@ -68,6 +68,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -369,6 +372,26 @@ namespace BLToolkit.Linq
 						var e2 = (TypeBinaryExpression)expr2;
 						return e1.TypeOperand == e2.TypeOperand && Compare(e1.Expression, e2.Expression, queryableAccessorDic);
 					}
+
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						var e1 = (BlockExpression)expr1;
+						var e2 = (BlockExpression)expr2;
+
+						for (var i = 0; i < e1.Expressions.Count; i++)
+							if (!Compare(e1.Expressions[i], e2.Expressions[i], queryableAccessorDic))
+								return false;
+
+						for (var i = 0; i < e1.Variables.Count; i++)
+							if (!Compare(e1.Variables[i], e2.Variables[i], queryableAccessorDic))
+								return false;
+
+						return true;
+					}
+
+#endif
 			}
 
 			throw new InvalidOperationException();
@@ -418,6 +441,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -601,6 +627,21 @@ namespace BLToolkit.Linq
 						func);
 					break;
 
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						path  = ConvertTo(path, typeof(BlockExpression));
+						var e = (BlockExpression)expr;
+
+						Path(e.Expressions, path, ReflectionHelper.Block.Expressions, func);
+						Path(e.Variables,   path, ReflectionHelper.Block.Variables,   func); // ?
+
+						break;
+					}
+
+#endif
+
 				case ExpressionType.Constant : path = ConvertTo(path, typeof(ConstantExpression));  break;
 				case ExpressionType.Parameter: path = ConvertTo(path, typeof(ParameterExpression)); break;
 			}
@@ -637,6 +678,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -756,6 +800,20 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
 
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						var e = (BlockExpression)expr;
+
+						Visit(e.Expressions, func);
+						Visit(e.Variables,   func);
+
+						break;
+					}
+
+#endif
+
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
 					Visit(((ChangeTypeExpression)expr).Expression,  func); break;
 			}
@@ -788,6 +846,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -909,6 +970,20 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayInit   : Visit(((NewArrayExpression)  expr).Expressions, func); break;
 				case ExpressionType.TypeIs         : Visit(((TypeBinaryExpression)expr).Expression,  func); break;
 
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						var e = (BlockExpression)expr;
+
+						Visit(e.Expressions, func);
+						Visit(e.Variables,   func);
+
+						break;
+					}
+
+#endif
+
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
 					Visit(((ChangeTypeExpression)expr).Expression,  func);
 					break;
@@ -956,6 +1031,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -1070,6 +1148,19 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayInit   : return Find(((NewArrayExpression)  expr).Expressions, func);
 				case ExpressionType.TypeIs         : return Find(((TypeBinaryExpression)expr).Expression,  func);
 
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						var e = (BlockExpression)expr;
+
+						return
+							Find(e.Expressions, func) ??
+							Find(e.Variables,   func);
+					}
+
+#endif
+
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
 					return Find(((ChangeTypeExpression)expr).Expression, func);
 			}
@@ -1125,6 +1216,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -1383,6 +1477,23 @@ namespace BLToolkit.Linq
 						return ex != e.Expression ? Expression.TypeIs(ex, e.Type) : expr;
 					}
 
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						var exp = func(expr);
+						if (exp != expr)
+							return exp;
+
+						var e  = expr as BlockExpression;
+						var ex = Convert(e.Expressions, func);
+						var v  = Convert(e.Variables,   func);
+
+						return ex != e.Expressions || v != e.Variables ? Expression.Block(e.Type, v, ex) : expr;
+					}
+
+#endif
+
 				case ExpressionType.Constant : return func(expr);
 				case ExpressionType.Parameter: return func(expr);
 
@@ -1474,6 +1585,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.And:
 				case ExpressionType.AndAlso:
 				case ExpressionType.ArrayIndex:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
 				case ExpressionType.Coalesce:
 				case ExpressionType.Divide:
 				case ExpressionType.Equal:
@@ -1731,6 +1845,23 @@ namespace BLToolkit.Linq
 
 						return ex != e.Expression ? Expression.TypeIs(ex, e.Type) : expr;
 					}
+
+#if FW4 || SILVERLIGHT
+
+				case ExpressionType.Block:
+					{
+						var exp = func(expr);
+						if (exp.Stop || exp.Expression != expr)
+							return exp.Expression;
+
+						var e  = expr as BlockExpression;
+						var ex = Convert2(e.Expressions, func);
+						var v  = Convert2(e.Variables,   func);
+
+						return ex != e.Expressions || v != e.Variables ? Expression.Block(e.Type, v, ex) : expr;
+					}
+
+#endif
 
 				case ExpressionType.Constant : return func(expr).Expression;
 				case ExpressionType.Parameter: return func(expr).Expression;
