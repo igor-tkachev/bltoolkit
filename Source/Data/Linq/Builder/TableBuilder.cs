@@ -448,7 +448,8 @@ namespace BLToolkit.Data.Linq.Builder
 				Expression expr;
 
 				if (Builder.DataContextInfo.DataContext == null ||
-					TypeHelper.IsSameOrParent(typeof(ISupportMapping), objectType))
+					TypeHelper.IsSameOrParent(typeof(ISupportMapping), objectType) ||
+					TypeHelper.GetFirstAttribute(objectType, typeof(ObjectFactoryAttribute)) != null)
 				{
 					expr = Expression.Convert(
 						Expression.Call(null, _mapperMethod2,

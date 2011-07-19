@@ -379,9 +379,9 @@ namespace Data.Linq
 
 		[TableName("Person")]
 		[ObjectFactory(typeof(TestPersonObject.Factory))]
-		public class  TestPersonObject
+		public class TestPersonObject
 		{
-			public class  Factory : IObjectFactory
+			public class Factory : IObjectFactory
 			{
 				#region IObjectFactory Members
 
@@ -395,6 +395,7 @@ namespace Data.Linq
 
 				#endregion
 			}
+
 			public int    PersonID;
 			public string FirstName;
 		}
@@ -402,8 +403,7 @@ namespace Data.Linq
 		[Test]
 		public void ObjectFactoryTest()
 		{
-			ForEachProvider(db =>
-							db.GetTable<TestPersonObject>().ToList());
+			ForEachProvider(db => db.GetTable<TestPersonObject>().ToList());
 		}
 
 		[Test]

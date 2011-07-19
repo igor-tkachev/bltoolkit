@@ -155,7 +155,7 @@ namespace DataAccess
 			[Identity]                     public int    PersonID;
 			                               public string FirstName;
 			                               public string LastName;
-			[NonUpdatable(OnInsert=false)] public string MiddleName;
+			[NonUpdatable(OnUpdate=false)] public string MiddleName;
 			                               public char   Gender;
 		}
 
@@ -190,7 +190,7 @@ namespace DataAccess
 			[PrimaryKey]                     public int    PersonID;
 			[NonUpdatable(OnUpdate = false)] public string FirstName;
 			                                 public string MiddleName;
-											 public string Gender;
+			                                 public string Gender;
 		}
 
 		[Test]
