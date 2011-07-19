@@ -405,5 +405,23 @@ namespace Data.Linq
 			ForEachProvider(db =>
 							db.GetTable<TestPersonObject>().ToList());
 		}
+
+		[Test]
+		public void ProjectionTest2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select p.Patient,
+				from p in db.Person select p.Patient));
+		}
+
+		[Test]
+		public void EqualTest1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = (from p in db.Parent select new { p1 = p, p2 = p }).First();
+				Assert.AreSame(q.p1, q.p2);
+			});
+		}
 	}
 }

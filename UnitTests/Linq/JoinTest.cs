@@ -567,6 +567,32 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void LeftJoin4()
+		{
+			ForEachProvider(db => AreEqual(
+				Parent
+					.GroupJoin(Child,
+						x => new { x.ParentID, x.Value1 },
+						y => new { y.ParentID, Value1 = (int?)y.ParentID },
+						(x, y) => new { Parent = x, Child = y })
+					.SelectMany(
+						y => y.Child.DefaultIfEmpty(),
+						(x, y) => new { x.Parent, Child = x.Child.FirstOrDefault() })
+					.Where(x => x.Parent.ParentID == 1 && x.Parent.Value1 != null)
+					.OrderBy(x => x.Parent.ParentID),
+				db.Parent
+					.GroupJoin(db.Child,
+						x => new { x.ParentID, x.Value1 },
+						y => new { y.ParentID, Value1 = (int?)y.ParentID },
+						(x, y) => new { Parent = x, Child = y })
+					.SelectMany(
+						y => y.Child.DefaultIfEmpty(),
+						(x, y) => new { x.Parent, Child = x.Child.FirstOrDefault() })
+					.Where(x => x.Parent.ParentID == 1 && x.Parent.Value1 != null)
+					.OrderBy(x => x.Parent.ParentID)));
+		}
+
+		[Test]
 		public void SubQueryJoin()
 		{
 			var expected =

@@ -70,6 +70,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 		readonly public List<ParameterAccessor>    CurrentSqlParameters = new List<ParameterAccessor>();
 
+#if FW4 || SILVERLIGHT
+
+		readonly public List<ParameterExpression>  BlockVariables       = new List<ParameterExpression>();
+		readonly public List<Expression>           BlockExpressions     = new List<Expression>();
+		         public bool                       IsBlockDisable;
+
+#else
+		         public bool                       IsBlockDisable = true;
+#endif
+
 		public ExpressionBuilder(
 			Query                 query,
 			IDataContextInfo      dataContext,
@@ -109,6 +119,25 @@ namespace BLToolkit.Data.Linq.Builder
 		public MappingSchema MappingSchema
 		{
 			get { return DataContextInfo.MappingSchema; }
+		}
+
+		public Expression BuildBlock(Expression expression)
+		{
+#if FW4 || SILVERLIGHT
+
+			if (IsBlockDisable || BlockExpressions.Count == 0)
+				return expression;
+
+			BlockExpressions.Add(expression);
+
+			expression = Expression.Block(BlockVariables, BlockExpressions);
+
+			BlockVariables.  Clear();
+			BlockExpressions.Clear();
+
+#endif
+
+			return expression;
 		}
 
 		#endregion
