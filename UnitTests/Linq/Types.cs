@@ -98,6 +98,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void BoolResult1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select new { p.Patient, IsPatient = p.Patient != null },
+				from p in db.Person select new { p.Patient, IsPatient = p.Patient != null }));
+		}
+
+		[Test]
+		public void BoolResult2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select new { IsPatient = Sql.AsSql(p.Patient != null) },
+				from p in db.Person select new { IsPatient = Sql.AsSql(p.Patient != null) }));
+		}
+
+		[Test]
 		public void GuidNew()
 		{
 			ForEachProvider(db => AreEqual(

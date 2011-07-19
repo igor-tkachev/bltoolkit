@@ -197,11 +197,13 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
+				/*
 				var dx = new TestServiceModelDataContext(ip);
 
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
 				yield return dx;
+				*/
 			}
 		}
 
@@ -337,8 +339,13 @@ namespace Data.Linq
 			get
 			{
 				if (_person == null)
+				{
 					using (var db = new TestDbManager("Sql2008"))
 						_person = db.Person.ToList();
+
+					foreach (var p in _person)
+						p.Patient = Patient.SingleOrDefault(ps => p.ID == ps.PersonID);
+				}
 
 				return _person;
 			}

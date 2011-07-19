@@ -43,10 +43,9 @@ namespace BLToolkit.Data.Linq.Builder
 				query.Queries[0].SqlQuery = new SqlQuery();
 				query.Queries[0].SqlQuery.Select.Add(sql);
 
-				var expr = Expression.Convert(Builder.BuildSql(typeof(bool), 0), typeof(object));
-
+				var expr   = Expression.Convert(Builder.BuildSql(typeof(bool), 0), typeof(object));
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
-					expr, new []
+					Builder.BuildBlock(expr), new []
 					{
 						ExpressionBuilder.ContextParam,
 						ExpressionBuilder.DataContextParam,

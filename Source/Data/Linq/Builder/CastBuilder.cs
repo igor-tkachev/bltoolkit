@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Linq.Builder
 					expr = Expression.Convert(expr, type);
 
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					expr, new []
+					Builder.BuildBlock(expr), new []
 					{
 						ExpressionBuilder.ContextParam,
 						ExpressionBuilder.DataContextParam,
