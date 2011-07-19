@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-
+using BLToolkit.DataAccess;
+using BLToolkit.Reflection;
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -374,6 +375,35 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID },
 				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID }));
+		}
+
+		[TableName("Person")]
+		[ObjectFactory(typeof(TestPersonObject.Factory))]
+		public class TestPersonObject
+		{
+			public class Factory : IObjectFactory
+			{
+				#region IObjectFactory Members
+
+				public object CreateInstance(TypeAccessor typeAccessor, InitContext context)
+				{
+					if (context == null)
+						throw new Exception("InitContext is null while mapping from DataReader!");
+
+					return typeAccessor.CreateInstance();
+				}
+
+				#endregion
+			}
+
+			public int    PersonID;
+			public string FirstName;
+		}
+
+		[Test]
+		public void ObjectFactoryTest()
+		{
+			ForEachProvider(db => db.GetTable<TestPersonObject>().ToList());
 		}
 
 		[Test]

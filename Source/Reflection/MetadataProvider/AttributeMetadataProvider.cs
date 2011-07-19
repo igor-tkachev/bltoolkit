@@ -15,14 +15,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private  TypeAccessor _typeAccessor;
 		private  object[]     _mapFieldAttributes;
+		private  object[]     _nonUpdatableAttributes;
 		readonly object       _sync = new object();
 
 		void EnsureMapper(TypeAccessor typeAccessor)
 		{
 			if (_typeAccessor != typeAccessor)
 			{
-				_typeAccessor       = typeAccessor;
-				_mapFieldAttributes = null;
+				_typeAccessor           = typeAccessor;
+				_mapFieldAttributes     = null;
+				_nonUpdatableAttributes = null;
 			}
 		}
 
@@ -33,6 +35,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 				EnsureMapper(typeAccessor);
 
 				return _mapFieldAttributes ?? (_mapFieldAttributes = TypeHelper.GetAttributes(typeAccessor.Type, typeof (MapFieldAttribute)));
+			}
+		}
+
+		object[] GetNonUpdatableAttributes(TypeAccessor typeAccessor)
+		{
+			lock (_sync)
+			{
+				EnsureMapper(typeAccessor);
+
+				return _nonUpdatableAttributes ?? (_nonUpdatableAttributes = TypeHelper.GetAttributes(typeAccessor.Type, typeof(NonUpdatableAttribute)));
 			}
 		}
 
@@ -559,6 +571,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 			{
 				isSet = true;
 				return attr;
+			}
+
+			foreach (NonUpdatableAttribute a in GetNonUpdatableAttributes(member.TypeAccessor))
+			{
+				if (string.Equals(a.FieldName, member.Name, StringComparison.InvariantCultureIgnoreCase))
+				{
+					isSet = true;
+					return a;
+				}
 			}
 
 			return base.GetNonUpdatableAttribute(type, typeExt, member, out isSet);
