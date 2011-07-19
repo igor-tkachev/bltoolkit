@@ -233,8 +233,9 @@ namespace BLToolkit.DataAccess
 				//
 
 				bool isSet;
+				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
-				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet) == null || !isSet)
+				if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.OnInsert == false)
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
@@ -287,7 +288,9 @@ namespace BLToolkit.DataAccess
 			{
 				bool isSet;
 
-				if (mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet) != null && isSet)
+				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
+
+				if (nonUpdatableAttribute != null && isSet && nonUpdatableAttribute.OnUpdate == true)
 					continue;
 
 				mp.GetPrimaryKeyOrder(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);

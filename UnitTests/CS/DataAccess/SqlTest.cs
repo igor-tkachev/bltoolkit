@@ -181,5 +181,44 @@ namespace DataAccess
 				db.RollbackTransaction();
 			}
 		}
+
+		[TableName("Person")]
+		[Identity(FieldName = "PersonID")]
+		[NonUpdatable(OnInsert = false, FieldName = "MiddleName")]
+		public class Person2
+		{
+			[PrimaryKey]                     public int    PersonID;
+			[NonUpdatable(OnUpdate = false)] public string FirstName;
+			                                 public string MiddleName;
+											 public string Gender;
+		}
+
+		[Test]
+		public void NonUpdatableOnClass()
+		{
+			var da = new SqlQuery();
+
+			using (var db = new DbManager())
+			{
+				var update = da.GetSqlQueryInfo<Person2>(db, "Update");
+				var insert = da.GetSqlQueryInfo<Person2>(db, "Insert");
+
+				var personID =   "\t" + db.DataProvider.Convert("PersonID",   ConvertType.NameToQueryField).ToString();
+				var middleName = "\t" + db.DataProvider.Convert("MiddleName", ConvertType.NameToQueryField).ToString();
+				var firstName =  "\t" + db.DataProvider.Convert("FirstName",  ConvertType.NameToQueryField).ToString();
+
+				var personID_P   = " = " + db.DataProvider.Convert("PersonID_P",   ConvertType.NameToQueryParameter).ToString();
+				var middleName_P = " = " + db.DataProvider.Convert("MiddleName_P", ConvertType.NameToQueryParameter).ToString();
+				var firstName_P  = " = " + db.DataProvider.Convert("FirstName_P",  ConvertType.NameToQueryParameter).ToString();
+
+				Assert.That(update.QueryText, Is.Not.Contains(personID   + personID_P),   "personId\n"   + update.QueryText);
+				Assert.That(update.QueryText, Is.Not.Contains(middleName + middleName_P), "middleName\n" + update.QueryText);
+				Assert.That(update.QueryText.Contains(firstName          + firstName_P),  "firstName\n"  + update.QueryText);
+
+				Assert.That(insert.QueryText, Is.Not.Contains(personID),  "personId\n"   + insert.QueryText);
+				Assert.That(insert.QueryText, Is.Not.Contains(firstName), "firstName\n"  + insert.QueryText);
+				Assert.That(insert.QueryText.Contains(middleName),        "middleName\n" + insert.QueryText);
+			}
+		}
 	}
 }

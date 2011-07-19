@@ -3,7 +3,10 @@ using System;
 namespace BLToolkit.DataAccess
 {
 	[Serializable]
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+	[AttributeUsage(
+		AttributeTargets.Field | AttributeTargets.Property |
+		AttributeTargets.Class | AttributeTargets.Interface,
+		AllowMultiple = true)]
 	public class NonUpdatableAttribute : Attribute
 	{
 		public NonUpdatableAttribute()
@@ -18,8 +21,9 @@ namespace BLToolkit.DataAccess
 			IsIdentity = isIdentity;
 		}
 
-		public bool OnInsert   { get; set; }
-		public bool OnUpdate   { get; set; }
-		public bool IsIdentity { get; set; }
+		public bool   OnInsert   { get; set; }
+		public bool   OnUpdate   { get; set; }
+		public bool   IsIdentity { get; set; }
+		public string FieldName  { get; set; }
 	}
 }

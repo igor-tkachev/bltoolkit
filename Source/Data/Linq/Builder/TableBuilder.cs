@@ -267,7 +267,8 @@ namespace BLToolkit.Data.Linq.Builder
 				public IValueMapper[] ValueMappers;
 			}
 
-			static object MapDataReaderToObject(IDataContext dataContext, IDataReader dataReader, MappingData data)
+			// TODO: two same methods, what for??
+			static object MapDataReaderToObject(/*Not used?...*/IDataContext dataContext, IDataReader dataReader, MappingData data)
 			{
 				var source = data.MappingSchema.CreateDataReaderMapper(dataReader);
 
@@ -357,65 +358,70 @@ namespace BLToolkit.Data.Linq.Builder
 
 			static object MapDataReaderToObject(IDataReader dataReader, MappingData data)
 			{
-				var source     = data.MappingSchema.CreateDataReaderMapper(dataReader);
-				var destObject = data.ObjectMapper.CreateInstance();
+				return MapDataReaderToObject(null, dataReader, data);
 
-				if (data.ValueMappers == null)
-				{
-					var mappers = new IValueMapper[data.Index.Length];
+				// Mostly same as MapDataReaderToObject(IDataContext dataContext, IDataReader dataReader, MappingData data)
+				// but doesn't support ISupportMapping & InitContext
 
-					for (var i = 0; i < data.Index.Length; i++)
-					{
-						var n = data.Index[i];
+				//var source     = data.MappingSchema.CreateDataReaderMapper(dataReader);
+				//var destObject = data.ObjectMapper.CreateInstance();
 
-						if (n < 0)
-							continue;
+				//if (data.ValueMappers == null)
+				//{
+				//    var mappers = new IValueMapper[data.Index.Length];
 
-						if (!data.ObjectMapper.SupportsTypedValues(i))
-						{
-							mappers[i] = data.MappingSchema.DefaultValueMapper;
-							continue;
-						}
+				//    for (var i = 0; i < data.Index.Length; i++)
+				//    {
+				//        var n = data.Index[i];
 
-						var sourceType = source.           GetFieldType(n) ?? typeof(object);
-						var destType   = data.ObjectMapper.GetFieldType(i) ?? typeof(object);
+				//        if (n < 0)
+				//            continue;
 
-						IValueMapper t;
+				//        if (!data.ObjectMapper.SupportsTypedValues(i))
+				//        {
+				//            mappers[i] = data.MappingSchema.DefaultValueMapper;
+				//            continue;
+				//        }
 
-						if (sourceType == destType)
-						{
-							lock (data.MappingSchema.SameTypeMappers)
-								if (!data.MappingSchema.SameTypeMappers.TryGetValue(sourceType, out t))
-									data.MappingSchema.SameTypeMappers.Add(sourceType, t = data.MappingSchema.GetValueMapper(sourceType, destType));
-						}
-						else
-						{
-							var key = new KeyValuePair<Type,Type>(sourceType, destType);
+				//        var sourceType = source.           GetFieldType(n) ?? typeof(object);
+				//        var destType   = data.ObjectMapper.GetFieldType(i) ?? typeof(object);
 
-							lock (data.MappingSchema.DifferentTypeMappers)
-								if (!data.MappingSchema.DifferentTypeMappers.TryGetValue(key, out t))
-									data.MappingSchema.DifferentTypeMappers.Add(key, t = data.MappingSchema.GetValueMapper(sourceType, destType));
-						}
+				//        IValueMapper t;
 
-						mappers[i] = t;
-					}
+				//        if (sourceType == destType)
+				//        {
+				//            lock (data.MappingSchema.SameTypeMappers)
+				//                if (!data.MappingSchema.SameTypeMappers.TryGetValue(sourceType, out t))
+				//                    data.MappingSchema.SameTypeMappers.Add(sourceType, t = data.MappingSchema.GetValueMapper(sourceType, destType));
+				//        }
+				//        else
+				//        {
+				//            var key = new KeyValuePair<Type,Type>(sourceType, destType);
 
-					data.ValueMappers = mappers;
-				}
+				//            lock (data.MappingSchema.DifferentTypeMappers)
+				//                if (!data.MappingSchema.DifferentTypeMappers.TryGetValue(key, out t))
+				//                    data.MappingSchema.DifferentTypeMappers.Add(key, t = data.MappingSchema.GetValueMapper(sourceType, destType));
+				//        }
 
-				var dest = data.ObjectMapper;
-				var idx  = data.Index;
-				var ms   = data.ValueMappers;
+				//        mappers[i] = t;
+				//    }
 
-				for (var i = 0; i < idx.Length; i++)
-				{
-					var n = idx[i];
+				//    data.ValueMappers = mappers;
+				//}
 
-					if (n >= 0)
-						ms[i].Map(source, dataReader, n, dest, destObject, i);
-				}
+				//var dest = data.ObjectMapper;
+				//var idx  = data.Index;
+				//var ms   = data.ValueMappers;
 
-				return destObject;
+				//for (var i = 0; i < idx.Length; i++)
+				//{
+				//    var n = idx[i];
+
+				//    if (n >= 0)
+				//        ms[i].Map(source, dataReader, n, dest, destObject, i);
+				//}
+
+				//return destObject;
 			}
 
 			static object DefaultInheritanceMappingException(object value, Type type)
