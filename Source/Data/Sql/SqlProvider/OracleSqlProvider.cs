@@ -311,6 +311,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					.Append(s.Substring(16, 16))
 					.Append("' as raw(16))");
 			}
+			else if (value is DateTime)
+			{
+				sb.AppendFormat("TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
+			}
 			else
 				base.BuildValue(sb, value);
 		}
