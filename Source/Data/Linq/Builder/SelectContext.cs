@@ -205,7 +205,7 @@ namespace BLToolkit.Data.Linq.Builder
 									case ExpressionType.MemberInit :
 										{
 											var mmExpresion = GetMemberExpression(memberExpression, expression, level + 1);
-											return BuildExpression(mmExpresion, 0);
+											return Builder.BuildExpression(this, mmExpresion);
 										}
 								}
 

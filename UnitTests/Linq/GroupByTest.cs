@@ -465,6 +465,54 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void GroupBy2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID
+				group p by new
+				{
+					ID = p.Value1 ?? c.ChildID
+				} into gr
+				select new
+				{
+					gr.Key.ID,
+					ID1 = gr.Key.ID + 1,
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID
+				group p by new
+				{
+					ID = p.Value1 ?? c.ChildID
+				} into gr
+				select new
+				{
+					gr.Key.ID,
+					ID1 = gr.Key.ID + 1,
+				}));
+		}
+
+		[Test]
+		public void GroupBy3()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in Child on p.ParentID equals c.ParentID
+				group p by p.Value1 ?? c.ChildID into gr
+				select new
+				{
+					gr.Key
+				},
+				from p in db.Parent
+				join c in db.Child on p.ParentID equals c.ParentID
+				group p by p.Value1 ?? c.ChildID into gr
+				select new
+				{
+					gr.Key
+				}));
+		}
+
+		[Test]
 		public void Sum1()
 		{
 			var expected =
