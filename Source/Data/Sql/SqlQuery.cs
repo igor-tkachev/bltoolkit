@@ -3031,23 +3031,26 @@ namespace BLToolkit.Data.Sql
 			return null;
 		}
 
-		static ISqlExpression GetColumn(QueryData data, SqlField field, bool addToGroupBy)
+		static ISqlExpression GetColumn(QueryData data, SqlField field)
 		{
 			foreach (var query in data.Queries)
 			{
-				foreach (var table in query.Query.From.Tables)
+				var q = query.Query;
+
+				foreach (var table in q.From.Tables)
 				{
 					var t = FindField(field, table);
 
 					if (t != null)
 					{
-						var n   = query.Query.Select.Columns.Count;
-						var idx = query.Query.Select.Add(field);
+						var n   = q.Select.Columns.Count;
+						var idx = q.Select.Add(field);
 
-						if (addToGroupBy && n != query.Query.Select.Columns.Count)
-							query.Query.GroupBy.Items.Add(field);
+						if (n != q.Select.Columns.Count)
+							if (!q.GroupBy.IsEmpty || q.Select.Columns.Exists(c => IsAggregationFunction(c.Expression)))
+								q.GroupBy.Items.Add(field);
 
-						return query.Query.Select.Columns[idx];
+						return q.Select.Columns[idx];
 					}
 				}
 			}
@@ -3055,13 +3058,12 @@ namespace BLToolkit.Data.Sql
 			return null;
 		}
 
-		void ResolveFields(QueryData data)
+		static void ResolveFields(QueryData data)
 		{
 			if (data.Queries.Count == 0)
 				return;
 
-			var dic     = new Dictionary<ISqlExpression,ISqlExpression>();
-			var isGroup = !GroupBy.IsEmpty || Select.Columns.Exists(c => IsAggregationFunction(c.Expression));
+			var dic = new Dictionary<ISqlExpression,ISqlExpression>();
 
 			foreach (SqlField field in data.Fields)
 			{
@@ -3080,7 +3082,7 @@ namespace BLToolkit.Data.Sql
 
 				if (!found)
 				{
-					var expr = GetColumn(data, field, isGroup);
+					var expr = GetColumn(data, field);
 
 					if (expr != null)
 						dic.Add(field, expr);
