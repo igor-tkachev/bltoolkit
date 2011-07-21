@@ -9,6 +9,8 @@ using NUnit.Framework;
 
 using Data.Linq;
 using Data.Linq.Model;
+using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.Mapping;
 
 #region ReSharper disable
 // ReSharper disable ConvertToConstant.Local
@@ -997,6 +999,61 @@ namespace Update
 
 				Assert.IsNull(parent.Value1);
 			});
+		}
+
+		public class FullName
+		{
+			           public string FirstName     { get; set; }
+			           public string LastName;
+			[Nullable] public string MiddleName;
+		}
+
+		[TableName("Person")]
+		[MapField("FirstName",  "Name.FirstName")]
+		[MapField("LastName",   "Name.LastName")]
+		[MapField("MiddleName", "Name.MiddleName")]
+		public class TestPerson
+		{
+			[Identity, PrimaryKey]
+			//[SequenceName("PostgreSQL", "Seq")]
+			[SequenceName("Firebird", "PersonID")]
+			[MapField("PersonID")]
+			public int ID;
+
+			public FullName Name;
+		}
+
+		[Test]
+		public void Insert11()
+		{
+			var p = new TestPerson();
+
+			ForEachProvider(db =>
+				db.Insert(p)
+				);
+		}
+
+		[Test]
+		public void Insert12()
+		{
+			ForEachProvider(db =>
+			                db.Into(db.GetTable<TestPerson>())
+								.Value(_ => _.Name.FirstName, "FirstName")
+								.Value(_ => _.Name.LastName, () => "LastName")
+								.Insert()
+				);
+
+		}
+
+		[Test]
+		public void Insert13()
+		{
+			ForEachProvider(db => db.GetTable<TestPerson>()
+			                      	.Insert(() =>
+			                      		new TestPerson() {Name = new FullName() {FirstName = "FirstName", LastName = "LastName"}})
+
+				);
+
 		}
 	}
 }
