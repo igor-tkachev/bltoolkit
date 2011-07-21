@@ -149,6 +149,9 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var sqlex = ConvertToSqlAndBuild(context, expression);
 			var idx   = context.SqlQuery.Select.Add(sqlex);
+
+			idx = context.ConvertToParentIndex(idx, context);
+
 			var field = BuildSql(expression.Type, idx);
 
 			return field;
