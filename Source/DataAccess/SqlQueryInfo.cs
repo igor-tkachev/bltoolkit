@@ -9,6 +9,12 @@ namespace BLToolkit.DataAccess
 {
 	public class SqlQueryInfo
 	{
+        //NOTE Added empty constructor
+        public SqlQueryInfo()
+        {
+
+        }
+
 		public SqlQueryInfo(ObjectMapper objectMapper)
 		{
 			ObjectMapper = objectMapper;
@@ -22,9 +28,11 @@ namespace BLToolkit.DataAccess
 			get { return ObjectMapper.TypeAccessor.OriginalType; }
 		}
 
-		private readonly List<SqlQueryParameterInfo> _parameters = new List<SqlQueryParameterInfo>();
+        //NOTE Changed from private to protected
+        protected readonly List<SqlQueryParameterInfo> _parameters = new List<SqlQueryParameterInfo>();
 
-		public SqlQueryParameterInfo AddParameter(string parameterName, string fieldName)
+        //NOTE Changed to virtual
+		public virtual SqlQueryParameterInfo AddParameter(string parameterName, string fieldName)
 		{
 			var parameter = new SqlQueryParameterInfo { ParameterName = parameterName, FieldName = fieldName };
 
