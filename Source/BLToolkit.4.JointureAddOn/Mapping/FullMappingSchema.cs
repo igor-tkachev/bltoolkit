@@ -390,7 +390,7 @@ namespace BLToolkit.Mapping
                 }
                 else
                 {
-                    object[] nomapAttr = prop.GetCustomAttributes(typeof (NoMapAttribute), true);
+                    object[] nomapAttr = prop.GetCustomAttributes(typeof(MapIgnoreAttribute), true);
                     if (nomapAttr.Length > 0)
                         continue;
 
