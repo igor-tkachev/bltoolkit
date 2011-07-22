@@ -30,7 +30,7 @@ namespace UnitTests.CS.JointureTests
                 var artist2 = (Artist2) query2.SelectByKey(typeof (Artist2), 2643);
                 List<Title> titles2 = artist2.Titles;
 
-                var query = new FullSqlQuery(db); // Dont ignore lazyloading
+                var query = new FullSqlQuery(db, false); // Dont ignore lazyloading
                 var artist = (Artist2) query.SelectByKey(typeof (Artist2), 2643);
                 List<Title> titles = artist.Titles;
                 Assert.AreEqual(titles2.Count, titles.Count);

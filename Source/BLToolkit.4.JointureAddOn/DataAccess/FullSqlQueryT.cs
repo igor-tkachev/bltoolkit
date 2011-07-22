@@ -48,6 +48,23 @@ namespace BLToolkit.DataAccess
             }
         }
 
+        private readonly Hashtable _actionSqlQueryInfo = new Hashtable();
+
+        [NoInterception]
+        public override SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
+        {    
+            var key = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
+            var query = (SqlQueryInfo)_actionSqlQueryInfo[key];
+
+            if (query == null)
+            {
+                query = CreateSqlText(db, type, actionName);
+                _actionSqlQueryInfo[key] = query;
+            }
+
+            return query;
+        }
+
         #endregion
 
         #region Protected
