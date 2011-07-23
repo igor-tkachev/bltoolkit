@@ -214,23 +214,5 @@ namespace Data.Linq
 				   Child.Select(c => string.Format("{0},{1}", c.ChildID, text)).FirstOrDefault(),
 				db.Child.Select(c => string.Format("{0},{1}", c.ChildID, text)).FirstOrDefault()));
 		}
-
-		[BLToolkit.DataAccess.TableName("Person")]
-		public class TestPerson
-		{
-			public int PersonID;
-			[BLToolkit.Mapping.MapIgnore]
-			public string FirstName;
-		}
-
-		[Test, ExpectedException(typeof(LinqException))]
-		public void ExceptionTest()
-		{
-			ForEachProvider(db =>
-				db.GetTable<TestPerson>()
-			      .Where(_ => _.PersonID == 1)
-			      .Select(_ => _.FirstName)
-				  .FirstOrDefault());
-		}
 	}
 }

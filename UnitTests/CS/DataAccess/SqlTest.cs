@@ -131,7 +131,6 @@ namespace DataAccess
 			}
 		}
 
-
 		[TableName("DataTypeTest")]
 		class UpdateTest
 		{
@@ -167,12 +166,12 @@ namespace DataAccess
 				db.BeginTransaction();
 
 				var person = new Person1
-				                   	{
-				                   		FirstName  = "TestOnInsert",
-				                   		LastName   = "",
-				                   		MiddleName = "1",
-				                   		Gender     = 'M'
-				                   	};
+				{
+					FirstName  = "TestOnInsert",
+					LastName   = "",
+					MiddleName = "1",
+					Gender     = 'M'
+				};
 
 				var sqlQuery = new SqlQuery<Person1>();
 

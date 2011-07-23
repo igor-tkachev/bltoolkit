@@ -620,6 +620,23 @@ namespace BLToolkit.Data.Linq.Builder
 				//
 				var table = FindTable(expression, level, false);
 
+				if (table == null)
+				{
+					if (expression is MemberExpression)
+					{
+						var memberExpression = (MemberExpression)expression;
+
+						if (ObjectMapper != null &&
+							ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
+						{
+							throw new LinqException("Member '{0}.{1}' is not a table column.",
+								memberExpression.Member.Name, memberExpression.Member.Name);
+						}
+					}
+
+					throw new InvalidOperationException();
+				}
+
 				if (table.Field == null)
 					return table.Table.BuildQuery();
 
