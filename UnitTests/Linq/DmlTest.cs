@@ -1012,7 +1012,7 @@ namespace Update
 		[MapField("FirstName",  "Name.FirstName")]
 		[MapField("LastName",   "Name.LastName")]
 		[MapField("MiddleName", "Name.MiddleName")]
-		public class TestPerson
+		public class TestPerson1
 		{
 			[Identity, PrimaryKey]
 			//[SequenceName("PostgreSQL", "Seq")]
@@ -1026,34 +1026,34 @@ namespace Update
 		[Test]
 		public void Insert11()
 		{
-			var p = new TestPerson();
+			var p = new TestPerson1();
 
-			ForEachProvider(db =>
-				db.Insert(p)
-				);
+			ForEachProvider(db => db.Insert(p));
 		}
 
 		[Test]
 		public void Insert12()
 		{
 			ForEachProvider(db =>
-			                db.Into(db.GetTable<TestPerson>())
-								.Value(_ => _.Name.FirstName, "FirstName")
-								.Value(_ => _.Name.LastName, () => "LastName")
-								.Insert()
-				);
+				db.Into(db.GetTable<TestPerson1>())
+					.Value(_ => _.Name.FirstName, "FirstName")
+					.Value(_ => _.Name.LastName, () => "LastName")
+					.Insert());
 
 		}
 
 		[Test]
 		public void Insert13()
 		{
-			ForEachProvider(db => db.GetTable<TestPerson>()
-			                      	.Insert(() =>
-			                      		new TestPerson() {Name = new FullName() {FirstName = "FirstName", LastName = "LastName"}})
-
-				);
-
+			ForEachProvider(db => db.GetTable<TestPerson1>()
+				.Insert(() => new TestPerson1
+				{
+					Name = new FullName
+					{
+						FirstName = "FirstName",
+						LastName  = "LastName"
+					}
+				}));
 		}
 	}
 }
