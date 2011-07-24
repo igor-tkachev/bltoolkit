@@ -1020,13 +1020,15 @@ namespace Update
 			[MapField("PersonID")]
 			public int ID;
 
+			public string Gender;
+
 			public FullName Name;
 		}
 
 		[Test]
 		public void Insert11()
 		{
-			var p = new TestPerson1();
+			var p = new TestPerson1 { Name = new FullName { FirstName = "fn", LastName = "ln" }, Gender = "M" };
 
 			ForEachProvider(db => db.Insert(p));
 		}
@@ -1034,11 +1036,11 @@ namespace Update
 		[Test]
 		public void Insert12()
 		{
-			ForEachProvider(db =>
-				db.Into(db.GetTable<TestPerson1>())
+			ForEachProvider(db => db
+				.Into(db.GetTable<TestPerson1>())
 					.Value(_ => _.Name.FirstName, "FirstName")
 					.Value(_ => _.Name.LastName, () => "LastName")
-					.Insert());
+				.Insert());
 
 		}
 
