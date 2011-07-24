@@ -395,7 +395,9 @@ namespace BLToolkit.Data.Linq
 
 			var mm       = field.MemberMapper;
 			var members  = mm.MemberName.Split('.');
-			var defValue = Expression.Constant(mm.MapMemberInfo.DefaultValue, mm.MapMemberInfo.Type);
+			var defValue = Expression.Constant(
+				mm.MapMemberInfo.DefaultValue ?? TypeHelper.GetDefaultValue(mm.MapMemberInfo.Type),
+				mm.MapMemberInfo.Type);
 
 			for (var i = 0; i < members.Length; i++)
 			{

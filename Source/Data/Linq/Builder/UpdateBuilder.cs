@@ -171,7 +171,8 @@ namespace BLToolkit.Data.Linq.Builder
 			while (pi.NodeType == ExpressionType.Convert || pi.NodeType == ExpressionType.ConvertChecked)
 				pi = ((UnaryExpression)pi).Operand;
 
-			if (pi.NodeType != ExpressionType.MemberAccess)
+			if (pi.NodeType != ExpressionType.MemberAccess ||
+				pi.GetRootObject() != extract.Parameters[0])
 				throw new LinqException("Member expression expected for the 'Set' statement.");
 
 			var body   = (MemberExpression)pi;
