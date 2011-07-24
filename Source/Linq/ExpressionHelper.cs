@@ -1965,6 +1965,51 @@ namespace BLToolkit.Linq
 			return expr;
 		}
 
+		static public List<Expression> GetMembers(this Expression expr)
+		{
+			if (expr == null)
+				return new List<Expression>();
+
+			List<Expression> list;
+
+			switch (expr.NodeType)
+			{
+				case ExpressionType.Call         :
+					{
+						var e = (MethodCallExpression)expr;
+
+						if (e.Object != null)
+							list = GetMembers(e.Object);
+						else if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
+							list = GetMembers(e.Arguments[0]);
+						else
+							list = new List<Expression>();
+
+						break;
+					}
+
+				case ExpressionType.MemberAccess :
+					{
+						var e = (MemberExpression)expr;
+
+						if (e.Expression != null)
+							list = GetMembers(e.Expression.Unwrap());
+						else
+							list = new List<Expression>();
+
+						break;
+					}
+
+				default                          :
+					list = new List<Expression>();
+					break;
+			}
+
+			list.Add(expr);
+
+			return list;
+		}
+
 		static public bool IsQueryable(this MethodCallExpression method)
 		{
 			var type = method.Method.DeclaringType;

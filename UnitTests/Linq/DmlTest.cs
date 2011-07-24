@@ -1040,6 +1040,7 @@ namespace Update
 				.Into(db.GetTable<TestPerson1>())
 					.Value(_ => _.Name.FirstName, "FirstName")
 					.Value(_ => _.Name.LastName, () => "LastName")
+					.Value(_ => _.Gender,         "F")
 				.Insert());
 
 		}
