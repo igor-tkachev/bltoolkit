@@ -175,7 +175,8 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected void AppendTableName(StringBuilder sb, DbManager db, Type type)
+        //NOTE changed to virtual
+		protected virtual void AppendTableName(StringBuilder sb, DbManager db, Type type)
 		{
 			var database = GetDatabaseName(type);
 			var owner    = GetOwnerName   (type);

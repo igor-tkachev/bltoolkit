@@ -1,4 +1,3 @@
-using System.Data;
 using BLToolkit.Mapping;
 
 namespace BLToolkit.DataAccess
@@ -25,7 +24,8 @@ namespace BLToolkit.DataAccess
 			get { return _memberMapper; }
 		}
 
-		internal void SetMemberMapper(ObjectMapper objectMapper)
+        //NOTE Changed internal to public and added virtual
+		public virtual void SetMemberMapper(ObjectMapper objectMapper)
 		{
 			_memberMapper = objectMapper[_fieldName];
 		}
