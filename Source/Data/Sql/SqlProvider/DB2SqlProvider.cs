@@ -15,9 +15,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity)
+			if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity)
 			{
-				_identityField = sqlQuery.Set.Into.GetIdentityField();
+				_identityField = sqlQuery.Insert.Into.GetIdentityField();
 
 				if (_identityField == null)
 					return 2;

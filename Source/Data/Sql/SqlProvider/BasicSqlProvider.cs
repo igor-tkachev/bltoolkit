@@ -162,7 +162,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
 
 			
-			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.Set.WithIdentity)
+			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
 		}
 
@@ -271,8 +271,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildUpdateTableName(StringBuilder sb)
 		{
-			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
+			if (SqlQuery.Update.Table != null && SqlQuery.Update.Table != SqlQuery.From.Tables[0].Source)
+				BuildPhysicalTable(sb, SqlQuery.Update.Table, null);
 			else
 				BuildTableName(sb, SqlQuery.From.Tables[0], true, true);
 		}
@@ -286,7 +286,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			var first = true;
 
-			foreach (var expr in _sqlQuery.Set.Items)
+			foreach (var expr in _sqlQuery.Update.Items)
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
@@ -310,7 +310,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildInsertClause(StringBuilder sb)
 		{
 			AppendIndent(sb).Append("INSERT INTO ");
-			BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
+			BuildPhysicalTable(sb, SqlQuery.Insert.Into, null);
 			sb.AppendLine(" ");
 
 			AppendIndent(sb).AppendLine("(");
@@ -319,7 +319,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			var first = true;
 
-			foreach (var expr in _sqlQuery.Set.Items)
+			foreach (var expr in _sqlQuery.Insert.Items)
 			{
 				if (!first)
 					sb.Append(',').AppendLine();
@@ -343,7 +343,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				first = true;
 
-				foreach (var expr in _sqlQuery.Set.Items)
+				foreach (var expr in _sqlQuery.Insert.Items)
 				{
 					if (!first)
 						sb.Append(',').AppendLine();
@@ -1896,7 +1896,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					foreach (var field in table.Fields.Values)
 						map.Add(field, copy[field.Name]);
 
-					foreach (var item in sqlQuery.Set.Items)
+					foreach (var item in sqlQuery.Update.Items)
 					{
 						((ISqlExpressionWalkable)item).Walk(false, expr =>
 						{
@@ -1904,13 +1904,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
 						});
 
-						sql.Set.Items.Add(item);
+						sql.Update.Items.Add(item);
 					}
 
 					sql.Parameters.AddRange(sqlQuery.Parameters);
 
 					sqlQuery.Parameters.Clear();
-					sqlQuery.Set.Items.Clear();
+					sqlQuery.Update.Items.Clear();
 
 					sqlQuery = sql;
 				}

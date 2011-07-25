@@ -12,17 +12,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			var attr = GetSequenceNameAttribute(SqlQuery.Set.Into, false);
+			var into = SqlQuery.Insert.Into;
+			var attr = GetSequenceNameAttribute(into, false);
 			var name =
 				attr != null ?
 					attr.SequenceName :
 					Convert(
-						string.Format("{0}_{1}_seq", SqlQuery.Set.Into.PhysicalName, SqlQuery.Set.Into.GetIdentityField().PhysicalName),
+						string.Format("{0}_{1}_seq", into.PhysicalName, into.GetIdentityField().PhysicalName),
 						ConvertType.NameToQueryField);
 
 			AppendIndent(sb)

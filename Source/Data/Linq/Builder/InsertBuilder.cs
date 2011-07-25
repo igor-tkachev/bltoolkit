@@ -30,16 +30,22 @@ namespace BLToolkit.Data.Linq.Builder
 					// static int Insert<T>              (this IValueInsertable<T> source)
 					// static int Insert<TSource,TTarget>(this ISelectInsertable<TSource,TTarget> source)
 					{
-						foreach (var item in sequence.SqlQuery.Set.Items)
+						foreach (var item in sequence.SqlQuery.Insert.Items)
 							sequence.SqlQuery.Select.Expr(item.Expression);
 						break;
 					}
 
 				case 2 : // static int Insert<T>(this Table<T> target, Expression<Func<T>> setter)
 					{
-						UpdateBuilder.BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[1].Unwrap(), sequence, sequence);
+						UpdateBuilder.BuildSetter(
+							builder,
+							buildInfo,
+							(LambdaExpression)methodCall.Arguments[1].Unwrap(),
+							sequence,
+							sequence.SqlQuery.Insert.Items,
+							sequence);
 
-						sequence.SqlQuery.Set.Into  = ((TableBuilder.TableContext)sequence).SqlTable;
+						sequence.SqlQuery.Insert.Into  = ((TableBuilder.TableContext)sequence).SqlTable;
 						sequence.SqlQuery.From.Tables.Clear();
 
 						break;
@@ -49,23 +55,29 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var into = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[1], new SqlQuery()));
 
-						UpdateBuilder.BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[2].Unwrap(), into, sequence);
+						UpdateBuilder.BuildSetter(
+							builder,
+							buildInfo,
+							(LambdaExpression)methodCall.Arguments[2].Unwrap(),
+							into,
+							sequence.SqlQuery.Insert.Items,
+							sequence);
 
 						sequence.SqlQuery.Select.Columns.Clear();
 
-						foreach (var item in sequence.SqlQuery.Set.Items)
+						foreach (var item in sequence.SqlQuery.Insert.Items)
 							sequence.SqlQuery.Select.Columns.Add(new SqlQuery.Column(sequence.SqlQuery, item.Expression));
 
-						sequence.SqlQuery.Set.Into = ((TableBuilder.TableContext)into).SqlTable;
+						sequence.SqlQuery.Insert.Into = ((TableBuilder.TableContext)into).SqlTable;
 
 						break;
 					}
 			}
 
-			sequence.SqlQuery.QueryType        = QueryType.Insert;
-			sequence.SqlQuery.Set.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
+			sequence.SqlQuery.QueryType           = QueryType.Insert;
+			sequence.SqlQuery.Insert.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
 
-			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Set.WithIdentity);
+			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity);
 		}
 
 		protected override SequenceConvertInfo Convert(
@@ -143,7 +155,7 @@ namespace BLToolkit.Data.Linq.Builder
 				if (source.NodeType == ExpressionType.Constant && ((ConstantExpression)source).Value == null)
 				{
 					sequence = builder.BuildSequence(new BuildInfo((IBuildContext)null, into, new SqlQuery()));
-					sequence.SqlQuery.Set.Into = ((TableBuilder.TableContext)sequence).SqlTable;
+					sequence.SqlQuery.Insert.Into = ((TableBuilder.TableContext)sequence).SqlTable;
 					sequence.SqlQuery.From.Tables.Clear();
 				}
 				// static ISelectInsertable<TSource,TTarget> Into<TSource,TTarget>(this IQueryable<TSource> source, Table<TTarget> target)
@@ -152,7 +164,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					sequence = builder.BuildSequence(new BuildInfo(buildInfo, source));
 					var tbl = builder.BuildSequence(new BuildInfo((IBuildContext)null, into, new SqlQuery()));
-					sequence.SqlQuery.Set.Into = ((TableBuilder.TableContext)tbl).SqlTable;
+					sequence.SqlQuery.Insert.Into = ((TableBuilder.TableContext)tbl).SqlTable;
 				}
 
 				sequence.SqlQuery.Select.Columns.Clear();
@@ -184,16 +196,29 @@ namespace BLToolkit.Data.Linq.Builder
 				var extract  = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 				var update   =                   methodCall.Arguments[2].Unwrap();
 
-				if (sequence.SqlQuery.Set.Into == null)
+				if (sequence.SqlQuery.Insert.Into == null)
 				{
-					sequence.SqlQuery.Set.Into = (SqlTable)sequence.SqlQuery.From.Tables[0].Source;
+					sequence.SqlQuery.Insert.Into = (SqlTable)sequence.SqlQuery.From.Tables[0].Source;
 					sequence.SqlQuery.From.Tables.Clear();
 				}
 
 				if (update.NodeType == ExpressionType.Lambda)
-					UpdateBuilder.ParseSet(builder, buildInfo, extract, (LambdaExpression)update, sequence);
+					UpdateBuilder.ParseSet(
+						builder,
+						buildInfo,
+						extract,
+						(LambdaExpression)update,
+						sequence,
+						sequence.SqlQuery.Insert.Into,
+						sequence.SqlQuery.Insert.Items);
 				else
-					UpdateBuilder.ParseSet(builder, buildInfo, extract, update, sequence);
+					UpdateBuilder.ParseSet(
+						builder,
+						buildInfo,
+						extract,
+						update,
+						sequence,
+						sequence.SqlQuery.Insert.Items);
 
 				return sequence;
 			}

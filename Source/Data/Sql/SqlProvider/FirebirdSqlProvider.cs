@@ -58,14 +58,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override bool   SkipFirst   { get { return false;       } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
+
 		public override bool IsIdentityParameterRequired { get { return true; } }
 
 		protected override void BuildGetIdentity(StringBuilder sb)
 		{
-			var identityField = SqlQuery.Set.Into.GetIdentityField();
+			var identityField = SqlQuery.Insert.Into.GetIdentityField();
 
 			if (identityField == null)
-				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
+				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Insert.Into.Name);
 
 			AppendIndent(sb).AppendLine("RETURNING");
 			AppendIndent(sb).Append("\t");

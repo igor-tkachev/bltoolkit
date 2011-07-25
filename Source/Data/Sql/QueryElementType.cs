@@ -33,7 +33,8 @@ namespace BLToolkit.Data.Sql
 				JoinedTable,
 
 			SelectClause,
-			SetClause,
+			InsertClause,
+			UpdateClause,
 				SetExpression,
 			FromClause,
 			WhereClause,
