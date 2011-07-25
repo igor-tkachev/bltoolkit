@@ -409,6 +409,30 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void SubQuery7()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in 
+					from c in Child
+					where c.ParentID == 1
+					select c
+				on p.ParentID equals c.ParentID into g
+				from c in g.DefaultIfEmpty()
+				group p by c == null ? 0 : c.ChildID into gg
+				select new { gg.Key },
+				from p in db.Parent
+				join c in 
+					from c in db.Child
+					where c.ParentID == 1
+					select c
+				on p.ParentID equals c.ParentID into g
+				from c in g.DefaultIfEmpty()
+				group p by c.ChildID into gg
+				select new { gg.Key }));
+		}
+
+		[Test]
 		public void Calculated1()
 		{
 			var expected = 

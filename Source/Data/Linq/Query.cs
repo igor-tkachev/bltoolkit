@@ -386,15 +386,26 @@ namespace BLToolkit.Data.Linq
 		static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
 		{
 			var exprParam = Expression.Parameter(typeof(Expression), "expr");
-			var getter    = (Expression)Expression.PropertyOrField(
-				Expression.Convert(
-					Expression.Property(
-						Expression.Convert(exprParam, typeof(ConstantExpression)),
-						ReflectionHelper.Constant.Value),
-					typeof(T)),
-				field.Name);
 
-			var mm = field.MemberMapper;
+			Expression getter = Expression.Convert(
+				Expression.Property(
+					Expression.Convert(exprParam, typeof(ConstantExpression)),
+					ReflectionHelper.Constant.Value),
+				typeof(T));
+
+			var mm       = field.MemberMapper;
+			var members  = mm.MemberName.Split('.');
+			var defValue = Expression.Constant(
+				mm.MapMemberInfo.DefaultValue ?? TypeHelper.GetDefaultValue(mm.MapMemberInfo.Type),
+				mm.MapMemberInfo.Type);
+
+			for (var i = 0; i < members.Length; i++)
+			{
+				var member = members[i];
+				var pof    = Expression.PropertyOrField(getter, member) as Expression;
+
+				getter = i == 0 ? pof : Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
+			}
 
 			if (!mm.Type.IsClass && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
 			{
@@ -415,7 +426,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(field.SystemType, field.Name, null, dataContext.MappingSchema)
+				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema)
 			};
 
 			if (field.SystemType.IsEnum)

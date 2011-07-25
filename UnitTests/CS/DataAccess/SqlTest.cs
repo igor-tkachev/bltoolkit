@@ -131,7 +131,6 @@ namespace DataAccess
 			}
 		}
 
-
 		[TableName("DataTypeTest")]
 		class UpdateTest
 		{
@@ -152,7 +151,7 @@ namespace DataAccess
 		[TableName("Person")]
 		public class Person1
 		{
-			[Identity]                     public int    PersonID;
+			[Identity, PrimaryKey]         public int    PersonID;
 			                               public string FirstName;
 			                               public string LastName;
 			[NonUpdatable(OnUpdate=false)] public string MiddleName;
@@ -166,18 +165,31 @@ namespace DataAccess
 			{
 				db.BeginTransaction();
 
-				new SqlQuery<Person1>().Insert(db, new Person1
+				var person = new Person1
 				{
 					FirstName  = "TestOnInsert",
 					LastName   = "",
 					MiddleName = "1",
 					Gender     = 'M'
-				});
+				};
+
+				var sqlQuery = new SqlQuery<Person1>();
+
+				sqlQuery.Insert(db, person);
 
 				var p = db.GetTable<Person1>().Single(_ => _.FirstName == "TestOnInsert");
 
-				Assert.AreNotEqual("1", p.MiddleName);
+				Assert.AreEqual(person.MiddleName, p.MiddleName);
 
+				person.PersonID   = p.PersonID;
+				person.MiddleName = "should not be updated";
+
+				sqlQuery.Update(db, person);
+
+				p = db.GetTable<Person1>().Single(_ => _.FirstName == "TestOnInsert");
+
+				Assert.AreNotEqual(person.MiddleName, p.MiddleName);
+				
 				db.RollbackTransaction();
 			}
 		}
