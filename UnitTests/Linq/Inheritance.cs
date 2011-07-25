@@ -243,5 +243,31 @@ namespace Data.Linq
 				Assert.IsNotEmpty(sql);
 			}
 		}
+
+		[Test]
+		public void ReferenceNavigation()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result =
+					from od in db.OrderDetail
+					where od.Product.Category.CategoryName == "Seafood"
+					select new { od.Order, od.Product };
+				
+				var list = result.ToList();
+
+				Assert.AreEqual(330, list.Count);
+
+				foreach (var item in list)
+				{
+					Assert.IsNotNull(item);
+					Assert.IsNotNull(item.Order);
+					Assert.IsNotNull(item.Product);
+					Assert.IsTrue(
+						 item.Product.Discontinued && item.Product is Northwind.DiscontinuedProduct ||
+						!item.Product.Discontinued && item.Product is Northwind.ActiveProduct);
+				}
+			}
+		}
 	}
 }

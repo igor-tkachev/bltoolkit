@@ -1212,7 +1212,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					Expression cond = null;
 
-					var checkNullOnly = true; //SqlQuery.Select.IsDistinct || SqlQuery.GroupBy.Items.Count > 0;
+					var checkNullOnly = SqlQuery.Select.IsDistinct || SqlQuery.GroupBy.Items.Count > 0;
 
 					if (checkNullOnly)
 					{
@@ -1263,7 +1263,7 @@ namespace BLToolkit.Data.Linq.Builder
 						cond = cond == null ? e : Expression.AndAlso(cond, e);
 					}
 
-					expression = Expression.Condition(cond, Expression.Constant(null, ObjectType), expression);
+					expression = Expression.Condition(cond, Expression.Constant(null, expression.Type), expression);
 				}
 
 				return expression;
