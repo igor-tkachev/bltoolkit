@@ -9,11 +9,10 @@ namespace BLToolkit.DataAccess
 {
 	public class SqlQueryInfo
 	{
-        //NOTE Added empty constructor
-        public SqlQueryInfo()
-        {
-
-        }
+		//NOTE Added empty constructor
+		public SqlQueryInfo()
+		{
+		}
 
 		public SqlQueryInfo(ObjectMapper objectMapper)
 		{
@@ -28,31 +27,31 @@ namespace BLToolkit.DataAccess
 			get { return ObjectMapper.TypeAccessor.OriginalType; }
 		}
 
-        //NOTE Changed from private to protected
-        protected readonly List<SqlQueryParameterInfo> _parameters = new List<SqlQueryParameterInfo>();
+		//NOTE Changed from private to protected
+		protected readonly List<SqlQueryParameterInfo> Parameters = new List<SqlQueryParameterInfo>();
 
-        //NOTE Changed to virtual
+		//NOTE Changed to virtual
 		public virtual SqlQueryParameterInfo AddParameter(string parameterName, string fieldName)
 		{
 			var parameter = new SqlQueryParameterInfo { ParameterName = parameterName, FieldName = fieldName };
 
 			parameter.SetMemberMapper(ObjectMapper);
 
-			_parameters.Add(parameter);
+			Parameters.Add(parameter);
 
 			return parameter;
 		}
 
 		public IDbDataParameter[] GetParameters(DbManager db, object[] key)
 		{
-			if (_parameters.Count != key.Length)
+			if (Parameters.Count != key.Length)
 				throw new DataAccessException("Parameter list does match key list.");
 
-			var parameters = new IDbDataParameter[_parameters.Count];
+			var parameters = new IDbDataParameter[Parameters.Count];
 
-			for (var i = 0; i < _parameters.Count; i++)
+			for (var i = 0; i < Parameters.Count; i++)
 			{
-				var info = _parameters[i];
+				var info = Parameters[i];
 
 				parameters[i] = db.Parameter(info.ParameterName, key[i]);
 			}
@@ -62,11 +61,11 @@ namespace BLToolkit.DataAccess
 
 		public IDbDataParameter[] GetParameters(DbManager db, object obj)
 		{
-			var parameters = new IDbDataParameter[_parameters.Count];
+			var parameters = new IDbDataParameter[Parameters.Count];
 
-			for (var i = 0; i < _parameters.Count; i++)
+			for (var i = 0; i < Parameters.Count; i++)
 			{
-				var info = _parameters[i];
+				var info = Parameters[i];
 
 				//parameters[i] = db.Parameter(info.ParameterName, info.MemberMapper.GetValue(obj));
 
@@ -96,10 +95,10 @@ namespace BLToolkit.DataAccess
 
 		public MemberMapper[] GetMemberMappers()
 		{
-			var members = new MemberMapper[_parameters.Count];
+			var members = new MemberMapper[Parameters.Count];
 
-			for (var i = 0; i < _parameters.Count; i++)
-				members[i] = _parameters[i].MemberMapper;
+			for (var i = 0; i < Parameters.Count; i++)
+				members[i] = Parameters[i].MemberMapper;
 
 			return members;
 		}

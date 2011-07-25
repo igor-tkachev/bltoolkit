@@ -328,7 +328,7 @@
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\BLToolkit.4.JointureAddOn\BLToolkit.4.JointureAddOn.csproj">
+    <ProjectReference Include="..\..\Extensions\JointureAddOn\BLToolkit.4.JointureAddOn.csproj">
       <Project>{9FD2722C-1E6C-4061-8AC0-32EE28808FC0}</Project>
       <Name>BLToolkit.4.JointureAddOn</Name>
     </ProjectReference>

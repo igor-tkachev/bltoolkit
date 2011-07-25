@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BLToolkit.Mapping;
 using System.Diagnostics;
+
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Reflection
 {
@@ -19,7 +18,6 @@ namespace BLToolkit.Reflection
         public MappingSchema MappingSchema { get; set; }
         public bool IsSource { get; set; }
         public bool StopMapping { get; set; }
-        [CLSCompliant(false)]
         public IMapDataSource DataSource { get; set; }
 
         private Dictionary<object, object> _items;
