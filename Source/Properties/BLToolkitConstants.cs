@@ -20,13 +20,12 @@ namespace BLToolkit
 		/// <summary>
 		/// Build component of version.
 		/// </summary>
-		public const string Build = "0";
+		public const string Build = "3";
 
 		/// <summary>
 		/// Full version string.
 		/// </summary>
-		public const string FullVersionString =
-			MajorVersion + "." + MinorVersion + "." + Build + "." + Revision;
+		public const string FullVersionString = MajorVersion + "." + MinorVersion + "." + Build + "." + Revision;
 
 		/// <summary>
 		/// Full BLT version.
