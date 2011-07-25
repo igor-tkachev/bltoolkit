@@ -269,5 +269,51 @@ namespace Data.Linq
 				}
 			}
 		}
+
+		[Test]
+		public void TypeCastIsChildConditional1()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.Product.         Select(x => x is Northwind.DiscontinuedProduct ? x : null);
+				var expected = db.Product.ToList().Select(x => x is Northwind.DiscontinuedProduct ? x : null);
+
+				var list = result.ToList();
+
+				Assert.Greater(list.Count, 0);
+				Assert.AreEqual(expected.Count(), list.Count);
+				Assert.IsTrue(list.Except(expected).Count() == 0);
+				Assert.IsTrue(list.Contains(null));
+			}
+		}
+
+		[Test]
+		public void TypeCastIsChildConditional2()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.Product.         Select(x => x is Northwind.DiscontinuedProduct);
+				var expected = db.Product.ToList().Select(x => x is Northwind.DiscontinuedProduct);
+
+				var list = result.ToList();
+
+				Assert.Greater(list.Count, 0);
+				Assert.AreEqual(expected.Count(), list.Count);
+				Assert.IsTrue(list.Except(expected).Count() == 0);
+			}
+		}
+
+		[Test]
+		public void TypeCastIsChild()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result    = db.Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
+				var exprected =    Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
+
+				Assert.Greater(result.Count, 0);
+				Assert.AreEqual(result.Count, exprected.Count);
+			}
+		}
 	}
 }
