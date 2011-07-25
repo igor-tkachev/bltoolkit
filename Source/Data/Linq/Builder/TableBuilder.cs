@@ -1023,7 +1023,31 @@ namespace BLToolkit.Data.Linq.Builder
 							foreach (var field in SqlTable.Fields.Values)
 							{
 								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
+								{
+									if (field.MemberMapper is MemberMapper.ComplexMapper &&
+										field.MemberMapper.MemberName.IndexOf('.') > 0)
+									{
+										var name = memberExpression.Member.Name;
+										var me   = memberExpression;
+
+										if (!(me.Expression is MemberExpression))
+											return null;
+
+										while (me.Expression is MemberExpression)
+										{
+											me   = (MemberExpression)me.Expression;
+											name = me.Member.Name + '.' + name;
+										}
+
+										foreach (var f in SqlTable.Fields.Values)
+											if (f.MemberMapper.MemberName == name)
+												return f;
+
+										return null;
+									}
+
 									return field;
+								}
 
 								if (InheritanceMapping.Count > 0 && field.Name == memberExpression.Member.Name)
 									foreach (var mapping in InheritanceMapping)

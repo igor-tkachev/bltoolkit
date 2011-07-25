@@ -93,13 +93,22 @@ namespace BLToolkit.Data.Linq.Builder
 			if (setter.Body.NodeType != ExpressionType.MemberInit)
 				throw new LinqException("Object initializer expected for insert statement.");
 
-			var body = (MemberInitExpression)setter.Body;
-			var ex   = body;
-			var ctx  = new ExpressionContext(buildInfo.Parent, sequence, setter);
+			var ex  = (MemberInitExpression)setter.Body;
+			var ctx = new ExpressionContext(buildInfo.Parent, sequence, setter);
 
-			for (var i = 0; i < ex.Bindings.Count; i++)
+			BuildSetter(builder, into, sequence, ctx, ex, Expression.Parameter(ex.Type, "p"));
+		}
+
+		static void BuildSetter(
+			ExpressionBuilder    builder,
+			IBuildContext        into,
+			IBuildContext        sequence,
+			IBuildContext        ctx,
+			MemberInitExpression expression,
+			Expression           path)
+		{
+			foreach (var binding in expression.Bindings)
 			{
-				var binding = ex.Bindings[i];
 				var member  = binding.Member;
 
 				if (member is MethodInfo)
@@ -107,15 +116,28 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (binding is MemberAssignment)
 				{
-					var ma     = binding as MemberAssignment;
-					var column = into.ConvertToSql(
-						Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field);
-					var expr   = builder.ConvertToSql(ctx, ma.Expression);
+					var ma = binding as MemberAssignment;
+					var pe = Expression.MakeMemberAccess(path, member);
 
-					if (expr is SqlParameter && ma.Expression.Type.IsEnum)
-						((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
+					if (ma.Expression is MemberInitExpression && !into.IsExpression(pe, 1, RequestFor.Field))
+					{
+						BuildSetter(
+							builder,
+							into,
+							sequence,
+							ctx,
+							(MemberInitExpression)ma.Expression, Expression.MakeMemberAccess(path, member));
+					}
+					else
+					{
+						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
+						var expr   = builder.ConvertToSql(ctx, ma.Expression);
 
-					sequence.SqlQuery.Set.Items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+						if (expr is SqlParameter && ma.Expression.Type.IsEnum)
+							((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
+
+						sequence.SqlQuery.Set.Items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+					}
 				}
 				else
 					throw new InvalidOperationException();

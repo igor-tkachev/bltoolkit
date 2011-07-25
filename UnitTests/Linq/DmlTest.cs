@@ -1055,7 +1055,8 @@ namespace Update
 					{
 						FirstName = "FirstName",
 						LastName  = "LastName"
-					}
+					},
+					Gender = "M",
 				}));
 		}
 	}
