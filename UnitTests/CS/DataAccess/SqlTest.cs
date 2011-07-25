@@ -154,12 +154,12 @@ namespace DataAccess
 			[Identity, PrimaryKey]         public int    PersonID;
 			                               public string FirstName;
 			                               public string LastName;
-			[NonUpdatable(OnUpdate=false)] public string MiddleName;
+			[NonUpdatable(OnInsert=false)] public string MiddleName;
 			                               public char   Gender;
 		}
 
 		[Test]
-		public void NonUpdatableOnInsert()
+		public void NonUpdatableOnUpdate()
 		{
 			using (var db = new DbManager())
 			{
