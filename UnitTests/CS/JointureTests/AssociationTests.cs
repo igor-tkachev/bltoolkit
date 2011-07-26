@@ -21,7 +21,7 @@ namespace UnitTests.CS.JointureTests
                                               "MUSICFR01.TEST", "scurutchet", "kisscool12"));
         }
 
-        [Test]
+        //[Test]
         public void SelectAllArtistsIgnoreLazyLoading()
         {
             using (var db = new MusicDB())
@@ -37,7 +37,7 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        [Test]
+        //[Test]
         public void SelectAllArtistsLazyLoading()
         {
             using (var db = new MusicDB())
@@ -56,7 +56,7 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        [Test]
+        //[Test]
         public void SelectAllTitlesFull()
         {
             using (var db = new MusicDB())
@@ -67,7 +67,7 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        [Test]
+        //[Test]
         public void SelectAllTitlesFull2()
         {
             using (var db = new MusicDB())
@@ -78,7 +78,7 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        [Test]
+        //[Test]
         public void SelectArtistFullWithLazyLoadingTitles()
         {
             using (var db = new MusicDB())
@@ -89,7 +89,7 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        [Test]
+        //[Test]
         public void SelectTitleFull()
         {
             using (var db = new MusicDB())

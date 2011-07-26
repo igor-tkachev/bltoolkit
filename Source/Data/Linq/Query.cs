@@ -453,7 +453,7 @@ namespace BLToolkit.Data.Linq
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
 
-						sqlQuery.Set.Into = sqlTable;
+						sqlQuery.Insert.Into = sqlTable;
 
 						ei = new Query<int>
 						{
@@ -471,14 +471,14 @@ namespace BLToolkit.Data.Linq
 
 								ei.Queries[0].Parameters.Add(param);
 
-								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+								sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
 							}
 							else if (field.Value.IsIdentity)
 							{
 								var expr = ei.SqlProvider.GetIdentityExpression(sqlTable, field.Value, false);
 
 								if (expr != null)
-									sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
+									sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
 							}
 						}
 
@@ -510,8 +510,8 @@ namespace BLToolkit.Data.Linq
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
 
-						sqlQuery.Set.Into         = sqlTable;
-						sqlQuery.Set.WithIdentity = true;
+						sqlQuery.Insert.Into         = sqlTable;
+						sqlQuery.Insert.WithIdentity = true;
 
 						ei = new Query<object>
 						{
@@ -529,14 +529,14 @@ namespace BLToolkit.Data.Linq
 
 								ei.Queries[0].Parameters.Add(param);
 
-								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+								sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
 							}
 							else if (field.Value.IsIdentity)
 							{
 								var expr = ei.SqlProvider.GetIdentityExpression(sqlTable, field.Value, true);
 
 								if (expr != null)
-									sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
+									sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
 							}
 						}
 
@@ -596,7 +596,7 @@ namespace BLToolkit.Data.Linq
 
 							ei.Queries[0].Parameters.Add(param);
 
-							sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+							sqlQuery.Update.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
 						}
 
 						foreach (var field in keys)

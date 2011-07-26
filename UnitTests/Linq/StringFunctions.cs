@@ -182,7 +182,7 @@ namespace Data.Linq
 		[Test]
 		public void LastIndexOf1()
 		{
-			ForEachProvider(_lastIndexExcludeList, db => 
+			ForEachProvider(_lastIndexExcludeList, db =>
 			{
 				var q = from p in db.Person where p.LastName.LastIndexOf("p") == 2 && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);

@@ -272,9 +272,10 @@ namespace Data.Linq
 		[Test]
 		public void StackOverflow3()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
-				from p in    Parent5 where p.Children.Count() != 0 select p,
-				from p in db.Parent5 where p.Children.Count() != 0 select p));
+			ForEachProvider(new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from p in    Parent5 where p.Children.Count() != 0 select p,
+					from p in db.Parent5 where p.Children.Count() != 0 select p));
 		}
 
 		[Test]

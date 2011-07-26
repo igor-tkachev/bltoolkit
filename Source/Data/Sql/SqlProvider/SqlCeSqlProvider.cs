@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
@@ -10,16 +9,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class SqlCeSqlProvider : BasicSqlProvider
 	{
-		public override bool IsSkipSupported           { get { return false; } }
-		public override bool IsTakeSupported           { get { return false; } }
-		public override bool IsSubQueryTakeSupported   { get { return false; } }
+		const int Version = 4;
+
+		public override bool IsSkipSupported           { get { return Version == 4; } }
+		public override bool IsTakeSupported           { get { return Version == 4; } }
+		public override bool IsSubQueryTakeSupported   { get { return Version == 4; } }
 		public override bool IsSubQueryColumnSupported { get { return false; } }
 		public override bool IsCountSubQuerySupported  { get { return false; } }
 		public override bool IsApplyJoinSupported      { get { return true;  } }
 
+		protected override string FirstFormat  { get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" :                null; } }
+		protected override string LimitFormat  { get { return SqlQuery.Select.SkipValue != null ? "FETCH NEXT {0} ROWS ONLY" : null; } }
+		protected override string OffsetFormat { get { return "OFFSET {0} ROWS"; } }
+		protected override bool   OffsetFirst  { get { return true;              } }
+
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -155,6 +161,36 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.QueryType != QueryType.Update)
 				base.BuildFromClause(sb);
+		}
+
+		protected override void BuildOrderByClause(StringBuilder sb)
+		{
+			if (SqlQuery.OrderBy.Items.Count == 0 && SqlQuery.Select.SkipValue != null)
+			{
+				AppendIndent(sb);
+
+				sb.Append("ORDER BY").AppendLine();
+
+				Indent++;
+
+				for (var i = 0; i < SqlQuery.Select.Columns.Count; i++)
+				{
+					AppendIndent(sb);
+
+					var col = SqlQuery.Select.Columns[i];
+
+					BuildExpression(sb, col.Expression);
+
+					if (i + 1 < SqlQuery.Select.Columns.Count)
+						sb.Append(',');
+
+					sb.AppendLine();
+				}
+
+				Indent--;
+			}
+			else
+				base.BuildOrderByClause(sb);
 		}
 
 		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)

@@ -111,8 +111,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
+			if (SqlQuery.Update.Table != null && SqlQuery.Update.Table != SqlQuery.From.Tables[0].Source)
+				BuildPhysicalTable(sb, SqlQuery.Update.Table, null);
 			else
 				sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
 		}

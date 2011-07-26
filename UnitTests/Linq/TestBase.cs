@@ -333,8 +333,8 @@ namespace Data.Linq
 			}
 		}
 
-		private   List<Person> _person;
-		protected List<Person>  Person
+		private          List<Person> _person;
+		protected IEnumerable<Person>  Person
 		{
 			get
 			{
@@ -347,7 +347,8 @@ namespace Data.Linq
 						p.Patient = Patient.SingleOrDefault(ps => p.ID == ps.PersonID);
 				}
 
-				return _person;
+				foreach (var item in _person)
+					yield return item;
 			}
 		}
 

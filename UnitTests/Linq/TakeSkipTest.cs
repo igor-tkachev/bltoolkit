@@ -82,7 +82,7 @@ namespace Data.Linq
 		[Test]
 		public void TakeCount()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.Sybase }, db => Assert.AreEqual(
 				   Child.Take(5).Count(),
 				db.Child.Take(5).Count()));
 		}
@@ -142,7 +142,7 @@ namespace Data.Linq
 		[Test]
 		public void SkipCount()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
 				   Child.Skip(2).Count(),
 				db.Child.Skip(2).Count()));
 		}
@@ -184,7 +184,7 @@ namespace Data.Linq
 		public void SkipTake4()
 		{
 			var expected = Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2);
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Sybase, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.SQLite, ProviderName.Sybase, ProviderName.Access }, db =>
 			{
 				var result = db.Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2);
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));

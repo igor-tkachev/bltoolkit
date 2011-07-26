@@ -247,6 +247,22 @@ namespace Data.Linq
 				q.ToList();
 			}
 		}
+
+		[Test]
+		public void Condition1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select new { Name = !string.IsNullOrEmpty(p.FirstName) ? p.FirstName : !string.IsNullOrEmpty(p.MiddleName) ? p.MiddleName : p.LastName },
+				from p in db.Person select new { Name = !string.IsNullOrEmpty(p.FirstName) ? p.FirstName : !string.IsNullOrEmpty(p.MiddleName) ? p.MiddleName : p.LastName }));
+		}
+
+		[Test]
+		public void Condition2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select new { Name = !p.FirstName.IsNullOrEmpty() ? p.FirstName : !p.MiddleName.IsNullOrEmpty() ? p.MiddleName : p.LastName },
+				from p in db.Person select new { Name = !p.FirstName.IsNullOrEmpty() ? p.FirstName : !p.MiddleName.IsNullOrEmpty() ? p.MiddleName : p.LastName }));
+		}
 	}
 
 	static class Extender
@@ -254,6 +270,11 @@ namespace Data.Linq
 		public static Table<Person> People(this DbManager db)
 		{
 			return db.GetTable<Person>();
+		}
+
+		public static bool IsNullOrEmpty(this string value)
+		{
+			return string.IsNullOrEmpty(value);
 		}
 	}
 }

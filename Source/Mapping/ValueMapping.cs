@@ -55,7 +55,7 @@ namespace BLToolkit.Mapping
 			if (t1.IsEnum) t1 = Enum.GetUnderlyingType(t1);
 			if (t2.IsEnum) t2 = Enum.GetUnderlyingType(t2);
 
-			KeyValue key = new KeyValue(t1, t2);
+			var key = new KeyValue(t1, t2);
 
 			lock (_sync)
 			{
@@ -68,7 +68,7 @@ namespace BLToolkit.Mapping
 
 				if (null == t)
 				{
-					Type type = typeof(GetSetDataChecker<,>).MakeGenericType(t1, t2);
+					var type = typeof(GetSetDataChecker<,>).MakeGenericType(t1, t2);
 
 					if (((IGetSetDataChecker)Activator.CreateInstance(type)).Check() == false)
 					{

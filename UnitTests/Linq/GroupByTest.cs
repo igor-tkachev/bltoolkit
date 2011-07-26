@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;

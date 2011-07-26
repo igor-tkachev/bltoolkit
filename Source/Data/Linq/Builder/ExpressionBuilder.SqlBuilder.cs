@@ -831,6 +831,13 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
+				case ExpressionType.TypeIs:
+					{
+						var condition = new SqlQuery.SearchCondition();
+						BuildSearchCondition(context, expression, condition.Conditions);
+						return condition;
+					}
+
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
 					return ConvertToSql(context, ((ChangeTypeExpression)expression).Expression);
 			}
@@ -1930,11 +1937,15 @@ namespace BLToolkit.Data.Linq.Builder
 				if (obj.Type != ttype)
 					obj = Expression.Convert(expression.Expression, ttype);
 
-				var        left  = Expression.PropertyOrField(obj, field.Name);
-				Expression right = Expression.Constant(m.m.Code);
+				var left = Expression.PropertyOrField(obj, field.Name);
+				var code = m.m.Code;
 
-				if (left.Type != right.Type)
-					right = Expression.Convert(right, left.Type);
+				if (code == null)
+					code = TypeHelper.GetDefaultValue(left.Type);
+				else if (left.Type != code.GetType())
+					code = MappingSchema.ConvertChangeType(code, left.Type);
+
+				Expression right = Expression.Constant(code, left.Type);
 
 				var e = isEqual ? Expression.Equal(left, right) : Expression.NotEqual(left, right);
 
@@ -2266,6 +2277,7 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
+					case ExpressionType.TypeIs : return canBeCompiled;
 					case ExpressionType.TypeAs :
 					case ExpressionType.New    : return true;
 				}

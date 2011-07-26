@@ -775,8 +775,8 @@ namespace BLToolkit.ServiceModel
 
 							switch (elem.QueryType)
 							{
-								case QueryType.Update : Append(elem.Set); break;
-								case QueryType.Insert : Append(elem.Set); 
+								case QueryType.Update : Append(elem.Update); break;
+								case QueryType.Insert : Append(elem.Insert); 
 									if (elem.From.Tables.Count == 0)
 										break;
 									goto default;
@@ -866,13 +866,23 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case QueryElementType.SetClause :
+					case QueryElementType.InsertClause :
 						{
-							var elem = (SqlQuery.SetClause)e;
+							var elem = (SqlQuery.InsertClause)e;
 
 							Append(elem.Items);
 							Append(elem.Into);
 							Append(elem.WithIdentity);
+
+							break;
+						}
+
+					case QueryElementType.UpdateClause :
+						{
+							var elem = (SqlQuery.UpdateClause)e;
+
+							Append(elem.Items);
+							Append(elem.Table);
 
 							break;
 						}
@@ -1246,9 +1256,12 @@ namespace BLToolkit.ServiceModel
 							var sid                = ReadInt();
 							var queryType          = (QueryType)ReadInt();
 							var from               = Read<SqlQuery.FromClause>();
-							var readSet            = queryType == QueryType.Update || queryType == QueryType.Insert;
-							var set                = readSet ? Read<SqlQuery.SetClause>() : null;
-							var select             = readSet && (queryType == QueryType.Update || from.Tables.Count == 0) ? new SqlQuery.SelectClause(null) : Read<SqlQuery.SelectClause>();
+							var readInsert         = queryType == QueryType.Insert;
+							var insert             = readInsert ? Read<SqlQuery.InsertClause>() : null;
+							var readUpdate         = queryType == QueryType.Update;
+							var update             = readUpdate ? Read<SqlQuery.UpdateClause>() : null;
+							var notReadSelect      = readInsert || readUpdate;
+							var select             = notReadSelect && (queryType == QueryType.Update || from.Tables.Count == 0) ? new SqlQuery.SelectClause(null) : Read<SqlQuery.SelectClause>();
 							var where              = Read<SqlQuery.WhereClause>();
 							var groupBy            = Read<SqlQuery.GroupByClause>();
 							var having             = Read<SqlQuery.WhereClause>();
@@ -1261,7 +1274,8 @@ namespace BLToolkit.ServiceModel
 							var query = _query = new SqlQuery(sid) { QueryType = queryType };
 
 							query.Init(
-								set,
+								insert,
+								update,
 								select,
 								from,
 								where,
@@ -1348,13 +1362,27 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case QueryElementType.SetClause :
+					case QueryElementType.InsertClause :
 						{
 							var items = ReadArray<SqlQuery.SetExpression>();
 							var into  = Read<SqlTable>();
 							var wid   = ReadBool();
 
-							var c = new SqlQuery.SetClause { Into = into, WithIdentity = wid };
+							var c = new SqlQuery.InsertClause { Into = into, WithIdentity = wid };
+
+							c.Items.AddRange(items);
+							obj = c;
+
+							break;
+						}
+
+					case QueryElementType.UpdateClause :
+						{
+							var items = ReadArray<SqlQuery.SetExpression>();
+							var table = Read<SqlTable>();
+							var wid   = ReadBool();
+
+							var c = new SqlQuery.UpdateClause { Table = table };
 
 							c.Items.AddRange(items);
 							obj = c;
