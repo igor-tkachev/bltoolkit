@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -71,6 +72,11 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
+			static object SequenceException()
+			{
+				return new object[0].First();
+			}
+
 			public override Expression BuildExpression(Expression expression, int level)
 			{
 				if (expression == null)
@@ -84,7 +90,28 @@ namespace BLToolkit.Data.Linq.Builder
 						var join = SqlQuery.OuterApply(SqlQuery);
 						Parent.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
 
-						return Sequence.BuildExpression(expression, level);
+						var expr = Sequence.BuildExpression(expression, level);
+
+						var idx = SqlQuery.Select.Add(new SqlValue(1));
+						idx = ConvertToParentIndex(idx, this);
+
+						var defaultValue = _methodCall.Method.Name.EndsWith("OrDefault") ?
+							Expression.Constant(TypeHelper.GetDefaultValue(expr.Type), expr.Type) as Expression :
+							Expression.Convert(
+								Expression.Call(
+									null,
+									ReflectionHelper.Expressor<object>.MethodExpressor(_ => SequenceException())),
+								expr.Type);
+
+						expr = Expression.Condition(
+							Expression.Call(
+								ExpressionBuilder.DataReaderParam,
+								ReflectionHelper.DataReader.IsDBNull,
+								Expression.Constant(idx)),
+							defaultValue,
+							expr);
+
+						return expr;
 					}
 
 					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));

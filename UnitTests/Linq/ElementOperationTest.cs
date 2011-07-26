@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using Data.Linq.Model;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -142,6 +142,28 @@ namespace Data.Linq
 				db => AreEqual(
 					from p in    Parent select p.Children.Select(c => c.ParentID).Distinct().SingleOrDefault(),
 					from p in db.Parent select p.Children.Select(c => c.ParentID).Distinct().SingleOrDefault()));
+		}
+
+		[Test]
+		public void FirstOrDefaultEntitySet()
+		{
+			using (var db = new NorthwindDB())
+			{
+				AreEqual(
+					   Customer.Select(c => c.Orders.FirstOrDefault()),
+					db.Customer.Select(c => c.Orders.FirstOrDefault()));
+			}
+		}
+
+		[Test]
+		public void NestedSingleOrDefaultTest()
+		{
+			using (var db = new NorthwindDB())
+			{
+				AreEqual(
+					   Customer.Select(c => c.Orders.Take(1).SingleOrDefault()),
+					db.Customer.Select(c => c.Orders.Take(1).SingleOrDefault()));
+			}
 		}
 	}
 }
