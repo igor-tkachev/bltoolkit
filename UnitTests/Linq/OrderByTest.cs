@@ -246,7 +246,7 @@ namespace Data.Linq
 		[Test]
 		public void Count2()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.Sybase }, db => Assert.AreEqual(
 				   Parent.OrderBy(p => p.ParentID).Take(3).Count(),
 				db.Parent.OrderBy(p => p.ParentID).Take(3).Count()));
 		}
@@ -262,7 +262,7 @@ namespace Data.Linq
 		[Test]
 		public void Min2()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase }, db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.Sybase }, db => Assert.AreEqual(
 				   Parent.OrderBy(p => p.ParentID).Take(3).Min(p => p.ParentID),
 				db.Parent.OrderBy(p => p.ParentID).Take(3).Min(p => p.ParentID)));
 		}
@@ -270,7 +270,7 @@ namespace Data.Linq
 		[Test]
 		public void Min3()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Informix }, db => Assert.AreEqual(
+			ForEachProvider(new[] { ProviderName.Sybase, ProviderName.Informix }, db => Assert.AreEqual(
 				   Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID),
 				db.Parent.OrderBy(p => p.Value1).Take(3).Min(p => p.ParentID)));
 		}
@@ -292,7 +292,7 @@ namespace Data.Linq
 		[Test]
 		public void Take()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe }, db =>
+			ForEachProvider(db =>
 			{
 				var q =
 					(from p in db.Parent

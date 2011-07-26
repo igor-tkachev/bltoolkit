@@ -143,11 +143,10 @@ namespace Data.Linq
 		[Test]
 		public void Concat6()
 		{
-			var expected =
-				Child.Where(c => c.GrandChildren.Count == 2).Concat(Child.Where(c => c.GrandChildren.Count() == 3));
-
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected, 
-				db.Child.Where(c => c.GrandChildren.Count == 2).Concat(db.Child.Where(c => c.GrandChildren.Count() == 3))));
+			ForEachProvider(new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					   Child.Where(c => c.GrandChildren.Count == 2).Concat(   Child.Where(c => c.GrandChildren.Count() == 3)),
+					db.Child.Where(c => c.GrandChildren.Count == 2).Concat(db.Child.Where(c => c.GrandChildren.Count() == 3))));
 		}
 
 		[Test]

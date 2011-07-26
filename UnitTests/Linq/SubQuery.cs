@@ -180,7 +180,7 @@ namespace Data.Linq
 		public void Contains1()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase },
+				new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase },
 				db => AreEqual(
 					from p in Parent
 					where (from p1 in    Parent where p1.Value1 == p.Value1 select p.ParentID).Take(3).Contains(p.ParentID)
@@ -194,7 +194,7 @@ namespace Data.Linq
 		public void Contains2()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase },
+				new[] { ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase },
 				db => AreEqual(
 					from p in Parent
 					where (from p1 in    Parent where p1.Value1 == p.Value1 select p1.ParentID).Take(3).Contains(p.ParentID)
@@ -244,7 +244,7 @@ namespace Data.Linq
 		public void SubSub2()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.DB2, "Oracle", ProviderName.MySql, ProviderName.Sybase, ProviderName.Informix },
+				new[] { ProviderName.Access, ProviderName.DB2, "Oracle", ProviderName.MySql, ProviderName.Sybase, ProviderName.Informix },
 				db => AreEqual(
 					from p1 in
 						from p2 in Parent

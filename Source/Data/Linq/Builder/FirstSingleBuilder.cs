@@ -48,7 +48,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
-		class FirstSingleContext : SequenceContextBase
+		public class FirstSingleContext : SequenceContextBase
 		{
 			public FirstSingleContext(IBuildContext parent, IBuildContext sequence, MethodCallExpression methodCall)
 				: base(parent, sequence, null)
@@ -74,13 +74,23 @@ namespace BLToolkit.Data.Linq.Builder
 			public override Expression BuildExpression(Expression expression, int level)
 			{
 				if (expression == null)
-					//if (Sequence.IsExpression(expression, level, RequestFor.Object))
-					//	return Sequence.BuildExpression(expression, level);
-					//else
-						return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+					////if (Sequence.IsExpression(expression, level, RequestFor.Object))
+					////	return Sequence.BuildExpression(expression, level);
+					////else
+					//	return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+				{
+					if (Builder.SqlProvider.IsApplyJoinSupported)
+					{
+						var join = SqlQuery.OuterApply(SqlQuery);
+						Parent.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
+
+						return Sequence.BuildExpression(expression, level);
+					}
+
+					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+				}
 
 				throw new NotImplementedException();
-				//return Sequence.BuildExpression(expression, level + 1);
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)

@@ -69,7 +69,7 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefaultScalar1()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase }, db => AreEqual(
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.Sybase }, db => AreEqual(
 				from p in    Parent select    Child.FirstOrDefault().ChildID,
 				from p in db.Parent select db.Child.FirstOrDefault().ChildID));
 		}
@@ -77,19 +77,71 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefaultScalar2()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Informix, "Oracle", ProviderName.Sybase }, db =>
-			{
-				var result =
+			ForEachProvider(
+				new[] { ProviderName.Informix, "Oracle", ProviderName.Sybase }, db =>
+				AreEqual(
+					from p in Parent
+					select new
+					{
+						p.ParentID,
+						MaxChild =
+							Child
+								.Where(c => c.Parent == p)
+								.OrderByDescending(c => c.ChildID * c.ParentID)
+								.FirstOrDefault() == null ?
+							0 :
+							Child
+								.Where(c => c.Parent == p)
+								.OrderByDescending(c => c.ChildID * c.ParentID)
+								.FirstOrDefault()
+								.ChildID
+					},
 					from p in db.Parent
 					select new
 					{
 						p.ParentID,
-						MaxChild = db.Child.Where(c => c.Parent == p).OrderByDescending(c => c.ChildID * c.ParentID).FirstOrDefault().ChildID
-					};
+						MaxChild = db.Child
+							.Where(c => c.Parent == p)
+							.OrderByDescending(c => c.ChildID * c.ParentID)
+							.FirstOrDefault()
+							.ChildID
+					}));
+		}
 
-				var list = result.ToList();
-				Assert.Greater(list.Count, 0);
-			});
+		[Test]
+		public void NestedFirstOrDefault1()
+		{
+			ForEachProvider(//new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in    Parent select    Child.FirstOrDefault(),
+					from p in db.Parent select db.Child.FirstOrDefault()));
+		}
+
+		[Test]
+		public void NestedFirstOrDefault2()
+		{
+			ForEachProvider(//new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in    Parent select p.Children.FirstOrDefault(),
+					from p in db.Parent select p.Children.FirstOrDefault()));
+		}
+
+		[Test]
+		public void NestedFirstOrDefault3()
+		{
+			ForEachProvider(//new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in    Parent select p.Children.Select(c => c.ParentID).Distinct().FirstOrDefault(),
+					from p in db.Parent select p.Children.Select(c => c.ParentID).Distinct().FirstOrDefault()));
+		}
+
+		[Test]
+		public void NestedSingleOrDefault1()
+		{
+			ForEachProvider(//new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in    Parent select p.Children.Select(c => c.ParentID).Distinct().SingleOrDefault(),
+					from p in db.Parent select p.Children.Select(c => c.ParentID).Distinct().SingleOrDefault()));
 		}
 	}
 }

@@ -3760,7 +3760,7 @@ namespace BLToolkit.Data.Sql
 				var sql   = (SqlQuery)joinSource.Source;
 				var isAgg = sql.Select.Columns.Exists(c => IsAggregationFunction(c.Expression));
 
-				if (isAgg && isApplySupported)
+				if (isApplySupported && (isAgg || sql.Select.TakeValue != null || sql.Select.SkipValue != null))
 					return;
 
 				var searchCondition = new List<Condition>(sql.Where.SearchCondition.Conditions);

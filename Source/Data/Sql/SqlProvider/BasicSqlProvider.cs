@@ -635,11 +635,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Skip/Take
 
-		protected virtual bool   SkipFirst    { get { return true; } }
-		protected virtual string SkipFormat   { get { return null; } }
-		protected virtual string FirstFormat  { get { return null; } }
-		protected virtual string LimitFormat  { get { return null; } }
-		protected virtual string OffsetFormat { get { return null; } }
+		protected virtual bool   SkipFirst    { get { return true;  } }
+		protected virtual string SkipFormat   { get { return null;  } }
+		protected virtual string FirstFormat  { get { return null;  } }
+		protected virtual string LimitFormat  { get { return null;  } }
+		protected virtual string OffsetFormat { get { return null;  } }
+		protected virtual bool   OffsetFirst  { get { return false; } }
 
 		protected bool NeedSkip { get { return SqlQuery.Select.SkipValue != null && IsSkipSupported; } }
 		protected bool NeedTake { get { return SqlQuery.Select.TakeValue != null && IsTakeSupported; } }
@@ -665,6 +666,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				AppendIndent(sb);
 
+				if (doSkip && OffsetFirst)
+				{
+					sb.AppendFormat(OffsetFormat, BuildExpression(new StringBuilder(), SqlQuery.Select.SkipValue));
+
+					if (doTake)
+						sb.Append(' ');
+				}
+
 				if (doTake)
 				{
 					sb.AppendFormat(LimitFormat, BuildExpression(new StringBuilder(), SqlQuery.Select.TakeValue));
@@ -673,7 +682,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						sb.Append(' ');
 				}
 
-				if (doSkip)
+				if (doSkip && !OffsetFirst)
 					sb.AppendFormat(OffsetFormat, BuildExpression(new StringBuilder(), SqlQuery.Select.SkipValue));
 
 				sb.AppendLine();
