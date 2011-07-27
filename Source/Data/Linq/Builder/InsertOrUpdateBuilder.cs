@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -21,7 +22,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			switch (methodCall.Arguments.Count)
 			{
-				case 2 : // static int InsertOrUpdate<T>(
+				case 3 : // static int InsertOrUpdate<T>(
 					{    //     this Table<T> target, Expression<Func<T>> insertSetter, Expression<Func<T>> onDuplicateKeyUpdateSetter)
 						UpdateBuilder.BuildSetter(
 							builder,
@@ -46,6 +47,23 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 			}
+
+			var table = sequence.SqlQuery.Insert.Into;
+			var keys  = table.GetKeys(false);
+
+			if (keys.Count == 0)
+				throw new LinqException("InsertOrUpdate method requires the '{0}' table to have a primary key.", table.Name);
+
+			var missedKey = keys.Except(
+				from k in keys
+					join i in sequence.SqlQuery.Insert.Items
+					on k equals i.Column
+				select k).FirstOrDefault();
+
+			if (missedKey != null)
+				throw new LinqException("InsertOrUpdate method requires the '{0}.{1}' field to be included in the insert setter.",
+					table.Name,
+					((SqlField)missedKey).Name);
 
 			sequence.SqlQuery.QueryType = QueryType.InsertOrUpdate;
 

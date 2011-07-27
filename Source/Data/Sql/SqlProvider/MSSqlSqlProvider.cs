@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -191,6 +192,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb);
 		}
 	}
 }

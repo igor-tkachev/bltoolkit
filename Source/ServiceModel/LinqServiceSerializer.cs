@@ -773,15 +773,34 @@ namespace BLToolkit.ServiceModel
 							Append((int)elem.QueryType);
 							Append(elem.From);
 
+							var appendInsert = false;
+							var appendUpdate = false;
+							var appendSelect = false;
+
 							switch (elem.QueryType)
 							{
-								case QueryType.Update : Append(elem.Update); break;
-								case QueryType.Insert : Append(elem.Insert); 
+								case QueryType.InsertOrUpdate :
+									appendUpdate = true;
+									goto case QueryType.Insert;
+
+								case QueryType.Update         :
+									appendUpdate = true;
+									break;
+
+								case QueryType.Insert         :
+									appendInsert = true;
 									if (elem.From.Tables.Count == 0)
 										break;
 									goto default;
-								default               : Append(elem.Select); break;
+
+								default                       :
+									appendSelect = true;
+									break;
 							}
+
+							Append(appendInsert); if (appendInsert) Append(elem.Insert);
+							Append(appendUpdate); if (appendUpdate) Append(elem.Update);
+							Append(appendSelect); if (appendSelect) Append(elem.Select);
 
 							Append(elem.Where);
 							Append(elem.GroupBy);
@@ -1256,12 +1275,12 @@ namespace BLToolkit.ServiceModel
 							var sid                = ReadInt();
 							var queryType          = (QueryType)ReadInt();
 							var from               = Read<SqlQuery.FromClause>();
-							var readInsert         = queryType == QueryType.Insert;
+							var readInsert         = ReadBool();
 							var insert             = readInsert ? Read<SqlQuery.InsertClause>() : null;
-							var readUpdate         = queryType == QueryType.Update;
+							var readUpdate         = ReadBool();
 							var update             = readUpdate ? Read<SqlQuery.UpdateClause>() : null;
-							var notReadSelect      = readInsert || readUpdate;
-							var select             = notReadSelect && (queryType == QueryType.Update || from.Tables.Count == 0) ? new SqlQuery.SelectClause(null) : Read<SqlQuery.SelectClause>();
+							var readSelect         = ReadBool();
+							var select             = readSelect ? Read<SqlQuery.SelectClause>() : new SqlQuery.SelectClause(null);
 							var where              = Read<SqlQuery.WhereClause>();
 							var groupBy            = Read<SqlQuery.GroupByClause>();
 							var having             = Read<SqlQuery.WhereClause>();

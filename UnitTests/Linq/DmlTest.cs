@@ -943,7 +943,7 @@ namespace Update
 		}
 
 		[Test]
-		public void InsertOrUpdate()
+		public void InsertOrUpdate1()
 		{
 			ForEachProvider(db =>
 			{

@@ -311,10 +311,10 @@ namespace BLToolkit.Data.Sql
 					orderby f.PrimaryKeyOrder
 					select f as ISqlExpression
 				).ToList();
-
-				if (_keyFields.Count == 0)
-					_keyFields = Fields.Values.Select(f => f as ISqlExpression).ToList();
 			}
+
+			if (_keyFields.Count == 0 && allIfEmpty)
+				return Fields.Values.Select(f => f as ISqlExpression).ToList();
 
 			return _keyFields;
 		}

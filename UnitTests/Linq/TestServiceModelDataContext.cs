@@ -28,6 +28,7 @@ namespace Data.Linq
 
 		public Table<Person>                 Person                 { get { return this.GetTable<Person>();                 } }
 		public Table<Patient>                Patient                { get { return this.GetTable<Patient>();                } }
+		public Table<Doctor>                 Doctor                 { get { return this.GetTable<Doctor>();                 } }
 		public Table<Parent>                 Parent                 { get { return this.GetTable<Parent>();                 } }
 		public Table<Parent1>                Parent1                { get { return this.GetTable<Parent1>();                } }
 		public Table<IParent>                Parent2                { get { return this.GetTable<IParent>();                } }

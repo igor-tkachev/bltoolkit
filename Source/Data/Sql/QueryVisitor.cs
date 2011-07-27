@@ -282,6 +282,15 @@ namespace BLToolkit.Data.Sql
 
 						switch (q.QueryType)
 						{
+							case QueryType.InsertOrUpdate :
+								Visit(q.Insert, all, parentFirst, action);
+								Visit(q.Update, all, parentFirst, action);
+
+								if (q.From.Tables.Count == 0)
+									break;
+
+								goto default;
+
 							case QueryType.Update :
 								Visit(q.Update, all, parentFirst, action);
 								break;
