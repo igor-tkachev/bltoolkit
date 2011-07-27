@@ -942,6 +942,35 @@ namespace Update
 			});
 		}
 
+		[Test]
+		public void InsertOrUpdate()
+		{
+			ForEachProvider(db =>
+			{
+				var id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+				{
+					FirstName = "John",
+					LastName  = "Shepard",
+					Gender    = Gender.Male
+				}));
+
+				for (var i = 0; i < 3; i++)
+				{
+					db.Patient.InsertOrUpdate(
+						() => new Patient
+						{
+							PersonID  = id,
+							Diagnosis = i.ToString(),
+						},
+						p => new Patient
+						{
+							Diagnosis = p.Diagnosis + i,
+						});
+				}
+
+				Assert.AreEqual("012", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+			});
+		}
 
 		private static readonly Func<TestDbManager,int,string,int> _updateQuery =
 			CompiledQuery.Compile   <TestDbManager,int,string,int>((ctx,key,value) =>

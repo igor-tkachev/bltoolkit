@@ -288,7 +288,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 

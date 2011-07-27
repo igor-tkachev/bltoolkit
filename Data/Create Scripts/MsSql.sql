@@ -522,3 +522,4 @@ CREATE TABLE LinqDataTypes
 	IntValue      int NULL
 )
 GO
+

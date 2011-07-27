@@ -23,7 +23,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 //		public override int CommandCount(SqlQuery sqlQuery)
 //		{
-//		    return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+//		    return sqlQuery.IsInsert && sqlQuery.Set.WithIdentity ? 2 : 1;
 //        }
 
 //        protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -200,7 +200,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 

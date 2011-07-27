@@ -15,7 +15,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity)
+			if (sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity)
 			{
 				_identityField = sqlQuery.Insert.Into.GetIdentityField();
 
@@ -201,7 +201,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 

@@ -11,7 +11,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -213,7 +213,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sqlQuery.From.Tables[0].Alias = "$";
 					break;
 
-				case QueryType.Update:
+				case QueryType.Update :
 					sqlQuery = GetAlternativeUpdate(sqlQuery);
 					break;
 			}
@@ -223,7 +223,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 
@@ -231,14 +231,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-					return "?";
-
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return ":" + value;
-
-				case ConvertType.SprocParameterToName:
+				case ConvertType.NameToQueryParameter   : return "?";
+				case ConvertType.NameToCommandParameter :
+				case ConvertType.NameToSprocParameter   : return ":" + value;
+				case ConvertType.SprocParameterToName   :
 					if (value != null)
 					{
 						var str = value.ToString();

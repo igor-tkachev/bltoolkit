@@ -487,8 +487,8 @@ namespace BLToolkit.Data.Sql
 						var q = (SqlQuery)element;
 						return
 							Find(q.Select,  find) ??
-							(q.QueryType == QueryType.Insert ? Find(q.Insert, find) : null) ??
-							(q.QueryType == QueryType.Update ? Find(q.Update, find) : null) ??
+							(q.IsInsert ? Find(q.Insert, find) : null) ??
+							(q.IsUpdate ? Find(q.Update, find) : null) ??
 							Find(q.From,    find) ??
 							Find(q.Where,   find) ??
 							Find(q.GroupBy, find) ??
@@ -974,8 +974,8 @@ namespace BLToolkit.Data.Sql
 
 						var fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
 						var sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
-						var ic = q.QueryType == QueryType.Insert ? ((SqlQuery.InsertClause)ConvertInternal(q.Insert, action) ?? q.Insert) : null;
-						var uc = q.QueryType == QueryType.Update ? ((SqlQuery.UpdateClause)ConvertInternal(q.Update, action) ?? q.Update) : null;
+						var ic = q.IsInsert ? ((SqlQuery.InsertClause)ConvertInternal(q.Insert, action) ?? q.Insert) : null;
+						var uc = q.IsUpdate ? ((SqlQuery.UpdateClause)ConvertInternal(q.Update, action) ?? q.Update) : null;
 						var wc = (SqlQuery.WhereClause)  ConvertInternal(q.Where,   action) ?? q.Where;
 						var gc = (SqlQuery.GroupByClause)ConvertInternal(q.GroupBy, action) ?? q.GroupBy;
 						var hc = (SqlQuery.WhereClause)  ConvertInternal(q.Having,  action) ?? q.Having;

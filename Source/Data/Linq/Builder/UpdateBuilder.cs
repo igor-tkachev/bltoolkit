@@ -268,7 +268,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region UpdateContext
 
-		class UpdateContext : SequenceContextBase
+		internal class UpdateContext : SequenceContextBase
 		{
 			public UpdateContext(IBuildContext parent, IBuildContext sequence)
 				: base(parent, sequence, null)

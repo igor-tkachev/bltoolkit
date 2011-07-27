@@ -162,7 +162,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
 
 			
-			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.Insert.WithIdentity)
+			if (SqlQuery.IsInsert && SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
 		}
 
@@ -1847,7 +1847,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeDelete(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.QueryType == QueryType.Delete && 
+			if (sqlQuery.IsDelete && 
 				(sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0) && 
 				sqlQuery.From.Tables[0].Source is SqlTable)
 			{
@@ -1879,7 +1879,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeUpdate(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.QueryType == QueryType.Update && sqlQuery.From.Tables[0].Source is SqlTable)
+			if (sqlQuery.IsUpdate && sqlQuery.From.Tables[0].Source is SqlTable)
 			{
 				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
 				{

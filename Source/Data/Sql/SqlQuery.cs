@@ -122,6 +122,12 @@ namespace BLToolkit.Data.Sql
 			set { _queryType = value; }
 		}
 
+		public bool IsSelect         { get { return _queryType == QueryType.Select;        } }
+		public bool IsDelete         { get { return _queryType == QueryType.Delete;        } }
+		public bool IsInsertOrUpdate { get { return _queryType == QueryType.InsertOrUpdate; } }
+		public bool IsInsert         { get { return _queryType == QueryType.Insert || _queryType == QueryType.InsertOrUpdate; } }
+		public bool IsUpdate         { get { return _queryType == QueryType.Update || _queryType == QueryType.InsertOrUpdate; } }
+
 		#endregion
 
 		#region Column
@@ -4225,8 +4231,8 @@ namespace BLToolkit.Data.Sql
 
 			_queryType = clone._queryType;
 
-			if (_queryType == QueryType.Insert) _insert = (InsertClause)clone._insert.Clone(objectTree, doClone);
-			if (_queryType == QueryType.Update) _update = (UpdateClause)clone._update.Clone(objectTree, doClone);
+			if (IsInsert) _insert = (InsertClause)clone._insert.Clone(objectTree, doClone);
+			if (IsUpdate) _update = (UpdateClause)clone._update.Clone(objectTree, doClone);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);
 			_from    = new FromClause   (this, clone._from,    objectTree, doClone);
