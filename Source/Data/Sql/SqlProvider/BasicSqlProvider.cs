@@ -64,6 +64,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsNestedJoinParenthesisRequired { get { return false; } }
 		public virtual bool IsIdentityParameterRequired     { get { return false; } }
 		public virtual bool IsApplyJoinSupported            { get { return false; } }
+		public virtual bool IsInsertOrUpdateSupported       { get { return true;  } }
 
 		public virtual bool ConvertCountSubQuery(SqlQuery subQuery)
 		{

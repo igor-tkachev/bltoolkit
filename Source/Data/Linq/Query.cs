@@ -180,7 +180,7 @@ namespace BLToolkit.Data.Linq
 
 		#region NonQueryQuery
 
-		private void FinalizeQuery()
+		void FinalizeQuery()
 		{
 			foreach (var sql in Queries)
 			{
@@ -214,6 +214,46 @@ namespace BLToolkit.Data.Linq
 			try
 			{
 				query = SetCommand(dataContext, expr, parameters, 0);
+				return dataContext.ExecuteNonQuery(query);
+			}
+			finally
+			{
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
+			}
+		}
+
+		public void SetNonQueryQuery2()
+		{
+			FinalizeQuery();
+
+			if (Queries.Count != 2)
+				throw new InvalidOperationException();
+
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
+
+			GetElement = (ctx,db,expr,ps) => NonQueryQuery2(db, expr, ps);
+		}
+
+		int NonQueryQuery2(IDataContextInfo dataContextInfo, Expression expr, object[] parameters)
+		{
+			var dataContext = dataContextInfo.DataContext;
+
+			object query = null;
+
+			try
+			{
+				query = SetCommand(dataContext, expr, parameters, 0);
+
+				var n = dataContext.ExecuteNonQuery(query);
+
+				if (n != 0)
+					return n;
+
+				query = SetCommand(dataContext, expr, parameters, 1);
 				return dataContext.ExecuteNonQuery(query);
 			}
 			finally

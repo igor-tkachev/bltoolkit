@@ -2287,6 +2287,11 @@ namespace BLToolkit.Data.Sql
 			get { return _insert ?? (_insert = new InsertClause()); }
 		}
 
+		public void ClearInsert()
+		{
+			_insert = null;
+		}
+
 		#endregion
 
 		#region UpdateClause
@@ -2379,6 +2384,11 @@ namespace BLToolkit.Data.Sql
 		public  UpdateClause  Update
 		{
 			get { return _update ?? (_update = new UpdateClause()); }
+		}
+
+		public void ClearUpdate()
+		{
+			_update = null;
 		}
 
 		#endregion

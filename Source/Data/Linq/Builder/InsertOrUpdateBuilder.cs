@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -67,13 +68,105 @@ namespace BLToolkit.Data.Linq.Builder
 
 			sequence.SqlQuery.QueryType = QueryType.InsertOrUpdate;
 
-			return new UpdateBuilder.UpdateContext(buildInfo.Parent, sequence);
+			return new InsertOrUpdateContext(buildInfo.Parent, sequence);
 		}
 
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
 			return null;
+		}
+
+		#endregion
+
+		#region UpdateContext
+
+		class InsertOrUpdateContext : SequenceContextBase
+		{
+			public InsertOrUpdateContext(IBuildContext parent, IBuildContext sequence)
+				: base(parent, sequence, null)
+			{
+			}
+
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			{
+				if (Builder.SqlProvider.IsInsertOrUpdateSupported)
+				{
+					query.SetNonQueryQuery();
+				}
+				else
+				{
+					var dic = new Dictionary<ICloneableElement,ICloneableElement>();
+
+					var insertQuery = (SqlQuery)SqlQuery.Clone(dic, _ => true);
+
+					insertQuery.QueryType = QueryType.Insert;
+					insertQuery.ClearUpdate();
+
+					query.Queries.Add(new Query<T>.QueryInfo
+					{
+						SqlQuery   = insertQuery,
+						Parameters = query.Queries[0].Parameters
+							.Select(p => new ParameterAccessor
+								{
+									Expression   = p.Expression,
+									Accessor     = p.Accessor,
+									SqlParameter = dic.ContainsKey(p.SqlParameter) ? (SqlParameter)dic[p.SqlParameter] : null
+								})
+							.Where(p => p.SqlParameter != null)
+							.ToList(),
+					});
+
+					var keys =
+						(
+							from k in SqlQuery.Update.Table.GetKeys(false)
+								join i in SqlQuery.Insert.Items
+								on k equals i.Column
+							select i
+						).ToList();
+
+					SqlQuery.From.Table(SqlQuery.Update.Table);
+
+					foreach (var key in keys)
+						SqlQuery.Where.Expr(key.Column).Equal.Expr(key.Expression);
+
+					SqlQuery.QueryType = QueryType.Update;
+					SqlQuery.ClearInsert();
+
+					query.SetNonQueryQuery2();
+
+					query.Queries.Add(new Query<T>.QueryInfo
+					{
+						SqlQuery   = insertQuery,
+						Parameters = query.Queries[0].Parameters.ToList(),
+					});
+				}
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
+			{
+				throw new NotImplementedException();
+			}
 		}
 
 		#endregion
