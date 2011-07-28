@@ -19,11 +19,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine("SELECT @@IDENTITY");
 		}
 
-		//public override bool IsSkipSupported          { get { return SqlQuery.Select.TakeValue != null; } }
-		public override bool IsSkipSupported          { get { return false; } }
-		public override bool TakeAcceptsParameter     { get { return false; } }
-		public override bool IsCountSubQuerySupported { get { return false; } }
-		public override bool IsNestedJoinSupported    { get { return false; } }
+		//public override bool IsSkipSupported           { get { return SqlQuery.Select.TakeValue != null; } }
+		public override bool IsSkipSupported           { get { return false; } }
+		public override bool TakeAcceptsParameter      { get { return false; } }
+		public override bool IsCountSubQuerySupported  { get { return false; } }
+		public override bool IsNestedJoinSupported     { get { return false; } }
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		public override bool ConvertCountSubQuery(SqlQuery subQuery)
 		{

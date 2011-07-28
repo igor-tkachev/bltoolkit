@@ -193,17 +193,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			_buildStep = Step.InsertClause; BuildInsertClause(sb);
 
-			if (_sqlQuery.From.Tables.Count != 0)
+			if (_sqlQuery.QueryType == QueryType.Insert && _sqlQuery.From.Tables.Count != 0)
 			{
-				_buildStep = Step.SelectClause; BuildSelectClause(sb);
+				_buildStep = Step.SelectClause;  BuildSelectClause (sb);
+				_buildStep = Step.FromClause;    BuildFromClause   (sb);
+				_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
+				_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
+				_buildStep = Step.HavingClause;  BuildHavingClause (sb);
+				_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
+				_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
 			}
-
-			_buildStep = Step.FromClause;    BuildFromClause   (sb);
-			_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
-			_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
-			_buildStep = Step.HavingClause;  BuildHavingClause (sb);
-			_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
-			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
 
 			if (SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
@@ -388,7 +387,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine();
 			AppendIndent(sb).AppendLine(")");
 
-			if (_sqlQuery.From.Tables.Count == 0)
+			if (_sqlQuery.QueryType == QueryType.InsertOrUpdate || _sqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb).AppendLine("VALUES");
 				AppendIndent(sb).AppendLine("(");
@@ -428,20 +427,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			throw new SqlException("InsertOrUpdate query type is not supported by {0} provider.", Name);
 		}
 
-		protected void BuildInsertOrUpdateQueryAsMerge(StringBuilder sb)
+		protected void BuildInsertOrUpdateQueryAsMerge(StringBuilder sb, string fromDummyTable)
 		{
 			var table       = SqlQuery.Insert.Into;
-			var targetAlias = table.Alias ?? GetTempAliases(1, "t")[0];
-			var sourceAlias = GetTempAliases(1, "s")[0];
-
-			if (table.Alias == null)
-				table.Alias = targetAlias;
-
-			targetAlias = Convert(targetAlias, ConvertType.NameToQueryTableAlias).ToString();
-			sourceAlias = Convert(sourceAlias, ConvertType.NameToQueryTableAlias).ToString();
-
-			var keys  = table.GetKeys(false);
-			var exprs =
+			var targetAlias = Convert(SqlQuery.From.Tables[0].Alias, ConvertType.NameToQueryTableAlias).ToString();
+			var sourceAlias = Convert(GetTempAliases(1, "s")[0],     ConvertType.NameToQueryTableAlias).ToString();
+			var keys        = table.GetKeys(false);
+			var exprs       =
 				(
 					from k in keys
 						join i in SqlQuery.Insert.Items
@@ -458,14 +450,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			for (var i = 0; i < keys.Count; i++)
 			{
 				BuildExpression(sb, exprs[i], false, false);
-				sb.Append(" as ");
+				sb.Append(" AS ");
 				BuildExpression(sb, keys [i], false, false);
 
 				if (i + 1 < keys.Count)
 					sb.Append(", ");
 			}
 
+			if (!string.IsNullOrEmpty(fromDummyTable))
+				sb.Append(' ').Append(fromDummyTable);
+
 			sb.Append(") ").Append(sourceAlias).AppendLine(" ON");
+
+			AppendIndent(sb).AppendLine("(");
 
 			Indent++;
 
@@ -489,16 +486,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			Indent--;
 
+			AppendIndent(sb).AppendLine(")");
 			AppendIndent(sb).AppendLine("WHEN MATCHED THEN");
-
-			SqlQuery.From.Table(table);
 
 			Indent++;
 			AppendIndent(sb).AppendLine("UPDATE ");
-			BuildUpdateSet  (sb);
+			BuildUpdateSet(sb);
 			Indent--;
-
-			SqlQuery.From.Tables.RemoveAt(0);
 
 			AppendIndent(sb).AppendLine("WHEN NOT MATCHED THEN");
 
@@ -506,10 +500,65 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			BuildInsertClause(sb, "INSERT", false);
 			Indent--;
 
-			while (sb[sb.Length - 1] == '\n' || sb[sb.Length - 1] == ' ')
+			while (_endLine.Contains(sb[sb.Length - 1]))
 				sb.Length--;
+		}
 
-			sb.AppendLine(";");
+		static readonly char[] _endLine = new[] { ' ', '\r', '\n' };
+
+		protected void BuildInsertOrUpdateQueryAsUpdateInsert(StringBuilder sb)
+		{
+			AppendIndent(sb).AppendLine("BEGIN TRAN").AppendLine();
+
+			BuildUpdateQuery(sb);
+
+			AppendIndent(sb).AppendLine("WHERE");
+
+			var alias = Convert(SqlQuery.From.Tables[0].Alias, ConvertType.NameToQueryTableAlias).ToString();
+			var exprs =
+				(
+					from k in SqlQuery.Insert.Into.GetKeys(false)
+						join i in SqlQuery.Insert.Items
+						on k equals i.Column
+					select i
+				).ToList();
+
+			Indent++;
+
+			for (var i = 0; i < exprs.Count; i++)
+			{
+				var expr = exprs[i];
+
+				AppendIndent(sb);
+
+				sb.Append(alias).Append('.');
+				BuildExpression(sb, expr.Column, false, false);
+
+				sb.Append(" = ");
+				BuildExpression(sb, Precedence.Comparison, expr.Expression);
+
+				if (i + 1 < exprs.Count)
+					sb.Append(" AND");
+
+				sb.AppendLine();
+			}
+
+			Indent--;
+
+			sb.AppendLine();
+			AppendIndent(sb).AppendLine("IF @@ROWCOUNT = 0");
+			AppendIndent(sb).AppendLine("BEGIN");
+
+			Indent++;
+
+			BuildInsertQuery(sb);
+
+			Indent--;
+
+			AppendIndent(sb).AppendLine("END");
+
+			sb.AppendLine();
+			AppendIndent(sb).AppendLine("COMMIT");
 		}
 
 		#endregion

@@ -44,6 +44,7 @@ namespace BLToolkit.Data.Linq.Builder
 						sequence.SqlQuery.Insert.Into  = ((TableBuilder.TableContext)sequence).SqlTable;
 						sequence.SqlQuery.Update.Table = ((TableBuilder.TableContext)sequence).SqlTable;
 						sequence.SqlQuery.From.Tables.Clear();
+						sequence.SqlQuery.From.Table(sequence.SqlQuery.Insert.Into);
 
 						break;
 					}
@@ -102,6 +103,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					insertQuery.QueryType = QueryType.Insert;
 					insertQuery.ClearUpdate();
+					insertQuery.From.Tables.Clear();
 
 					query.Queries.Add(new Query<T>.QueryInfo
 					{
@@ -124,8 +126,6 @@ namespace BLToolkit.Data.Linq.Builder
 								on k equals i.Column
 							select i
 						).ToList();
-
-					SqlQuery.From.Table(SqlQuery.Update.Table);
 
 					foreach (var key in keys)
 						SqlQuery.Where.Expr(key.Column).Equal.Expr(key.Expression);

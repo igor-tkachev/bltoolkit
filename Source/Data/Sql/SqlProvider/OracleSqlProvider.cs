@@ -349,5 +349,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb, "FROM SYS.DUAL");
+		}
 	}
 }

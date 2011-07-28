@@ -181,13 +181,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		static void SetQueryParameter(IQueryElement element)
+		{
+			if (element.ElementType == QueryElementType.SqlParameter)
+				((SqlParameter)element).IsQueryParameter = false;
+		}
+
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			new QueryVisitor().Visit(sqlQuery.Select, element =>
-			{
-				if (element.ElementType == QueryElementType.SqlParameter)
-					((SqlParameter)element).IsQueryParameter = false;
-			});
+			new QueryVisitor().Visit(sqlQuery.Select, SetQueryParameter);
+
+			//if (sqlQuery.QueryType == QueryType.InsertOrUpdate)
+			//	foreach (var key in sqlQuery.Insert.Items)
+			//		if (((SqlField)key.Column).IsPrimaryKey)
+			//			new QueryVisitor().Visit(key.Expression, SetQueryParameter);
 
 			sqlQuery = base.Finalize(sqlQuery);
 
@@ -288,6 +295,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb, "FROM SYSIBM.SYSDUMMY1 FETCH FIRST 1 ROW ONLY");
 		}
 	}
 }

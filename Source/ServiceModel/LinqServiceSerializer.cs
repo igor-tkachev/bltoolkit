@@ -781,7 +781,8 @@ namespace BLToolkit.ServiceModel
 							{
 								case QueryType.InsertOrUpdate :
 									appendUpdate = true;
-									goto case QueryType.Insert;
+									appendInsert = true;
+									break;
 
 								case QueryType.Update         :
 									appendUpdate = true;

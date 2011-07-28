@@ -956,19 +956,21 @@ namespace Update
 
 				for (var i = 0; i < 3; i++)
 				{
+					var s = "*" + i;
+
 					db.Patient.InsertOrUpdate(
 						() => new Patient
 						{
 							PersonID  = id,
-							Diagnosis = i.ToString(),
+							Diagnosis = "abc",
 						},
 						p => new Patient
 						{
-							Diagnosis = p.Diagnosis + i,
+							Diagnosis = (p.Diagnosis.Length + i).ToString(),
 						});
 				}
 
-				Assert.AreEqual("012", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				Assert.AreEqual("3", db.Patient.Single(p => p.PersonID == id).Diagnosis);
 			});
 		}
 

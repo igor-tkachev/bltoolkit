@@ -563,7 +563,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression) } };
 		}
 
-		public ISqlExpression ConvertToSqlAndBuild(IBuildContext context, Expression expression)
+		public ISqlExpression ConvertToSqlExpression(IBuildContext context, Expression expression)
 		{
 			var expr = ConvertExpression(expression);
 			return ConvertToSql(context, expr);

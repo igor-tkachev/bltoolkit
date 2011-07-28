@@ -10,7 +10,7 @@ namespace Data.Linq.ProviderSpecific
 	[TestFixture]
 	public class SqlCe : TestBase
 	{
-		[Test]
+		//[Test]
 		public void SqlTest()
 		{
 			using (new TransactionScope())

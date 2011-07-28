@@ -23,14 +23,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 //		public override int CommandCount(SqlQuery sqlQuery)
 //		{
-//		    return sqlQuery.IsInsert && sqlQuery.Set.WithIdentity ? 2 : 1;
-//        }
+//			return sqlQuery.IsInsert && sqlQuery.Set.WithIdentity ? 2 : 1;
+//		}
 
-//        protected override void BuildCommand(int commandNumber, StringBuilder sb)
+//		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 //		{
 //			SequenceNameAttribute attr = GetSequenceNameAttribute(true);
 //
-//            AppendIndent(sb)
+//			AppendIndent(sb)
 //				.Append("SELECT gen_id(")
 //				.Append(attr.SequenceName)
 //				.AppendLine(", 0) FROM rdb$database");
@@ -182,6 +182,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			new QueryVisitor().Visit(sqlQuery.Select, SetNonQueryParameter);
 
+			if (sqlQuery.QueryType == QueryType.InsertOrUpdate)
+			{
+				foreach (var key in sqlQuery.Insert.Items)
+					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
+
+				foreach (var key in sqlQuery.Update.Items)
+					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
+			}
+
 			new QueryVisitor().Visit(sqlQuery, element =>
 			{
 				if (element.ElementType == QueryElementType.InSubQueryPredicate)
@@ -260,6 +269,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb, "FROM rdb$database");
 		}
 
 		#region IMappingSchemaProvider Members

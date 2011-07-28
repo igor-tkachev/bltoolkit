@@ -10,6 +10,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
+
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
 			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
@@ -185,5 +187,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+
+		//protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		//{
+		//	BuildInsertOrUpdateQueryAsMerge(sb, null);
+		//}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -7,6 +8,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2008SqlProvider();
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb, null);
+			sb.AppendLine(";");
 		}
 	}
 }

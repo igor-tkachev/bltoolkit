@@ -150,7 +150,7 @@ namespace BLToolkit.Data.Linq.Builder
 					else
 					{
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
-						var expr   = builder.ConvertToSql(ctx, ma.Expression);
+						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression);
 
 						if (expr is SqlParameter && ma.Expression.Type.IsEnum)
 							((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
@@ -216,7 +216,7 @@ namespace BLToolkit.Data.Linq.Builder
 					body, 1, ConvertFlags.Field)[0].Sql;
 					//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
 			var ctx    = new ExpressionContext(buildInfo.Parent, select, update);
-			var expr   = builder.ConvertToSql(ctx, update.Body);
+			var expr   = builder.ConvertToSqlExpression(ctx, update.Body);
 
 			if (expr is SqlParameter && update.Body.Type.IsEnum)
 				((SqlParameter)expr).SetEnumConverter(update.Body.Type, builder.MappingSchema);

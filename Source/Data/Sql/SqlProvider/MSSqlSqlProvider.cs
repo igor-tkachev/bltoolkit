@@ -196,7 +196,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
-			BuildInsertOrUpdateQueryAsMerge(sb);
+			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
 		}
 	}
 }

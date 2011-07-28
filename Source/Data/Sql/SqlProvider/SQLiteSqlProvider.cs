@@ -27,8 +27,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override string LimitFormat  { get { return "LIMIT {0}";  } }
 		protected override string OffsetFormat { get { return "OFFSET {0}"; } }
 
-		public override bool IsSkipSupported       { get { return SqlQuery.Select.TakeValue != null; } }
-		public override bool IsNestedJoinSupported { get { return false; } }
+		public override bool IsSkipSupported           { get { return SqlQuery.Select.TakeValue != null; } }
+		public override bool IsNestedJoinSupported     { get { return false; } }
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
