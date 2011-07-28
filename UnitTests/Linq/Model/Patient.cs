@@ -7,6 +7,7 @@ namespace Data.Linq.Model
 {
 	public class Patient
 	{
+		[PrimaryKey]
 		public int    PersonID;
 		public string Diagnosis;
 

@@ -7,6 +7,7 @@ namespace BLToolkit.Data.Sql
 		Select,
 		Delete,
 		Update,
-		Insert
+		Insert,
+		InsertOrUpdate
 	}
 }

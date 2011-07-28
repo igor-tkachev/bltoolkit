@@ -78,7 +78,7 @@ namespace BLToolkit.Data
 		{
 		}
 
-		public DbManager Clone()
+		public virtual DbManager Clone()
 		{
 			var clone =
 				new DbManager(0)

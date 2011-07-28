@@ -11,7 +11,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -47,7 +47,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildSelectClause(sb);
 		}
 
-		public override bool IsSubQueryTakeSupported { get { return false; } }
+		public override bool IsSubQueryTakeSupported   { get { return false; } }
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
@@ -194,15 +195,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 		}
 
+		static void SetQueryParameter(IQueryElement element)
+		{
+			if (element.ElementType == QueryElementType.SqlParameter)
+				((SqlParameter)element).IsQueryParameter = false;
+		}
+
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
 			CheckAliases(sqlQuery, int.MaxValue);
 
-			new QueryVisitor().Visit(sqlQuery.Select, element =>
-			{
-				if (element.ElementType == QueryElementType.SqlParameter)
-					((SqlParameter)element).IsQueryParameter = false;
-			});
+			new QueryVisitor().Visit(sqlQuery.Select, SetQueryParameter);
+
+			//if (sqlQuery.QueryType == QueryType.InsertOrUpdate)
+			//{
+			//	foreach (var key in sqlQuery.Insert.Items)
+			//		new QueryVisitor().Visit(key.Expression, SetQueryParameter);
+			//
+			//	foreach (var key in sqlQuery.Update.Items)
+			//		new QueryVisitor().Visit(key.Expression, SetQueryParameter);
+			//}
 
 			sqlQuery = base.Finalize(sqlQuery);
 
@@ -213,7 +225,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sqlQuery.From.Tables[0].Alias = "$";
 					break;
 
-				case QueryType.Update:
+				case QueryType.Update :
 					sqlQuery = GetAlternativeUpdate(sqlQuery);
 					break;
 			}
@@ -223,7 +235,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 
@@ -231,14 +243,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToQueryParameter:
-					return "?";
-
-				case ConvertType.NameToCommandParameter:
-				case ConvertType.NameToSprocParameter:
-					return ":" + value;
-
-				case ConvertType.SprocParameterToName:
+				case ConvertType.NameToQueryParameter   : return "?";
+				case ConvertType.NameToCommandParameter :
+				case ConvertType.NameToSprocParameter   : return ":" + value;
+				case ConvertType.SprocParameterToName   :
 					if (value != null)
 					{
 						var str = value.ToString();
@@ -250,5 +258,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+
+		//protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		//{
+		//	BuildInsertOrUpdateQueryAsMerge(sb, "FROM SYSTABLES");
+		//}
 	}
 }

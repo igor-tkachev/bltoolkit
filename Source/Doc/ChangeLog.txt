@@ -1,12 +1,9 @@
 v 4.1
 
-Bug fixes
-
-- 
-
 Enhancement
 
 - New Linq converter.
+- New InsertOrUpdate method.
 
 
 v 4.0

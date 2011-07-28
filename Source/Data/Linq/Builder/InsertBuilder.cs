@@ -103,7 +103,7 @@ namespace BLToolkit.Data.Linq.Builder
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				if (_insertWithIdentity) query.SetScalarQuery<object>();
-				else					 query.SetNonQueryQuery();
+				else                     query.SetNonQueryQuery();
 			}
 
 			public override Expression BuildExpression(Expression expression, int level)

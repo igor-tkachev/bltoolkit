@@ -10,6 +10,7 @@ namespace Data.Linq
 	{
 		Table<Person>                 Person                 { get; }
 		Table<Patient>                Patient                { get; }
+		Table<Doctor>                 Doctor                 { get; }
 		Table<Parent>                 Parent                 { get; }
 		Table<Parent1>                Parent1                { get; }
 		Table<IParent>                Parent2                { get; }

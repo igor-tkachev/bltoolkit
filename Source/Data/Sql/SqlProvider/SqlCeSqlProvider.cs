@@ -17,6 +17,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public override bool IsSubQueryColumnSupported { get { return false; } }
 		public override bool IsCountSubQuerySupported  { get { return false; } }
 		public override bool IsApplyJoinSupported      { get { return true;  } }
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		protected override string FirstFormat  { get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" :                null; } }
 		protected override string LimitFormat  { get { return SqlQuery.Select.SkipValue != null ? "FETCH NEXT {0} ROWS ONLY" : null; } }
@@ -25,7 +26,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -159,7 +160,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 

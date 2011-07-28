@@ -11,7 +11,6 @@ namespace BLToolkit.Data
 {
 	using DataProvider;
 	using Linq;
-	using Reflection;
 	using Sql;
 	using Sql.SqlProvider;
 
@@ -202,7 +201,7 @@ namespace BLToolkit.Data
 			{
 				var sql = pq.SqlQuery;
 
-				if (sql.QueryType == QueryType.Insert && sql.Insert.WithIdentity)
+				if (sql.IsInsert && sql.Insert.WithIdentity)
 				{
 					var pname = DataProvider.Convert("IDENTITY_PARAMETER", ConvertType.NameToQueryParameter).ToString();
 					idparam = OutputParameter(pname, DbType.Decimal);

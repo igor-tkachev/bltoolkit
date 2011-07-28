@@ -171,7 +171,7 @@ namespace BLToolkit.ServiceModel
 
 		protected virtual void ValidateQuery(LinqServiceQuery query)
 		{
-			if (AllowUpdates == false && query.Query.QueryType != QueryType.Select)
+			if (AllowUpdates == false && !query.Query.IsSelect)
 				throw new LinqException("Insert/Update/Delete requests are not allowed by the service policy.");
 		}
 

@@ -11,7 +11,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Insert.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -27,8 +27,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override string LimitFormat  { get { return "LIMIT {0}";  } }
 		protected override string OffsetFormat { get { return "OFFSET {0}"; } }
 
-		public override bool IsSkipSupported       { get { return SqlQuery.Select.TakeValue != null; } }
-		public override bool IsNestedJoinSupported { get { return false; } }
+		public override bool IsSkipSupported           { get { return SqlQuery.Select.TakeValue != null; } }
+		public override bool IsNestedJoinSupported     { get { return false; } }
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
@@ -108,12 +109,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			switch (sqlQuery.QueryType)
 			{
-				case QueryType.Delete: 
+				case QueryType.Delete :
 					sqlQuery = GetAlternativeDelete(base.Finalize(sqlQuery));
 					sqlQuery.From.Tables[0].Alias = "$";
 					break;
 
-				case QueryType.Update:
+				case QueryType.Update :
 					sqlQuery = GetAlternativeUpdate(sqlQuery);
 					break;
 			}
@@ -123,7 +124,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -63,6 +64,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsNestedJoinParenthesisRequired { get { return false; } }
 		public virtual bool IsIdentityParameterRequired     { get { return false; } }
 		public virtual bool IsApplyJoinSupported            { get { return false; } }
+		public virtual bool IsInsertOrUpdateSupported       { get { return true;  } }
 
 		public virtual bool ConvertCountSubQuery(SqlQuery subQuery)
 		{
@@ -145,25 +147,70 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			switch (_sqlQuery.QueryType)
 			{
-				case QueryType.Delete : _buildStep = Step.DeleteClause; BuildDeleteClause(sb); break;
-				case QueryType.Update : _buildStep = Step.UpdateClause; BuildUpdateClause(sb); break;
-				case QueryType.Insert : _buildStep = Step.InsertClause; BuildInsertClause(sb);
-					if (_sqlQuery.From.Tables.Count == 0)
-						break;
-					goto default;
-				default               : _buildStep = Step.SelectClause; BuildSelectClause(sb); break;
+				case QueryType.Select         : BuildSelectQuery        (sb); break;
+				case QueryType.Delete         : BuildDeleteQuery        (sb); break;
+				case QueryType.Update         : BuildUpdateQuery        (sb); break;
+				case QueryType.Insert         : BuildInsertQuery        (sb); break;
+				case QueryType.InsertOrUpdate : BuildInsertOrUpdateQuery(sb); break;
+				default                       : BuildUnknownQuery       (sb); break;
 			}
+		}
 
+		protected virtual void BuildDeleteQuery(StringBuilder sb)
+		{
+			_buildStep = Step.DeleteClause;  BuildDeleteClause (sb);
 			_buildStep = Step.FromClause;    BuildFromClause   (sb);
 			_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
 			_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
 			_buildStep = Step.HavingClause;  BuildHavingClause (sb);
 			_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
 			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
+		}
 
-			
-			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.Insert.WithIdentity)
+		protected virtual void BuildUpdateQuery(StringBuilder sb)
+		{
+			_buildStep = Step.UpdateClause;  BuildUpdateClause (sb);
+			_buildStep = Step.FromClause;    BuildFromClause   (sb);
+			_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
+			_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
+			_buildStep = Step.HavingClause;  BuildHavingClause (sb);
+			_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
+			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
+		}
+
+		protected virtual void BuildSelectQuery(StringBuilder sb)
+		{
+			_buildStep = Step.SelectClause;  BuildSelectClause (sb);
+			_buildStep = Step.FromClause;    BuildFromClause   (sb);
+			_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
+			_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
+			_buildStep = Step.HavingClause;  BuildHavingClause (sb);
+			_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
+			_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
+		}
+
+		protected virtual void BuildInsertQuery(StringBuilder sb)
+		{
+			_buildStep = Step.InsertClause; BuildInsertClause(sb);
+
+			if (_sqlQuery.QueryType == QueryType.Insert && _sqlQuery.From.Tables.Count != 0)
+			{
+				_buildStep = Step.SelectClause;  BuildSelectClause (sb);
+				_buildStep = Step.FromClause;    BuildFromClause   (sb);
+				_buildStep = Step.WhereClause;   BuildWhereClause  (sb);
+				_buildStep = Step.GroupByClause; BuildGroupByClause(sb);
+				_buildStep = Step.HavingClause;  BuildHavingClause (sb);
+				_buildStep = Step.OrderByClause; BuildOrderByClause(sb);
+				_buildStep = Step.OffsetLimit;   BuildOffsetLimit  (sb);
+			}
+
+			if (SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
+		}
+
+		protected virtual void BuildUnknownQuery(StringBuilder sb)
+		{
+			throw new SqlException("Unknown query type '{0}'.", _sqlQuery.QueryType);
 		}
 
 		public virtual StringBuilder BuildTableName(StringBuilder sb, string database, string owner, string table)
@@ -307,10 +354,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Build Insert
 
-		protected virtual void BuildInsertClause(StringBuilder sb)
+		protected void BuildInsertClause(StringBuilder sb)
 		{
-			AppendIndent(sb).Append("INSERT INTO ");
-			BuildPhysicalTable(sb, SqlQuery.Insert.Into, null);
+			BuildInsertClause(sb, "INSERT INTO ", true);
+		}
+
+		protected virtual void BuildInsertClause(StringBuilder sb, string insertText, bool appendTableName)
+		{
+			AppendIndent(sb).Append(insertText);
+			if (appendTableName)
+				BuildPhysicalTable(sb, SqlQuery.Insert.Into, null);
 			sb.AppendLine(" ");
 
 			AppendIndent(sb).AppendLine("(");
@@ -334,7 +387,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine();
 			AppendIndent(sb).AppendLine(")");
 
-			if (_sqlQuery.From.Tables.Count == 0)
+			if (_sqlQuery.QueryType == QueryType.InsertOrUpdate || _sqlQuery.From.Tables.Count == 0)
 			{
 				AppendIndent(sb).AppendLine("VALUES");
 				AppendIndent(sb).AppendLine("(");
@@ -363,6 +416,149 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected virtual void BuildGetIdentity(StringBuilder sb)
 		{
 			//throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
+		}
+
+		#endregion
+
+		#region Build InsertOrUpdate
+
+		protected virtual void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			throw new SqlException("InsertOrUpdate query type is not supported by {0} provider.", Name);
+		}
+
+		protected void BuildInsertOrUpdateQueryAsMerge(StringBuilder sb, string fromDummyTable)
+		{
+			var table       = SqlQuery.Insert.Into;
+			var targetAlias = Convert(SqlQuery.From.Tables[0].Alias, ConvertType.NameToQueryTableAlias).ToString();
+			var sourceAlias = Convert(GetTempAliases(1, "s")[0],     ConvertType.NameToQueryTableAlias).ToString();
+			var keys        = table.GetKeys(false);
+			var exprs       =
+				(
+					from k in keys
+						join i in SqlQuery.Insert.Items
+						on k equals i.Column
+					select i.Expression
+				).ToList();
+
+			AppendIndent(sb).Append("MERGE INTO ");
+			BuildPhysicalTable(sb, table, null);
+			sb.Append(' ').AppendLine(targetAlias);
+
+			AppendIndent(sb).Append("USING (SELECT ");
+
+			for (var i = 0; i < keys.Count; i++)
+			{
+				BuildExpression(sb, exprs[i], false, false);
+				sb.Append(" AS ");
+				BuildExpression(sb, keys [i], false, false);
+
+				if (i + 1 < keys.Count)
+					sb.Append(", ");
+			}
+
+			if (!string.IsNullOrEmpty(fromDummyTable))
+				sb.Append(' ').Append(fromDummyTable);
+
+			sb.Append(") ").Append(sourceAlias).AppendLine(" ON");
+
+			AppendIndent(sb).AppendLine("(");
+
+			Indent++;
+
+			for (var i = 0; i < keys.Count; i++)
+			{
+				var key = keys[i];
+
+				AppendIndent(sb);
+
+				sb.Append(targetAlias).Append('.');
+				BuildExpression(sb, key, false, false);
+
+				sb.Append(" = ").Append(sourceAlias).Append('.');
+				BuildExpression(sb, key, false, false);
+
+				if (i + 1 < keys.Count)
+					sb.Append(" AND");
+
+				sb.AppendLine();
+			}
+
+			Indent--;
+
+			AppendIndent(sb).AppendLine(")");
+			AppendIndent(sb).AppendLine("WHEN MATCHED THEN");
+
+			Indent++;
+			AppendIndent(sb).AppendLine("UPDATE ");
+			BuildUpdateSet(sb);
+			Indent--;
+
+			AppendIndent(sb).AppendLine("WHEN NOT MATCHED THEN");
+
+			Indent++;
+			BuildInsertClause(sb, "INSERT", false);
+			Indent--;
+
+			while (_endLine.Contains(sb[sb.Length - 1]))
+				sb.Length--;
+		}
+
+		static readonly char[] _endLine = new[] { ' ', '\r', '\n' };
+
+		protected void BuildInsertOrUpdateQueryAsUpdateInsert(StringBuilder sb)
+		{
+			AppendIndent(sb).AppendLine("BEGIN TRAN").AppendLine();
+
+			BuildUpdateQuery(sb);
+
+			AppendIndent(sb).AppendLine("WHERE");
+
+			var alias = Convert(SqlQuery.From.Tables[0].Alias, ConvertType.NameToQueryTableAlias).ToString();
+			var exprs =
+				(
+					from k in SqlQuery.Insert.Into.GetKeys(false)
+						join i in SqlQuery.Insert.Items
+						on k equals i.Column
+					select i
+				).ToList();
+
+			Indent++;
+
+			for (var i = 0; i < exprs.Count; i++)
+			{
+				var expr = exprs[i];
+
+				AppendIndent(sb);
+
+				sb.Append(alias).Append('.');
+				BuildExpression(sb, expr.Column, false, false);
+
+				sb.Append(" = ");
+				BuildExpression(sb, Precedence.Comparison, expr.Expression);
+
+				if (i + 1 < exprs.Count)
+					sb.Append(" AND");
+
+				sb.AppendLine();
+			}
+
+			Indent--;
+
+			sb.AppendLine();
+			AppendIndent(sb).AppendLine("IF @@ROWCOUNT = 0");
+			AppendIndent(sb).AppendLine("BEGIN");
+
+			Indent++;
+
+			BuildInsertQuery(sb);
+
+			Indent--;
+
+			AppendIndent(sb).AppendLine("END");
+
+			sb.AppendLine();
+			AppendIndent(sb).AppendLine("COMMIT");
 		}
 
 		#endregion
@@ -1847,7 +2043,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeDelete(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.QueryType == QueryType.Delete && 
+			if (sqlQuery.IsDelete && 
 				(sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0) && 
 				sqlQuery.From.Tables[0].Source is SqlTable)
 			{
@@ -1879,7 +2075,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeUpdate(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.QueryType == QueryType.Update && sqlQuery.From.Tables[0].Source is SqlTable)
+			if (sqlQuery.IsUpdate && sqlQuery.From.Tables[0].Source is SqlTable)
 			{
 				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
 				{
@@ -2101,7 +2297,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							if (tbl.TableArguments != null && tbl.TableArguments.Length > 0)
 							{
-								bool first = true;
+								var first = true;
 
 								foreach (var arg in tbl.TableArguments)
 								{
