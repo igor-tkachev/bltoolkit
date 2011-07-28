@@ -155,6 +155,7 @@
     <Compile Include="Data\Linq\Builder\GroupByBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IBuildContext.cs" />
     <Compile Include="Data\Linq\Builder\InsertBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ISequenceBuilder.cs" />
     <Compile Include="Data\Linq\Builder\JoinBuilder.cs" />
