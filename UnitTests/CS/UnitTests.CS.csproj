@@ -177,6 +177,7 @@
     <Compile Include="EditableObjects\InnerObjectTest.cs" />
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
+    <Compile Include="EditableObjects\NotifyPropertyChangedTest.cs" />
     <Compile Include="JointureTests\Artist.cs" />
     <Compile Include="JointureTests\Artist2.cs" />
     <Compile Include="JointureTests\AssociationTests.cs" />
