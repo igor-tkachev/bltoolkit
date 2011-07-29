@@ -651,9 +651,9 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.UnaryPlus:
-				case ExpressionType.Negate:
-				case ExpressionType.NegateChecked:
+				case ExpressionType.UnaryPlus      :
+				case ExpressionType.Negate         :
+				case ExpressionType.NegateChecked  :
 					{
 						var e = (UnaryExpression)expression;
 						var o = ConvertToSql(context, e.Operand);
@@ -679,15 +679,24 @@ namespace BLToolkit.Data.Linq.Builder
 						if (e.Method == null && e.IsLifted)
 							return o;
 
-						if (e.Operand.Type.IsEnum && Enum.GetUnderlyingType(e.Operand.Type) == e.Type)
+						var t = e.Operand.Type;
+						var s = SqlDataType.GetDataType(t);
+
+						if (o.SystemType != null && s.Type == typeof(object))
+						{
+							t = o.SystemType;
+							s = SqlDataType.GetDataType(t);
+						}
+
+						if (e.Type == t || t.IsEnum && Enum.GetUnderlyingType(t) == e.Type)
 							return o;
 
 						return Convert(
 							context,
-							new SqlFunction(e.Type, "$Convert$", SqlDataType.GetDataType(e.Type), SqlDataType.GetDataType(e.Operand.Type), o));
+							new SqlFunction(e.Type, "$Convert$", SqlDataType.GetDataType(e.Type), s, o));
 					}
 
-				case ExpressionType.Conditional   :
+				case ExpressionType.Conditional    :
 					{
 						var e = (ConditionalExpression)expression;
 						var s = ConvertToSql(context, e.Test);
