@@ -320,21 +320,21 @@ namespace Data.Linq
 #region Models for Test14
         interface IChildTest14
         {
-            int ChildId { get; set; }
+            int ChildID { get; set; }
         }
 
         [TableName("Child")]
         class ChildTest14 : IChildTest14
         {
             [PrimaryKey]
-            public int ChildId { get; set; }
+            public int ChildID { get; set; }
 
         }
 
         T FindById<T>(IQueryable<T> queryable, int id)
             where T : IChildTest14
         {
-            return queryable.Where(x => x.ChildId == id).FirstOrDefault();
+            return queryable.Where(x => x.ChildID == id).FirstOrDefault();
         }
 #endregion
 
@@ -345,7 +345,7 @@ namespace Data.Linq
             ForEachProvider(context =>
                 {
                     var db = (TestDbManager)context;
-                    var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildId = c.ChildId });
+                    var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildID = c.ChildID });
                     FindById(q, 10);
                 });
         }

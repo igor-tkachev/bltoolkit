@@ -64,7 +64,7 @@ namespace BLToolkit.Data.Linq.Builder
 			readonly bool                          _isObject;
 			readonly MethodCallExpression          _methodCall;
 			readonly ParameterExpression           _unionParameter;
-			readonly Dictionary<MemberInfo,Member> _members = new Dictionary<MemberInfo,Member>();
+			readonly Dictionary<MemberInfo,Member> _members = new Dictionary<MemberInfo,Member>(new MemberInfoComparer());
 
 			class Member
 			{
