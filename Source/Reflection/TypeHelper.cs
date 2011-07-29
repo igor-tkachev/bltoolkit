@@ -1271,7 +1271,7 @@ namespace BLToolkit.Reflection
 				return type.HasElementType ? type.GetElementType(): null;
 
 			if (type.IsArray)
-				type.GetElementType();
+				return type.GetElementType();
 
 			if (type.IsGenericType)
 				foreach (var aType in type.GetGenericArguments())
