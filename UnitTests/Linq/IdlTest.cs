@@ -362,19 +362,8 @@ namespace Data.Linq
                         Name = p.FirstName
                     };
 
-                var q1 =
-                    from p in people
-                    where p.Id == 1
-                    select p;
-
-                var sql1 = q1.ToString();
-
-                var q2 =
-                    from p in people
-                    where p.Id.Value == 1
-                    select p;
-
-                var sql2 = q2.ToString();
+                var sql1 = (from p in people where p.Id       == 1 select p).ToString();
+                var sql2 = (from p in people where p.Id.Value == 1 select p).ToString();
 
                 Assert.That(sql1, Is.EqualTo(sql2));
             });
