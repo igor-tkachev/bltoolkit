@@ -1,8 +1,9 @@
 using System;
-using BLToolkit.TypeBuilder;
+
 using NUnit.Framework;
 
 using BLToolkit.Patterns;
+using BLToolkit.TypeBuilder;
 
 namespace Patterns
 {
@@ -67,7 +68,7 @@ namespace Patterns
 		[Test]
 		public void Test()
 		{
-			IOptionalInterfaceNoException duck = DuckTyping.Implement<IOptionalInterfaceNoException> (new TestClass());
+			var duck = DuckTyping.Implement<IOptionalInterfaceNoException> (new TestClass());
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 			Assert.AreEqual(0, duck.OtherOptionalMethod());
@@ -83,7 +84,7 @@ namespace Patterns
 		[Test, ExpectedException(typeof(NotImplementedException))]
 		public void RuntimeExceptionTest()
 		{
-			IOptionalInterface duck = DuckTyping.Implement<IOptionalInterface>(new TestClass());
+			var duck = DuckTyping.Implement<IOptionalInterface>(new TestClass());
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 
@@ -95,7 +96,7 @@ namespace Patterns
 		[Test, ExpectedException(typeof(NotImplementedException))]
 		public void RuntimeAggregateExceptionTest()
 		{
-			IOptionalInterface duck = DuckTyping.Aggregate<IOptionalInterface>(new TestClass(), new EmptyClass());
+			var duck = DuckTyping.Aggregate<IOptionalInterface>(new TestClass(), new EmptyClass());
 
 			Assert.AreEqual(1, duck.RequiredMethod());
 
@@ -109,7 +110,7 @@ namespace Patterns
 		{
 			// Exception here.
 			//
-			IOptionalInterface duck1 = DuckTyping.Implement<IOptionalInterface> (string.Empty);
+			var duck1 = DuckTyping.Implement<IOptionalInterface> (string.Empty);
 		}
 
 		[Test, ExpectedException(typeof(TypeBuilderException))]
@@ -117,13 +118,14 @@ namespace Patterns
 		{
 			// Exception here.
 			//
-			IOptionalInterface duck1 = DuckTyping.Aggregate<IOptionalInterface>(string.Empty, Guid.Empty);
+			var duck1 = DuckTyping.Aggregate<IOptionalInterface>(string.Empty, Guid.Empty);
 		}
 
 		[Test]
 		public void AsLikeBehaviourTest()
 		{
-			IOtherOptionalInterface duck = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
+			var duck = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
+
 			Assert.IsNotNull(duck);
 
 			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
@@ -135,6 +137,5 @@ namespace Patterns
 			duck = DuckTyping.Aggregate<IOtherOptionalInterface>(new EmptyClass(), string.Empty);
 			Assert.IsNull   (duck);
 		}
-
 	}
 }
