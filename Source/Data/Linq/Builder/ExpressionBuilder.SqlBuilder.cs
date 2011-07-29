@@ -1487,11 +1487,11 @@ namespace BLToolkit.Data.Linq.Builder
 			bool      isNull;
 			SqlInfo[] lcols;
 
-			var rmembers = new Dictionary<MemberInfo,Expression>();
+			var rmembers = new Dictionary<MemberInfo,Expression>(new MemberInfoComparer());
 
 			if (sl == false && sr == false)
 			{
-				var lmembers = new Dictionary<MemberInfo,Expression>();
+				var lmembers = new Dictionary<MemberInfo,Expression>(new MemberInfoComparer());
 
 				if (!ProcessProjection(lmembers, left) && !ProcessProjection(rmembers, right))
 					return null;

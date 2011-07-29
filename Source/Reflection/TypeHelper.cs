@@ -29,17 +29,13 @@ namespace BLToolkit.Reflection
 		{
 			if (type == null) throw new ArgumentNullException("type");
 
-			_type = type;
+			Type = type;
 		}
 
-		private readonly Type _type;
 		/// <summary>
 		/// Gets associated Type.
 		/// </summary>
-		public           Type  Type
-		{
-			get { return _type; }
-		}
+		public Type Type { get; private set; }
 
 		/// <summary>
 		/// Converts the supplied <see cref="Type"/> to a <see cref="TypeHelper"/>.
@@ -78,7 +74,7 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			return _type.GetCustomAttributes(attributeType, inherit);
+			return Type.GetCustomAttributes(attributeType, inherit);
 		}
 
 		/// <summary>
@@ -91,7 +87,7 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetCustomAttributes(Type attributeType)
 		{
-			return _type.GetCustomAttributes(attributeType, true);
+			return Type.GetCustomAttributes(attributeType, true);
 		}
 
 
@@ -104,7 +100,7 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetCustomAttributes(bool inherit)
 		{
-			return _type.GetCustomAttributes(inherit);
+			return Type.GetCustomAttributes(inherit);
 		}
 
 		/// <summary>
@@ -114,7 +110,7 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetCustomAttributes()
 		{
-			return _type.GetCustomAttributes(true);
+			return Type.GetCustomAttributes(true);
 		}
 
 		/// <summary>
@@ -127,7 +123,7 @@ namespace BLToolkit.Reflection
 		/// or an array with zero (0) elements if no attributes are defined.</returns>
 		public object[] GetAttributes(Type attributeType)
 		{
-			return GetAttributes(_type, attributeType);
+			return GetAttributes(Type, attributeType);
 		}
 
 		/// <summary>
@@ -146,7 +142,7 @@ namespace BLToolkit.Reflection
 		{
 			lock (_typeAttributes)
 			{
-				var key = _type.FullName;
+				var key = Type.FullName;
 
 				object[] attrs;
 
@@ -154,7 +150,7 @@ namespace BLToolkit.Reflection
 				{
 					var list = new List<object>();
 
-					GetAttributesInternal(list, _type);
+					GetAttributesInternal(list, Type);
 
 					_typeAttributes.Add(key, attrs = list.ToArray());
 				}
@@ -189,9 +185,9 @@ namespace BLToolkit.Reflection
 
 			if (Common.Configuration.FilterOutBaseEqualAttributes)
 			{
-				for (var i = 0; i < attrs.Length; i++)
-					if (!list.Contains(attrs[i]))
-						list.Add(attrs[i]);
+				foreach (var t in attrs)
+					if (!list.Contains(t))
+						list.Add(t);
 			}
 			else
 				list.AddRange(attrs);
@@ -314,7 +310,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public string FullName
 		{
-			get { return _type.FullName; }
+			get { return Type.FullName; }
 		}
 
 		/// <summary>
@@ -322,7 +318,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public string Name
 		{
-			get { return _type.Name; }
+			get { return Type.Name; }
 		}
 
 		/// <summary>
@@ -330,7 +326,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public bool IsAbstract
 		{
-			get { return _type.IsAbstract; }
+			get { return Type.IsAbstract; }
 		}
 
 		/// <summary>
@@ -338,7 +334,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public bool IsArray
 		{
-			get { return _type.IsArray; }
+			get { return Type.IsArray; }
 		}
 
 		/// <summary>
@@ -346,7 +342,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public bool IsValueType
 		{
-			get { return _type.IsValueType; }
+			get { return Type.IsValueType; }
 		}
 
 		/// <summary>
@@ -354,7 +350,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public bool IsClass
 		{
-			get { return _type.IsClass; }
+			get { return Type.IsClass; }
 		}
 
 		/// <summary>
@@ -362,7 +358,7 @@ namespace BLToolkit.Reflection
 		/// </summary>
 		public bool IsInterface
 		{
-			get { return _type.IsInterface; }
+			get { return Type.IsInterface; }
 		}
 
 		/// <summary>
@@ -375,7 +371,7 @@ namespace BLToolkit.Reflection
 #if SILVERLIGHT
 				return false;
 #else
-				return _type.IsSerializable;
+				return Type.IsSerializable;
 #endif
 			}
 		}
@@ -391,7 +387,7 @@ namespace BLToolkit.Reflection
 		/// defined for the current Type.</returns>
 		public MethodInfo[] GetMethods()
 		{
-			return _type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			return Type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		/// <summary>
@@ -401,7 +397,7 @@ namespace BLToolkit.Reflection
 		/// defined for the current Type.</returns>
 		public MethodInfo[] GetPublicMethods()
 		{
-			return _type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+			return Type.GetMethods(BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		/// <summary>
@@ -414,7 +410,7 @@ namespace BLToolkit.Reflection
 		/// for the current Type that match the specified binding constraints.</returns>
 		public MethodInfo[] GetMethods(BindingFlags flags)
 		{
-			return _type.GetMethods(flags);
+			return Type.GetMethods(flags);
 		}
 
 		/// <summary>
@@ -425,7 +421,7 @@ namespace BLToolkit.Reflection
 		/// defined for the current Type.</returns>
 		public MethodInfo[] GetMethods(bool generic)
 		{
-			return GetMethods(_type, generic, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			return GetMethods(Type, generic, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		/// <summary>
@@ -436,7 +432,7 @@ namespace BLToolkit.Reflection
 		/// defined for the current Type.</returns>
 		public MethodInfo[] GetPublicMethods(bool generic)
 		{
-			return GetMethods(_type, generic, BindingFlags.Instance | BindingFlags.Public);
+			return GetMethods(Type, generic, BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		/// <summary>
@@ -450,7 +446,7 @@ namespace BLToolkit.Reflection
 		/// for the current Type that match the specified binding constraints.</returns>
 		public MethodInfo[] GetMethods(bool generic, BindingFlags flags)
 		{
-			return GetMethods(_type, generic, flags);
+			return GetMethods(Type, generic, flags);
 		}
 
 		#endregion
@@ -465,7 +461,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified name, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName)
 		{
-			return _type.GetMethod(methodName,
+			return Type.GetMethod(methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
@@ -477,7 +473,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified name, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(string methodName)
 		{
-			return _type.GetMethod(methodName,
+			return Type.GetMethod(methodName,
 				BindingFlags.Instance | BindingFlags.Public);
 		}
 
@@ -491,7 +487,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName, BindingFlags flags)
 		{
-			return _type.GetMethod(methodName, flags);
+			return Type.GetMethod(methodName, flags);
 		}
 
 		/// <summary>
@@ -506,7 +502,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(string methodName, params Type[] types)
 		{
-			return _type.GetMethod(
+			return Type.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public,
 				null,
@@ -527,7 +523,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName, params Type[] types)
 		{
-			return _type.GetMethod(
+			return Type.GetMethod(
 				methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				null,
@@ -550,7 +546,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(string methodName, BindingFlags flags, params Type[] types)
 		{
-			return _type.GetMethod(methodName, flags, null, types, null);
+			return Type.GetMethod(methodName, flags, null, types, null);
 		}
 
 		/// <summary>
@@ -563,7 +559,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName)
 		{
-			return GetMethod(_type, generic, methodName,
+			return GetMethod(Type, generic, methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
@@ -577,7 +573,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(bool generic, string methodName)
 		{
-			return GetMethod(_type, generic, methodName,
+			return GetMethod(Type, generic, methodName,
 				BindingFlags.Instance | BindingFlags.Public);
 		}
 
@@ -593,7 +589,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags)
 		{
-			return GetMethod(_type, generic, methodName, flags);
+			return GetMethod(Type, generic, methodName, flags);
 		}
 
 		/// <summary>
@@ -610,7 +606,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetPublicMethod(bool generic, string methodName, params Type[] types)
 		{
-			return _type.GetMethod(methodName,
+			return Type.GetMethod(methodName,
 				BindingFlags.Instance | BindingFlags.Public,
 				generic ? GenericBinder.Generic : GenericBinder.NonGeneric,
 				types, null);
@@ -631,7 +627,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName, params Type[] types)
 		{
-			return _type.GetMethod(methodName,
+			return Type.GetMethod(methodName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
 				generic ? GenericBinder.Generic : GenericBinder.NonGeneric,
 				types, null);
@@ -653,7 +649,7 @@ namespace BLToolkit.Reflection
 		/// that matches the specified requirements, if found; otherwise, null.</returns>
 		public MethodInfo GetMethod(bool generic, string methodName, BindingFlags flags, params Type[] types)
 		{
-			return _type.GetMethod(methodName,
+			return Type.GetMethod(methodName,
 				flags,
 				generic ? GenericBinder.Generic : GenericBinder.NonGeneric,
 				types, null);
@@ -670,7 +666,7 @@ namespace BLToolkit.Reflection
 		/// all the public fields defined for the current Type.</returns>
 		public FieldInfo[] GetFields()
 		{
-			return _type.GetFields();
+			return Type.GetFields();
 		}
 
 		/// <summary>
@@ -683,7 +679,7 @@ namespace BLToolkit.Reflection
 		/// that match the specified binding constraints.</returns>
 		public FieldInfo[] GetFields(BindingFlags bindingFlags)
 		{
-			return _type.GetFields(bindingFlags);
+			return Type.GetFields(bindingFlags);
 		}
 
 		/// <summary>
@@ -694,7 +690,7 @@ namespace BLToolkit.Reflection
 		/// if found; otherwise, a null reference.</returns>
 		public FieldInfo GetField(string name)
 		{
-			return _type.GetField(
+			return Type.GetField(
 				name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
@@ -709,7 +705,7 @@ namespace BLToolkit.Reflection
 		/// all public properties of the current Type.</returns>
 		public PropertyInfo[] GetProperties()
 		{
-			return _type.GetProperties();
+			return Type.GetProperties();
 		}
 
 		/// <summary>
@@ -722,7 +718,7 @@ namespace BLToolkit.Reflection
 		/// that match the specified binding constraints.</returns>
 		public PropertyInfo[] GetProperties(BindingFlags bindingFlags)
 		{
-			return _type.GetProperties(bindingFlags);
+			return Type.GetProperties(bindingFlags);
 		}
 
 		/// <summary>
@@ -733,7 +729,7 @@ namespace BLToolkit.Reflection
 		/// if found; otherwise, a null reference.</returns>
 		public PropertyInfo GetProperty(string name)
 		{
-			return _type.GetProperty(
+			return Type.GetProperty(
 				name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
@@ -785,7 +781,7 @@ namespace BLToolkit.Reflection
 		/// mapping for <paramref name="interfaceType"/>.</returns>
 		public InterfaceMapping GetInterfaceMap(Type interfaceType)
 		{
-			return _type.GetInterfaceMap(interfaceType);
+			return Type.GetInterfaceMap(interfaceType);
 		}
 
 		#endregion
@@ -803,7 +799,7 @@ namespace BLToolkit.Reflection
 		/// the parameter type array, if found; otherwise, a null reference.</returns>
 		public ConstructorInfo GetPublicConstructor(params Type[] types)
 		{
-			return _type.GetConstructor(types);
+			return Type.GetConstructor(types);
 		}
 
 		/// <summary>
@@ -817,7 +813,7 @@ namespace BLToolkit.Reflection
 		/// otherwise, a null reference.</returns>
 		public ConstructorInfo GetConstructor(Type parameterType)
 		{
-			return GetConstructor(_type, parameterType);
+			return GetConstructor(Type, parameterType);
 		}
 
 		/// <summary>
@@ -847,7 +843,7 @@ namespace BLToolkit.Reflection
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
 		public ConstructorInfo GetPublicDefaultConstructor()
 		{
-			return _type.GetConstructor(Type.EmptyTypes);
+			return Type.GetConstructor(Type.EmptyTypes);
 		}
 
 		/// <summary>
@@ -856,7 +852,7 @@ namespace BLToolkit.Reflection
 		/// <returns>A <see cref="ConstructorInfo"/> object representing the constructor.</returns>
 		public ConstructorInfo GetDefaultConstructor()
 		{
-			return GetDefaultConstructor(_type);
+			return GetDefaultConstructor(Type);
 		}
 
 		/// <summary>
@@ -882,7 +878,7 @@ namespace BLToolkit.Reflection
 		/// representing all the type public constructors, if found; otherwise, an empty array.</returns>
 		public ConstructorInfo[] GetPublicConstructors()
 		{
-			return _type.GetConstructors();
+			return Type.GetConstructors();
 		}
 
 		/// <summary>
@@ -892,7 +888,7 @@ namespace BLToolkit.Reflection
 		/// representing all the type constructors, if found; otherwise, an empty array.</returns>
 		public ConstructorInfo[] GetConstructors()
 		{
-			return _type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			return Type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
 		#endregion
@@ -1020,10 +1016,8 @@ namespace BLToolkit.Reflection
 			if (type == null) throw new ArgumentNullException("type");
 
 			foreach (var method in type.GetMethods(flags))
-			{
 				if (method.IsGenericMethodDefinition == generic && method.Name == methodName)
 					return method;
-			}
 
 			return null;
 		}
@@ -1189,23 +1183,15 @@ namespace BLToolkit.Reflection
 			{
 				if (list is IList)
 				{
-					var l = (IList)list;
-
-					for (var i = 0; i < l.Count; i++)
-					{
-						var o = l[i];
-
+					foreach (var o in (IList)list)
 						if (o != null && o.GetType() != typeOfObject)
 							return o.GetType();
-					}
 				}
 				else if (list is IEnumerable)
 				{
 					foreach (var o in (IEnumerable)list)
-					{
 						if (o != null && o.GetType() != typeOfObject)
 							return o.GetType();
-					}
 				}
 			}
 			catch

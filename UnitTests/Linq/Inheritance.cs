@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -315,5 +315,39 @@ namespace Data.Linq
 				Assert.AreEqual(result.Count, exprected.Count);
 			}
 		}
+
+
+#region Models for Test14
+        interface IChildTest14
+        {
+            int ChildID { get; set; }
+        }
+
+        [TableName("Child")]
+        class ChildTest14 : IChildTest14
+        {
+            [PrimaryKey]
+            public int ChildID { get; set; }
+
+        }
+
+        T FindById<T>(IQueryable<T> queryable, int id)
+            where T : IChildTest14
+        {
+            return queryable.Where(x => x.ChildID == id).FirstOrDefault();
+        }
+#endregion
+
+        [Test]
+        public void Test14()
+        {
+            // Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray()
+            ForEachProvider(context =>
+                {
+                    var db = (TestDbManager)context;
+                    var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildID = c.ChildID });
+                    FindById(q, 10);
+                });
+        }
 	}
 }

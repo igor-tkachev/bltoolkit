@@ -37,7 +37,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression IBuildContext.Expression { get { return Lambda; } }
 
-		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>();
+		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>(new MemberInfoComparer());
 
 		public SelectContext(IBuildContext parent, LambdaExpression lambda, params IBuildContext[] sequences)
 		{
@@ -230,7 +230,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertToSql
 
-		readonly Dictionary<MemberInfo,SqlInfo[]> _sql = new Dictionary<MemberInfo,SqlInfo[]>();
+		readonly Dictionary<MemberInfo,SqlInfo[]> _sql = new Dictionary<MemberInfo,SqlInfo[]>(new MemberInfoComparer());
 
 		public virtual SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{

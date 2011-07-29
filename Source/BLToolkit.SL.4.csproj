@@ -176,6 +176,7 @@
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
+    <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\Query.cs" />
     <Compile Include="Data\Linq\QueryContext.cs" />

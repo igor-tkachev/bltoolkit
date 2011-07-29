@@ -1070,7 +1070,8 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			[JetBrains.Annotations.NotNull]
-			readonly Dictionary<MemberInfo,AssociatedTableContext> _associations = new Dictionary<MemberInfo,AssociatedTableContext>();
+			readonly Dictionary<MemberInfo,AssociatedTableContext> _associations =
+				new Dictionary<MemberInfo,AssociatedTableContext>(new MemberInfoComparer());
 
 			class TableLevel
 			{

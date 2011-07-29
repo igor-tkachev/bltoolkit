@@ -2,7 +2,6 @@ using System;
 
 using NUnit.Framework;
 
-using BLToolkit.TypeBuilder;
 using BLToolkit.Patterns;
 
 namespace Patterns
@@ -63,9 +62,9 @@ namespace Patterns
 		[Test]
 		public void Test()
 		{
-			TestInterface   duck = DuckTyping.Implement<TestInterface> (new TestClass());
-			TestInterface   same = DuckTyping.Implement<TestInterface> (duck);
-			TestInterface2 duck2 = DuckTyping.Implement<TestInterface2>(same);
+			var duck  = DuckTyping.Implement<TestInterface> (new TestClass());
+			var same  = DuckTyping.Implement<TestInterface> (duck);
+			var duck2 = DuckTyping.Implement<TestInterface2>(same);
 
 			Assert.AreSame(duck, same);
 
@@ -114,7 +113,7 @@ namespace Patterns
 		[Test]
 		public void BulkTest()
 		{
-			TestInterface[] ducks  = DuckTyping.Implement<TestInterface, TestClass> (new Child1(), new Child2());
+			var ducks  = DuckTyping.Implement<TestInterface,TestClass>(new Child1(), new Child2());
 
 			Assert.IsNotEmpty(ducks);
 			Assert.AreEqual(42, ducks[0].Method(40));
@@ -124,7 +123,7 @@ namespace Patterns
 		[Test]
 		public void BulkTest2()
 		{
-			TestInterface[] ducks = DuckTyping.Implement<TestInterface>(new Child1(), new Child2());
+			var ducks = DuckTyping.Implement<TestInterface>(new Child1(), new Child2());
 
 			Assert.IsNotEmpty(ducks);
 			Assert.AreEqual(45, ducks[0].Method(40));
@@ -134,20 +133,19 @@ namespace Patterns
 		[Test]
 		public void InheritanceTest()
 		{
-			TestInterface duck1 = DuckTyping.Implement<TestInterface> (new Child1());
-			TestInterface duck2 = DuckTyping.Implement<TestInterface> (new Child2());
+			var duck1 = DuckTyping.Implement<TestInterface>(new Child1());
+			var duck2 = DuckTyping.Implement<TestInterface>(new Child2());
 
 			Assert.AreNotSame(duck1, duck2);
 			Assert.AreEqual(45, duck1.Method(40));
 			Assert.AreEqual(50, duck2.Method(40));
-
 		}
 
 		[Test]
 		public void InheritanceTest2()
 		{
-			TestInterface duck1 = DuckTyping.Implement<TestInterface, TestClass> (new Child1());
-			TestInterface duck2 = DuckTyping.Implement<TestInterface, TestClass> (new Child2());
+			var duck1 = DuckTyping.Implement<TestInterface,TestClass>(new Child1());
+			var duck2 = DuckTyping.Implement<TestInterface,TestClass>(new Child2());
 
 			Assert.AreNotSame(duck1, duck2);
 			Assert.AreEqual(42, duck1.Method(40));
@@ -166,7 +164,8 @@ namespace Patterns
 		public void StaticTest()
 		{
 			DuckTyping.AllowStaticMembers = true;
-			TestInterface duck = DuckTyping.Implement<TestInterface, StaticClass> (new StaticClass());
+
+			var duck = DuckTyping.Implement<TestInterface,StaticClass>(new StaticClass());
 
 			Assert.AreEqual(43, duck.Method(40));
 		}
@@ -183,7 +182,8 @@ namespace Patterns
 		public void StructTest()
 		{
 			DuckTyping.AllowStaticMembers = true;
-			TestInterface duck = DuckTyping.Implement<TestInterface> (new TestStruct());
+
+			var duck = DuckTyping.Implement<TestInterface>(new TestStruct());
 
 			Assert.AreEqual(43, duck.Method(40));
 		}
@@ -210,9 +210,9 @@ namespace Patterns
 		[Test]
 		public void GenericInterfaceTest()
 		{
-			GenericClass<int> o = new GenericClass<int>();
-			GenericInterface<int> duck  = DuckTyping.Implement<GenericInterface<int>> (o);
-			TestInterface2        duck2 = DuckTyping.Implement<TestInterface2> (o);
+			var o     = new GenericClass<int>();
+			var duck  = DuckTyping.Implement<GenericInterface<int>>(o);
+			var duck2 = DuckTyping.Implement<TestInterface2> (o);
 
 			Assert.AreEqual(40, duck .Method(40));
 			Assert.AreEqual(40, duck2.Method(40));
@@ -227,8 +227,8 @@ namespace Patterns
 		{
 			TestInterface o = null;
 
-			TestInterface duck1 = DuckTyping.Implement<TestInterface>(o);
-			TestInterface duck2 = (TestInterface)DuckTyping.Implement(typeof(TestInterface), o);
+			var duck1 = DuckTyping.Implement<TestInterface>(o);
+			var duck2 = (TestInterface)DuckTyping.Implement(typeof(TestInterface), o);
 		}
 
 		interface NonPublicInterface
@@ -238,19 +238,19 @@ namespace Patterns
 		[Test, ExpectedException(typeof(ArgumentException))]
 		public void InvalidArgTest2()
 		{
-			NonPublicInterface duck  = (NonPublicInterface) DuckTyping.Implement(typeof(NonPublicInterface), new TestClass());
+			var duck  = (NonPublicInterface)DuckTyping.Implement(typeof(NonPublicInterface), new TestClass());
 		}
 
 		[Test, ExpectedException(typeof(ArgumentException))]
 		public void InvalidArgTest3()
 		{
-			Child1 duck  = (Child1)DuckTyping.Implement(typeof(Child1), new Child2());
+			var duck  = (Child1)DuckTyping.Implement(typeof(Child1), new Child2());
 		}
 
 		[Test, ExpectedException(typeof(ArgumentException))]
 		public void InvalidArgTest4()
 		{
-			TestInterface duck  = (TestInterface)DuckTyping.Implement(typeof(TestInterface), typeof(TestInterface), new TestClass());
+			var duck  = (TestInterface)DuckTyping.Implement(typeof(TestInterface), typeof(TestInterface), new TestClass());
 		}
 
 		#region Aggregate
@@ -286,7 +286,8 @@ namespace Patterns
 		[Test]
 		public void AggregateTest()
 		{
-			IAggregatable duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
+			var duck  = DuckTyping.Aggregate<IAggregatable>(new AggregateClass1(), new AggregateClass2());
+
 			Assert.IsNotNull(duck);
 
 			Assert.AreEqual(1, duck.Method1());
@@ -295,13 +296,15 @@ namespace Patterns
 			// It is still possible to get access
 			// to an interface of an underlying object.
 			//
-			IClass2 cls2 = DuckTyping.Implement<IClass2>(duck);
+			var cls2 = DuckTyping.Implement<IClass2>(duck);
+
 			Assert.IsNotNull(cls2);
 			Assert.AreEqual(2, cls2.Method2());
 
 			// Even to switch from one aggregated object to another
 			//
-			IClass1 cls1 = DuckTyping.Implement<IClass1>(cls2);
+			var cls1 = DuckTyping.Implement<IClass1>(cls2);
+
 			Assert.IsNotNull(cls1);
 			Assert.AreEqual(1, cls1.Method1());
 			Assert.AreEqual(3, cls1.Method3());
@@ -310,7 +313,7 @@ namespace Patterns
 		[Test]
 		public void MissedMethodsAggregateTest()
 		{
-			IClass1 duck = DuckTyping.Aggregate<IClass1>(new Version(1,0), Guid.NewGuid());
+			var duck = DuckTyping.Aggregate<IClass1>(new Version(1,0), Guid.NewGuid());
 
 			Assert.That(duck, Is.Not.Null);
 
