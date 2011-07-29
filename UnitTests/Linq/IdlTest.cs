@@ -348,6 +348,37 @@ namespace Data.Linq
         {
             ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
         }
+
+        [Test]
+        public void ImplicitCastTest()
+        {
+            ForMySqlProvider(db =>
+            {
+                var people =
+                    from p in db.Person
+                    select new IdlPerson
+                    {
+                        Id   = new ObjectId { Value = p.ID },
+                        Name = p.FirstName
+                    };
+
+                var q1 =
+                    from p in people
+                    where p.Id == 1
+                    select p;
+
+                var sql1 = q1.ToString();
+
+                var q2 =
+                    from p in people
+                    where p.Id.Value == 1
+                    select p;
+
+                var sql2 = q2.ToString();
+
+                Assert.That(sql1, Is.EqualTo(sql2));
+            });
+        }
     }
 
     #region TestConvertFunction classes
