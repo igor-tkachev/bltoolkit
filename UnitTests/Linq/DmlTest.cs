@@ -933,30 +933,40 @@ namespace Update
 		{
 			ForEachProvider(db =>
 			{
-				var id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
-				{
-					FirstName = "John",
-					LastName  = "Shepard",
-					Gender    = Gender.Male
-				}));
+				var id = 0;
 
-				for (var i = 0; i < 3; i++)
+				try
 				{
-					var s = "*" + i;
+					id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+					{
+						FirstName = "John",
+						LastName  = "Shepard",
+						Gender    = Gender.Male
+					}));
 
-					db.Patient.InsertOrUpdate(
-						() => new Patient
-						{
-							PersonID  = id,
-							Diagnosis = "abc",
-						},
-						p => new Patient
-						{
-							Diagnosis = (p.Diagnosis.Length + i).ToString(),
-						});
+					for (var i = 0; i < 3; i++)
+					{
+						var s = "*" + i;
+
+						db.Patient.InsertOrUpdate(
+							() => new Patient
+							{
+								PersonID  = id,
+								Diagnosis = "abc",
+							},
+							p => new Patient
+							{
+								Diagnosis = (p.Diagnosis.Length + i).ToString(),
+							});
+					}
+
+					Assert.AreEqual("3", db.Patient.Single(p => p.PersonID == id).Diagnosis);
 				}
-
-				Assert.AreEqual("3", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				finally
+				{
+					db.Patient.Delete(p => p.PersonID == id);
+					db.Person.Delete(p => p.ID        == id);
+				}
 			});
 		}
 
