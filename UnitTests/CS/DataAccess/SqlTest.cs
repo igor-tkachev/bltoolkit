@@ -43,12 +43,11 @@ namespace DataAccess
 		[Test]
 		public void GetFieldListTest()
 		{
-			SqlQuery     da = new SqlQuery();
-			SqlQueryInfo info;
+			var da = new SqlQuery();
 
 			using (var db = new DbManager())
 			{
-				info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
+				var info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
 
 				Console.WriteLine(info.QueryText);
 				Assert.That(info.QueryText.Contains("\t" + db.DataProvider.Convert("PersonID", ConvertType.NameToQueryField)));
@@ -215,9 +214,9 @@ namespace DataAccess
 				var update = da.GetSqlQueryInfo<Person2>(db, "Update");
 				var insert = da.GetSqlQueryInfo<Person2>(db, "Insert");
 
-				var personID =   "\t" + db.DataProvider.Convert("PersonID",   ConvertType.NameToQueryField).ToString();
+				var personID   = "\t" + db.DataProvider.Convert("PersonID",   ConvertType.NameToQueryField).ToString();
 				var middleName = "\t" + db.DataProvider.Convert("MiddleName", ConvertType.NameToQueryField).ToString();
-				var firstName =  "\t" + db.DataProvider.Convert("FirstName",  ConvertType.NameToQueryField).ToString();
+				var firstName  = "\t" + db.DataProvider.Convert("FirstName",  ConvertType.NameToQueryField).ToString();
 
 				var personID_P   = " = " + db.DataProvider.Convert("PersonID_P",   ConvertType.NameToQueryParameter).ToString();
 				var middleName_P = " = " + db.DataProvider.Convert("MiddleName_P", ConvertType.NameToQueryParameter).ToString();

@@ -189,7 +189,7 @@ namespace Data.Linq
 			{
 			inheritance.ForEachProvider(db => inheritance.AreEqual(
 				inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
-				         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
+						 db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
 			}
 		}
 
@@ -316,38 +316,37 @@ namespace Data.Linq
 			}
 		}
 
+		#region Models for Test14
 
-#region Models for Test14
-        interface IChildTest14
-        {
-            int ChildID { get; set; }
-        }
+		interface IChildTest14
+		{
+			int ChildID { get; set; }
+		}
 
-        [TableName("Child")]
-        class ChildTest14 : IChildTest14
-        {
-            [PrimaryKey]
-            public int ChildID { get; set; }
+		[TableName("Child")]
+		class ChildTest14 : IChildTest14
+		{
+			[PrimaryKey]
+			public int ChildID { get; set; }
 
-        }
+		}
 
-        T FindById<T>(IQueryable<T> queryable, int id)
-            where T : IChildTest14
-        {
-            return queryable.Where(x => x.ChildID == id).FirstOrDefault();
-        }
-#endregion
+		T FindById<T>(IQueryable<T> queryable, int id)
+			where T : IChildTest14
+		{
+			return queryable.Where(x => x.ChildID == id).FirstOrDefault();
+		}
 
-        [Test]
-        public void Test14()
-        {
-            // Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray()
-            ForEachProvider(context =>
-                {
-                    var db = (TestDbManager)context;
-                    var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildID = c.ChildID });
-                    FindById(q, 10);
-                });
-        }
+		#endregion
+
+		[Test]
+		public void Test14()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildID = c.ChildID });
+				FindById(q, 10);
+			});
+		}
 	}
 }

@@ -41,3 +41,4 @@ BLToolkit.2010.userprefs
 Mono/_ReSharper.Mono/*
 BLToolkit.2010.sln.docstates
 *.csproj.user
+UnitTests/BLToolkit.Linq.VisualState.xml

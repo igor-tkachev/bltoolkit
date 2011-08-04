@@ -21,20 +21,6 @@ namespace Update
 	[TestFixture]
 	public class DmlTest : TestBase
 	{
-		[TestFixtureTearDown]
-		public new void TearDown()
-		{
-			/*
-			ForEachProvider(db =>
-			{
-				if (db is TestDbManager)
-					db.Parent.Delete(p => p.ParentID >= 1000);
-			});
-			*/
-
-			base.TearDown();
-		}
-
 		[Test]
 		public void Delete1()
 		{

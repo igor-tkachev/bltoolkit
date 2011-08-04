@@ -84,67 +84,57 @@ namespace Data.Linq
 					info.Loaded = false;
 				}
 			}
-		}
 
-		readonly List<ServiceHost> _hosts = new List<ServiceHost>();
-
-		const int StartIP = 12345;
-
-		[TestFixtureSetUp]
-		public void SetUp()
-		{
 			LinqService.TypeResolver = str =>
 			{
 				switch (str)
 				{
-					case "Data.Linq.Model.Gender": return typeof(Gender);
-					case "Data.Linq.Model.Person": return typeof(Person);
-					default : return null;
+					case "Data.Linq.Model.Gender" : return typeof(Gender);
+					case "Data.Linq.Model.Person" : return typeof(Person);
+					default                       : return null;
 				}
 			};
-
-			var ip = StartIP;
-
-			foreach (var info in Providers)
-			{
-				ip++;
-
-				if (!info.Loaded)
-					continue;
-
-				var host = new ServiceHost(new LinqService(info.Name) { AllowUpdates = true }, new Uri("net.tcp://localhost:" + ip));
-
-				host.Description.Behaviors.Add(new ServiceMetadataBehavior());
-				host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
-				host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "mex");
-				host.AddServiceEndpoint(
-					typeof(ILinqService),
-					new NetTcpBinding(SecurityMode.None)
-					{
-						MaxReceivedMessageSize = 10000000,
-						MaxBufferPoolSize      = 10000000,
-						MaxBufferSize          = 10000000,
-						CloseTimeout           = new TimeSpan(00, 01, 00),
-						OpenTimeout            = new TimeSpan(00, 01, 00),
-						ReceiveTimeout         = new TimeSpan(00, 10, 00),
-						SendTimeout            = new TimeSpan(00, 10, 00),
-					},
-					"LinqOverWCF");
-
-				host.Open();
-
-				_hosts.Add(host);
-			}
 		}
 
-		[TestFixtureTearDown]
-		public void TearDown()
+		const  int StartIP = 12345;
+		static int _lastIP = StartIP;
+
+		static int GetIP(string config)
 		{
-			foreach (var host in _hosts)
-				host.Close();
+			int ip;
+
+			if (_ips.TryGetValue(config, out ip))
+				return ip;
+
+			_lastIP++;
+
+			var host = new ServiceHost(new LinqService(config) { AllowUpdates = true }, new Uri("net.tcp://localhost:" + _lastIP));
+
+			host.Description.Behaviors.Add(new ServiceMetadataBehavior());
+			host.Description.Behaviors.Find<ServiceDebugBehavior>().IncludeExceptionDetailInFaults = true;
+			host.AddServiceEndpoint(typeof(IMetadataExchange), MetadataExchangeBindings.CreateMexTcpBinding(), "mex");
+			host.AddServiceEndpoint(
+				typeof(ILinqService),
+				new NetTcpBinding(SecurityMode.None)
+				{
+					MaxReceivedMessageSize = 10000000,
+					MaxBufferPoolSize      = 10000000,
+					MaxBufferSize          = 10000000,
+					CloseTimeout           = new TimeSpan(00, 01, 00),
+					OpenTimeout            = new TimeSpan(00, 01, 00),
+					ReceiveTimeout         = new TimeSpan(00, 10, 00),
+					SendTimeout            = new TimeSpan(00, 10, 00),
+				},
+				"LinqOverWCF");
+
+			host.Open();
+
+			_ips.Add(config, _lastIP);
+
+			return _lastIP;
 		}
 
-		protected class ProviderInfo
+		public class ProviderInfo
 		{
 			public ProviderInfo(string name, string assembly, string type)
 			{
@@ -157,10 +147,11 @@ namespace Data.Linq
 			public readonly string Assembly;
 			public readonly string Type;
 			public          bool   Loaded;
+			public          int    IP;
 		}
 
 		[CLSCompliant(false)]
-		protected static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
+		public static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
 			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",      "BLToolkit.Data.DataProvider.SqlCeDataProvider"),
@@ -181,12 +172,8 @@ namespace Data.Linq
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			var ip = StartIP;
-
 			foreach (var info in Providers)
 			{
-				ip++;
-
 				if (exceptList.Contains(info.Name))
 					continue;
 
@@ -197,14 +184,33 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
-				/*
+				var ip = GetIP(info.Name);
 				var dx = new TestServiceModelDataContext(ip);
 
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
 				yield return dx;
-				*/
 			}
+		}
+
+		static readonly Dictionary<string,int> _ips = new Dictionary<string,int>();
+
+		protected ITestDataContext GetDataContext(string configuration)
+		{
+			if (configuration.EndsWith(".LinqService"))
+			{
+				var str = configuration.Substring(0, configuration.Length - ".LinqService".Length);
+				var ip  = GetIP(str);
+				var dx  = new TestServiceModelDataContext(ip);
+
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+
+				return dx;
+			}
+
+			Debug.WriteLine(configuration, "Provider ");
+
+			return new TestDbManager(configuration);
 		}
 
 		protected void ForEachProvider(Type expectedException, string[] exceptList, Action<ITestDataContext> func)
