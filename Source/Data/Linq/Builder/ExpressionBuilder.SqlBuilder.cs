@@ -28,7 +28,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (checkForSubQuery && CheckSubQueryForWhere(ctx, expr, out makeHaving))
 			{
-				sequence.Parent = prevParent;
+				ReplaceParent(ctx, prevParent);
+
 				sequence = new SubQueryContext(sequence);
 				prevParent = sequence.Parent;
 
@@ -42,7 +43,7 @@ namespace BLToolkit.Data.Linq.Builder
 					ctx.SqlQuery.Having.SearchCondition.Conditions :
 					ctx.SqlQuery.Where. SearchCondition.Conditions);
 
-			sequence.Parent = prevParent;
+			ReplaceParent(ctx, prevParent);
 
 			return sequence;
 		}
@@ -2480,6 +2481,14 @@ namespace BLToolkit.Data.Linq.Builder
 				default                        :
 					return false;
 			}
+		}
+
+		public void ReplaceParent(IBuildContext oldParent, IBuildContext newParent)
+		{
+			foreach (var context in Contexts)
+				if (context != newParent)
+					if (context.Parent == oldParent)
+						context.Parent = newParent;
 		}
 
 		#endregion

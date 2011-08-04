@@ -52,6 +52,8 @@ namespace BLToolkit.Data.Linq.Builder
 				context.Parent = this;
 
 			IsScalar = !Builder.ProcessProjection(Members, Body);
+
+			Builder.Contexts.Add(this);
 		}
 
 		#endregion

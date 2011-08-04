@@ -113,9 +113,12 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new LinqException("Object initializer expected for insert statement.");
 
 			var ex  = (MemberInitExpression)setter.Body;
+			var p   = sequence.Parent;
 			var ctx = new ExpressionContext(buildInfo.Parent, sequence, setter);
 
 			BuildSetter(builder, into, items, ctx, ex, Expression.Parameter(ex.Type, "p"));
+
+			builder.ReplaceParent(ctx, p);
 		}
 
 		static void BuildSetter(
@@ -215,8 +218,11 @@ namespace BLToolkit.Data.Linq.Builder
 				select.ConvertToSql(
 					body, 1, ConvertFlags.Field)[0].Sql;
 					//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
+			var sp     = select.Parent;
 			var ctx    = new ExpressionContext(buildInfo.Parent, select, update);
 			var expr   = builder.ConvertToSqlExpression(ctx, update.Body);
+
+			builder.ReplaceParent(ctx, sp);
 
 			if (expr is SqlParameter && update.Body.Type.IsEnum)
 				((SqlParameter)expr).SetEnumConverter(update.Body.Type, builder.MappingSchema);

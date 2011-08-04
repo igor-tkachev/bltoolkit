@@ -206,6 +206,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			protected void Init()
 			{
+				Builder.Contexts.Add(this);
+
 				InheritanceMapping = ObjectMapper.InheritanceMapping;
 
 				if (InheritanceMapping.Count > 0)

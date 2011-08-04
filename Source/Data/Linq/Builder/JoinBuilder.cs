@@ -109,9 +109,9 @@ namespace BLToolkit.Data.Linq.Builder
 				BuildJoin(builder, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
 			}
 
-			context.     Parent = outerParent;
-			innerContext.Parent = innerParent;
-			countContext.Parent = countParent;
+			builder.ReplaceParent(outerKeyContext, outerParent);
+			builder.ReplaceParent(innerKeyContext, innerParent);
+			builder.ReplaceParent(countKeyContext, countParent);
 
 			if (isGroup)
 			{
@@ -144,9 +144,9 @@ namespace BLToolkit.Data.Linq.Builder
 		static void BuildJoin(
 			ExpressionBuilder        builder,
 			SqlQuery.FromClause.Join join,
-			ExpressionContext outerKeyContext, Expression outerKeySelector,
-			ExpressionContext innerKeyContext, Expression innerKeySelector,
-			ExpressionContext countKeyContext, SqlQuery countSql)
+			IBuildContext outerKeyContext, Expression outerKeySelector,
+			IBuildContext innerKeyContext, Expression innerKeySelector,
+			IBuildContext countKeyContext, SqlQuery countSql)
 		{
 			var predicate = builder.ConvertObjectComparison(
 				ExpressionType.Equal,

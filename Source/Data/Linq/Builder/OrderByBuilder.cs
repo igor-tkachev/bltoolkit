@@ -46,7 +46,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var body    = lambda.Body.Unwrap();
 			var sql     = builder.ConvertExpressions(order, body, ConvertFlags.Key);
 
-			sequence.Parent = sparent;
+			builder.ReplaceParent(order, sparent);
 
 			if (!methodCall.Method.Name.StartsWith("Then"))
 				sequence.SqlQuery.OrderBy.Items.Clear();

@@ -363,10 +363,9 @@ namespace BLToolkit.Data.Linq.Builder
 								{
 									var p   = _element.Parent;
 									var ctx = new ExpressionContext(Parent, _element, l);
-
-									_element.Parent = p;
-
 									var sql = Builder.ConvertToSql(ctx, l.Body.Unwrap());
+
+									Builder.ReplaceParent(ctx, p);
 
 									return new SqlFunction(call.Type, call.Method.Name, sql);
 								}
@@ -461,9 +460,9 @@ namespace BLToolkit.Data.Linq.Builder
 							var p   = _element.Parent;
 							var ctx = new ExpressionContext(Parent, _element, l);
 
-							_element.Parent = p;
-
 							args[i - 1] = Builder.ConvertToSql(ctx, l.Body.Unwrap());
+
+							Builder.ReplaceParent(ctx, p);
 						}
 						else
 						{

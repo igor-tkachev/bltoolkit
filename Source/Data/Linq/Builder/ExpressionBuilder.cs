@@ -104,6 +104,7 @@ namespace BLToolkit.Data.Linq.Builder
 		public readonly Expression            OriginalExpression;
 		public readonly Expression            Expression;
 		public readonly ParameterExpression[] CompiledParameters;
+		public readonly List<IBuildContext>   Contexts = new List<IBuildContext>();
 
 		private ISqlProvider _sqlProvider;
 		public  ISqlProvider  SqlProvider
