@@ -126,7 +126,8 @@ namespace BLToolkit.Data.Linq.Builder
 			public ExpressionBuilder Builder    { get; private set; }
 			public Expression        Expression { get; private set; }
 			public SqlQuery          SqlQuery   { get; set; }
-			public IBuildContext     Parent     { get; set; }
+
+			public virtual IBuildContext Parent { get; set; }
 
 			protected Type         OriginalType;
 			public    Type         ObjectType;
@@ -1162,6 +1163,12 @@ namespace BLToolkit.Data.Linq.Builder
 			private         TableContext         _parentAssociation;
 			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
 			public          bool                  IsList;
+
+			public override IBuildContext Parent
+			{
+				get { return _parentAssociation.Parent; }
+				set { }
+			}
 
 			public AssociatedTableContext(ExpressionBuilder builder, TableContext parent, Association association)
 				: base(builder, parent.SqlQuery)
