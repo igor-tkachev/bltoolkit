@@ -1827,7 +1827,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					if (SqlQuery.OrderBy.IsEmpty)
 					{
 						AppendIndent(sb).Append("ORDER BY").AppendLine();
-						BuildAliases(sb, aliases[0], SqlQuery.Select.Columns, null);
+						BuildAliases(sb, aliases[0], SqlQuery.Select.Columns.Take(1).ToList(), null);
 					}
 					else
 						BuildAlternativeOrderBy(sb, true);

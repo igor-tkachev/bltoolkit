@@ -270,5 +270,13 @@ namespace Data.Linq
 			var n = 300000;
 			ForEachProvider(db => Assert.IsNull((from p in db.Parent where p.ParentID > 1 select p).ElementAtOrDefault(() => n)));
 		}
+
+		[Test]
+		public void ElementAtDefault5()
+		{
+			ForEachProvider(db => Assert.AreEqual(
+				   Person.ElementAtOrDefault(3),
+				db.Person.ElementAtOrDefault(3)));
+		}
 	}
 }
