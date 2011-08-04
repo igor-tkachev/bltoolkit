@@ -174,19 +174,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				Indent++;
 
-				for (var i = 0; i < SqlQuery.Select.Columns.Count; i++)
-				{
-					AppendIndent(sb);
+				AppendIndent(sb);
 
-					var col = SqlQuery.Select.Columns[i];
-
-					BuildExpression(sb, col.Expression);
-
-					if (i + 1 < SqlQuery.Select.Columns.Count)
-						sb.Append(',');
-
-					sb.AppendLine();
-				}
+				BuildExpression(sb, SqlQuery.Select.Columns[0].Expression);
+				sb.AppendLine();
 
 				Indent--;
 			}

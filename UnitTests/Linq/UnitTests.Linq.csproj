@@ -179,6 +179,7 @@
     <Compile Include="IdlTest.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="ParserTest.cs" />
+    <Compile Include="Providers.cs" />
     <Compile Include="ProviderSpecific\Firebird.cs" />
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />

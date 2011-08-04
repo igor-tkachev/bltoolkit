@@ -10,6 +10,8 @@ namespace BLToolkit.Data.Linq.Builder
 		protected PassThroughContext(IBuildContext context)
 		{
 			Context = context;
+
+			context.Builder.Contexts.Add(this);
 		}
 
 		public IBuildContext Context { get; set; }

@@ -5,11 +5,11 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Common;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
+	using Common;
 	using Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;
@@ -104,6 +104,7 @@ namespace BLToolkit.Data.Linq.Builder
 		public readonly Expression            OriginalExpression;
 		public readonly Expression            Expression;
 		public readonly ParameterExpression[] CompiledParameters;
+		public readonly List<IBuildContext>   Contexts = new List<IBuildContext>();
 
 		private ISqlProvider _sqlProvider;
 		public  ISqlProvider  SqlProvider

@@ -293,5 +293,25 @@ namespace Data.Linq
 				from g in    GrandChild where g.Child.Parent.Value1 == 1 select g,
 				from g in db.GrandChild where g.Child.Parent.Value1 == 1 select g));
 		}
+
+		[Test]
+		public void Projection1()
+		{
+			ForEachProvider(db => AreEqual(
+				from c in
+					from c in Child
+					where c.Parent.ParentID == 2
+					select c
+				join g in GrandChild on c.ParentID equals g.ParentID
+				where g.ChildID == 22
+				select new { c.Parent, c },
+				from c in
+					from c in db.Child
+					where c.Parent.ParentID == 2
+					select c
+				join g in db.GrandChild on c.ParentID equals g.ParentID
+				where g.ChildID == 22
+				select new { c.Parent, c }));
+		}
 	}
 }
