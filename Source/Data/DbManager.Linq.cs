@@ -132,7 +132,7 @@ namespace BLToolkit.Data
 					if (sqlp.IsQueryParameter)
 					{
 						var parm = parameters.Length > i && parameters[i] == sqlp ? parameters[i] : parameters.First(p => p == sqlp);
-						parms.Add(Parameter(x, parm.Value));
+						AddParameter(parms, x, parm);
 					}
 				}
 			}
@@ -143,12 +143,25 @@ namespace BLToolkit.Data
 					if (parm.IsQueryParameter && pq.SqlParameters.Contains(parm))
 					{
 						var name = DataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter).ToString();
-						parms.Add(Parameter(name, parm.Value));
+						AddParameter(parms, name, parm);
 					}
 				}
 			}
 
 			pq.Parameters = parms.ToArray();
+		}
+
+		private void AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
+		{
+			if (parm.Value != null)
+			{
+				parms.Add(Parameter(name, parm.Value));
+			}
+			else
+			{
+				var dataType = DataProvider.GetDbType(parm.SystemType);
+				parms.Add(dataType == DbType.Object ? Parameter(name, parm.Value) : Parameter(name, null, dataType));
+			}
 		}
 
 		#endregion

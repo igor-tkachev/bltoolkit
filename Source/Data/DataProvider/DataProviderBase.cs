@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.Linq;
+using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -242,6 +245,14 @@ namespace BLToolkit.Data.DataProvider
 			// default implementation is case-insensitive, because if we make it 
 			// case-sensitive and don't overload it in all existing providers - client code may break
 			return string.Equals(paramName1, paramName2, StringComparison.OrdinalIgnoreCase);
+		}
+
+		public virtual DbType GetDbType(Type systemType)
+		{
+			if (systemType == typeof(Binary))
+				return DbType.Binary;
+
+			return DbType.Object;
 		}
 
 		public virtual string ProviderName  { get { return ConnectionType.Namespace; } }
