@@ -1899,9 +1899,17 @@ namespace BLToolkit.Linq
 
 			switch (ex.NodeType)
 			{
-				case ExpressionType.Quote          :
+				case ExpressionType.Quote          : return ((UnaryExpression)ex).Operand.Unwrap();
+				case ExpressionType.ConvertChecked :
 				case ExpressionType.Convert        :
-				case ExpressionType.ConvertChecked : return ((UnaryExpression)ex).Operand.Unwrap();
+					{
+						var ue = (UnaryExpression)ex;
+
+						if (!ue.Operand.Type.IsEnum)
+							return ue.Operand.Unwrap();
+
+						break;
+					}
 			}
 
 			return ex;

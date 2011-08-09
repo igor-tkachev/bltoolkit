@@ -1409,11 +1409,11 @@ namespace BLToolkit.Data.Linq.Builder
 						var name = Enum.GetName(type, ((ConstantExpression)value).Value);
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
-						if (name == null)
-// ReSharper restore ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
+						if (name == null)
 							return null;
 // ReSharper restore HeuristicUnreachableCode
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
 
 						var    origValue = Enum.Parse(type, name, false);
 						object mapValue;

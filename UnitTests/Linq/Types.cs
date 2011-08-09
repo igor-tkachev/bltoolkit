@@ -221,7 +221,7 @@ namespace Data.Linq
 					{
 						ID          = 1001,
 						BinaryValue = data,
-						BoolValue    = true,
+						BoolValue   = true,
 					});
 					db.Types.Delete(_ => _.ID > 1000);
 				});
