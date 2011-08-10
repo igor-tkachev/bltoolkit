@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Data.DataProvider;
+
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -37,15 +37,17 @@ namespace Data.Linq
 		[Test]
 		public void Test4()
 		{
-			var expected = from p in ParentInheritance where !(p is ParentInheritanceNull) select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.ParentInheritance where !(p is ParentInheritanceNull) select p));
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance where !(p is ParentInheritanceNull) select p,
+				from p in db.ParentInheritance where !(p is ParentInheritanceNull) select p));
 		}
 
 		[Test]
 		public void Test5()
 		{
-			var expected = from p in ParentInheritance where p is ParentInheritanceValue select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.ParentInheritance where p is ParentInheritanceValue select p));
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance where p is ParentInheritanceValue select p,
+				from p in db.ParentInheritance where p is ParentInheritanceValue select p));
 		}
 
 		[Test]
@@ -187,9 +189,9 @@ namespace Data.Linq
 
 			public static void Test(Inheritance inheritance)
 			{
-			inheritance.ForEachProvider(db => inheritance.AreEqual(
-				inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
-						 db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
+				inheritance.ForEachProvider(db => inheritance.AreEqual(
+					inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
+					         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
 			}
 		}
 
@@ -308,11 +310,11 @@ namespace Data.Linq
 		{
 			using (var db = new NorthwindDB())
 			{
-				var result    = db.Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
-				var exprected =    Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
+				var result   = db.Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
+				var expected =    Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
 
 				Assert.Greater(result.Count, 0);
-				Assert.AreEqual(result.Count, exprected.Count);
+				Assert.AreEqual(result.Count, expected.Count);
 			}
 		}
 
@@ -347,6 +349,30 @@ namespace Data.Linq
 				var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildID = c.ChildID });
 				FindById(q, 10);
 			});
+		}
+
+		[Test]
+		public void Test15()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.DiscontinuedProduct.Select(p => p).ToList();
+				var expected =    DiscontinuedProduct.Select(p => p).ToList();
+
+				Assert.That(result.Count, Is.Not.EqualTo(0).And.EqualTo(expected.Count));
+			}
+		}
+
+		[Test]
+		public void Test16()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.DiscontinuedProduct.ToList();
+				var expected =    DiscontinuedProduct.ToList();
+
+				Assert.That(result.Count, Is.Not.EqualTo(0).And.EqualTo(expected.Count));
+			}
 		}
 	}
 }

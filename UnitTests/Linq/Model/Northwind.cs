@@ -173,8 +173,8 @@ namespace Data.Linq.Model
 		}
 
 		[TableName("Products")]
-		[InheritanceMapping(Code="True",  Type=typeof(DiscontinuedProduct))]
-		[InheritanceMapping(Code="False", Type=typeof(ActiveProduct))]
+		[InheritanceMapping(Code=true,  Type=typeof(DiscontinuedProduct))]
+		[InheritanceMapping(Code=false, Type=typeof(ActiveProduct))]
 		public abstract class Product
 		{
 			[PrimaryKey, NonUpdatable]                  public int      ProductID;
