@@ -44,7 +44,7 @@ namespace BLToolkit.Data.Linq.Builder
 						sequence.SqlQuery.Insert.Into  = ((TableBuilder.TableContext)sequence).SqlTable;
 						sequence.SqlQuery.Update.Table = ((TableBuilder.TableContext)sequence).SqlTable;
 						sequence.SqlQuery.From.Tables.Clear();
-						sequence.SqlQuery.From.Table(sequence.SqlQuery.Insert.Into);
+						sequence.SqlQuery.From.Table(sequence.SqlQuery.Update.Table);
 
 						break;
 					}
@@ -92,55 +92,9 @@ namespace BLToolkit.Data.Linq.Builder
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				if (Builder.SqlProvider.IsInsertOrUpdateSupported)
-				{
 					query.SetNonQueryQuery();
-				}
 				else
-				{
-					var dic = new Dictionary<ICloneableElement,ICloneableElement>();
-
-					var insertQuery = (SqlQuery)SqlQuery.Clone(dic, _ => true);
-
-					insertQuery.QueryType = QueryType.Insert;
-					insertQuery.ClearUpdate();
-					insertQuery.From.Tables.Clear();
-
-					query.Queries.Add(new Query<T>.QueryInfo
-					{
-						SqlQuery   = insertQuery,
-						Parameters = query.Queries[0].Parameters
-							.Select(p => new ParameterAccessor
-								{
-									Expression   = p.Expression,
-									Accessor     = p.Accessor,
-									SqlParameter = dic.ContainsKey(p.SqlParameter) ? (SqlParameter)dic[p.SqlParameter] : null
-								})
-							.Where(p => p.SqlParameter != null)
-							.ToList(),
-					});
-
-					var keys =
-						(
-							from k in SqlQuery.Update.Table.GetKeys(false)
-								join i in SqlQuery.Insert.Items
-								on k equals i.Column
-							select i
-						).ToList();
-
-					foreach (var key in keys)
-						SqlQuery.Where.Expr(key.Column).Equal.Expr(key.Expression);
-
-					SqlQuery.QueryType = QueryType.Update;
-					SqlQuery.ClearInsert();
-
-					query.SetNonQueryQuery2();
-
-					query.Queries.Add(new Query<T>.QueryInfo
-					{
-						SqlQuery   = insertQuery,
-						Parameters = query.Queries[0].Parameters.ToList(),
-					});
-				}
+					query.MakeAlternativeInsertOrUpdate(SqlQuery);
 			}
 
 			public override Expression BuildExpression(Expression expression, int level)

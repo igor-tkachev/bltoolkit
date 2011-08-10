@@ -33,5 +33,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		bool             IsIdentityParameterRequired { get; }
 		bool             IsApplyJoinSupported        { get; }
 		bool             IsInsertOrUpdateSupported   { get; }
+		bool             CanCombineParameters        { get; }
 	}
 }

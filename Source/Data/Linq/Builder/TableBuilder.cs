@@ -514,8 +514,8 @@ namespace BLToolkit.Data.Linq.Builder
 				var info  = ConvertToIndex(null, 0, ConvertFlags.All);
 				var index = info.Select(idx => ConvertToParentIndex(idx.Index, null)).ToArray();
 
-				if (InheritanceMapping.Count == 0)
-					return BuildTableExpression(!Builder.IsBlockDisable, ObjectType, index);
+				if (OriginalType != ObjectType || InheritanceMapping.Count == 0)
+					return BuildTableExpression(!Builder.IsBlockDisable, OriginalType, index);
 
 				Expression expr;
 

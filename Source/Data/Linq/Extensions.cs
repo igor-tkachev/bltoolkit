@@ -192,6 +192,21 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region InsertOrUpdate
+
+		public static int InsertOrUpdate<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			return Query<T>.InsertOrUpdate(dataContextInfo, obj);
+		}
+
+		public static int InsertOrUpdate<T>(this IDataContext dataContext, T obj)
+		{
+			return Query<T>.InsertOrUpdate(DataContextInfo.Create(dataContext), obj);
+		}
+
+		#endregion
+
 		#region InsertBatch
 
 #if !SILVERLIGHT

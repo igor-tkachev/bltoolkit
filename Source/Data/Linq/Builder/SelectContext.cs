@@ -4,12 +4,12 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	// This class implements double functionality (scalar and member type selects)
 	// and could be implemented as two different classes.

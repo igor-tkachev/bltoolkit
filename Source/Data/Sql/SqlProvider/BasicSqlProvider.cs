@@ -65,6 +65,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsIdentityParameterRequired     { get { return false; } }
 		public virtual bool IsApplyJoinSupported            { get { return false; } }
 		public virtual bool IsInsertOrUpdateSupported       { get { return true;  } }
+		public virtual bool CanCombineParameters            { get { return true;  } }
 
 		public virtual bool ConvertCountSubQuery(SqlQuery subQuery)
 		{

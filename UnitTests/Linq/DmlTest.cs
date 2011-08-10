@@ -946,8 +946,6 @@ namespace Update
 
 					for (var i = 0; i < 3; i++)
 					{
-						var s = "*" + i;
-
 						db.Patient.InsertOrUpdate(
 							() => new Patient
 							{
@@ -965,7 +963,44 @@ namespace Update
 				finally
 				{
 					db.Patient.Delete(p => p.PersonID == id);
-					db.Person.Delete(p => p.ID        == id);
+					db.Person. Delete(p => p.ID       == id);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertOrUpdate2()
+		{
+			ForEachProvider(db =>
+			{
+				var id = 0;
+
+				try
+				{
+					id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+					{
+						FirstName = "John",
+						LastName  = "Shepard",
+						Gender    = Gender.Male
+					}));
+
+					for (var i = 0; i < 3; i++)
+					{
+						var s = "*" + i;
+
+						db.InsertOrUpdate(new Patient
+						{
+							PersonID  = id,
+							Diagnosis = ("abc" + i).ToString(),
+						});
+					}
+
+					Assert.AreEqual("abc2", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				}
+				finally
+				{
+					db.Patient.Delete(p => p.PersonID == id);
+					db.Person. Delete(p => p.ID       == id);
 				}
 			});
 		}

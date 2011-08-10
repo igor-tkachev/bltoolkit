@@ -661,15 +661,17 @@ namespace Data.Linq
 			}
 		}
 
-		private List<Northwind.Product> _product;
-		public  List<Northwind.Product>  Product
+		private IEnumerable<Northwind.Product> _product;
+		public  IEnumerable<Northwind.Product>  Product
 		{
 			get
 			{
 				if (_product == null)
 					using (var db = new NorthwindDB())
 						_product = db.Product.ToList();
-				return _product;
+
+				foreach (var product in _product)
+					yield return product;
 			}
 		}
 
@@ -679,10 +681,9 @@ namespace Data.Linq
 			get { return _activeProduct ?? (_activeProduct = Product.OfType<Northwind.ActiveProduct>().ToList()); }
 		}
 
-		private List<Northwind.DiscontinuedProduct> _discontinuedProduct;
-		public  List<Northwind.DiscontinuedProduct>  DiscontinuedProduct
+		public  IEnumerable<Northwind.DiscontinuedProduct>  DiscontinuedProduct
 		{
-			get { return _discontinuedProduct ?? (_discontinuedProduct = Product.OfType<Northwind.DiscontinuedProduct>().ToList()); }
+			get { return Product.OfType<Northwind.DiscontinuedProduct>(); }
 		}
 
 		private List<Northwind.Region> _region;
