@@ -182,9 +182,22 @@ namespace BLToolkit.Data.Linq.Builder
 				MethodInfo mi;
 
 				if (!ReflectionHelper.MapSchema.Converters.TryGetValue(type, out mi))
-					throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
+				{
+					//throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
 
-				mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+					mapper =
+						Expression.Convert(
+							Expression.Call(
+								Expression.Constant(MappingSchema),
+								ReflectionHelper.MapSchema.ChangeType,
+									expr,
+									Expression.Constant(type)),
+							type);
+				}
+				else
+				{
+					mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+				}
 			}
 
 			return mapper;
