@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using BLToolkit.DataAccess;
@@ -423,5 +424,16 @@ namespace Data.Linq
 				Assert.AreSame(q.p1, q.p2);
 			});
 		}
+
+	    [Test]
+	    public void SelectEnumOnClient()
+	    {
+            // Providers.Select(x => x.Name).Except(new [] { ProviderName.Firebird}).ToArray()
+	        ForEachProvider(context =>
+	            {
+	                var arr = new List<Person>();
+	                var _ = context.Person.Select(person => new {person.ID, Arr = arr.Take(1)}).FirstOrDefault();
+	            });
+	    }
 	}
 }
