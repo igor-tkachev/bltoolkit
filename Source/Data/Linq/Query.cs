@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-
-using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
@@ -186,9 +182,9 @@ namespace BLToolkit.Data.Linq
 			{
 				sql.SqlQuery   = SqlProvider.Finalize(sql.SqlQuery);
 				sql.Parameters = sql.Parameters
-					.Select(p => new { p, idx = sql.SqlQuery.Parameters.IndexOf(p.SqlParameter) })
+					.Select (p => new { p, idx = sql.SqlQuery.Parameters.IndexOf(p.SqlParameter) })
 					.OrderBy(p => p.idx)
-					.Select(p => p.p)
+					.Select (p => p.p)
 					.ToList();
 			}
 		}
@@ -413,6 +409,7 @@ namespace BLToolkit.Data.Linq
 		{
 			public static readonly Dictionary<object,Query<int>>    Insert             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<object>> InsertWithIdentity = new Dictionary<object,Query<object>>();
+			public static readonly Dictionary<object,Query<int>>    InsertOrUpdate     = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Update             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
 		}
@@ -586,6 +583,168 @@ namespace BLToolkit.Data.Linq
 					}
 
 			return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
+		}
+
+		#endregion
+
+		#region InsertOrUpdate
+
+		public static int InsertOrUpdate(IDataContextInfo dataContextInfo, T obj)
+		{
+			if (Equals(default(T), obj))
+				return 0;
+
+			Query<int> ei;
+
+			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
+
+			if (!ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+			{
+				lock (_sync)
+				{
+					if (!ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+					{
+						var fieldDic = new Dictionary<SqlField, ParameterAccessor>();
+						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+						var sqlQuery = new SqlQuery { QueryType = QueryType.InsertOrUpdate };
+
+						ParameterAccessor param;
+
+						sqlQuery.Insert.Into  = sqlTable;
+						sqlQuery.Update.Table = sqlTable;
+
+						sqlQuery.From.Table(sqlTable);
+
+						ei = new Query<int>
+						{
+							MappingSchema     = dataContextInfo.MappingSchema,
+							ContextID         = dataContextInfo.ContextID,
+							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
+							Queries           = { new Query<int>.QueryInfo { SqlQuery = sqlQuery, } }
+						};
+
+						var supported = ei.SqlProvider.IsInsertOrUpdateSupported && ei.SqlProvider.CanCombineParameters;
+
+						// Insert.
+						//
+						foreach (var field in sqlTable.Fields.Select(f => f.Value))
+						{
+							if (field.IsInsertable)
+							{
+								if (!supported || !fieldDic.TryGetValue(field, out param))
+								{
+									param = GetParameter<int>(dataContextInfo.DataContext, field);
+									ei.Queries[0].Parameters.Add(param);
+
+									if (supported)
+										fieldDic.Add(field, param);
+								}
+
+								sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+							}
+							else if (field.IsIdentity)
+							{
+								throw new LinqException("InsertOrUpdate method does not support identity field '{0}.{1}'.", sqlTable.Name, field.Name);
+							}
+						}
+
+						// Update.
+						//
+						var keys   = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
+						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
+
+						if (keys.Count == 0)
+							throw new LinqException("InsertOrUpdate method requires the '{0}' table to have a primary key.", sqlTable.Name);
+
+						var missedKey = keys.Except(
+							from k in keys
+								join i in sqlQuery.Insert.Items
+								on k equals i.Column
+							select k).FirstOrDefault();
+
+						if (missedKey != null)
+							throw new LinqException("InsertOrUpdate method requires the '{0}.{1}' field to be included in the insert setter.",
+								sqlTable.Name,
+								missedKey.Name);
+
+						if (fields.Count == 0)
+							throw new LinqException(
+								string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
+
+						foreach (var field in fields)
+						{
+							if (!supported || !fieldDic.TryGetValue(field, out param))
+							{
+								param = GetParameter<int>(dataContextInfo.DataContext, field);
+								ei.Queries[0].Parameters.Add(param);
+
+								if (supported)
+									fieldDic.Add(field, param = GetParameter<int>(dataContextInfo.DataContext, field));
+							}
+
+							sqlQuery.Update.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+						}
+
+						// Set the query.
+						//
+						if (ei.SqlProvider.IsInsertOrUpdateSupported)
+							ei.SetNonQueryQuery();
+						else
+							ei.MakeAlternativeInsertOrUpdate(sqlQuery);
+
+						ObjectOperation<T>.InsertOrUpdate.Add(key, ei);
+					}
+				}
+			}
+
+			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
+		}
+
+		internal void MakeAlternativeInsertOrUpdate(SqlQuery sqlQuery)
+		{
+			var dic = new Dictionary<ICloneableElement,ICloneableElement>();
+
+			var insertQuery = (SqlQuery)sqlQuery.Clone(dic, _ => true);
+
+			insertQuery.QueryType = QueryType.Insert;
+			insertQuery.ClearUpdate();
+			insertQuery.From.Tables.Clear();
+
+			Queries.Add(new QueryInfo
+			{
+				SqlQuery   = insertQuery,
+				Parameters = Queries[0].Parameters
+					.Select(p => new ParameterAccessor
+						{
+							Expression   = p.Expression,
+							Accessor     = p.Accessor,
+							SqlParameter = dic.ContainsKey(p.SqlParameter) ? (SqlParameter)dic[p.SqlParameter] : null
+						})
+					.Where(p => p.SqlParameter != null)
+					.ToList(),
+			});
+
+			var keys =
+				(
+					from k in sqlQuery.Update.Table.GetKeys(false)
+						join i in sqlQuery.Insert.Items
+						on k equals i.Column
+					select i
+				).ToList();
+
+			foreach (var key in keys)
+				sqlQuery.Where.Expr(key.Column).Equal.Expr(key.Expression);
+
+			sqlQuery.QueryType = QueryType.Update;
+			sqlQuery.ClearInsert();
+
+			SetNonQueryQuery2();
+
+			Queries.Add(new QueryInfo
+			{
+				SqlQuery   = insertQuery,
+				Parameters = Queries[0].Parameters.ToList(),
+			});
 		}
 
 		#endregion

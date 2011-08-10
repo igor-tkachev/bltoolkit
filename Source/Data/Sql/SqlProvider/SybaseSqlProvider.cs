@@ -25,6 +25,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public    override bool   TakeAcceptsParameter     { get { return false;     } }
 		public    override bool   IsSubQueryTakeSupported  { get { return false;     } }
 		public    override bool   IsCountSubQuerySupported { get { return false;     } }
+		public    override bool   CanCombineParameters     { get { return false;     } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
