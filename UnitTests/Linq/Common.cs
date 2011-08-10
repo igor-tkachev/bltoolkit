@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -262,6 +264,30 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in    Person select new { Name = !p.FirstName.IsNullOrEmpty() ? p.FirstName : !p.MiddleName.IsNullOrEmpty() ? p.MiddleName : p.LastName },
 				from p in db.Person select new { Name = !p.FirstName.IsNullOrEmpty() ? p.FirstName : !p.MiddleName.IsNullOrEmpty() ? p.MiddleName : p.LastName }));
+		}
+
+		enum PersonID
+		{
+			Person1 = 1,
+			Person2 = 2
+		}
+
+		[Test]
+		public void ConvertEnum1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.ID == (int)PersonID.Person1 select p,
+				from p in db.Person where p.ID == (int)PersonID.Person1 select p));
+		}
+
+		[Test]
+		public void ConvertEnum2()
+		{
+			var id = PersonID.Person1;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.ID == (int)id select p,
+				from p in db.Person where p.ID == (int)id select p));
 		}
 	}
 
