@@ -866,7 +866,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var predicate = Expression.Lambda<Func<T,bool>>(expr, param);
 
-					return Linq.Extensions.GetTable<T>(null).Where(predicate).Expression;
+					return association.Builder.DataContextInfo.DataContext.GetTable<T>().Where(predicate).Expression;
 				}
 			}
 
