@@ -111,6 +111,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
+		public bool IsSequence(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return true;
+		}
+
 		#endregion
 
 		#region TableContext
@@ -866,7 +871,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var predicate = Expression.Lambda<Func<T,bool>>(expr, param);
 
-					return Linq.Extensions.GetTable<T>(null).Where(predicate).Expression;
+					return association.Builder.DataContextInfo.DataContext.GetTable<T>().Where(predicate).Expression;
 				}
 			}
 

@@ -27,6 +27,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return Convert(builder, (MethodCallExpression)buildInfo.Expression, buildInfo, param);
 		}
 
+		public bool IsSequence(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return builder.IsSequence(new BuildInfo(buildInfo, ((MethodCallExpression)buildInfo.Expression).Arguments[0]));
+		}
+
 		protected abstract bool                CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
 		protected abstract IBuildContext       BuildMethodCall   (ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo);
 		protected abstract SequenceConvertInfo Convert           (ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param);

@@ -583,7 +583,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			foreach (var ts in _sqlQuery.From.Tables)
 			{
 				if (!first)
-					sb.Append(", ");
+				{
+					sb.Append(",");
+					AppendIndent(sb);
+				}
+
 				first = false;
 
 				var jn = ParenthesizeJoin() ? ts.GetJoinNumber() : 0;

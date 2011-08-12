@@ -249,6 +249,11 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			if (call.IsQueryable())
 			{
+				var info = new BuildInfo(context, call, new SqlQuery { ParentSql = context.SqlQuery });
+
+				if (!IsSequence(info))
+					return false;
+
 				var arg = call.Arguments[0];
 
 				if (AggregationBuilder.MethodNames.Contains(call.Method.Name))
