@@ -33,6 +33,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
+		public bool IsSequence(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return true;
+		}
+
 		class ScalarSelectContext : IBuildContext
 		{
 			public ScalarSelectContext(ExpressionBuilder builder)

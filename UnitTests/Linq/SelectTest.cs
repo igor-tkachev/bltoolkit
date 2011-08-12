@@ -428,11 +428,12 @@ namespace Data.Linq
 		[Test]
 		public void SelectEnumOnClient()
 		{
-			// Providers.Select(x => x.Name).Except(new [] { ProviderName.Firebird}).ToArray()
 			ForEachProvider(context =>
 			{
-				var arr = new List<Person>();
-				var _ = context.Person.Select(person => new { person.ID, Arr = arr.Take(1) }).FirstOrDefault();
+				var arr = new List<Person> { new Person() };
+				var p = context.Person.Select(person => new { person.ID, Arr = arr.Take(1) }).FirstOrDefault();
+
+				p.Arr.Single();
 			});
 		}
 	}

@@ -204,6 +204,17 @@ namespace BLToolkit.Data.Linq.Builder
 			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", buildInfo.Expression);
 		}
 
+		public bool IsSequence(BuildInfo buildInfo)
+		{
+			buildInfo.Expression = buildInfo.Expression.Unwrap();
+
+			foreach (var builder in _builders)
+				if (builder.CanBuild(this, buildInfo))
+					return builder.IsSequence(this, buildInfo);
+
+			return false;
+		}
+
 		#endregion
 
 		#region ConvertExpression
