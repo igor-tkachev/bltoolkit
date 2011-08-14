@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
-using BLToolkit.DataAccess;
-using BLToolkit.Reflection;
+
 using NUnit.Framework;
 
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Reflection;
 using BLToolkit.Mapping;
 
 namespace Data.Linq
@@ -60,7 +60,7 @@ namespace Data.Linq
 		[Test]
 		public void NewParam()
 		{
-			ForEachProvider(db => { for (int i = 0; i < 5; i++) NewParam(db.Person, i); });
+			ForEachProvider(db => { for (var i = 0; i < 5; i++) NewParam(db.Person, i); });
 		}
 
 		[Test]
@@ -379,7 +379,7 @@ namespace Data.Linq
 		}
 
 		[TableName("Person")]
-		[ObjectFactory(typeof(TestPersonObject.Factory))]
+		[ObjectFactory(typeof(Factory))]
 		public class TestPersonObject
 		{
 			public class Factory : IObjectFactory
