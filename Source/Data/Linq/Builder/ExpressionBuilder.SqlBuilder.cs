@@ -1825,7 +1825,7 @@ namespace BLToolkit.Data.Linq.Builder
 					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, GetLikeEscaper(start, end))
 				};
 
-				_parameters.Add(e, ep);
+				//_parameters.Add(e, ep);
 				CurrentSqlParameters.Add(ep);
 
 				return new SqlQuery.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
