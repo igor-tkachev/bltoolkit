@@ -362,7 +362,7 @@ namespace Data.Linq
 		{
 			List<PersonCharTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonCharTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
@@ -375,7 +375,7 @@ namespace Data.Linq
 		{
 			List<PersonCharTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonCharTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
@@ -399,7 +399,7 @@ namespace Data.Linq
 		{
 			List<PersonBoolTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonBoolTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
@@ -412,12 +412,28 @@ namespace Data.Linq
 		{
 			List<PersonBoolTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonBoolTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
 				from p in list                          where p.IsMale == true select p.PersonID,
 				from p in db.GetTable<PersonBoolTest>() where p.IsMale == true select p.PersonID));
+		}
+
+		[Test]
+		public void LongTest1()
+		{
+			ForEachProvider(db =>
+			{
+				uint value = 0;
+
+				var q =
+					from t in db.Types2
+					where t.BigIntValue == value
+					select t;
+
+				q.ToList();
+			});
 		}
 	}
 }

@@ -594,7 +594,8 @@ CREATE TABLE LinqDataTypes
 	GuidValue     raw(16),
 	BinaryValue   blob,
 	SmallIntValue smallint,
-	IntValue      int NULL
+	IntValue      int NULL,
+	BigIntValue   number(20,0) NULL
 )
 /
 

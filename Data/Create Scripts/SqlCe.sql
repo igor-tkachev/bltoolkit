@@ -146,6 +146,7 @@ CREATE TABLE LinqDataTypes
 	GuidValue     uniqueidentifier,
 	BinaryValue   binary(5000),
 	SmallIntValue smallint,
-	IntValue      int NULL
+	IntValue      int NULL,
+	BigIntValue   bigint NULL
 )
 GO

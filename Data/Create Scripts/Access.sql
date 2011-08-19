@@ -265,6 +265,7 @@ CREATE TABLE LinqDataTypes
 	GuidValue     uniqueidentifier,
 	BinaryValue   Image,
 	SmallIntValue smallint,
-	IntValue      int NULL
+	IntValue      int NULL,
+	BigIntValue   long NULL
 )
 GO
