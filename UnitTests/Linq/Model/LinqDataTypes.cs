@@ -46,12 +46,12 @@ namespace Data.Linq.Model
 			return ID - ((LinqDataTypes)obj).ID;
 		}
 
-		public static bool operator ==(LinqDataTypes left, LinqDataTypes right)
+		public static bool operator == (LinqDataTypes left, LinqDataTypes right)
 		{
 			return Equals(left, right);
 		}
 
-		public static bool operator !=(LinqDataTypes left, LinqDataTypes right)
+		public static bool operator != (LinqDataTypes left, LinqDataTypes right)
 		{
 			return !Equals(left, right);
 		}
@@ -72,6 +72,7 @@ namespace Data.Linq.Model
 		public Guid?     GuidValue;
 		public short?    SmallIntValue;
 		public int?      IntValue;
+		public long?     BigIntValue;
 
 		public override bool Equals(object obj)
 		{

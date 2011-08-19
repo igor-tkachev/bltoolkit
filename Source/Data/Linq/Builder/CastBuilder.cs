@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder

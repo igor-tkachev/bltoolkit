@@ -119,11 +119,12 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					switch (pi.NodeType)
 					{
-						case ExpressionType.MemberInit:
-						case ExpressionType.New:
-						case ExpressionType.Convert:
+						case ExpressionType.MemberInit :
+						case ExpressionType.New        :
+						case ExpressionType.Convert    :
 							break;
-						default:
+
+						default                        :
 							if (CanBeCompiled(pi))
 								break;
 							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));

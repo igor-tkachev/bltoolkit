@@ -74,6 +74,7 @@ CREATE TABLE "LinqDataTypes"
 	"GuidValue"     char(16) for bit DATA,
 	"BinaryValue"   blob(5000),
 	"SmallIntValue" smallint,
-	"IntValue"      int NULL
+	"IntValue"      int NULL,
+	"BigIntValue"   bigint NULL
 )
 GO

@@ -138,7 +138,6 @@ namespace BLToolkit.Data.Linq.Builder
 					case ConvertFlags.All   :
 					case ConvertFlags.Key   :
 					case ConvertFlags.Field : return Sequence.ConvertToSql(expression, level + 1, flags);
-					//case ConvertFlags.Field : return new[] { new SqlInfo { Query = Parent.SqlQuery, Sql = Sql } };
 				}
 
 				throw new NotImplementedException();
@@ -172,11 +171,6 @@ namespace BLToolkit.Data.Linq.Builder
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
 				throw new NotImplementedException();
-			}
-
-			public override ISqlExpression GetSubQuery(IBuildContext context)
-			{
-				return base.GetSubQuery(context);
 			}
 		}
 	}

@@ -575,13 +575,27 @@ namespace BLToolkit.Data.Linq.Builder
 			return ConvertToSql(context, expr);
 		}
 
+#if FW3
 		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression)
+		{
+			return ConvertToSql(context, expression, false);
+		}
+#endif
+
+		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression, bool unwrap
+#if !FW3
+			= false
+#endif
+			)
 		{
 			if (CanBeConstant(expression))
 				return BuildConstant(expression);
 
 			if (CanBeCompiled(expression))
 				return BuildParameter(expression).SqlParameter;
+
+			if (unwrap)
+				expression = expression.Unwrap();
 
 			switch (expression.NodeType)
 			{
@@ -947,7 +961,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			return null == expr.Find(ex =>
 			{
-				if (ex is BinaryExpression || ex is UnaryExpression || ex.NodeType == ExpressionType.Convert)
+				if (ex is BinaryExpression || ex is UnaryExpression /*|| ex.NodeType == ExpressionType.Convert*/)
 					return false;
 
 				switch (ex.NodeType)
@@ -1345,7 +1359,7 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			var l = ConvertToSql(context, left);
-			var r = ConvertToSql(context, right.Unwrap());
+			var r = ConvertToSql(context, right, true);
 
 			switch (nodeType)
 			{
