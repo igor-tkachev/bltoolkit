@@ -16,7 +16,7 @@ namespace BLToolkit.Linq
 	using Data.Linq;
 	using Reflection;
 
-	static class ExpressionHelper
+	public static class ExpressionHelper
 	{
 		#region IsConstant
 
