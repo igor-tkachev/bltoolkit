@@ -536,16 +536,18 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var exceptionMethod = ReflectionHelper.Expressor<object>.MethodExpressor(_ => DefaultInheritanceMappingException(null, null));
 					var dindex          =
-						from f in SqlTable.Fields.Values
-						where f.Name == InheritanceDiscriminators[0]
-						select _indexes[f].Index;
+						(
+							from f in SqlTable.Fields.Values
+							where f.Name == InheritanceDiscriminators[0]
+							select ConvertToParentIndex(_indexes[f].Index, null)
+						).First();
 
 					expr = Expression.Convert(
 						Expression.Call(null, exceptionMethod,
 							Expression.Call(
 								ExpressionBuilder.DataReaderParam,
 								ReflectionHelper.DataReader.GetValue,
-								Expression.Constant(dindex.First())),
+								Expression.Constant(dindex)),
 							Expression.Constant(ObjectType)),
 						ObjectType);
 				}
@@ -556,7 +558,7 @@ namespace BLToolkit.Data.Linq.Builder
 						(
 							from f in SqlTable.Fields.Values
 							where f.Name == InheritanceDiscriminators[mapping.i]
-							select _indexes[f].Index
+							select ConvertToParentIndex(_indexes[f].Index, null)
 						).First();
 
 					Expression testExpr;
@@ -570,22 +572,11 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 					else
 					{
-						MethodInfo mi;
 						var codeType = mapping.m.Code.GetType();
 
-						if (!ReflectionHelper.MapSchema.Converters.TryGetValue(codeType, out mi))
-							throw new LinqException("Cannot find converter for the '{0}' type.", codeType.FullName);
-
-						testExpr =
-							Expression.Equal(
-								Expression.Constant(mapping.m.Code),
-								Expression.Call(
-									Expression.Constant(Builder.MappingSchema),
-									mi,
-									Expression.Call(
-										ExpressionBuilder.DataReaderParam,
-										ReflectionHelper.DataReader.GetValue,
-										Expression.Constant(dindex))));
+						testExpr = Expression.Equal(
+							Expression.Constant(mapping.m.Code),
+							Builder.BuildSql(codeType, dindex));
 					}
 
 					expr = Expression.Condition(
