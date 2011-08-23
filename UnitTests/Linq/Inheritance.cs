@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using BLToolkit.Data.Linq;
@@ -372,6 +373,71 @@ namespace Data.Linq
 				var expected =    DiscontinuedProduct.ToList();
 
 				Assert.That(result.Count, Is.Not.EqualTo(0).And.EqualTo(expected.Count));
+			}
+		}
+
+		public enum TypeCodeEnum
+		{
+			Base,
+			A,
+			A1,
+			A2,
+		}
+
+		[TableName("LinqDataTypes")]
+		public abstract class InheritanceBase
+		{
+			public Guid GuidValue { get; set; }
+
+			[MapField("ID")]
+			public virtual TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.Base; }
+			}
+		}
+
+		[InheritanceMapping(Code = TypeCodeEnum.A1, Type = typeof(InheritanceA1), IsDefault = false)]
+		[InheritanceMapping(Code = TypeCodeEnum.A2, Type = typeof(InheritanceA2), IsDefault = true)]
+		public abstract class InheritanceA : InheritanceBase
+		{
+			[Association(CanBeNull = true, ThisKey = "GuidValue", OtherKey = "GuidValue")]
+			public List<InheritanceB> Bs { get; set; }
+
+			[MapField("ID", IsInheritanceDiscriminator = true)]
+			public override TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.A; }
+			}
+		}
+
+		class InheritanceA1 : InheritanceA
+		{
+			[MapField("ID", IsInheritanceDiscriminator = true)]
+			public override TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.A1; }
+			}
+		}
+
+		class InheritanceA2 : InheritanceA
+		{
+			[MapField("ID", IsInheritanceDiscriminator = true)]
+			public override TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.A2; }
+			}
+		}
+
+		public class InheritanceB : InheritanceBase
+		{
+		}
+
+		[Test]
+		public void GuidTest()
+		{
+			using (var db = new TestDbManager())
+			{
+				var list = db.GetTable<InheritanceA>().Where(a => a.Bs.Any()).ToList();
 			}
 		}
 	}

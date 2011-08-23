@@ -161,6 +161,10 @@ namespace BLToolkit.Reflection
 
 					Setter = (Action<object,T>)dm.CreateDelegate(typeof(Action<object,T>));
 				}
+				else
+				{
+					Setter = (_,__) => {};
+				}
 			}
 
 			public override object GetValue(object obj)
