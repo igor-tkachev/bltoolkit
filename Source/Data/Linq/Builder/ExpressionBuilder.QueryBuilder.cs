@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (ctx != null)
 								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(pi, 0));
 
-							throw new NotImplementedException();
+							break;
 						}
 
 					case ExpressionType.Constant:
@@ -73,7 +73,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (_expressionAccessors.ContainsKey(pi))
 								return new ExpressionHelper.ConvertInfo(Expression.Convert(_expressionAccessors[pi], pi.Type));
 
-							throw new NotImplementedException();
+							break;
 						}
 
 					case ExpressionType.Coalesce:

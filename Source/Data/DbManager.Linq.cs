@@ -151,16 +151,18 @@ namespace BLToolkit.Data
 			pq.Parameters = parms.ToArray();
 		}
 
-		private void AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
+		void AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
 		{
-			if (parm.Value != null)
+			var value = MappingSchema.ConvertParameterValue(parm.Value, parm.SystemType);
+
+			if (value != null)
 			{
-				parms.Add(Parameter(name, parm.Value));
+				parms.Add(Parameter(name, value));
 			}
 			else
 			{
 				var dataType = DataProvider.GetDbType(parm.SystemType);
-				parms.Add(dataType == DbType.Object ? Parameter(name, parm.Value) : Parameter(name, null, dataType));
+				parms.Add(dataType == DbType.Object ? Parameter(name, value) : Parameter(name, null, dataType));
 			}
 		}
 
