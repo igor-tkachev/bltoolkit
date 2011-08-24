@@ -3648,5 +3648,14 @@ namespace BLToolkit.Mapping
 		}
 
 		#endregion
+
+		#region ConvertParameterValue
+
+		public virtual object ConvertParameterValue(object value, Type systemType)
+		{
+			return value;
+		}
+
+		#endregion
 	}
 }
