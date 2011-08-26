@@ -280,6 +280,7 @@ namespace Data.Linq
 		{
 			using (var db = new TestDbManager { MappingSchema = _myMappingSchema })
 			{
+				db.BeginTransaction();
 				db.Insert(new MyParent { ParentID = new MyInt { MyValue = 1001 }, Value1 = 1001 });
 			}
 		}
