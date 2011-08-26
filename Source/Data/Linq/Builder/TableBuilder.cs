@@ -1212,8 +1212,19 @@ namespace BLToolkit.Data.Linq.Builder
 
 			protected override Expression ProcessExpression(Expression expression)
 			{
-				if (ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
-				    ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply)
+				SqlQuery.JoinedTable parentAssociationJoin = null;
+
+				for (var a = this; a != null; a = a._parentAssociation as AssociatedTableContext)
+				{
+					if (a.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
+						a.ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply)
+					{
+						parentAssociationJoin = a.ParentAssociationJoin;
+						break;
+					}
+				}
+
+				if (isLeft)
 				{
 					Expression cond = null;
 
