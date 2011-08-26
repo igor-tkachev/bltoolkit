@@ -2255,23 +2255,50 @@ namespace BLToolkit.Data.Linq.Builder
 
 		bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
 		{
+			List<Expression> ignoredMembers = null;
+
 			return null == expr.Find(pi =>
 			{
+				if (ignoredMembers != null)
+				{
+					if (pi != ignoredMembers[ignoredMembers.Count - 1])
+						throw new InvalidOperationException();
+
+					if (ignoredMembers.Count == 1)
+						ignoredMembers = null;
+					else
+						ignoredMembers.RemoveAt(ignoredMembers.Count - 1);
+
+					return false;
+				}
+
 				switch (pi.NodeType)
 				{
-					case ExpressionType.MemberAccess:
+					case ExpressionType.MemberAccess :
 						{
 							var ma   = (MemberExpression)pi;
 							var attr = GetFunctionAttribute(ma.Member);
 
 							if (attr == null && !TypeHelper.IsNullableValueMember(ma.Member))
-								if (canBeCompiled && GetContext(context, pi) == null)
-									return !CanBeCompiled(pi);;
+							{
+								if (canBeCompiled)
+								{
+									var ctx = GetContext(context, pi);
+
+									if (ctx == null)
+										return !CanBeCompiled(pi);
+
+									if (ctx.IsExpression(pi, 0, RequestFor.Object))
+										return !CanBeCompiled(pi);
+
+									ignoredMembers = ma.Expression.GetMembers();
+								}
+							}
 
 							break;
 						}
 
-					case ExpressionType.Parameter:
+					case ExpressionType.Parameter    :
 						{
 							var ctx = GetContext(context, pi);
 
@@ -2291,7 +2318,7 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
-					case ExpressionType.Call:
+					case ExpressionType.Call         :
 						{
 							var e = pi as MethodCallExpression;
 
@@ -2306,9 +2333,11 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
-					case ExpressionType.TypeIs : return canBeCompiled;
-					case ExpressionType.TypeAs :
-					case ExpressionType.New    : return true;
+					//case ExpressionType.Conditional  :
+
+					case ExpressionType.TypeIs       : return canBeCompiled;
+					case ExpressionType.TypeAs       :
+					case ExpressionType.New          : return true;
 				}
 
 				return false;
