@@ -1212,69 +1212,32 @@ namespace BLToolkit.Data.Linq.Builder
 
 			protected override Expression ProcessExpression(Expression expression)
 			{
-				SqlQuery.JoinedTable parentAssociationJoin = null;
+				var isLeft = false;
 
-				for (var a = this; a != null; a = a._parentAssociation as AssociatedTableContext)
+				for (
+					var association = this;
+					isLeft == false && association != null;
+					association = association._parentAssociation as AssociatedTableContext)
 				{
-					if (a.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
-						a.ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply)
-					{
-						parentAssociationJoin = a.ParentAssociationJoin;
-						break;
-					}
+					isLeft =
+						association.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
+						association.ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply;
 				}
 
 				if (isLeft)
 				{
 					Expression cond = null;
 
-					var checkNullOnly = SqlQuery.Select.IsDistinct || SqlQuery.GroupBy.Items.Count > 0;
+					var keys = ConvertToIndex(null, 0, ConvertFlags.Key);
 
-					if (checkNullOnly)
+					foreach (var key in keys)
 					{
-						checkNullOnly = false;
+						var index2  = ConvertToParentIndex(key.Index, null);
 
-						foreach (var c in ParentAssociationJoin.Condition.Conditions)
-						{
-							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-							var f  = (SqlField)ee.Expr1;
-
-							checkNullOnly = SqlQuery.Select.Columns.FirstOrDefault(col => col.Expression == f) == null;
-
-							if (checkNullOnly)
-								break;
-						}
-					}
-
-					foreach (var c in ParentAssociationJoin.Condition.Conditions)
-					{
-						var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-						var field2  = (SqlField)ee.Expr2;
-						var info2   = GetIndex(new SqlInfo { Sql = field2, Member = field2.MemberMapper.MemberAccessor.MemberInfo });
-						var index2  = ConvertToParentIndex(info2.Index, null);
-
-						Expression e;
-
-						if (checkNullOnly)
-						{
-							e = Expression.Call(
-								ExpressionBuilder.DataReaderParam,
-								ReflectionHelper.DataReader.IsDBNull,
-								Expression.Constant(index2));
-						}
-						else
-						{
-							var field1  = (SqlField)ee.Expr1;
-							var info1   = GetIndex(new SqlInfo { Sql = field1, Member = field1.MemberMapper.MemberAccessor.MemberInfo });
-							var index1  = ConvertToParentIndex(info1.Index, null);
-
-							e =
-								Expression.AndAlso(
-									Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index2)),
-									Expression.Not(
-										Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index1))));
-						}
+						Expression e = Expression.Call(
+							ExpressionBuilder.DataReaderParam,
+							ReflectionHelper.DataReader.IsDBNull,
+							Expression.Constant(index2));
 
 						cond = cond == null ? e : Expression.AndAlso(cond, e);
 					}

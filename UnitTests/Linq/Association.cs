@@ -322,7 +322,7 @@ namespace Data.Linq
 			public int  ParentID;
 			public int? Value1;
 
-			[Association(CanBeNull = true, ThisKey = "ParentID", OtherKey = "ParentID")]
+			[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = true)]
 			public Middle Middle { get; set; }
 		}
 
@@ -332,8 +332,11 @@ namespace Data.Linq
 			[PrimaryKey] public int ParentID;
 			[PrimaryKey] public int ChildID;
 
-			[Association(ThisKey = "ChildID", OtherKey = "ChildID")]
+			[Association(ThisKey = "ChildID", OtherKey = "ChildID", CanBeNull = false)]
 			public Bottom Bottom { get; set; }
+
+			[Association(ThisKey = "ChildID", OtherKey = "ChildID", CanBeNull = true)]
+			public Bottom Bottom1 { get; set; }
 		}
 
 		[TableName("GrandChild")]
@@ -349,13 +352,57 @@ namespace Data.Linq
 		{
 			var ids = new[] { 1, 5 };
 
+			ForEachProvider(
+				new[] { ProviderName.SQLite, ProviderName.Access },
+				db =>
+				{
+					var q =
+						from t in db.GetTable<Top>()
+						where ids.Contains(t.ParentID)
+						orderby t.ParentID
+						select t.Middle == null ? null : t.Middle.Bottom;
+
+					var list = q.ToList();
+
+					Assert.NotNull(list[0]);
+					Assert.Null   (list[1]);
+				});
+		}
+
+		[Test]
+		public void TestTernary2()
+		{
+			var ids = new[] { 1, 5 };
+
+			ForEachProvider(
+				new[] { ProviderName.SQLite, ProviderName.Access },
+				db =>
+				{
+					var q =
+						from t in db.GetTable<Top>()
+						where ids.Contains(t.ParentID)
+						orderby t.ParentID
+						select t.Middle.Bottom;
+
+					var list = q.ToList();
+
+					Assert.NotNull(list[0]);
+					Assert.Null   (list[1]);
+				});
+		}
+
+		[Test]
+		public void TestTernary3()
+		{
+			var ids = new[] { 1, 5 };
+
 			ForEachProvider(db =>
 			{
 				var q =
 					from t in db.GetTable<Top>()
 					where ids.Contains(t.ParentID)
 					orderby t.ParentID
-					select t.Middle == null ? null : t.Middle.Bottom;
+					select t.Middle.Bottom1;
 
 				var list = q.ToList();
 
