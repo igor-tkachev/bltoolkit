@@ -189,6 +189,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				foreach (var key in sqlQuery.Update.Items)
 					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
+
+				foreach (var key in sqlQuery.Update.Keys)
+					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
 			}
 
 			new QueryVisitor().Visit(sqlQuery, element =>

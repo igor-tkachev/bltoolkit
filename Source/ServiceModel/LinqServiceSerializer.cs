@@ -902,6 +902,7 @@ namespace BLToolkit.ServiceModel
 							var elem = (SqlQuery.UpdateClause)e;
 
 							Append(elem.Items);
+							Append(elem.Keys);
 							Append(elem.Table);
 
 							break;
@@ -1399,12 +1400,14 @@ namespace BLToolkit.ServiceModel
 					case QueryElementType.UpdateClause :
 						{
 							var items = ReadArray<SqlQuery.SetExpression>();
+							var keys  = ReadArray<SqlQuery.SetExpression>();
 							var table = Read<SqlTable>();
-							var wid   = ReadBool();
+							//var wid   = ReadBool();
 
 							var c = new SqlQuery.UpdateClause { Table = table };
 
 							c.Items.AddRange(items);
+							c.Keys. AddRange(keys);
 							obj = c;
 
 							break;
