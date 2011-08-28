@@ -2159,9 +2159,12 @@ namespace BLToolkit.Data.Sql
 
 				ICloneableElement clone;
 
-				objectTree.Add(this, clone = new SetExpression(
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					objectTree.Add(this, clone = new SetExpression(
 						(ISqlExpression)Column.    Clone(objectTree, doClone),
 						(ISqlExpression)Expression.Clone(objectTree, doClone)));
+				}
 
 				return clone;
 			}
@@ -2198,11 +2201,14 @@ namespace BLToolkit.Data.Sql
 
 		public class InsertClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
-			readonly List<SetExpression> _items = new List<SetExpression>();
-			public   List<SetExpression>  Items { get { return _items; } }
+			public InsertClause()
+			{
+				Items = new List<SetExpression>();
+			}
 
-			public SqlTable Into         { get; set; }
-			public bool     WithIdentity { get; set; }
+			public List<SetExpression> Items        { get; private set; }
+			public SqlTable            Into         { get; set; }
+			public bool                WithIdentity { get; set; }
 
 			#region Overrides
 
@@ -2298,10 +2304,15 @@ namespace BLToolkit.Data.Sql
 
 		public class UpdateClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
-			readonly List<SetExpression> _items = new List<SetExpression>();
-			public   List<SetExpression>  Items { get { return _items; } }
+			public UpdateClause()
+			{
+				Items = new List<SetExpression>();
+				Keys  = new List<SetExpression>();
+			}
 
-			public SqlTable Table { get; set; }
+			public List<SetExpression> Items { get; private set; }
+			public List<SetExpression> Keys  { get; private set; }
+			public SqlTable            Table { get; set; }
 
 			#region Overrides
 
@@ -2331,6 +2342,9 @@ namespace BLToolkit.Data.Sql
 				foreach (var item in Items)
 					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
 
+				foreach (var item in Keys)
+					clone.Keys.Add((SetExpression)item.Clone(objectTree, doClone));
+
 				objectTree.Add(this, clone);
 
 				return clone;
@@ -2347,6 +2361,9 @@ namespace BLToolkit.Data.Sql
 					((ISqlExpressionWalkable)Table).Walk(skipColumns, func);
 
 				foreach (var t in Items)
+					((ISqlExpressionWalkable)t).Walk(skipColumns, func);
+
+				foreach (var t in Keys)
 					((ISqlExpressionWalkable)t).Walk(skipColumns, func);
 
 				return null;

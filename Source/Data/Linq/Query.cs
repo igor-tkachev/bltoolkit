@@ -656,11 +656,14 @@ namespace BLToolkit.Data.Linq
 						if (keys.Count == 0)
 							throw new LinqException("InsertOrUpdate method requires the '{0}' table to have a primary key.", sqlTable.Name);
 
-						var missedKey = keys.Except(
+						var q =
+						(
 							from k in keys
-								join i in sqlQuery.Insert.Items
-								on k equals i.Column
-							select k).FirstOrDefault();
+							join i in sqlQuery.Insert.Items on k equals i.Column
+							select new { k, i }
+						).ToList();
+
+						var missedKey = keys.Except(q.Select(i => i.k)).FirstOrDefault();
 
 						if (missedKey != null)
 							throw new LinqException("InsertOrUpdate method requires the '{0}.{1}' field to be included in the insert setter.",
@@ -684,6 +687,8 @@ namespace BLToolkit.Data.Linq
 
 							sqlQuery.Update.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
 						}
+
+						sqlQuery.Update.Keys.AddRange(q.Select(i => i.i));
 
 						// Set the query.
 						//
@@ -724,13 +729,7 @@ namespace BLToolkit.Data.Linq
 					.ToList(),
 			});
 
-			var keys =
-				(
-					from k in sqlQuery.Update.Table.GetKeys(false)
-						join i in sqlQuery.Insert.Items
-						on k equals i.Column
-					select i
-				).ToList();
+			var keys = sqlQuery.Update.Keys;
 
 			foreach (var key in keys)
 				sqlQuery.Where.Expr(key.Column).Equal.Expr(key.Expression);
