@@ -17,5 +17,5 @@ namespace PetShop.ObjectModel
 		[MapField("ProductId")]  public string  ProductID;
 
 		[MapIgnore]              public decimal Subtotal { get { return Price * Quantity; } }
- 	}
+	}
 }

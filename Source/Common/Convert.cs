@@ -102,7 +102,6 @@ namespace BLToolkit.Common
 
 		#endregion
 
-
 		#region SqlTypes
 
 #if !SILVERLIGHT
