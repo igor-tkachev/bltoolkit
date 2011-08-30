@@ -434,11 +434,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\Sql\ReservedWords.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ComponentModel\" />
-    <Folder Include="Configuration\" />
-    <Folder Include="EditableObjects\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
