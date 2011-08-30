@@ -6,24 +6,24 @@ namespace BLToolkit.ServiceModel.Async
 	[ServiceContract]
 	[ServiceKnownType(typeof(LinqServiceQuery))]
 	[ServiceKnownType(typeof(LinqServiceResult))]
-	public interface ILinqService
+	public interface ILinqSoapService
 	{
-		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ILinqService/GetSqlProviderType", ReplyAction = "http://tempuri.org/ILinqService/GetSqlProviderTypeResponse")]
+		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/GetSqlProviderType", ReplyAction = "http://tempuri.org/GetSqlProviderTypeResponse")]
 		IAsyncResult BeginGetSqlProviderType(AsyncCallback callback, object asyncState);
 
 		string EndGetSqlProviderType(IAsyncResult result);
 
-		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ILinqService/ExecuteNonQuery", ReplyAction = "http://tempuri.org/ILinqService/ExecuteNonQueryResponse")]
+		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteNonQuery", ReplyAction = "http://tempuri.org/ExecuteNonQueryResponse")]
 		IAsyncResult BeginExecuteNonQuery(LinqServiceQuery query, AsyncCallback callback, object asyncState);
 
 		int EndExecuteNonQuery(IAsyncResult result);
 
-		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ILinqService/ExecuteScalar", ReplyAction = "http://tempuri.org/ILinqService/ExecuteScalarResponse")]
+		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteScalar", ReplyAction = "http://tempuri.org/ExecuteScalarResponse")]
 		IAsyncResult BeginExecuteScalar(LinqServiceQuery query, AsyncCallback callback, object asyncState);
 
 		object EndExecuteScalar(IAsyncResult result);
 
-		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ILinqService/ExecuteReader", ReplyAction = "http://tempuri.org/ILinqService/ExecuteReaderResponse")]
+		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteReader", ReplyAction = "http://tempuri.org/ExecuteReaderResponse")]
 		IAsyncResult BeginExecuteReader(LinqServiceQuery query, AsyncCallback callback, object asyncState);
 
 		LinqServiceResult EndExecuteReader(IAsyncResult result);

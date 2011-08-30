@@ -91,6 +91,7 @@
     <Content Include="ClientTestPage.html" />
     <Content Include="Silverlight.js" />
     <Content Include="TestLinqService.svc" />
+    <Content Include="TestLinqWebService.asmx" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -103,6 +104,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestLinqService.svc.cs">
       <DependentUpon>TestLinqService.svc</DependentUpon>
+    </Compile>
+    <Compile Include="TestLinqWebService.asmx.cs">
+      <DependentUpon>TestLinqWebService.asmx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

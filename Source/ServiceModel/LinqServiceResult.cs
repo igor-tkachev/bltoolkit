@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 namespace BLToolkit.ServiceModel
 {
 	[DataContract]
 	public class LinqServiceResult
 	{
-		public int            FieldCount   { get; set; }
-		public int            RowCount     { get; set; }
-		public Guid           QueryID      { get; set; }
-		public string[]       FieldNames   { get; set; }
-		public Type[]         FieldTypes   { get; set; }
-		public Type[]         VaryingTypes { get; set; }
-		public List<string[]> Data         { get; set; }
+		[XmlIgnore] public int            FieldCount   { get; set; }
+		[XmlIgnore] public int            RowCount     { get; set; }
+		[XmlIgnore] public Guid           QueryID      { get; set; }
+		[XmlIgnore] public string[]       FieldNames   { get; set; }
+		[XmlIgnore] public Type[]         FieldTypes   { get; set; }
+		[XmlIgnore] public Type[]         VaryingTypes { get; set; }
+		[XmlIgnore] public List<string[]> Data         { get; set; }
 
 		string _resultData;
 

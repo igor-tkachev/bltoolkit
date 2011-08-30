@@ -10,15 +10,15 @@ namespace BLToolkit.ServiceModel
 
 	using NotNullAttribute = NotNullAttribute;
 
-	public class ServiceModelDataContext : RemoteDataContextBase
+	public class SoapDataContext : RemoteDataContextBase
 	{
 		#region Init
 
-		ServiceModelDataContext()
+		SoapDataContext()
 		{
 		}
 
-		public ServiceModelDataContext([NotNull] string endpointConfigurationName)
+		public SoapDataContext([NotNull] string endpointConfigurationName)
 			: this()
 		{
 			if (endpointConfigurationName == null) throw new ArgumentNullException("endpointConfigurationName");
@@ -26,7 +26,7 @@ namespace BLToolkit.ServiceModel
 			_endpointConfigurationName = endpointConfigurationName;
 		}
 
-		public ServiceModelDataContext([NotNull] string endpointConfigurationName, [NotNull] string remoteAddress)
+		public SoapDataContext([NotNull] string endpointConfigurationName, [NotNull] string remoteAddress)
 			: this()
 		{
 			if (endpointConfigurationName == null) throw new ArgumentNullException("endpointConfigurationName");
@@ -36,7 +36,7 @@ namespace BLToolkit.ServiceModel
 			_remoteAddress             = remoteAddress;
 		}
 
-		public ServiceModelDataContext([NotNull] string endpointConfigurationName, [NotNull] EndpointAddress endpointAddress)
+		public SoapDataContext([NotNull] string endpointConfigurationName, [NotNull] EndpointAddress endpointAddress)
 			: this()
 		{
 			if (endpointConfigurationName == null) throw new ArgumentNullException("endpointConfigurationName");
@@ -46,7 +46,7 @@ namespace BLToolkit.ServiceModel
 			_endpointAddress           = endpointAddress;
 		}
 
-		public ServiceModelDataContext([NotNull] Binding binding, [NotNull] EndpointAddress endpointAddress)
+		public SoapDataContext([NotNull] Binding binding, [NotNull] EndpointAddress endpointAddress)
 			: this()
 		{
 			if (binding         == null) throw new ArgumentNullException("binding");
@@ -69,20 +69,20 @@ namespace BLToolkit.ServiceModel
 		protected override ILinqService GetClient()
 		{
 			if (Binding != null)
-				return new LinqServiceClient(Binding, _endpointAddress);
+				return new LinqSoapServiceClient(Binding, _endpointAddress);
 
 			if (_endpointAddress != null)
-				return new LinqServiceClient(_endpointConfigurationName, _endpointAddress);
+				return new LinqSoapServiceClient(_endpointConfigurationName, _endpointAddress);
 
 			if (_remoteAddress != null)
-				return new LinqServiceClient(_endpointConfigurationName, _remoteAddress);
+				return new LinqSoapServiceClient(_endpointConfigurationName, _remoteAddress);
 
-			return new LinqServiceClient(_endpointConfigurationName);
+			return new LinqSoapServiceClient(_endpointConfigurationName);
 		}
 
 		protected override IDataContext Clone()
 		{
-			return new ServiceModelDataContext
+			return new SoapDataContext
 			{
 				MappingSchema              = MappingSchema,
 				Binding                    = Binding,
@@ -94,7 +94,7 @@ namespace BLToolkit.ServiceModel
 
 		protected override string ContextIDPrefix
 		{
-			get { return "LinqService_"; }
+			get { return "LinqSoapService_"; }
 		}
 
 		#endregion

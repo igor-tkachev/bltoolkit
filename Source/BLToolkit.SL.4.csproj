@@ -345,7 +345,11 @@
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="Reflection\TypeAccessorT.cs" />
     <Compile Include="Reflection\TypeHelper.cs" />
+    <Compile Include="ServiceModel\Async\ILinqSoapService.cs" />
     <Compile Include="ServiceModel\Async\ILinqService.cs" />
+    <Compile Include="ServiceModel\SoapDataContext.cs" />
+    <Compile Include="ServiceModel\LinqSoapServiceClient.Silverlight.cs" />
+    <Compile Include="ServiceModel\RemoteDataContextBase.cs" />
     <Compile Include="ServiceModel\LinqServiceClient.Silverlight.cs" />
     <Compile Include="ServiceModel\ILinqService.cs" />
     <Compile Include="ServiceModel\LinqServiceQuery.cs" />

@@ -43,6 +43,7 @@ namespace BLToolkit.ServiceModel
 
 		public Type SqlProviderType { get; set; }
 
+		[WebMethod]
 		public virtual string GetSqlProviderType()
 		{
 			if (SqlProviderType == null)
@@ -64,6 +65,7 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		[WebMethod]
 		public int ExecuteNonQuery(LinqServiceQuery query)
 		{
 			ValidateQuery(query);
@@ -75,6 +77,7 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		[WebMethod]
 		public object ExecuteScalar(LinqServiceQuery query)
 		{
 			ValidateQuery(query);
@@ -86,6 +89,7 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		[WebMethod]
 		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
 		{
 			ValidateQuery(query);

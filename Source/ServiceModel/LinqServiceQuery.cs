@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 namespace BLToolkit.ServiceModel
 {
@@ -8,8 +9,8 @@ namespace BLToolkit.ServiceModel
 	[DataContract]
 	public class LinqServiceQuery
 	{
-		public SqlQuery       Query      { get; set; }
-		public SqlParameter[] Parameters { get; set; }
+		[XmlIgnore] public SqlQuery       Query      { get; set; }
+		[XmlIgnore] public SqlParameter[] Parameters { get; set; }
 
 		string _queryData;
 
