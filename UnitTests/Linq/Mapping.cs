@@ -241,7 +241,15 @@ namespace Data.Linq
 				if (conversionType == typeof(MyInt))
 					return new MyInt { MyValue = Convert.ToInt32(value) };
 
+				if (value is MyInt)
+					value = ((MyInt)value).MyValue;
+
 				return base.ConvertChangeType(value, conversionType, isNullable);
+			}
+
+			public override object ConvertParameterValue(object value, Type systemType)
+			{
+				return value is MyInt ? ((MyInt)value).MyValue : value;
 			}
 		}
 
@@ -264,6 +272,16 @@ namespace Data.Linq
 				var list = db.GetTable<MyParent>()
 					.Select(t => new MyParent { ParentID = t.ParentID, Value1 = t.Value1 })
 					.ToList();
+			}
+		}
+
+		[Test]
+		public void MyType3()
+		{
+			using (var db = new TestDbManager { MappingSchema = _myMappingSchema })
+			{
+				db.BeginTransaction();
+				db.Insert(new MyParent { ParentID = new MyInt { MyValue = 1001 }, Value1 = 1001 });
 			}
 		}
 	}

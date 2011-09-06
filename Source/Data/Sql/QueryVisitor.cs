@@ -222,6 +222,7 @@ namespace BLToolkit.Data.Sql
 							Visit(sc.Table, all, parentFirst, action);
 
 						foreach (var c in sc.Items.ToArray()) Visit(c, all, parentFirst, action);
+						foreach (var c in sc.Keys. ToArray()) Visit(c, all, parentFirst, action);
 						break;
 					}
 
@@ -479,7 +480,8 @@ namespace BLToolkit.Data.Sql
 						var sc = (SqlQuery.UpdateClause)element;
 						return
 							Find(sc.Table, find) ??
-							Find(sc.Items, find);
+							Find(sc.Items, find) ??
+							Find(sc.Keys,  find);
 					}
 
 				case QueryElementType.SelectClause:
@@ -823,12 +825,16 @@ namespace BLToolkit.Data.Sql
 						var s = (SqlQuery.UpdateClause)element;
 						var t = s.Table != null ? (SqlTable)ConvertInternal(s.Table, action) : null;
 						var i = Convert(s.Items, action);
+						var k = Convert(s.Keys,  action);
 
-						if (t != null && !ReferenceEquals(s.Table, t) || i != null && !ReferenceEquals(s.Items, i))
+						if (t != null && !ReferenceEquals(s.Table, t) ||
+							i != null && !ReferenceEquals(s.Items, i) ||
+							k != null && !ReferenceEquals(s.Keys,  k))
 						{
 							var sc = new SqlQuery.UpdateClause();
 							sc.Table = t ?? sc.Table;
 							sc.Items.AddRange(i ?? s.Items);
+							sc.Keys. AddRange(k ?? s.Keys);
 
 							newElement = sc;
 						}

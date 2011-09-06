@@ -433,14 +433,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			var table       = SqlQuery.Insert.Into;
 			var targetAlias = Convert(SqlQuery.From.Tables[0].Alias, ConvertType.NameToQueryTableAlias).ToString();
 			var sourceAlias = Convert(GetTempAliases(1, "s")[0],     ConvertType.NameToQueryTableAlias).ToString();
-			var keys        = table.GetKeys(false);
-			var exprs       =
-				(
-					from k in keys
-						join i in SqlQuery.Insert.Items
-						on k equals i.Column
-					select i.Expression
-				).ToList();
+			var keys        = SqlQuery.Update.Keys;
 
 			AppendIndent(sb).Append("MERGE INTO ");
 			BuildPhysicalTable(sb, table, null);
@@ -450,9 +443,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			for (var i = 0; i < keys.Count; i++)
 			{
-				BuildExpression(sb, exprs[i], false, false);
+				BuildExpression(sb, keys[i].Expression, false, false);
 				sb.Append(" AS ");
-				BuildExpression(sb, keys [i], false, false);
+				BuildExpression(sb, keys[i].Column, false, false);
 
 				if (i + 1 < keys.Count)
 					sb.Append(", ");
@@ -474,10 +467,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				AppendIndent(sb);
 
 				sb.Append(targetAlias).Append('.');
-				BuildExpression(sb, key, false, false);
+				BuildExpression(sb, key.Column, false, false);
 
 				sb.Append(" = ").Append(sourceAlias).Append('.');
-				BuildExpression(sb, key, false, false);
+				BuildExpression(sb, key.Column, false, false);
 
 				if (i + 1 < keys.Count)
 					sb.Append(" AND");
@@ -516,13 +509,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			AppendIndent(sb).AppendLine("WHERE");
 
 			var alias = Convert(SqlQuery.From.Tables[0].Alias, ConvertType.NameToQueryTableAlias).ToString();
-			var exprs =
-				(
-					from k in SqlQuery.Insert.Into.GetKeys(false)
-						join i in SqlQuery.Insert.Items
-						on k equals i.Column
-					select i
-				).ToList();
+			var exprs = SqlQuery.Update.Keys;
 
 			Indent++;
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -312,6 +314,101 @@ namespace Data.Linq
 				join g in db.GrandChild on c.ParentID equals g.ParentID
 				where g.ChildID == 22
 				select new { c.Parent, c }));
+		}
+
+		[TableName("Parent")]
+		public class Top
+		{
+			public int  ParentID;
+			public int? Value1;
+
+			[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = true)]
+			public Middle Middle { get; set; }
+		}
+
+		[TableName("Child")]
+		public class Middle
+		{
+			[PrimaryKey] public int ParentID;
+			[PrimaryKey] public int ChildID;
+
+			[Association(ThisKey = "ChildID", OtherKey = "ChildID", CanBeNull = false)]
+			public Bottom Bottom { get; set; }
+
+			[Association(ThisKey = "ChildID", OtherKey = "ChildID", CanBeNull = true)]
+			public Bottom Bottom1 { get; set; }
+		}
+
+		[TableName("GrandChild")]
+		public class Bottom
+		{
+			public int ParentID;
+			public int ChildID;
+			public int GrandChildID;
+		}
+
+		[Test]
+		public void TestTernary1()
+		{
+			var ids = new[] { 1, 5 };
+
+			ForEachProvider(
+				new[] { ProviderName.SQLite, ProviderName.Access },
+				db =>
+				{
+					var q =
+						from t in db.GetTable<Top>()
+						where ids.Contains(t.ParentID)
+						orderby t.ParentID
+						select t.Middle == null ? null : t.Middle.Bottom;
+
+					var list = q.ToList();
+
+					Assert.NotNull(list[0]);
+					Assert.Null   (list[1]);
+				});
+		}
+
+		[Test]
+		public void TestTernary2()
+		{
+			var ids = new[] { 1, 5 };
+
+			ForEachProvider(
+				new[] { ProviderName.SQLite, ProviderName.Access },
+				db =>
+				{
+					var q =
+						from t in db.GetTable<Top>()
+						where ids.Contains(t.ParentID)
+						orderby t.ParentID
+						select t.Middle.Bottom;
+
+					var list = q.ToList();
+
+					Assert.NotNull(list[0]);
+					Assert.Null   (list[1]);
+				});
+		}
+
+		[Test]
+		public void TestTernary3()
+		{
+			var ids = new[] { 1, 5 };
+
+			ForEachProvider(db =>
+			{
+				var q =
+					from t in db.GetTable<Top>()
+					where ids.Contains(t.ParentID)
+					orderby t.ParentID
+					select t.Middle.Bottom1;
+
+				var list = q.ToList();
+
+				Assert.NotNull(list[0]);
+				Assert.Null   (list[1]);
+			});
 		}
 	}
 }

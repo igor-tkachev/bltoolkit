@@ -4,13 +4,14 @@ using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
+
 using NUnit.Framework;
 
 using Data.Linq;
 using Data.Linq.Model;
-using BLToolkit.Data.Sql.SqlProvider;
-using BLToolkit.Mapping;
 
 #region ReSharper disable
 // ReSharper disable ConvertToConstant.Local
@@ -1005,7 +1006,56 @@ namespace Update
 			});
 		}
 
-		private static readonly Func<TestDbManager,int,string,int> _updateQuery =
+		[Test]
+		public void InsertOrUpdate3()
+		{
+			ForEachProvider(db =>
+			{
+				var id = 0;
+
+				try
+				{
+					id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+					{
+						FirstName = "John",
+						LastName  = "Shepard",
+						Gender    = Gender.Male
+					}));
+
+					var diagnosis = "abc";
+
+					for (var i = 0; i < 3; i++)
+					{
+						db.Patient.InsertOrUpdate(
+							() => new Patient
+							{
+								PersonID  = id,
+								Diagnosis = "abc",
+							},
+							p => new Patient
+							{
+								Diagnosis = (p.Diagnosis.Length + i).ToString(),
+							},
+							() => new Patient
+							{
+								PersonID  = id,
+								//Diagnosis = diagnosis,
+							});
+
+						diagnosis = (diagnosis.Length + i).ToString();
+					}
+
+					Assert.AreEqual("3", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				}
+				finally
+				{
+					db.Patient.Delete(p => p.PersonID == id);
+					db.Person. Delete(p => p.ID       == id);
+				}
+			});
+		}
+
+		static readonly Func<TestDbManager,int,string,int> _updateQuery =
 			CompiledQuery.Compile   <TestDbManager,int,string,int>((ctx,key,value) =>
 				ctx.Person
 					.Where(_ => _.ID == key)

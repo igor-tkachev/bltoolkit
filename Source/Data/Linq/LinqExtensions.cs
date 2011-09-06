@@ -588,6 +588,32 @@ namespace BLToolkit.Data.Linq
 					new[] { query.Expression, Expression.Quote(insertSetter), Expression.Quote(onDuplicateKeyUpdateSetter) }));
 		}
 
+		public static int InsertOrUpdate<T>(
+			[NotNull] this Table<T> target,
+			[NotNull] Expression<Func<T>>   insertSetter,
+			[NotNull] Expression<Func<T,T>> onDuplicateKeyUpdateSetter,
+			[NotNull] Expression<Func<T>>   keySelector)
+		{
+			if (target                     == null) throw new ArgumentNullException("target");
+			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
+			if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
+			if (keySelector                == null) throw new ArgumentNullException("keySelector");
+
+			IQueryable<T> query = target;
+
+			return query.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[]
+					{
+						query.Expression,
+						Expression.Quote(insertSetter),
+						Expression.Quote(onDuplicateKeyUpdateSetter),
+						Expression.Quote(keySelector)
+					}));
+		}
+
 		#endregion
 
 		#region Take / Skip / ElementAt

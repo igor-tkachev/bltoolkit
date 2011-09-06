@@ -176,6 +176,7 @@
     <Compile Include="Exceptions\Aggregation.cs" />
     <Compile Include="Exceptions\DmlTest.cs" />
     <Compile Include="ExtensionTests.cs" />
+    <Compile Include="GenerateTest.cs" />
     <Compile Include="IdlTest.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="ParserTest.cs" />

@@ -575,13 +575,27 @@ namespace BLToolkit.Data.Linq.Builder
 			return ConvertToSql(context, expr);
 		}
 
+#if FW3
 		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression)
+		{
+			return ConvertToSql(context, expression, false);
+		}
+#endif
+
+		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression, bool unwrap
+#if !FW3
+			= false
+#endif
+			)
 		{
 			if (CanBeConstant(expression))
 				return BuildConstant(expression);
 
 			if (CanBeCompiled(expression))
 				return BuildParameter(expression).SqlParameter;
+
+			if (unwrap)
+				expression = expression.Unwrap();
 
 			switch (expression.NodeType)
 			{
@@ -947,7 +961,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			return null == expr.Find(ex =>
 			{
-				if (ex is BinaryExpression || ex is UnaryExpression || ex.NodeType == ExpressionType.Convert)
+				if (ex is BinaryExpression || ex is UnaryExpression /*|| ex.NodeType == ExpressionType.Convert*/)
 					return false;
 
 				switch (ex.NodeType)
@@ -1345,7 +1359,7 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			var l = ConvertToSql(context, left);
-			var r = ConvertToSql(context, right.Unwrap());
+			var r = ConvertToSql(context, right, true);
 
 			switch (nodeType)
 			{
@@ -1811,7 +1825,7 @@ namespace BLToolkit.Data.Linq.Builder
 					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, GetLikeEscaper(start, end))
 				};
 
-				_parameters.Add(e, ep);
+				//_parameters.Add(e, ep);
 				CurrentSqlParameters.Add(ep);
 
 				return new SqlQuery.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
@@ -2241,23 +2255,50 @@ namespace BLToolkit.Data.Linq.Builder
 
 		bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
 		{
+			List<Expression> ignoredMembers = null;
+
 			return null == expr.Find(pi =>
 			{
+				if (ignoredMembers != null)
+				{
+					if (pi != ignoredMembers[ignoredMembers.Count - 1])
+						throw new InvalidOperationException();
+
+					if (ignoredMembers.Count == 1)
+						ignoredMembers = null;
+					else
+						ignoredMembers.RemoveAt(ignoredMembers.Count - 1);
+
+					return false;
+				}
+
 				switch (pi.NodeType)
 				{
-					case ExpressionType.MemberAccess:
+					case ExpressionType.MemberAccess :
 						{
 							var ma   = (MemberExpression)pi;
 							var attr = GetFunctionAttribute(ma.Member);
 
 							if (attr == null && !TypeHelper.IsNullableValueMember(ma.Member))
-								if (canBeCompiled && GetContext(context, pi) == null)
-									return !CanBeCompiled(pi);;
+							{
+								if (canBeCompiled)
+								{
+									var ctx = GetContext(context, pi);
+
+									if (ctx == null)
+										return !CanBeCompiled(pi);
+
+									if (ctx.IsExpression(pi, 0, RequestFor.Object))
+										return !CanBeCompiled(pi);
+
+									ignoredMembers = ma.Expression.GetMembers();
+								}
+							}
 
 							break;
 						}
 
-					case ExpressionType.Parameter:
+					case ExpressionType.Parameter    :
 						{
 							var ctx = GetContext(context, pi);
 
@@ -2277,7 +2318,7 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
-					case ExpressionType.Call:
+					case ExpressionType.Call         :
 						{
 							var e = pi as MethodCallExpression;
 
@@ -2292,9 +2333,11 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 						}
 
-					case ExpressionType.TypeIs : return canBeCompiled;
-					case ExpressionType.TypeAs :
-					case ExpressionType.New    : return true;
+					//case ExpressionType.Conditional  :
+
+					case ExpressionType.TypeIs       : return canBeCompiled;
+					case ExpressionType.TypeAs       :
+					case ExpressionType.New          : return true;
 				}
 
 				return false;
