@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -440,5 +440,39 @@ namespace Data.Linq
 				var list = db.GetTable<InheritanceA>().Where(a => a.Bs.Any()).ToList();
 			}
 		}
+
+
+        [TableName("Person")]
+        [InheritanceMapping(Code = 1, Type = typeof(Test17John))]
+        [InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
+        public class Test17Person
+        {
+            [MapField(IsInheritanceDiscriminator = true)]
+            public int PersonID { get; set; }
+        }
+
+        public class Test17John : Test17Person
+        {
+            public string FirstName { get; set; }
+        }
+        public class Test17Tester : Test17Person
+        {
+            public string LastName { get; set; }
+        }
+
+
+        [Test]
+        public void Test17()
+        {
+            ForEachProvider(Providers.Select(p => p.Name).Where(provider => provider != ProviderName.Firebird).ToArray(), context =>
+            {
+                if (context is TestDbManager)
+                {
+                    var db = (TestDbManager)context;
+                    db.GetTable<Test17Person>().OfType<Test17John>().ToList();
+                    Assert.False(db.LastQuery.ToLowerInvariant().Contains("lastname"), "Why select LastName field??");
+                }
+            });
+        }
 	}
 }
