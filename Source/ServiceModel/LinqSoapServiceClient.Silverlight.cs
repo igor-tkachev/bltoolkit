@@ -3,14 +3,14 @@ using System.ServiceModel;
 
 namespace BLToolkit.ServiceModel
 {
-	class LinqServiceClient : ClientBase<Async.ILinqService>, ILinqService, IDisposable
+	class LinqSoapServiceClient : ClientBase<Async.ILinqSoapService>, ILinqService, IDisposable
 	{
 		#region Init
 
-		public LinqServiceClient(string endpointConfigurationName)                                            : base(endpointConfigurationName) { }
-		public LinqServiceClient(string endpointConfigurationName, string remoteAddress)                      : base(endpointConfigurationName, remoteAddress) { }
-		public LinqServiceClient(string endpointConfigurationName, EndpointAddress remoteAddress)             : base(endpointConfigurationName, remoteAddress) { }
-		public LinqServiceClient(System.ServiceModel.Channels.Binding binding, EndpointAddress remoteAddress) : base(binding, remoteAddress) { }
+		public LinqSoapServiceClient(string endpointConfigurationName)                                            : base(endpointConfigurationName) { }
+		public LinqSoapServiceClient(string endpointConfigurationName, string remoteAddress)                      : base(endpointConfigurationName, remoteAddress) { }
+		public LinqSoapServiceClient(string endpointConfigurationName, EndpointAddress remoteAddress)             : base(endpointConfigurationName, remoteAddress) { }
+		public LinqSoapServiceClient(System.ServiceModel.Channels.Binding binding, EndpointAddress remoteAddress) : base(binding, remoteAddress) { }
 
 		#endregion
 
@@ -72,18 +72,18 @@ namespace BLToolkit.ServiceModel
 
 		#region Overrides
 
-		protected override Async.ILinqService CreateChannel()
+		protected override Async.ILinqSoapService CreateChannel()
 		{
-			return new LinqServiceClientChannel(this);
+			return new LinqSoapServiceClientChannel(this);
 		}
 
 		#endregion
 
 		#region Channel
 
-		class LinqServiceClientChannel : ChannelBase<Async.ILinqService>, Async.ILinqService
+		class LinqSoapServiceClientChannel : ChannelBase<Async.ILinqSoapService>, Async.ILinqSoapService
 		{
-			public LinqServiceClientChannel(ClientBase<Async.ILinqService> client) :
+			public LinqSoapServiceClientChannel(ClientBase<Async.ILinqSoapService> client) :
 				base(client)
 			{
 			}

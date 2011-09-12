@@ -1,29 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
-using Demo.WebServices.Client.WebClient;
-using Demo.WebServices.ObjectModel;
 
 namespace Demo.WebServices.Client
 {
+	using ObjectModel;
+	using WebClient;
+
 	class Program
 	{
 		static void Main(string[] args)
 		{
 			WebClientBase.BaseUrl = args.Length == 0? "localhost": args[0];
 
-			foreach (Person p in PersonClient.Instance.SelectAll())
+			foreach (var p in PersonClient.Instance.SelectAll())
 			{
 				PrintPerson(p);
 			}
 
-			XmlMap<string, Person> map = PersonClient.Instance.SelectMap();
-			foreach (KeyValuePair<string, Person> pair in map)
+			var map = PersonClient.Instance.SelectMap();
+
+			foreach (var pair in map)
 			{
 				Console.WriteLine("{0}: {1} {2} ({3})",
 					pair.Key,
-					pair.Value.FirstName, pair.Value.LastName, pair.Value.Gender);
+					pair.Value.FirstName,
+					pair.Value.LastName,
+					pair.Value.Gender);
 			}
 
 			// Async call to server
@@ -32,13 +35,12 @@ namespace Demo.WebServices.Client
 
 			string strVal;
 			Guid   guidVal;
-			int intVal = PersonClient.Instance.MethodWithOutParams(out strVal, out guidVal);
+			var    intVal = PersonClient.Instance.MethodWithOutParams(out strVal, out guidVal);
+
 			Console.WriteLine("int: {0}, str: {1}, guid: {2}", intVal, strVal, guidVal);
 
-			PersonClient.Instance.MethodWithOutParams(delegate(int i, string s, Guid g)
-			{
-				Console.WriteLine("[Callback] int: {0}, str: {1}, guid: {2}", i, s, g);
-			});
+			PersonClient.Instance.MethodWithOutParams(
+				(i,s,g) => Console.WriteLine("[Callback] int: {0}, str: {1}, guid: {2}", i, s, g));
 
 			Console.WriteLine();
 			Console.WriteLine("Press [Enter] key to continue");

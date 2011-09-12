@@ -114,7 +114,12 @@ namespace BLToolkit.Data.Linq.Builder
 						return expr;
 					}
 
-					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+					if (Sequence.IsExpression(null, level, RequestFor.Object))
+					{
+						
+					}
+					else
+						return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 				}
 
 				throw new NotImplementedException();

@@ -23,7 +23,7 @@ using BLToolkit.ServiceModel;
 
 namespace Client
 {
-	public partial class DataModel : ServiceModelDataContext
+	public partial class DataModel : SoapDataContext // ServiceModelDataContext
 	{
 		public Table<AlphabeticalListOfProducts> AlphabeticalListOfProducts { get { return this.GetTable<AlphabeticalListOfProducts>(); } }
 		public Table<Categories>                 Categories                 { get { return this.GetTable<Categories>();                 } }
@@ -611,7 +611,9 @@ namespace Client
 				ReceiveTimeout         = new TimeSpan(00, 10, 00),
 				SendTimeout            = new TimeSpan(00, 10, 00),
 			},
-			new EndpointAddress("http://localhost:31020/TestLinqService.svc"))
+			//new EndpointAddress("http://localhost:31020/TestLinqService.svc"))
+			new EndpointAddress("http://localhost:31020/TestLinqWebService.asmx"))
+			//base("TestLinqWebServiceSoap")
 		{
 		}
 	}

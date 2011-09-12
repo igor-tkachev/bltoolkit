@@ -16,14 +16,14 @@ namespace BLToolkit.ServiceModel
 
 	static class LinqServiceSerializer
 	{
-		public static string Serialize(LinqServiceQuery query)
+		public static string Serialize(SqlQuery query, SqlParameter[] parameters)
 		{
-			return new QuerySerializer().Serialize(query);
+			return new QuerySerializer().Serialize(query, parameters);
 		}
 
-		public static void Deserialize(LinqServiceQuery query, string str)
+		public static LinqServiceQuery Deserialize(string str)
 		{
-			new QueryDeserializer().Deserialize(query, str);
+			return new QueryDeserializer().Deserialize(str);
 		}
 
 		public static string Serialize(LinqServiceResult result)
@@ -31,9 +31,9 @@ namespace BLToolkit.ServiceModel
 			return new ResultSerializer().Serialize(result);
 		}
 
-		public static void Deserialize(LinqServiceResult result, string str)
+		public static LinqServiceResult DeserializeResult(string str)
 		{
-			new ResultDeserializer().Deserialize(result, str);
+			return new ResultDeserializer().DeserializeResult(str);
 		}
 
 		#region SerializerBase
@@ -414,13 +414,13 @@ namespace BLToolkit.ServiceModel
 
 		class QuerySerializer : SerializerBase
 		{
-			public string Serialize(LinqServiceQuery query)
+			public string Serialize(SqlQuery query, SqlParameter[] parameters)
 			{
 				var visitor = new QueryVisitor();
 
-				visitor.Visit(query.Query, Visit);
+				visitor.Visit(query, Visit);
 
-				foreach (var parameter in query.Parameters)
+				foreach (var parameter in parameters)
 					if (!Dic.ContainsKey(parameter))
 						Visit(parameter);
 
@@ -429,9 +429,9 @@ namespace BLToolkit.ServiceModel
 					.Append(' ')
 					.Append(_paramIndex);
 
-				Append(query.Parameters.Length);
+				Append(parameters.Length);
 
-				foreach (var parameter in query.Parameters)
+				foreach (var parameter in parameters)
 					Append(parameter);
 
 				Builder.AppendLine();
@@ -974,7 +974,7 @@ namespace BLToolkit.ServiceModel
 			readonly Dictionary<int,SqlQuery> _queries = new Dictionary<int,SqlQuery>();
 			readonly List<Action>             _actions = new List<Action>();
 
-			public void Deserialize(LinqServiceQuery query, string str)
+			public LinqServiceQuery Deserialize(string str)
 			{
 				Str = str;
 
@@ -983,8 +983,7 @@ namespace BLToolkit.ServiceModel
 				foreach (var action in _actions)
 					action();
 
-				query.Query      = _query;
-				query.Parameters = _parameters;
+				return new LinqServiceQuery { Query = _query, Parameters = _parameters };
 			}
 
 			bool Parse()
@@ -1506,20 +1505,23 @@ namespace BLToolkit.ServiceModel
 
 		class ResultDeserializer : DeserializerBase
 		{
-			public void Deserialize(LinqServiceResult result, string str)
+			public LinqServiceResult DeserializeResult(string str)
 			{
 				Str = str;
 
 				var fieldCount  = ReadInt();
 				var varTypesLen = ReadInt();
 
-				result.FieldCount   = fieldCount;
-				result.RowCount     = ReadInt();
-				result.VaryingTypes = new Type[varTypesLen];
-				result.QueryID      = new Guid(ReadString());
-				result.FieldNames   = new string[fieldCount];
-				result.FieldTypes   = new Type  [fieldCount];
-				result.Data         = new List<string[]>();
+				var result = new LinqServiceResult
+				{
+					FieldCount   = fieldCount,
+					RowCount     = ReadInt(),
+					VaryingTypes = new Type[varTypesLen],
+					QueryID      = new Guid(ReadString()),
+					FieldNames   = new string[fieldCount],
+					FieldTypes   = new Type  [fieldCount],
+					Data         = new List<string[]>(),
+				};
 
 				NextLine();
 
@@ -1554,7 +1556,7 @@ namespace BLToolkit.ServiceModel
 					NextLine();
 				}
 
-				return;
+				return result;
 			}
 		}
 

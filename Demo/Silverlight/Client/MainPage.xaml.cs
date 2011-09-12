@@ -13,18 +13,27 @@ namespace Client
 
 			ThreadPool.QueueUserWorkItem(_ =>
 			{
-				using (var dm = new DataModel())
+				try
 				{
-					var q =
-						from c in dm.Categories
-						where  !c.CategoryName.StartsWith("Con")
-						orderby c.CategoryName
-						select  c.CategoryName;
+					using (var dm = new DataModel())
+					{
+						var q =
+							from c in dm.Categories
+							where  !c.CategoryName.StartsWith("Con")
+							orderby c.CategoryName
+							select  c.CategoryName;
 
-					var text = string.Join("\n", q.ToArray());
+						var text = string.Join("\n", q.ToArray());
 
-					Dispatcher.BeginInvoke(() => OutputText.Text = text);
+						Dispatcher.BeginInvoke(() => OutputText.Text = text);
+					}
 				}
+				catch (Exception ex)
+				{
+					Dispatcher.BeginInvoke(() => OutputText.Text = ex.Message);
+				}
+
+				//new ServiceReference1.TestLinqWebServiceSoap();
 			});
 		}
 	}
