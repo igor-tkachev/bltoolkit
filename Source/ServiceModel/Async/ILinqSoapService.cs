@@ -14,18 +14,18 @@ namespace BLToolkit.ServiceModel.Async
 		string EndGetSqlProviderType(IAsyncResult result);
 
 		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteNonQuery", ReplyAction = "http://tempuri.org/ExecuteNonQueryResponse")]
-		IAsyncResult BeginExecuteNonQuery(LinqServiceQuery query, AsyncCallback callback, object asyncState);
+		IAsyncResult BeginExecuteNonQuery(string queryData, AsyncCallback callback, object asyncState);
 
 		int EndExecuteNonQuery(IAsyncResult result);
 
 		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteScalar", ReplyAction = "http://tempuri.org/ExecuteScalarResponse")]
-		IAsyncResult BeginExecuteScalar(LinqServiceQuery query, AsyncCallback callback, object asyncState);
+		IAsyncResult BeginExecuteScalar(string queryData, AsyncCallback callback, object asyncState);
 
 		object EndExecuteScalar(IAsyncResult result);
 
 		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteReader", ReplyAction = "http://tempuri.org/ExecuteReaderResponse")]
-		IAsyncResult BeginExecuteReader(LinqServiceQuery query, AsyncCallback callback, object asyncState);
+		IAsyncResult BeginExecuteReader(string queryData, AsyncCallback callback, object asyncState);
 
-		LinqServiceResult EndExecuteReader(IAsyncResult result);
+		string EndExecuteReader(IAsyncResult result);
 	}
 }

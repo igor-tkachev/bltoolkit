@@ -66,8 +66,10 @@ namespace BLToolkit.ServiceModel
 		}
 
 		[WebMethod]
-		public int ExecuteNonQuery(LinqServiceQuery query)
+		public int ExecuteNonQuery(string queryData)
 		{
+			var query = LinqServiceSerializer.Deserialize(queryData);
+
 			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
@@ -78,8 +80,10 @@ namespace BLToolkit.ServiceModel
 		}
 
 		[WebMethod]
-		public object ExecuteScalar(LinqServiceQuery query)
+		public object ExecuteScalar(string queryData)
 		{
+			var query = LinqServiceSerializer.Deserialize(queryData);
+
 			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
@@ -90,8 +94,10 @@ namespace BLToolkit.ServiceModel
 		}
 
 		[WebMethod]
-		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
+		public string ExecuteReader(string queryData)
 		{
+			var query = LinqServiceSerializer.Deserialize(queryData);
+
 			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
@@ -174,7 +180,7 @@ namespace BLToolkit.ServiceModel
 
 					ret.VaryingTypes = varyingTypes.ToArray();
 
-					return ret;
+					return LinqServiceSerializer.Serialize(ret);
 				}
 			}
 		}

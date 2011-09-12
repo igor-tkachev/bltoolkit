@@ -28,19 +28,19 @@ namespace BLToolkit.ServiceModel
 			return Channel.GetSqlProviderType();
 		}
 
-		public int ExecuteNonQuery(LinqServiceQuery query)
+		public int ExecuteNonQuery(string queryData)
 		{
-			return Channel.ExecuteNonQuery(query);
+			return Channel.ExecuteNonQuery(queryData);
 		}
 
-		public object ExecuteScalar(LinqServiceQuery query)
+		public object ExecuteScalar(string queryData)
 		{
-			return Channel.ExecuteScalar(query);
+			return Channel.ExecuteScalar(queryData);
 		}
 
-		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
+		public string ExecuteReader(string queryData)
 		{
-			return Channel.ExecuteReader(query);
+			return Channel.ExecuteReader(queryData);
 		}
 
 		#endregion

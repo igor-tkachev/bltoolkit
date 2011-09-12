@@ -473,6 +473,7 @@
     <Compile Include="ServiceModel\LinqServiceQuery.cs" />
     <Compile Include="ServiceModel\LinqServiceResult.cs" />
     <Compile Include="ServiceModel\LinqServiceSerializer.cs" />
+    <Compile Include="ServiceModel\RemoteDataContextBase.cs" />
     <Compile Include="ServiceModel\ServiceModelDataContext.cs" />
     <Compile Include="ServiceModel\ServiceModelDataReader.cs" />
     <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
