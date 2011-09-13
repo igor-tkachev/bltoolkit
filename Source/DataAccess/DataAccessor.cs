@@ -689,7 +689,7 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
-		protected SqlQueryAttribute GetSqlQueryAttribute(MethodInfo methodInfo)
+		protected virtual SqlQueryAttribute GetSqlQueryAttribute(MethodInfo methodInfo)
 		{
 			var attrs = methodInfo.GetCustomAttributes(typeof(SqlQueryAttribute), true);
 			return (SqlQueryAttribute)attrs[0];
