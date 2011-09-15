@@ -435,5 +435,78 @@ namespace Data.Linq
 				q.ToList();
 			});
 		}
+
+		[Test]
+		public void CompareNullableInt()
+		{
+			int? param = null;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Parent where param == null || t.Value1 == param select t,
+				from t in db.Parent where param == null || t.Value1 == param select t));
+
+			param = 1;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Parent where param == null || t.Value1 == param select t,
+				from t in db.Parent where param == null || t.Value1 == param select t));
+		}
+
+		[Test]
+		public void CompareNullableBoolean1()
+		{
+			bool? param = null;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where param == null || t.BoolValue == param select t,
+				from t in db.Types where param == null || t.BoolValue == param select t));
+
+			param = true;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where param == null || t.BoolValue == param select t,
+				from t in db.Types where param == null || t.BoolValue == param select t));
+		}
+
+		[Test]
+		public void CompareNullableBoolean2()
+		{
+			short? param1 = null;
+			bool?  param2 = null;
+
+			ForEachProvider(db => AreEqual(
+				from t1 in    Types
+				join t2 in    Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1,
+				from t1 in db.Types
+				join t2 in db.Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1));
+
+			//param1 = null;
+			param2 = false;
+
+			ForEachProvider(db => AreEqual(
+				from t1 in    Types
+				join t2 in    Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1,
+				from t1 in db.Types
+				join t2 in db.Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1));
+		}
+
+		[Test]
+		public void CompareNullableBoolean3()
+		{
+			short? param1 = null;
+			bool?  param2 = false;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where (param1 == null || t.SmallIntValue == param1) && (param2 == null || t.BoolValue == param2) select t,
+				from t in db.Types where (param1 == null || t.SmallIntValue == param1) && (param2 == null || t.BoolValue == param2) select t));
+		}
 	}
 }
