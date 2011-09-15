@@ -4077,7 +4077,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (ParameterDependent)
 			{
-				return new QueryVisitor().Convert(this, e =>
+				var query = new QueryVisitor().Convert(this, e =>
 				{
 					switch (e.ElementType)
 					{
@@ -4087,9 +4087,43 @@ namespace BLToolkit.Data.Sql
 
 								if (p.Value == null)
 									return new SqlValue(null);
-
-								break;
 							}
+
+							break;
+
+						case QueryElementType.ExprExprPredicate :
+							{
+								var ee = (Predicate.ExprExpr)e;
+								
+								if (ee.Operator == Predicate.Operator.Equal || ee.Operator == Predicate.Operator.NotEqual)
+								{
+									object value1;
+									object value2;
+
+									if (ee.Expr1 is SqlValue)
+										value1 = ((SqlValue)ee.Expr1).Value;
+									else if (ee.Expr1 is SqlParameter)
+										value1 = ((SqlParameter)ee.Expr1).Value;
+									else
+										break;
+
+									if (ee.Expr2 is SqlValue)
+										value2 = ((SqlValue)ee.Expr2).Value;
+									else if (ee.Expr2 is SqlParameter)
+										value2 = ((SqlParameter)ee.Expr2).Value;
+									else
+										break;
+
+									var value = Equals(value1, value2);
+
+									if (ee.Operator == Predicate.Operator.NotEqual)
+										value = !value;
+
+									return new Predicate.Expr(new SqlValue(value), Sql.Precedence.Comparison);
+								}
+							}
+
+							break;
 
 						case QueryElementType.InListPredicate :
 							return ConvertInListPredicate((Predicate.InList)e);
@@ -4097,6 +4131,23 @@ namespace BLToolkit.Data.Sql
 
 					return null;
 				});
+
+				if (query != this)
+				{
+					query.Parameters.Clear();
+
+					new QueryVisitor().VisitAll(query, expr =>
+					{
+						if (expr.ElementType == QueryElementType.SqlParameter)
+						{
+							var p = (SqlParameter)expr;
+							if (p.IsQueryParameter)
+								query.Parameters.Add(p);
+						}
+					});
+				}
+
+				return query;
 			}
 
 			return this;

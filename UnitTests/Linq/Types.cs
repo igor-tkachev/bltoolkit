@@ -488,6 +488,23 @@ namespace Data.Linq
 			param2 = false;
 
 			ForEachProvider(db => AreEqual(
+				from t1 in    Types
+				join t2 in    Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1,
+				from t1 in db.Types
+				join t2 in db.Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1));
+		}
+
+		[Test]
+		public void CompareNullableBoolean3()
+		{
+			short? param1 = null;
+			bool?  param2 = false;
+
+			ForEachProvider(db => AreEqual(
 				from t in    Types where (param1 == null || t.SmallIntValue == param1) && (param2 == null || t.BoolValue == param2) select t,
 				from t in db.Types where (param1 == null || t.SmallIntValue == param1) && (param2 == null || t.BoolValue == param2) select t));
 		}

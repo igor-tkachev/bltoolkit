@@ -2942,7 +2942,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					var v3 = func.Parameters[4] as SqlValue;
 
 					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
-						c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
+					    c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
 					{
 						var ee1 = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
 						var ee2 = c2.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
