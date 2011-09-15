@@ -1133,50 +1133,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#endregion
 
-		#region ConvertEnumerable
-
-		ISqlExpression ConvertEnumerable(IBuildContext context, MethodCallExpression expression)
-		{
-			return SubQueryToSql(context, expression);
-
-			//throw new NotImplementedException();
-
-			/*
-			QueryField field = queries.Length == 1 && queries[0] is QuerySource.GroupBy ? queries[0] : null;
-
-			if (field == null)
-				field = GetField(lambda, expression.Arguments[0], queries);
-
-			while (field is QuerySource.SubQuerySourceColumn)
-				field = ((QuerySource.SubQuerySourceColumn)field).SourceColumn;
-
-			if (field is QuerySource.GroupJoin && expression.Method.Name == "Count")
-			{
-				var ex = ((QuerySource.GroupJoin)field).Counter.GetExpressions(this)[0];
-				return ex;
-			}
-
-			if (!(field is QuerySource.GroupBy))
-				throw new LinqException("'{0}' cannot be converted to SQL.", expression);
-
-			var groupBy = (QuerySource.GroupBy)field;
-			var expr    = ConvertEnumerable(expression, groupBy);
-
-			if (queries.Length == 1 && queries[0] is QuerySource.SubQuery)
-			{
-				var subQuery  = (QuerySource.SubQuery)queries[0];
-				var column    = groupBy.FindField(new QueryField.ExprColumn(groupBy, expr, null));
-				var subColumn = subQuery.EnsureField(column);
-
-				expr = subColumn.GetExpressions(this)[0];
-			}
-
-			return expr;
-			*/
-		}
-
-		#endregion
-
 		#region Predicate Converter
 
 		ISqlPredicate ConvertPredicate(IBuildContext context, Expression expression)
