@@ -1287,5 +1287,37 @@ namespace Data.Linq
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20))));
 		}
+
+		[Test]
+		public void GroupByExtraFieldBugTest()
+		{
+			// https://github.com/igor-tkachev/bltoolkit/issues/42
+			// extra field is generated in the GROUP BY clause, for example:
+			// GROUP BY p.LastName, p.LastName <--- the second one is redundant
+
+			using (var db = new TestDbManager("MySql"))
+			{
+				var q =
+					from
+						d in db.Doctor
+					join p in db.Person
+						on d.PersonID equals p.ID
+					group d by
+						new {p.LastName}
+					into g
+					select
+						new {g.Key.LastName};
+
+				q.ToList();
+				string lastQuery = db.LastQuery;
+
+				const string fieldName = "LastName";
+				int groupByPos = lastQuery.IndexOf("GROUP BY");
+				int fieldPos = lastQuery.IndexOf(fieldName, groupByPos);
+				
+				// check that our field does not present in the GROUP BY clause second time
+				Assert.AreEqual(-1, lastQuery.IndexOf(fieldName, fieldPos + 1));
+			}
+		}
 	}
 }
