@@ -912,5 +912,19 @@ namespace Data.Linq
 				select new { p, Value = p.Value1 * 100 } into p
 				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p }));
 		}
+
+		[Test]
+		public void SubQuery1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Types
+				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
+				where pp.Value != 0
+				select pp.Value,
+				from p in db.Types
+				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
+				where pp.Value != 0
+				select pp.Value));
+		}
 	}
 }
