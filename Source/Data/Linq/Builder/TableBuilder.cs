@@ -514,13 +514,33 @@ namespace BLToolkit.Data.Linq.Builder
 				return q.ToArray();
 			}
 
-			Expression BuildQuery()
+			Expression BuildQuery(Type tableType)
 			{
-				var info  = ConvertToIndex(null, 0, ConvertFlags.All);
+				SqlInfo[] info;
+
+				if (ObjectType == tableType)
+				{
+					info = ConvertToIndex(null, 0, ConvertFlags.All);
+				}
+				else
+				{
+					info = ConvertToSql(null, 0, ConvertFlags.All);
+
+					var table = new SqlTable(Builder.MappingSchema, tableType);
+
+					var q =
+						from fld1 in table.Fields.Values.Select((f,i) => new { f, i })
+						join fld2 in info on fld1.f.Name equals ((SqlField)fld2.Sql).Name
+						orderby fld1.i
+						select GetIndex(fld2);
+
+					info = q.ToArray();
+				}
+
 				var index = info.Select(idx => ConvertToParentIndex(idx.Index, null)).ToArray();
 
-				if (OriginalType != ObjectType || InheritanceMapping.Count == 0)
-					return BuildTableExpression(!Builder.IsBlockDisable, OriginalType, index);
+				if (ObjectType != tableType || InheritanceMapping.Count == 0)
+					return BuildTableExpression(!Builder.IsBlockDisable, tableType, index);
 
 				Expression expr;
 
@@ -590,7 +610,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				//var expr = BuildExpression(null, 0);
+				var expr = BuildQuery(typeof(T));
 
 				if (expr.Type != typeof(T))
 					expr = Expression.Convert(expr, typeof(T));
@@ -636,7 +657,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				if (table.Field == null)
-					return table.Table.BuildQuery();
+					return table.Table.BuildQuery(table.Table.OriginalType);
 
 				// Build field.
 				//
