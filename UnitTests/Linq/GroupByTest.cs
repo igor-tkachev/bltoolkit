@@ -1303,17 +1303,19 @@ namespace Data.Linq
 					join p in db.Person
 						on d.PersonID equals p.ID
 					group d by
-						new {p.LastName}
+						new { p.LastName }
 					into g
 					select
-						new {g.Key.LastName};
+						new { g.Key.LastName };
 
 				q.ToList();
-				string lastQuery = db.LastQuery;
+
+				var lastQuery = db.LastQuery;
 
 				const string fieldName = "LastName";
-				int groupByPos = lastQuery.IndexOf("GROUP BY");
-				int fieldPos = lastQuery.IndexOf(fieldName, groupByPos);
+
+				var groupByPos = lastQuery.IndexOf("GROUP BY");
+				var fieldPos   = lastQuery.IndexOf(fieldName, groupByPos);
 				
 				// check that our field does not present in the GROUP BY clause second time
 				Assert.AreEqual(-1, lastQuery.IndexOf(fieldName, fieldPos + 1));

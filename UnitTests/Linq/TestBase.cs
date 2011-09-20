@@ -318,14 +318,16 @@ namespace Data.Linq
 		}
 
 		private   List<LinqDataTypes> _types;
-		protected List<LinqDataTypes>  Types
+		protected IEnumerable<LinqDataTypes>  Types
 		{
 			get
 			{
 				if (_types == null)
 					using (var db = new TestDbManager("Sql2008"))
 						_types = db.Types.ToList();
-				return _types;
+
+				foreach (var type in _types)
+					yield return type;
 			}
 		}
 

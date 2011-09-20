@@ -881,7 +881,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				case ExpressionType.MemberAccess :
 				case ExpressionType.Parameter    :
-				case ExpressionType.Call         :
+				//case ExpressionType.Call         :
 					if (sequence != null)
 						return action(2, sequence, newExpression, 1, memberExpression);
 					throw new NotImplementedException();
