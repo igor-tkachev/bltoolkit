@@ -1298,22 +1298,16 @@ namespace Data.Linq
 			using (var db = new TestDbManager("MySql"))
 			{
 				var q =
-					from
-						d in db.Doctor
-					join p in db.Person
-						on d.PersonID equals p.ID
-					group d by
-						new { p.LastName }
-					into g
-					select
-						new { g.Key.LastName };
+					from d in db.Doctor
+					join p in db.Person on d.PersonID equals p.ID
+					group d by p.LastName into g
+					select g.Key;
 
 				q.ToList();
 
-				var lastQuery = db.LastQuery;
-
 				const string fieldName = "LastName";
 
+				var lastQuery  = db.LastQuery;
 				var groupByPos = lastQuery.IndexOf("GROUP BY");
 				var fieldPos   = lastQuery.IndexOf(fieldName, groupByPos);
 				
