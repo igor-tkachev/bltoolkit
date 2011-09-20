@@ -184,8 +184,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (!ReflectionHelper.MapSchema.Converters.TryGetValue(type, out mi))
 				{
-					//throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
-
 					mapper =
 						Expression.Convert(
 							Expression.Call(
