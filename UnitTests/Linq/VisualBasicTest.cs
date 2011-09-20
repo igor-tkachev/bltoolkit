@@ -17,6 +17,16 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CompareString1()
+		{
+			ForEachProvider(db =>
+			{
+				var str = CompilerServices.CompareString(db).ToString();
+				Assert.That(str.IndexOf("CASE"), Is.EqualTo(-1));
+			});
+		}
+
+		[Test]
 		public void ParameterName()
 		{
 			ForEachProvider(db => AreEqual(
