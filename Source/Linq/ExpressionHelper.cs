@@ -1834,7 +1834,7 @@ namespace BLToolkit.Linq
 							expr;
 					}
 
-				case ExpressionType.TypeIs:
+				case ExpressionType.TypeIs :
 					{
 						var exp = func(expr);
 						if (exp.Stop || exp.Expression != expr)
@@ -1848,7 +1848,7 @@ namespace BLToolkit.Linq
 
 #if FW4 || SILVERLIGHT
 
-				case ExpressionType.Block:
+				case ExpressionType.Block :
 					{
 						var exp = func(expr);
 						if (exp.Stop || exp.Expression != expr)
@@ -2110,7 +2110,7 @@ namespace BLToolkit.Linq
 		static public Expression GetLevelExpression(this Expression expression, int level)
 		{
 			var current = 0;
-			var expr = FindLevel(expression, level, ref current);
+			var expr    = FindLevel(expression, level, ref current);
 
 			if (expr == null || current != level)
 				throw new InvalidOperationException();

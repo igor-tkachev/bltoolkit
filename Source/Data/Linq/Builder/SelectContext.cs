@@ -866,8 +866,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var memberExpression = Members[((MemberExpression)levelExpression).Member];
 			var newExpression    = GetExpression(expression, levelExpression, memberExpression);
-
-			var sequence  = GetSequence(expression, level);
+			var sequence         = GetSequence  (expression, level);
 
 			if (sequence != null)
 			{
@@ -881,7 +880,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				case ExpressionType.MemberAccess :
 				case ExpressionType.Parameter    :
-				case ExpressionType.Call         :
+				//case ExpressionType.Call         :
 					if (sequence != null)
 						return action(2, sequence, newExpression, 1, memberExpression);
 					throw new NotImplementedException();

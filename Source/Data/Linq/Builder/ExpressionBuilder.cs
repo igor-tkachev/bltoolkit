@@ -879,7 +879,12 @@ namespace BLToolkit.Data.Linq.Builder
 				types["TKey"],
 				types.ContainsKey("TElement") ? types["TElement"] : types["TSource"],
 				types.ContainsKey("TResult")  ? types["TResult"]  : types["TSource"]);
-			var helper = (IGroupByHelper)Activator.CreateInstance(gtype);
+
+			var helper =
+				//Expression.Lambda<Func<IGroupByHelper>>(
+				//	Expression.Convert(Expression.New(gtype), typeof(IGroupByHelper)))
+				//.Compile()();
+				(IGroupByHelper)Activator.CreateInstance(gtype);
 
 			helper.Set(needSubQuery, sourceExpression, keySelector, elementSelector, resultSelector);
 
@@ -1003,7 +1008,11 @@ namespace BLToolkit.Data.Linq.Builder
 			var colSelector      = (LambdaExpression)OptimizeExpression(method.Arguments[1].Unwrap());
 
 			var gtype  = typeof(SelectManyHelper<,>).MakeGenericType(types["TSource"], types["TResult"]);
-			var helper = (ISelectManyHelper)Activator.CreateInstance(gtype);
+			var helper =
+				//Expression.Lambda<Func<ISelectManyHelper>>(
+				//	Expression.Convert(Expression.New(gtype), typeof(ISelectManyHelper)))
+				//.Compile()();
+				(ISelectManyHelper)Activator.CreateInstance(gtype);
 
 			helper.Set(sourceExpression, colSelector);
 
