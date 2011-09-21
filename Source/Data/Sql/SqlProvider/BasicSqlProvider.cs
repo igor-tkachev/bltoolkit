@@ -2802,8 +2802,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					break;
 
-				case QueryElementType.SearchCondition:
+				case QueryElementType.SearchCondition :
 					SqlQuery.OptimizeSearchCondition((SqlQuery.SearchCondition)expression);
+					break;
+
+				case QueryElementType.SqlExpression   :
+					{
+						var se = (SqlExpression)expression;
+
+						if (se.Expr == "{0}" && se.Parameters.Length == 1 && se.Parameters[0] != null)
+							return se.Parameters[0];
+					}
+
 					break;
 			}
 

@@ -350,7 +350,7 @@ namespace BLToolkit.Data.Linq.Builder
 					ObjectMapper  = data.ObjectMapper
 				};
 
-				var destObject = /*dataContext.CreateInstance(initContext) ??*/ data.ObjectMapper.CreateInstance(initContext);
+				var destObject = data.ObjectMapper.CreateInstance(initContext);
 
 				if (initContext.StopMapping)
 					return destObject;
@@ -527,8 +527,7 @@ namespace BLToolkit.Data.Linq.Builder
 					info = ConvertToSql(null, 0, ConvertFlags.All);
 
 					var table = new SqlTable(Builder.MappingSchema, tableType);
-
-					var q =
+					var q     =
 						from fld1 in table.Fields.Values.Select((f,i) => new { f, i })
 						join fld2 in info on fld1.f.Name equals ((SqlField)fld2.Sql).Name
 						orderby fld1.i
@@ -610,7 +609,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				//var expr = BuildExpression(null, 0);
 				var expr = BuildQuery(typeof(T));
 
 				if (expr.Type != typeof(T))
@@ -925,24 +923,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 							}
-
-							/*
-							var table       = new TableContext(
-								Builder,
-								new BuildInfo(Parent is SelectManyBuilder.SelectManyContext ? this : Parent, Expression, buildInfo.SqlQuery),
-								association.Table.ObjectType);
-
-							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
-							{
-								var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
-								buildInfo.SqlQuery.Where
-									.Expr(predicate.Expr1)
-									.Equal
-									.Field(table.SqlTable.Fields[((SqlField)predicate.Expr2).Name]);
-							}
-
-							return table;
-							*/
 						}
 						else
 						{
@@ -1058,11 +1038,7 @@ namespace BLToolkit.Data.Linq.Builder
 											name = me.Member.Name + '.' + name;
 										}
 
-										foreach (var f in SqlTable.Fields.Values)
-											if (f.MemberMapper.MemberName == name)
-												return f;
-
-										return null;
+										return SqlTable.Fields.Values.FirstOrDefault(f => f.MemberMapper.MemberName == name);
 									}
 
 									return field;
@@ -1177,9 +1153,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 		class AssociatedTableContext : TableContext
 		{
-			private         TableContext         _parentAssociation;
+			       readonly TableContext         _parentAssociation;
 			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
-			public          bool                  IsList;
+			public readonly bool                  IsList;
 
 			public override IBuildContext Parent
 			{
@@ -1216,7 +1192,6 @@ namespace BLToolkit.Data.Linq.Builder
 				for (var i = 0; i < association.ThisKey.Length; i++)
 				{
 					SqlField field1;
-
 					SqlField field2;
 
 					if (!parent.SqlTable.Fields.TryGetValue(association.ThisKey[i], out field1))

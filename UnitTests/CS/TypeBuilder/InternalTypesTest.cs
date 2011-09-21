@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+
 using NUnit.Framework;
 
 using BLToolkit.Reflection;
@@ -35,15 +36,16 @@ namespace TypeBuilder
 		{
 			TypeFactory.SetGlobalAssembly("InternalTypesTest.dll", new Version(1,2,3,4), "TypeBuilder/InternalTypesTest.snk");
 
-			InternalObject o = TypeAccessor.CreateInstance<InternalObject>();
+			var o = TypeAccessor.CreateInstance<InternalObject>();
 			Assert.IsNotNull(o);
 
-			PublicObject  o2 = TypeAccessor.CreateInstance<PublicObject>();
+			var o2 = TypeAccessor.CreateInstance<PublicObject>();
 			Assert.IsNotNull(o2);
 
 			TypeFactory.SaveGlobalAssembly();
 
-			TypeAccessor ta = TypeAccessor<PublicObject>.Instance;
+			var ta = TypeAccessor<PublicObject>.Instance;
+
 			Assert.IsNotNull(ta["InternalField"]);
 			Assert.IsTrue   (ta["InternalField"].HasGetter);
 			Assert.IsTrue   (ta["InternalField"].HasSetter);

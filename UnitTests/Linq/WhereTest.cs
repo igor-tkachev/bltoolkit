@@ -284,8 +284,9 @@ namespace Data.Linq
 		[Test]
 		public void Coalesce4()
 		{
-			var expected = from p in Parent where p.ParentID == 1 ? false: true select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent where p.ParentID == 1 ? false: true select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where p.ParentID == 1 ? false: true select p,
+				from p in db.Parent where p.ParentID == 1 ? false: true select p));
 		}
 
 		[Test]
@@ -298,15 +299,17 @@ namespace Data.Linq
 		[Test]
 		public void Coalesce6()
 		{
-			var expected = from p in Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p,
+				from p in db.Parent where (p.Value1 == 1 ? 10 : 20) == 20 select p));
 		}
 
 		[Test]
 		public void Coalesce7()
 		{
-			var expected = from p in Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p));
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p,
+				from p in db.Parent where (p.ParentID == 1 ? 10 : 20) == 20 select p));
 		}
 
 		[Test]
@@ -925,6 +928,18 @@ namespace Data.Linq
 				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
 				where pp.Value != 0
 				select pp.Value));
+		}
+
+		[Test]
+		public void SearchCondition1()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types
+				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
+				select t,
+				from t in db.Types
+				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
+				select t));
 		}
 	}
 }
