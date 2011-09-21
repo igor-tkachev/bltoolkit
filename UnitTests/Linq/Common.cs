@@ -289,6 +289,38 @@ namespace Data.Linq
 				from p in    Person where p.ID == (int)id select p,
 				from p in db.Person where p.ID == (int)id select p));
 		}
+
+		[Test]
+		public void GroupByUnion()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in (
+					from c in Child
+					where c.ParentID < 4
+					select new { c.ParentID, ID = c.ChildID })
+				.Concat(
+					from g in GrandChild
+					where g.ParentID >= 4
+					select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+				group t by t.ParentID into gr
+				select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+				where tt.Sum != 0
+				select tt
+				,
+				from t in (
+					from c in db.Child
+					where c.ParentID < 4
+					select new { c.ParentID, ID = c.ChildID })
+				.Concat(
+					from g in db.GrandChild
+					where g.ParentID >= 4
+					select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+				group t by t.ParentID into gr
+				select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+				where tt.Sum != 0
+				select tt
+			));
+		}
 	}
 
 	static class Extender

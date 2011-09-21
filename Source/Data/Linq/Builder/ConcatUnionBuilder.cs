@@ -150,8 +150,8 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					if (expression == null)
 					{
-						var type   = _methodCall.Method.GetGenericArguments()[0];
-						var nctor  = (NewExpression)Expression.Find(e =>
+						var type  = _methodCall.Method.GetGenericArguments()[0];
+						var nctor = (NewExpression)Expression.Find(e =>
 						{
 							if (e.NodeType == ExpressionType.New && e.Type == type)
 							{
@@ -198,7 +198,12 @@ namespace BLToolkit.Data.Linq.Builder
 						if (expression == levelExpression)
 						{
 							var idx = ConvertToIndex(expression, level, ConvertFlags.Field);
-							return Builder.BuildSql(expression.Type, idx[0].Index);
+							var n   = idx[0].Index;
+
+							if (Parent != null)
+								n = Parent.ConvertToParentIndex(n, this);
+
+							return Builder.BuildSql(expression.Type, n);
 						}
 					}
 
