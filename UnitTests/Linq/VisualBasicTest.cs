@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
+using Data.Linq.Model;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -32,6 +33,31 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in Parent where p.ParentID == 1 select p,
 				VisualBasicCommon.ParamenterName(db)));
+		}
+
+		[Test]
+		public void SearchCondition1()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Access },
+				db => AreEqual(
+					from t in Types
+					where !t.BoolValue && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || (t.SmallIntValue | 2) == 10)
+					select t,
+					VisualBasicCommon.SearchCondition1(db)));
+		}
+
+		[Test]
+		public void SearchCondition2()
+		{
+			using (var db = new NorthwindDB())
+			{
+				AreEqual(
+					from cust in Customer
+					where cust.Orders.Count > 0 && cust.CompanyName.StartsWith("H")
+					select cust.CustomerID,
+					VisualBasicCommon.SearchCondition2(db));
+			}
 		}
 	}
 }

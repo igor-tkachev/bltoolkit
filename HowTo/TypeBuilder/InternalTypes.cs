@@ -23,7 +23,7 @@ namespace HowTo.TypeBuilder
 		[Test]
 		public void Test()
 		{
-			TestObject o = TypeAccessor.CreateInstance<TestObject>();
+			var o = TypeAccessor.CreateInstance<TestObject>();
 			Assert.IsNotNull(o);
 		}
 	}

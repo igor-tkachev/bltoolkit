@@ -582,34 +582,40 @@ namespace BLToolkit.Data.Linq.Builder
 
 			switch (expression.NodeType)
 			{
-				case ExpressionType.AndAlso:
-				case ExpressionType.OrElse:
-				case ExpressionType.Not:
-				case ExpressionType.Equal:
-				case ExpressionType.NotEqual:
-				case ExpressionType.GreaterThan:
-				case ExpressionType.GreaterThanOrEqual:
-				case ExpressionType.LessThan:
-				case ExpressionType.LessThanOrEqual:
+				case ExpressionType.AndAlso            :
+				case ExpressionType.OrElse             :
+				case ExpressionType.Not                :
+				case ExpressionType.Equal              :
+				case ExpressionType.NotEqual           :
+				case ExpressionType.GreaterThan        :
+				case ExpressionType.GreaterThanOrEqual :
+				case ExpressionType.LessThan           :
+				case ExpressionType.LessThanOrEqual    :
 					{
 						var condition = new SqlQuery.SearchCondition();
 						BuildSearchCondition(context, expression, condition.Conditions);
 						return condition;
 					}
 
-				case ExpressionType.Add:
-				case ExpressionType.AddChecked:
-				case ExpressionType.And:
-				case ExpressionType.Divide:
-				case ExpressionType.ExclusiveOr:
-				case ExpressionType.Modulo:
-				case ExpressionType.Multiply:
-				case ExpressionType.MultiplyChecked:
-				case ExpressionType.Or:
-				case ExpressionType.Power:
-				case ExpressionType.Subtract:
-				case ExpressionType.SubtractChecked:
-				case ExpressionType.Coalesce:
+				case ExpressionType.And                :
+				case ExpressionType.Or                 :
+					{
+						if (expression.Type == typeof(bool))
+							goto case ExpressionType.AndAlso;
+						goto case ExpressionType.Add;
+					}
+
+				case ExpressionType.Add                :
+				case ExpressionType.AddChecked         :
+				case ExpressionType.Divide             :
+				case ExpressionType.ExclusiveOr        :
+				case ExpressionType.Modulo             :
+				case ExpressionType.Multiply           :
+				case ExpressionType.MultiplyChecked    :
+				case ExpressionType.Power              :
+				case ExpressionType.Subtract           :
+				case ExpressionType.SubtractChecked    :
+				case ExpressionType.Coalesce           :
 					{
 						var e = (BinaryExpression)expression;
 						var l = ConvertToSql(context, e.Left);
@@ -725,7 +731,7 @@ namespace BLToolkit.Data.Linq.Builder
 						return Convert(context, new SqlFunction(e.Type, "CASE", s, t, f));
 					}
 
-				case ExpressionType.MemberAccess:
+				case ExpressionType.MemberAccess :
 					{
 						var ma   = (MemberExpression)expression;
 						var attr = GetFunctionAttribute(ma.Member);
@@ -750,7 +756,7 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.Parameter:
+				case ExpressionType.Parameter   :
 					{
 						var ctx = GetContext(context, expression);
 
@@ -769,7 +775,7 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.Call:
+				case ExpressionType.Call        :
 					{
 						var e = (MethodCallExpression)expression;
 
@@ -815,7 +821,7 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.Invoke:
+				case ExpressionType.Invoke :
 					{
 						var pi = (InvocationExpression)expression;
 						var ex = pi.Expression;
@@ -843,7 +849,7 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.TypeIs:
+				case ExpressionType.TypeIs :
 					{
 						var condition = new SqlQuery.SearchCondition();
 						BuildSearchCondition(context, expression, condition.Conditions);
@@ -1929,7 +1935,8 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			switch (expression.NodeType)
 			{
-				case ExpressionType.AndAlso:
+				case ExpressionType.And     :
+				case ExpressionType.AndAlso :
 					{
 						var e = (BinaryExpression)expression;
 
@@ -1939,7 +1946,8 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.OrElse:
+				case ExpressionType.Or     :
+				case ExpressionType.OrElse :
 					{
 						var e           = (BinaryExpression)expression;
 						var orCondition = new SqlQuery.SearchCondition();
@@ -1953,7 +1961,7 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				case ExpressionType.Not:
+				case ExpressionType.Not    :
 					{
 						var e            = expression as UnaryExpression;
 						var notCondition = new SqlQuery.SearchCondition();
@@ -1972,7 +1980,7 @@ namespace BLToolkit.Data.Linq.Builder
 						break;
 					}
 
-				default:
+				default                    :
 					var predicate = ConvertPredicate(context, expression);
 
 					if (predicate is SqlQuery.Predicate.Expr)

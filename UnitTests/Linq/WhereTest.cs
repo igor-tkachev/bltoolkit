@@ -929,5 +929,17 @@ namespace Data.Linq
 				where pp.Value != 0
 				select pp.Value));
 		}
+
+		[Test]
+		public void SearchCondition1()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types
+				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
+				select t,
+				from t in db.Types
+				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
+				select t));
+		}
 	}
 }
