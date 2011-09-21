@@ -1908,6 +1908,9 @@ namespace BLToolkit.Data.Sql
 
 			public int Add(ISqlExpression expr)
 			{
+				if (expr is Column && ((Column)expr).Parent == SqlQuery)
+					throw new InvalidOperationException();
+
 				return Columns.IndexOf(AddOrGetColumn(new Column(SqlQuery, expr)));
 			}
 
