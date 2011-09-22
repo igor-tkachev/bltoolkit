@@ -27,5 +27,10 @@ namespace BLToolkit.ServiceModel.Async
 		IAsyncResult BeginExecuteReader(string queryData, AsyncCallback callback, object asyncState);
 
 		string EndExecuteReader(IAsyncResult result);
+
+		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ILinqService/ExecuteBatch", ReplyAction = "http://tempuri.org/ILinqService/ExecuteBatchResponse")]
+		IAsyncResult BeginExecuteBatch(string[] queryData, AsyncCallback callback, object asyncState);
+
+		int EndExecuteBatch(IAsyncResult result);
 	}
 }

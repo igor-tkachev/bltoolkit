@@ -4,7 +4,7 @@ using System.ServiceModel;
 namespace BLToolkit.ServiceModel
 {
 	[ServiceContract]
-	public interface ILinqService
+	public interface ILinqSoapService
 	{
 		[OperationContract] string GetSqlProviderType();
 		[OperationContract] int    ExecuteNonQuery(string   queryData);

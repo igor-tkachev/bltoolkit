@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace UnitTests.CS.JointureTests
 {
-    [TestFixture]
+    //[TestFixture]
     internal class AssociationTests
     {
         [TestFixtureSetUp]
@@ -26,13 +26,13 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = new MusicDB())
             {
-                var query2 = new FullSqlQuery(db, true); //loading is automatic
+                var query2  = new FullSqlQuery(db, true); //loading is automatic
                 var artist2 = (Artist2) query2.SelectByKey(typeof (Artist2), 2643);
-                List<Title> titles2 = artist2.Titles;
+                var titles2 = artist2.Titles;
 
-                var query = new FullSqlQuery(db); // Dont ignore lazyloading
+                var query  = new FullSqlQuery(db); // Dont ignore lazyloading
                 var artist = (Artist2) query.SelectByKey(typeof (Artist2), 2643);
-                List<Title> titles = artist.Titles;
+                var titles = artist.Titles;
                 Assert.AreEqual(titles2.Count, titles.Count);
             }
         }
@@ -42,17 +42,16 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = new MusicDB())
             {
-                DbManager dbCmd =
-                    db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
+                var dbCmd = db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
+
                 dbCmd.MappingSchema = new FullMappingSchema();
 
-                List<Artist2> art = dbCmd.ExecuteList<Artist2>();
-                List<Title> titles = art[0].Titles;
-
-                var query2 = new FullSqlQueryT<Artist2>(db);
-                List<Artist2> artists = query2.SelectAll();
-                Artist2 artist2 = artists[0];
-                List<Title> titles2 = artist2.Titles;
+                var art     = dbCmd.ExecuteList<Artist2>();
+                var titles  = art[0].Titles;
+                var query2  = new FullSqlQueryT<Artist2>(db);
+                var artists = query2.SelectAll();
+                var artist2 = artists[0];
+                var titles2 = artist2.Titles;
             }
         }
 
@@ -73,8 +72,8 @@ namespace UnitTests.CS.JointureTests
             using (var db = new MusicDB())
             {
                 var query2 = new FullSqlQuery(db);
-                List<Title> titles = query2.SelectAll<Title>();
-                var title = (Title) query2.SelectByKey(typeof (Title), 137653);
+                var titles = query2.SelectAll<Title>();
+                var title  = (Title) query2.SelectByKey(typeof (Title), 137653);
             }
         }
 
@@ -84,8 +83,8 @@ namespace UnitTests.CS.JointureTests
             using (var db = new MusicDB())
             {
                 var query2 = new FullSqlQueryT<Artist2>(db);
-                Artist2 artist = query2.SelectByKey(2643);
-                List<Title> titles = artist.Titles;
+                var artist = query2.SelectByKey(2643);
+                var titles = artist.Titles;
             }
         }
 
@@ -94,9 +93,9 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = new MusicDB())
             {
-                var query2 = new FullSqlQueryT<Title>(db);
-                Title title = query2.SelectByKey(137653);
-                string titleName = title.Name;
+                var query2    = new FullSqlQueryT<Title>(db);
+                var title     = query2.SelectByKey(137653);
+                var titleName = title.Name;
             }
         }
     }

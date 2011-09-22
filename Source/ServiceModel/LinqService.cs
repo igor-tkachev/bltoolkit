@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.ServiceModel;
 using System.Web.Services;
+using BLToolkit.Data;
 
 namespace BLToolkit.ServiceModel
 {
@@ -182,6 +184,29 @@ namespace BLToolkit.ServiceModel
 
 					return LinqServiceSerializer.Serialize(ret);
 				}
+			}
+		}
+
+		public int ExecuteBatch(string[] queryData)
+		{
+			var queries = queryData.Select(LinqServiceSerializer.Deserialize).ToArray();
+
+			foreach (var query in queries)
+				ValidateQuery(query);
+
+			using (var db = CreateDataContext())
+			{
+				if (db is DbManager) ((DbManager)db).BeginTransaction();
+
+				foreach (var query in queries)
+				{
+					var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
+					db.ExecuteNonQuery(obj);
+				}
+
+				if (db is DbManager) ((DbManager)db).CommitTransaction();
+
+				return queryData.Length;
 			}
 		}
 
