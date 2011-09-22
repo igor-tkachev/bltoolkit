@@ -40,7 +40,7 @@ namespace BLToolkit.ServiceModel
 			return Channel.EndExecuteReader(async);
 		}
 
-		public int ExecuteBatch(string[] queryData)
+		public int ExecuteBatch(string queryData)
 		{
 			var async = Channel.BeginExecuteBatch(queryData, null, null);
 			return Channel.EndExecuteBatch(async);
@@ -134,9 +134,9 @@ namespace BLToolkit.ServiceModel
 				return (string)EndInvoke("ExecuteReader", new object[0], result);
 			}
 
-			public IAsyncResult BeginExecuteBatch(string[] queryData, AsyncCallback callback, object asyncState)
+			public IAsyncResult BeginExecuteBatch(string queryData, AsyncCallback callback, object asyncState)
 			{
-				return BeginInvoke("ExecuteExecuteBatch", new object[] { queryData }, callback, asyncState);
+				return BeginInvoke("ExecuteBatch", new object[] { queryData }, callback, asyncState);
 			}
 
 			public int EndExecuteBatch(IAsyncResult result)

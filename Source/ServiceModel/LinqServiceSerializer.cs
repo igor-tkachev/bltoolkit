@@ -36,6 +36,16 @@ namespace BLToolkit.ServiceModel
 			return new ResultDeserializer().DeserializeResult(str);
 		}
 
+		public static string Serialize(string[] data)
+		{
+			return new StringArraySerializer().Serialize(data);
+		}
+
+		public static string[] DeserializeStringArray(string str)
+		{
+			return new StringArrayDeserializer().Deserialize(str);
+		}
+
 		#region SerializerBase
 
 		const int _paramIndex     = -1;
@@ -1557,6 +1567,42 @@ namespace BLToolkit.ServiceModel
 				}
 
 				return result;
+			}
+		}
+
+		#endregion
+
+		#region StringArraySerializer
+
+		class StringArraySerializer : SerializerBase
+		{
+			public string Serialize(string[] data)
+			{
+				Append(data.Length);
+
+				foreach (var str in data)
+					Append(str);
+
+				return Builder.ToString();
+			}
+		}
+
+		#endregion
+
+		#region StringArrayDeserializer
+
+		class StringArrayDeserializer : DeserializerBase
+		{
+			public string[] Deserialize(string str)
+			{
+				Str = str;
+
+				var data = new string[ReadInt()];
+
+				for (var i = 0; i < data.Length; i++)
+					data[i] = ReadString();
+
+				return data;
 			}
 		}
 

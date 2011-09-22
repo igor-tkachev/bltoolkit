@@ -7,9 +7,9 @@ namespace BLToolkit.ServiceModel
 	public interface ILinqSoapService
 	{
 		[OperationContract] string GetSqlProviderType();
-		[OperationContract] int    ExecuteNonQuery(string   queryData);
-		[OperationContract] object ExecuteScalar  (string   queryData);
-		[OperationContract] string ExecuteReader  (string   queryData);
-		[OperationContract] int    ExecuteBatch   (string[] queryData);
+		[OperationContract] int    ExecuteNonQuery(string queryData);
+		[OperationContract] object ExecuteScalar  (string queryData);
+		[OperationContract] string ExecuteReader  (string queryData);
+		[OperationContract] int    ExecuteBatch   (string queryData);
 	}
 }

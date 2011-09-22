@@ -187,9 +187,10 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		public int ExecuteBatch(string[] queryData)
+		public int ExecuteBatch(string queryData)
 		{
-			var queries = queryData.Select(LinqServiceSerializer.Deserialize).ToArray();
+			var data    = LinqServiceSerializer.DeserializeStringArray(queryData);
+			var queries = data.Select(LinqServiceSerializer.Deserialize).ToArray();
 
 			foreach (var query in queries)
 				ValidateQuery(query);
