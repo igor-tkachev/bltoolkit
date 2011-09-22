@@ -291,7 +291,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupByUnion()
+		public void GroupByUnion1()
 		{
 			ForEachProvider(db => AreEqual(
 				from t in (
@@ -320,6 +320,81 @@ namespace Data.Linq
 				where tt.Sum != 0
 				select tt
 			));
+		}
+
+		[Test]
+		public void GroupByUnion2()
+		{
+			ForEachProvider(db =>
+			{
+				var qe1 =
+					from t in (
+						from c in Child
+						where c.ParentID < 4
+						select new { c.ParentID, ID = c.ChildID })
+					.Concat(
+						from g in GrandChild
+						where g.ParentID >= 4
+						select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+					group t by t.ParentID into gr
+					select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+					where tt.Sum != 0
+					select tt;
+
+				var qe2 =
+					from p in Parent
+						join tt in qe1 on p.ParentID equals tt.ParentID into gr
+						from tt in gr.DefaultIfEmpty()
+					select new { p.ParentID };
+
+				var qr1 =
+					from t in (
+						from c in db.Child
+						where c.ParentID < 4
+						select new { c.ParentID, ID = c.ChildID })
+					.Concat(
+						from g in db.GrandChild
+						where g.ParentID >= 4
+						select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+					group t by t.ParentID into gr
+					select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+					where tt.Sum != 0
+					select tt;
+
+				var qr2 =
+					from p in db.Parent
+						join tt in qr1 on p.ParentID equals tt.ParentID into gr
+						from tt in gr.DefaultIfEmpty()
+					select new { p.ParentID };
+
+				AreEqual(qe2, qr2);
+			});
+		}
+
+		[Test]
+		public void GroupByLeftJoin1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join tt in
+						from t in Child
+						group t by t.ParentID into gr
+						select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ChildID) } into tt
+						where tt.Sum != 0
+						select tt
+					on p.ParentID equals tt.ParentID into gr
+					from tt in gr.DefaultIfEmpty()
+				select p.ParentID,
+				from p in db.Parent
+					join tt in
+						from t in db.Child
+						group t by t.ParentID into gr
+						select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ChildID) } into tt
+						where tt.Sum != 0
+						select tt
+					on p.ParentID equals tt.ParentID into gr
+					from tt in gr.DefaultIfEmpty()
+				select p.ParentID));
 		}
 	}
 
