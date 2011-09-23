@@ -16,6 +16,8 @@ namespace BLToolkit.ServiceModel
 
 	static class LinqServiceSerializer
 	{
+		#region Public Members
+
 		public static string Serialize(SqlQuery query, SqlParameter[] parameters)
 		{
 			return new QuerySerializer().Serialize(query, parameters);
@@ -45,6 +47,8 @@ namespace BLToolkit.ServiceModel
 		{
 			return new StringArrayDeserializer().Deserialize(str);
 		}
+
+		#endregion
 
 		#region SerializerBase
 
@@ -1582,6 +1586,8 @@ namespace BLToolkit.ServiceModel
 
 				foreach (var str in data)
 					Append(str);
+
+				Builder.AppendLine();
 
 				return Builder.ToString();
 			}

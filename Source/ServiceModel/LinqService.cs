@@ -187,6 +187,7 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		[WebMethod]
 		public int ExecuteBatch(string queryData)
 		{
 			var data    = LinqServiceSerializer.DeserializeStringArray(queryData);
