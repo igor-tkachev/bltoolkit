@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Windows.Controls;
+using BLToolkit.Data.Linq;
 
 namespace Client
 {
@@ -42,6 +43,9 @@ namespace Client
 						Dispatcher.BeginInvoke(() => OutputText.Text = text);
 
 						dm.BeginBatch();
+
+						dm.Categories.Delete(c => c.CategoryID == -99999);
+						dm.Categories.Delete(c => c.CategoryID == -999999);
 
 						dm.CommitBatch();
 					}

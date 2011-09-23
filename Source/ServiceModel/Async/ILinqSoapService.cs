@@ -29,7 +29,7 @@ namespace BLToolkit.ServiceModel.Async
 		string EndExecuteReader(IAsyncResult result);
 
 		[OperationContract(AsyncPattern = true, Action = "http://tempuri.org/ExecuteBatch", ReplyAction = "http://tempuri.org/ExecuteBatchResponse")]
-		IAsyncResult BeginExecuteBatch(string queryData, AsyncCallback callback, object asyncState);
+		IAsyncResult BeginExecuteBatch(string[] queryData, AsyncCallback callback, object asyncState);
 
 		int EndExecuteBatch(IAsyncResult result);
 	}
