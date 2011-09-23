@@ -87,6 +87,41 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
+		List<string> _queryBatch;
+		int          _batchCounter;
+
+		public void BeginBatch()
+		{
+			_batchCounter++;
+
+			if (_queryBatch == null)
+				_queryBatch = new List<string>();
+		}
+
+		public void CommitBatch()
+		{
+			if (_batchCounter == 0)
+				throw new InvalidOperationException();
+
+			_batchCounter--;
+
+			if (_batchCounter == 0)
+			{
+				var client = GetClient();
+
+				try
+				{
+					var data = LinqServiceSerializer.Serialize(_queryBatch.ToArray());
+					client.ExecuteBatch(data);
+				}
+				finally
+				{
+					((IDisposable)client).Dispose();
+					_queryBatch = null;
+				}
+			}
+		}
+
 		class QueryContext
 		{
 			public IQueryContext Query;
@@ -100,18 +135,26 @@ namespace BLToolkit.ServiceModel
 
 		int IDataContext.ExecuteNonQuery(object query)
 		{
-			var ctx = (QueryContext)query;
+			var ctx  = (QueryContext)query;
+			var q    = ctx.Query.SqlQuery.ProcessParameters();
+			var data = LinqServiceSerializer.Serialize(q, q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters());
+
+			if (_batchCounter > 0)
+			{
+				_queryBatch.Add(data);
+				return -1;
+			}
 
 			ctx.Client = GetClient();
 
-			var q = ctx.Query.SqlQuery.ProcessParameters();
-
-			return ctx.Client.ExecuteNonQuery(
-				LinqServiceSerializer.Serialize(q, q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()));
+			return ctx.Client.ExecuteNonQuery(data);
 		}
 
 		object IDataContext.ExecuteScalar(object query)
 		{
+			if (_batchCounter > 0)
+				throw new LinqException("Incompatible batch operation.");
+
 			var ctx = (QueryContext)query;
 
 			ctx.Client = GetClient();
@@ -124,6 +167,9 @@ namespace BLToolkit.ServiceModel
 
 		IDataReader IDataContext.ExecuteReader(object query)
 		{
+			if (_batchCounter > 0)
+				throw new LinqException("Incompatible batch operation.");
+
 			var ctx = (QueryContext)query;
 
 			ctx.Client = GetClient();
@@ -140,7 +186,8 @@ namespace BLToolkit.ServiceModel
 		{
 			var ctx = (QueryContext)query;
 
-			((IDisposable)ctx.Client).Dispose();
+			if (ctx.Client != null)
+				((IDisposable)ctx.Client).Dispose();
 		}
 
 		string IDataContext.GetSqlText(object query)

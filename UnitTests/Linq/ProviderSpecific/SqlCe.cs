@@ -7,7 +7,7 @@ using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq.ProviderSpecific
 {
-	[TestFixture]
+	//[TestFixture]
 	public class SqlCe : TestBase
 	{
 		//[Test]

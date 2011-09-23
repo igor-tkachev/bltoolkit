@@ -40,6 +40,12 @@ namespace BLToolkit.ServiceModel
 			return Channel.EndExecuteReader(async);
 		}
 
+		public int ExecuteBatch(string queryData)
+		{
+			var async = Channel.BeginExecuteBatch(queryData, null, null);
+			return Channel.EndExecuteBatch(async);
+		}
+
 		#endregion
 
 		#region IDisposable Members
@@ -126,6 +132,16 @@ namespace BLToolkit.ServiceModel
 			public string EndExecuteReader(IAsyncResult result)
 			{
 				return (string)EndInvoke("ExecuteReader", new object[0], result);
+			}
+
+			public IAsyncResult BeginExecuteBatch(string queryData, AsyncCallback callback, object asyncState)
+			{
+				return BeginInvoke("ExecuteBatch", new object[] { queryData }, callback, asyncState);
+			}
+
+			public int EndExecuteBatch(IAsyncResult result)
+			{
+				return (int)EndInvoke("ExecuteBatch", new object[0], result);
 			}
 		}
 

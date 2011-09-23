@@ -40,6 +40,10 @@ namespace Client
 						var text = string.Join("\n", q.ToArray());
 
 						Dispatcher.BeginInvoke(() => OutputText.Text = text);
+
+						dm.BeginBatch();
+
+						dm.CommitBatch();
 					}
 				}
 				catch (Exception ex)
