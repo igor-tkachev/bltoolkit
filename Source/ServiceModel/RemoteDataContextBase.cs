@@ -111,8 +111,7 @@ namespace BLToolkit.ServiceModel
 
 				try
 				{
-					var data = LinqServiceSerializer.Serialize(_queryBatch.ToArray());
-					client.ExecuteBatch(data);
+					client.ExecuteBatch(_queryBatch.ToArray());
 				}
 				finally
 				{

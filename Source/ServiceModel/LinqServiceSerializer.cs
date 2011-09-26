@@ -75,8 +75,13 @@ namespace BLToolkit.ServiceModel
 						case TypeCode.Decimal  : Append(((decimal) value).ToString(CultureInfo.InvariantCulture)); break;
 						case TypeCode.Double   : Append(((double)  value).ToString(CultureInfo.InvariantCulture)); break;
 						case TypeCode.Single   : Append(((float)   value).ToString(CultureInfo.InvariantCulture)); break;
-						case TypeCode.DateTime : Append(((DateTime)value).ToString(CultureInfo.InvariantCulture)); break;
-						default                : Append(Common.Convert.ToString(value)); break;
+						case TypeCode.DateTime : Append(((DateTime)value).ToString("o"));                          break;
+						default                :
+							if (type == typeof(DateTimeOffset))
+								Append(((DateTimeOffset)value).ToString("o"));
+							else
+								Append(Common.Convert.ToString(value));
+							break;
 					}
 				}
 				else
@@ -382,8 +387,11 @@ namespace BLToolkit.ServiceModel
 					case TypeCode.Decimal  : return decimal. Parse(str, CultureInfo.InvariantCulture);
 					case TypeCode.Double   : return double.  Parse(str, CultureInfo.InvariantCulture);
 					case TypeCode.Single   : return float.   Parse(str, CultureInfo.InvariantCulture);
-					case TypeCode.DateTime : return DateTime.Parse(str, CultureInfo.InvariantCulture);
+					case TypeCode.DateTime : return DateTime.ParseExact(str, "o", CultureInfo.InvariantCulture);
 				}
+
+				if (type == typeof(DateTimeOffset))
+					return DateTimeOffset.ParseExact(str, "o", CultureInfo.InvariantCulture);
 
 				return Common.Convert.ChangeTypeFromString(str, type);
 			}

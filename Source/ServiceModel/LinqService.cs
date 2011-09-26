@@ -188,10 +188,9 @@ namespace BLToolkit.ServiceModel
 		}
 
 		[WebMethod]
-		public int ExecuteBatch(string queryData)
+		public int ExecuteBatch(string[] queryData)
 		{
-			var data    = LinqServiceSerializer.DeserializeStringArray(queryData);
-			var queries = data.Select(LinqServiceSerializer.Deserialize).ToArray();
+			var queries = queryData.Select(LinqServiceSerializer.Deserialize).ToList();
 
 			foreach (var query in queries)
 				ValidateQuery(query);
