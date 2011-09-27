@@ -961,13 +961,25 @@ namespace BLToolkit.Reflection
 				return true;
 			}
 
+			if (parent.IsGenericTypeDefinition)
+				for (var t = child; t != typeof(object) && t != null; t = t.BaseType)
+					if (t.IsGenericType && t.GetGenericTypeDefinition() == parent)
+						return true;
+
 			if (parent.IsInterface)
 			{
 				var interfaces = child.GetInterfaces();
 
 				foreach (var t in interfaces)
-					if (t == parent)
+				{
+					if (parent.IsGenericTypeDefinition)
+					{
+						if (t.IsGenericType && t.GetGenericTypeDefinition() == parent)
+							return true;
+					}
+					else if (t == parent)
 						return true;
+				}
 			}
 
 			return false;
@@ -1317,12 +1329,36 @@ namespace BLToolkit.Reflection
 			var baseTypeName = baseType.Name;
 
 			for (var t = type; t != typeof(object) && t != null; t = t.BaseType)
-				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
-					return t.GetGenericArguments();
+			{
+				if (t.IsGenericType)
+				{
+					if (baseType.IsGenericTypeDefinition)
+					{
+						if (t.GetGenericTypeDefinition() == baseType)
+							return t.GetGenericArguments();
+					}
+					else if (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName)
+					{
+						return t.GetGenericArguments();
+					}
+				}
+			}
 
 			foreach (var t in type.GetInterfaces())
-				if (t.IsGenericType && (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName))
-					return t.GetGenericArguments();
+			{
+				if (t.IsGenericType)
+				{
+					if (baseType.IsGenericTypeDefinition)
+					{
+						if (t.GetGenericTypeDefinition() == baseType)
+							return t.GetGenericArguments();
+					}
+					else if (baseTypeName == null || t.Name.Split('`')[0] == baseTypeName)
+					{
+						return t.GetGenericArguments();
+					}
+				}
+			}
 
 			return null;
 		}

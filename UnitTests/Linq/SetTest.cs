@@ -192,6 +192,14 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Any12()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in             Parent    where             Child.   Any(c => p.ParentID == c.ParentID && c.ChildID > 3) select p,
+				from p in db.GetTable<Parent>() where db.GetTable<Child>().Any(c => p.ParentID == c.ParentID && c.ChildID > 3) select p));
+		}
+
+		[Test]
 		public void All1()
 		{
 			ForEachProvider(db => AreEqual(

@@ -107,6 +107,72 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsKey1()
+		{
+			var arr = new Dictionary<int,int>
+			{
+				{ 1, 1 },
+				{ 2, 2 },
+			};
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.Keys.Contains(p.ParentID) select p,
+				from p in db.Parent where arr.Keys.Contains(p.ParentID) select p));
+		}
+
+		[Test]
+		public void ContainsKey2()
+		{
+			var arr = new Dictionary<int,int>
+			{
+				{ 1, 1 },
+				{ 2, 2 },
+			};
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.ContainsKey(p.ParentID) select p,
+				from p in db.Parent where arr.ContainsKey(p.ParentID) select p));
+		}
+
+		[Test]
+		public void ContainsValue1()
+		{
+			var arr = new Dictionary<int,int>
+			{
+				{ 1, 1 },
+				{ 2, 2 },
+			};
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.Values.Contains(p.ParentID) select p,
+				from p in db.Parent where arr.Values.Contains(p.ParentID) select p));
+		}
+
+		[Test]
+		public void ContainsValue2()
+		{
+			var arr = new Dictionary<int,int>
+			{
+				{ 1, 1 },
+				{ 2, 2 },
+			};
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.ContainsValue(p.ParentID) select p,
+				from p in db.Parent where arr.ContainsValue(p.ParentID) select p));
+		}
+
+		[Test]
+		public void ContainsHashSet1()
+		{
+			var arr = new HashSet<int> { 1, 2 };
+
+			ForEachProvider(db => AreEqual(
+				from p in    Parent where arr.Contains(p.ParentID) select p,
+				from p in db.Parent where arr.Contains(p.ParentID) select p));
+		}
+
+		[Test]
 		public void EmptyContains1()
 		{
 			var expected =

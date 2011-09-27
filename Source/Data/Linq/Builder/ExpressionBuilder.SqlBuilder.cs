@@ -1156,23 +1156,42 @@ namespace BLToolkit.Data.Linq.Builder
 								case "EndsWith"   : predicate = ConvertLikePredicate(context, e, "%", "");  break;
 							}
 						}
-						else if (e.Method.DeclaringType == typeof(Enumerable))
+						else if (e.Method.Name == "Contains")
 						{
-							switch (e.Method.Name)
+							if (e.Method.DeclaringType == typeof(Enumerable) ||
+							    TypeHelper.IsSameOrParent(typeof(IList), e.Method.DeclaringType) ||
+							    TypeHelper.IsSameOrParent(typeof(ICollection<>), e.Method.DeclaringType))
 							{
-								case "Contains" :
-									predicate = ConvertInPredicate(context, e);
-									break;
+								predicate = ConvertInPredicate(context, e);
 							}
 						}
-						else if (TypeHelper.IsSameOrParent(typeof(IList), e.Method.DeclaringType))
+						else if (e.Method.Name == "ContainsValue" && TypeHelper.IsSameOrParent(typeof(Dictionary<,>), e.Method.DeclaringType))
 						{
-							switch (e.Method.Name)
-							{
-								case "Contains" :
-									predicate = ConvertInPredicate(context, e);
-									break;
-							}
+							var args = TypeHelper.GetGenericArguments(e.Method.DeclaringType, typeof(Dictionary<,>));
+							var minf = EnumerableMethods
+								.First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
+								.MakeGenericMethod(args[1]);
+
+							var expr = Expression.Call(
+								minf, 
+								Expression.PropertyOrField(e.Object, "Values"),
+								e.Arguments[0]);
+
+							predicate = ConvertInPredicate(context, expr);
+						}
+						else if (e.Method.Name == "ContainsKey" && TypeHelper.IsSameOrParent(typeof(IDictionary<,>), e.Method.DeclaringType))
+						{
+							var args = TypeHelper.GetGenericArguments(e.Method.DeclaringType, typeof(IDictionary<,>));
+							var minf = EnumerableMethods
+								.First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
+								.MakeGenericMethod(args[0]);
+
+							var expr = Expression.Call(
+								minf, 
+								Expression.PropertyOrField(e.Object, "Keys"),
+								e.Arguments[0]);
+
+							predicate = ConvertInPredicate(context, expr);
 						}
 #if !SILVERLIGHT
 						else if (e.Method == ReflectionHelper.Functions.String.Like11) predicate = ConvertLikePredicate(context, e);
