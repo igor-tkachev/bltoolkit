@@ -50,6 +50,28 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CompiledTest4()
+		{
+			var query = CompiledQuery.Compile((ITestDataContext db, int[] n) => db.GetTable<Child>().Where(c => n.Contains(c.ParentID)));
+
+			ForEachProvider(db =>
+				Assert.AreEqual(3, query(db, new[] { 1, 2 }).ToList().Count()));
+		}
+
+		[Test]
+		public void CompiledTest5()
+		{
+			var query = CompiledQuery.Compile((ITestDataContext db, object[] ps) => 
+				db.Parent.Where(p => p.ParentID == (int)ps[0] && p.Value1 == (int?)ps[1]));
+
+			ForEachProvider(db =>
+			{
+				Assert.AreEqual(1, query(db, new object[] { 1, 1    }).ToList().Count());
+				Assert.AreEqual(1, query(db, new object[] { 2, null }).ToList().Count());
+			});
+		}
+
+		[Test]
 		public void CompiledTable1()
 		{
 			var query = CompiledQuery.Compile((ITestDataContext db) => db.Child);

@@ -22,7 +22,7 @@ namespace BLToolkit.ServiceModel
 
 		IDataServiceMetadataProvider _metadata;
 
-		public DataService() 
+		public DataService()
 		{
 			_metadata = GetMetadataProvider(typeof(T)); 
 		}
