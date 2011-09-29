@@ -2,7 +2,8 @@
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -344,6 +345,23 @@ namespace Data.Linq
 					(from p1 in db.Parent select new { ParentID = p1.ParentID,    p = p1,           ch = (Child)null }).Union(
 					(from p2 in db.Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() }))
 					.Select(p => new { p.ParentID, p.p, p.ch })));
+		}
+
+		[TableName("Parent")]
+		public abstract class AbstractParent
+		{
+			public abstract int  ParentID { get; set; }
+			public abstract int? Value1   { get; set; }
+		}
+
+		[Test]
+		public void UnionAbstract1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.GetTable<AbstractParent>().Union(db.GetTable<AbstractParent>());
+				Assert.AreEqual(Parent.Count(), q.Count());
+			});
 		}
 	}
 }
