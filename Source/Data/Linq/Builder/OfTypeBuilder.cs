@@ -31,6 +31,11 @@ namespace BLToolkit.Data.Linq.Builder
 						sequence.SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 				}
 			}
+			else
+			{
+				//throw new NotImplementedException();
+				//var f = sequence.IsExpression(null, 0, RequestFor.Table);
+			}
 
 			return sequence;
 		}

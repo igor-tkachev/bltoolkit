@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
@@ -192,7 +193,7 @@ namespace Data.Linq
 			{
 				inheritance.ForEachProvider(db => inheritance.AreEqual(
 					inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
-					         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
+							 db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
 			}
 		}
 
@@ -471,6 +472,49 @@ namespace Data.Linq
 					db.GetTable<Test17Person>().OfType<Test17John>().ToList();
 					Assert.False(db.LastQuery.ToLowerInvariant().Contains("lastname"), "Why select LastName field??");
 				}
+			});
+		}
+
+		[TableName("Person")]
+		[InheritanceMapping(Code = Gender.Male,   Type = typeof(Test18Male))]
+		[InheritanceMapping(Code = Gender.Female, Type = typeof(Test18Female))]
+		public class Test18Person
+		{
+			[PrimaryKey, NonUpdatable(IsIdentity = true, OnInsert = true, OnUpdate = true), SequenceName("PERSONID")]
+			public int PersonID { get; set; }
+			[MapField(IsInheritanceDiscriminator = true)]
+			public Gender Gender { get; set; }
+		}
+
+		public class Test18Male : Test18Person
+		{
+			public string FirstName { get; set; }
+		}
+
+		public class Test18Female : Test18Person
+		{
+			public string FirstName { get; set; }
+			public string LastName { get; set; }
+		}
+
+		[Test]
+		public void Test18()
+		{
+			ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray(), context =>
+			{
+				var db = context as TestDbManager;
+				if (db == null) return;
+
+				var ids = Enumerable.Range(0, 10).ToList();
+
+				var persons = (
+					from person1 in db.GetTable<Test18Person>()
+					where ids.Contains(person1.PersonID)
+					join person2 in db.GetTable<Test18Person>() on person1.PersonID equals person2.PersonID
+					select person1
+				).Distinct();
+
+				var list = persons.OfType<Test18Female>().ToList();
 			});
 		}
 	}
