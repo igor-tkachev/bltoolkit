@@ -1,11 +1,13 @@
 ﻿using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class ElementOperationTest : TestBase
 	{
@@ -111,7 +113,7 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefault1()
 		{
-			ForEachProvider(//new[] { ProviderName.Informix, ProviderName.Sybase },
+			ForEachProvider(
 				db => AreEqual(
 					from p in    Parent select    Child.FirstOrDefault(),
 					from p in db.Parent select db.Child.FirstOrDefault()));
@@ -120,7 +122,7 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefault2()
 		{
-			ForEachProvider(//new[] { ProviderName.Informix, ProviderName.Sybase },
+			ForEachProvider(
 				db => AreEqual(
 					from p in    Parent select p.Children.FirstOrDefault(),
 					from p in db.Parent select p.Children.FirstOrDefault()));
@@ -129,7 +131,7 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefault3()
 		{
-			ForEachProvider(//new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+			ForEachProvider(
 				db => AreEqual(
 					from p in    Parent select p.Children.Select(c => c.ParentID).Distinct().FirstOrDefault(),
 					from p in db.Parent select p.Children.Select(c => c.ParentID).Distinct().FirstOrDefault()));
@@ -138,7 +140,7 @@ namespace Data.Linq
 		[Test]
 		public void NestedSingleOrDefault1()
 		{
-			ForEachProvider(//new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+			ForEachProvider(
 				db => AreEqual(
 					from p in    Parent select p.Children.Select(c => c.ParentID).Distinct().SingleOrDefault(),
 					from p in db.Parent select p.Children.Select(c => c.ParentID).Distinct().SingleOrDefault()));

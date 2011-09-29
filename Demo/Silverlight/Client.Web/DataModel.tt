@@ -1,0 +1,36 @@
+﻿<#@ template debug="True" hostspecific="True" #>
+<#@ output extension=".generated.cs" #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"   #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLT4Toolkit.ttinclude" #>
+<#@ include file="$(SolutionDir)\Source\Templates\MSSQL.ttinclude"       #>
+<#
+	ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
+
+	BaseDataContextClass = "ServiceModelDataContext";
+	
+	Usings.Add("BLToolkit.ServiceModel");
+	Usings.Add("System.ServiceModel");
+
+	GenerateModel();
+#>
+
+namespace Client
+{
+	public partial class DataModel
+	{
+		public DataModel() : base(
+			new BasicHttpBinding(BasicHttpSecurityMode.None)
+			{
+				MaxReceivedMessageSize = 10000000,
+				MaxBufferSize          = 10000000,
+				CloseTimeout           = new TimeSpan(00, 01, 00),
+				OpenTimeout            = new TimeSpan(00, 01, 00),
+				ReceiveTimeout         = new TimeSpan(00, 10, 00),
+				SendTimeout            = new TimeSpan(00, 10, 00),
+			},
+			new EndpointAddress("http://localhost:31020/TestLinqService.svc"))
+			// base("TestLinqWebServiceSoap")
+		{
+		}
+	}
+}

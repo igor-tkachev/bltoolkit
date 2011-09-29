@@ -117,6 +117,7 @@
     </Reference>
     <Reference Include="System.Data.Linq">
     </Reference>
+    <Reference Include="System.Data.Services" />
     <Reference Include="System.Design">
     </Reference>
     <Reference Include="System.Drawing">
@@ -514,6 +515,7 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
+    <Compile Include="ServiceModel\DataService.cs" />
     <Compile Include="ServiceModel\ILinqSoapService.cs" />
     <Compile Include="ServiceModel\LinqSoapServiceClient.cs" />
     <Compile Include="ServiceModel\ILinqService.cs" />

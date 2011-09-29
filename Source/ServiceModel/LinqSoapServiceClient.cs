@@ -37,7 +37,7 @@ namespace BLToolkit.ServiceModel
 			return Channel.ExecuteReader(queryData);
 		}
 
-		public int ExecuteBatch(string[] queryData)
+		public int ExecuteBatch(string queryData)
 		{
 			return Channel.ExecuteBatch(queryData);
 		}

@@ -970,7 +970,7 @@ namespace Update
 		}
 
 		[Test]
-		public void InsertOrUpdate2()
+		public void InsertOrReplace1()
 		{
 			ForEachProvider(db =>
 			{
@@ -987,9 +987,7 @@ namespace Update
 
 					for (var i = 0; i < 3; i++)
 					{
-						var s = "*" + i;
-
-						db.InsertOrUpdate(new Patient
+						db.InsertOrReplace(new Patient
 						{
 							PersonID  = id,
 							Diagnosis = ("abc" + i).ToString(),

@@ -80,19 +80,16 @@ namespace BLToolkit.Data.Linq.Builder
 			public override Expression BuildExpression(Expression expression, int level)
 			{
 				if (expression == null)
-					////if (Sequence.IsExpression(expression, level, RequestFor.Object))
-					////	return Sequence.BuildExpression(expression, level);
-					////else
-					//	return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 				{
 					if (Builder.SqlProvider.IsApplyJoinSupported)
 					{
 						var join = SqlQuery.OuterApply(SqlQuery);
+
 						Parent.SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
 
 						var expr = Sequence.BuildExpression(expression, level);
+						var idx  = SqlQuery.Select.Add(new SqlValue(1));
 
-						var idx = SqlQuery.Select.Add(new SqlValue(1));
 						idx = ConvertToParentIndex(idx, this);
 
 						var defaultValue = _methodCall.Method.Name.EndsWith("OrDefault") ?
