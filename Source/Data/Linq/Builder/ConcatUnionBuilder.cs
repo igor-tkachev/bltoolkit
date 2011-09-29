@@ -179,8 +179,10 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 						else
 						{
+							var ta = TypeAccessor.GetAccessor(type);
+
 							expr = Expression.MemberInit(
-								Expression.New(type),
+								Expression.New(ta.Type),
 								_members
 									.Select(m => Expression.Bind(m.Value.MemberExpression.Member, m.Value.MemberExpression))
 									.Cast<MemberBinding>());

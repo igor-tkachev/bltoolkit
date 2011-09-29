@@ -359,8 +359,8 @@ namespace Data.Linq
 		{
 			ForEachProvider(db =>
 			{
-				var q = db.GetTable<AbstractParent>().Union(db.GetTable<AbstractParent>());
-				Assert.AreEqual(Parent.Count(), q.Count());
+				var list = db.GetTable<AbstractParent>().Union(db.GetTable<AbstractParent>()).ToList();
+				Assert.AreEqual(Parent.Count(), list.Count);
 			});
 		}
 	}
