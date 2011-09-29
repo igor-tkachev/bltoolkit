@@ -194,15 +194,27 @@ namespace BLToolkit.Data.Linq
 
 		#region InsertOrUpdate
 
-		public static int InsertOrUpdate<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+		[Obsolete("Use 'InsertOrReplace' instead.")]
+		public static int InsertOrUpdate<T>(this IDataContextInfo dataContextInfo, T obj)
 		{
-			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return Query<T>.InsertOrUpdate(dataContextInfo, obj);
+			return InsertOrReplace(dataContextInfo, obj);
 		}
 
+		public static int InsertOrReplace<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			return Query<T>.InsertOrReplace(dataContextInfo, obj);
+		}
+
+		[Obsolete("Use 'InsertOrReplace' instead.")]
 		public static int InsertOrUpdate<T>(this IDataContext dataContext, T obj)
 		{
-			return Query<T>.InsertOrUpdate(DataContextInfo.Create(dataContext), obj);
+			return InsertOrReplace(dataContext, obj);
+		}
+
+		public static int InsertOrReplace<T>(this IDataContext dataContext, T obj)
+		{
+			return Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
 		}
 
 		#endregion

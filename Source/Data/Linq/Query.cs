@@ -587,9 +587,15 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region InsertOrUpdate
+		#region InsertOrReplace
 
+		[Obsolete("Use 'InsertOrReplace' instead.")]
 		public static int InsertOrUpdate(IDataContextInfo dataContextInfo, T obj)
+		{
+			return InsertOrReplace(dataContextInfo, obj);
+		}
+
+		public static int InsertOrReplace(IDataContextInfo dataContextInfo, T obj)
 		{
 			if (Equals(default(T), obj))
 				return 0;
