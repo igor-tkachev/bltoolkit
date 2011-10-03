@@ -95,12 +95,7 @@ namespace BLToolkit.DataAccess
 
 		public MemberMapper[] GetMemberMappers()
 		{
-			var members = new MemberMapper[Parameters.Count];
-
-			for (var i = 0; i < Parameters.Count; i++)
-				members[i] = Parameters[i].MemberMapper;
-
-			return members;
+			return ObjectMapper.ToArray();
 		}
 	}
 }
