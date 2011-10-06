@@ -33,8 +33,9 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 			else
 			{
-				//throw new NotImplementedException();
-				//var f = sequence.IsExpression(null, 0, RequestFor.Table);
+				var f = sequence.IsExpression(null, 0, RequestFor.Table);
+
+				//sequence.get
 			}
 
 			return sequence;

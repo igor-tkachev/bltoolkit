@@ -74,8 +74,9 @@ namespace Data.Linq
 		[Test]
 		public void Test8()
 		{
-			var expected = ParentInheritance.OfType<ParentInheritance1>();
-			ForEachProvider(db => AreEqual(expected, db.ParentInheritance.OfType<ParentInheritance1>()));
+			ForEachProvider(db => AreEqual(
+				   ParentInheritance.OfType<ParentInheritance1>(),
+				db.ParentInheritance.OfType<ParentInheritance1>()));
 		}
 
 		[Test]
@@ -481,9 +482,9 @@ namespace Data.Linq
 		public class Test18Person
 		{
 			[PrimaryKey, NonUpdatable(IsIdentity = true, OnInsert = true, OnUpdate = true), SequenceName("PERSONID")]
-			public int PersonID { get; set; }
+			public int    PersonID { get; set; }
 			[MapField(IsInheritanceDiscriminator = true)]
-			public Gender Gender { get; set; }
+			public Gender Gender   { get; set; }
 		}
 
 		public class Test18Male : Test18Person
@@ -494,27 +495,22 @@ namespace Data.Linq
 		public class Test18Female : Test18Person
 		{
 			public string FirstName { get; set; }
-			public string LastName { get; set; }
+			public string LastName  { get; set; }
 		}
 
 		[Test]
 		public void Test18()
 		{
-			ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray(), context =>
+			ForEachProvider(db =>
 			{
-				var db = context as TestDbManager;
-				if (db == null) return;
-
 				var ids = Enumerable.Range(0, 10).ToList();
+				var q   =
+					from p1 in db.GetTable<Test18Person>()
+					where ids.Contains(p1.PersonID)
+					join p2 in db.GetTable<Test18Person>() on p1.PersonID equals p2.PersonID
+					select p1;
 
-				var persons = (
-					from person1 in db.GetTable<Test18Person>()
-					where ids.Contains(person1.PersonID)
-					join person2 in db.GetTable<Test18Person>() on person1.PersonID equals person2.PersonID
-					select person1
-				).Distinct();
-
-				var list = persons.OfType<Test18Female>().ToList();
+				var list = q.Distinct().OfType<Test18Female>().ToList();
 			});
 		}
 	}

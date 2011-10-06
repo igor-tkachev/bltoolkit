@@ -230,9 +230,6 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null, mm);
 								SqlTable.Fields.Add(field);
-
-								if (mm.MapMemberInfo.IsInheritanceDiscriminator)
-									discriminator = mm.MapMemberInfo.MemberName;
 							}
 
 							if (mm.MapMemberInfo.IsInheritanceDiscriminator)

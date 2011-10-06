@@ -1846,11 +1846,14 @@ namespace BLToolkit.Data.Linq.Builder
 			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
 				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
-			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
+			var mapping = table.InheritanceMapping
+				.Select((m,i) => new { m, i })
+				.Where ( m => m.m.Type == typeOperand && !m.m.IsDefault)
+				.ToList();
 
 			switch (mapping.Count)
 			{
-				case 0:
+				case 0 :
 					{
 						var cond = new SqlQuery.SearchCondition();
 
@@ -1869,7 +1872,7 @@ namespace BLToolkit.Data.Linq.Builder
 						return cond;
 					}
 
-				case 1:
+				case 1 :
 					return Convert(table,
 						new SqlQuery.Predicate.ExprExpr(
 							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
