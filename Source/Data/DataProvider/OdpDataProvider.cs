@@ -243,7 +243,16 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToCommandParameter:
+                case ConvertType.NameToQueryParameter:
+                    var qname = (string)value;
+                    if (qname.Length > 30)
+                    {
+                        qname = qname.Substring(0, 30);
+                        return SqlProvider.Convert(qname, convertType);
+                    }
+			        return SqlProvider.Convert(value, convertType);
+
+			    case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
