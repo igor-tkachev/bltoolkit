@@ -20,9 +20,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			return new ScalarSelectContext
+			return new ScalarSelectContext(builder)
 			{
-				Builder     = builder,
 				Parent     = buildInfo.Parent,
 				Expression = buildInfo.Expression,
 				SqlQuery   = buildInfo.SqlQuery
@@ -34,8 +33,20 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
+		public bool IsSequence(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return true;
+		}
+
 		class ScalarSelectContext : IBuildContext
 		{
+			public ScalarSelectContext(ExpressionBuilder builder)
+			{
+				Builder = builder;
+
+				builder.Contexts.Add(this);
+			}
+
 #if DEBUG
 			public string _sqlQueryText { get { return SqlQuery == null ? "" : SqlQuery.SqlText; } }
 #endif

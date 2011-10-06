@@ -5,7 +5,6 @@ namespace BLToolkit.Data.Linq
 {
 	using Data.Sql.SqlProvider;
 	using Mapping;
-	using Reflection;
 
 	public interface IDataContext : IMappingSchemaProvider, IDisposable
 	{

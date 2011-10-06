@@ -146,18 +146,18 @@ namespace BLToolkit.Mapping
 
 		public virtual void InitNullValues()
 		{
-			_defaultSByteNullValue          = (SByte)         GetNullValue(typeof(SByte));
-			_defaultInt16NullValue          = (Int16)         GetNullValue(typeof(Int16));
-			_defaultInt32NullValue          = (Int32)         GetNullValue(typeof(Int32));
-			_defaultInt64NullValue          = (Int64)         GetNullValue(typeof(Int64));
-			_defaultByteNullValue           = (Byte)          GetNullValue(typeof(Byte));
-			_defaultUInt16NullValue         = (UInt16)        GetNullValue(typeof(UInt16));
-			_defaultUInt32NullValue         = (UInt32)        GetNullValue(typeof(UInt32));
-			_defaultUInt64NullValue         = (UInt64)        GetNullValue(typeof(UInt64));
-			_defaultCharNullValue           = (Char)          GetNullValue(typeof(Char));
-			_defaultSingleNullValue         = (Single)        GetNullValue(typeof(Single));
-			_defaultDoubleNullValue         = (Double)        GetNullValue(typeof(Double));
-			_defaultBooleanNullValue        = (Boolean)       GetNullValue(typeof(Boolean));
+			DefaultSByteNullValue          = (SByte)         GetNullValue(typeof(SByte));
+			DefaultInt16NullValue          = (Int16)         GetNullValue(typeof(Int16));
+			DefaultInt32NullValue          = (Int32)         GetNullValue(typeof(Int32));
+			DefaultInt64NullValue          = (Int64)         GetNullValue(typeof(Int64));
+			DefaultByteNullValue           = (Byte)          GetNullValue(typeof(Byte));
+			DefaultUInt16NullValue         = (UInt16)        GetNullValue(typeof(UInt16));
+			DefaultUInt32NullValue         = (UInt32)        GetNullValue(typeof(UInt32));
+			DefaultUInt64NullValue         = (UInt64)        GetNullValue(typeof(UInt64));
+			DefaultCharNullValue           = (Char)          GetNullValue(typeof(Char));
+			DefaultSingleNullValue         = (Single)        GetNullValue(typeof(Single));
+			DefaultDoubleNullValue         = (Double)        GetNullValue(typeof(Double));
+			DefaultBooleanNullValue        = (Boolean)       GetNullValue(typeof(Boolean));
 
 			DefaultStringNullValue         = (String)        GetNullValue(typeof(String));
 			DefaultDateTimeNullValue       = (DateTime)      GetNullValue(typeof(DateTime));
@@ -174,191 +174,131 @@ namespace BLToolkit.Mapping
 
 		#region Primitive Types
 
-		private SByte _defaultSByteNullValue;
 		[CLSCompliant(false)]
-		public  SByte  DefaultSByteNullValue
-		{
-			get { return _defaultSByteNullValue;  }
-			set { _defaultSByteNullValue = value; }
-		}
+		public sbyte DefaultSByteNullValue { get; set; }
 
 		[CLSCompliant(false)]
 		public virtual SByte ConvertToSByte(object value)
 		{
 			return
 				value is SByte ? (SByte)value :
-				value == null ? _defaultSByteNullValue :
+				value == null ? DefaultSByteNullValue :
 					Convert.ToSByte(value);
 		}
 
-		private Int16 _defaultInt16NullValue;
-		public  Int16  DefaultInt16NullValue
-		{
-			get { return _defaultInt16NullValue;  }
-			set { _defaultInt16NullValue = value; }
-		}
+		public short DefaultInt16NullValue { get; set; }
 
 		public virtual Int16 ConvertToInt16(object value)
 		{
 			return
 				value is Int16? (Int16)value:
-				value == null || value is DBNull? _defaultInt16NullValue:
+				value == null || value is DBNull? DefaultInt16NullValue:
 					Convert.ToInt16(value);
 		}
 
-		private Int32 _defaultInt32NullValue;
-		public  Int32  DefaultInt32NullValue
-		{
-			get { return _defaultInt32NullValue;  }
-			set { _defaultInt32NullValue = value; }
-		}
+		public int DefaultInt32NullValue { get; set; }
 
 		public virtual Int32 ConvertToInt32(object value)
 		{
 			return
 				value is Int32? (Int32)value:
-				value == null || value is DBNull? _defaultInt32NullValue:
+				value == null || value is DBNull? DefaultInt32NullValue:
 					Convert.ToInt32(value);
 		}
 
-		private Int64 _defaultInt64NullValue;
-		public  Int64  DefaultInt64NullValue
-		{
-			get { return _defaultInt64NullValue;  }
-			set { _defaultInt64NullValue = value; }
-		}
+		public long DefaultInt64NullValue { get; set; }
 
 		public virtual Int64 ConvertToInt64(object value)
 		{
 			return
 				value is Int64? (Int64)value:
-				value == null || value is DBNull? _defaultInt64NullValue:
+				value == null || value is DBNull? DefaultInt64NullValue:
 					Convert.ToInt64(value);
 		}
 
-		private Byte _defaultByteNullValue;
-		public  Byte  DefaultByteNullValue
-		{
-			get { return _defaultByteNullValue;  }
-			set { _defaultByteNullValue = value; }
-		}
+		public byte DefaultByteNullValue { get; set; }
 
 		public virtual Byte ConvertToByte(object value)
 		{
 			return
 				value is Byte? (Byte)value:
-				value == null || value is DBNull? _defaultByteNullValue:
+				value == null || value is DBNull? DefaultByteNullValue:
 					Convert.ToByte(value);
 		}
 
-		private UInt16 _defaultUInt16NullValue;
 		[CLSCompliant(false)]
-		public  UInt16  DefaultUInt16NullValue
-		{
-			get { return _defaultUInt16NullValue;  }
-			set { _defaultUInt16NullValue = value; }
-		}
+		public ushort DefaultUInt16NullValue { get; set; }
 
 		[CLSCompliant(false)]
 		public virtual UInt16 ConvertToUInt16(object value)
 		{
 			return
 				value is UInt16? (UInt16)value:
-				value == null || value is DBNull? _defaultUInt16NullValue:
+				value == null || value is DBNull? DefaultUInt16NullValue:
 					Convert.ToUInt16(value);
 		}
 
-		private UInt32 _defaultUInt32NullValue;
 		[CLSCompliant(false)]
-		public  UInt32  DefaultUInt32NullValue
-		{
-			get { return _defaultUInt32NullValue;  }
-			set { _defaultUInt32NullValue = value; }
-		}
+		public uint DefaultUInt32NullValue { get; set; }
 
 		[CLSCompliant(false)]
 		public virtual UInt32 ConvertToUInt32(object value)
 		{
 			return
 				value is UInt32? (UInt32)value:
-				value == null || value is DBNull? _defaultUInt32NullValue:
+				value == null || value is DBNull? DefaultUInt32NullValue:
 					Convert.ToUInt32(value);
 		}
 
-		private UInt64 _defaultUInt64NullValue;
 		[CLSCompliant(false)]
-		public  UInt64  DefaultUInt64NullValue
-		{
-			get { return _defaultUInt64NullValue;  }
-			set { _defaultUInt64NullValue = value; }
-		}
+		public ulong DefaultUInt64NullValue { get; set; }
 
 		[CLSCompliant(false)]
 		public virtual UInt64 ConvertToUInt64(object value)
 		{
 			return
 				value is UInt64? (UInt64)value:
-				value == null || value is DBNull? _defaultUInt64NullValue:
+				value == null || value is DBNull? DefaultUInt64NullValue:
 					Convert.ToUInt64(value);
 		}
 
-		private Char _defaultCharNullValue;
-		public  Char  DefaultCharNullValue
-		{
-			get { return _defaultCharNullValue;  }
-			set { _defaultCharNullValue = value; }
-		}
+		public char DefaultCharNullValue { get; set; }
 
 		public virtual Char ConvertToChar(object value)
 		{
 			return
 				value is Char? (Char)value:
-				value == null || value is DBNull? _defaultCharNullValue:
+				value == null || value is DBNull? DefaultCharNullValue:
 					Convert.ToChar(value);
 		}
 
-		private Single _defaultSingleNullValue;
-		public  Single  DefaultSingleNullValue
-		{
-			get { return _defaultSingleNullValue;  }
-			set { _defaultSingleNullValue = value; }
-		}
+		public float DefaultSingleNullValue { get; set; }
 
 		public virtual Single ConvertToSingle(object value)
 		{
 			return
 				value is Single? (Single)value:
-				value == null || value is DBNull? _defaultSingleNullValue:
+				value == null || value is DBNull? DefaultSingleNullValue:
 					Convert.ToSingle(value);
 		}
 
-		private Double _defaultDoubleNullValue;
-		public  Double  DefaultDoubleNullValue
-		{
-			get { return _defaultDoubleNullValue;  }
-			set { _defaultDoubleNullValue = value; }
-		}
+		public double DefaultDoubleNullValue { get; set; }
 
 		public virtual Double ConvertToDouble(object value)
 		{
 			return
 				value is Double? (Double)value:
-				value == null || value is DBNull? _defaultDoubleNullValue:
+				value == null || value is DBNull? DefaultDoubleNullValue:
 					Convert.ToDouble(value);
 		}
 
-		private Boolean _defaultBooleanNullValue;
-		public  Boolean  DefaultBooleanNullValue
-		{
-			get { return _defaultBooleanNullValue;  }
-			set { _defaultBooleanNullValue = value; }
-		}
+		public bool DefaultBooleanNullValue { get; set; }
 
 		public virtual Boolean ConvertToBoolean(object value)
 		{
 			return
 				value is Boolean? (Boolean)value:
-				value == null || value is DBNull? _defaultBooleanNullValue:
+				value == null || value is DBNull? DefaultBooleanNullValue:
 					Convert.ToBoolean(value);
 		}
 
@@ -770,21 +710,21 @@ namespace BLToolkit.Mapping
 		{
 			switch (Type.GetTypeCode(typeof(T)))
 			{
-				case TypeCode.Boolean:  return (T)(object)_defaultBooleanNullValue;
-				case TypeCode.Byte:     return (T)(object)_defaultByteNullValue;
-				case TypeCode.Char:     return (T)(object)_defaultCharNullValue;
+				case TypeCode.Boolean:  return (T)(object)DefaultBooleanNullValue;
+				case TypeCode.Byte:     return (T)(object)DefaultByteNullValue;
+				case TypeCode.Char:     return (T)(object)DefaultCharNullValue;
 				case TypeCode.DateTime: return (T)(object)DefaultDateTimeNullValue;
 				case TypeCode.Decimal:  return (T)(object)DefaultDecimalNullValue;
-				case TypeCode.Double:   return (T)(object)_defaultDoubleNullValue;
-				case TypeCode.Int16:    return (T)(object)_defaultInt16NullValue;
-				case TypeCode.Int32:    return (T)(object)_defaultInt32NullValue;
-				case TypeCode.Int64:    return (T)(object)_defaultInt64NullValue;
-				case TypeCode.SByte:    return (T)(object)_defaultSByteNullValue;
-				case TypeCode.Single:   return (T)(object)_defaultSingleNullValue;
+				case TypeCode.Double:   return (T)(object)DefaultDoubleNullValue;
+				case TypeCode.Int16:    return (T)(object)DefaultInt16NullValue;
+				case TypeCode.Int32:    return (T)(object)DefaultInt32NullValue;
+				case TypeCode.Int64:    return (T)(object)DefaultInt64NullValue;
+				case TypeCode.SByte:    return (T)(object)DefaultSByteNullValue;
+				case TypeCode.Single:   return (T)(object)DefaultSingleNullValue;
 				case TypeCode.String:   return (T)(object)DefaultStringNullValue;
-				case TypeCode.UInt16:   return (T)(object)_defaultUInt16NullValue;
-				case TypeCode.UInt32:   return (T)(object)_defaultUInt32NullValue;
-				case TypeCode.UInt64:   return (T)(object)_defaultUInt64NullValue;
+				case TypeCode.UInt16:   return (T)(object)DefaultUInt16NullValue;
+				case TypeCode.UInt32:   return (T)(object)DefaultUInt32NullValue;
+				case TypeCode.UInt64:   return (T)(object)DefaultUInt64NullValue;
 			}
 
 			if (typeof(Guid)           == typeof(T)) return (T)(object)DefaultGuidNullValue;
@@ -3705,6 +3645,15 @@ namespace BLToolkit.Mapping
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy)
 		{
 			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy }.GetMapper();
+		}
+
+		#endregion
+
+		#region ConvertParameterValue
+
+		public virtual object ConvertParameterValue(object value, Type systemType)
+		{
+			return value;
 		}
 
 		#endregion

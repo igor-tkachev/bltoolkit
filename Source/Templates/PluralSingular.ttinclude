@@ -150,6 +150,7 @@ public sealed class Plurals
 		//to test that this class only initializes once uncomment next line
 		//System.Web.HttpContext.Current.Response.Write("initializing singleton <br>");
 		// irregular plurals
+		_dictionary.Add("access",       "accesses");
 		_dictionary.Add("afterlife",    "afterlives");
 		_dictionary.Add("alga",         "algae");
 		_dictionary.Add("alumna",       "alumnae");

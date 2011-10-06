@@ -1,4 +1,6 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
+
 using BLToolkit.DataAccess;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;

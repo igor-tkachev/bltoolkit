@@ -111,6 +111,11 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
+		public bool IsSequence(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return true;
+		}
+
 		#endregion
 
 		#region TableContext
@@ -126,7 +131,8 @@ namespace BLToolkit.Data.Linq.Builder
 			public ExpressionBuilder Builder    { get; private set; }
 			public Expression        Expression { get; private set; }
 			public SqlQuery          SqlQuery   { get; set; }
-			public IBuildContext     Parent     { get; set; }
+
+			public virtual IBuildContext Parent { get; set; }
 
 			protected Type         OriginalType;
 			public    Type         ObjectType;
@@ -206,6 +212,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			protected void Init()
 			{
+				Builder.Contexts.Add(this);
+
 				InheritanceMapping = ObjectMapper.InheritanceMapping;
 
 				if (InheritanceMapping.Count > 0)
@@ -267,7 +275,70 @@ namespace BLToolkit.Data.Linq.Builder
 				public IValueMapper[] ValueMappers;
 			}
 
-			static object MapDataReaderToObject(IDataContext dataContext, IDataReader dataReader, MappingData data)
+			static object MapDataReaderToObject1(IDataReader dataReader, MappingData data)
+			{
+				var source     = data.MappingSchema.CreateDataReaderMapper(dataReader);
+				var destObject = data.ObjectMapper.CreateInstance();
+
+				if (data.ValueMappers == null)
+				{
+					var mappers = new IValueMapper[data.Index.Length];
+
+					for (var i = 0; i < data.Index.Length; i++)
+					{
+						var n = data.Index[i];
+
+						if (n < 0)
+							continue;
+
+						if (!data.ObjectMapper.SupportsTypedValues(i))
+						{
+							mappers[i] = data.MappingSchema.DefaultValueMapper;
+							continue;
+						}
+
+						var sourceType = source.           GetFieldType(n) ?? typeof(object);
+						var destType   = data.ObjectMapper.GetFieldType(i) ?? typeof(object);
+
+						IValueMapper t;
+
+						if (sourceType == destType)
+						{
+							lock (data.MappingSchema.SameTypeMappers)
+								if (!data.MappingSchema.SameTypeMappers.TryGetValue(sourceType, out t))
+									data.MappingSchema.SameTypeMappers.Add(sourceType, t = data.MappingSchema.GetValueMapper(sourceType, destType));
+						}
+						else
+						{
+							var key = new KeyValuePair<Type,Type>(sourceType, destType);
+
+							lock (data.MappingSchema.DifferentTypeMappers)
+								if (!data.MappingSchema.DifferentTypeMappers.TryGetValue(key, out t))
+									data.MappingSchema.DifferentTypeMappers.Add(key, t = data.MappingSchema.GetValueMapper(sourceType, destType));
+						}
+
+						mappers[i] = t;
+					}
+
+					data.ValueMappers = mappers;
+				}
+
+				var dest = data.ObjectMapper;
+				var idx  = data.Index;
+				var ms   = data.ValueMappers;
+
+				for (var i = 0; i < idx.Length; i++)
+				{
+					var n = idx[i];
+
+					if (n >= 0)
+						ms[i].Map(source, dataReader, n, dest, destObject, i);
+				}
+
+				return destObject;
+			}
+
+			static object MapDataReaderToObject2(IDataReader dataReader, MappingData data)
 			{
 				var source = data.MappingSchema.CreateDataReaderMapper(dataReader);
 
@@ -279,7 +350,7 @@ namespace BLToolkit.Data.Linq.Builder
 					ObjectMapper  = data.ObjectMapper
 				};
 
-				var destObject = /*dataContext.CreateInstance(initContext) ??*/ data.ObjectMapper.CreateInstance(initContext);
+				var destObject = data.ObjectMapper.CreateInstance(initContext);
 
 				if (initContext.StopMapping)
 					return destObject;
@@ -355,76 +426,13 @@ namespace BLToolkit.Data.Linq.Builder
 				return destObject;
 			}
 
-			static object MapDataReaderToObject(IDataReader dataReader, MappingData data)
-			{
-				var source     = data.MappingSchema.CreateDataReaderMapper(dataReader);
-				var destObject = data.ObjectMapper.CreateInstance();
-
-				if (data.ValueMappers == null)
-				{
-					var mappers = new IValueMapper[data.Index.Length];
-
-					for (var i = 0; i < data.Index.Length; i++)
-					{
-						var n = data.Index[i];
-
-						if (n < 0)
-							continue;
-
-						if (!data.ObjectMapper.SupportsTypedValues(i))
-						{
-							mappers[i] = data.MappingSchema.DefaultValueMapper;
-							continue;
-						}
-
-						var sourceType = source.           GetFieldType(n) ?? typeof(object);
-						var destType   = data.ObjectMapper.GetFieldType(i) ?? typeof(object);
-
-						IValueMapper t;
-
-						if (sourceType == destType)
-						{
-							lock (data.MappingSchema.SameTypeMappers)
-								if (!data.MappingSchema.SameTypeMappers.TryGetValue(sourceType, out t))
-									data.MappingSchema.SameTypeMappers.Add(sourceType, t = data.MappingSchema.GetValueMapper(sourceType, destType));
-						}
-						else
-						{
-							var key = new KeyValuePair<Type,Type>(sourceType, destType);
-
-							lock (data.MappingSchema.DifferentTypeMappers)
-								if (!data.MappingSchema.DifferentTypeMappers.TryGetValue(key, out t))
-									data.MappingSchema.DifferentTypeMappers.Add(key, t = data.MappingSchema.GetValueMapper(sourceType, destType));
-						}
-
-						mappers[i] = t;
-					}
-
-					data.ValueMappers = mappers;
-				}
-
-				var dest = data.ObjectMapper;
-				var idx  = data.Index;
-				var ms   = data.ValueMappers;
-
-				for (var i = 0; i < idx.Length; i++)
-				{
-					var n = idx[i];
-
-					if (n >= 0)
-						ms[i].Map(source, dataReader, n, dest, destObject, i);
-				}
-
-				return destObject;
-			}
-
 			static object DefaultInheritanceMappingException(object value, Type type)
 			{
 				throw new LinqException("Inheritance mapping is not defined for discriminator value '{0}' in the '{1}' hierarchy.", value, type);
 			}
 
-			static readonly MethodInfo _mapperMethod1 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(      null, null));
-			static readonly MethodInfo _mapperMethod2 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject(null, null, null));
+			static readonly MethodInfo _mapperMethod1 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject1(null, null));
+			static readonly MethodInfo _mapperMethod2 = ReflectionHelper.Expressor<object>.MethodExpressor(_ => MapDataReaderToObject2(null, null));
 
 #if FW4 || SILVERLIGHT
 			ParameterExpression _variable;
@@ -453,7 +461,6 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					expr = Expression.Convert(
 						Expression.Call(null, _mapperMethod2,
-							ExpressionBuilder.DataContextParam,
 							ExpressionBuilder.DataReaderParam,
 							Expression.Constant(data)),
 						objectType);
@@ -507,13 +514,32 @@ namespace BLToolkit.Data.Linq.Builder
 				return q.ToArray();
 			}
 
-			Expression BuildQuery()
+			Expression BuildQuery(Type tableType)
 			{
-				var info  = ConvertToIndex(null, 0, ConvertFlags.All);
+				SqlInfo[] info;
+
+				if (ObjectType == tableType)
+				{
+					info = ConvertToIndex(null, 0, ConvertFlags.All);
+				}
+				else
+				{
+					info = ConvertToSql(null, 0, ConvertFlags.All);
+
+					var table = new SqlTable(Builder.MappingSchema, tableType);
+					var q     =
+						from fld1 in table.Fields.Values.Select((f,i) => new { f, i })
+						join fld2 in info on fld1.f.Name equals ((SqlField)fld2.Sql).Name
+						orderby fld1.i
+						select GetIndex(fld2);
+
+					info = q.ToArray();
+				}
+
 				var index = info.Select(idx => ConvertToParentIndex(idx.Index, null)).ToArray();
 
-				if (InheritanceMapping.Count == 0)
-					return BuildTableExpression(!Builder.IsBlockDisable, ObjectType, index);
+				if (ObjectType != tableType || InheritanceMapping.Count == 0)
+					return BuildTableExpression(!Builder.IsBlockDisable, tableType, index);
 
 				Expression expr;
 
@@ -529,16 +555,18 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var exceptionMethod = ReflectionHelper.Expressor<object>.MethodExpressor(_ => DefaultInheritanceMappingException(null, null));
 					var dindex          =
-						from f in SqlTable.Fields.Values
-						where f.Name == InheritanceDiscriminators[0]
-						select _indexes[f].Index;
+						(
+							from f in SqlTable.Fields.Values
+							where f.Name == InheritanceDiscriminators[0]
+							select ConvertToParentIndex(_indexes[f].Index, null)
+						).First();
 
 					expr = Expression.Convert(
 						Expression.Call(null, exceptionMethod,
 							Expression.Call(
 								ExpressionBuilder.DataReaderParam,
 								ReflectionHelper.DataReader.GetValue,
-								Expression.Constant(dindex.First())),
+								Expression.Constant(dindex)),
 							Expression.Constant(ObjectType)),
 						ObjectType);
 				}
@@ -549,7 +577,7 @@ namespace BLToolkit.Data.Linq.Builder
 						(
 							from f in SqlTable.Fields.Values
 							where f.Name == InheritanceDiscriminators[mapping.i]
-							select _indexes[f].Index
+							select ConvertToParentIndex(_indexes[f].Index, null)
 						).First();
 
 					Expression testExpr;
@@ -563,22 +591,11 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 					else
 					{
-						MethodInfo mi;
 						var codeType = mapping.m.Code.GetType();
 
-						if (!ReflectionHelper.MapSchema.Converters.TryGetValue(codeType, out mi))
-							throw new LinqException("Cannot find converter for the '{0}' type.", codeType.FullName);
-
-						testExpr =
-							Expression.Equal(
-								Expression.Constant(mapping.m.Code),
-								Expression.Call(
-									Expression.Constant(Builder.MappingSchema),
-									mi,
-									Expression.Call(
-										ExpressionBuilder.DataReaderParam,
-										ReflectionHelper.DataReader.GetValue,
-										Expression.Constant(dindex))));
+						testExpr = Expression.Equal(
+							Expression.Constant(mapping.m.Code),
+							Builder.BuildSql(codeType, dindex));
 					}
 
 					expr = Expression.Condition(
@@ -592,7 +609,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				var expr = BuildQuery(typeof(T));
 
 				if (expr.Type != typeof(T))
 					expr = Expression.Convert(expr, typeof(T));
@@ -620,8 +637,25 @@ namespace BLToolkit.Data.Linq.Builder
 				//
 				var table = FindTable(expression, level, false);
 
+				if (table == null)
+				{
+					if (expression is MemberExpression)
+					{
+						var memberExpression = (MemberExpression)expression;
+
+						if (ObjectMapper != null &&
+							ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
+						{
+							throw new LinqException("Member '{0}.{1}' is not a table column.",
+								memberExpression.Member.Name, memberExpression.Member.Name);
+						}
+					}
+
+					throw new InvalidOperationException();
+				}
+
 				if (table.Field == null)
-					return table.Table.BuildQuery();
+					return table.Table.BuildQuery(table.Table.OriginalType);
 
 				// Build field.
 				//
@@ -847,7 +881,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var predicate = Expression.Lambda<Func<T,bool>>(expr, param);
 
-					return Linq.Extensions.GetTable<T>(null).Where(predicate).Expression;
+					return association.Builder.DataContextInfo.DataContext.GetTable<T>().Where(predicate).Expression;
 				}
 			}
 
@@ -889,24 +923,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 							}
-
-							/*
-							var table       = new TableContext(
-								Builder,
-								new BuildInfo(Parent is SelectManyBuilder.SelectManyContext ? this : Parent, Expression, buildInfo.SqlQuery),
-								association.Table.ObjectType);
-
-							foreach (var cond in ((AssociatedTableContext)association.Table).ParentAssociationJoin.Condition.Conditions)
-							{
-								var predicate = (SqlQuery.Predicate.ExprExpr)cond.Predicate;
-								buildInfo.SqlQuery.Where
-									.Expr(predicate.Expr1)
-									.Equal
-									.Field(table.SqlTable.Fields[((SqlField)predicate.Expr2).Name]);
-							}
-
-							return table;
-							*/
 						}
 						else
 						{
@@ -1006,7 +1022,27 @@ namespace BLToolkit.Data.Linq.Builder
 							foreach (var field in SqlTable.Fields.Values)
 							{
 								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
+								{
+									if (field.MemberMapper is MemberMapper.ComplexMapper &&
+										field.MemberMapper.MemberName.IndexOf('.') > 0)
+									{
+										var name = memberExpression.Member.Name;
+										var me   = memberExpression;
+
+										if (!(me.Expression is MemberExpression))
+											return null;
+
+										while (me.Expression is MemberExpression)
+										{
+											me   = (MemberExpression)me.Expression;
+											name = me.Member.Name + '.' + name;
+										}
+
+										return SqlTable.Fields.Values.FirstOrDefault(f => f.MemberMapper.MemberName == name);
+									}
+
 									return field;
+								}
 
 								if (InheritanceMapping.Count > 0 && field.Name == memberExpression.Member.Name)
 									foreach (var mapping in InheritanceMapping)
@@ -1030,7 +1066,8 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			[JetBrains.Annotations.NotNull]
-			readonly Dictionary<MemberInfo,AssociatedTableContext> _associations = new Dictionary<MemberInfo,AssociatedTableContext>();
+			readonly Dictionary<MemberInfo,AssociatedTableContext> _associations =
+				new Dictionary<MemberInfo,AssociatedTableContext>(new MemberInfoComparer());
 
 			class TableLevel
 			{
@@ -1116,9 +1153,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 		class AssociatedTableContext : TableContext
 		{
-			private         TableContext         _parentAssociation;
+			       readonly TableContext         _parentAssociation;
 			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
-			public          bool                  IsList;
+			public readonly bool                  IsList;
+
+			public override IBuildContext Parent
+			{
+				get { return _parentAssociation.Parent; }
+				set { }
+			}
 
 			public AssociatedTableContext(ExpressionBuilder builder, TableContext parent, Association association)
 				: base(builder, parent.SqlQuery)
@@ -1149,7 +1192,6 @@ namespace BLToolkit.Data.Linq.Builder
 				for (var i = 0; i < association.ThisKey.Length; i++)
 				{
 					SqlField field1;
-
 					SqlField field2;
 
 					if (!parent.SqlTable.Fields.TryGetValue(association.ThisKey[i], out field1))
@@ -1166,63 +1208,37 @@ namespace BLToolkit.Data.Linq.Builder
 
 			protected override Expression ProcessExpression(Expression expression)
 			{
-				if (ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
-				    ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply)
+				var isLeft = false;
+
+				for (
+					var association = this;
+					isLeft == false && association != null;
+					association = association._parentAssociation as AssociatedTableContext)
+				{
+					isLeft =
+						association.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||
+						association.ParentAssociationJoin.JoinType == SqlQuery.JoinType.OuterApply;
+				}
+
+				if (isLeft)
 				{
 					Expression cond = null;
 
-					var checkNullOnly = true; //SqlQuery.Select.IsDistinct || SqlQuery.GroupBy.Items.Count > 0;
+					var keys = ConvertToIndex(null, 0, ConvertFlags.Key);
 
-					if (checkNullOnly)
+					foreach (var key in keys)
 					{
-						checkNullOnly = false;
+						var index2  = ConvertToParentIndex(key.Index, null);
 
-						foreach (var c in ParentAssociationJoin.Condition.Conditions)
-						{
-							var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-							var f  = (SqlField)ee.Expr1;
-
-							checkNullOnly = SqlQuery.Select.Columns.FirstOrDefault(col => col.Expression == f) == null;
-
-							if (checkNullOnly)
-								break;
-						}
-					}
-
-					foreach (var c in ParentAssociationJoin.Condition.Conditions)
-					{
-						var ee = (SqlQuery.Predicate.ExprExpr)c.Predicate;
-
-						var field2  = (SqlField)ee.Expr2;
-						var info2   = GetIndex(new SqlInfo { Sql = field2, Member = field2.MemberMapper.MemberAccessor.MemberInfo });
-						var index2  = ConvertToParentIndex(info2.Index, null);
-
-						Expression e;
-
-						if (checkNullOnly)
-						{
-							e = Expression.Call(
-								ExpressionBuilder.DataReaderParam,
-								ReflectionHelper.DataReader.IsDBNull,
-								Expression.Constant(index2));
-						}
-						else
-						{
-							var field1  = (SqlField)ee.Expr1;
-							var info1   = GetIndex(new SqlInfo { Sql = field1, Member = field1.MemberMapper.MemberAccessor.MemberInfo });
-							var index1  = ConvertToParentIndex(info1.Index, null);
-
-							e =
-								Expression.AndAlso(
-									Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index2)),
-									Expression.Not(
-										Expression.Call(ExpressionBuilder.DataReaderParam, ReflectionHelper.DataReader.IsDBNull, Expression.Constant(index1))));
-						}
+						Expression e = Expression.Call(
+							ExpressionBuilder.DataReaderParam,
+							ReflectionHelper.DataReader.IsDBNull,
+							Expression.Constant(index2));
 
 						cond = cond == null ? e : Expression.AndAlso(cond, e);
 					}
 
-					expression = Expression.Condition(cond, Expression.Constant(null, ObjectType), expression);
+					expression = Expression.Condition(cond, Expression.Constant(null, expression.Type), expression);
 				}
 
 				return expression;

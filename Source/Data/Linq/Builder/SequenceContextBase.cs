@@ -17,6 +17,8 @@ namespace BLToolkit.Data.Linq.Builder
 			SqlQuery = sequence.SqlQuery;
 
 			Sequence.Parent = this;
+
+			Builder.Contexts.Add(this);
 		}
 
 #if DEBUG

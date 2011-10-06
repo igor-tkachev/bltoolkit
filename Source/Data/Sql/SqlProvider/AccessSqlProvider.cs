@@ -11,7 +11,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -19,11 +19,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.AppendLine("SELECT @@IDENTITY");
 		}
 
-		//public override bool IsSkipSupported          { get { return SqlQuery.Select.TakeValue != null; } }
-		public override bool IsSkipSupported          { get { return false; } }
-		public override bool TakeAcceptsParameter     { get { return false; } }
-		public override bool IsCountSubQuerySupported { get { return false; } }
-		public override bool IsNestedJoinSupported    { get { return false; } }
+		//public override bool IsSkipSupported           { get { return SqlQuery.Select.TakeValue != null; } }
+		public override bool IsSkipSupported           { get { return false; } }
+		public override bool TakeAcceptsParameter      { get { return false; } }
+		public override bool IsCountSubQuerySupported  { get { return false; } }
+		public override bool IsNestedJoinSupported     { get { return false; } }
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		public override bool ConvertCountSubQuery(SqlQuery subQuery)
 		{
@@ -367,7 +368,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 

@@ -78,6 +78,7 @@
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
@@ -155,6 +156,7 @@
     <Compile Include="Data\Linq\Builder\GroupByBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IBuildContext.cs" />
     <Compile Include="Data\Linq\Builder\InsertBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ISequenceBuilder.cs" />
     <Compile Include="Data\Linq\Builder\JoinBuilder.cs" />
@@ -179,6 +181,7 @@
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\WhereBuilder.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
+    <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
     <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
@@ -470,6 +473,7 @@
     <Compile Include="ServiceModel\LinqServiceQuery.cs" />
     <Compile Include="ServiceModel\LinqServiceResult.cs" />
     <Compile Include="ServiceModel\LinqServiceSerializer.cs" />
+    <Compile Include="ServiceModel\RemoteDataContextBase.cs" />
     <Compile Include="ServiceModel\ServiceModelDataContext.cs" />
     <Compile Include="ServiceModel\ServiceModelDataReader.cs" />
     <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />

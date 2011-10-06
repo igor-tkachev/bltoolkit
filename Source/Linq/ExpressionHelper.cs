@@ -16,7 +16,7 @@ namespace BLToolkit.Linq
 	using Data.Linq;
 	using Reflection;
 
-	static class ExpressionHelper
+	public static class ExpressionHelper
 	{
 		#region IsConstant
 
@@ -1834,7 +1834,7 @@ namespace BLToolkit.Linq
 							expr;
 					}
 
-				case ExpressionType.TypeIs:
+				case ExpressionType.TypeIs :
 					{
 						var exp = func(expr);
 						if (exp.Stop || exp.Expression != expr)
@@ -1848,7 +1848,7 @@ namespace BLToolkit.Linq
 
 #if FW4 || SILVERLIGHT
 
-				case ExpressionType.Block:
+				case ExpressionType.Block :
 					{
 						var exp = func(expr);
 						if (exp.Stop || exp.Expression != expr)
@@ -1899,9 +1899,17 @@ namespace BLToolkit.Linq
 
 			switch (ex.NodeType)
 			{
-				case ExpressionType.Quote          :
+				case ExpressionType.Quote          : return ((UnaryExpression)ex).Operand.Unwrap();
+				case ExpressionType.ConvertChecked :
 				case ExpressionType.Convert        :
-				case ExpressionType.ConvertChecked : return ((UnaryExpression)ex).Operand.Unwrap();
+					{
+						var ue = (UnaryExpression)ex;
+
+						if (!ue.Operand.Type.IsEnum)
+							return ue.Operand.Unwrap();
+
+						break;
+					}
 			}
 
 			return ex;
@@ -1915,15 +1923,36 @@ namespace BLToolkit.Linq
 			{
 				switch (e.NodeType)
 				{
-					case ExpressionType.Call         :
-					case ExpressionType.MemberAccess :
-					case ExpressionType.New          :
+					case ExpressionType.Call           :
+					case ExpressionType.MemberAccess   :
+					case ExpressionType.New            :
 						if (!accessors.ContainsKey(e))
 							accessors.Add(e, p);
 						break;
-					case ExpressionType.Constant     :
+
+					case ExpressionType.Constant       :
 						if (!accessors.ContainsKey(e))
 							accessors.Add(e, Expression.Property(p, ReflectionHelper.Constant.Value));
+						break;
+
+					case ExpressionType.ConvertChecked :
+					case ExpressionType.Convert        :
+						if (!accessors.ContainsKey(e))
+						{
+							var ue = (UnaryExpression)e;
+
+							switch (ue.Operand.NodeType)
+							{
+								case ExpressionType.Call           :
+								case ExpressionType.MemberAccess   :
+								case ExpressionType.New            :
+								case ExpressionType.Constant       :
+
+									accessors.Add(e, p);
+									break;
+							}
+						}
+
 						break;
 				}
 			});
@@ -1963,6 +1992,51 @@ namespace BLToolkit.Linq
 			}
 
 			return expr;
+		}
+
+		static public List<Expression> GetMembers(this Expression expr)
+		{
+			if (expr == null)
+				return new List<Expression>();
+
+			List<Expression> list;
+
+			switch (expr.NodeType)
+			{
+				case ExpressionType.Call         :
+					{
+						var e = (MethodCallExpression)expr;
+
+						if (e.Object != null)
+							list = GetMembers(e.Object);
+						else if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
+							list = GetMembers(e.Arguments[0]);
+						else
+							list = new List<Expression>();
+
+						break;
+					}
+
+				case ExpressionType.MemberAccess :
+					{
+						var e = (MemberExpression)expr;
+
+						if (e.Expression != null)
+							list = GetMembers(e.Expression.Unwrap());
+						else
+							list = new List<Expression>();
+
+						break;
+					}
+
+				default                          :
+					list = new List<Expression>();
+					break;
+			}
+
+			list.Add(expr);
+
+			return list;
 		}
 
 		static public bool IsQueryable(this MethodCallExpression method)
@@ -2036,7 +2110,7 @@ namespace BLToolkit.Linq
 		static public Expression GetLevelExpression(this Expression expression, int level)
 		{
 			var current = 0;
-			var expr = FindLevel(expression, level, ref current);
+			var expr    = FindLevel(expression, level, ref current);
 
 			if (expr == null || current != level)
 				throw new InvalidOperationException();

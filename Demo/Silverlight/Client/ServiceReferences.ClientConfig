@@ -1,6 +1,17 @@
 ﻿<configuration>
     <system.serviceModel>
-        <bindings />
-        <client />
+        <bindings>
+            <basicHttpBinding>
+                <binding name="TestLinqWebServiceSoap" maxBufferSize="2147483647"
+                    maxReceivedMessageSize="2147483647">
+                    <security mode="None" />
+                </binding>
+            </basicHttpBinding>
+        </bindings>
+        <client>
+            <endpoint address="http://localhost:31020/TestLinqWebService.asmx"
+                binding="basicHttpBinding" bindingConfiguration="TestLinqWebServiceSoap"
+                contract="BLToolkit.ServiceModel.Async.ILinqSoapService" name="TestLinqWebServiceSoap" />
+        </client>
     </system.serviceModel>
 </configuration>

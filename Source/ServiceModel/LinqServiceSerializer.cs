@@ -16,14 +16,16 @@ namespace BLToolkit.ServiceModel
 
 	static class LinqServiceSerializer
 	{
-		public static string Serialize(LinqServiceQuery query)
+		#region Public Members
+
+		public static string Serialize(SqlQuery query, SqlParameter[] parameters)
 		{
-			return new QuerySerializer().Serialize(query);
+			return new QuerySerializer().Serialize(query, parameters);
 		}
 
-		public static void Deserialize(LinqServiceQuery query, string str)
+		public static LinqServiceQuery Deserialize(string str)
 		{
-			new QueryDeserializer().Deserialize(query, str);
+			return new QueryDeserializer().Deserialize(str);
 		}
 
 		public static string Serialize(LinqServiceResult result)
@@ -31,10 +33,22 @@ namespace BLToolkit.ServiceModel
 			return new ResultSerializer().Serialize(result);
 		}
 
-		public static void Deserialize(LinqServiceResult result, string str)
+		public static LinqServiceResult DeserializeResult(string str)
 		{
-			new ResultDeserializer().Deserialize(result, str);
+			return new ResultDeserializer().DeserializeResult(str);
 		}
+
+		public static string Serialize(string[] data)
+		{
+			return new StringArraySerializer().Serialize(data);
+		}
+
+		public static string[] DeserializeStringArray(string str)
+		{
+			return new StringArrayDeserializer().Deserialize(str);
+		}
+
+		#endregion
 
 		#region SerializerBase
 
@@ -61,8 +75,13 @@ namespace BLToolkit.ServiceModel
 						case TypeCode.Decimal  : Append(((decimal) value).ToString(CultureInfo.InvariantCulture)); break;
 						case TypeCode.Double   : Append(((double)  value).ToString(CultureInfo.InvariantCulture)); break;
 						case TypeCode.Single   : Append(((float)   value).ToString(CultureInfo.InvariantCulture)); break;
-						case TypeCode.DateTime : Append(((DateTime)value).ToString(CultureInfo.InvariantCulture)); break;
-						default                : Append(Common.Convert.ToString(value)); break;
+						case TypeCode.DateTime : Append(((DateTime)value).ToString("o"));                          break;
+						default                :
+							if (type == typeof(DateTimeOffset))
+								Append(((DateTimeOffset)value).ToString("o"));
+							else
+								Append(Common.Convert.ToString(value));
+							break;
 					}
 				}
 				else
@@ -368,8 +387,11 @@ namespace BLToolkit.ServiceModel
 					case TypeCode.Decimal  : return decimal. Parse(str, CultureInfo.InvariantCulture);
 					case TypeCode.Double   : return double.  Parse(str, CultureInfo.InvariantCulture);
 					case TypeCode.Single   : return float.   Parse(str, CultureInfo.InvariantCulture);
-					case TypeCode.DateTime : return DateTime.Parse(str, CultureInfo.InvariantCulture);
+					case TypeCode.DateTime : return DateTime.ParseExact(str, "o", CultureInfo.InvariantCulture);
 				}
+
+				if (type == typeof(DateTimeOffset))
+					return DateTimeOffset.ParseExact(str, "o", CultureInfo.InvariantCulture);
 
 				return Common.Convert.ChangeTypeFromString(str, type);
 			}
@@ -414,13 +436,13 @@ namespace BLToolkit.ServiceModel
 
 		class QuerySerializer : SerializerBase
 		{
-			public string Serialize(LinqServiceQuery query)
+			public string Serialize(SqlQuery query, SqlParameter[] parameters)
 			{
 				var visitor = new QueryVisitor();
 
-				visitor.Visit(query.Query, Visit);
+				visitor.Visit(query, Visit);
 
-				foreach (var parameter in query.Parameters)
+				foreach (var parameter in parameters)
 					if (!Dic.ContainsKey(parameter))
 						Visit(parameter);
 
@@ -429,9 +451,9 @@ namespace BLToolkit.ServiceModel
 					.Append(' ')
 					.Append(_paramIndex);
 
-				Append(query.Parameters.Length);
+				Append(parameters.Length);
 
-				foreach (var parameter in query.Parameters)
+				foreach (var parameter in parameters)
 					Append(parameter);
 
 				Builder.AppendLine();
@@ -773,15 +795,35 @@ namespace BLToolkit.ServiceModel
 							Append((int)elem.QueryType);
 							Append(elem.From);
 
+							var appendInsert = false;
+							var appendUpdate = false;
+							var appendSelect = false;
+
 							switch (elem.QueryType)
 							{
-								case QueryType.Update : Append(elem.Set); break;
-								case QueryType.Insert : Append(elem.Set); 
+								case QueryType.InsertOrUpdate :
+									appendUpdate = true;
+									appendInsert = true;
+									break;
+
+								case QueryType.Update         :
+									appendUpdate = true;
+									break;
+
+								case QueryType.Insert         :
+									appendInsert = true;
 									if (elem.From.Tables.Count == 0)
 										break;
 									goto default;
-								default               : Append(elem.Select); break;
+
+								default                       :
+									appendSelect = true;
+									break;
 							}
+
+							Append(appendInsert); if (appendInsert) Append(elem.Insert);
+							Append(appendUpdate); if (appendUpdate) Append(elem.Update);
+							Append(appendSelect); if (appendSelect) Append(elem.Select);
 
 							Append(elem.Where);
 							Append(elem.GroupBy);
@@ -866,13 +908,24 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case QueryElementType.SetClause :
+					case QueryElementType.InsertClause :
 						{
-							var elem = (SqlQuery.SetClause)e;
+							var elem = (SqlQuery.InsertClause)e;
 
 							Append(elem.Items);
 							Append(elem.Into);
 							Append(elem.WithIdentity);
+
+							break;
+						}
+
+					case QueryElementType.UpdateClause :
+						{
+							var elem = (SqlQuery.UpdateClause)e;
+
+							Append(elem.Items);
+							Append(elem.Keys);
+							Append(elem.Table);
 
 							break;
 						}
@@ -943,7 +996,7 @@ namespace BLToolkit.ServiceModel
 			readonly Dictionary<int,SqlQuery> _queries = new Dictionary<int,SqlQuery>();
 			readonly List<Action>             _actions = new List<Action>();
 
-			public void Deserialize(LinqServiceQuery query, string str)
+			public LinqServiceQuery Deserialize(string str)
 			{
 				Str = str;
 
@@ -952,8 +1005,7 @@ namespace BLToolkit.ServiceModel
 				foreach (var action in _actions)
 					action();
 
-				query.Query      = _query;
-				query.Parameters = _parameters;
+				return new LinqServiceQuery { Query = _query, Parameters = _parameters };
 			}
 
 			bool Parse()
@@ -1246,9 +1298,12 @@ namespace BLToolkit.ServiceModel
 							var sid                = ReadInt();
 							var queryType          = (QueryType)ReadInt();
 							var from               = Read<SqlQuery.FromClause>();
-							var readSet            = queryType == QueryType.Update || queryType == QueryType.Insert;
-							var set                = readSet ? Read<SqlQuery.SetClause>() : null;
-							var select             = readSet && (queryType == QueryType.Update || from.Tables.Count == 0) ? new SqlQuery.SelectClause(null) : Read<SqlQuery.SelectClause>();
+							var readInsert         = ReadBool();
+							var insert             = readInsert ? Read<SqlQuery.InsertClause>() : null;
+							var readUpdate         = ReadBool();
+							var update             = readUpdate ? Read<SqlQuery.UpdateClause>() : null;
+							var readSelect         = ReadBool();
+							var select             = readSelect ? Read<SqlQuery.SelectClause>() : new SqlQuery.SelectClause(null);
 							var where              = Read<SqlQuery.WhereClause>();
 							var groupBy            = Read<SqlQuery.GroupByClause>();
 							var having             = Read<SqlQuery.WhereClause>();
@@ -1261,7 +1316,8 @@ namespace BLToolkit.ServiceModel
 							var query = _query = new SqlQuery(sid) { QueryType = queryType };
 
 							query.Init(
-								set,
+								insert,
+								update,
 								select,
 								from,
 								where,
@@ -1348,15 +1404,31 @@ namespace BLToolkit.ServiceModel
 							break;
 						}
 
-					case QueryElementType.SetClause :
+					case QueryElementType.InsertClause :
 						{
 							var items = ReadArray<SqlQuery.SetExpression>();
 							var into  = Read<SqlTable>();
 							var wid   = ReadBool();
 
-							var c = new SqlQuery.SetClause { Into = into, WithIdentity = wid };
+							var c = new SqlQuery.InsertClause { Into = into, WithIdentity = wid };
 
 							c.Items.AddRange(items);
+							obj = c;
+
+							break;
+						}
+
+					case QueryElementType.UpdateClause :
+						{
+							var items = ReadArray<SqlQuery.SetExpression>();
+							var keys  = ReadArray<SqlQuery.SetExpression>();
+							var table = Read<SqlTable>();
+							//var wid   = ReadBool();
+
+							var c = new SqlQuery.UpdateClause { Table = table };
+
+							c.Items.AddRange(items);
+							c.Keys. AddRange(keys);
 							obj = c;
 
 							break;
@@ -1455,20 +1527,23 @@ namespace BLToolkit.ServiceModel
 
 		class ResultDeserializer : DeserializerBase
 		{
-			public void Deserialize(LinqServiceResult result, string str)
+			public LinqServiceResult DeserializeResult(string str)
 			{
 				Str = str;
 
 				var fieldCount  = ReadInt();
 				var varTypesLen = ReadInt();
 
-				result.FieldCount   = fieldCount;
-				result.RowCount     = ReadInt();
-				result.VaryingTypes = new Type[varTypesLen];
-				result.QueryID      = new Guid(ReadString());
-				result.FieldNames   = new string[fieldCount];
-				result.FieldTypes   = new Type  [fieldCount];
-				result.Data         = new List<string[]>();
+				var result = new LinqServiceResult
+				{
+					FieldCount   = fieldCount,
+					RowCount     = ReadInt(),
+					VaryingTypes = new Type[varTypesLen],
+					QueryID      = new Guid(ReadString()),
+					FieldNames   = new string[fieldCount],
+					FieldTypes   = new Type  [fieldCount],
+					Data         = new List<string[]>(),
+				};
 
 				NextLine();
 
@@ -1503,7 +1578,45 @@ namespace BLToolkit.ServiceModel
 					NextLine();
 				}
 
-				return;
+				return result;
+			}
+		}
+
+		#endregion
+
+		#region StringArraySerializer
+
+		class StringArraySerializer : SerializerBase
+		{
+			public string Serialize(string[] data)
+			{
+				Append(data.Length);
+
+				foreach (var str in data)
+					Append(str);
+
+				Builder.AppendLine();
+
+				return Builder.ToString();
+			}
+		}
+
+		#endregion
+
+		#region StringArrayDeserializer
+
+		class StringArrayDeserializer : DeserializerBase
+		{
+			public string[] Deserialize(string str)
+			{
+				Str = str;
+
+				var data = new string[ReadInt()];
+
+				for (var i = 0; i < data.Length; i++)
+					data[i] = ReadString();
+
+				return data;
 			}
 		}
 

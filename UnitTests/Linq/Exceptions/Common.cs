@@ -22,10 +22,10 @@ namespace Data.Exceptions
 
 			protected override SqlQuery ProcessQuery(SqlQuery sqlQuery)
 			{
-				if (sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.Into.Name == "Parent")
+				if (sqlQuery.IsInsert && sqlQuery.Insert.Into.Name == "Parent")
 				{
 					var expr =
-						new QueryVisitor().Find(sqlQuery.Set, e =>
+						new QueryVisitor().Find(sqlQuery.Insert, e =>
 						{
 							if (e.ElementType == QueryElementType.SetExpression)
 							{

@@ -66,7 +66,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var countParent = countContext.Parent;
 
 			var outerKeyContext = new ExpressionContext(buildInfo.Parent, context,      outerKeyLambda);
-			var innerKeyContext = new ExpressionContext(buildInfo.Parent, innerContext, innerKeyLambda);
+			var innerKeyContext = new InnerKeyContext  (buildInfo.Parent, innerContext, innerKeyLambda);
 			var countKeyContext = new ExpressionContext(buildInfo.Parent, countContext, innerKeyLambda);
 
 			// Process counter.
@@ -109,9 +109,9 @@ namespace BLToolkit.Data.Linq.Builder
 				BuildJoin(builder, join, outerKeyContext, outerKeySelector, innerKeyContext, innerKeySelector, countKeyContext, counterSql);
 			}
 
-			context.     Parent = outerParent;
-			innerContext.Parent = innerParent;
-			countContext.Parent = countParent;
+			builder.ReplaceParent(outerKeyContext, outerParent);
+			builder.ReplaceParent(innerKeyContext, innerParent);
+			builder.ReplaceParent(countKeyContext, countParent);
 
 			if (isGroup)
 			{
@@ -144,9 +144,9 @@ namespace BLToolkit.Data.Linq.Builder
 		static void BuildJoin(
 			ExpressionBuilder        builder,
 			SqlQuery.FromClause.Join join,
-			ExpressionContext outerKeyContext, Expression outerKeySelector,
-			ExpressionContext innerKeyContext, Expression innerKeySelector,
-			ExpressionContext countKeyContext, SqlQuery countSql)
+			IBuildContext outerKeyContext, Expression outerKeySelector,
+			IBuildContext innerKeyContext, Expression innerKeySelector,
+			IBuildContext countKeyContext, SqlQuery countSql)
 		{
 			var predicate = builder.ConvertObjectComparison(
 				ExpressionType.Equal,
@@ -171,6 +171,32 @@ namespace BLToolkit.Data.Linq.Builder
 				countSql.Where
 					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector)).Equal
 					.Expr(builder.ConvertToSql(countKeyContext, innerKeySelector));
+		}
+
+		class InnerKeyContext : ExpressionContext
+		{
+			public InnerKeyContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
+				: base(parent, sequence, lambda)
+			{
+			}
+
+			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
+			{
+				return base
+					.ConvertToSql(expression, level, flags)
+					.Select(idx =>
+					{
+						var n = SqlQuery.Select.Add(idx.Sql);
+
+						return new SqlInfo
+						{
+							Sql    = SqlQuery.Select.Columns[n],
+							Member = idx.Member,
+							Index  = n
+						};
+					})
+					.ToArray();
+			}
 		}
 
 		internal class JoinContext : SelectContext

@@ -123,7 +123,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					ctx = Builder.GetContext(ctx, expr) ?? ctx;
 
-					Sequence.Parent = this;
+					Builder.ReplaceParent(ctx, this);
 
 					SqlQuery.Condition cond;
 

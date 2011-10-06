@@ -11,7 +11,6 @@ namespace BLToolkit.Data
 {
 	using DataProvider;
 	using Linq;
-	using Reflection;
 	using Sql;
 	using Sql.SqlProvider;
 
@@ -133,7 +132,7 @@ namespace BLToolkit.Data
 					if (sqlp.IsQueryParameter)
 					{
 						var parm = parameters.Length > i && parameters[i] == sqlp ? parameters[i] : parameters.First(p => p == sqlp);
-						parms.Add(Parameter(x, parm.Value));
+						AddParameter(parms, x, parm);
 					}
 				}
 			}
@@ -144,12 +143,27 @@ namespace BLToolkit.Data
 					if (parm.IsQueryParameter && pq.SqlParameters.Contains(parm))
 					{
 						var name = DataProvider.Convert(parm.Name, ConvertType.NameToQueryParameter).ToString();
-						parms.Add(Parameter(name, parm.Value));
+						AddParameter(parms, name, parm);
 					}
 				}
 			}
 
 			pq.Parameters = parms.ToArray();
+		}
+
+		void AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
+		{
+			var value = MappingSchema.ConvertParameterValue(parm.Value, parm.SystemType);
+
+			if (value != null)
+			{
+				parms.Add(Parameter(name, value));
+			}
+			else
+			{
+				var dataType = DataProvider.GetDbType(parm.SystemType);
+				parms.Add(dataType == DbType.Object ? Parameter(name, value) : Parameter(name, null, dataType));
+			}
 		}
 
 		#endregion
@@ -202,7 +216,7 @@ namespace BLToolkit.Data
 			{
 				var sql = pq.SqlQuery;
 
-				if (sql.QueryType == QueryType.Insert && sql.Set.WithIdentity)
+				if (sql.IsInsert && sql.Insert.WithIdentity)
 				{
 					var pname = DataProvider.Convert("IDENTITY_PARAMETER", ConvertType.NameToQueryParameter).ToString();
 					idparam = OutputParameter(pname, DbType.Decimal);

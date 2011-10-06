@@ -43,12 +43,11 @@ namespace DataAccess
 		[Test]
 		public void GetFieldListTest()
 		{
-			SqlQuery     da = new SqlQuery();
-			SqlQueryInfo info;
+			var da = new SqlQuery();
 
 			using (var db = new DbManager())
 			{
-				info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
+				var info = da.GetSqlQueryInfo(db, typeof (Person),        "SelectAll");
 
 				Console.WriteLine(info.QueryText);
 				Assert.That(info.QueryText.Contains("\t" + db.DataProvider.Convert("PersonID", ConvertType.NameToQueryField)));
@@ -131,7 +130,6 @@ namespace DataAccess
 			}
 		}
 
-
 		[TableName("DataTypeTest")]
 		class UpdateTest
 		{
@@ -152,32 +150,45 @@ namespace DataAccess
 		[TableName("Person")]
 		public class Person1
 		{
-			[Identity]                     public int    PersonID;
+			[Identity, PrimaryKey]         public int    PersonID;
 			                               public string FirstName;
 			                               public string LastName;
-			[NonUpdatable(OnUpdate=false)] public string MiddleName;
+			[NonUpdatable(OnInsert=false)] public string MiddleName;
 			                               public char   Gender;
 		}
 
 		[Test]
-		public void NonUpdatableOnInsert()
+		public void NonUpdatableOnUpdate()
 		{
 			using (var db = new DbManager())
 			{
 				db.BeginTransaction();
 
-				new SqlQuery<Person1>().Insert(db, new Person1
+				var person = new Person1
 				{
 					FirstName  = "TestOnInsert",
 					LastName   = "",
 					MiddleName = "1",
 					Gender     = 'M'
-				});
+				};
+
+				var sqlQuery = new SqlQuery<Person1>();
+
+				sqlQuery.Insert(db, person);
 
 				var p = db.GetTable<Person1>().Single(_ => _.FirstName == "TestOnInsert");
 
-				Assert.AreNotEqual("1", p.MiddleName);
+				Assert.AreEqual(person.MiddleName, p.MiddleName);
 
+				person.PersonID   = p.PersonID;
+				person.MiddleName = "should not be updated";
+
+				sqlQuery.Update(db, person);
+
+				p = db.GetTable<Person1>().Single(_ => _.FirstName == "TestOnInsert");
+
+				Assert.AreNotEqual(person.MiddleName, p.MiddleName);
+				
 				db.RollbackTransaction();
 			}
 		}
@@ -203,9 +214,9 @@ namespace DataAccess
 				var update = da.GetSqlQueryInfo<Person2>(db, "Update");
 				var insert = da.GetSqlQueryInfo<Person2>(db, "Insert");
 
-				var personID =   "\t" + db.DataProvider.Convert("PersonID",   ConvertType.NameToQueryField).ToString();
+				var personID   = "\t" + db.DataProvider.Convert("PersonID",   ConvertType.NameToQueryField).ToString();
 				var middleName = "\t" + db.DataProvider.Convert("MiddleName", ConvertType.NameToQueryField).ToString();
-				var firstName =  "\t" + db.DataProvider.Convert("FirstName",  ConvertType.NameToQueryField).ToString();
+				var firstName  = "\t" + db.DataProvider.Convert("FirstName",  ConvertType.NameToQueryField).ToString();
 
 				var personID_P   = " = " + db.DataProvider.Convert("PersonID_P",   ConvertType.NameToQueryParameter).ToString();
 				var middleName_P = " = " + db.DataProvider.Convert("MiddleName_P", ConvertType.NameToQueryParameter).ToString();

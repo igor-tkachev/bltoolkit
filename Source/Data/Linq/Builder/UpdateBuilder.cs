@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -29,7 +31,12 @@ namespace BLToolkit.Data.Linq.Builder
 				case 2 : // int Update<T>(this IQueryable<T> source, Expression<Func<T,T>> setter)
 					{
 						BuildSetter(
-							builder, buildInfo, (LambdaExpression)methodCall.Arguments[1].Unwrap(), sequence, sequence);
+							builder,
+							buildInfo,
+							(LambdaExpression)methodCall.Arguments[1].Unwrap(),
+							sequence,
+							sequence.SqlQuery.Update.Items,
+							sequence);
 						break;
 					}
 
@@ -43,7 +50,13 @@ namespace BLToolkit.Data.Linq.Builder
 							//
 							sequence = builder.BuildWhere(buildInfo.Parent, sequence, (LambdaExpression)methodCall.Arguments[1].Unwrap(), false);
 
-							BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[2].Unwrap(), sequence, sequence);
+							BuildSetter(
+								builder,
+								buildInfo,
+								(LambdaExpression)methodCall.Arguments[2].Unwrap(),
+								sequence,
+								sequence.SqlQuery.Update.Items,
+								sequence);
 						}
 						else
 						{
@@ -51,16 +64,22 @@ namespace BLToolkit.Data.Linq.Builder
 							//
 							var into = builder.BuildSequence(new BuildInfo(buildInfo, expr, new SqlQuery()));
 
-							BuildSetter(builder, buildInfo, (LambdaExpression)methodCall.Arguments[2].Unwrap(), into, sequence);
+							BuildSetter(
+								builder,
+								buildInfo,
+								(LambdaExpression)methodCall.Arguments[2].Unwrap(),
+								into,
+								sequence.SqlQuery.Update.Items,
+								sequence);
 
 							var sql = sequence.SqlQuery;
 
 							sql.Select.Columns.Clear();
 
-							foreach (var item in sql.Set.Items)
+							foreach (var item in sql.Update.Items)
 								sql.Select.Columns.Add(new SqlQuery.Column(sql, item.Expression));
 
-							sql.Set.Into = ((TableBuilder.TableContext)into).SqlTable;
+							sql.Update.Table = ((TableBuilder.TableContext)into).SqlTable;
 						}
 
 						break;
@@ -83,22 +102,35 @@ namespace BLToolkit.Data.Linq.Builder
 		#region Helpers
 
 		internal static void BuildSetter(
-			ExpressionBuilder builder,
-			BuildInfo         buildInfo,
-			LambdaExpression  setter,
-			IBuildContext     into,
-			IBuildContext     sequence)
+			ExpressionBuilder            builder,
+			BuildInfo                    buildInfo,
+			LambdaExpression             setter,
+			IBuildContext                into,
+			List<SqlQuery.SetExpression> items,
+			IBuildContext                sequence)
 		{
 			if (setter.Body.NodeType != ExpressionType.MemberInit)
 				throw new LinqException("Object initializer expected for insert statement.");
 
-			var body = (MemberInitExpression)setter.Body;
-			var ex   = body;
-			var ctx  = new ExpressionContext(buildInfo.Parent, sequence, setter);
+			var ex  = (MemberInitExpression)setter.Body;
+			var p   = sequence.Parent;
+			var ctx = new ExpressionContext(buildInfo.Parent, sequence, setter);
 
-			for (var i = 0; i < ex.Bindings.Count; i++)
+			BuildSetter(builder, into, items, ctx, ex, Expression.Parameter(ex.Type, "p"));
+
+			builder.ReplaceParent(ctx, p);
+		}
+
+		static void BuildSetter(
+			ExpressionBuilder            builder,
+			IBuildContext                into,
+			List<SqlQuery.SetExpression> items,
+			IBuildContext                ctx,
+			MemberInitExpression         expression,
+			Expression                   path)
+		{
+			foreach (var binding in expression.Bindings)
 			{
-				var binding = ex.Bindings[i];
 				var member  = binding.Member;
 
 				if (member is MethodInfo)
@@ -106,15 +138,28 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (binding is MemberAssignment)
 				{
-					var ma     = binding as MemberAssignment;
-					var column = into.ConvertToSql(
-						Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field);
-					var expr   = builder.ConvertToSql(ctx, ma.Expression);
+					var ma = binding as MemberAssignment;
+					var pe = Expression.MakeMemberAccess(path, member);
 
-					if (expr is SqlParameter && ma.Expression.Type.IsEnum)
-						((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
+					if (ma.Expression is MemberInitExpression && !into.IsExpression(pe, 1, RequestFor.Field))
+					{
+						BuildSetter(
+							builder,
+							into,
+							items,
+							ctx,
+							(MemberInitExpression)ma.Expression, Expression.MakeMemberAccess(path, member));
+					}
+					else
+					{
+						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
+						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression);
 
-					sequence.SqlQuery.Set.Items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+						if (expr is SqlParameter && ma.Expression.Type.IsEnum)
+							((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
+
+						items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+					}
 				}
 				else
 					throw new InvalidOperationException();
@@ -122,66 +167,97 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		internal static void ParseSet(
-			ExpressionBuilder builder,
-			BuildInfo         buildInfo,
-			LambdaExpression  extract, 
-			LambdaExpression  update, 
-			IBuildContext     select)
+			ExpressionBuilder            builder,
+			BuildInfo                    buildInfo,
+			LambdaExpression             extract,
+			LambdaExpression             update,
+			IBuildContext                select,
+			SqlTable                     table,
+			List<SqlQuery.SetExpression> items)
 		{
-			var pi = extract.Body;
+			var ext = extract.Body;
 
-			while (pi.NodeType == ExpressionType.Convert || pi.NodeType == ExpressionType.ConvertChecked)
-				pi = ((UnaryExpression)pi).Operand;
+			while (ext.NodeType == ExpressionType.Convert || ext.NodeType == ExpressionType.ConvertChecked)
+				ext = ((UnaryExpression)ext).Operand;
 
-			if (pi.NodeType != ExpressionType.MemberAccess)
+			if (ext.NodeType != ExpressionType.MemberAccess || ext.GetRootObject() != extract.Parameters[0])
 				throw new LinqException("Member expression expected for the 'Set' statement.");
 
-			var body   = (MemberExpression)pi;
+			var body   = (MemberExpression)ext;
 			var member = body.Member;
 
 			if (member is MethodInfo)
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-			var sql    = select.SqlQuery;
-			var column = sql.Set.Into != null ?
-				sql.Set.Into.Fields[member.Name] :
+			var members = body.GetMembers();
+			var name    = members
+				.Skip(1)
+				.Select(ex =>
+				{
+					var me = ex as MemberExpression;
+
+					if (me == null)
+						return null;
+
+					var m = me.Member;
+
+					if (m is MethodInfo)
+						m = TypeHelper.GetPropertyByMethod((MethodInfo)m);
+
+					return m;
+				})
+				.Where(m => m != null && !TypeHelper.IsNullableValueMember(m))
+				.Select(m => m.Name)
+				.Aggregate((s1,s2) => s1 + "." + s2);
+
+			if (table != null && !table.Fields.ContainsKey(name))
+				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, name);
+
+			var column = table != null ?
+				table.Fields[name] :
 				select.ConvertToSql(
-					Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
+					body, 1, ConvertFlags.Field)[0].Sql;
+					//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
+			var sp     = select.Parent;
 			var ctx    = new ExpressionContext(buildInfo.Parent, select, update);
-			var expr   = builder.ConvertToSql(ctx, update.Body);
+			var expr   = builder.ConvertToSqlExpression(ctx, update.Body);
+
+			builder.ReplaceParent(ctx, sp);
 
 			if (expr is SqlParameter && update.Body.Type.IsEnum)
 				((SqlParameter)expr).SetEnumConverter(update.Body.Type, builder.MappingSchema);
 
-			sql.Set.Items.Add(new SqlQuery.SetExpression(column, expr));
+			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
 
 		internal static void ParseSet(
-			ExpressionBuilder builder,
-			BuildInfo         buildInfo,
-			LambdaExpression  extract,
-			Expression        update,
-			IBuildContext     select)
+			ExpressionBuilder            builder,
+			BuildInfo                    buildInfo,
+			LambdaExpression             extract,
+			Expression                   update,
+			IBuildContext                select,
+			List<SqlQuery.SetExpression> items)
 		{
-			var pi = extract.Body;
+			var ext = extract.Body;
 
 			if (!ExpressionHelper.IsConstant(update.Type) && !builder.AsParameters.Contains(update))
 				builder.AsParameters.Add(update);
 
-			while (pi.NodeType == ExpressionType.Convert || pi.NodeType == ExpressionType.ConvertChecked)
-				pi = ((UnaryExpression)pi).Operand;
+			while (ext.NodeType == ExpressionType.Convert || ext.NodeType == ExpressionType.ConvertChecked)
+				ext = ((UnaryExpression)ext).Operand;
 
-			if (pi.NodeType != ExpressionType.MemberAccess)
+			if (ext.NodeType != ExpressionType.MemberAccess || ext.GetRootObject() != extract.Parameters[0])
 				throw new LinqException("Member expression expected for the 'Set' statement.");
 
-			var body   = (MemberExpression)pi;
+			var body   = (MemberExpression)ext;
 			var member = body.Member;
 
 			if (member is MethodInfo)
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
 			var column = select.ConvertToSql(
-				Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field);
+				body, 1, ConvertFlags.Field);
+				//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field);
 
 			if (column.Length == 0)
 				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
@@ -191,7 +267,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (expr is SqlParameter && update.Type.IsEnum)
 				((SqlParameter)expr).SetEnumConverter(update.Type, builder.MappingSchema);
 
-			select.SqlQuery.Set.Items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+			items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 		}
 
 		#endregion
@@ -254,9 +330,22 @@ namespace BLToolkit.Data.Linq.Builder
 				var update   =                   methodCall.Arguments[2].Unwrap();
 
 				if (update.NodeType == ExpressionType.Lambda)
-					ParseSet(builder, buildInfo, extract, (LambdaExpression)update, sequence);
+					ParseSet(
+						builder,
+						buildInfo,
+						extract,
+						(LambdaExpression)update,
+						sequence,
+						sequence.SqlQuery.Update.Table,
+						sequence.SqlQuery.Update.Items);
 				else
-					ParseSet(builder, buildInfo, extract, update, sequence);
+					ParseSet(
+						builder,
+						buildInfo,
+						extract,
+						update,
+						sequence,
+						sequence.SqlQuery.Update.Items);
 
 				return sequence;
 			}

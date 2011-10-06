@@ -58,7 +58,8 @@ namespace BLToolkit.Data.Sql
 		}
 
 		internal void Init(
-			SetClause          set,
+			InsertClause       insert,
+			UpdateClause       update,
 			SelectClause       select,
 			FromClause         from,
 			WhereClause        where,
@@ -70,7 +71,8 @@ namespace BLToolkit.Data.Sql
 			bool               parameterDependent,
 			List<SqlParameter> parameters)
 		{
-			_set                = set;
+			_insert             = insert;
+			_update             = update;
 			_select             = select;
 			_from               = from;
 			_where              = where;
@@ -119,6 +121,12 @@ namespace BLToolkit.Data.Sql
 			get { return _queryType;  }
 			set { _queryType = value; }
 		}
+
+		public bool IsSelect         { get { return _queryType == QueryType.Select;        } }
+		public bool IsDelete         { get { return _queryType == QueryType.Delete;        } }
+		public bool IsInsertOrUpdate { get { return _queryType == QueryType.InsertOrUpdate; } }
+		public bool IsInsert         { get { return _queryType == QueryType.Insert || _queryType == QueryType.InsertOrUpdate; } }
+		public bool IsUpdate         { get { return _queryType == QueryType.Update || _queryType == QueryType.InsertOrUpdate; } }
 
 		#endregion
 
@@ -440,8 +448,8 @@ namespace BLToolkit.Data.Sql
 			{
 				Source = (ISqlTableSource)Source.Walk(skipColumns, func);
 
-				for (var i = 0; i < Joins.Count; i++)
-					((ISqlExpressionWalkable)Joins[i]).Walk(skipColumns, func);
+				foreach (var t in Joins)
+					((ISqlExpressionWalkable)t).Walk(skipColumns, func);
 
 				return this;
 			}
@@ -1900,6 +1908,9 @@ namespace BLToolkit.Data.Sql
 
 			public int Add(ISqlExpression expr)
 			{
+				if (expr is Column && ((Column)expr).Parent == SqlQuery)
+					throw new InvalidOperationException();
+
 				return Columns.IndexOf(AddOrGetColumn(new Column(SqlQuery, expr)));
 			}
 
@@ -2116,7 +2127,7 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
-		#region SetClause
+		#region InsertClause
 
 		public class SetExpression : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
@@ -2151,9 +2162,12 @@ namespace BLToolkit.Data.Sql
 
 				ICloneableElement clone;
 
-				objectTree.Add(this, clone = new SetExpression(
+				if (!objectTree.TryGetValue(this, out clone))
+				{
+					objectTree.Add(this, clone = new SetExpression(
 						(ISqlExpression)Column.    Clone(objectTree, doClone),
 						(ISqlExpression)Expression.Clone(objectTree, doClone)));
+				}
 
 				return clone;
 			}
@@ -2188,13 +2202,16 @@ namespace BLToolkit.Data.Sql
 			#endregion
 		}
 
-		public class SetClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
+		public class InsertClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
 		{
-			readonly List<SetExpression> _items = new List<SetExpression>();
-			public   List<SetExpression>  Items { get { return _items; } }
+			public InsertClause()
+			{
+				Items = new List<SetExpression>();
+			}
 
-			public SqlTable Into         { get; set; }
-			public bool     WithIdentity { get; set; }
+			public List<SetExpression> Items        { get; private set; }
+			public SqlTable            Into         { get; set; }
+			public bool                WithIdentity { get; set; }
 
 			#region Overrides
 
@@ -2216,7 +2233,7 @@ namespace BLToolkit.Data.Sql
 				if (!doClone(this))
 					return this;
 
-				var clone = new SetClause { WithIdentity = WithIdentity };
+				var clone = new InsertClause { WithIdentity = WithIdentity };
 
 				if (Into != null)
 					clone.Into = (SqlTable)Into.Clone(objectTree, doClone);
@@ -2239,8 +2256,9 @@ namespace BLToolkit.Data.Sql
 				if (Into != null)
 					((ISqlExpressionWalkable)Into).Walk(skipColumns, func);
 
-				for (var i = 0; i < Items.Count; i++)
-					((ISqlExpressionWalkable)Items[i]).Walk(skipColumns, func);
+				foreach (var t in Items)
+					((ISqlExpressionWalkable)t).Walk(skipColumns, func);
+
 				return null;
 			}
 
@@ -2248,11 +2266,11 @@ namespace BLToolkit.Data.Sql
 
 			#region IQueryElement Members
 
-			public QueryElementType ElementType { get { return QueryElementType.SetClause; } }
+			public QueryElementType ElementType { get { return QueryElementType.InsertClause; } }
 
 			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
-				sb.Append("SET ");
+				sb.Append("VALUES ");
 
 				if (Into != null)
 					((IQueryElement)Into).ToString(sb, dic);
@@ -2272,10 +2290,125 @@ namespace BLToolkit.Data.Sql
 			#endregion
 		}
 
-		private SetClause _set;
-		public  SetClause  Set
+		private InsertClause _insert;
+		public  InsertClause  Insert
 		{
-			get { return _set ?? (_set = new SetClause()); }
+			get { return _insert ?? (_insert = new InsertClause()); }
+		}
+
+		public void ClearInsert()
+		{
+			_insert = null;
+		}
+
+		#endregion
+
+		#region UpdateClause
+
+		public class UpdateClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
+		{
+			public UpdateClause()
+			{
+				Items = new List<SetExpression>();
+				Keys  = new List<SetExpression>();
+			}
+
+			public List<SetExpression> Items { get; private set; }
+			public List<SetExpression> Keys  { get; private set; }
+			public SqlTable            Table { get; set; }
+
+			#region Overrides
+
+#if OVERRIDETOSTRING
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+#endif
+
+			#endregion
+
+			#region ICloneableElement Members
+
+			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				if (!doClone(this))
+					return this;
+
+				var clone = new UpdateClause();
+
+				if (Table != null)
+					clone.Table = (SqlTable)Table.Clone(objectTree, doClone);
+
+				foreach (var item in Items)
+					clone.Items.Add((SetExpression)item.Clone(objectTree, doClone));
+
+				foreach (var item in Keys)
+					clone.Keys.Add((SetExpression)item.Clone(objectTree, doClone));
+
+				objectTree.Add(this, clone);
+
+				return clone;
+			}
+
+			#endregion
+
+			#region ISqlExpressionWalkable Members
+
+			[Obsolete]
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
+			{
+				if (Table != null)
+					((ISqlExpressionWalkable)Table).Walk(skipColumns, func);
+
+				foreach (var t in Items)
+					((ISqlExpressionWalkable)t).Walk(skipColumns, func);
+
+				foreach (var t in Keys)
+					((ISqlExpressionWalkable)t).Walk(skipColumns, func);
+
+				return null;
+			}
+
+			#endregion
+
+			#region IQueryElement Members
+
+			public QueryElementType ElementType { get { return QueryElementType.UpdateClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				sb.Append("SET ");
+
+				if (Table != null)
+					((IQueryElement)Table).ToString(sb, dic);
+
+				sb.AppendLine();
+
+				foreach (var e in Items)
+				{
+					sb.Append("\t");
+					((IQueryElement)e).ToString(sb, dic);
+					sb.AppendLine();
+				}
+
+				return sb;
+			}
+
+			#endregion
+		}
+
+		private UpdateClause _update;
+		public  UpdateClause  Update
+		{
+			get { return _update ?? (_update = new UpdateClause()); }
+		}
+
+		public void ClearUpdate()
+		{
+			_update = null;
 		}
 
 		#endregion
@@ -2826,9 +2959,8 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				for (var i = 0; i < Items.Count; i++)
-					Items[i].Walk(skipColumns, func);
-
+				foreach (var t in Items)
+					t.Walk(skipColumns, func);
 				return null;
 			}
 
@@ -2909,12 +3041,7 @@ namespace BLToolkit.Data.Sql
 		private List<Union> _unions;
 		public  List<Union>  Unions
 		{
-			get
-			{
-				if (_unions == null)
-					_unions = new List<Union>();
-				return _unions;
-			}
+			get { return _unions ?? (_unions = new List<Union>()); }
 		}
 
 		public bool HasUnion { get { return _unions != null && _unions.Count > 0; } }
@@ -3031,23 +3158,26 @@ namespace BLToolkit.Data.Sql
 			return null;
 		}
 
-		static ISqlExpression GetColumn(QueryData data, SqlField field, bool addToGroupBy)
+		static ISqlExpression GetColumn(QueryData data, SqlField field)
 		{
 			foreach (var query in data.Queries)
 			{
-				foreach (var table in query.Query.From.Tables)
+				var q = query.Query;
+
+				foreach (var table in q.From.Tables)
 				{
 					var t = FindField(field, table);
 
 					if (t != null)
 					{
-						var n   = query.Query.Select.Columns.Count;
-						var idx = query.Query.Select.Add(field);
+						var n   = q.Select.Columns.Count;
+						var idx = q.Select.Add(field);
 
-						if (addToGroupBy && n != query.Query.Select.Columns.Count)
-							query.Query.GroupBy.Items.Add(field);
+						if (n != q.Select.Columns.Count)
+							if (!q.GroupBy.IsEmpty || q.Select.Columns.Exists(c => IsAggregationFunction(c.Expression)))
+								q.GroupBy.Items.Add(field);
 
-						return query.Query.Select.Columns[idx];
+						return q.Select.Columns[idx];
 					}
 				}
 			}
@@ -3055,13 +3185,12 @@ namespace BLToolkit.Data.Sql
 			return null;
 		}
 
-		void ResolveFields(QueryData data)
+		static void ResolveFields(QueryData data)
 		{
 			if (data.Queries.Count == 0)
 				return;
 
-			var dic     = new Dictionary<ISqlExpression,ISqlExpression>();
-			var isGroup = !GroupBy.IsEmpty || Select.Columns.Exists(c => IsAggregationFunction(c.Expression));
+			var dic = new Dictionary<ISqlExpression,ISqlExpression>();
 
 			foreach (SqlField field in data.Fields)
 			{
@@ -3080,7 +3209,7 @@ namespace BLToolkit.Data.Sql
 
 				if (!found)
 				{
-					var expr = GetColumn(data, field, isGroup);
+					var expr = GetColumn(data, field);
 
 					if (expr != null)
 						dic.Add(field, expr);
@@ -3230,7 +3359,7 @@ namespace BLToolkit.Data.Sql
 			{
 				var sql = e as SqlQuery;
 
-				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._set != null)
+				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._insert != null || sql._update != null)
 					return;
 
 				var table = sql.From.Tables[0];
@@ -3522,8 +3651,11 @@ namespace BLToolkit.Data.Sql
 							visitor.VisitAll(Having,  tableCollector);
 							visitor.VisitAll(OrderBy, tableCollector);
 
-							if (_set != null)
-								visitor.VisitAll(Set, tableCollector);
+							if (_insert != null)
+								visitor.VisitAll(Insert, tableCollector);
+
+							if (_update != null)
+								visitor.VisitAll(Update, tableCollector);
 						}
 
 						if (findTable(join.Table))
@@ -3664,7 +3796,7 @@ namespace BLToolkit.Data.Sql
 				var sql   = (SqlQuery)joinSource.Source;
 				var isAgg = sql.Select.Columns.Exists(c => IsAggregationFunction(c.Expression));
 
-				if (isAgg && isApplySupported)
+				if (isApplySupported && (isAgg || sql.Select.TakeValue != null || sql.Select.SkipValue != null))
 					return;
 
 				var searchCondition = new List<Condition>(sql.Where.SearchCondition.Conditions);
@@ -3847,8 +3979,8 @@ namespace BLToolkit.Data.Sql
 			for (var i = 0; i < aliases.Length; i++)
 				aliases[i] = GetAlias(defaultAlias, defaultAlias);
 
-			for (var i = 0; i < aliases.Length; i++)
-				RemoveAlias(aliases[i]);
+			foreach (var t in aliases)
+				RemoveAlias(t);
 
 			return aliases;
 		}
@@ -3923,16 +4055,13 @@ namespace BLToolkit.Data.Sql
 								{
 									var col = sql.Select.Columns[i];
 
-									for (var j = 0; j < sql.Unions.Count; j++)
+									foreach (var t in sql.Unions)
 									{
-										var union = sql.Unions[j].SqlQuery.Select;
+										var union = t.SqlQuery.Select;
 
 										objs.Remove(union.Columns[i].Alias);
 
-										union.Columns[i].Alias = null;
-
-										if (union.Columns[i].Alias != col.Alias)
-											union.Columns[i].Alias = col.Alias;
+										union.Columns[i].Alias = col.Alias;
 									}
 								}
 							}
@@ -3951,7 +4080,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (ParameterDependent)
 			{
-				return new QueryVisitor().Convert(this, e =>
+				var query = new QueryVisitor().Convert(this, e =>
 				{
 					switch (e.ElementType)
 					{
@@ -3961,9 +4090,43 @@ namespace BLToolkit.Data.Sql
 
 								if (p.Value == null)
 									return new SqlValue(null);
-
-								break;
 							}
+
+							break;
+
+						case QueryElementType.ExprExprPredicate :
+							{
+								var ee = (Predicate.ExprExpr)e;
+								
+								if (ee.Operator == Predicate.Operator.Equal || ee.Operator == Predicate.Operator.NotEqual)
+								{
+									object value1;
+									object value2;
+
+									if (ee.Expr1 is SqlValue)
+										value1 = ((SqlValue)ee.Expr1).Value;
+									else if (ee.Expr1 is SqlParameter)
+										value1 = ((SqlParameter)ee.Expr1).Value;
+									else
+										break;
+
+									if (ee.Expr2 is SqlValue)
+										value2 = ((SqlValue)ee.Expr2).Value;
+									else if (ee.Expr2 is SqlParameter)
+										value2 = ((SqlParameter)ee.Expr2).Value;
+									else
+										break;
+
+									var value = Equals(value1, value2);
+
+									if (ee.Operator == Predicate.Operator.NotEqual)
+										value = !value;
+
+									return new Predicate.Expr(new SqlValue(value), Sql.Precedence.Comparison);
+								}
+							}
+
+							break;
 
 						case QueryElementType.InListPredicate :
 							return ConvertInListPredicate((Predicate.InList)e);
@@ -3971,6 +4134,23 @@ namespace BLToolkit.Data.Sql
 
 					return null;
 				});
+
+				if (query != this)
+				{
+					query.Parameters.Clear();
+
+					new QueryVisitor().VisitAll(query, expr =>
+					{
+						if (expr.ElementType == QueryElementType.SqlParameter)
+						{
+							var p = (SqlParameter)expr;
+							if (p.IsQueryParameter)
+								query.Parameters.Add(p);
+						}
+					});
+				}
+
+				return query;
 			}
 
 			return this;
@@ -4132,8 +4312,8 @@ namespace BLToolkit.Data.Sql
 
 			_queryType = clone._queryType;
 
-			if (_queryType == QueryType.Insert || _queryType == QueryType.Update)
-				_set = (SetClause)clone._set.Clone(objectTree, doClone);
+			if (IsInsert) _insert = (InsertClause)clone._insert.Clone(objectTree, doClone);
+			if (IsUpdate) _update = (UpdateClause)clone._update.Clone(objectTree, doClone);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);
 			_from    = new FromClause   (this, clone._from,    objectTree, doClone);
@@ -4262,8 +4442,8 @@ namespace BLToolkit.Data.Sql
 		[Obsolete]
 		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
-			if (_set != null)
-				((ISqlExpressionWalkable)_set).Walk(skipColumns, func);
+			if (_insert != null) ((ISqlExpressionWalkable)_insert).Walk(skipColumns, func);
+			if (_update != null) ((ISqlExpressionWalkable)_update).Walk(skipColumns, func);
 
 			((ISqlExpressionWalkable)Select) .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)From)   .Walk(skipColumns, func);

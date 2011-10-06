@@ -62,7 +62,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (ctx != null)
 								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(pi, 0));
 
-							throw new NotImplementedException();
+							break;
 						}
 
 					case ExpressionType.Constant:
@@ -73,7 +73,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (_expressionAccessors.ContainsKey(pi))
 								return new ExpressionHelper.ConvertInfo(Expression.Convert(_expressionAccessors[pi], pi.Type));
 
-							throw new NotImplementedException();
+							break;
 						}
 
 					case ExpressionType.Coalesce:
@@ -119,11 +119,12 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					switch (pi.NodeType)
 					{
-						case ExpressionType.MemberInit:
-						case ExpressionType.New:
-						case ExpressionType.Convert:
+						case ExpressionType.MemberInit :
+						case ExpressionType.New        :
+						case ExpressionType.Convert    :
 							break;
-						default:
+
+						default                        :
 							if (CanBeCompiled(pi))
 								break;
 							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
@@ -147,7 +148,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression BuildSql(IBuildContext context, Expression expression)
 		{
-			var sqlex = ConvertToSqlAndBuild(context, expression);
+			var sqlex = ConvertToSqlExpression(context, expression);
 			var idx   = context.SqlQuery.Select.Add(sqlex);
 
 			idx = context.ConvertToParentIndex(idx, context);
@@ -182,9 +183,20 @@ namespace BLToolkit.Data.Linq.Builder
 				MethodInfo mi;
 
 				if (!ReflectionHelper.MapSchema.Converters.TryGetValue(type, out mi))
-					throw new LinqException("Cannot find converter for the '{0}' type.", type.FullName);
-
-				mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+				{
+					mapper =
+						Expression.Convert(
+							Expression.Call(
+								Expression.Constant(MappingSchema),
+								ReflectionHelper.MapSchema.ChangeType,
+									expr,
+									Expression.Constant(type)),
+							type);
+				}
+				else
+				{
+					mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+				}
 			}
 
 			return mapper;

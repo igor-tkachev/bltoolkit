@@ -46,7 +46,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ContainsParameter()
+		public void ContainsParameter1()
 		{
 			var str = "oh";
 
@@ -69,6 +69,23 @@ namespace Data.Linq
 				var q = from p in db.Person where !p.FirstName.Contains(str) && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
+		}
+
+		[Test]
+		public void ContainsParameter3()
+		{
+			var str = "o";
+
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from d in db.Doctor
+					join p in db.Person.Where(p => p.FirstName.Contains(str))
+					on d.PersonID equals p.ID
+					select p;
+
+				Assert.AreEqual(1, q.ToList().First().ID);
+			}
 		}
 
 		[Test]
@@ -182,7 +199,7 @@ namespace Data.Linq
 		[Test]
 		public void LastIndexOf1()
 		{
-			ForEachProvider(_lastIndexExcludeList, db => 
+			ForEachProvider(_lastIndexExcludeList, db =>
 			{
 				var q = from p in db.Person where p.LastName.LastIndexOf("p") == 2 && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);

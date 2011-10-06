@@ -4,7 +4,10 @@ using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
+
 using NUnit.Framework;
 
 using Data.Linq;
@@ -19,20 +22,6 @@ namespace Update
 	[TestFixture]
 	public class DmlTest : TestBase
 	{
-		[TestFixtureTearDown]
-		public new void TearDown()
-		{
-			/*
-			ForEachProvider(db =>
-			{
-				if (db is TestDbManager)
-					db.Parent.Delete(p => p.ParentID >= 1000);
-			});
-			*/
-
-			base.TearDown();
-		}
-
 		[Test]
 		public void Delete1()
 		{
@@ -940,8 +929,131 @@ namespace Update
 			});
 		}
 
+		[Test]
+		public void InsertOrUpdate1()
+		{
+			ForEachProvider(db =>
+			{
+				var id = 0;
 
-		private static readonly Func<TestDbManager,int,string,int> _updateQuery =
+				try
+				{
+					id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+					{
+						FirstName = "John",
+						LastName  = "Shepard",
+						Gender    = Gender.Male
+					}));
+
+					for (var i = 0; i < 3; i++)
+					{
+						db.Patient.InsertOrUpdate(
+							() => new Patient
+							{
+								PersonID  = id,
+								Diagnosis = "abc",
+							},
+							p => new Patient
+							{
+								Diagnosis = (p.Diagnosis.Length + i).ToString(),
+							});
+					}
+
+					Assert.AreEqual("3", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				}
+				finally
+				{
+					db.Patient.Delete(p => p.PersonID == id);
+					db.Person. Delete(p => p.ID       == id);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertOrReplace1()
+		{
+			ForEachProvider(db =>
+			{
+				var id = 0;
+
+				try
+				{
+					id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+					{
+						FirstName = "John",
+						LastName  = "Shepard",
+						Gender    = Gender.Male
+					}));
+
+					for (var i = 0; i < 3; i++)
+					{
+						db.InsertOrReplace(new Patient
+						{
+							PersonID  = id,
+							Diagnosis = ("abc" + i).ToString(),
+						});
+					}
+
+					Assert.AreEqual("abc2", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				}
+				finally
+				{
+					db.Patient.Delete(p => p.PersonID == id);
+					db.Person. Delete(p => p.ID       == id);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertOrUpdate3()
+		{
+			ForEachProvider(db =>
+			{
+				var id = 0;
+
+				try
+				{
+					id = Convert.ToInt32(db.Person.InsertWithIdentity(() => new Person
+					{
+						FirstName = "John",
+						LastName  = "Shepard",
+						Gender    = Gender.Male
+					}));
+
+					var diagnosis = "abc";
+
+					for (var i = 0; i < 3; i++)
+					{
+						db.Patient.InsertOrUpdate(
+							() => new Patient
+							{
+								PersonID  = id,
+								Diagnosis = "abc",
+							},
+							p => new Patient
+							{
+								Diagnosis = (p.Diagnosis.Length + i).ToString(),
+							},
+							() => new Patient
+							{
+								PersonID  = id,
+								//Diagnosis = diagnosis,
+							});
+
+						diagnosis = (diagnosis.Length + i).ToString();
+					}
+
+					Assert.AreEqual("3", db.Patient.Single(p => p.PersonID == id).Diagnosis);
+				}
+				finally
+				{
+					db.Patient.Delete(p => p.PersonID == id);
+					db.Person. Delete(p => p.ID       == id);
+				}
+			});
+		}
+
+		static readonly Func<TestDbManager,int,string,int> _updateQuery =
 			CompiledQuery.Compile   <TestDbManager,int,string,int>((ctx,key,value) =>
 				ctx.Person
 					.Where(_ => _.ID == key)
@@ -997,6 +1109,65 @@ namespace Update
 
 				Assert.IsNull(parent.Value1);
 			});
+		}
+
+		public class FullName
+		{
+			           public string FirstName     { get; set; }
+			           public string LastName;
+			[Nullable] public string MiddleName;
+		}
+
+		[TableName("Person")]
+		[MapField("FirstName",  "Name.FirstName")]
+		[MapField("LastName",   "Name.LastName")]
+		[MapField("MiddleName", "Name.MiddleName")]
+		public class TestPerson1
+		{
+			[Identity, PrimaryKey]
+			//[SequenceName("PostgreSQL", "Seq")]
+			[SequenceName("Firebird", "PersonID")]
+			[MapField("PersonID")]
+			public int ID;
+
+			public string Gender;
+
+			public FullName Name;
+		}
+
+		[Test]
+		public void Insert11()
+		{
+			var p = new TestPerson1 { Name = new FullName { FirstName = "fn", LastName = "ln" }, Gender = "M" };
+
+			ForEachProvider(db => db.Insert(p));
+		}
+
+		[Test]
+		public void Insert12()
+		{
+			ForEachProvider(db => db
+				.Into(db.GetTable<TestPerson1>())
+					.Value(_ => _.Name.FirstName, "FirstName")
+					.Value(_ => _.Name.LastName, () => "LastName")
+					.Value(_ => _.Gender,         "F")
+				.Insert());
+
+		}
+
+		[Test]
+		public void Insert13()
+		{
+			ForEachProvider(db => db.GetTable<TestPerson1>()
+				.Insert(() => new TestPerson1
+				{
+					Name = new FullName
+					{
+						FirstName = "FirstName",
+						LastName  = "LastName"
+					},
+					Gender = "M",
+				}));
 		}
 	}
 }

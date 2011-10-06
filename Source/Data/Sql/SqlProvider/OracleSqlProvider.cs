@@ -26,10 +26,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildGetIdentity(StringBuilder sb)
 		{
-			var identityField = SqlQuery.Set.Into.GetIdentityField();
+			var identityField = SqlQuery.Insert.Into.GetIdentityField();
 
 			if (identityField == null)
-				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
+				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Insert.Into.Name);
 
 			AppendIndent(sb).AppendLine("RETURNING");
 			AppendIndent(sb).Append("\t");
@@ -288,7 +288,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 
@@ -310,6 +310,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					.Append(s.Substring(12,  2))
 					.Append(s.Substring(16, 16))
 					.Append("' as raw(16))");
+			}
+			else if (value is DateTime)
+			{
+				sb.AppendFormat("TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
 			}
 			else
 				base.BuildValue(sb, value);
@@ -344,6 +348,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb, "FROM SYS.DUAL");
 		}
 	}
 }

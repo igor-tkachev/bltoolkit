@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class MySqlSqlProvider : BasicSqlProvider
 	{
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
@@ -35,14 +35,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildOffsetLimit(sb);
 			else
 			{
-				AppendIndent(sb).AppendFormat
-				(
-					SqlQuery.Select.SkipValue != null ? "LIMIT {0},{1}" : "LIMIT {1}",
-					BuildExpression(new StringBuilder(), SqlQuery.Select.SkipValue),
-					SqlQuery.Select.TakeValue == null?
-						long.MaxValue.ToString():
-						BuildExpression(new StringBuilder(), SqlQuery.Select.TakeValue).ToString()
-				).AppendLine();
+				AppendIndent(sb)
+					.AppendFormat(
+						"LIMIT {0},{1}",
+						BuildExpression(new StringBuilder(), SqlQuery.Select.SkipValue),
+						SqlQuery.Select.TakeValue == null ?
+							long.MaxValue.ToString() :
+							BuildExpression(new StringBuilder(), SqlQuery.Select.TakeValue).ToString())
+					.AppendLine();
 			}
 		}
 
@@ -52,7 +52,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (expr is SqlBinaryExpression)
 			{
-				SqlBinaryExpression be = (SqlBinaryExpression)expr;
+				var be = (SqlBinaryExpression)expr;
 
 				switch (be.Operation)
 				{
@@ -61,12 +61,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						{
 							if (be.Expr1 is SqlFunction)
 							{
-								SqlFunction func = (SqlFunction)be.Expr1;
+								var func = (SqlFunction)be.Expr1;
 
 								if (func.Name == "Concat")
 								{
-									List<ISqlExpression> list = new List<ISqlExpression>(func.Parameters);
-									list.Add(be.Expr2);
+									var list = new List<ISqlExpression>(func.Parameters) { be.Expr2 };
 									return new SqlFunction(be.SystemType, "Concat", list.ToArray());
 								}
 							}
@@ -79,16 +78,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlFunction)
 			{
-				SqlFunction func = (SqlFunction) expr;
+				var func = (SqlFunction) expr;
 
 				switch (func.Name)
 				{
 					case "Convert" :
-						Type ftype = TypeHelper.GetUnderlyingType(func.SystemType);
+						var ftype = TypeHelper.GetUnderlyingType(func.SystemType);
 
 						if (ftype == typeof(bool))
 						{
-							ISqlExpression ex = AlternativeConvertToBoolean(func, 1);
+							var ex = AlternativeConvertToBoolean(func, 1);
 							if (ex != null)
 								return ex;
 						}
@@ -101,7 +100,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 			else if (expr is SqlExpression)
 			{
-				SqlExpression e = (SqlExpression)expr;
+				var e = (SqlExpression)expr;
 
 				if (e.Expr.StartsWith("Extract(DayOfYear"))
 					return new SqlFunction(e.SystemType, "DayOfYear", e.Parameters);
@@ -163,7 +162,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 
@@ -202,38 +201,74 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					return ParameterSymbol + value.ToString();
 
 				case ConvertType.NameToCommandParameter:
-					return ParameterSymbol + CommandParameterPrefix + value.ToString();
+					return ParameterSymbol + CommandParameterPrefix + value;
 
 				case ConvertType.NameToSprocParameter:
 					{
-						string valueStr = value.ToString();
+						var valueStr = value.ToString();
+
 						if(string.IsNullOrEmpty(valueStr))
 							throw new ArgumentException("Argument 'value' must represent parameter name.");
 
 						if (valueStr[0] == ParameterSymbol)
 							valueStr = valueStr.Substring(1);
+
 						if (valueStr.StartsWith(SprocParameterPrefix, StringComparison.Ordinal))
 							valueStr = valueStr.Substring(SprocParameterPrefix.Length);
+
 						return ParameterSymbol + SprocParameterPrefix + valueStr;
 					}
 
 				case ConvertType.SprocParameterToName:
-					if (value != null)
 					{
-						string str = value.ToString();
+						var str = value.ToString();
 						str = (str.Length > 0 && (str[0] == ParameterSymbol || (TryConvertParameterSymbol && ConvertParameterSymbols.Contains(str[0])))) ? str.Substring(1) : str;
 
-						if ((!string.IsNullOrEmpty(SprocParameterPrefix))
-							&& str.StartsWith(SprocParameterPrefix))
+						if (!string.IsNullOrEmpty(SprocParameterPrefix) && str.StartsWith(SprocParameterPrefix))
 							str = str.Substring(SprocParameterPrefix.Length);
 
 						return str;
 					}
-
-					break;
 			}
 
 			return value;
+		}
+
+		protected override StringBuilder BuildExpression(StringBuilder sb, ISqlExpression expr, bool buildTableName, bool checkParentheses, string alias, ref bool addAlias)
+		{
+			return base.BuildExpression(
+				sb,
+				expr,
+				buildTableName && SqlQuery.QueryType != QueryType.InsertOrUpdate,
+				checkParentheses,
+				alias,
+				ref addAlias);
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertQuery(sb);
+			AppendIndent(sb).AppendLine("ON DUPLICATE KEY UPDATE");
+
+			Indent++;
+
+			var first = true;
+
+			foreach (var expr in SqlQuery.Update.Items)
+			{
+				if (!first)
+					sb.Append(',').AppendLine();
+				first = false;
+
+				AppendIndent(sb);
+				BuildExpression(sb, expr.Column, false, true);
+				sb.Append(" = ");
+				BuildExpression(sb, expr.Expression, false, true);
+			}
+
+			Indent--;
+
+			sb.AppendLine();
 		}
 	}
 }

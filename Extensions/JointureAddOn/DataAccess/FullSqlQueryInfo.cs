@@ -8,7 +8,7 @@ namespace BLToolkit.DataAccess
 
             parameter.SetMemberMapper(ObjectMapper);
 
-            _parameters.Add(parameter);
+            Parameters.Add(parameter);
 
             return parameter;
         }

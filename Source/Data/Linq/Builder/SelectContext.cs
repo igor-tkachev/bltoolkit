@@ -4,12 +4,12 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	// This class implements double functionality (scalar and member type selects)
 	// and could be implemented as two different classes.
@@ -37,7 +37,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression IBuildContext.Expression { get { return Lambda; } }
 
-		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>();
+		public readonly Dictionary<MemberInfo,Expression> Members = new Dictionary<MemberInfo,Expression>(new MemberInfoComparer());
 
 		public SelectContext(IBuildContext parent, LambdaExpression lambda, params IBuildContext[] sequences)
 		{
@@ -52,6 +52,8 @@ namespace BLToolkit.Data.Linq.Builder
 				context.Parent = this;
 
 			IsScalar = !Builder.ProcessProjection(Members, Body);
+
+			Builder.Contexts.Add(this);
 		}
 
 		#endregion
@@ -216,10 +218,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 
 					case ExpressionType.Parameter :
-
-						//if (levelExpression == expression)
-							break;
-						//return Sequence.BuildExpression(expression, level + 1);
+						break;
 				}
 			}
 
@@ -230,7 +229,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertToSql
 
-		readonly Dictionary<MemberInfo,SqlInfo[]> _sql = new Dictionary<MemberInfo,SqlInfo[]>();
+		readonly Dictionary<MemberInfo,SqlInfo[]> _sql = new Dictionary<MemberInfo,SqlInfo[]>(new MemberInfoComparer());
 
 		public virtual SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
@@ -332,7 +331,6 @@ namespace BLToolkit.Data.Linq.Builder
 												switch (n)
 												{
 													case 0 :
-													//case 2 :
 														var buildExpression = GetExpression(expression, levelExpression, mex);
 														return ConvertExpressions(buildExpression, flags);
 													default:
@@ -384,7 +382,7 @@ namespace BLToolkit.Data.Linq.Builder
 		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Builder.ConvertExpressions(this, expression, flags)
-				.Select(_ => CheckExpression(_))
+				.Select<SqlInfo,SqlInfo>(CheckExpression)
 				.ToArray();
 		}
 
@@ -809,11 +807,6 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (Body.NodeType == ExpressionType.Parameter)
 				{
-					//if (Sequence.Length == 2 && Sequence[1] is GroupByBuilder.KeyContext && expression == Body)
-					//{
-					//	return action(Sequence[1], null, 0);
-					//}
-
 					var sequence = GetSequence(Body, 0);
 
 					return expression == Body ?
@@ -852,8 +845,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return action(this, newExpression, 0);
 				}
-
-				//return action(GetSequence(expression, level), expression, level);
 			}
 
 			throw new NotImplementedException();
@@ -864,8 +855,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var memberExpression = Members[((MemberExpression)levelExpression).Member];
 			var newExpression    = GetExpression(expression, levelExpression, memberExpression);
-
-			var sequence  = GetSequence(expression, level);
+			var sequence         = GetSequence  (expression, level);
 
 			if (sequence != null)
 			{
@@ -879,7 +869,6 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				case ExpressionType.MemberAccess :
 				case ExpressionType.Parameter    :
-				case ExpressionType.Call         :
 					if (sequence != null)
 						return action(2, sequence, newExpression, 1, memberExpression);
 					throw new NotImplementedException();
@@ -912,7 +901,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (IsScalar)
 			{
-				root =  expression.GetRootObject();
+				root = expression.GetRootObject();
 			}
 			else
 			{
@@ -968,11 +957,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.New        :
 				case ExpressionType.MemberInit : break;
 				default                        :
-					//if (levelExpresion == expression)
-					//	return newExpression;
-
 					var le = expression.GetLevelExpression(level - 1);
-
 					return GetExpression(expression, le, newExpression);
 			}
 

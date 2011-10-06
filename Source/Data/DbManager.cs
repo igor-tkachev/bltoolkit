@@ -78,7 +78,7 @@ namespace BLToolkit.Data
 		{
 		}
 
-		public DbManager Clone()
+		public virtual DbManager Clone()
 		{
 			var clone =
 				new DbManager(0)
@@ -1579,7 +1579,7 @@ namespace BLToolkit.Data
 			parameter.Direction     = parameterDirection;
 			parameter.DbType        = dbType;
 
-			_dataProvider.SetParameterValue(parameter, value);
+			_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 
 			return parameter;
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -111,8 +112,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
+			if (SqlQuery.Update.Table != null && SqlQuery.Update.Table != SqlQuery.From.Tables[0].Source)
+				BuildPhysicalTable(sb, SqlQuery.Update.Table, null);
 			else
 				sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
 		}
@@ -191,6 +192,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
 		}
 	}
 }

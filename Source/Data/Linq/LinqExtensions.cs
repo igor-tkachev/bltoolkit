@@ -273,8 +273,6 @@ namespace BLToolkit.Data.Linq
 
 		#region Insert
 
-		#region ValueInsertable
-
 		public static int Insert<T>([NotNull] this Table<T> target, [NotNull] Expression<Func<T>> setter)
 		{
 			if (target == null) throw new ArgumentNullException("target");
@@ -302,6 +300,8 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
 					new[] { query.Expression, Expression.Quote(setter) }));
 		}
+
+		#region ValueInsertable
 
 		class ValueInsertable<T> : IValueInsertable<T>
 		{
@@ -565,6 +565,54 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		#endregion
+
+		#region InsertOrUpdate
+
+		public static int InsertOrUpdate<T>(
+			[NotNull] this Table<T> target,
+			[NotNull] Expression<Func<T>> insertSetter,
+			[NotNull] Expression<Func<T,T>> onDuplicateKeyUpdateSetter)
+		{
+			if (target                     == null) throw new ArgumentNullException("target");
+			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
+			if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
+
+			IQueryable<T> query = target;
+
+			return query.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[] { query.Expression, Expression.Quote(insertSetter), Expression.Quote(onDuplicateKeyUpdateSetter) }));
+		}
+
+		public static int InsertOrUpdate<T>(
+			[NotNull] this Table<T> target,
+			[NotNull] Expression<Func<T>>   insertSetter,
+			[NotNull] Expression<Func<T,T>> onDuplicateKeyUpdateSetter,
+			[NotNull] Expression<Func<T>>   keySelector)
+		{
+			if (target                     == null) throw new ArgumentNullException("target");
+			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
+			if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
+			if (keySelector                == null) throw new ArgumentNullException("keySelector");
+
+			IQueryable<T> query = target;
+
+			return query.Provider.Execute<int>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[]
+					{
+						query.Expression,
+						Expression.Quote(insertSetter),
+						Expression.Quote(onDuplicateKeyUpdateSetter),
+						Expression.Quote(keySelector)
+					}));
+		}
 
 		#endregion
 

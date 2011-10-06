@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -406,6 +406,30 @@ namespace Data.Linq
 				from ch in db.Child select new { ParentID = ch.ParentID + 1 } into ch
 				group ch.ParentID by ch into g
 				select g.Key));
+		}
+
+		[Test]
+		public void SubQuery7()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+				join c in 
+					from c in Child
+					where c.ParentID == 1
+					select c
+				on p.ParentID equals c.ParentID into g
+				from c in g.DefaultIfEmpty()
+				group p by c == null ? 0 : c.ChildID into gg
+				select new { gg.Key },
+				from p in db.Parent
+				join c in 
+					from c in db.Child
+					where c.ParentID == 1
+					select c
+				on p.ParentID equals c.ParentID into g
+				from c in g.DefaultIfEmpty()
+				group p by c.ChildID into gg
+				select new { gg.Key }));
 		}
 
 		[Test]
@@ -1262,6 +1286,34 @@ namespace Data.Linq
 				(from ch in db.Child
 				 group ch by ch.ParentID into g
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20))));
+		}
+
+		[Test]
+		public void GroupByExtraFieldBugTest()
+		{
+			// https://github.com/igor-tkachev/bltoolkit/issues/42
+			// extra field is generated in the GROUP BY clause, for example:
+			// GROUP BY p.LastName, p.LastName <--- the second one is redundant
+
+			using (var db = new TestDbManager("MySql"))
+			{
+				var q =
+					from d in db.Doctor
+					join p in db.Person on d.PersonID equals p.ID
+					group d by p.LastName into g
+					select g.Key;
+
+				q.ToList();
+
+				const string fieldName = "LastName";
+
+				var lastQuery  = db.LastQuery;
+				var groupByPos = lastQuery.IndexOf("GROUP BY");
+				var fieldPos   = lastQuery.IndexOf(fieldName, groupByPos);
+				
+				// check that our field does not present in the GROUP BY clause second time
+				Assert.AreEqual(-1, lastQuery.IndexOf(fieldName, fieldPos + 1));
+			}
 		}
 	}
 }

@@ -109,9 +109,10 @@ namespace Data.Linq
 		[Test]
 		public void TakeDistinct()
 		{
-			var expected = (from ch in Child select ch.ParentID).Take(4).Distinct();
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite },
-				db => AreEqual(expected, (from ch in db.Child select ch.ParentID).Take(4).Distinct()));
+			ForEachProvider(new[] { ProviderName.Sybase, ProviderName.SQLite },
+				db => AreEqual(
+					(from ch in    Child orderby ch.ParentID select ch.ParentID).Take(4).Distinct(),
+					(from ch in db.Child orderby ch.ParentID select ch.ParentID).Take(4).Distinct()));
 		}
 	}
 }

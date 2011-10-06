@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
+using System.Linq;
 using System.Text;
 
 namespace BLToolkit.Data.Sql
@@ -147,13 +148,7 @@ namespace BLToolkit.Data.Sql
 
 		static TypeInfo[] SortTypeInfo(params TypeInfo[] info)
 		{
-			var maxIndex = 0;
-
-			foreach (var typeInfo in info)
-				if (maxIndex < (int)typeInfo.SqlDbType)
-					maxIndex = (int)typeInfo.SqlDbType;
-
-			var sortedInfo = new TypeInfo[maxIndex + 1];
+			var sortedInfo = new TypeInfo[info.Max(ti => (int)ti.SqlDbType) + 1];
 
 			foreach (var typeInfo in info)
 				sortedInfo[(int)typeInfo.SqlDbType] = typeInfo;
@@ -502,7 +497,7 @@ namespace BLToolkit.Data.Sql
 			if (this == other)
 				return true;
 
-			var value = other as SqlDataType;
+			var value = (SqlDataType)other;
 			return Type == value.Type && Length == value.Length && Precision == value.Precision && Scale == value.Scale;
 		}
 

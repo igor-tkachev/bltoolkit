@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq.Expressions;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Text;
 
 using JetBrains.Annotations;
 
 namespace BLToolkit.ServiceModel
 {
 	using Data.Linq;
-	using Data.Sql.SqlProvider;
-	using Mapping;
-	using Reflection;
 
 	using NotNullAttribute = NotNullAttribute;
 
-	public class ServiceModelDataContext : IDataContext
+	public class ServiceModelDataContext : RemoteDataContextBase
 	{
 		#region Init
 
@@ -71,7 +64,9 @@ namespace BLToolkit.ServiceModel
 
 		#endregion
 
-		ILinqService GetClient()
+		#region Overrides
+
+		protected override ILinqService GetClient()
 		{
 			if (Binding != null)
 				return new LinqServiceClient(Binding, _endpointAddress);
@@ -85,227 +80,23 @@ namespace BLToolkit.ServiceModel
 			return new LinqServiceClient(_endpointConfigurationName);
 		}
 
-		string             _contextID;
-		string IDataContext.ContextID
-		{
-			get { return _contextID ?? (_contextID = "LinqService_" + SqlProviderType.Name.Replace("SqlProvider", "")); }
-		}
-
-		private MappingSchema _mappingSchema;
-		public  MappingSchema  MappingSchema
-		{
-			get
-			{
-				if (_mappingSchema == null)
-				{
-					var sp = ((IDataContext)this).CreateSqlProvider();
-					_mappingSchema = sp is IMappingSchemaProvider ? ((IMappingSchemaProvider)sp).MappingSchema : Map.DefaultSchema;
-				}
-
-				return _mappingSchema;
-			}
-
-			set { _mappingSchema = value; }
-		}
-
-		private        Type _sqlProviderType;
-		public virtual Type  SqlProviderType
-		{
-			get
-			{
-				if (_sqlProviderType == null)
-				{
-					var client = GetClient();
-
-					try
-					{
-						var type = client.GetSqlProviderType();
-						_sqlProviderType = Type.GetType(type);
-					}
-					finally
-					{
-						((IDisposable)client).Dispose();
-					}
-				}
-
-				return _sqlProviderType;
-			}
-
-			set { _sqlProviderType = value;  }
-		}
-
-		static readonly Dictionary<Type,Func<ISqlProvider>> _sqlProviders = new Dictionary<Type, Func<ISqlProvider>>();
-
-		Func<ISqlProvider> _createSqlProvider;
-
-		Func<ISqlProvider> IDataContext.CreateSqlProvider
-		{
-			get
-			{
-				if (_createSqlProvider == null)
-				{
-					var type = SqlProviderType;
-
-					if (!_sqlProviders.TryGetValue(type, out _createSqlProvider))
-						lock (_sqlProviderType)
-							if (!_sqlProviders.TryGetValue(type, out _createSqlProvider))
-								_sqlProviders.Add(type, _createSqlProvider = Expression.Lambda<Func<ISqlProvider>>(Expression.New(type)).Compile());
-				}
-
-				return _createSqlProvider;
-			}
-		}
-
-		class QueryContext
-		{
-			public IQueryContext Query;
-			public ILinqService  Client;
-		}
-
-		object IDataContext.SetQuery(IQueryContext queryContext)
-		{
-			return new QueryContext { Query = queryContext };
-		}
-
-		int IDataContext.ExecuteNonQuery(object query)
-		{
-			var ctx = (QueryContext)query;
-
-			ctx.Client = GetClient();
-
-			var q = ctx.Query.SqlQuery.ProcessParameters();
-
-			return ctx.Client.ExecuteNonQuery(new LinqServiceQuery
-			{
-				Query      = q,
-				Parameters = q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()
-			});
-		}
-
-		object IDataContext.ExecuteScalar(object query)
-		{
-			var ctx = (QueryContext)query;
-
-			ctx.Client = GetClient();
-
-			var q = ctx.Query.SqlQuery.ProcessParameters();
-
-			return ctx.Client.ExecuteScalar(new LinqServiceQuery
-			{
-				Query      = q,
-				Parameters = q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()
-			});
-		}
-
-		IDataReader IDataContext.ExecuteReader(object query)
-		{
-			var ctx = (QueryContext)query;
-
-			ctx.Client = GetClient();
-
-			var q = ctx.Query.SqlQuery.ProcessParameters();
-
-			LinqServiceResult ret;
-
-			ret = ctx.Client.ExecuteReader(new LinqServiceQuery
-			{
-				Query      = q,
-				Parameters = q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()
-			});
-
-			return new ServiceModelDataReader(ret);
-		}
-
-		public void ReleaseQuery(object query)
-		{
-			var ctx = (QueryContext)query;
-
-			((IDisposable)ctx.Client).Dispose();
-		}
-
-		string IDataContext.GetSqlText(object query)
-		{
-			var ctx         = (QueryContext)query;
-			var sqlProvider = ((IDataContext)this).CreateSqlProvider();
-			var sb          = new StringBuilder();
-
-			sb
-				.Append("-- ")
-				.Append("ServiceModel")
-				.Append(' ')
-				.Append(((IDataContext)this).ContextID)
-				.Append(' ')
-				.Append(sqlProvider.Name)
-				.AppendLine();
-
-			if (ctx.Query.SqlQuery.Parameters != null && ctx.Query.SqlQuery.Parameters.Count > 0)
-			{
-				foreach (var p in ctx.Query.SqlQuery.Parameters)
-					sb
-						.Append("-- DECLARE ")
-						.Append(p.Name)
-						.Append(' ')
-						.Append(p.Value == null ? p.SystemType.ToString() : p.Value.GetType().Name)
-						.AppendLine();
-
-				sb.AppendLine();
-
-				foreach (var p in ctx.Query.SqlQuery.Parameters)
-				{
-					var value = p.Value;
-
-					if (value is string || value is char)
-						value = "'" + value.ToString().Replace("'", "''") + "'";
-
-					sb
-						.Append("-- SET ")
-						.Append(p.Name)
-						.Append(" = ")
-						.Append(value)
-						.AppendLine();
-				}
-
-				sb.AppendLine();
-			}
-
-			var cc       = sqlProvider.CommandCount(ctx.Query.SqlQuery);
-			var commands = new string[cc];
-
-			for (var i = 0; i < cc; i++)
-			{
-				sb.Length = 0;
-
-				sqlProvider.BuildSql(i, ctx.Query.SqlQuery, sb, 0, 0, false);
-				commands[i] = sb.ToString();
-			}
-
-			if (!ctx.Query.SqlQuery.ParameterDependent)
-				ctx.Query.Context = commands;
-
-			foreach (var command in commands)
-				sb.AppendLine(command);
-
-			return sb.ToString();
-		}
-
-		IDataContext IDataContext.Clone()
+		protected override IDataContext Clone()
 		{
 			return new ServiceModelDataContext
 			{
 				MappingSchema              = MappingSchema,
+				Binding                    = Binding,
 				_endpointConfigurationName = _endpointConfigurationName,
 				_remoteAddress             = _remoteAddress,
 				_endpointAddress           = _endpointAddress,
-				Binding                   = Binding,
 			};
 		}
 
-		public event EventHandler OnClosing;
-
-		public void Dispose()
+		protected override string ContextIDPrefix
 		{
-			if (OnClosing != null)
-				OnClosing(this, EventArgs.Empty);
+			get { return "LinqService_"; }
 		}
+
+		#endregion
 	}
 }

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-
-using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
@@ -180,15 +176,15 @@ namespace BLToolkit.Data.Linq
 
 		#region NonQueryQuery
 
-		private void FinalizeQuery()
+		void FinalizeQuery()
 		{
 			foreach (var sql in Queries)
 			{
 				sql.SqlQuery   = SqlProvider.Finalize(sql.SqlQuery);
 				sql.Parameters = sql.Parameters
-					.Select(p => new { p, idx = sql.SqlQuery.Parameters.IndexOf(p.SqlParameter) })
+					.Select (p => new { p, idx = sql.SqlQuery.Parameters.IndexOf(p.SqlParameter) })
 					.OrderBy(p => p.idx)
-					.Select(p => p.p)
+					.Select (p => p.p)
 					.ToList();
 			}
 		}
@@ -214,6 +210,46 @@ namespace BLToolkit.Data.Linq
 			try
 			{
 				query = SetCommand(dataContext, expr, parameters, 0);
+				return dataContext.ExecuteNonQuery(query);
+			}
+			finally
+			{
+				if (query != null)
+					dataContext.ReleaseQuery(query);
+
+				if (dataContextInfo.DisposeContext)
+					dataContext.Dispose();
+			}
+		}
+
+		public void SetNonQueryQuery2()
+		{
+			FinalizeQuery();
+
+			if (Queries.Count != 2)
+				throw new InvalidOperationException();
+
+			SqlProvider.SqlQuery = Queries[0].SqlQuery;
+
+			GetElement = (ctx,db,expr,ps) => NonQueryQuery2(db, expr, ps);
+		}
+
+		int NonQueryQuery2(IDataContextInfo dataContextInfo, Expression expr, object[] parameters)
+		{
+			var dataContext = dataContextInfo.DataContext;
+
+			object query = null;
+
+			try
+			{
+				query = SetCommand(dataContext, expr, parameters, 0);
+
+				var n = dataContext.ExecuteNonQuery(query);
+
+				if (n != 0)
+					return n;
+
+				query = SetCommand(dataContext, expr, parameters, 1);
 				return dataContext.ExecuteNonQuery(query);
 			}
 			finally
@@ -373,6 +409,7 @@ namespace BLToolkit.Data.Linq
 		{
 			public static readonly Dictionary<object,Query<int>>    Insert             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<object>> InsertWithIdentity = new Dictionary<object,Query<object>>();
+			public static readonly Dictionary<object,Query<int>>    InsertOrUpdate     = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Update             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
 		}
@@ -386,15 +423,26 @@ namespace BLToolkit.Data.Linq
 		static ParameterAccessor GetParameter<TR>(IDataContext dataContext, SqlField field)
 		{
 			var exprParam = Expression.Parameter(typeof(Expression), "expr");
-			var getter    = (Expression)Expression.PropertyOrField(
-				Expression.Convert(
-					Expression.Property(
-						Expression.Convert(exprParam, typeof(ConstantExpression)),
-						ReflectionHelper.Constant.Value),
-					typeof(T)),
-				field.Name);
 
-			var mm = field.MemberMapper;
+			Expression getter = Expression.Convert(
+				Expression.Property(
+					Expression.Convert(exprParam, typeof(ConstantExpression)),
+					ReflectionHelper.Constant.Value),
+				typeof(T));
+
+			var mm       = field.MemberMapper;
+			var members  = mm.MemberName.Split('.');
+			var defValue = Expression.Constant(
+				mm.MapMemberInfo.DefaultValue ?? TypeHelper.GetDefaultValue(mm.MapMemberInfo.Type),
+				mm.MapMemberInfo.Type);
+
+			for (var i = 0; i < members.Length; i++)
+			{
+				var member = members[i];
+				var pof    = Expression.PropertyOrField(getter, member) as Expression;
+
+				getter = i == 0 ? pof : Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
+			}
 
 			if (!mm.Type.IsClass && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
 			{
@@ -415,7 +463,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(field.SystemType, field.Name, null, dataContext.MappingSchema)
+				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema)
 			};
 
 			if (field.SystemType.IsEnum)
@@ -442,7 +490,7 @@ namespace BLToolkit.Data.Linq
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
 
-						sqlQuery.Set.Into = sqlTable;
+						sqlQuery.Insert.Into = sqlTable;
 
 						ei = new Query<int>
 						{
@@ -460,14 +508,14 @@ namespace BLToolkit.Data.Linq
 
 								ei.Queries[0].Parameters.Add(param);
 
-								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+								sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
 							}
 							else if (field.Value.IsIdentity)
 							{
 								var expr = ei.SqlProvider.GetIdentityExpression(sqlTable, field.Value, false);
 
 								if (expr != null)
-									sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
+									sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
 							}
 						}
 
@@ -499,8 +547,8 @@ namespace BLToolkit.Data.Linq
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
 
-						sqlQuery.Set.Into         = sqlTable;
-						sqlQuery.Set.WithIdentity = true;
+						sqlQuery.Insert.Into         = sqlTable;
+						sqlQuery.Insert.WithIdentity = true;
 
 						ei = new Query<object>
 						{
@@ -518,14 +566,14 @@ namespace BLToolkit.Data.Linq
 
 								ei.Queries[0].Parameters.Add(param);
 
-								sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
+								sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, param.SqlParameter));
 							}
 							else if (field.Value.IsIdentity)
 							{
 								var expr = ei.SqlProvider.GetIdentityExpression(sqlTable, field.Value, true);
 
 								if (expr != null)
-									sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
+									sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field.Value, expr));
 							}
 						}
 
@@ -535,6 +583,173 @@ namespace BLToolkit.Data.Linq
 					}
 
 			return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
+		}
+
+		#endregion
+
+		#region InsertOrReplace
+
+		[Obsolete("Use 'InsertOrReplace' instead.")]
+		public static int InsertOrUpdate(IDataContextInfo dataContextInfo, T obj)
+		{
+			return InsertOrReplace(dataContextInfo, obj);
+		}
+
+		public static int InsertOrReplace(IDataContextInfo dataContextInfo, T obj)
+		{
+			if (Equals(default(T), obj))
+				return 0;
+
+			Query<int> ei;
+
+			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
+
+			if (!ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+			{
+				lock (_sync)
+				{
+					if (!ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+					{
+						var fieldDic = new Dictionary<SqlField, ParameterAccessor>();
+						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+						var sqlQuery = new SqlQuery { QueryType = QueryType.InsertOrUpdate };
+
+						ParameterAccessor param;
+
+						sqlQuery.Insert.Into  = sqlTable;
+						sqlQuery.Update.Table = sqlTable;
+
+						sqlQuery.From.Table(sqlTable);
+
+						ei = new Query<int>
+						{
+							MappingSchema     = dataContextInfo.MappingSchema,
+							ContextID         = dataContextInfo.ContextID,
+							CreateSqlProvider = dataContextInfo.CreateSqlProvider,
+							Queries           = { new Query<int>.QueryInfo { SqlQuery = sqlQuery, } }
+						};
+
+						var supported = ei.SqlProvider.IsInsertOrUpdateSupported && ei.SqlProvider.CanCombineParameters;
+
+						// Insert.
+						//
+						foreach (var field in sqlTable.Fields.Select(f => f.Value))
+						{
+							if (field.IsInsertable)
+							{
+								if (!supported || !fieldDic.TryGetValue(field, out param))
+								{
+									param = GetParameter<int>(dataContextInfo.DataContext, field);
+									ei.Queries[0].Parameters.Add(param);
+
+									if (supported)
+										fieldDic.Add(field, param);
+								}
+
+								sqlQuery.Insert.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+							}
+							else if (field.IsIdentity)
+							{
+								throw new LinqException("InsertOrUpdate method does not support identity field '{0}.{1}'.", sqlTable.Name, field.Name);
+							}
+						}
+
+						// Update.
+						//
+						var keys   = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
+						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
+
+						if (keys.Count == 0)
+							throw new LinqException("InsertOrUpdate method requires the '{0}' table to have a primary key.", sqlTable.Name);
+
+						var q =
+						(
+							from k in keys
+							join i in sqlQuery.Insert.Items on k equals i.Column
+							select new { k, i }
+						).ToList();
+
+						var missedKey = keys.Except(q.Select(i => i.k)).FirstOrDefault();
+
+						if (missedKey != null)
+							throw new LinqException("InsertOrUpdate method requires the '{0}.{1}' field to be included in the insert setter.",
+								sqlTable.Name,
+								missedKey.Name);
+
+						if (fields.Count == 0)
+							throw new LinqException(
+								string.Format("There are no fields to update in the type '{0}'.", sqlTable.Name));
+
+						foreach (var field in fields)
+						{
+							if (!supported || !fieldDic.TryGetValue(field, out param))
+							{
+								param = GetParameter<int>(dataContextInfo.DataContext, field);
+								ei.Queries[0].Parameters.Add(param);
+
+								if (supported)
+									fieldDic.Add(field, param = GetParameter<int>(dataContextInfo.DataContext, field));
+							}
+
+							sqlQuery.Update.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+						}
+
+						sqlQuery.Update.Keys.AddRange(q.Select(i => i.i));
+
+						// Set the query.
+						//
+						if (ei.SqlProvider.IsInsertOrUpdateSupported)
+							ei.SetNonQueryQuery();
+						else
+							ei.MakeAlternativeInsertOrUpdate(sqlQuery);
+
+						ObjectOperation<T>.InsertOrUpdate.Add(key, ei);
+					}
+				}
+			}
+
+			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
+		}
+
+		internal void MakeAlternativeInsertOrUpdate(SqlQuery sqlQuery)
+		{
+			var dic = new Dictionary<ICloneableElement,ICloneableElement>();
+
+			var insertQuery = (SqlQuery)sqlQuery.Clone(dic, _ => true);
+
+			insertQuery.QueryType = QueryType.Insert;
+			insertQuery.ClearUpdate();
+			insertQuery.From.Tables.Clear();
+
+			Queries.Add(new QueryInfo
+			{
+				SqlQuery   = insertQuery,
+				Parameters = Queries[0].Parameters
+					.Select(p => new ParameterAccessor
+						{
+							Expression   = p.Expression,
+							Accessor     = p.Accessor,
+							SqlParameter = dic.ContainsKey(p.SqlParameter) ? (SqlParameter)dic[p.SqlParameter] : null
+						})
+					.Where(p => p.SqlParameter != null)
+					.ToList(),
+			});
+
+			var keys = sqlQuery.Update.Keys;
+
+			foreach (var key in keys)
+				sqlQuery.Where.Expr(key.Column).Equal.Expr(key.Expression);
+
+			sqlQuery.QueryType = QueryType.Update;
+			sqlQuery.ClearInsert();
+
+			SetNonQueryQuery2();
+
+			Queries.Add(new QueryInfo
+			{
+				SqlQuery   = insertQuery,
+				Parameters = Queries[0].Parameters.ToList(),
+			});
 		}
 
 		#endregion
@@ -585,7 +800,7 @@ namespace BLToolkit.Data.Linq
 
 							ei.Queries[0].Parameters.Add(param);
 
-							sqlQuery.Set.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
+							sqlQuery.Update.Items.Add(new SqlQuery.SetExpression(field, param.SqlParameter));
 						}
 
 						foreach (var field in keys)

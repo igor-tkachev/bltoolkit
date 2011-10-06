@@ -4,12 +4,12 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	class ConcatUnionBuilder : MethodCallBuilder
 	{
@@ -64,7 +64,7 @@ namespace BLToolkit.Data.Linq.Builder
 			readonly bool                          _isObject;
 			readonly MethodCallExpression          _methodCall;
 			readonly ParameterExpression           _unionParameter;
-			readonly Dictionary<MemberInfo,Member> _members = new Dictionary<MemberInfo,Member>();
+			readonly Dictionary<MemberInfo,Member> _members = new Dictionary<MemberInfo,Member>(new MemberInfoComparer());
 
 			class Member
 			{
@@ -150,8 +150,8 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					if (expression == null)
 					{
-						var type   = _methodCall.Method.GetGenericArguments()[0];
-						var nctor  = (NewExpression)Expression.Find(e =>
+						var type  = _methodCall.Method.GetGenericArguments()[0];
+						var nctor = (NewExpression)Expression.Find(e =>
 						{
 							if (e.NodeType == ExpressionType.New && e.Type == type)
 							{
@@ -179,8 +179,10 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 						else
 						{
+							var ta = TypeAccessor.GetAccessor(type);
+
 							expr = Expression.MemberInit(
-								Expression.New(type),
+								Expression.New(ta.Type),
 								_members
 									.Select(m => Expression.Bind(m.Value.MemberExpression.Member, m.Value.MemberExpression))
 									.Cast<MemberBinding>());
@@ -198,7 +200,12 @@ namespace BLToolkit.Data.Linq.Builder
 						if (expression == levelExpression)
 						{
 							var idx = ConvertToIndex(expression, level, ConvertFlags.Field);
-							return Builder.BuildSql(expression.Type, idx[0].Index);
+							var n   = idx[0].Index;
+
+							if (Parent != null)
+								n = Parent.ConvertToParentIndex(n, this);
+
+							return Builder.BuildSql(expression.Type, n);
 						}
 					}
 

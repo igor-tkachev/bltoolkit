@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.ServiceModel;
+using System.Web.Services;
+using BLToolkit.Data;
 
 namespace BLToolkit.ServiceModel
 {
 	using Data.Linq;
 	using Data.Sql;
 
-	[ServiceBehavior(
-		InstanceContextMode = InstanceContextMode.Single,
-		ConcurrencyMode     = ConcurrencyMode.Multiple)]
+	[ServiceBehavior  (InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
+	[WebService       (Namespace  = "http://tempuri.org/")]
+	[WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 	public class LinqService : ILinqService
 	{
-		public string Configuration { get; set; }
-
 		public LinqService()
 		{
 		}
@@ -24,15 +25,27 @@ namespace BLToolkit.ServiceModel
 			Configuration = configuration;
 		}
 
+		public string Configuration { get; set; }
+		public bool   AllowUpdates  { get; set; }
+
+		public static Func<string,Type> TypeResolver = _ => null;
+
 		public virtual IDataContext CreateDataContext()
 		{
 			return Settings.CreateDefaultDataContext(Configuration);
+		}
+
+		protected virtual void ValidateQuery(LinqServiceQuery query)
+		{
+			if (AllowUpdates == false && !query.Query.IsSelect)
+				throw new LinqException("Insert/Update/Delete requests are not allowed by the service policy.");
 		}
 
 		#region ILinqService Members
 
 		public Type SqlProviderType { get; set; }
 
+		[WebMethod]
 		public virtual string GetSqlProviderType()
 		{
 			if (SqlProviderType == null)
@@ -54,8 +67,11 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		public int ExecuteNonQuery(LinqServiceQuery query)
+		[WebMethod]
+		public int ExecuteNonQuery(string queryData)
 		{
+			var query = LinqServiceSerializer.Deserialize(queryData);
+
 			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
@@ -65,8 +81,11 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		public object ExecuteScalar(LinqServiceQuery query)
+		[WebMethod]
+		public object ExecuteScalar(string queryData)
 		{
+			var query = LinqServiceSerializer.Deserialize(queryData);
+
 			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
@@ -76,8 +95,11 @@ namespace BLToolkit.ServiceModel
 			}
 		}
 
-		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
+		[WebMethod]
+		public string ExecuteReader(string queryData)
 		{
+			var query = LinqServiceSerializer.Deserialize(queryData);
+
 			ValidateQuery(query);
 
 			using (var db = CreateDataContext())
@@ -160,21 +182,36 @@ namespace BLToolkit.ServiceModel
 
 					ret.VaryingTypes = varyingTypes.ToArray();
 
-					return ret;
+					return LinqServiceSerializer.Serialize(ret);
 				}
 			}
 		}
 
-		#endregion
-
-		public bool AllowUpdates { get; set; }
-
-		protected virtual void ValidateQuery(LinqServiceQuery query)
+		[WebMethod]
+		public int ExecuteBatch(string queryData)
 		{
-			if (AllowUpdates == false && query.Query.QueryType != QueryType.Select)
-				throw new LinqException("Insert/Update/Delete requests are not allowed by the service policy.");
+			var data    = LinqServiceSerializer.DeserializeStringArray(queryData);
+			var queries = data.Select(LinqServiceSerializer.Deserialize).ToArray();
+
+			foreach (var query in queries)
+				ValidateQuery(query);
+
+			using (var db = CreateDataContext())
+			{
+				if (db is DbManager) ((DbManager)db).BeginTransaction();
+
+				foreach (var query in queries)
+				{
+					var obj = db.SetQuery(new QueryContext { SqlQuery = query.Query, Parameters = query.Parameters });
+					db.ExecuteNonQuery(obj);
+				}
+
+				if (db is DbManager) ((DbManager)db).CommitTransaction();
+
+				return queryData.Length;
+			}
 		}
 
-		public static Func<string,Type> TypeResolver = _ => null;
+		#endregion
 	}
 }

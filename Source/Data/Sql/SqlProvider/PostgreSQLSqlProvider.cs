@@ -10,19 +10,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{
+		public override bool IsInsertOrUpdateSupported { get { return false; } }
+
 		public override int CommandCount(SqlQuery sqlQuery)
 		{
-			return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
+			return sqlQuery.IsInsert && sqlQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
 		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 		{
-			var attr = GetSequenceNameAttribute(SqlQuery.Set.Into, false);
+			var into = SqlQuery.Insert.Into;
+			var attr = GetSequenceNameAttribute(into, false);
 			var name =
 				attr != null ?
 					attr.SequenceName :
 					Convert(
-						string.Format("{0}_{1}_seq", SqlQuery.Set.Into.PhysicalName, SqlQuery.Set.Into.GetIdentityField().PhysicalName),
+						string.Format("{0}_{1}_seq", into.PhysicalName, into.GetIdentityField().PhysicalName),
 						ConvertType.NameToQueryField);
 
 			AppendIndent(sb)
@@ -36,7 +39,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return new PostgreSQLSqlProvider();
 		}
 
-		protected override string LimitFormat  { get { return "LIMIT {0}"; } }
+		protected override string LimitFormat  { get { return "LIMIT {0}";   } }
 		protected override string OffsetFormat { get { return "OFFSET {0} "; } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
@@ -141,7 +144,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 
@@ -184,5 +187,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+
+		//protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		//{
+		//	BuildInsertOrUpdateQueryAsMerge(sb, null);
+		//}
 	}
 }

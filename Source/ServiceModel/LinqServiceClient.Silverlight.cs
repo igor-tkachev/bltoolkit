@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ServiceModel;
-using System.Threading;
-//using System.ServiceModel.Channels;
 
 namespace BLToolkit.ServiceModel
 {
@@ -9,16 +7,10 @@ namespace BLToolkit.ServiceModel
 	{
 		#region Init
 
-		//public LinqServiceClient() {}
-		public LinqServiceClient(string endpointConfigurationName)                                                                  : base(endpointConfigurationName) { }
-		public LinqServiceClient(string endpointConfigurationName, string remoteAddress)                                            : base(endpointConfigurationName, remoteAddress) { }
-		public LinqServiceClient(string endpointConfigurationName, EndpointAddress remoteAddress)                                   : base(endpointConfigurationName, remoteAddress) { }
-		public LinqServiceClient(System.ServiceModel.Channels.Binding binding, EndpointAddress remoteAddress)                       : base(binding, remoteAddress) { }
-		//public LinqServiceClient(InstanceContext callbackInstance)                                                                  : base(callbackInstance) { }
-		//public LinqServiceClient(InstanceContext callbackInstance, string endpointConfigurationName)                                : base(callbackInstance, endpointConfigurationName) { }
-		//public LinqServiceClient(InstanceContext callbackInstance, string endpointConfigurationName, string remoteAddress)          : base(callbackInstance, endpointConfigurationName, remoteAddress) { }
-		//public LinqServiceClient(InstanceContext callbackInstance, string endpointConfigurationName, EndpointAddress remoteAddress) : base(callbackInstance, endpointConfigurationName, remoteAddress) { }
-		//public LinqServiceClient(InstanceContext callbackInstance, Binding binding, EndpointAddress remoteAddress)                  : base(callbackInstance, binding, remoteAddress) { }
+		public LinqServiceClient(string endpointConfigurationName)                                            : base(endpointConfigurationName) { }
+		public LinqServiceClient(string endpointConfigurationName, string remoteAddress)                      : base(endpointConfigurationName, remoteAddress) { }
+		public LinqServiceClient(string endpointConfigurationName, EndpointAddress remoteAddress)             : base(endpointConfigurationName, remoteAddress) { }
+		public LinqServiceClient(System.ServiceModel.Channels.Binding binding, EndpointAddress remoteAddress) : base(binding, remoteAddress) { }
 
 		#endregion
 
@@ -30,22 +22,28 @@ namespace BLToolkit.ServiceModel
 			return Channel.EndGetSqlProviderType(async);
 		}
 
-		public int ExecuteNonQuery(LinqServiceQuery query)
+		public int ExecuteNonQuery(string queryData)
 		{
-			var async = Channel.BeginExecuteNonQuery(query, null, null);
+			var async = Channel.BeginExecuteNonQuery(queryData, null, null);
 			return Channel.EndExecuteNonQuery(async);
 		}
 
-		public object ExecuteScalar(LinqServiceQuery query)
+		public object ExecuteScalar(string queryData)
 		{
-			var async = Channel.BeginExecuteScalar(query, null, null);
+			var async = Channel.BeginExecuteScalar(queryData, null, null);
 			return Channel.EndExecuteScalar(async);
 		}
 
-		public LinqServiceResult ExecuteReader(LinqServiceQuery query)
+		public string ExecuteReader(string queryData)
 		{
-			var async = Channel.BeginExecuteReader(query, null, null);
+			var async = Channel.BeginExecuteReader(queryData, null, null);
 			return Channel.EndExecuteReader(async);
+		}
+
+		public int ExecuteBatch(string queryData)
+		{
+			var async = Channel.BeginExecuteBatch(queryData, null, null);
+			return Channel.EndExecuteBatch(async);
 		}
 
 		#endregion
@@ -89,7 +87,7 @@ namespace BLToolkit.ServiceModel
 
 		#region Channel
 
-		private class LinqServiceClientChannel : ChannelBase<Async.ILinqService>, Async.ILinqService
+		class LinqServiceClientChannel : ChannelBase<Async.ILinqService>, Async.ILinqService
 		{
 			public LinqServiceClientChannel(ClientBase<Async.ILinqService> client) :
 				base(client)
@@ -106,34 +104,44 @@ namespace BLToolkit.ServiceModel
 				return (string)EndInvoke("GetSqlProviderType", new object[0], result);
 			}
 
-			public IAsyncResult BeginExecuteNonQuery(LinqServiceQuery query, AsyncCallback callback, object asyncState)
+			public IAsyncResult BeginExecuteNonQuery(string queryData, AsyncCallback callback, object asyncState)
 			{
-				return BeginInvoke("ExecuteNonQuery", new object[] { query }, callback, asyncState);
+				return BeginInvoke("ExecuteNonQuery", new object[] { queryData }, callback, asyncState);
 			}
 
-			public int EndExecuteNonQuery(System.IAsyncResult result)
+			public int EndExecuteNonQuery(IAsyncResult result)
 			{
 				return (int)EndInvoke("ExecuteNonQuery", new object[0], result);
 			}
 
-			public IAsyncResult BeginExecuteScalar(LinqServiceQuery query, AsyncCallback callback, object asyncState)
+			public IAsyncResult BeginExecuteScalar(string queryData, AsyncCallback callback, object asyncState)
 			{
-				return BeginInvoke("ExecuteScalar", new object[] { query }, callback, asyncState);
+				return BeginInvoke("ExecuteScalar", new object[] { queryData }, callback, asyncState);
 			}
 
 			public object EndExecuteScalar(IAsyncResult result)
 			{
-				return (object)base.EndInvoke("ExecuteScalar", new object[0], result);
+				return EndInvoke("ExecuteScalar", new object[0], result);
 			}
 
-			public IAsyncResult BeginExecuteReader(LinqServiceQuery query, AsyncCallback callback, object asyncState)
+			public IAsyncResult BeginExecuteReader(string queryData, AsyncCallback callback, object asyncState)
 			{
-				return BeginInvoke("ExecuteReader", new object[] { query }, callback, asyncState);
+				return BeginInvoke("ExecuteReader", new object[] { queryData }, callback, asyncState);
 			}
 
-			public LinqServiceResult EndExecuteReader(IAsyncResult result)
+			public string EndExecuteReader(IAsyncResult result)
 			{
-				return (LinqServiceResult)base.EndInvoke("ExecuteReader", new object[0], result);
+				return (string)EndInvoke("ExecuteReader", new object[0], result);
+			}
+
+			public IAsyncResult BeginExecuteBatch(string queryData, AsyncCallback callback, object asyncState)
+			{
+				return BeginInvoke("ExecuteBatch", new object[] { queryData }, callback, asyncState);
+			}
+
+			public int EndExecuteBatch(IAsyncResult result)
+			{
+				return (int)EndInvoke("ExecuteBatch", new object[0], result);
 			}
 		}
 

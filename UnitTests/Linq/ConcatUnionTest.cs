@@ -2,7 +2,8 @@
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -143,11 +144,10 @@ namespace Data.Linq
 		[Test]
 		public void Concat6()
 		{
-			var expected =
-				Child.Where(c => c.GrandChildren.Count == 2).Concat(Child.Where(c => c.GrandChildren.Count() == 3));
-
-			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(expected, 
-				db.Child.Where(c => c.GrandChildren.Count == 2).Concat(db.Child.Where(c => c.GrandChildren.Count() == 3))));
+			ForEachProvider(new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					   Child.Where(c => c.GrandChildren.Count == 2).Concat(   Child.Where(c => c.GrandChildren.Count() == 3)),
+					db.Child.Where(c => c.GrandChildren.Count == 2).Concat(db.Child.Where(c => c.GrandChildren.Count() == 3))));
 		}
 
 		[Test]
@@ -345,6 +345,23 @@ namespace Data.Linq
 					(from p1 in db.Parent select new { ParentID = p1.ParentID,    p = p1,           ch = (Child)null }).Union(
 					(from p2 in db.Parent select new { ParentID = p2.Value1 ?? 0, p = (Parent)null, ch = p2.Children.First() }))
 					.Select(p => new { p.ParentID, p.p, p.ch })));
+		}
+
+		[TableName("Parent")]
+		public abstract class AbstractParent
+		{
+			public abstract int  ParentID { get; set; }
+			public abstract int? Value1   { get; set; }
+		}
+
+		[Test]
+		public void UnionAbstract1()
+		{
+			ForEachProvider(db =>
+			{
+				var list = db.GetTable<AbstractParent>().Union(db.GetTable<AbstractParent>()).ToList();
+				Assert.AreEqual(Parent.Count(), list.Count);
+			});
 		}
 	}
 }

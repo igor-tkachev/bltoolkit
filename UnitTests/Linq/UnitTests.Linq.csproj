@@ -174,10 +174,13 @@
     <Compile Include="DataContextTest.cs" />
     <Compile Include="Exceptions\Common.cs" />
     <Compile Include="Exceptions\Aggregation.cs" />
+    <Compile Include="Exceptions\DmlTest.cs" />
     <Compile Include="ExtensionTests.cs" />
+    <Compile Include="GenerateTest.cs" />
     <Compile Include="IdlTest.cs" />
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="ParserTest.cs" />
+    <Compile Include="Providers.cs" />
     <Compile Include="ProviderSpecific\Firebird.cs" />
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />

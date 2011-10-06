@@ -117,6 +117,7 @@
     </Reference>
     <Reference Include="System.Data.Linq">
     </Reference>
+    <Reference Include="System.Data.Services" />
     <Reference Include="System.Design">
     </Reference>
     <Reference Include="System.Drawing">
@@ -127,6 +128,7 @@
     </Reference>
     <Reference Include="System.Web">
     </Reference>
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Forms">
     </Reference>
     <Reference Include="System.Xml">
@@ -208,6 +210,7 @@
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
@@ -232,6 +235,7 @@
     <Compile Include="Data\Linq\Builder\TableAttributeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
+    <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
@@ -511,14 +515,19 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
+    <Compile Include="ServiceModel\DataService.cs" />
+    <Compile Include="ServiceModel\ILinqSoapService.cs" />
+    <Compile Include="ServiceModel\LinqSoapServiceClient.cs" />
     <Compile Include="ServiceModel\ILinqService.cs" />
     <Compile Include="ServiceModel\LinqService.cs" />
     <Compile Include="ServiceModel\LinqServiceClient.cs" />
     <Compile Include="ServiceModel\LinqServiceQuery.cs" />
     <Compile Include="ServiceModel\LinqServiceResult.cs" />
     <Compile Include="ServiceModel\LinqServiceSerializer.cs" />
+    <Compile Include="ServiceModel\RemoteDataContextBase.cs" />
     <Compile Include="ServiceModel\ServiceModelDataContext.cs" />
     <Compile Include="ServiceModel\ServiceModelDataReader.cs" />
+    <Compile Include="ServiceModel\SoapDataContext.cs" />
     <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />

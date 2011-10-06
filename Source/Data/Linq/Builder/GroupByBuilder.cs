@@ -300,7 +300,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			Expression BuildGrouping()
 			{
-				var gtype  = typeof(GroupByHelper<,,>).MakeGenericType(
+				var gtype = typeof(GroupByHelper<,,>).MakeGenericType(
 					_key.Lambda.Body.Type,
 					_element.Lambda.Body.Type,
 					_key.Lambda.Parameters[0].Type);
@@ -336,8 +336,6 @@ namespace BLToolkit.Data.Linq.Builder
 								_key.BuildExpression(null,       0) :
 								_key.BuildExpression(expression, level + 1);
 						}
-
-						//return Sequence.BuildExpression(expression, level);
 					}
 				}
 
@@ -363,10 +361,9 @@ namespace BLToolkit.Data.Linq.Builder
 								{
 									var p   = _element.Parent;
 									var ctx = new ExpressionContext(Parent, _element, l);
+									var sql = Builder.ConvertToSql(ctx, l.Body, true);
 
-									_element.Parent = p;
-
-									var sql = Builder.ConvertToSql(ctx, l.Body.Unwrap());
+									Builder.ReplaceParent(ctx, p);
 
 									return new SqlFunction(call.Type, call.Method.Name, sql);
 								}
@@ -394,60 +391,10 @@ namespace BLToolkit.Data.Linq.Builder
 				if (CountBuilder.MethodNames.Contains(call.Method.Name))
 				{
 					if (args.Length > 0)
-					{
 						throw new InvalidOperationException();
-
-						/*
-						var ctx = _element;
-						var l   = (LambdaExpression)call.Arguments[1].Unwrap();
-						var cnt = Builder.BuildWhere(Parent, ctx, l, false);
-						var sql = cnt.SqlQuery.Clone((_ => !(_ is SqlParameter)));
-
-						sql.ParentSql = SqlQuery;
-						sql.Select.Columns.Clear();
-
-						if (ctx == cnt)
-							ctx.SqlQuery.Where.SearchCondition.Conditions.RemoveAt(ctx.SqlQuery.Where.SearchCondition.Conditions.Count - 1);
-
-						if (Builder.SqlProvider.IsSubQueryColumnSupported && Builder.SqlProvider.IsCountSubQuerySupported)
-						{
-							for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-							{
-								var item1 = sql.GroupBy.Items[i];
-								var item2 = SqlQuery.GroupBy.Items[i];
-								var pr    = Builder.Convert(this, new SqlQuery.Predicate.ExprExpr(item1, SqlQuery.Predicate.Operator.Equal, item2));
-
-								sql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, pr));
-							}
-
-							sql.GroupBy.Items.Clear();
-							sql.Select.Expr(SqlFunction.CreateCount(call.Type, sql));
-
-							return sql;
-						}
-
-						var join = sql.WeakLeftJoin();
-
-						SqlQuery.From.Tables[0].Joins.Add(join.JoinedTable);
-
-						for (var i = 0; i < sql.GroupBy.Items.Count; i++)
-						{
-							var item1 = sql.GroupBy.Items[i];
-							var item2 = SqlQuery.GroupBy.Items[i];
-							var col   = sql.Select.Columns[sql.Select.Add(item1)];
-							var pr    = Builder.Convert(this, new SqlQuery.Predicate.ExprExpr(col, SqlQuery.Predicate.Operator.Equal, item2));
-
-							join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, pr));
-						}
-
-						return new SqlFunction(call.Type, "Count", sql.Select.Columns[0]);
-						*/
-					}
 
 					return SqlFunction.CreateCount(call.Type, SqlQuery);
 				}
-
-				//throw new NotImplementedException();
 
 				if (call.Arguments.Count > 1)
 				{
@@ -461,9 +408,9 @@ namespace BLToolkit.Data.Linq.Builder
 							var p   = _element.Parent;
 							var ctx = new ExpressionContext(Parent, _element, l);
 
-							_element.Parent = p;
+							args[i - 1] = Builder.ConvertToSql(ctx, l.Body, true);
 
-							args[i - 1] = Builder.ConvertToSql(ctx, l.Body.Unwrap());
+							Builder.ReplaceParent(ctx, p);
 						}
 						else
 						{
@@ -559,11 +506,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				//switch (requestFlag)
-				//{
-				//	case RequestFor.Object: return expression == null;
-				//}
-
 				if (level != 0)
 				{
 					var levelExpression = expression.GetLevelExpression(level);
@@ -578,8 +520,6 @@ namespace BLToolkit.Data.Linq.Builder
 								_key.IsExpression(null,       0,         requestFlag) :
 								_key.IsExpression(expression, level + 1, requestFlag);
 						}
-
-						//return Sequence.BuildExpression(expression, level);
 					}
 				}
 
@@ -590,7 +530,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				var expr = SqlQuery.Select.Columns[index].Expression;
 
-				if (!SqlQuery.GroupBy.Items.Exists(_ => _ == expr))
+				if (!SqlQuery.GroupBy.Items.Exists(_ => _ == expr || (expr is SqlQuery.Column && _ == ((SqlQuery.Column)expr).Expression)))
 					SqlQuery.GroupBy.Items.Add(expr);
 
 				return base.ConvertToParentIndex(index, this);

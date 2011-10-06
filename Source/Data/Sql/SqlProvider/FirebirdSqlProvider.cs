@@ -23,14 +23,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 //		public override int CommandCount(SqlQuery sqlQuery)
 //		{
-//		    return sqlQuery.QueryType == QueryType.Insert && sqlQuery.Set.WithIdentity ? 2 : 1;
-//        }
+//			return sqlQuery.IsInsert && sqlQuery.Set.WithIdentity ? 2 : 1;
+//		}
 
-//        protected override void BuildCommand(int commandNumber, StringBuilder sb)
+//		protected override void BuildCommand(int commandNumber, StringBuilder sb)
 //		{
 //			SequenceNameAttribute attr = GetSequenceNameAttribute(true);
 //
-//            AppendIndent(sb)
+//			AppendIndent(sb)
 //				.Append("SELECT gen_id(")
 //				.Append(attr.SequenceName)
 //				.AppendLine(", 0) FROM rdb$database");
@@ -58,14 +58,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override bool   SkipFirst   { get { return false;       } }
 		protected override string SkipFormat  { get { return "SKIP {0}";  } }
 		protected override string FirstFormat { get { return "FIRST {0}"; } }
+
 		public override bool IsIdentityParameterRequired { get { return true; } }
 
 		protected override void BuildGetIdentity(StringBuilder sb)
 		{
-			var identityField = SqlQuery.Set.Into.GetIdentityField();
+			var identityField = SqlQuery.Insert.Into.GetIdentityField();
 
 			if (identityField == null)
-				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Set.Into.Name);
+				throw new SqlException("Identity field must be defined for '{0}'.", SqlQuery.Insert.Into.Name);
 
 			AppendIndent(sb).AppendLine("RETURNING");
 			AppendIndent(sb).Append("\t");
@@ -181,6 +182,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			new QueryVisitor().Visit(sqlQuery.Select, SetNonQueryParameter);
 
+			if (sqlQuery.QueryType == QueryType.InsertOrUpdate)
+			{
+				foreach (var key in sqlQuery.Insert.Items)
+					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
+
+				foreach (var key in sqlQuery.Update.Items)
+					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
+
+				foreach (var key in sqlQuery.Update.Keys)
+					new QueryVisitor().Visit(key.Expression, SetNonQueryParameter);
+			}
+
 			new QueryVisitor().Visit(sqlQuery, element =>
 			{
 				if (element.ElementType == QueryElementType.InSubQueryPredicate)
@@ -199,7 +212,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildFromClause(StringBuilder sb)
 		{
-			if (SqlQuery.QueryType != QueryType.Update)
+			if (!SqlQuery.IsUpdate)
 				base.BuildFromClause(sb);
 		}
 
@@ -259,6 +272,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsMerge(sb, "FROM rdb$database");
 		}
 
 		#region IMappingSchemaProvider Members

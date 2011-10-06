@@ -5,11 +5,11 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Common;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
+	using Common;
 	using Data.Sql;
 	using Data.Sql.SqlProvider;
 	using Mapping;
@@ -42,6 +42,7 @@ namespace BLToolkit.Data.Linq.Builder
 			new InsertBuilder        (),
 			new InsertBuilder.Into   (),
 			new InsertBuilder.Value  (),
+			new InsertOrUpdateBuilder(),
 			new UpdateBuilder        (),
 			new UpdateBuilder.Set    (),
 			new DeleteBuilder        (),
@@ -103,6 +104,7 @@ namespace BLToolkit.Data.Linq.Builder
 		public readonly Expression            OriginalExpression;
 		public readonly Expression            Expression;
 		public readonly ParameterExpression[] CompiledParameters;
+		public readonly List<IBuildContext>   Contexts = new List<IBuildContext>();
 
 		private ISqlProvider _sqlProvider;
 		public  ISqlProvider  SqlProvider
@@ -200,6 +202,17 @@ namespace BLToolkit.Data.Linq.Builder
 					return builder.Convert(this, buildInfo, param);
 
 			throw new LinqException("Sequence '{0}' cannot be converted to SQL.", buildInfo.Expression);
+		}
+
+		public bool IsSequence(BuildInfo buildInfo)
+		{
+			buildInfo.Expression = buildInfo.Expression.Unwrap();
+
+			foreach (var builder in _builders)
+				if (builder.CanBuild(this, buildInfo))
+					return builder.IsSequence(this, buildInfo);
+
+			return false;
 		}
 
 		#endregion
@@ -866,7 +879,12 @@ namespace BLToolkit.Data.Linq.Builder
 				types["TKey"],
 				types.ContainsKey("TElement") ? types["TElement"] : types["TSource"],
 				types.ContainsKey("TResult")  ? types["TResult"]  : types["TSource"]);
-			var helper = (IGroupByHelper)Activator.CreateInstance(gtype);
+
+			var helper =
+				//Expression.Lambda<Func<IGroupByHelper>>(
+				//	Expression.Convert(Expression.New(gtype), typeof(IGroupByHelper)))
+				//.Compile()();
+				(IGroupByHelper)Activator.CreateInstance(gtype);
 
 			helper.Set(needSubQuery, sourceExpression, keySelector, elementSelector, resultSelector);
 
@@ -990,7 +1008,11 @@ namespace BLToolkit.Data.Linq.Builder
 			var colSelector      = (LambdaExpression)OptimizeExpression(method.Arguments[1].Unwrap());
 
 			var gtype  = typeof(SelectManyHelper<,>).MakeGenericType(types["TSource"], types["TResult"]);
-			var helper = (ISelectManyHelper)Activator.CreateInstance(gtype);
+			var helper =
+				//Expression.Lambda<Func<ISelectManyHelper>>(
+				//	Expression.Convert(Expression.New(gtype), typeof(ISelectManyHelper)))
+				//.Compile()();
+				(ISelectManyHelper)Activator.CreateInstance(gtype);
 
 			helper.Set(sourceExpression, colSelector);
 

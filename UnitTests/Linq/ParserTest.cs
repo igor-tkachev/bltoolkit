@@ -917,6 +917,11 @@ namespace Data.Linq
 			return null;
 		}
 
+		public bool IsSequence(ExpressionBuilder builder, BuildInfo buildInfo)
+		{
+			return builder.IsSequence(new BuildInfo(buildInfo, ((MethodCallExpression)buildInfo.Expression).Arguments[0]));
+		}
+
 		public class Context : PassThroughContext
 		{
 			public Context(IBuildContext context) : base(context)

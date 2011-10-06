@@ -25,6 +25,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public    override bool   TakeAcceptsParameter     { get { return false;     } }
 		public    override bool   IsSubQueryTakeSupported  { get { return false;     } }
 		public    override bool   IsCountSubQuerySupported { get { return false;     } }
+		public    override bool   CanCombineParameters     { get { return false;     } }
 
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
@@ -132,8 +133,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			if (SqlQuery.Set.Into != null && SqlQuery.Set.Into != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Set.Into, null);
+			if (SqlQuery.Update.Table != null && SqlQuery.Update.Table != SqlQuery.From.Tables[0].Source)
+				BuildPhysicalTable(sb, SqlQuery.Update.Table, null);
 			else
 				BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 		}
@@ -173,7 +174,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var name = value.ToString();
 
-						if (name.Length > 0 && (name[0] == '[' || name[0] == '#'))
+						if (name.Length > 28 || name.Length > 0 && (name[0] == '[' || name[0] == '#'))
 							return value;
 
 						if (name.IndexOf('.') > 0)
@@ -193,6 +194,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return value;
+		}
+
+		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
+		{
+			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
 		}
 	}
 }

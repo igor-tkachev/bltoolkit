@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -247,6 +249,153 @@ namespace Data.Linq
 				q.ToList();
 			}
 		}
+
+		[Test]
+		public void Condition1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select new { Name = !string.IsNullOrEmpty(p.FirstName) ? p.FirstName : !string.IsNullOrEmpty(p.MiddleName) ? p.MiddleName : p.LastName },
+				from p in db.Person select new { Name = !string.IsNullOrEmpty(p.FirstName) ? p.FirstName : !string.IsNullOrEmpty(p.MiddleName) ? p.MiddleName : p.LastName }));
+		}
+
+		[Test]
+		public void Condition2()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person select new { Name = !p.FirstName.IsNullOrEmpty() ? p.FirstName : !p.MiddleName.IsNullOrEmpty() ? p.MiddleName : p.LastName },
+				from p in db.Person select new { Name = !p.FirstName.IsNullOrEmpty() ? p.FirstName : !p.MiddleName.IsNullOrEmpty() ? p.MiddleName : p.LastName }));
+		}
+
+		enum PersonID
+		{
+			Person1 = 1,
+			Person2 = 2
+		}
+
+		[Test]
+		public void ConvertEnum1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.ID == (int)PersonID.Person1 select p,
+				from p in db.Person where p.ID == (int)PersonID.Person1 select p));
+		}
+
+		[Test]
+		public void ConvertEnum2()
+		{
+			var id = PersonID.Person1;
+
+			ForEachProvider(db => AreEqual(
+				from p in    Person where p.ID == (int)id select p,
+				from p in db.Person where p.ID == (int)id select p));
+		}
+
+		[Test]
+		public void GroupByUnion1()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in (
+					from c in Child
+					where c.ParentID < 4
+					select new { c.ParentID, ID = c.ChildID })
+				.Concat(
+					from g in GrandChild
+					where g.ParentID >= 4
+					select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+				group t by t.ParentID into gr
+				select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+				where tt.Sum != 0
+				select tt
+				,
+				from t in (
+					from c in db.Child
+					where c.ParentID < 4
+					select new { c.ParentID, ID = c.ChildID })
+				.Concat(
+					from g in db.GrandChild
+					where g.ParentID >= 4
+					select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+				group t by t.ParentID into gr
+				select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+				where tt.Sum != 0
+				select tt
+			));
+		}
+
+		[Test]
+		public void GroupByUnion2()
+		{
+			ForEachProvider(db =>
+			{
+				var qe1 =
+					from t in (
+						from c in Child
+						where c.ParentID < 4
+						select new { c.ParentID, ID = c.ChildID })
+					.Concat(
+						from g in GrandChild
+						where g.ParentID >= 4
+						select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+					group t by t.ParentID into gr
+					select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+					where tt.Sum != 0
+					select tt;
+
+				var qe2 =
+					from p in Parent
+						join tt in qe1 on p.ParentID equals tt.ParentID into gr
+						from tt in gr.DefaultIfEmpty()
+					select new { p.ParentID };
+
+				var qr1 =
+					from t in (
+						from c in db.Child
+						where c.ParentID < 4
+						select new { c.ParentID, ID = c.ChildID })
+					.Concat(
+						from g in db.GrandChild
+						where g.ParentID >= 4
+						select new { ParentID = g.ParentID ?? 0, ID = g.GrandChildID ?? 0 })
+					group t by t.ParentID into gr
+					select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ID) } into tt
+					where tt.Sum != 0
+					select tt;
+
+				var qr2 =
+					from p in db.Parent
+						join tt in qr1 on p.ParentID equals tt.ParentID into gr
+						from tt in gr.DefaultIfEmpty()
+					select new { p.ParentID };
+
+				AreEqual(qe2, qr2);
+			});
+		}
+
+		[Test]
+		public void GroupByLeftJoin1()
+		{
+			ForEachProvider(db => AreEqual(
+				from p in Parent
+					join tt in
+						from t in Child
+						group t by t.ParentID into gr
+						select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ChildID) } into tt
+						where tt.Sum != 0
+						select tt
+					on p.ParentID equals tt.ParentID into gr
+					from tt in gr.DefaultIfEmpty()
+				select p.ParentID,
+				from p in db.Parent
+					join tt in
+						from t in db.Child
+						group t by t.ParentID into gr
+						select new { ParentID = gr.Key, Sum = gr.Sum(i => i.ChildID) } into tt
+						where tt.Sum != 0
+						select tt
+					on p.ParentID equals tt.ParentID into gr
+					from tt in gr.DefaultIfEmpty()
+				select p.ParentID));
+		}
 	}
 
 	static class Extender
@@ -254,6 +403,11 @@ namespace Data.Linq
 		public static Table<Person> People(this DbManager db)
 		{
 			return db.GetTable<Person>();
+		}
+
+		public static bool IsNullOrEmpty(this string value)
+		{
+			return string.IsNullOrEmpty(value);
 		}
 	}
 }

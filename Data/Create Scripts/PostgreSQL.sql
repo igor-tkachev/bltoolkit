@@ -101,6 +101,7 @@ CREATE TABLE "LinqDataTypes"
 	"GuidValue"     uuid,
 	"BinaryValue"   bytea,
 	"SmallIntValue" smallint,
-	"IntValue"      int NULL
+	"IntValue"      int NULL,
+	"BigIntValue"   bigint NULL
 )
 GO

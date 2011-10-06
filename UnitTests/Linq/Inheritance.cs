@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -37,15 +38,17 @@ namespace Data.Linq
 		[Test]
 		public void Test4()
 		{
-			var expected = from p in ParentInheritance where !(p is ParentInheritanceNull) select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.ParentInheritance where !(p is ParentInheritanceNull) select p));
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance where !(p is ParentInheritanceNull) select p,
+				from p in db.ParentInheritance where !(p is ParentInheritanceNull) select p));
 		}
 
 		[Test]
 		public void Test5()
 		{
-			var expected = from p in ParentInheritance where p is ParentInheritanceValue select p;
-			ForEachProvider(db => AreEqual(expected, from p in db.ParentInheritance where p is ParentInheritanceValue select p));
+			ForEachProvider(db => AreEqual(
+				from p in    ParentInheritance where p is ParentInheritanceValue select p,
+				from p in db.ParentInheritance where p is ParentInheritanceValue select p));
 		}
 
 		[Test]
@@ -187,9 +190,9 @@ namespace Data.Linq
 
 			public static void Test(Inheritance inheritance)
 			{
-			inheritance.ForEachProvider(db => inheritance.AreEqual(
-				inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
-				         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
+				inheritance.ForEachProvider(db => inheritance.AreEqual(
+					inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
+					         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
 			}
 		}
 
@@ -242,6 +245,233 @@ namespace Data.Linq
 				var sql = ((Table<Parent222>)q).SqlText;
 				Assert.IsNotEmpty(sql);
 			}
+		}
+
+		[Test]
+		public void ReferenceNavigation()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result =
+					from od in db.OrderDetail
+					where od.Product.Category.CategoryName == "Seafood"
+					select new { od.Order, od.Product };
+				
+				var list = result.ToList();
+
+				Assert.AreEqual(330, list.Count);
+
+				foreach (var item in list)
+				{
+					Assert.IsNotNull(item);
+					Assert.IsNotNull(item.Order);
+					Assert.IsNotNull(item.Product);
+					Assert.IsTrue(
+						 item.Product.Discontinued && item.Product is Northwind.DiscontinuedProduct ||
+						!item.Product.Discontinued && item.Product is Northwind.ActiveProduct);
+				}
+			}
+		}
+
+		[Test]
+		public void TypeCastIsChildConditional1()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.Product.         Select(x => x is Northwind.DiscontinuedProduct ? x : null);
+				var expected = db.Product.ToList().Select(x => x is Northwind.DiscontinuedProduct ? x : null);
+
+				var list = result.ToList();
+
+				Assert.Greater(list.Count, 0);
+				Assert.AreEqual(expected.Count(), list.Count);
+				Assert.IsTrue(list.Except(expected).Count() == 0);
+				Assert.IsTrue(list.Contains(null));
+			}
+		}
+
+		[Test]
+		public void TypeCastIsChildConditional2()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.Product.         Select(x => x is Northwind.DiscontinuedProduct);
+				var expected = db.Product.ToList().Select(x => x is Northwind.DiscontinuedProduct);
+
+				var list = result.ToList();
+
+				Assert.Greater(list.Count, 0);
+				Assert.AreEqual(expected.Count(), list.Count);
+				Assert.IsTrue(list.Except(expected).Count() == 0);
+			}
+		}
+
+		[Test]
+		public void TypeCastIsChild()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
+				var expected =    Product.Where(x => x is Northwind.DiscontinuedProduct).ToList();
+
+				Assert.Greater(result.Count, 0);
+				Assert.AreEqual(result.Count, expected.Count);
+			}
+		}
+
+		#region Models for Test14
+
+		interface IChildTest14
+		{
+			int ChildID { get; set; }
+		}
+
+		[TableName("Child")]
+		class ChildTest14 : IChildTest14
+		{
+			[PrimaryKey]
+			public int ChildID { get; set; }
+
+		}
+
+		T FindById<T>(IQueryable<T> queryable, int id)
+			where T : IChildTest14
+		{
+			return queryable.Where(x => x.ChildID == id).FirstOrDefault();
+		}
+
+		#endregion
+
+		[Test]
+		public void Test14()
+		{
+			ForEachProvider(db =>
+			{
+				var q = db.GetTable<ChildTest14>().Select(c => new ChildTest14() { ChildID = c.ChildID });
+				FindById(q, 10);
+			});
+		}
+
+		[Test]
+		public void Test15()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.DiscontinuedProduct.Select(p => p).ToList();
+				var expected =    DiscontinuedProduct.Select(p => p).ToList();
+
+				Assert.That(result.Count, Is.Not.EqualTo(0).And.EqualTo(expected.Count));
+			}
+		}
+
+		[Test]
+		public void Test16()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var result   = db.DiscontinuedProduct.ToList();
+				var expected =    DiscontinuedProduct.ToList();
+
+				Assert.That(result.Count, Is.Not.EqualTo(0).And.EqualTo(expected.Count));
+			}
+		}
+
+		public enum TypeCodeEnum
+		{
+			Base,
+			A,
+			A1,
+			A2,
+		}
+
+		[TableName("LinqDataTypes")]
+		public abstract class InheritanceBase
+		{
+			public Guid GuidValue { get; set; }
+
+			[MapField("ID")]
+			public virtual TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.Base; }
+			}
+		}
+
+		[InheritanceMapping(Code = TypeCodeEnum.A1, Type = typeof(InheritanceA1), IsDefault = false)]
+		[InheritanceMapping(Code = TypeCodeEnum.A2, Type = typeof(InheritanceA2), IsDefault = true)]
+		public abstract class InheritanceA : InheritanceBase
+		{
+			[Association(CanBeNull = true, ThisKey = "GuidValue", OtherKey = "GuidValue")]
+			public List<InheritanceB> Bs { get; set; }
+
+			[MapField("ID", IsInheritanceDiscriminator = true)]
+			public override TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.A; }
+			}
+		}
+
+		class InheritanceA1 : InheritanceA
+		{
+			[MapField("ID", IsInheritanceDiscriminator = true)]
+			public override TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.A1; }
+			}
+		}
+
+		class InheritanceA2 : InheritanceA
+		{
+			[MapField("ID", IsInheritanceDiscriminator = true)]
+			public override TypeCodeEnum TypeCode
+			{
+				get { return TypeCodeEnum.A2; }
+			}
+		}
+
+		public class InheritanceB : InheritanceBase
+		{
+		}
+
+		[Test]
+		public void GuidTest()
+		{
+			using (var db = new TestDbManager())
+			{
+				var list = db.GetTable<InheritanceA>().Where(a => a.Bs.Any()).ToList();
+			}
+		}
+
+		[TableName("Person")]
+		[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
+		[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
+		public class Test17Person
+		{
+			[MapField(IsInheritanceDiscriminator = true)]
+			public int PersonID { get; set; }
+		}
+
+		public class Test17John : Test17Person
+		{
+			public string FirstName { get; set; }
+		}
+
+		public class Test17Tester : Test17Person
+		{
+			public string LastName { get; set; }
+		}
+
+		[Test]
+		public void Test17()
+		{
+			ForEachProvider(context =>
+			{
+				if (context is TestDbManager)
+				{
+					var db = (TestDbManager)context;
+					db.GetTable<Test17Person>().OfType<Test17John>().ToList();
+					Assert.False(db.LastQuery.ToLowerInvariant().Contains("lastname"), "Why select LastName field??");
+				}
+			});
 		}
 	}
 }

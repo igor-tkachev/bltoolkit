@@ -183,27 +183,48 @@ namespace Data.Linq
 		[Test]
 		public void NewGuid()
 		{
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.Firebird, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access },
-			db =>
-			{
-				db.Types.Delete(_ => _.ID > 1000);
-				db.Types.Insert(() => new LinqDataTypes
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.Firebird, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access },
+				db =>
 				{
-					ID            = 1001,
-					MoneyValue    = 1001,
-					DateTimeValue = Sql.CurrentTimestamp,
-					BoolValue     = true,
-					GuidValue     = Sql.NewGuid(),
-					BinaryValue   = new Binary(new byte[] { 1 }),
-					SmallIntValue = 1001
+					db.Types.Delete(_ => _.ID > 1000);
+					db.Types.Insert(() => new LinqDataTypes
+					{
+						ID            = 1001,
+						MoneyValue    = 1001,
+						DateTimeValue = Sql.CurrentTimestamp,
+						BoolValue     = true,
+						GuidValue     = Sql.NewGuid(),
+						BinaryValue   = new Binary(new byte[] { 1 }),
+						SmallIntValue = 1001
+					});
+
+					var guid = db.Types.Single(_ => _.ID == 1001).GuidValue;
+
+					Assert.AreEqual(1001, db.Types.Single(_ => _.GuidValue == guid).ID);
+
+					db.Types.Delete(_ => _.ID > 1000);
 				});
+		}
 
-				var guid = db.Types.Single(_ => _.ID == 1001).GuidValue;
+		[Test]
+		public void InsertBinary1()
+		{
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.Firebird, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access },
+				db =>
+				{
+					Binary data = null;
 
-				Assert.AreEqual(1001, db.Types.Single(_ => _.GuidValue == guid).ID);
-
-				db.Types.Delete(_ => _.ID > 1000);
-			});
+					db.Types.Delete(_ => _.ID > 1000);
+					db.Types.Insert(() => new LinqDataTypes
+					{
+						ID          = 1001,
+						BinaryValue = data,
+						BoolValue   = true,
+					});
+					db.Types.Delete(_ => _.ID > 1000);
+				});
 		}
 
 		[Test]
@@ -341,7 +362,7 @@ namespace Data.Linq
 		{
 			List<PersonCharTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonCharTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
@@ -354,7 +375,7 @@ namespace Data.Linq
 		{
 			List<PersonCharTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonCharTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
@@ -378,7 +399,7 @@ namespace Data.Linq
 		{
 			List<PersonBoolTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonBoolTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
@@ -391,12 +412,101 @@ namespace Data.Linq
 		{
 			List<PersonBoolTest> list;
 
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager())
 				list = db.GetTable<PersonBoolTest>().ToList();
 
 			ForEachProvider(db => AreEqual(
 				from p in list                          where p.IsMale == true select p.PersonID,
 				from p in db.GetTable<PersonBoolTest>() where p.IsMale == true select p.PersonID));
+		}
+
+		[Test]
+		public void LongTest1()
+		{
+			ForEachProvider(db =>
+			{
+				uint value = 0;
+
+				var q =
+					from t in db.Types2
+					where t.BigIntValue == value
+					select t;
+
+				q.ToList();
+			});
+		}
+
+		[Test]
+		public void CompareNullableInt()
+		{
+			int? param = null;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Parent where param == null || t.Value1 == param select t,
+				from t in db.Parent where param == null || t.Value1 == param select t));
+
+			param = 1;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Parent where param == null || t.Value1 == param select t,
+				from t in db.Parent where param == null || t.Value1 == param select t));
+		}
+
+		[Test]
+		public void CompareNullableBoolean1()
+		{
+			bool? param = null;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where param == null || t.BoolValue == param select t,
+				from t in db.Types where param == null || t.BoolValue == param select t));
+
+			param = true;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where param == null || t.BoolValue == param select t,
+				from t in db.Types where param == null || t.BoolValue == param select t));
+		}
+
+		[Test]
+		public void CompareNullableBoolean2()
+		{
+			short? param1 = null;
+			bool?  param2 = null;
+
+			ForEachProvider(db => AreEqual(
+				from t1 in    Types
+				join t2 in    Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1,
+				from t1 in db.Types
+				join t2 in db.Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1));
+
+			//param1 = null;
+			param2 = false;
+
+			ForEachProvider(db => AreEqual(
+				from t1 in    Types
+				join t2 in    Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1,
+				from t1 in db.Types
+				join t2 in db.Types on t1.ID equals t2.ID
+				where (param1 == null || t1.SmallIntValue == param1) && (param2 == null || t1.BoolValue == param2)
+				select t1));
+		}
+
+		[Test]
+		public void CompareNullableBoolean3()
+		{
+			short? param1 = null;
+			bool?  param2 = false;
+
+			ForEachProvider(db => AreEqual(
+				from t in    Types where (param1 == null || t.SmallIntValue == param1) && (param2 == null || t.BoolValue == param2) select t,
+				from t in db.Types where (param1 == null || t.SmallIntValue == param1) && (param2 == null || t.BoolValue == param2) select t));
 		}
 	}
 }
