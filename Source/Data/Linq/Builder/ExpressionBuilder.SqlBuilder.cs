@@ -1846,9 +1846,21 @@ namespace BLToolkit.Data.Linq.Builder
 			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
 				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
-			var mapping = table.InheritanceMapping
+			return MakeIsPredicate(
+				table, table.InheritanceMapping, table.InheritanceDiscriminators, typeOperand,
+				name => table.SqlTable.Fields.Values.First(f => f.Name == name));
+		}
+
+		internal ISqlPredicate MakeIsPredicate(
+			IBuildContext                     context,
+			List<InheritanceMappingAttribute> inheritanceMapping,
+			List<string>                      inheritanceDiscriminators,
+			Type                              toType,
+			Func<string,ISqlExpression>       getSql)
+		{
+			var mapping = inheritanceMapping
 				.Select((m,i) => new { m, i })
-				.Where ( m => m.m.Type == typeOperand && !m.m.IsDefault)
+				.Where ( m => m.m.Type == toType && !m.m.IsDefault)
 				.ToList();
 
 			switch (mapping.Count)
@@ -1857,14 +1869,14 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var cond = new SqlQuery.SearchCondition();
 
-						foreach (var m in table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
+						foreach (var m in inheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
 						{
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false, 
-									Convert(table,
+									Convert(context,
 										new SqlQuery.Predicate.ExprExpr(
-											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
+											getSql(inheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.NotEqual,
 											new SqlValue(m.m.Code)))));
 						}
@@ -1873,9 +1885,9 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 
 				case 1 :
-					return Convert(table,
+					return Convert(context,
 						new SqlQuery.Predicate.ExprExpr(
-							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
+							getSql(inheritanceDiscriminators[mapping[0].i]),
 							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(mapping[0].m.Code)));
 
@@ -1888,9 +1900,9 @@ namespace BLToolkit.Data.Linq.Builder
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false,
-									Convert(table,
+									Convert(context,
 										new SqlQuery.Predicate.ExprExpr(
-											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
+											getSql(inheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.Equal,
 											new SqlValue(m.m.Code))),
 									true));

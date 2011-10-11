@@ -513,5 +513,22 @@ namespace Data.Linq
 				var list = q.Distinct().OfType<Test18Female>().ToList();
 			});
 		}
+
+		[Test]
+		public void Test19()
+		{
+			ForEachProvider(db =>
+			{
+				var ids = Enumerable.Range(0, 10).ToList();
+				var q   =
+					from p1 in db.GetTable<Test18Person>()
+					where ids.Contains(p1.PersonID)
+					join p2 in db.GetTable<Test18Person>() on p1.PersonID equals p2.PersonID
+					select p1;
+
+				IQueryable iq   = q.Distinct();
+				var        list = iq.OfType<Test18Female>().ToList();
+			});
+		}
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -6,6 +8,7 @@ namespace BLToolkit.Data.Linq.Builder
 	using BLToolkit.Linq;
 	using Data.Sql;
 	using Reflection;
+	using Reflection.Extension;
 
 	class OfTypeBuilder : MethodCallBuilder
 	{
@@ -33,12 +36,49 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 			else
 			{
-				var f = sequence.IsExpression(null, 0, RequestFor.Table);
+				var toType   = methodCall.Type.GetGenericArguments()[0];
+				var gargs    = TypeHelper.GetGenericArguments(methodCall.Arguments[0].Type, typeof(IQueryable<>));
+				var fromType = gargs == null ? typeof(object) : gargs[0];
 
-				//sequence.get
+				if (toType.IsSubclassOf(fromType))
+				{
+					for (var type = toType.BaseType; type != null && type != typeof(object); type = type.BaseType)
+					{
+						var extension = TypeExtension.GetTypeExtension(type, builder.MappingSchema.Extensions);
+						var mapping   = builder.MappingSchema.MetadataProvider.GetInheritanceMapping(type, extension);
+
+						if (mapping.Length > 0)
+						{
+							var predicate = MakeIsPredicate(builder, sequence, fromType, toType);
+
+							sequence.SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
+
+							return new OfTypeContext(sequence, methodCall);
+						}
+					}
+				}
 			}
 
 			return sequence;
+		}
+
+		ISqlPredicate MakeIsPredicate(ExpressionBuilder builder, IBuildContext context, Type fromType, Type toType)
+		{
+			var table          = new SqlTable(builder.MappingSchema, fromType);
+			var mapper         = builder.MappingSchema.GetObjectMapper(fromType);
+			var discriminators = TableBuilder.TableContext.GetInheritanceDiscriminators(
+				builder, table, fromType, mapper.InheritanceMapping);
+
+			return builder.MakeIsPredicate(context, mapper.InheritanceMapping, discriminators, toType,
+				name =>
+				{
+					var field  = table.Fields.Values.First(f => f.Name == name);
+					var member = field.MemberMapper.MemberAccessor.MemberInfo;
+					var expr   = Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member);
+					var sql    = context.ConvertToSql(expr, 1, ConvertFlags.Field)[0].Sql;
+
+					return sql;
+				});
 		}
 
 		protected override SequenceConvertInfo Convert(
@@ -46,5 +86,47 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			return null;
 		}
+
+		#region OfTypeContext
+
+		class OfTypeContext : PassThroughContext
+		{
+			public OfTypeContext(IBuildContext context, MethodCallExpression methodCall)
+				: base(context)
+			{
+				_methodCall = methodCall;
+			}
+
+			private readonly MethodCallExpression _methodCall;
+
+			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+			{
+				var expr   = BuildExpression(null, 0);
+				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
+					Builder.BuildBlock(expr), new []
+					{
+						ExpressionBuilder.ContextParam,
+						ExpressionBuilder.DataContextParam,
+						ExpressionBuilder.DataReaderParam,
+						ExpressionBuilder.ExpressionParam,
+						ExpressionBuilder.ParametersParam,
+					});
+
+				query.SetQuery(mapper.Compile());
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				var expr = base.BuildExpression(expression, level);
+				var type = _methodCall.Method.GetGenericArguments()[0];
+
+				if (expr.Type != type)
+					expr = Expression.Convert(expr, type);
+
+				return expr;
+			}
+		}
+
+		#endregion
 	}
 }

@@ -38,12 +38,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
-				var type = _methodCall.Method.GetGenericArguments()[0];
-				
-				if (expr.Type != type)
-					expr = Expression.Convert(expr, type);
-
+				var expr   = BuildExpression(null, 0);
 				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					Builder.BuildBlock(expr), new []
 					{
@@ -55,6 +50,17 @@ namespace BLToolkit.Data.Linq.Builder
 					});
 
 				query.SetQuery(mapper.Compile());
+			}
+
+			public override Expression BuildExpression(Expression expression, int level)
+			{
+				var expr = base.BuildExpression(expression, level);
+				var type = _methodCall.Method.GetGenericArguments()[0];
+
+				if (expr.Type != type)
+					expr = Expression.Convert(expr, type);
+
+				return expr;
 			}
 		}
 	}
