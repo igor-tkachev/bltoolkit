@@ -64,5 +64,26 @@ namespace Aspects
 				}
 			}
 		}
+
+		public abstract class TestClass2
+		{
+			[Counter]
+			public virtual void Test()
+			{
+			}
+		}
+
+		[Test]
+		public void Test2()
+		{
+			// custom create counter delegate returns null
+			CounterAspect.CreateCounter = mi => null;
+
+			var t = (TestClass2)TypeAccessor.CreateInstance(typeof(TestClass2));
+
+			// interceptor should fallback to default counter implementation
+			t.Test();
+		}
+
 	}
 }
