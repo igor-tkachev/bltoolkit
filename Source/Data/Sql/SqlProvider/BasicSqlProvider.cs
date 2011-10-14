@@ -571,7 +571,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				if (!first)
 				{
-					sb.Append(",");
+					sb.AppendLine(",");
 					AppendIndent(sb);
 				}
 
