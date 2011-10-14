@@ -17,7 +17,7 @@ namespace BLToolkit.Aspects
 		{
 			base.Init(info, configString);
 
-            _counters.Add(_counter = CreateCounter(info) ?? CreateCounterInternal(info));
+			 _counters.Add(_counter = CreateCounter(info) ?? CreateCounterInternal(info));
 		}
 
 		private MethodCallCounter _counter;
