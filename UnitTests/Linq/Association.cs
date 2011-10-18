@@ -426,15 +426,14 @@ namespace Data.Linq
 			public Parent Parent { get; set; }
 		}
 
-
 		[Test]
-		public void TestAssociationInHeirarhy()
+		public void AssociationInHeirarhy()
 		{
 			ForEachProvider(db =>
 			{
 				db.GetTable<ChildBaseForHeirarhy>()
 					.OfType<ChildForHeirarhy>()
-					.Select(ch => new ChildForHeirarhy() { Parent = ch.Parent })
+					.Select(ch => new ChildForHeirarhy { Parent = ch.Parent })
 					.ToList();
 			});
 		}
