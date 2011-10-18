@@ -1108,7 +1108,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			TableLevel GetAssociation(Expression expression, int level)
 			{
-				if (ObjectMapper.Associations.Count > 0)
+				var objectMapper = ObjectMapper;
+
+				if (objectMapper.Associations.Count > 0)
 				{
 					var levelExpression = expression.GetLevelExpression(level);
 
@@ -1121,7 +1123,7 @@ namespace BLToolkit.Data.Linq.Builder
 						if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
 						{
 							var q =
-								from a in ObjectMapper.Associations
+								from a in objectMapper.Associations
 								where TypeHelper.Equals(a.MemberAccessor.MemberInfo, memberExpression.Member)
 								select new AssociatedTableContext(Builder, this, a) { Parent = Parent };
 
