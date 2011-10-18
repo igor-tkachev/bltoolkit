@@ -59,7 +59,11 @@ RenderForeignKey = (tt,key) =>
 {
 	WriteComment(tt, " " + key.KeyName);
 
-	var type = string.Format(OneToManyAssociationType, key.OtherTable.ClassName);
+	var type = "" ;
+	if (key.AssociationType == AssociationType.OneToMany)
+		type = string.Format(OneToManyAssociationType, key.OtherTable.ClassName);
+	else
+		type = key.OtherTable.ClassName ;
 
 	if (!RenderField)
 		WriteLine("Private _{0} As {1}", key.MemberName, type);
