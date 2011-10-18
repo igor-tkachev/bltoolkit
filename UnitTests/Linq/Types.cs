@@ -208,6 +208,29 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void BinaryLength()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Access },
+				db =>
+				{
+					db.Types
+						.Where(t => t.ID == 1)
+						.Set(t => t.BinaryValue, new Binary(new byte[] { 1, 2, 3, 4, 5 }))
+						.Update();
+
+					Assert.That(
+						(from t in db.Types where t.ID == 1 select t.BinaryValue.Length).First(),
+						Is.EqualTo(5));
+
+					db.Types
+						.Where(t => t.ID == 1)
+						.Set(t => t.BinaryValue, (Binary)null)
+						.Update();
+				});
+		}
+
+		[Test]
 		public void InsertBinary1()
 		{
 			ForEachProvider(
