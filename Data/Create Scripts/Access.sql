@@ -263,7 +263,7 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue datetime,
 	BoolValue     bit,
 	GuidValue     uniqueidentifier,
-	BinaryValue   Image,
+	BinaryValue   OleObject,
 	SmallIntValue smallint,
 	IntValue      int NULL,
 	BigIntValue   long NULL
