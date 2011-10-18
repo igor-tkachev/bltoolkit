@@ -888,7 +888,7 @@ namespace BLToolkit.Data.Sql
 					Expr1.ToString(sb, dic);
 
 					if (IsNot) sb.Append(" NOT");
-					sb.Append(" LINKE ");
+					sb.Append(" LIKE ");
 
 					Expr2.ToString(sb, dic);
 
