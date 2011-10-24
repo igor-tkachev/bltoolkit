@@ -39,15 +39,7 @@ namespace BLToolkit.Data.Linq.Builder
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				var expr   = BuildExpression(null, 0);
-				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					Builder.BuildBlock(expr), new []
-					{
-						ExpressionBuilder.ContextParam,
-						ExpressionBuilder.DataContextParam,
-						ExpressionBuilder.DataReaderParam,
-						ExpressionBuilder.ExpressionParam,
-						ExpressionBuilder.ParametersParam,
-					});
+				var mapper = Builder.BuildMapper<T>(expr);
 
 				query.SetQuery(mapper.Compile());
 			}

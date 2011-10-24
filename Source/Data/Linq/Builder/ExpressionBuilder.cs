@@ -123,25 +123,6 @@ namespace BLToolkit.Data.Linq.Builder
 			get { return DataContextInfo.MappingSchema; }
 		}
 
-		public Expression BuildBlock(Expression expression)
-		{
-#if FW4 || SILVERLIGHT
-
-			if (IsBlockDisable || BlockExpressions.Count == 0)
-				return expression;
-
-			BlockExpressions.Add(expression);
-
-			expression = Expression.Block(BlockVariables, BlockExpressions);
-
-			BlockVariables.  Clear();
-			BlockExpressions.Clear();
-
-#endif
-
-			return expression;
-		}
-
 		#endregion
 
 		#region Builder SQL

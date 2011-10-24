@@ -443,6 +443,16 @@ namespace Data.Linq
 			}
 		}
 
+		[Test]
+		public void QuerySyntaxSimpleTest()
+		{
+			ForEachProvider(db =>
+			{
+				// db.GetTable<Parent111>().OfType<Parent222>().ToList(); - it's work!!!
+				(from p in db.GetTable<Parent111>().OfType<Parent222>() select p).ToList();
+			});
+		}
+
 		[TableName("Person")]
 		[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
 		[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
