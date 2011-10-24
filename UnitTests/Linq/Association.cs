@@ -410,5 +410,32 @@ namespace Data.Linq
 				Assert.Null   (list[1]);
 			});
 		}
+
+		[TableName("Child")]
+		[InheritanceMapping(Code = 1, IsDefault = true, Type = typeof(ChildForHeirarhy))]
+		public class ChildBaseForHeirarhy
+		{
+			[MapField(IsInheritanceDiscriminator = true)]
+			public int ChildID { get; set; }
+		}
+
+		public class ChildForHeirarhy : ChildBaseForHeirarhy
+		{
+			public int ParentID { get; set; }
+			[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = true)]
+			public Parent Parent { get; set; }
+		}
+
+		[Test]
+		public void AssociationInHeirarhy()
+		{
+			ForEachProvider(db =>
+			{
+				db.GetTable<ChildBaseForHeirarhy>()
+					.OfType<ChildForHeirarhy>()
+					.Select(ch => new ChildForHeirarhy { Parent = ch.Parent })
+					.ToList();
+			});
+		}
 	}
 }
