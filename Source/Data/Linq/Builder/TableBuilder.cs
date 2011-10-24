@@ -615,20 +615,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildQuery(typeof(T));
-
-				if (expr.Type != typeof(T))
-					expr = Expression.Convert(expr, typeof(T));
-
-				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					Builder.BuildBlock(expr), new []
-					{
-						ExpressionBuilder.ContextParam,
-						ExpressionBuilder.DataContextParam,
-						ExpressionBuilder.DataReaderParam,
-						ExpressionBuilder.ExpressionParam,
-						ExpressionBuilder.ParametersParam,
-					});
+				var expr   = BuildQuery(typeof(T));
+				var mapper = Builder.BuildMapper<T>(expr);
 
 				query.SetQuery(mapper.Compile());
 			}

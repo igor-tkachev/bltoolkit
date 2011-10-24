@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -249,6 +250,49 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return false;
+		}
+
+		#endregion
+
+		#region Build Mapper
+
+		public Expression BuildBlock(Expression expression)
+		{
+#if FW4 || SILVERLIGHT
+
+			if (IsBlockDisable || BlockExpressions.Count == 0)
+				return expression;
+
+			BlockExpressions.Add(expression);
+
+			expression = Expression.Block(BlockVariables, BlockExpressions);
+
+			BlockVariables.  Clear();
+			BlockExpressions.Clear();
+
+#endif
+
+			return expression;
+		}
+
+		public Expression<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>> BuildMapper<T>(Expression expr)
+		{
+			var type = typeof(T);
+
+			if (expr.Type != type)
+				expr = Expression.Convert(expr, type);
+
+			var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
+				BuildBlock(expr), new []
+				{
+					ContextParam,
+					DataContextParam,
+					DataReaderParam,
+					ExpressionParam,
+					ParametersParam,
+				});
+
+			return mapper;
 		}
 
 		#endregion

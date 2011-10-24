@@ -443,19 +443,15 @@ namespace Data.Linq
 			}
 		}
 
-        [Test]
-        public void QuerySyntaxSimpleTest()
-        {
-            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray(), context =>
-            {
-                if (context is TestDbManager)
-                {
-                    var db = (TestDbManager)context;
-                    // db.GetTable<Parent111>().OfType<Parent222>().ToList(); - it's work!!!
-                    (from p in db.GetTable<Parent111>().OfType<Parent222>() select p).ToList();
-                }
-            });
-        }
+		[Test]
+		public void QuerySyntaxSimpleTest()
+		{
+			ForEachProvider(db =>
+			{
+				// db.GetTable<Parent111>().OfType<Parent222>().ToList(); - it's work!!!
+				(from p in db.GetTable<Parent111>().OfType<Parent222>() select p).ToList();
+			});
+		}
 
 		[TableName("Person")]
 		[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
