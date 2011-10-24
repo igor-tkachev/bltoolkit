@@ -3747,16 +3747,16 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			using (var dr = ExecuteReaderInternal(/*CommandBehavior.SingleRow*/)) // Sybase provider does not support this flag.
-				return ExecuteOperation(OperationType.Fill, () => //wrap this too, because of PostgreSQL lazy query execution
-				                                     	{
-				                                     		while (dr.Read())
-				                                     			return
-				                                     				entity == null
-				                                     					? _mappingSchema.MapDataReaderToObject(dr, type, parameters)
-				                                     					: _mappingSchema.MapDataReaderToObject(dr, entity, parameters);
+				return ExecuteOperation(OperationType.Read, () =>
+				{
+					while (dr.Read())
+						return
+							entity == null
+								? _mappingSchema.MapDataReaderToObject(dr, type, parameters)
+								: _mappingSchema.MapDataReaderToObject(dr, entity, parameters);
 
-				                                     		return null;
-				                                     	});
+					return null;
+				});
 		}
 
 		/// <summary>

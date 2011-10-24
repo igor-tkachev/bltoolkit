@@ -20,6 +20,7 @@ namespace BLToolkit.Data
 		ExecuteScalar,
 		ExecuteReader,
 		Fill,
-		Update
+		Update,
+		Read
 	}
 }
