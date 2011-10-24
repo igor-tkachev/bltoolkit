@@ -89,13 +89,52 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void StartsWith()
+		public void StartsWith1()
 		{
 			ForEachProvider(db => 
 			{
 				var q = from p in db.Person where p.FirstName.StartsWith("Jo") && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
+		}
+
+		[Test]
+		public void StartsWith2()
+		{
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Access },
+				db => AreEqual(
+					from p in    Person where "John123".StartsWith(p.FirstName) select p,
+					from p in db.Person where "John123".StartsWith(p.FirstName) select p));
+		}
+
+		[Test]
+		public void StartsWith3()
+		{
+			var str = "John123";
+
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Access },
+				db => AreEqual(
+					from p in    Person where str.StartsWith(p.FirstName) select p,
+					from p in db.Person where str.StartsWith(p.FirstName) select p));
+		}
+
+		[Test]
+		public void StartsWith4()
+		{
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Access },
+				db => AreEqual(
+					from p1 in    Person
+					from p2 in    Person
+					where p1.ID == p2.ID && p1.FirstName.StartsWith(p2.FirstName)
+					select p1,
+					from p1 in db.Person
+					from p2 in db.Person
+					where p1.ID == p2.ID && 
+						Sql.Like(p1.FirstName, p2.FirstName.Replace("%", "~%"), '~')
+					select p1));
 		}
 
 		[Test]
