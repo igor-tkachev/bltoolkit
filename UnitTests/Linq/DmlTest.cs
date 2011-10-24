@@ -1169,5 +1169,34 @@ namespace Update
 					Gender = "M",
 				}));
 		}
+
+		[Test]
+		public void Insert14()
+		{
+			ForEachProvider(
+				new [] { ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.Sybase },
+				db =>
+				{
+					try
+					{
+						db.Person.Delete(p => p.FirstName.StartsWith("Insert14"));
+
+						Assert.AreEqual(1,
+							db.Person
+							.Insert(() => new Person
+							{
+								FirstName = "Insert14" + db.Person.Where(p => p.ID == 1).Select(p => p.FirstName).FirstOrDefault(),
+								LastName  = "Shepard",
+								Gender = Gender.Male
+							}));
+
+						Assert.AreEqual(1, db.Person.Count(p => p.FirstName.StartsWith("Insert14")));
+					}
+					finally
+					{
+						db.Person.Delete(p => p.FirstName.StartsWith("Insert14"));
+					}
+				});
+		}
 	}
 }

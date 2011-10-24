@@ -70,7 +70,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.Root        :  return Lambda.Parameters.Count > 0 && expression == Lambda.Parameters[0];
+				case RequestFor.Root        : return Lambda.Parameters.Count > 0 && expression == Lambda.Parameters[0];
 
 				case RequestFor.Table       :
 				case RequestFor.Association :
