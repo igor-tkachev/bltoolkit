@@ -1791,7 +1791,25 @@ namespace BLToolkit.Data.Linq.Builder
 				return new SqlQuery.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
 			}
 
-			return null;
+			var mi = ReflectionHelper.Expressor<string>.MethodExpressor(_ => _.Replace("", ""));
+			var ex =
+				Expression.Call(
+				Expression.Call(
+				Expression.Call(
+					e.Arguments[0],
+						mi, Expression.Constant("%"), Expression.Constant("~%")),
+						mi, Expression.Constant("_"), Expression.Constant("~_")),
+						mi, Expression.Constant("~"), Expression.Constant("~~"));
+
+			var expr = ConvertToSql(context, ConvertExpression(ex));
+
+			if (!string.IsNullOrEmpty(start))
+				expr = new SqlBinaryExpression(typeof(string), new SqlValue("%"), "+", expr);
+
+			if (!string.IsNullOrEmpty(end))
+				expr = new SqlBinaryExpression(typeof(string), expr, "+", new SqlValue("%"));
+
+			return new SqlQuery.Predicate.Like(o, false, expr, new SqlValue('~'));
 		}
 
 		ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression)
