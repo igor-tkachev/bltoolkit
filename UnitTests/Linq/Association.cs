@@ -411,7 +411,7 @@ namespace Data.Linq
 			});
 		}
 
-		[TableName("CHILD")]
+		[TableName("Child")]
 		[InheritanceMapping(Code = 1, IsDefault = true, Type = typeof(ChildForHeirarhy))]
 		public class ChildBaseForHeirarhy
 		{
