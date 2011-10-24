@@ -3747,15 +3747,16 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			using (var dr = ExecuteReaderInternal(/*CommandBehavior.SingleRow*/)) // Sybase provider does not support this flag.
-			{
-				while (dr.Read())
-					return
-						entity == null
-							? _mappingSchema.MapDataReaderToObject(dr, type, parameters)
-							: _mappingSchema.MapDataReaderToObject(dr, entity, parameters);
+				return ExecuteOperation(OperationType.Read, () =>
+				{
+					while (dr.Read())
+						return
+							entity == null
+								? _mappingSchema.MapDataReaderToObject(dr, type, parameters)
+								: _mappingSchema.MapDataReaderToObject(dr, entity, parameters);
 
-				return null;
-			}
+					return null;
+				});
 		}
 
 		/// <summary>
@@ -3840,7 +3841,8 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			using (var dr = ExecuteReaderInternal())
-				return _mappingSchema.MapDataReaderToList(dr, list, type, parameters);
+				//wrap this too, because of PostgreSQL lazy query execution
+				return ExecuteOperation(OperationType.Fill, () => _mappingSchema.MapDataReaderToList(dr, list, type, parameters));
 		}
 
 		private void ExecuteListInternal<T>(IList<T> list, params object[] parameters)
@@ -3852,7 +3854,7 @@ namespace BLToolkit.Data
 				InitParameters(CommandAction.Select);
 
 			using (var dr = ExecuteReaderInternal())
-				_mappingSchema.MapDataReaderToList(dr, list, parameters);
+				ExecuteOperation(OperationType.Fill, () => _mappingSchema.MapDataReaderToList(dr, list, parameters));
 		}
 
 		/// <summary>
