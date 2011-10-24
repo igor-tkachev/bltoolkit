@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-//#if !SILVERLIGHT
-//using Microsoft.VisualBasic.CompilerServices;
-//#endif
-
-#region ReSharper C# 2.0 disable
+#region ReSharper disables
 // ReSharper disable RedundantTypeArgumentsOfMethod
 // ReSharper disable RedundantCast
+// ReSharper disable PossibleInvalidOperationException
+// ReSharper disable CSharpWarnings::CS0693
+// ReSharper disable RedundantToStringCall
 #endregion
 
 namespace BLToolkit.Data.Linq
@@ -185,6 +185,12 @@ namespace BLToolkit.Data.Linq
 #endif
 
 				{ M(() => AltStuff("",0,0,"")), L<S,I?,I?,S,S>((p0, p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
+
+				#endregion
+
+				#region Binary
+
+				{ M(() => ((Binary)null).Length ), L<Binary,I>(obj => Sql.Length(obj).Value) },
 
 				#endregion
 
