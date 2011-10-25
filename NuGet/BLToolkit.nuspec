@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>BLToolkit</id>
+		<version>4.1.6</version>
+		<title>Business Logic Toolkit for .NET</title>
+		<authors>Igor Tkachev</authors>
+		<owners />
+		<licenseUrl>http://bltoolkit.net/License.ashx</licenseUrl>
+		<projectUrl>http://bltoolkit.net/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Business Logic Toolkit is a set of components to simplify .NET application development.</description>
+		<summary />
+		<tags>bltoolkit Linq ORM DAL database DB</tags>
+		<frameworkAssemblies>
+			<frameworkAssembly assemblyName="BLToolkit.4.dll" targetFramework=".NETFramework4.0" />
+			<frameworkAssembly assemblyName="BLToolkit.3.dll" targetFramework=".NETFramework3.5" />
+			<frameworkAssembly assemblyName="BLToolkit.SL.4"  targetFramework="Silverlight4.0"   />
+		</frameworkAssemblies>
+	</metadata>
+	<files>
+		<file src="..\Source\bin\Release\BLToolkit.3.dll"    target="lib\net35" />
+		<file src="..\Source\bin\Release\BLToolkit.4.dll"    target="lib\net40" />
+		<file src="..\Source\bin\Release\BLToolkit.SL.4.dll" target="lib\sl40"  />
+	</files>
+</package>

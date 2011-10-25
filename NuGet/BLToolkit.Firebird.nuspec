@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>BLToolkit.Firebird</id>
+		<version>4.1.6</version>
+		<title>BLToolkit Firebird Data Provider</title>
+		<authors>Igor Tkachev</authors>
+		<owners />
+		<licenseUrl>http://bltoolkit.net/License.ashx</licenseUrl>
+		<projectUrl>http://bltoolkit.net/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Business Logic Toolkit Firebird Data Provider for .NET</description>
+		<summary />
+		<tags>Firebird bltoolkit Linq ORM DAL database DB</tags>
+		<dependencies>
+			<dependency id="FirebirdSql.Data.FirebirdClient" />
+			<dependency id="BLToolkit"                       />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.Firebird.3.dll" target="lib\net35" />
+		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.Firebird.4.dll" target="lib\net40" />
+	</files>
+</package>

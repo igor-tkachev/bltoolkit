@@ -148,6 +148,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.4.JointureAddOn",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{218E3584-CDC7-4A77-AD1A-CF9FBE90F67F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{4A9C0E31-8697-48BA-A46B-6A5EE78424D6}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet\BLToolkit.DB2.nuspec = NuGet\BLToolkit.DB2.nuspec
+		NuGet\BLToolkit.Firebird.nuspec = NuGet\BLToolkit.Firebird.nuspec
+		NuGet\BLToolkit.Informix.nuspec = NuGet\BLToolkit.Informix.nuspec
+		NuGet\BLToolkit.MySql.nuspec = NuGet\BLToolkit.MySql.nuspec
+		NuGet\BLToolkit.nuspec = NuGet\BLToolkit.nuspec
+		NuGet\BLToolkit.Oracle.nuspec = NuGet\BLToolkit.Oracle.nuspec
+		NuGet\BLToolkit.PostgreSql.nuspec = NuGet\BLToolkit.PostgreSql.nuspec
+		NuGet\BLToolkit.SqlCe.nuspec = NuGet\BLToolkit.SqlCe.nuspec
+		NuGet\BLToolkit.SQLite.nuspec = NuGet\BLToolkit.SQLite.nuspec
+		NuGet\BLToolkit.Sybase.nuspec = NuGet\BLToolkit.Sybase.nuspec
+		NuGet\BLToolkit.symbols.nuspec = NuGet\BLToolkit.symbols.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

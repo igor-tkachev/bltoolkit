@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>BLToolkit.PostgreSql</id>
+		<version>4.1.6</version>
+		<title>BLToolkit PostgreSql Data Provider</title>
+		<authors>Igor Tkachev</authors>
+		<owners />
+		<licenseUrl>http://bltoolkit.net/License.ashx</licenseUrl>
+		<projectUrl>http://bltoolkit.net/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Business Logic Toolkit PostgreSql Data Provider for .NET</description>
+		<summary />
+		<tags>PostgreSql Npgsql bltoolkit Linq ORM DAL database DB</tags>
+		<dependencies>
+			<dependency id="Npgsql"    />
+			<dependency id="BLToolkit" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.PostgreSQL.3.dll" target="lib\net35" />
+		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.PostgreSQL.4.dll" target="lib\net40" />
+	</files>
+</package>
