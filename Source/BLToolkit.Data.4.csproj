@@ -92,13 +92,6 @@
     <Reference Include="System.Data.Services" />
     <Reference Include="System.Runtime.Serialization">
     </Reference>
-    <Reference Include="System.ServiceModel">
-    </Reference>
-    <Reference Include="System.Web">
-    </Reference>
-    <Reference Include="System.Web.Services" />
-    <Reference Include="System.Windows.Forms">
-    </Reference>
     <Reference Include="System.Xml">
     </Reference>
     <Reference Include="System.Configuration">
@@ -140,16 +133,108 @@
     <None Include="Data\DataProvider\PostgreSQLDataProvider.cs">
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
-    <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs" />
-    <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
-    <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />
-    <Compile Include="Aspects\Builders\NotNullAspectBuilder.cs" />
-    <Compile Include="Aspects\Builders\OverloadAspectBuilder.cs" />
-    <Compile Include="Aspects\ClearCacheAspect.cs" />
-    <Compile Include="Aspects\Builders\ClearCacheAspectBuilder.cs" />
-    <Compile Include="Aspects\ClearCacheAttribute.cs" />
-    <Compile Include="Aspects\InstanceCacheAttribute.cs" />
-    <Compile Include="Aspects\OverloadAttribute.cs" />
+    <Compile Include="Aspects\AsyncAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Builders\ClearCacheAspectBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Builders\MixinAspectBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Builders\NotNullAspectBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Builders\OverloadAspectBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CacheAspect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CacheAspectItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CacheAspectT.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CacheAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CallMethodInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\ClearCacheAspect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\ClearCacheAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CounterAspect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\CounterAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\IInterceptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\InstanceCacheAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\InterceptCallInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\Interceptor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\InterceptorAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\InterceptResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\InterceptType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\LogAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\LoggingAspect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\MethodCallCounter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\MixinAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\MixinOverrideAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\NoCacheAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\NoCounterAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\NoInterceptionAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\NoLogAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\NotNullAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Aspects\OverloadAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Common\ArrayT.cs" />
     <Compile Include="Common\Convert.generated.cs">
       <AutoGen>True</AutoGen>
@@ -310,36 +395,21 @@
     </Compile>
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
+    <Compile Include="Patterns\DuckType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Patterns\DuckTyping.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Patterns\MustImplementAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\BLToolkitConstants.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Aspects\CacheAspect.cs" />
-    <Compile Include="Aspects\CacheAspectItem.cs" />
-    <Compile Include="Aspects\CacheAspectT.cs" />
-    <Compile Include="Aspects\CacheAttribute.cs" />
-    <Compile Include="Aspects\CallMethodInfo.cs" />
-    <Compile Include="Aspects\AsyncAttribute.cs" />
-    <Compile Include="Aspects\MethodCallCounter.cs" />
-    <Compile Include="Aspects\CounterAspect.cs" />
-    <Compile Include="Aspects\CounterAttribute.cs" />
-    <Compile Include="Aspects\NoCacheAttribute.cs" />
-    <Compile Include="Aspects\IInterceptor.cs" />
-    <Compile Include="Aspects\Interceptor.cs" />
-    <Compile Include="Aspects\InterceptCallInfo.cs" />
-    <Compile Include="Aspects\InterceptorAttribute.cs" />
-    <Compile Include="Aspects\InterceptResult.cs" />
-    <Compile Include="Aspects\InterceptType.cs" />
-    <Compile Include="Aspects\LogAttribute.cs" />
-    <Compile Include="Aspects\LoggingAspect.cs" />
-    <Compile Include="Aspects\MixinAttribute.cs" />
-    <Compile Include="Aspects\MixinOverrideAttribute.cs" />
-    <Compile Include="Aspects\NoCounterAttribute.cs" />
-    <Compile Include="Aspects\NoInterceptionAttribute.cs" />
-    <Compile Include="Aspects\NoLogAttribute.cs" />
-    <Compile Include="Aspects\NotNullAttribute.cs" />
     <Compile Include="Common\CompoundValue.cs" />
     <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Convert.cs" />
@@ -430,9 +500,6 @@
     <Compile Include="Mapping\NullDateTimeAttribute.cs" />
     <Compile Include="Mapping\NullDecimalAttribute.cs" />
     <Compile Include="Mapping\NullGuidAttribute.cs" />
-    <Compile Include="Patterns\DuckTyping.cs" />
-    <Compile Include="Patterns\DuckType.cs" />
-    <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\JetBrains.Annotations.cs" />
     <Compile Include="Properties\Revision.generated.cs" />
     <Compile Include="Reflection\ExprMemberAccessor.cs" />
@@ -444,19 +511,6 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderBase.cs" />
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
-    <Compile Include="ServiceModel\DataService.cs" />
-    <Compile Include="ServiceModel\ILinqSoapService.cs" />
-    <Compile Include="ServiceModel\LinqSoapServiceClient.cs" />
-    <Compile Include="ServiceModel\ILinqService.cs" />
-    <Compile Include="ServiceModel\LinqService.cs" />
-    <Compile Include="ServiceModel\LinqServiceClient.cs" />
-    <Compile Include="ServiceModel\LinqServiceQuery.cs" />
-    <Compile Include="ServiceModel\LinqServiceResult.cs" />
-    <Compile Include="ServiceModel\LinqServiceSerializer.cs" />
-    <Compile Include="ServiceModel\RemoteDataContextBase.cs" />
-    <Compile Include="ServiceModel\ServiceModelDataContext.cs" />
-    <Compile Include="ServiceModel\ServiceModelDataReader.cs" />
-    <Compile Include="ServiceModel\SoapDataContext.cs" />
     <Compile Include="TypeBuilder\AutoImplementInterfaceAttribute.cs" />
     <Compile Include="TypeBuilder\Builders\GeneratedAttributeBuilder.cs" />
     <Compile Include="TypeBuilder\Builders\DuckTypeBuilder.cs" />
@@ -587,8 +641,6 @@
     <None Include="DataAccess\DataAccess.xsx">
       <DependentUpon>DataAccess.xsd</DependentUpon>
     </None>
-    <None Include="Doc\BLToolkit.chm" />
-    <None Include="Doc\Development rules and regulations.doc" />
     <None Include="Mapping\Mapping.xsx">
       <DependentUpon>Mapping.xsd</DependentUpon>
     </None>
@@ -602,9 +654,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Data\Sql\ReservedWords.txt" />
-    <Content Include="Doc\ChangeLog.txt" />
-    <Content Include="Doc\License.txt" />
-    <Content Include="Doc\OnlineDoc.txt" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
