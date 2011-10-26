@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace BLToolkit.Reflection
 {
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 	using EditableObjects;
 #endif
 	using TypeBuilder;
@@ -1153,7 +1153,7 @@ namespace BLToolkit.Reflection
 			if (list == null)
 				return typeOfObject;
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 
 			if (list is EditableArrayList)
 				return ((EditableArrayList)list).ItemType;
