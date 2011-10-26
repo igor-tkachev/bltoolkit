@@ -139,6 +139,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -184,6 +185,7 @@
     <Compile Include="L2SAttributes.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="Providers.cs" />
+    <Compile Include="ProviderSpecific\PostgreSQL.cs" />
     <Compile Include="ProviderSpecific\Firebird.cs" />
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />

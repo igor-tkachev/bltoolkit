@@ -17,20 +17,36 @@ namespace PostgreSQLDataModel
 	public partial class PostgreSQLDataModel : DbManager
 	{
 		public Table<Child>         Child         { get { return this.GetTable<Child>();         } }
+		public Table<Doctor>        Doctor        { get { return this.GetTable<Doctor>();        } }
+		public Table<entity>        entity        { get { return this.GetTable<entity>();        } }
 		public Table<GrandChild>    GrandChild    { get { return this.GetTable<GrandChild>();    } }
 		public Table<LinqDataTypes> LinqDataTypes { get { return this.GetTable<LinqDataTypes>(); } }
 		public Table<Parent>        Parent        { get { return this.GetTable<Parent>();        } }
+		public Table<Patient>       Patient       { get { return this.GetTable<Patient>();       } }
 		public Table<Person>        Person        { get { return this.GetTable<Person>();        } }
 	}
 
-	[TableName(Name="Child")]
+	[TableName(Owner="public", Name="Child")]
 	public partial class Child
 	{
 		[Nullable] public Int32? ParentID { get; set; } // integer
 		[Nullable] public Int32? ChildID  { get; set; } // integer
 	}
 
-	[TableName(Name="GrandChild")]
+	[TableName(Owner="public", Name="Doctor")]
+	public partial class Doctor
+	{
+		[Required] public Int32  PersonID { get; set; } // integer
+		[Required] public String Taxonomy { get; set; } // character varying(50)(50)
+	}
+
+	[TableName(Owner="public", Name="entity")]
+	public partial class entity
+	{
+		[Required] public String the_name { get; set; } // character varying(255)(255)
+	}
+
+	[TableName(Owner="public", Name="GrandChild")]
 	public partial class GrandChild
 	{
 		[Nullable] public Int32? ParentID     { get; set; } // integer
@@ -38,7 +54,7 @@ namespace PostgreSQLDataModel
 		[Nullable] public Int32? GrandChildID { get; set; } // integer
 	}
 
-	[TableName(Name="LinqDataTypes")]
+	[TableName(Owner="public", Name="LinqDataTypes")]
 	public partial class LinqDataTypes
 	{
 		[Nullable          ] public Int32?    ID            { get; set; } // integer
@@ -48,16 +64,25 @@ namespace PostgreSQLDataModel
 		[Nullable          ] public Guid?     GuidValue     { get; set; } // uuid
 		[          Required] public Byte[]    BinaryValue   { get; set; } // bytea
 		[Nullable          ] public Int16?    SmallIntValue { get; set; } // smallint
+		[Nullable          ] public Int32?    IntValue      { get; set; } // integer
+		[Nullable          ] public Int64?    BigIntValue   { get; set; } // bigint
 	}
 
-	[TableName(Name="Parent")]
+	[TableName(Owner="public", Name="Parent")]
 	public partial class Parent
 	{
 		[Nullable] public Int32? ParentID { get; set; } // integer
 		[Nullable] public Int32? Value1   { get; set; } // integer
 	}
 
-	[TableName(Name="Person")]
+	[TableName(Owner="public", Name="Patient")]
+	public partial class Patient
+	{
+		[Required] public Int32  PersonID  { get; set; } // integer
+		[Required] public String Diagnosis { get; set; } // character varying(256)(256)
+	}
+
+	[TableName(Owner="public", Name="Person")]
 	public partial class Person
 	{
 		[Identity, PrimaryKey(1), Required] public Int32  PersonID   { get; set; } // integer

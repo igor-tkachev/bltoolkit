@@ -451,7 +451,7 @@ namespace BLToolkit.Data
 		/// </summary>
 		protected virtual IDbCommand OnInitCommand(IDbCommand command)
 		{
-			if (command == null) 
+			if (command == null)
 			{
 				// Create a command object.
 				//
@@ -486,7 +486,7 @@ namespace BLToolkit.Data
 		/// <returns>The command object.</returns>
 		private IDbCommand GetCommand(CommandAction commandAction, CommandType commandType, string sql)
 		{
-			var command = GetCommand(commandAction);
+			var command = GetCommand(commandAction, commandType);
 
 			command.Parameters.Clear();
 			command.CommandType = commandType;
@@ -1895,6 +1895,34 @@ namespace BLToolkit.Data
 				case CommandAction.Update: return UpdateCommand;
 				case CommandAction.Delete: return DeleteCommand;
 			}
+		}
+
+		private IDbCommand GetCommand(CommandAction commandAction, CommandType commandType)
+		{
+			IDbCommand command;
+
+			switch (commandAction)
+			{
+				default                   : command = _selectCommand; break;
+				case CommandAction.Insert : command = _insertCommand; break;
+				case CommandAction.Update : command = _updateCommand; break;
+				case CommandAction.Delete : command = _deleteCommand; break;
+			}
+
+			if (command != null && !DataProvider.CanReuseCommand(command, commandType))
+			{
+				command.Dispose();
+
+				switch (commandAction)
+				{
+					default                   : _selectCommand = null; break;
+					case CommandAction.Insert : _insertCommand = null; break;
+					case CommandAction.Update : _updateCommand = null; break;
+					case CommandAction.Delete : _deleteCommand = null; break;
+				}
+			}
+
+			return GetCommand(commandAction);
 		}
 
 		private void SetCommandParameters(CommandAction commandAction, IDbDataParameter[] commandParameters)

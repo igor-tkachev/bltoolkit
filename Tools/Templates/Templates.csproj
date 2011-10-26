@@ -85,6 +85,12 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Security">
+      <HintPath>..\..\packages\Npgsql.2.0.11\lib\Net40\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\..\packages\Npgsql.2.0.11\lib\Net40\Npgsql.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -151,6 +157,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MSSqlDataModel.generated.cs</LastGenOutput>
     </None>
+    <None Include="packages.config" />
     <None Include="PostgreSQLDataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PostgreSQLDataModel.generated.cs</LastGenOutput>
