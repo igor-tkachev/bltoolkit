@@ -3,7 +3,7 @@ using System.Data.SqlTypes;
 using System.Reflection;
 using System.ComponentModel;
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 using BLToolkit.ComponentModel;
 #endif
 
@@ -22,7 +22,7 @@ namespace BLToolkit.Reflection
 		public MemberInfo   MemberInfo   { get; private set; }
 		public TypeAccessor TypeAccessor { get; private set; }
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 
 		private PropertyDescriptor _propertyDescriptor;
 		public  PropertyDescriptor  PropertyDescriptor

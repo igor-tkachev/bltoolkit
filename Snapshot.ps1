@@ -58,6 +58,8 @@ $comp = "$env:windir\Microsoft.NET\Framework\v3.5\MSBuild.exe BLToolkit.3.csproj
 cmd /c $comp
 $comp = "$env:windir\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.4.csproj /property:Configuration=Release"
 cmd /c $comp
+$comp = "$env:windir\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.Data.4.csproj /property:Configuration=Release"
+cmd /c $comp
 $comp = "$env:windir\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe BLToolkit.SL.4.csproj /property:Configuration=Release"
 cmd /c $comp
 

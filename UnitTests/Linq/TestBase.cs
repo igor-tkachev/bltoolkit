@@ -32,6 +32,7 @@ namespace Data.Linq
 				     if (args.Name.IndexOf("Sybase.AdoNet2.AseClient")  >= 0) assembly = @"Sybase\Sybase.AdoNet2.AseClient.dll";
 				else if (args.Name.IndexOf("Oracle.DataAccess")         >= 0) assembly = @"Oracle\Oracle.DataAccess.dll";
 				else if (args.Name.IndexOf("IBM.Data.DB2")              >= 0) assembly = @"IBM\IBM.Data.DB2.dll";
+				else if (args.Name.IndexOf("Npgsql.resources")          >= 0) return null;
 				else if (args.Name.IndexOf("Npgsql")                    >= 0) assembly = @"PostgreSql\Npgsql.dll";
 				else if (args.Name.IndexOf("Mono.Security")             >= 0) assembly = @"PostgreSql\Mono.Security.dll";
 				else if (args.Name.IndexOf("System.Data.SqlServerCe,")  >= 0) assembly = @"SqlCe\System.Data.SqlServerCe.dll";
