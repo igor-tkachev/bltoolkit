@@ -785,7 +785,12 @@ namespace BLToolkit.Mapping
 				{
 					try
 					{
-						if (comp.CompareTo(mapValue) == 0)
+						if (comp is string && ((string)comp).Length == 1 && mapValue is char)
+						{
+							if (((string)comp)[0] == (char)mapValue)
+								return mv.OrigValue;
+						}
+						else if (comp.CompareTo(mapValue) == 0)
 							return mv.OrigValue;
 					}
 					catch
