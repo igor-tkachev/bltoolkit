@@ -4,10 +4,10 @@ using System.Globalization;
 using System.Linq;
 using System.ServiceModel;
 using System.Web.Services;
-using BLToolkit.Data;
 
 namespace BLToolkit.ServiceModel
 {
+	using Data;
 	using Data.Linq;
 	using Data.Sql;
 
