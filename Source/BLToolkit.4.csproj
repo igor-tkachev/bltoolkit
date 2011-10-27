@@ -516,6 +516,7 @@
     <Compile Include="Reflection\MetadataProvider\MetadataProviderList.cs" />
     <Compile Include="Reflection\XmlIncludeAbstractAttribute.cs" />
     <Compile Include="ServiceModel\DataService.cs" />
+    <Compile Include="ServiceModel\DataServiceMetadataProvider.cs" />
     <Compile Include="ServiceModel\ILinqSoapService.cs" />
     <Compile Include="ServiceModel\LinqSoapServiceClient.cs" />
     <Compile Include="ServiceModel\ILinqService.cs" />
