@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Data.Services.Providers;
 using System.Linq;
-using BLToolkit.Data.Sql;
+using System.Linq.Expressions;
+using JetBrains.Annotations;
 
 namespace BLToolkit.ServiceModel
 {
 	using Data.Linq;
+	using Data.Sql;
 	using Mapping;
 
 	public class DataService<T> : System.Data.Services.DataService<T>, IServiceProvider
@@ -20,12 +22,12 @@ namespace BLToolkit.ServiceModel
 		{
 			_mappingSchema = mappingSchema;
 			_metadata      = new MetadataProvider(_mappingSchema, typeof(T));
-			_query         = new QueryProvider();
+			_query         = new QueryProvider(_metadata.TypeDic);
 		}
 
-		readonly MappingSchema                _mappingSchema;
-		readonly IDataServiceMetadataProvider _metadata;
-		readonly IDataServiceQueryProvider    _query;
+		readonly MappingSchema    _mappingSchema;
+		readonly MetadataProvider _metadata;
+		readonly QueryProvider    _query;
 
 		public object GetService(Type serviceType)
 		{
@@ -37,6 +39,13 @@ namespace BLToolkit.ServiceModel
 
 		#region MetadataProvider
 
+		class TypeInfo
+		{
+			public ResourceType Type;
+			public SqlTable     Table;
+			public ObjectMapper Mapper;
+		}
+
 		class MetadataProvider : IDataServiceMetadataProvider
 		{
 			public MetadataProvider(MappingSchema mappingSchema, Type dataSourceType)
@@ -47,18 +56,12 @@ namespace BLToolkit.ServiceModel
 				LoadMetadata();
 			}
 
-			class TypeInfo
-			{
-				public ResourceType Type;
-				public SqlTable     Table;
-				public ObjectMapper Mapper;
-			}
+			readonly MappingSchema                    _mappingSchema;
+			readonly Type                             _dataSourceType;
+			readonly Dictionary<string,ResourceType>  _types  = new Dictionary<string,ResourceType>();
+			readonly Dictionary<string,ResourceSet>   _sets   = new Dictionary<string,ResourceSet>();
 
-			readonly MappingSchema                   _mappingSchema;
-			readonly Type                            _dataSourceType;
-			readonly Dictionary<string,ResourceType> _types   = new Dictionary<string,ResourceType>();
-			readonly Dictionary<string,ResourceSet>  _sets    = new Dictionary<string,ResourceSet>();
-			readonly Dictionary<Type,TypeInfo>       _typeDic = new Dictionary<Type,TypeInfo>();
+			public readonly Dictionary<Type,TypeInfo> TypeDic = new Dictionary<Type,TypeInfo>();
 
 			void LoadMetadata()
 			{
@@ -66,16 +69,18 @@ namespace BLToolkit.ServiceModel
 				var list =
 				(
 					from p in _dataSourceType.GetProperties()
-					let t  = p.PropertyType
+					let t   = p.PropertyType
 					where t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Table<>)
-					let tt = t.GetGenericArguments()[0]
-					let m  = _mappingSchema.GetObjectMapper(tt)
+					let tt  = t.GetGenericArguments()[0]
+					let tbl = new SqlTable(_mappingSchema, tt)
+					where tbl.Fields.Values.Any(f => f.IsPrimaryKey)
+					let m   = _mappingSchema.GetObjectMapper(tt)
 					select new
 					{
 						p.Name,
 						ID     = n++,
 						Type   = tt,
-						Table  = new SqlTable(_mappingSchema, tt),
+						Table  = tbl,
 						Mapper = m
 					}
 				).ToList();
@@ -119,7 +124,7 @@ namespace BLToolkit.ServiceModel
 				{
 					foreach (var m in item.Mapper.InheritanceMapping)
 					{
-						if (!_typeDic.ContainsKey(m.Type))
+						if (!TypeDic.ContainsKey(m.Type))
 						{
 							GetTypeInfo(
 								m.Type,
@@ -135,16 +140,16 @@ namespace BLToolkit.ServiceModel
 			{
 				TypeInfo typeInfo;
 
-				if (!_typeDic.TryGetValue(type, out typeInfo))
+				if (!TypeDic.TryGetValue(type, out typeInfo))
 				{
-					var baseResourceType = baseType != null ? _typeDic[baseType].Type : null;
+					var baseInfo = baseType != null ? TypeDic[baseType] : null;
 
 					typeInfo = new TypeInfo
 					{
 						Type   = new ResourceType(
 							type,
 							ResourceTypeKind.EntityType,
-							baseResourceType,
+							baseInfo != null ? baseInfo.Type : null,
 							type.Namespace,
 							type.Name,
 							type.IsAbstract),
@@ -154,10 +159,13 @@ namespace BLToolkit.ServiceModel
 
 					foreach (var field in table.Fields.Values)
 					{
+						if (baseType != null && baseInfo.Table.Fields.ContainsKey(field.Name))
+							continue;
+
 						var kind  = ResourcePropertyKind.Primitive;
 						var ptype = ResourceType.GetPrimitiveResourceType(field.SystemType);
 
-						if (field.IsPrimaryKey)
+						if (baseType == null && field.IsPrimaryKey)
 							kind |= ResourcePropertyKind.Key;
 
 						var p = new ResourceProperty(field.Name, kind, ptype);
@@ -168,7 +176,7 @@ namespace BLToolkit.ServiceModel
 					typeInfo.Type.SetReadOnly();
 
 					_types.  Add(typeInfo.Type.FullName, typeInfo.Type);
-					_typeDic.Add(type, typeInfo);
+					TypeDic.Add(type, typeInfo);
 				}
 
 				return typeInfo;
@@ -191,12 +199,12 @@ namespace BLToolkit.ServiceModel
 
 			public IEnumerable<ResourceType> GetDerivedTypes(ResourceType resourceType)
 			{
-				return _typeDic[resourceType.InstanceType].Mapper.InheritanceMapping.Select(m => _typeDic[m.Type].Type);
+				return TypeDic[resourceType.InstanceType].Mapper.InheritanceMapping.Select(m => TypeDic[m.Type].Type);
 			}
 
 			public bool HasDerivedTypes(ResourceType resourceType)
 			{
-				return _typeDic[resourceType.InstanceType].Mapper.InheritanceMapping.Count > 0;
+				return TypeDic[resourceType.InstanceType].Mapper.InheritanceMapping.Count > 0;
 			}
 
 			public bool TryResolveServiceOperation(string name, out ServiceOperation serviceOperation)
@@ -216,16 +224,43 @@ namespace BLToolkit.ServiceModel
 
 		#region QueryProvider
 
-		public class QueryProvider : IDataServiceQueryProvider
+		class QueryProvider : IDataServiceQueryProvider
 		{
+			public QueryProvider(Dictionary<Type,TypeInfo> typeDic)
+			{
+				_typeDic = typeDic;
+			}
+
+			readonly Dictionary<Type,TypeInfo>                  _typeDic;
+			readonly Dictionary<string,Func<object,IQueryable>> _sets = new Dictionary<string,Func<object,IQueryable>>();
+
 			public IQueryable GetQueryRootForResourceSet(ResourceSet resourceSet)
 			{
-				throw new NotImplementedException();
+				Func<object,IQueryable> func;
+
+				lock (_sets)
+				{
+					if (!_sets.TryGetValue(resourceSet.Name, out func))
+					{
+						var p = Expression.Parameter(typeof(object), "p");
+						var l = Expression.Lambda<Func<object,IQueryable>>(
+							Expression.PropertyOrField(
+								Expression.Convert(p, typeof(T)),
+								resourceSet.Name),
+							p);
+
+						func = l.Compile();
+
+						_sets.Add(resourceSet.Name, func);
+					}
+				}
+
+				return func(CurrentDataSource);
 			}
 
 			public ResourceType GetResourceType(object target)
 			{
-				throw new NotImplementedException();
+				return _typeDic[target.GetType()].Type;
 			}
 
 			public object GetPropertyValue(object target, ResourceProperty resourceProperty)
@@ -238,7 +273,7 @@ namespace BLToolkit.ServiceModel
 				throw new NotImplementedException();
 			}
 
-			public IEnumerable<KeyValuePair<string, object>> GetOpenPropertyValues(object target)
+			public IEnumerable<KeyValuePair<string,object>> GetOpenPropertyValues(object target)
 			{
 				throw new NotImplementedException();
 			}
@@ -248,12 +283,8 @@ namespace BLToolkit.ServiceModel
 				throw new NotImplementedException();
 			}
 
-			public object CurrentDataSource { get; set; }
-
-			public bool IsNullPropagationRequired
-			{
-				get { throw new NotImplementedException(); }
-			}
+			public object CurrentDataSource         { get; set; }
+			public bool   IsNullPropagationRequired { get { return true; } }
 		}
 
 		#endregion
