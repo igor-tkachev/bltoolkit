@@ -335,7 +335,10 @@ namespace BLToolkit.Data
 				ExecuteOperation(OperationType.CommitTransaction, _transaction.Commit);
 
 				if (_closeTransaction)
+				{
+					ExecuteOperation(OperationType.DisposeTransaction, _transaction.Dispose);
 					_transaction = null;
+				}
 			}
 
 			return this;
@@ -352,7 +355,10 @@ namespace BLToolkit.Data
 				ExecuteOperation(OperationType.RollbackTransaction, _transaction.Rollback);
 
 				if (_closeTransaction)
+				{
+					ExecuteOperation(OperationType.DisposeTransaction, _transaction.Dispose);
 					_transaction = null;
+				}
 			}
 
 			return this;
