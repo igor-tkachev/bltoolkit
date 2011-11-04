@@ -1706,16 +1706,16 @@
     <!-- Diagram content (shape and connector positions) -->
     <Diagrams>
       <Diagram Name="NorthwindModel">
-        <EntityTypeShape EntityType="NorthwindModel.Category" Width="1.5" PointX="3" PointY="19.5" Height="1.9802864583333317" IsExpanded="true" />
+        <EntityTypeShape EntityType="NorthwindModel.Category" Width="1.5" PointX="8.125" PointY="14.75" Height="1.9802864583333317" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.CustomerDemographic" Width="1.5" PointX="0.75" PointY="2.5" Height="1.5956835937499996" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Customer" Width="1.5" PointX="3" PointY="1.5" Height="3.5186979166666656" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Employee" Width="1.5" PointX="3" PointY="9.25" Height="5.2494108072916674" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Order_Detail" Width="1.5" PointX="7.5" PointY="2.125" Height="2.3648893229166656" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Order" Width="1.5" PointX="5.25" PointY="1" Height="4.4802050781250031" IsExpanded="true" />
-        <EntityTypeShape EntityType="NorthwindModel.Product" Width="1.5" PointX="5.25" PointY="20.875" Height="3.5186979166666674" IsExpanded="true" />
+        <EntityTypeShape EntityType="NorthwindModel.Product" Width="1.5" PointX="10.375" PointY="16.125" Height="3.5186979166666674" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Region" Width="1.5" PointX="5.75" PointY="7.125" Height="1.5956835937500005" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Shipper" Width="1.5" PointX="3" PointY="15.25" Height="1.7879850260416674" IsExpanded="true" />
-        <EntityTypeShape EntityType="NorthwindModel.Supplier" Width="1.5" PointX="3" PointY="22.25" Height="3.5186979166666674" IsExpanded="true" />
+        <EntityTypeShape EntityType="NorthwindModel.Supplier" Width="1.5" PointX="8.125" PointY="17.5" Height="3.5186979166666674" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.sysdiagram" Width="1.5" PointX="7.75" PointY="5.75" Height="1.9802864583333353" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Territory" Width="1.5" PointX="8" PointY="9.875" Height="1.9802864583333317" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Alphabetical_list_of_product" Width="1.5" PointX="9.75" PointY="0.75" Height="3.1340950520833388" IsExpanded="true" />
@@ -1734,8 +1734,8 @@
         <EntityTypeShape EntityType="NorthwindModel.Summary_of_Sales_by_Quarter" Width="1.5" PointX="12.75" PointY="13.75" Height="1.5956835937500102" IsExpanded="true" />
         <EntityTypeShape EntityType="NorthwindModel.Summary_of_Sales_by_Year" Width="1.5" PointX="14.75" PointY="6.75" Height="1.5956835937500102" IsExpanded="true" />
         <AssociationConnector Association="NorthwindModel.FK_Products_Categories" ManuallyRouted="false">
-          <ConnectorPoint PointX="4.5" PointY="21.177643229166666" />
-          <ConnectorPoint PointX="5.25" PointY="21.177643229166666" />
+          <ConnectorPoint PointX="9.625" PointY="16.427643229166666" />
+          <ConnectorPoint PointX="10.375" PointY="16.427643229166666" />
         </AssociationConnector>
         <AssociationConnector Association="NorthwindModel.FK_Orders_Customers" ManuallyRouted="false">
           <ConnectorPoint PointX="4.5" PointY="3.2593489583333328" />
@@ -1761,8 +1761,8 @@
           <ConnectorPoint PointX="7.5" PointY="3.3074446614583328" />
         </AssociationConnector>
         <AssociationConnector Association="NorthwindModel.FK_Order_Details_Products" ManuallyRouted="false">
-          <ConnectorPoint PointX="6.75" PointY="22.634348958333334" />
-          <ConnectorPoint PointX="7.59375" PointY="22.634348958333334" />
+          <ConnectorPoint PointX="10.375" PointY="17.115143229166666" />
+          <ConnectorPoint PointX="7.59375" PointY="17.115143229166666" />
           <ConnectorPoint PointX="7.59375" PointY="4.4898893229166656" />
         </AssociationConnector>
         <AssociationConnector Association="NorthwindModel.FK_Orders_Shippers" ManuallyRouted="false">
@@ -1772,8 +1772,8 @@
           <ConnectorPoint PointX="5.25" PointY="2.0984224791666657" />
         </AssociationConnector>
         <AssociationConnector Association="NorthwindModel.FK_Products_Suppliers" ManuallyRouted="false">
-          <ConnectorPoint PointX="4.5" PointY="23.321848958333334" />
-          <ConnectorPoint PointX="5.25" PointY="23.321848958333334" />
+          <ConnectorPoint PointX="9.625" PointY="18.571848958333334" />
+          <ConnectorPoint PointX="10.375" PointY="18.571848958333334" />
         </AssociationConnector>
         <AssociationConnector Association="NorthwindModel.FK_Territories_Region" ManuallyRouted="false">
           <ConnectorPoint PointX="6.5" PointY="8.72068359375" />
@@ -1787,16 +1787,12 @@
           <ConnectorPoint PointX="3" PointY="3.297841796875" />
         </AssociationConnector>
         <AssociationConnector Association="NorthwindModel.EmployeeTerritories" ManuallyRouted="false">
-          <ConnectorPoint PointX="4.5" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="4.791666666666667" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="4.958333333333333" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="5.385416666666667" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="5.552083333333333" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="6.416666666666667" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="6.583333333333333" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="7.510416666666667" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="7.677083333333333" PointY="10.307571614583333" />
-          <ConnectorPoint PointX="8" PointY="10.307571614583333" />
+          <ConnectorPoint PointX="4.5" PointY="11.327694740639076" />
+          <ConnectorPoint PointX="4.9375" PointY="11.327694740639076" />
+          <ConnectorPoint PointX="4.9375" PointY="11.318800799589202" />
+          <ConnectorPoint PointX="7.510416666666667" PointY="11.318800799589202" />
+          <ConnectorPoint PointX="7.677083333333333" PointY="11.318800799589202" />
+          <ConnectorPoint PointX="8" PointY="11.318800799589202" />
         </AssociationConnector>
       </Diagram>
     </Diagrams>
