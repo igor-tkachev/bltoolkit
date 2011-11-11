@@ -1,0 +1,15 @@
+﻿<#@ template language="C#" debug="True" hostspecific="True" #>
+<#@ output extension=".generated.cs" #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"            #>
+<#@ include file="$(SolutionDir)\Source\Templates\MSSql.ttinclude"                #>
+<#@ include file="$(SolutionDir)\Source\Templates\PluralSingular.ttinclude"       #>
+<#
+	ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
+	Namespace        = "NorthwindDS";
+
+	LoadMetadata();
+
+	Tables["Products"].Columns["Discontinued"].Attributes.Add("MapField(IsInheritanceDiscriminator=true)");
+	
+	GenerateModel();
+#>
