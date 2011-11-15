@@ -58,8 +58,7 @@ namespace BLToolkit.Data.Linq
 		void OnRootClosing(object sender, EventArgs e)
 		{
 			foreach (var context in _contexts)
-				if (context.DataContextInfo.DataContext is IDisposable)
-					((IDisposable)context.DataContextInfo.DataContext).Dispose();
+				context.DataContextInfo.DataContext.Dispose();
 
 			RootDataContext.DataContext.OnClosing -= OnRootClosing;
 

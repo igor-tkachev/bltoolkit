@@ -14,8 +14,9 @@ namespace Data.Linq
 		[Test]
 		public void First()
 		{
-			var expected = Parent.OrderByDescending(p => p.ParentID).First().ParentID;
-			ForEachProvider(db => Assert.AreEqual(expected, db.Parent.OrderByDescending(p => p.ParentID).First().ParentID));
+			ForEachProvider(db => Assert.AreEqual(
+				   Parent.OrderByDescending(p => p.ParentID).First().ParentID,
+				db.Parent.OrderByDescending(p => p.ParentID).First().ParentID));
 		}
 
 		[Test]
@@ -132,9 +133,31 @@ namespace Data.Linq
 		public void NestedFirstOrDefault3()
 		{
 			ForEachProvider(
+				// Can be fixed.
+				new[] { ProviderName.Informix, ProviderName.Firebird },
 				db => AreEqual(
 					from p in    Parent select p.Children.Select(c => c.ParentID).Distinct().FirstOrDefault(),
 					from p in db.Parent select p.Children.Select(c => c.ParentID).Distinct().FirstOrDefault()));
+		}
+
+		[Test]
+		public void NestedFirstOrDefault4()
+		{
+			ForEachProvider(
+				// Can be fixed.
+				new[] { ProviderName.Informix, ProviderName.Firebird, ProviderName.PostgreSQL },
+				db => AreEqual(
+					from p in    Parent select p.Children.Where(c => c.ParentID > 0).Distinct().FirstOrDefault(),
+					from p in db.Parent select p.Children.Where(c => c.ParentID > 0).Distinct().FirstOrDefault()));
+		}
+
+		[Test]
+		public void NestedFirstOrDefault5()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					from p in    GrandChild select p.Child.Parent.Children.FirstOrDefault(),
+					from p in db.GrandChild select p.Child.Parent.Children.FirstOrDefault()));
 		}
 
 		[Test]

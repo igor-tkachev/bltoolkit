@@ -66,11 +66,11 @@ namespace BLToolkit.Data.Linq.Builder
 			throw new InvalidOperationException();
 		}
 
-		public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+		public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.Root        : return Lambda.Parameters.Count > 0 && expression == Lambda.Parameters[0];
+				case RequestFor.Root        : return new IsExpressionResult(Lambda.Parameters.Count > 0 && expression == Lambda.Parameters[0]);
 
 				case RequestFor.Table       :
 				case RequestFor.Association :
@@ -87,7 +87,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 			}
 
-			return false;
+			return IsExpressionResult.False;
 		}
 
 		public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)

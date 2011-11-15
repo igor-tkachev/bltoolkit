@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Xml;
+
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -16,9 +17,10 @@ namespace Data
 		//[TestFixtureSetUp]
 		public void SetUp()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string query = "INSERT INTO Person(FirstName, LastName, Gender) SELECT FirstName, LastName, Gender FROM Person";
+				var query = "INSERT INTO Person(FirstName, LastName, Gender) SELECT FirstName, LastName, Gender FROM Person";
+
 				db.SetCommand(query).ExecuteNonQuery(); // 4
 				db.SetCommand(query).ExecuteNonQuery(); // 8
 				db.SetCommand(query).ExecuteNonQuery(); // 16
@@ -44,7 +46,7 @@ namespace Data
 		//[TestFixtureTearDown]
 		public void TearDown()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
 				db.SetCommand("DELETE FROM Person WHERE PersonID > 2").ExecuteNonQuery();
 			}
@@ -53,9 +55,9 @@ namespace Data
 		[Test]
 		public void ScalarListTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				ArrayList array = db
+				var array = db
 #if SQLITE || SQLCE || SQLCE
 					.SetCommand("SELECT * FROM Person")
 #else
@@ -71,12 +73,11 @@ namespace Data
 		[Test]
 		public void ScalarListTest2()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				ArrayList array = new ArrayList();
-					db
-					.SetCommand("SELECT * FROM Person")
-					.ExecuteScalarList(array, typeof(int));
+				var array = new ArrayList();
+
+				db.SetCommand("SELECT * FROM Person").ExecuteScalarList(array, typeof(int));
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -86,11 +87,9 @@ namespace Data
 		[Test]
 		public void ScalarListTest3()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				ArrayList array = db
-					.SetCommand("SELECT * FROM Person")
-					.ExecuteScalarList(typeof(string),1);
+				var array = db.SetCommand("SELECT * FROM Person").ExecuteScalarList(typeof(string),1);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -100,12 +99,11 @@ namespace Data
 		[Test]
 		public void ScalarListTest4()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				ArrayList array = new ArrayList();
-				db
-					.SetCommand("SELECT * FROM Person")
-					.ExecuteScalarList(array, typeof(string), "LastName");
+				var array = new ArrayList();
+
+				db.SetCommand("SELECT * FROM Person").ExecuteScalarList(array, typeof(string), "LastName");
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -115,16 +113,14 @@ namespace Data
 		[Test]
 		public void GenericsScalarListTest()
 		{
-			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
+			var cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
 #if !MSSQL && !SQLCE
 			cmd += " FROM dual";
 #endif
 
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				List<int?> array = db
-					.SetCommand(cmd)
-					.ExecuteScalarList<int?>();
+				var array = db.SetCommand(cmd).ExecuteScalarList<int?>();
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -135,16 +131,15 @@ namespace Data
 		[Test]
 		public void GenericsScalarListTest2()
 		{
-			string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
+			var cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
 #if !MSSQL && !SQLCE
 			cmd += " FROM dual";
 #endif
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				List<int> array = new List<int>();
-				db
-					.SetCommand(cmd)
-					.ExecuteScalarList(array);
+				var array = new List<int>();
+
+				db.SetCommand(cmd).ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -155,11 +150,9 @@ namespace Data
 		[Test]
 		public void GenericsScalarListTest3()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				List<string> array = db
-					.SetCommand("SELECT * FROM Person")
-					.ExecuteScalarList<string>(1);
+				var array = db.SetCommand("SELECT * FROM Person").ExecuteScalarList<string>(1);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -169,12 +162,11 @@ namespace Data
 		[Test]
 		public void GenericsScalarListTest4()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				List<string> array = new List<string>();
-				db
-					.SetCommand("SELECT * FROM Person")
-					.ExecuteScalarList(array, "LastName");
+				var array = new List<string>();
+
+				db.SetCommand("SELECT * FROM Person").ExecuteScalarList(array, "LastName");
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -184,15 +176,13 @@ namespace Data
 		[Test]
 		public void GenericsScalarListTest5()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
+				var cmd = "SELECT PersonID FROM Person UNION ALL SELECT NULL";
 #if !MSSQL && !SQLCE
 				cmd += " FROM dual";
 #endif
-				List<uint?> array = db
-					.SetCommand(cmd)
-					.ExecuteScalarList<uint?>();
+				var array = db.SetCommand(cmd).ExecuteScalarList<uint?>();
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -203,12 +193,11 @@ namespace Data
 		[Test]
 		public void GenericsScalarListTest6()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				List<uint> array = new List<uint>();
-				db
-					.SetCommand("SELECT * FROM Person")
-					.ExecuteScalarList(array);
+				var array = new List<uint>();
+
+				db.SetCommand("SELECT * FROM Person").ExecuteScalarList(array);
 
 				Assert.IsNotNull(array);
 				Assert.IsTrue(array.Count > 0);
@@ -217,7 +206,7 @@ namespace Data
 
 		private List<T> TestType<T>(DbManager db, string columnName) where T : class
 		{
-			List<T> array = db
+			var array = db
 				.SetCommand(string.Format("SELECT {0} FROM DataTypeTest ORDER BY DataTypeID", columnName))
 				.ExecuteScalarList<T>();
 
@@ -228,11 +217,11 @@ namespace Data
 			return array;
 		}
 
-		private List<Nullable<T>> TestNullableType<T>(DbManager db, string columnName) where T : struct
+		private List<T?> TestNullableType<T>(DbManager db, string columnName) where T : struct
 		{
-			List<Nullable<T>> array = db
+			List<T?> array = db
 				.SetCommand(string.Format("SELECT {0} FROM DataTypeTest ORDER BY DataTypeID", columnName))
-				.ExecuteScalarList<Nullable<T>>();
+				.ExecuteScalarList<T?>();
 
 			Assert.IsNotNull(array);
 			Assert.IsTrue   (array.Count > 1);
@@ -242,11 +231,11 @@ namespace Data
 			return array;
 		}
 
-		private List<Nullable<T>> TestINullableType<T>(DbManager db, string columnName) where T : struct, INullable
+		private List<T?> TestINullableType<T>(DbManager db, string columnName) where T : struct, INullable
 		{
-			List<Nullable<T>> array = db
+			var array = db
 				.SetCommand(string.Format("SELECT {0} FROM DataTypeTest ORDER BY DataTypeID", columnName))
-				.ExecuteScalarList<Nullable<T>>();
+				.ExecuteScalarList<T?>();
 
 			Assert.IsNotNull(array);
 			Assert.IsTrue(array.Count > 1);
@@ -260,7 +249,7 @@ namespace Data
 		[Test]
 		public void GenericsScalarListDataTypesTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
 				// Base types
 				//
@@ -305,21 +294,21 @@ namespace Data
 				TestType<SqlXml>              (db, "Xml_");
 #endif
 				// BLToolkit extension
-				List<Byte[]> arrays  = TestType<Byte[]>(db, "Binary_");
+				var arrays  = TestType<Byte[]>(db, "Binary_");
 				Console.WriteLine("{0}", arrays[1][0]);
 
-				List<Stream> streams = TestType<Stream>(db, "Bytes_");
+				var streams = TestType<Stream>(db, "Bytes_");
 				Console.WriteLine("{0}", streams[1].ReadByte());
 
-				List<Char[]> symbols = TestType<Char[]>(db, "String_");
+				var symbols = TestType<Char[]>(db, "String_");
 				Assert.AreEqual(symbols[1][0], 's');
 
-				List<XmlReader> xmlReaders = TestType<XmlReader>(db, "Xml_");
+				var xmlReaders = TestType<XmlReader>(db, "Xml_");
 				xmlReaders[1].MoveToContent();
 				Assert.IsTrue(xmlReaders[1].ReadToDescendant("element"));
 				Console.WriteLine("{0}", xmlReaders[1].GetAttribute("strattr"));
 
-				List<XmlDocument> xmlDocs = TestType<XmlDocument>(db, "Xml_");
+				var xmlDocs = TestType<XmlDocument>(db, "Xml_");
 				Assert.IsNotNull(xmlDocs[1]);
 				Assert.IsNotNull(xmlDocs[1].DocumentElement);
 				Console.WriteLine("{0}", xmlDocs[1].DocumentElement.GetAttribute("strattr"));

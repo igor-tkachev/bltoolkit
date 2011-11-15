@@ -167,5 +167,17 @@ namespace Data.Linq
 
 			ForEachProvider(db => Assert.AreEqual(2, query(db, 2).ToList().Count()));
 		}
+
+		[Test]
+		public void ElementTest1()
+		{
+			var query = CompiledQuery.Compile((ITestDataContext db, int n) => db.Child.Where(c => c.ParentID == n).First());
+
+			ForEachProvider(db =>
+			{
+				Assert.AreEqual(1, query(db, 1).ParentID);
+				Assert.AreEqual(2, query(db, 2).ParentID);
+			});
+		}
 	}
 }

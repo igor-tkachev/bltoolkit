@@ -141,7 +141,7 @@ namespace BLToolkit.Data.Linq.Builder
 					var ma = binding as MemberAssignment;
 					var pe = Expression.MakeMemberAccess(path, member);
 
-					if (ma.Expression is MemberInitExpression && !into.IsExpression(pe, 1, RequestFor.Field))
+					if (ma.Expression is MemberInitExpression && !into.IsExpression(pe, 1, RequestFor.Field).Result)
 					{
 						BuildSetter(
 							builder,
@@ -301,7 +301,7 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				throw new NotImplementedException();
 			}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -124,14 +123,14 @@ namespace BLToolkit.Data.Linq.Builder
 				return sql;
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				if (expression == null)
 				{
 					switch (requestFlag)
 					{
 						case RequestFor.Expression :
-						case RequestFor.Field      : return false;
+						case RequestFor.Field      : return IsExpressionResult.False;
 					}
 				}
 

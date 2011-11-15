@@ -296,5 +296,160 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		#endregion
+
+		#region BuildSubQuery
+
+		interface ISubQueryHelper
+		{
+			Expression GetSubquery(
+				ExpressionBuilder       builder,
+				Expression              expression,
+				ParameterExpression     paramArray,
+				IEnumerable<Expression> parameters);
+		}
+
+		class SubQueryHelper<TRet> : ISubQueryHelper
+		{
+			public Expression GetSubquery(
+				ExpressionBuilder       builder,
+				Expression              expression,
+				ParameterExpression     paramArray,
+				IEnumerable<Expression> parameters)
+			{
+				var lambda      = Expression.Lambda<Func<IDataContext,object[],TRet>>(
+					expression,
+					Expression.Parameter(typeof(IDataContext), "ctx"),
+					paramArray);
+				var queryReader = CompiledQuery.Compile(lambda);
+
+				return Expression.Call(
+					null,
+					ReflectionHelper.Expressor<object>.MethodExpressor(_ => ExecuteSubQuery(null, null, null)),
+						ExpressionBuilder.ContextParam,
+						Expression.NewArrayInit(typeof(object), parameters),
+						Expression.Constant(queryReader)
+					);
+			}
+
+			static TRet ExecuteSubQuery(
+				QueryContext                     queryContext,
+				object[]                         parameters,
+				Func<IDataContext,object[],TRet> queryReader)
+			{
+				var db = queryContext.GetDataContext();
+
+				try
+				{
+					return queryReader(db.DataContextInfo.DataContext, parameters);
+				}
+				finally
+				{
+					queryContext.ReleaseDataContext(db);
+				}
+			}
+		}
+
+		public Expression BuildSubQuery(IBuildContext context, Expression expression)
+		{
+			var parameters = new HashSet<ParameterExpression>();
+
+			expression.Visit(e =>
+			{
+				if (e.NodeType == ExpressionType.Lambda)
+					foreach (var p in ((LambdaExpression)e).Parameters)
+						parameters.Add(p);
+			});
+
+			// Convert associations.
+			//
+			expression = expression.Convert(e =>
+			{
+				switch (e.NodeType)
+				{
+					case ExpressionType.MemberAccess :
+						{
+							var root = e.GetRootObject();
+
+							if (root != null &&
+								root.NodeType == ExpressionType.Parameter &&
+								!parameters.Contains((ParameterExpression)root))
+							{
+								var res = context.IsExpression(e, 0, RequestFor.Association);
+
+								if (res.Result)
+								{
+									var table = (TableBuilder.AssociatedTableContext)res.Context;
+
+									if (table.IsList)
+									{
+										var ttype  = typeof(Table<>).MakeGenericType(table.ObjectType);
+										var tbl    = Activator.CreateInstance(ttype);
+										var method = typeof(LinqExtensions)
+											.GetMethod("Where", BindingFlags.NonPublic | BindingFlags.Static)
+											.MakeGenericMethod(e.Type, table.ObjectType, ttype);
+
+										var me = (MemberExpression)e;
+										var op = Expression.Parameter(table.ObjectType, "t");
+
+										parameters.Add(op);
+
+										Expression ex = null;
+
+										for (var i = 0; i < table.Association.ThisKey.Length; i++)
+										{
+											var field1 = table.ParentAssociation.SqlTable.Fields[table.Association.ThisKey [i]];
+											var field2 = table.                  SqlTable.Fields[table.Association.OtherKey[i]];
+
+											var ee = Expression.Equal(
+												Expression.MakeMemberAccess(op,            field2.MemberMapper.MemberAccessor.MemberInfo),
+												Expression.MakeMemberAccess(me.Expression, field1.MemberMapper.MemberAccessor.MemberInfo));
+
+											ex = ex == null ? ee : Expression.AndAlso(ex, ee);
+										}
+
+										return Expression.Call(null, method, Expression.Constant(tbl), Expression.Lambda(ex, op));
+									}
+								}
+							}
+
+							break;
+						}
+				}
+
+				return e;
+			});
+
+			var paramex = Expression.Parameter(typeof(object[]), "ps");
+			var parms   = new List<Expression>();
+
+			// Convert parameters.
+			//
+			expression = expression.Convert(e =>
+			{
+				var root = e.GetRootObject();
+
+				if (root != null &&
+					root.NodeType == ExpressionType.Parameter &&
+					!parameters.Contains((ParameterExpression)root))
+				{
+					var ex = Expression.Convert(BuildExpression(context, e), typeof(object));
+
+					parms.Add(ex);
+
+					return Expression.Convert(
+						Expression.ArrayIndex(paramex, Expression.Constant(parms.Count - 1)),
+						e.Type);
+				}
+
+				return e;
+			});
+
+			var sqtype = typeof(SubQueryHelper<>).MakeGenericType(expression.Type);
+			var helper = (ISubQueryHelper)Activator.CreateInstance(sqtype);
+
+			return helper.GetSubquery(this, expression, paramex, parms);
+		}
+
+		#endregion
 	}
 }

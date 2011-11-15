@@ -73,7 +73,7 @@ namespace BLToolkit.Data.Linq
 						{
 							var expr = (MethodCallExpression)pi;
 
-							if (expr.Method.DeclaringType == typeof(Queryable) || expr.Method.DeclaringType == typeof(LinqExtensions))
+							if (expr.IsQueryable())
 							{
 								var qtype = TypeHelper.GetGenericType(typeof(IQueryable<>), expr.Type);
 								var helper = (ITableHelper)Activator.CreateInstance(

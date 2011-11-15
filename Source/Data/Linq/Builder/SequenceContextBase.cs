@@ -42,11 +42,11 @@ namespace BLToolkit.Data.Linq.Builder
 			query.SetQuery(mapper.Compile());
 		}
 
-		public abstract Expression    BuildExpression(Expression expression, int level);
-		public abstract SqlInfo[]     ConvertToSql   (Expression expression, int level, ConvertFlags flags);
-		public abstract SqlInfo[]     ConvertToIndex (Expression expression, int level, ConvertFlags flags);
-		public abstract bool          IsExpression   (Expression expression, int level, RequestFor requestFlag);
-		public abstract IBuildContext GetContext     (Expression expression, int level, BuildInfo buildInfo);
+		public abstract Expression         BuildExpression(Expression expression, int level);
+		public abstract SqlInfo[]          ConvertToSql   (Expression expression, int level, ConvertFlags flags);
+		public abstract SqlInfo[]          ConvertToIndex (Expression expression, int level, ConvertFlags flags);
+		public abstract IsExpressionResult IsExpression   (Expression expression, int level, RequestFor requestFlag);
+		public abstract IBuildContext      GetContext     (Expression expression, int level, BuildInfo buildInfo);
 
 		public virtual int ConvertToParentIndex(int index, IBuildContext context)
 		{
@@ -65,7 +65,7 @@ namespace BLToolkit.Data.Linq.Builder
 		protected bool IsSubQuery()
 		{
 			for (var p = Parent; p != null; p = p.Parent)
-				if (p.IsExpression(null, 0, RequestFor.SubQuery))
+				if (p.IsExpression(null, 0, RequestFor.SubQuery).Result)
 					return true;
 			return false;
 		}

@@ -18,19 +18,19 @@ namespace BLToolkit.Data.Linq.Builder
 // ReSharper restore InconsistentNaming
 #endif
 
-		ExpressionBuilder Builder    { get; }
-		Expression        Expression { get; }
-		SqlQuery          SqlQuery   { get; set; }
-		IBuildContext     Parent     { get; set; }
+		ExpressionBuilder  Builder    { get; }
+		Expression         Expression { get; }
+		SqlQuery           SqlQuery   { get; set; }
+		IBuildContext      Parent     { get; set; }
 
-		void              BuildQuery<T>       (Query<T> query, ParameterExpression queryParameter);
-		Expression        BuildExpression     (Expression expression, int level);
-		SqlInfo[]         ConvertToSql        (Expression expression, int level, ConvertFlags flags);
-		SqlInfo[]         ConvertToIndex      (Expression expression, int level, ConvertFlags flags);
-		bool              IsExpression        (Expression expression, int level, RequestFor requestFlag);
-		IBuildContext     GetContext          (Expression expression, int level, BuildInfo buildInfo);
-		int               ConvertToParentIndex(int index, IBuildContext context);
-		void              SetAlias            (string alias);
-		ISqlExpression    GetSubQuery         (IBuildContext context);
+		void               BuildQuery<T>       (Query<T> query, ParameterExpression queryParameter);
+		Expression         BuildExpression     (Expression expression, int level);
+		SqlInfo[]          ConvertToSql        (Expression expression, int level, ConvertFlags flags);
+		SqlInfo[]          ConvertToIndex      (Expression expression, int level, ConvertFlags flags);
+		IsExpressionResult IsExpression        (Expression expression, int level, RequestFor requestFlag);
+		IBuildContext      GetContext          (Expression expression, int level, BuildInfo buildInfo);
+		int                ConvertToParentIndex(int index, IBuildContext context);
+		void               SetAlias            (string alias);
+		ISqlExpression     GetSubQuery         (IBuildContext context);
 	}
 }

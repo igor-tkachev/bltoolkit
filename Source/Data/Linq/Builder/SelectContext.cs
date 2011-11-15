@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -95,7 +94,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (Body.NodeType != ExpressionType.Parameter && level == 0)
 					if (levelExpression == expression)
-						if (IsSubQuery() && IsExpression(null, 0, RequestFor.Expression))
+						if (IsSubQuery() && IsExpression(null, 0, RequestFor.Expression).Result)
 						{
 							var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 							var idx = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
@@ -147,8 +146,8 @@ namespace BLToolkit.Data.Linq.Builder
 														switch (e.NodeType)
 														{
 															case ExpressionType.MemberAccess :
-																if (!sequence.IsExpression(e, 0, RequestFor.Object) &&
-																	!sequence.IsExpression(e, 0, RequestFor.Field))
+																if (!sequence.IsExpression(e, 0, RequestFor.Object).Result &&
+																	!sequence.IsExpression(e, 0, RequestFor.Field). Result)
 																{
 																	var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
 																	var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
@@ -167,7 +166,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 									var me = memberExpression.NodeType == ExpressionType.Parameter ? null : memberExpression;
 
-									if (!IsExpression(me, 0, RequestFor.Object) && !IsExpression(me, 0, RequestFor.Field))
+									if (!IsExpression(me, 0, RequestFor.Object).Result &&
+										!IsExpression(me, 0, RequestFor.Field). Result)
 									{
 										var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 										var idx  = Parent == null ? info.Index : Parent.ConvertToParentIndex(info.Index, this);
@@ -251,7 +251,7 @@ namespace BLToolkit.Data.Linq.Builder
 								var levelExpression = expression.GetLevelExpression(level);
 
 								if (levelExpression != expression)
-									if (flags != ConvertFlags.Field && IsExpression(expression, level, RequestFor.Field))
+									if (flags != ConvertFlags.Field && IsExpression(expression, level, RequestFor.Field).Result)
 										flags = ConvertFlags.Field;
 							}
 
@@ -355,7 +355,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				case ExpressionType.MemberAccess :
 				case ExpressionType.Parameter :
-					if (IsExpression(expression, 0, RequestFor.Field))
+					if (IsExpression(expression, 0, RequestFor.Field).Result)
 						flags = ConvertFlags.Field;
 
 					var sql = ConvertToSql(expression, 0, flags)[0];
@@ -587,15 +587,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region IsExpression
 
-		public virtual bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+		public virtual IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 		{
 			switch (requestFlag)
 			{
-				case RequestFor.SubQuery : return false;
+				case RequestFor.SubQuery : return IsExpressionResult.False;
 				case RequestFor.Root     :
-					return Sequence.Length == 1 ?
+					return new IsExpressionResult(Sequence.Length == 1 ?
 						expression == Lambda.Parameters[0] :
-						Lambda.Parameters.Any(p => p == expression);
+						Lambda.Parameters.Any(p => p == expression));
 			}
 
 			if (IsScalar)
@@ -605,7 +605,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				switch (requestFlag)
 				{
-					default                     : return false;
+					default                     : return IsExpressionResult.False;
 					case RequestFor.Table       :
 					case RequestFor.Association :
 					case RequestFor.Field       :
@@ -616,14 +616,14 @@ namespace BLToolkit.Data.Linq.Builder
 							expression,
 							level,
 							(ctx, ex, l) => ctx.IsExpression(ex, l, requestFlag),
-							() => requestFlag == RequestFor.Expression);
+							() => new IsExpressionResult(requestFlag == RequestFor.Expression));
 				}
 			}
 			else
 			{
 				switch (requestFlag)
 				{
-					default                     : return false;
+					default                     : return IsExpressionResult.False;
 					case RequestFor.Table       :
 					case RequestFor.Association :
 					case RequestFor.Field       :
@@ -634,9 +634,9 @@ namespace BLToolkit.Data.Linq.Builder
 							if (expression == null)
 							{
 								if (requestFlag == RequestFor.Expression)
-									return Members.Values.Any(member => IsExpression(member, 0, requestFlag));
+									return new IsExpressionResult(Members.Values.Any(member => IsExpression(member, 0, requestFlag).Result));
 
-								return requestFlag == RequestFor.Object;
+								return new IsExpressionResult(requestFlag == RequestFor.Object);
 							}
 
 							var levelExpression = expression.GetLevelExpression(level);
@@ -652,7 +652,8 @@ namespace BLToolkit.Data.Linq.Builder
 											switch (memberExpression.NodeType)
 											{
 												case ExpressionType.New        :
-												case ExpressionType.MemberInit : return requestFlag == RequestFor.Object;
+												case ExpressionType.MemberInit :
+													return new IsExpressionResult(requestFlag == RequestFor.Object);
 											}
 										}
 
@@ -661,7 +662,7 @@ namespace BLToolkit.Data.Linq.Builder
 											levelExpression,
 											level,
 											(n,ctx,ex,l,_) => n == 0 ?
-												requestFlag == RequestFor.Expression :
+												new IsExpressionResult(requestFlag == RequestFor.Expression) : 
 												ctx.IsExpression(ex, l, requestFlag));
 									}
 
@@ -682,8 +683,8 @@ namespace BLToolkit.Data.Linq.Builder
 									}
 
 								case ExpressionType.New          :
-								case ExpressionType.MemberInit   : return requestFlag == RequestFor.Object;
-								default                          : return requestFlag == RequestFor.Expression;
+								case ExpressionType.MemberInit   : return new IsExpressionResult(requestFlag == RequestFor.Object);
+								default                          : return new IsExpressionResult(requestFlag == RequestFor.Expression);
 							}
 
 							break;
@@ -879,7 +880,7 @@ namespace BLToolkit.Data.Linq.Builder
 		protected bool IsSubQuery()
 		{
 			for (var p = Parent; p != null; p = p.Parent)
-				if (p.IsExpression(null, 0, RequestFor.SubQuery))
+				if (p.IsExpression(null, 0, RequestFor.SubQuery).Result)
 					return true;
 			return false;
 		}

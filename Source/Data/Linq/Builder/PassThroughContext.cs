@@ -45,7 +45,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return Context.ConvertToIndex(expression, level, flags);
 		}
 
-		public virtual bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+		public virtual IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 		{
 			return Context.IsExpression(expression, level, requestFlag);
 		}

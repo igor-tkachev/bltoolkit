@@ -111,12 +111,10 @@ namespace BLToolkit.Data.Linq.Builder
 						return expr;
 					}
 
-					if (Sequence.IsExpression(null, level, RequestFor.Object))
-					{
-						
-					}
-					else
-						return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
+					if (Sequence.IsExpression(null, level, RequestFor.Object).Result)
+						return Builder.BuildSubQuery(Parent, _methodCall);
+
+					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 				}
 
 				throw new NotImplementedException();
@@ -132,7 +130,7 @@ namespace BLToolkit.Data.Linq.Builder
 				return Sequence.ConvertToIndex(expression, level, flags);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				return Sequence.IsExpression(expression, level, requestFlag);
 			}
