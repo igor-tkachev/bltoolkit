@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -107,7 +109,12 @@ namespace BLToolkit.Data.Linq.Builder
 							}
 
 							if (IsSubQuery(context, ce))
+							{
+								if (TypeHelper.IsSameOrParent(typeof(IEnumerable), pi.Type))
+									return new ExpressionHelper.ConvertInfo(BuildSubQuery(context, pi));
+
 								return new ExpressionHelper.ConvertInfo(GetSubQuery(context, ce).BuildExpression(null, 0));
+							}
 
 							if (IsServerSideOnly(pi) || PreferServerSide(pi))
 								return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));

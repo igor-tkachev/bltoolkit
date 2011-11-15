@@ -16,7 +16,8 @@ namespace Data.Linq
 		[Test]
 		public void CompiledTest1()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db, string n1, int n2) => n1 + n2);
+			var query = CompiledQuery.Compile((ITestDataContext db, string n1, int n2) =>
+				n1 + n2);
 
 			ForEachProvider(db =>
 			{
@@ -28,7 +29,8 @@ namespace Data.Linq
 		[Test]
 		public void CompiledTest2()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db, int n) => db.Child.Where(c => c.ParentID == n).Take(n));
+			var query = CompiledQuery.Compile((ITestDataContext db, int n) =>
+				db.Child.Where(c => c.ParentID == n).Take(n));
 
 			ForEachProvider(db =>
 			{
@@ -40,7 +42,8 @@ namespace Data.Linq
 		[Test]
 		public void CompiledTest3()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db, int n) => db.GetTable<Child>().Where(c => c.ParentID == n).Take(n));
+			var query = CompiledQuery.Compile((ITestDataContext db, int n) =>
+				db.GetTable<Child>().Where(c => c.ParentID == n).Take(n));
 
 			ForEachProvider(db =>
 			{
@@ -52,7 +55,8 @@ namespace Data.Linq
 		[Test]
 		public void CompiledTest4()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db, int[] n) => db.GetTable<Child>().Where(c => n.Contains(c.ParentID)));
+			var query = CompiledQuery.Compile((ITestDataContext db, int[] n) =>
+				db.GetTable<Child>().Where(c => n.Contains(c.ParentID)));
 
 			ForEachProvider(db =>
 				Assert.AreEqual(3, query(db, new[] { 1, 2 }).ToList().Count()));
@@ -74,7 +78,8 @@ namespace Data.Linq
 		[Test]
 		public void CompiledTable1()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db) => db.Child);
+			var query = CompiledQuery.Compile((ITestDataContext db) =>
+				db.Child);
 
 			ForEachProvider(db => query(db).ToList().Count());
 		}
@@ -82,7 +87,8 @@ namespace Data.Linq
 		[Test]
 		public void CompiledTable2()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db) => db.GetTable<Child>());
+			var query = CompiledQuery.Compile((ITestDataContext db) =>
+				db.GetTable<Child>());
 
 			ForEachProvider(db => query(db).ToList().Count());
 		}
@@ -90,7 +96,8 @@ namespace Data.Linq
 		[Test]
 		public void ConcurentTest1()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db, int n) => db.GetTable<Parent>().Where(p => p.ParentID == n).First().ParentID);
+			var query = CompiledQuery.Compile((ITestDataContext db, int n) =>
+				db.GetTable<Parent>().Where(p => p.ParentID == n).First().ParentID);
 
 			const int count = 100;
 
@@ -171,7 +178,8 @@ namespace Data.Linq
 		[Test]
 		public void ElementTest1()
 		{
-			var query = CompiledQuery.Compile((ITestDataContext db, int n) => db.Child.Where(c => c.ParentID == n).First());
+			var query = CompiledQuery.Compile((ITestDataContext db, int n) =>
+				db.Child.Where(c => c.ParentID == n).First());
 
 			ForEachProvider(db =>
 			{

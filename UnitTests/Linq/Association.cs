@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
+
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using NUnit.Framework;
 
-using BLToolkit.Data.DataProvider;
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -14,7 +15,7 @@ namespace Data.Linq
 	[TestFixture]
 	public class Association : TestBase
 	{
-		//[Test]
+		[Test]
 		public void Test1()
 		{
 			ForEachProvider(db => AreEqual(
@@ -22,7 +23,7 @@ namespace Data.Linq
 				from p in db.Parent select p.Children));
 		}
 
-		//[Test]
+		[Test]
 		public void Test2()
 		{
 			ForEachProvider(db => AreEqual(
@@ -38,7 +39,7 @@ namespace Data.Linq
 				from ch in db.Child where ch.ParentID == 1 select new { ch, ch.Parent }));
 		}
 
-		//[Test]
+		[Test]
 		public void Test4()
 		{
 			var expected =

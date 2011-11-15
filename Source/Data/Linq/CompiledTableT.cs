@@ -86,10 +86,11 @@ namespace BLToolkit.Data.Linq
 
 		public T Execute(object[] parameters)
 		{
-			var db  = (IDataContext)parameters[0];
-			var ctx = DataContextInfo.Create(db);
+			var db    = (IDataContext)parameters[0];
+			var ctx   = DataContextInfo.Create(db);
+			var query = GetInfo(db);
 
-			return (T)GetInfo(db).GetElement(null, ctx, _expression, parameters);
+			return (T)query.GetElement(null, ctx, _expression, parameters);
 		}
 	}
 }

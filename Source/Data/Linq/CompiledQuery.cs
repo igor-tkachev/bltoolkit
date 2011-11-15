@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -75,7 +76,12 @@ namespace BLToolkit.Data.Linq
 
 							if (expr.IsQueryable())
 							{
-								var qtype = TypeHelper.GetGenericType(typeof(IQueryable<>), expr.Type);
+								var qtype  = TypeHelper.GetGenericType(
+									TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type) ?
+										typeof(IQueryable<>) :
+										typeof(IEnumerable<>),
+									expr.Type);
+
 								var helper = (ITableHelper)Activator.CreateInstance(
 									typeof(TableHelper<>).MakeGenericType(qtype == null ? expr.Type : qtype.GetGenericArguments()[0]));
 
@@ -91,8 +97,9 @@ namespace BLToolkit.Data.Linq
 					case ExpressionType.MemberAccess :
 						if (pi.Type.IsGenericType && pi.Type.GetGenericTypeDefinition() == typeof(Table<>))
 						{
-							var helper =
-								(ITableHelper)Activator.CreateInstance(typeof(TableHelper<>).MakeGenericType(pi.Type.GetGenericArguments()[0]));
+							var helper = (ITableHelper)Activator
+								.CreateInstance(typeof(TableHelper<>)
+								.MakeGenericType(pi.Type.GetGenericArguments()[0]));
 							return helper.CallTable(query, pi, ps, true);
 						}
 
