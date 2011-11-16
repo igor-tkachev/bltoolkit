@@ -114,19 +114,27 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefault1()
 		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
 			ForEachProvider(
 				db => AreEqual(
 					from p in    Parent select    Child.FirstOrDefault(),
 					from p in db.Parent select db.Child.FirstOrDefault()));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
 		[Test]
 		public void NestedFirstOrDefault2()
 		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
 			ForEachProvider(
 				db => AreEqual(
 					from p in    Parent select p.Children.FirstOrDefault(),
 					from p in db.Parent select p.Children.FirstOrDefault()));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
 		[Test]
@@ -143,21 +151,29 @@ namespace Data.Linq
 		[Test]
 		public void NestedFirstOrDefault4()
 		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
 			ForEachProvider(
 				// Can be fixed.
 				new[] { ProviderName.Informix, ProviderName.Firebird, ProviderName.PostgreSQL },
 				db => AreEqual(
 					from p in    Parent select p.Children.Where(c => c.ParentID > 0).Distinct().FirstOrDefault(),
 					from p in db.Parent select p.Children.Where(c => c.ParentID > 0).Distinct().FirstOrDefault()));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
 		[Test]
 		public void NestedFirstOrDefault5()
 		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
 			ForEachProvider(
 				db => AreEqual(
 					from p in    GrandChild select p.Child.Parent.Children.FirstOrDefault(),
 					from p in db.GrandChild select p.Child.Parent.Children.FirstOrDefault()));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
 		[Test]

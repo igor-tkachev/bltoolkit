@@ -112,7 +112,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 
 					if (Sequence.IsExpression(null, level, RequestFor.Object).Result)
-						return Builder.BuildSubQuery(Parent, _methodCall);
+						return Builder.BuildMultipleQuery(Parent, _methodCall);
 
 					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 				}

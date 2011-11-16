@@ -20,7 +20,7 @@ namespace BLToolkit.Data.Linq
 
 		readonly object                _sync = new object();
 		readonly LambdaExpression      _query;
-		private  Func<object[],object> _compiledQuery;
+		volatile Func<object[],object> _compiledQuery;
 
 		TResult ExecuteQuery<TResult>(params object[] args)
 		{

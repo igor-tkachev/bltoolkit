@@ -5,11 +5,11 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
+	using Reflection;
 
 	partial class ExpressionBuilder
 	{
@@ -35,6 +35,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (SqlProvider.ConvertMember(ma.Member) != null)
 								break;
+
+							var res = context.IsExpression(pi, 0, RequestFor.Association);
+
+							if (res.Result)
+							{
+								var table = (TableBuilder.AssociatedTableContext)res.Context;
+
+								if (table.IsList)
+									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
+							}
 
 							var ctx = GetContext(context, pi);
 
@@ -111,7 +121,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (IsSubQuery(context, ce))
 							{
 								if (TypeHelper.IsSameOrParent(typeof(IEnumerable), pi.Type))
-									return new ExpressionHelper.ConvertInfo(BuildSubQuery(context, pi));
+									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
 
 								return new ExpressionHelper.ConvertInfo(GetSubQuery(context, ce).BuildExpression(null, 0));
 							}
@@ -304,9 +314,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#endregion
 
-		#region BuildSubQuery
+		#region BuildMultipleQuery
 
-		interface ISubQueryHelper
+		interface IMultipleQueryHelper
 		{
 			Expression GetSubquery(
 				ExpressionBuilder       builder,
@@ -315,7 +325,7 @@ namespace BLToolkit.Data.Linq.Builder
 				IEnumerable<Expression> parameters);
 		}
 
-		class SubQueryHelper<TRet> : ISubQueryHelper
+		class MultipleQueryHelper<TRet> : IMultipleQueryHelper
 		{
 			public Expression GetSubquery(
 				ExpressionBuilder       builder,
@@ -332,7 +342,7 @@ namespace BLToolkit.Data.Linq.Builder
 				return Expression.Call(
 					null,
 					ReflectionHelper.Expressor<object>.MethodExpressor(_ => ExecuteSubQuery(null, null, null)),
-						ExpressionBuilder.ContextParam,
+						ContextParam,
 						Expression.NewArrayInit(typeof(object), parameters),
 						Expression.Constant(queryReader)
 					);
@@ -356,8 +366,11 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 		}
 
-		public Expression BuildSubQuery(IBuildContext context, Expression expression)
+		public Expression BuildMultipleQuery(IBuildContext context, Expression expression)
 		{
+			if (!Common.Configuration.Linq.AllowMultipleQuery)
+				throw new LinqException("Multiple queries are not allowed. Set the 'BLToolkit.Common.Configuration.Linq.AllowMultipleQuery' flag to 'true' to allow multiple queries.");
+
 			var parameters = new HashSet<ParameterExpression>();
 
 			expression.Visit(e =>
@@ -451,8 +464,8 @@ namespace BLToolkit.Data.Linq.Builder
 				return e;
 			});
 
-			var sqtype = typeof(SubQueryHelper<>).MakeGenericType(expression.Type);
-			var helper = (ISubQueryHelper)Activator.CreateInstance(sqtype);
+			var sqtype = typeof(MultipleQueryHelper<>).MakeGenericType(expression.Type);
+			var helper = (IMultipleQueryHelper)Activator.CreateInstance(sqtype);
 
 			return helper.GetSubquery(this, expression, paramex, parms);
 		}
