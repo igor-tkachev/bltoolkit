@@ -317,7 +317,7 @@ namespace BLToolkit.Data.Linq.Builder
 										}
 
 										return ProcessMemberAccess(
-											expression, levelExpression, level,
+											expression, (MemberExpression)levelExpression, level,
 											(n,ctx,ex,l,mex) =>
 											{
 												switch (n)
@@ -551,7 +551,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 										return ProcessMemberAccess(
 											expression,
-											levelExpression,
+											(MemberExpression)levelExpression,
 											level,
 											(n, ctx, ex, l, _) => n == 0 ?
 												GetSequence(expression, level).ConvertToIndex(expression, level + 1, flags) :
@@ -659,7 +659,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 										return ProcessMemberAccess(
 											expression,
-											levelExpression,
+											(MemberExpression)levelExpression,
 											level,
 											(n,ctx,ex,l,_) => n == 0 ?
 												new IsExpressionResult(requestFlag == RequestFor.Expression) : 
@@ -722,7 +722,7 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							var context = ProcessMemberAccess(
 								expression,
-								levelExpression,
+								(MemberExpression)levelExpression,
 								level,
 								(n,ctx,ex,l,_) => n == 0 ?
 									null :
@@ -843,10 +843,10 @@ namespace BLToolkit.Data.Linq.Builder
 			throw new NotImplementedException();
 		}
 
-		T ProcessMemberAccess<T>(Expression expression, Expression levelExpression, int level,
+		T ProcessMemberAccess<T>(Expression expression, MemberExpression levelExpression, int level,
 			Func<int,IBuildContext,Expression,int,Expression,T> action)
 		{
-			var memberExpression = Members[((MemberExpression)levelExpression).Member];
+			var memberExpression = Members[levelExpression.Member];
 			var newExpression    = GetExpression(expression, levelExpression, memberExpression);
 			var sequence         = GetSequence  (expression, level);
 

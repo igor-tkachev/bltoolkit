@@ -36,6 +36,7 @@ namespace BLToolkit.Data.Linq.Builder
 							if (SqlProvider.ConvertMember(ma.Member) != null)
 								break;
 
+							/*
 							var res = context.IsExpression(pi, 0, RequestFor.Association);
 
 							if (res.Result)
@@ -45,6 +46,7 @@ namespace BLToolkit.Data.Linq.Builder
 								if (table.IsList)
 									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
 							}
+							*/
 
 							var ctx = GetContext(context, pi);
 
