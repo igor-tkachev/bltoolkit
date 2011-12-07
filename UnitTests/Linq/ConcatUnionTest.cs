@@ -104,15 +104,15 @@ namespace Data.Linq
 		[Test]
 		public void Concat5()
 		{
-			var expected =
-				(from c in Child where c.ParentID == 1 select c).Concat(
-				(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 }).
-				Where(c => c.ChildID != 1032));
-
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix }, db => AreEqual(expected, 
-				(from c in db.Child where c.ParentID == 1 select c).Concat(
-				(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 })).
-				Where(c => c.ChildID != 1032)));
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Informix },
+				db => AreEqual(
+					(from c in Child where c.ParentID == 1 select c).Concat(
+					(from c in Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 }).
+					Where(c => c.ChildID != 1032)), 
+					(from c in db.Child where c.ParentID == 1 select c).Concat(
+					(from c in db.Child where c.ParentID == 3 select new Child { ChildID = c.ChildID + 1000 })).
+					Where(c => c.ChildID != 1032)));
 		}
 
 		[Test]
@@ -157,6 +157,130 @@ namespace Data.Linq
 				AreEqual(
 					   Customer.Where(c => c.Orders.Count <= 1).Concat(   Customer.Where(c => c.Orders.Count > 1)),
 					db.Customer.Where(c => c.Orders.Count <= 1).Concat(db.Customer.Where(c => c.Orders.Count > 1)));
+		}
+
+		[Test]
+		public void Concat81()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, }).Concat(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  })),
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, }).Concat(
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  }))));
+		}
+
+		[Test]
+		public void Concat82()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  }).Concat(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, })),
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  }).Concat(
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, }))));
+		}
+
+		[Test]
+		public void Concat83()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, ID3 = c.Value1 ?? 0,  }).Concat(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  ID3 = c.ParentID + 1, })),
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, ID3 = c.Value1 ?? 0,  }).Concat(
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  ID3 = c.ParentID + 1, }))));
+		}
+
+		[Test]
+		public void Concat84()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  ID3 = c.ParentID + 1, }).Concat(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, ID3 = c.Value1 ?? 0,  })),
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ChildID,  ID3 = c.ParentID + 1, }).Concat(
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID, ID3 = c.Value1 ?? 0,  }))));
+		}
+
+		[Test]
+		public void Concat85()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.Value1 ?? 0,  ID3 = c.ParentID, }).Concat(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID + 1, ID3 = c.ChildID,  })),
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.Value1 ?? 0,  ID3 = c.ParentID, }).Concat(
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID + 1, ID3 = c.ChildID,  }))));
+		}
+
+		[Test]
+		public void Concat851()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID,     ID3 = c.ParentID, }).Concat(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID + 1, ID3 = c.ChildID,  })),
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID,     ID3 = c.ParentID, }).Concat(
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID + 1, ID3 = c.ChildID,  }))));
+		}
+
+		[Test]
+		public void Concat86()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID + 1, ID3 = c.ChildID,  }).Concat(
+					   Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.Value1 ?? 0,  ID3 = c.ParentID, })),
+					db.Child. Select(c => new { ID1 = c.ParentID, ID2 = c.ParentID + 1, ID3 = c.ChildID,  }).Concat(
+					db.Parent.Select(c => new { ID1 = c.ParentID, ID2 = c.Value1 ?? 0,  ID3 = c.ParentID, }))));
+		}
+
+		[Test]
+		public void Concat87()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					   Child. Select(c => new Parent { ParentID = c.ParentID }).Concat(
+					   Parent.Select(c => new Parent { Value1   = c.Value1   })),
+					db.Child. Select(c => new Parent { ParentID = c.ParentID }).Concat(
+					db.Parent.Select(c => new Parent { Value1   = c.Value1   }))));
+		}
+
+		[Test]
+		public void Concat871()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					   Parent.Select(c => new Parent { Value1   = c.Value1   }).Concat(
+					   Child. Select(c => new Parent { ParentID = c.ParentID })),
+					db.Parent.Select(c => new Parent { Value1   = c.Value1   }).Concat(
+					db.Child. Select(c => new Parent { ParentID = c.ParentID }))));
+		}
+
+		[Test]
+		public void Concat88()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					   Child. Select(c => new Parent { Value1   = c.ChildID,  ParentID = c.ParentID }).Concat(
+					   Parent.Select(c => new Parent { ParentID = c.ParentID, Value1   = c.Value1   })),
+					db.Child. Select(c => new Parent { Value1   = c.ChildID,  ParentID = c.ParentID }).Concat(
+					db.Parent.Select(c => new Parent { ParentID = c.ParentID, Value1   = c.Value1   }))));
+		}
+
+		[Test]
+		public void Concat89()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Informix },
+				db => AreEqual(
+					   Child. Select(c => new Parent { Value1   = c.ParentID, ParentID = c.ParentID }).Concat(
+					   Parent.Select(c => new Parent { ParentID = c.ParentID                        })),
+					db.Child. Select(c => new Parent { Value1   = c.ParentID, ParentID = c.ParentID }).Concat(
+					db.Parent.Select(c => new Parent { ParentID = c.ParentID                        }))));
 		}
 
 		[Test]
@@ -306,6 +430,18 @@ namespace Data.Linq
 					(from p1 in    Parent select new Parent { Value1 = p1.Value1 }).Union(
 					(from p2 in    Parent select p2)),
 					(from p1 in db.Parent select new Parent { Value1 = p1.Value1 }).Union(
+					(from p2 in db.Parent select p2))));
+		}
+
+		[Test]
+		public void Union523()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					(from p1 in    Parent select new Parent { ParentID = p1.ParentID }).Union(
+					(from p2 in    Parent select p2)),
+					(from p1 in db.Parent select new Parent { ParentID = p1.ParentID }).Union(
 					(from p2 in db.Parent select p2))));
 		}
 

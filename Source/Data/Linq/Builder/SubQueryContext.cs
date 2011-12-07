@@ -72,7 +72,7 @@ namespace BLToolkit.Data.Linq.Builder
 			return base.IsExpression(expression, level, testFlag);
 		}
 
-		protected readonly Dictionary<ISqlExpression,int> ColumnIndexes = new Dictionary<ISqlExpression,int>();
+		internal protected readonly Dictionary<ISqlExpression,int> ColumnIndexes = new Dictionary<ISqlExpression,int>();
 
 		protected virtual int GetIndex(SqlQuery.Column column)
 		{
