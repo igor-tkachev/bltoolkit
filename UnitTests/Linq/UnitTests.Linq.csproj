@@ -175,6 +175,7 @@
     <Compile Include="Association.cs" />
     <Compile Include="ConvertExpression.cs" />
     <Compile Include="ConcatUnionTest.cs" />
+    <Compile Include="MultipleQuery.cs" />
     <Compile Include="CountTest.cs" />
     <Compile Include="DataContextTest.cs" />
     <Compile Include="DataServiceTest.cs" />

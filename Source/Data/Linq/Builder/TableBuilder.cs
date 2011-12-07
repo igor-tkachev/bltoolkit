@@ -134,7 +134,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public virtual IBuildContext Parent { get; set; }
 
-			protected Type         OriginalType;
+			public    Type         OriginalType;
 			public    Type         ObjectType;
 			protected ObjectMapper ObjectMapper;
 			public    SqlTable     SqlTable;
@@ -769,30 +769,30 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#region IsExpression
 
-			public bool IsExpression(Expression expression, int level, RequestFor requestFor)
+			public IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFor)
 			{
 				switch (requestFor)
 				{
 					case RequestFor.Field      :
 						{
 							var table = FindTable(expression, level, false);
-							return table != null && table.Field != null;
+							return new IsExpressionResult(table != null && table.Field != null);
 						}
 
 					case RequestFor.Table       :
 					case RequestFor.Object      :
 						{
 							var table = FindTable(expression, level, false);
-							return
+							return new IsExpressionResult(
 								table       != null &&
 								table.Field == null &&
-								(expression == null || expression.GetLevelExpression(table.Level) == expression);
+								(expression == null || expression.GetLevelExpression(table.Level) == expression));
 						}
 
 					case RequestFor.Expression :
 						{
 							if (expression == null)
-								return false;
+								return IsExpressionResult.False;
 
 							var levelExpression = expression.GetLevelExpression(level);
 
@@ -803,10 +803,10 @@ namespace BLToolkit.Data.Linq.Builder
 								case ExpressionType.Call         :
 
 									var table = FindTable(expression, level, false);
-									return table == null;
+									return new IsExpressionResult(table == null);
 							}
 
-							return true;
+							return IsExpressionResult.True;
 						}
 
 					case RequestFor.Association      :
@@ -814,18 +814,20 @@ namespace BLToolkit.Data.Linq.Builder
 							if (ObjectMapper.Associations.Count > 0)
 							{
 								var table = FindTable(expression, level, false);
-								return
+								var isat  =
 									table       != null &&
 									table.Table is AssociatedTableContext &&
 									table.Field == null &&
 									(expression == null || expression.GetLevelExpression(table.Level) == expression);
+
+								return new IsExpressionResult(isat, isat ? table.Table : null);
 							}
 
-							return false;
+							return IsExpressionResult.False;
 						}
 				}
 
-				return false;
+				return IsExpressionResult.False;
 			}
 
 			#endregion
@@ -1153,15 +1155,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region AssociatedTableContext
 
-		class AssociatedTableContext : TableContext
+		public class AssociatedTableContext : TableContext
 		{
-			       readonly TableContext         _parentAssociation;
+			public readonly TableContext          ParentAssociation;
 			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
+			public readonly Association           Association;
 			public readonly bool                  IsList;
 
 			public override IBuildContext Parent
 			{
-				get { return _parentAssociation.Parent; }
+				get { return ParentAssociation.Parent; }
 				set { }
 			}
 
@@ -1186,7 +1189,8 @@ namespace BLToolkit.Data.Linq.Builder
 				var psrc = parent.SqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : IsList ? SqlTable.InnerJoin() : SqlTable.WeakInnerJoin();
 
-				_parentAssociation    = parent;
+				Association           = association;
+				ParentAssociation     = parent;
 				ParentAssociationJoin = join.JoinedTable;
 
 				psrc.Joins.Add(join.JoinedTable);
@@ -1215,7 +1219,7 @@ namespace BLToolkit.Data.Linq.Builder
 				for (
 					var association = this;
 					isLeft == false && association != null;
-					association = association._parentAssociation as AssociatedTableContext)
+					association = association.ParentAssociation as AssociatedTableContext)
 				{
 					isLeft =
 						association.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||

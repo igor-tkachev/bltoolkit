@@ -33,8 +33,8 @@ namespace BLToolkit.Aspects
 			get { return _parameters; }
 		}
 
-		private Hashtable  _items;
-		public  IDictionary Items
+		volatile Hashtable  _items;
+		public   IDictionary Items
 		{
 			get
 			{

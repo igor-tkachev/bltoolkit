@@ -353,7 +353,7 @@ namespace BLToolkit.Aspects
 				Stop();
 			}
 
-			static Timer  _timer;
+			static volatile Timer  _timer;
 			static readonly object _syncTimer = new object();
 
 			private static void Start()

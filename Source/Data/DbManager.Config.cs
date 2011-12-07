@@ -301,10 +301,10 @@ namespace BLToolkit.Data
 				_defaultDataProviderName = SqlDataProviderBase.NameString;
 		}
 
-		private static string             _firstConfiguration;
-		private static DataProviderBase   _firstProvider;
-		private static readonly Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
-		private static readonly Hashtable _anyProviderConfigurationList = Hashtable.Synchronized(new Hashtable());
+		volatile static string             _firstConfiguration;
+		private  static DataProviderBase   _firstProvider;
+		private  static readonly Hashtable _configurationList = Hashtable.Synchronized(new Hashtable());
+		private  static readonly Hashtable _anyProviderConfigurationList = Hashtable.Synchronized(new Hashtable());
 
 		private static DataProviderBase GetDataProvider(IDbConnection connection)
 		{

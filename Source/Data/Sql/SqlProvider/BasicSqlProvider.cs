@@ -66,6 +66,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsApplyJoinSupported            { get { return false; } }
 		public virtual bool IsInsertOrUpdateSupported       { get { return true;  } }
 		public virtual bool CanCombineParameters            { get { return true;  } }
+		public virtual bool IsGroupByExpressionSupported    { get { return true;  } }
 
 		public virtual bool ConvertCountSubQuery(SqlQuery subQuery)
 		{
@@ -3083,13 +3084,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual SqlQuery Finalize(SqlQuery sqlQuery)
 		{
-			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
+			sqlQuery.FinalizeAndValidate(IsApplyJoinSupported, IsGroupByExpressionSupported);
 
 			if (!IsCountSubQuerySupported)  sqlQuery = MoveCountSubQuery (sqlQuery);
 			if (!IsSubQueryColumnSupported) sqlQuery = MoveSubQueryColumn(sqlQuery);
 
 			if (!IsCountSubQuerySupported || !IsSubQueryColumnSupported)
-				sqlQuery.FinalizeAndValidate(IsApplyJoinSupported);
+				sqlQuery.FinalizeAndValidate(IsApplyJoinSupported, IsGroupByExpressionSupported);
 
 			return sqlQuery;
 		}

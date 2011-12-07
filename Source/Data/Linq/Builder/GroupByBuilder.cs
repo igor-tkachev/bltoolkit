@@ -504,7 +504,7 @@ namespace BLToolkit.Data.Linq.Builder
 				return info;
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				if (level != 0)
 				{
@@ -523,7 +523,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				return false;
+				return IsExpressionResult.False;
 			}
 
 			public override int ConvertToParentIndex(int index, IBuildContext context)

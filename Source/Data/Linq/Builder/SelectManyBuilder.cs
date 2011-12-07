@@ -225,7 +225,7 @@ namespace BLToolkit.Data.Linq.Builder
 				return base.GetContext(expression, level, buildInfo);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				if (Collection != null)
 				{

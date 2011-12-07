@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +14,7 @@ using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 using BLToolkit.ServiceModel;
 
 using NUnit.Framework;
@@ -761,6 +763,24 @@ namespace Data.Linq
 
 			Assert.AreEqual(0, exceptExpected);
 			Assert.AreEqual(0, exceptResult);
+		}
+
+		protected void AreEqual<T>(IEnumerable<IEnumerable<T>> expected, IEnumerable<IEnumerable<T>> result)
+		{
+			var resultList   = result.  ToList();
+			var expectedList = expected.ToList();
+
+			Assert.AreNotEqual(0, expectedList.Count);
+			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
+
+			for (var i = 0; i < resultList.Count; i++)
+			{
+				var elist = expectedList[i].ToList();
+				var rlist = resultList  [i].ToList();
+
+				if (elist.Count > 0 || rlist.Count > 0)
+					AreEqual(elist, rlist);
+			}
 		}
 
 		protected void AreSame<T>(IEnumerable<T> expected, IEnumerable<T> result)

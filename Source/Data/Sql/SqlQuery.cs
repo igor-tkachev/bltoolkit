@@ -3055,7 +3055,7 @@ namespace BLToolkit.Data.Sql
 
 		#region FinalizeAndValidate
 
-		public void FinalizeAndValidate(bool isApplySupported)
+		public void FinalizeAndValidate(bool isApplySupported, bool optimizeColumns)
 		{
 #if DEBUG
 			var sqlText = SqlText;
@@ -3077,7 +3077,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal(isApplySupported);
+			FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
 			ResolveFields();
 			SetAliases();
 
@@ -3418,7 +3418,7 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal(bool isApplySupported)
+		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
@@ -3436,7 +3436,7 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal(isApplySupported);
+					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
 
 					if (sql.ParameterDependent)
 						ParameterDependent = true;
@@ -3445,9 +3445,9 @@ namespace BLToolkit.Data.Sql
 
 			ResolveWeakJoins();
 			OptimizeColumns();
-			OptimizeApplies   (isApplySupported);
-			OptimizeSubQueries(isApplySupported);
-			OptimizeApplies   (isApplySupported);
+			OptimizeApplies   (isApplySupported, optimizeColumns);
+			OptimizeSubQueries(isApplySupported, optimizeColumns);
+			OptimizeApplies   (isApplySupported, optimizeColumns);
 
 			new QueryVisitor().Visit(this, e =>
 			{
@@ -3673,7 +3673,13 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		TableSource OptimizeSubQuery(TableSource source, bool optimizeWhere, bool allColumns, bool isApplySupported)
+		TableSource OptimizeSubQuery(
+			TableSource source,
+			bool        optimizeWhere,
+			bool        allColumns,
+			bool        isApplySupported,
+			bool        optimizeValues,
+			bool        optimizeColumns)
 		{
 			foreach (var jt in source.Joins)
 			{
@@ -3681,7 +3687,9 @@ namespace BLToolkit.Data.Sql
 					jt.Table,
 					jt.JoinType == JoinType.Inner || jt.JoinType == JoinType.CrossApply,
 					false,
-					isApplySupported);
+					isApplySupported,
+					jt.JoinType == JoinType.Inner || jt.JoinType == JoinType.CrossApply,
+					optimizeColumns);
 
 				if (table != jt.Table)
 				{
@@ -3695,10 +3703,17 @@ namespace BLToolkit.Data.Sql
 				}
 			}
 
-			return source.Source is SqlQuery ? RemoveSubQuery(source, optimizeWhere, allColumns && !isApplySupported) : source;
+			return source.Source is SqlQuery ?
+				RemoveSubQuery(source, optimizeWhere, allColumns && !isApplySupported, optimizeValues, optimizeColumns) :
+				source;
 		}
 
-		TableSource RemoveSubQuery(TableSource childSource, bool concatWhere, bool allColumns)
+		TableSource RemoveSubQuery(
+			TableSource childSource,
+			bool        concatWhere,
+			bool        allColumns,
+			bool        optimizeValues,
+			bool        optimizeColumns)
 		{
 			var query = (SqlQuery)childSource. Source;
 
@@ -3712,7 +3727,26 @@ namespace BLToolkit.Data.Sql
 
 			var isColumnsOK = 
 				(allColumns && !query.Select.Columns.Exists(c => IsAggregationFunction(c.Expression))) ||
-				!query.Select.Columns.Exists(c => !(c.Expression is SqlField || c.Expression is Column));
+				!query.Select.Columns.Exists(c =>
+				{
+					if (c.Expression is SqlField || c.Expression is Column)
+						return false;
+
+					if (c.Expression is SqlValue)
+						return !optimizeValues && 1.Equals(((SqlValue)c.Expression).Value);
+
+					if (optimizeColumns && !(c.Expression is SqlQuery || IsAggregationFunction(c.Expression)))
+					{
+						var n = 0;
+						var q = query.ParentSql ?? query;
+
+						new QueryVisitor().VisitAll(q, e => { if (e == c) n++; });
+
+						return n > 2;
+					}
+
+					return true;
+				});
 
 			if (!isColumnsOK)
 				return childSource;
@@ -3783,13 +3817,13 @@ namespace BLToolkit.Data.Sql
 			return false;
 		}
 
-		void OptimizeApply(TableSource tableSource, JoinedTable joinTable, bool isApplySupported)
+		void OptimizeApply(TableSource tableSource, JoinedTable joinTable, bool isApplySupported, bool optimizeColumns)
 		{
 			var joinSource = joinTable.Table;
 
 			foreach (var join in joinSource.Joins)
 				if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
-					OptimizeApply(joinSource, join, isApplySupported);
+					OptimizeApply(joinSource, join, isApplySupported, optimizeColumns);
 
 			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
 			{
@@ -3816,7 +3850,9 @@ namespace BLToolkit.Data.Sql
 						joinTable.Table,
 						joinTable.JoinType == JoinType.Inner || joinTable.JoinType == JoinType.CrossApply,
 						joinTable.JoinType == JoinType.CrossApply,
-						isApplySupported);
+						isApplySupported,
+						joinTable.JoinType == JoinType.Inner || joinTable.JoinType == JoinType.CrossApply,
+						optimizeColumns);
 
 					if (table != joinTable.Table)
 					{
@@ -3828,7 +3864,7 @@ namespace BLToolkit.Data.Sql
 
 						joinTable.Table = table;
 
-						OptimizeApply(tableSource, joinTable, isApplySupported);
+						OptimizeApply(tableSource, joinTable, isApplySupported, optimizeColumns);
 					}
 				}
 			}
@@ -3878,11 +3914,11 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void OptimizeSubQueries(bool isApplySupported)
+		void OptimizeSubQueries(bool isApplySupported, bool optimizeColumns)
 		{
 			for (var i = 0; i < From.Tables.Count; i++)
 			{
-				var table = OptimizeSubQuery(From.Tables[i], true, false, isApplySupported);
+				var table = OptimizeSubQuery(From.Tables[i], true, false, isApplySupported, true, optimizeColumns);
 
 				if (table != From.Tables[i])
 				{
@@ -3897,12 +3933,12 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void OptimizeApplies(bool isApplySupported)
+		void OptimizeApplies(bool isApplySupported, bool optimizeColumns)
 		{
 			foreach (var table in From.Tables)
 				foreach (var join in table.Joins)
 					if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
-						OptimizeApply(table, join, isApplySupported);
+						OptimizeApply(table, join, isApplySupported, optimizeColumns);
 		}
 
 		void OptimizeColumns()

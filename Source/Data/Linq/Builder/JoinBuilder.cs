@@ -377,10 +377,10 @@ namespace BLToolkit.Data.Linq.Builder
 				return base.ConvertToIndex(expression, level, flags);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor testFlag)
 			{
 				if (testFlag == RequestFor.GroupJoin && expression == null)
-					return true;
+					return IsExpressionResult.True;
 
 				return base.IsExpression(expression, level, testFlag);
 			}

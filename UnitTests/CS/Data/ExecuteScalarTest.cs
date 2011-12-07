@@ -12,10 +12,10 @@ namespace Data
 		[Test]
 		public void RegressionTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				int expectedValue = 12345;
-				int actualValue = db.MappingSchema.ConvertToInt32(
+				var expectedValue = 12345;
+				var actualValue   = db.MappingSchema.ConvertToInt32(
 					db
 #if SQLITE || SQLCE
 						.SetCommand("SELECT 12345")
@@ -31,10 +31,10 @@ namespace Data
 		[Test]
 		public void DataReaderTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				int expectedValue = 12345;
-				int actualValue = db.MappingSchema.ConvertToInt32(
+				var expectedValue = 12345;
+				var actualValue   = db.MappingSchema.ConvertToInt32(
 					db
 #if SQLITE || SQLCE
 						.SetCommand("SELECT 12345")
@@ -50,10 +50,10 @@ namespace Data
 		[Test]
 		public void DataReader2Test()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string expectedValue = "54321";
-				string actualValue = db.MappingSchema.ConvertToString(
+				var expectedValue = "54321";
+				var actualValue   = db.MappingSchema.ConvertToString(
 					db
 #if SQLITE || SQLCE
 						.SetCommand("SELECT 12345, '54321'")
@@ -69,10 +69,10 @@ namespace Data
 		[Test]
 		public void DataReader3Test()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string expectedValue = "54321";
-				string actualValue = db.MappingSchema.ConvertToString(
+				var expectedValue = "54321";
+				var actualValue   = db.MappingSchema.ConvertToString(
 					db
 #if SQLITE || SQLCE
 						.SetCommand("SELECT 12345 intField, '54321' stringField")
@@ -89,10 +89,10 @@ namespace Data
 		[Test]
 		public void OutputParameterTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				int expectedValue = 12345;
-				int actualValue = db.MappingSchema.ConvertToInt32(db
+				var expectedValue = 12345;
+				var actualValue   = db.MappingSchema.ConvertToInt32(db
 					.SetSpCommand("Scalar_OutputParameter")
 					.ExecuteScalar(ScalarSourceType.OutputParameter));
 
@@ -103,10 +103,10 @@ namespace Data
 		[Test]
 		public void OutputParameter2Test()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string expectedValue = "54321";
-				string actualValue = db.MappingSchema.ConvertToString(db
+				var expectedValue = "54321";
+				var actualValue   = db.MappingSchema.ConvertToString(db
 					.SetSpCommand("Scalar_OutputParameter")
 					.ExecuteScalar(ScalarSourceType.OutputParameter, 1));
 
@@ -117,10 +117,10 @@ namespace Data
 		[Test]
 		public void OutputParameter3Test()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string expectedValue = "54321";
-				string actualValue = db.MappingSchema.ConvertToString(db
+				var expectedValue = "54321";
+				var actualValue   = db.MappingSchema.ConvertToString(db
 					.SetSpCommand("Scalar_OutputParameter")
 					.ExecuteScalar(ScalarSourceType.OutputParameter, "outputString"));
 
@@ -131,10 +131,10 @@ namespace Data
 		[Test]
 		public void ReturnParameterTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				int expectedValue = 12345;
-				int actualValue = db.MappingSchema.ConvertToInt32(db
+				var expectedValue = 12345;
+				var actualValue   = db.MappingSchema.ConvertToInt32(db
 					.SetSpCommand("Scalar_ReturnParameter")
 					.ExecuteScalar(ScalarSourceType.ReturnValue));
 
@@ -146,14 +146,14 @@ namespace Data
 		[Test]
 		public void AffectedRowsTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
 #if ACCESS || SQLITE
-				int expectedValue = 0;
+				var expectedValue = 0;
 #else
- 				int expectedValue = -1;
+				var expectedValue = -1;
 #endif
-				int actualValue = db.MappingSchema.ConvertToInt32(
+				var actualValue   = db.MappingSchema.ConvertToInt32(
 					db
 #if SQLITE || SQLCE
 						.SetCommand("SELECT 12345")
@@ -169,10 +169,10 @@ namespace Data
 		[Test]
 		public void GenericsRegressionTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				int expectedValue = 12345;
-				int actualValue = db
+				var expectedValue = 12345;
+				var actualValue   = db
 #if SQLITE || SQLCE
 					.SetCommand("SELECT 12345")
 #else
@@ -187,10 +187,10 @@ namespace Data
 		[Test]
 		public void GenericsDataReaderTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				int expectedValue = 12345;
-				int actualValue = db
+				var expectedValue = 12345;
+				var actualValue   = db
 #if SQLITE || SQLCE
 					.SetCommand("SELECT 12345")
 #else
@@ -205,10 +205,10 @@ namespace Data
 		[Test]
 		public void GenericsDataReader2Test()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string expectedValue = "54321";
-				string actualValue = db
+				var expectedValue = "54321";
+				var actualValue   = db
 #if SQLITE || SQLCE
 					.SetCommand("SELECT 12345, '54321'")
 #else
@@ -223,9 +223,9 @@ namespace Data
 		[Test]
 		public void NoResult()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				string actualValue = db.SetCommand("SELECT FirstName FROM Person WHERE PersonID = -1").ExecuteScalar<string>();
+				var actualValue = db.SetCommand("SELECT FirstName FROM Person WHERE PersonID = -1").ExecuteScalar<string>();
 				Assert.AreEqual("", actualValue);
 			}
 		}

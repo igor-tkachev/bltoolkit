@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -103,12 +102,12 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			public bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Expression : return true;
-					default                    : return false;
+					case RequestFor.Expression : return IsExpressionResult.True;
+					default                    : return IsExpressionResult.False;
 				}
 			}
 

@@ -128,14 +128,14 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Expression : return true;
+					case RequestFor.Expression : return IsExpressionResult.True;
 				}
 
-				return false;
+				return IsExpressionResult.False;
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -81,14 +80,14 @@ namespace BLToolkit.Data.Linq.Builder
 				return sql;
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				if (expression == null)
 				{
 					switch (requestFlag)
 					{
 						case RequestFor.Expression :
-						case RequestFor.Field      : return false;
+						case RequestFor.Field      : return IsExpressionResult.False;
 					}
 				}
 
@@ -120,7 +119,8 @@ namespace BLToolkit.Data.Linq.Builder
 					SqlQuery.Condition cond;
 
 					if (Sequence.SqlQuery != SqlQuery &&
-						(ctx.IsExpression(expr, 0, RequestFor.Field) || ctx.IsExpression(expr, 0, RequestFor.Expression)))
+						(ctx.IsExpression(expr, 0, RequestFor.Field).     Result ||
+						 ctx.IsExpression(expr, 0, RequestFor.Expression).Result))
 					{
 						Sequence.ConvertToIndex(null, 0, ConvertFlags.All);
 						var ex = Builder.ConvertToSql(ctx, _methodCall.Arguments[1]);

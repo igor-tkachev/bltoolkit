@@ -62,17 +62,17 @@ namespace BLToolkit.Data.Linq.Builder
 				.ToArray();
 		}
 
-		public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+		public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor testFlag)
 		{
 			switch (testFlag)
 			{
-				case RequestFor.SubQuery : return true;
+				case RequestFor.SubQuery : return IsExpressionResult.True;
 			}
 
 			return base.IsExpression(expression, level, testFlag);
 		}
 
-		protected readonly Dictionary<ISqlExpression,int> ColumnIndexes = new Dictionary<ISqlExpression,int>();
+		internal protected readonly Dictionary<ISqlExpression,int> ColumnIndexes = new Dictionary<ISqlExpression,int>();
 
 		protected virtual int GetIndex(SqlQuery.Column column)
 		{

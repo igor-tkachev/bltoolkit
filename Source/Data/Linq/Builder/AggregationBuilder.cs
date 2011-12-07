@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -149,15 +148,15 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Root       : return Lambda != null && expression == Lambda.Parameters[0];
-					case RequestFor.Expression : return true;
+					case RequestFor.Root       : return new IsExpressionResult(Lambda != null && expression == Lambda.Parameters[0]);
+					case RequestFor.Expression : return IsExpressionResult.True;
 				}
 
-				return false;
+				return IsExpressionResult.False;
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)

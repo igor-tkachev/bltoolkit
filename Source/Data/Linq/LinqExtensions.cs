@@ -667,5 +667,14 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+
+		#region Stub helpers
+
+		static TOutput Where<TOutput,TSource,TInput>(this TInput source, Func<TSource,bool> predicate)
+		{
+			throw new InvalidOperationException();
+		}
+
+		#endregion
 	}
 }

@@ -101,14 +101,14 @@ namespace BLToolkit.Data.Linq.Builder
 				query.SetQuery(map);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
 					case RequestFor.Expression :
 					case RequestFor.Root       :
 						if (expression == Lambda.Parameters[1])
-							return true;
+							return IsExpressionResult.True;
 						break;
 				}
 
