@@ -21,8 +21,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence1 = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
-			var sequence2 = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[1], new SqlQuery()));
+			var sequence1 = new SubQueryContext(builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0])));
+			var sequence2 = new SubQueryContext(builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[1], new SqlQuery())));
 			var union     = new SqlQuery.Union(sequence2.SqlQuery, methodCall.Method.Name == "Concat");
 
 			sequence1.SqlQuery.Unions.Add(union);
@@ -42,7 +42,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		sealed class UnionContext : SubQueryContext
 		{
-			public UnionContext(IBuildContext sequence1, IBuildContext sequence2, MethodCallExpression methodCall)
+			public UnionContext(SubQueryContext sequence1, SubQueryContext sequence2, MethodCallExpression methodCall)
 				: base(sequence1)
 			{
 				_methodCall = methodCall;
@@ -72,13 +72,113 @@ namespace BLToolkit.Data.Linq.Builder
 				public MemberExpression MemberExpression;
 			}
 
-			void Init(IBuildContext sequence1, IBuildContext sequence2)
+			class UnionMember
 			{
-				var idx1 = sequence1.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
+				public Member  Member;
+				public SqlInfo Info1;
+				public SqlInfo Info2;
+			}
 
+			void Init(SubQueryContext sequence1, SubQueryContext sequence2)
+			{
+				var info1 = sequence1.ConvertToIndex(null, 0, ConvertFlags.All).ToList();
+				var info2 = sequence2.ConvertToIndex(null, 0, ConvertFlags.All).ToList();
+
+				if (!_isObject)
+					return;
+
+				var members = new List<UnionMember>();
+
+				foreach (var info in info1)
+				{
+					if (info.Member == null)
+						throw new InvalidOperationException();
+
+					var member = new Member
+					{
+						SequenceInfo     = info,
+						MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Member)
+					};
+
+					if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
+						throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
+
+					members.Add(new UnionMember { Member = member, Info1 = info });
+				}
+
+				foreach (var info in info2)
+				{
+					if (info.Member == null)
+						throw new InvalidOperationException();
+
+					var em = members.FirstOrDefault(m =>
+						m.Member.SequenceInfo != null &&
+						m.Member.SequenceInfo.Member == info.Member);
+
+					if (em == null)
+					{
+						var member = new Member { MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Member) };
+
+						if (sequence2.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
+							throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
+
+						members.Add(new UnionMember { Member = member, Info2 = info });
+					}
+					else
+					{
+						em.Info2 = info;
+					}
+				}
+
+				sequence1.SqlQuery.Select.Columns.Clear();
+				sequence2.SqlQuery.Select.Columns.Clear();
+
+				for (var i = 0; i < members.Count; i++)
+				{
+					var member = members[i];
+
+					if (member.Info1 == null)
+					{
+						member.Info1 = new SqlInfo
+						{
+							Sql    = new SqlValue(null),
+							Query  = sequence1.SqlQuery,
+							Member = member.Info2.Member
+						};
+
+						member.Member.SequenceInfo = member.Info1;
+					}
+
+					if (member.Info2 == null)
+					{
+						member.Info2 = new SqlInfo
+						{
+							Sql    = new SqlValue(null),
+							Query  = sequence2.SqlQuery,
+							Member = member.Info1.Member
+						};
+					}
+
+					sequence1.SqlQuery.Select.Columns.Add(new SqlQuery.Column(sequence1.SqlQuery, member.Info1.Sql));
+					sequence2.SqlQuery.Select.Columns.Add(new SqlQuery.Column(sequence2.SqlQuery, member.Info2.Sql));
+
+					member.Member.SequenceInfo.Index = i;
+					//member.Info1.Index = i;
+					//member.Info2.Index = i;
+
+					_members.Add(member.Member.MemberExpression.Member, member.Member);
+				}
+
+				foreach (var key in sequence1.ColumnIndexes.Keys.ToList())
+					sequence1.ColumnIndexes[key] = sequence1.SqlQuery.Select.Add(key);
+
+				foreach (var key in sequence2.ColumnIndexes.Keys.ToList())
+					sequence2.ColumnIndexes[key] = sequence2.SqlQuery.Select.Add(key);
+
+				/*
 				if (_isObject)
 				{
-					foreach (var info in idx1)
+					foreach (var info in info1)
 					{
 						if (info.Member == null)
 							throw new InvalidOperationException();
@@ -86,26 +186,27 @@ namespace BLToolkit.Data.Linq.Builder
 						CheckAndAddMember(sequence1, sequence2, info);
 					}
 
-					var idx2 = sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
+					info2 = sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
 
-					if (idx1.Count != idx2.Count)
+					if (info1.Count != info2.Count)
 					{
-						for (var i = 0; i < idx2.Count; i++)
+						for (var i = 0; i < info2.Count; i++)
 						{
-							if (i < idx1.Count)
+							if (i < info1.Count)
 							{
-								if (idx1[i].Index != idx2[i].Index)
+								if (info1[i].Index != info2[i].Index)
 									throw new InvalidOperationException();
 							}
 							else
 							{
-								CheckAndAddMember(sequence2, sequence1, idx2[i]);
+								CheckAndAddMember(sequence2, sequence1, info2[i]);
 							}
 						}
 					}
 				}
 				else
 					sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
+				*/
 			}
 
 			void CheckAndAddMember(IBuildContext sequence1, IBuildContext sequence2, SqlInfo info)
@@ -222,7 +323,18 @@ namespace BLToolkit.Data.Linq.Builder
 						.Select(idx =>
 						{
 							if (idx.Index < 0)
-								idx.Index = SqlQuery.Select.Add(idx.Sql);
+							{
+								if (idx.Index == -2)
+								{
+									SqlQuery.Select.Columns.Add(new SqlQuery.Column(SqlQuery, idx.Sql));
+									idx.Index = SqlQuery.Select.Columns.Count - 1;
+								}
+								else
+								{
+									idx.Index = SqlQuery.Select.Add(idx.Sql);
+								}
+							}
+
 							return idx;
 						})
 						.ToArray();
@@ -264,6 +376,7 @@ namespace BLToolkit.Data.Linq.Builder
 									{
 										member.SqlQueryInfo = new SqlInfo
 										{
+											Index  = -2,
 											Sql    = SubQuery.SqlQuery.Select.Columns[member.SequenceInfo.Index],
 											Query  = SqlQuery,
 											Member = member.MemberExpression.Member,
