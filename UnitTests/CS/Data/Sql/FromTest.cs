@@ -39,7 +39,7 @@ namespace Data.Sql
 					.Table(Order)
 				;
 
-			sb.FinalizeAndValidate(true);
+			sb.FinalizeAndValidate(true, true);
 
 			Assert.AreEqual(1, sb.From.Tables.Count);
 			Assert.AreEqual(0, sb.From.Tables[0].Joins.Count);
@@ -76,7 +76,7 @@ namespace Data.Sql
 			Assert.AreEqual(3, sb.From.Tables[0].Joins.Count);
 			Assert.AreEqual(2, sb.From.Tables[0].Joins[2].Table.Joins.Count);
 
-			sb.FinalizeAndValidate(true);
+			sb.FinalizeAndValidate(true, true);
 
 			Assert.AreEqual(2, sb.From.Tables[0].Joins.Count);
 			Assert.AreEqual(1, sb.From.Tables[0].Joins[1].Table.Joins.Count);

@@ -34,7 +34,7 @@ namespace Data.Linq.Model
 
 		public override bool Equals(object obj)
 		{
-			if (obj.GetType() != typeof (Parent)) return false;
+			if (obj.GetType() != typeof(Parent)) return false;
 			return Equals((Parent)obj);
 		}
 
