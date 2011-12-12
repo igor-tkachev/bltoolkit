@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -49,8 +48,8 @@ namespace BLToolkit.Data.Linq.Builder
 				_methodCall = methodCall;
 
 				_isObject =
-					sequence1.IsExpression(null, 0, RequestFor.Object) ||
-					sequence2.IsExpression(null, 0, RequestFor.Object);
+					sequence1.IsExpression(null, 0, RequestFor.Object).Result ||
+					sequence2.IsExpression(null, 0, RequestFor.Object).Result;
 
 				if (_isObject)
 				{
@@ -218,7 +217,7 @@ namespace BLToolkit.Data.Linq.Builder
 					MemberExpression = Expression.PropertyOrField(_unionParameter, info.Member.Name)
 				};
 
-				if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object))
+				if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
 					throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
 
 				var idx = sequence2.ConvertToIndex(member.MemberExpression, 1, ConvertFlags.Field);
@@ -232,15 +231,7 @@ namespace BLToolkit.Data.Linq.Builder
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				var expr   = BuildExpression(null, 0);
-				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					Builder.BuildBlock(expr), new []
-					{
-						ExpressionBuilder.ContextParam,
-						ExpressionBuilder.DataContextParam,
-						ExpressionBuilder.DataReaderParam,
-						ExpressionBuilder.ExpressionParam,
-						ExpressionBuilder.ParametersParam,
-					});
+				var mapper = Builder.BuildMapper<T>(expr);
 
 				query.SetQuery(mapper.Compile());
 			}
@@ -316,10 +307,10 @@ namespace BLToolkit.Data.Linq.Builder
 				return base.BuildExpression(expression, level);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor testFlag)
 			{
 				if (testFlag == RequestFor.Root && expression == _unionParameter)
-					return true;
+					return IsExpressionResult.True;
 
 				return base.IsExpression(expression, level, testFlag);
 			}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +14,7 @@ using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection;
 using BLToolkit.ServiceModel;
 
 using NUnit.Framework;
@@ -32,6 +34,7 @@ namespace Data.Linq
 				     if (args.Name.IndexOf("Sybase.AdoNet2.AseClient")  >= 0) assembly = @"Sybase\Sybase.AdoNet2.AseClient.dll";
 				else if (args.Name.IndexOf("Oracle.DataAccess")         >= 0) assembly = @"Oracle\Oracle.DataAccess.dll";
 				else if (args.Name.IndexOf("IBM.Data.DB2")              >= 0) assembly = @"IBM\IBM.Data.DB2.dll";
+				else if (args.Name.IndexOf("Npgsql.resources")          >= 0) return null;
 				else if (args.Name.IndexOf("Npgsql")                    >= 0) assembly = @"PostgreSql\Npgsql.dll";
 				else if (args.Name.IndexOf("Mono.Security")             >= 0) assembly = @"PostgreSql\Mono.Security.dll";
 				else if (args.Name.IndexOf("System.Data.SqlServerCe,")  >= 0) assembly = @"SqlCe\System.Data.SqlServerCe.dll";
@@ -184,14 +187,14 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
-				//*
+				/*
 				var ip = GetIP(info.Name);
 				var dx = new TestServiceModelDataContext(ip);
 
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
 				yield return dx;
-				//*/
+				*/
 			}
 		}
 
@@ -760,6 +763,24 @@ namespace Data.Linq
 
 			Assert.AreEqual(0, exceptExpected);
 			Assert.AreEqual(0, exceptResult);
+		}
+
+		protected void AreEqual<T>(IEnumerable<IEnumerable<T>> expected, IEnumerable<IEnumerable<T>> result)
+		{
+			var resultList   = result.  ToList();
+			var expectedList = expected.ToList();
+
+			Assert.AreNotEqual(0, expectedList.Count);
+			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
+
+			for (var i = 0; i < resultList.Count; i++)
+			{
+				var elist = expectedList[i].ToList();
+				var rlist = resultList  [i].ToList();
+
+				if (elist.Count > 0 || rlist.Count > 0)
+					AreEqual(elist, rlist);
+			}
 		}
 
 		protected void AreSame<T>(IEnumerable<T> expected, IEnumerable<T> result)

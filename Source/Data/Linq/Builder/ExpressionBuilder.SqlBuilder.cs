@@ -80,7 +80,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 								if (ctx != null)
 								{
-									if (ctx.IsExpression(expr, 0, RequestFor.Expression))
+									if (ctx.IsExpression(expr, 0, RequestFor.Expression).Result)
 										makeSubQuery = true;
 									stopWalking = true;
 								}
@@ -109,7 +109,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (ctx != null)
 							{
-								if (ctx.IsExpression(expr, 0, RequestFor.Expression))
+								if (ctx.IsExpression(expr, 0, RequestFor.Expression).Result)
 									makeSubQuery = true;
 								stopWalking = true;
 							}
@@ -186,8 +186,8 @@ namespace BLToolkit.Data.Linq.Builder
 			var ctx  = BuildSequence(info);
 
 			if (ctx.SqlQuery.Select.Columns.Count == 0 &&
-				(ctx.IsExpression(null, 0, RequestFor.Expression) ||
-				 ctx.IsExpression(null, 0, RequestFor.Field)))
+				(ctx.IsExpression(null, 0, RequestFor.Expression).Result ||
+				 ctx.IsExpression(null, 0, RequestFor.Field).     Result))
 			{
 				ctx.ConvertToIndex(null, 0, ConvertFlags.Field);
 			}
@@ -282,7 +282,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var ctx = GetContext(context, expr);
 
-			if (ctx != null && ctx.IsExpression(expr, 0, RequestFor.Object))
+			if (ctx != null && ctx.IsExpression(expr, 0, RequestFor.Object).Result)
 				return true;
 
 			while (expr != null && expr.NodeType == ExpressionType.MemberAccess)
@@ -303,7 +303,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var ctx = GetContext(context, expr);
 
-			return ctx != null && ctx.IsExpression(expr, 0, RequestFor.GroupJoin);
+			return ctx != null && ctx.IsExpression(expr, 0, RequestFor.GroupJoin).Result;
 		}
 
 		#endregion
@@ -546,7 +546,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var ctx = GetContext(context, expression);
 
-			if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Object))
+			if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Object).Result)
 				return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 
 			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression) } };
@@ -1233,7 +1233,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var e   = (TypeBinaryExpression)expression;
 						var ctx = GetContext(context, e.Expression);
 
-						if (ctx != null && ctx.IsExpression(e.Expression, 0, RequestFor.Table))
+						if (ctx != null && ctx.IsExpression(e.Expression, 0, RequestFor.Table).Result)
 							return MakeIsPredicate(ctx, e);
 
 						break;
@@ -1448,8 +1448,8 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var ctx = GetContext(context, left);
 
-					if (ctx != null && ctx.IsExpression(left, 0, RequestFor.Object) ||
-						left.NodeType == ExpressionType.Parameter && ctx.IsExpression(left, 0, RequestFor.Field))
+					if (ctx != null && ctx.IsExpression(left, 0, RequestFor.Object).Result ||
+						left.NodeType == ExpressionType.Parameter && ctx.IsExpression(left, 0, RequestFor.Field).Result)
 					{
 						return new SqlQuery.Predicate.Expr(new SqlValue(!isEqual));
 					}
@@ -1473,8 +1473,8 @@ namespace BLToolkit.Data.Linq.Builder
 			var qsl = GetContext(leftContext,  left);
 			var qsr = GetContext(rightContext, right);
 
-			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Object);
-			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Object);
+			var sl = qsl != null && qsl.IsExpression(left,  0, RequestFor.Object).Result;
+			var sr = qsr != null && qsr.IsExpression(right, 0, RequestFor.Object).Result;
 
 			bool      isNull;
 			SqlInfo[] lcols;
@@ -1703,7 +1703,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (ctx is TableBuilder.TableContext &&
 			    ctx.SqlQuery != context.SqlQuery &&
-			    ctx.IsExpression(arg, 0, RequestFor.Object))
+			    ctx.IsExpression(arg, 0, RequestFor.Object).Result)
 			{
 				expr = ctx.SqlQuery;
 			}
@@ -1864,22 +1864,37 @@ namespace BLToolkit.Data.Linq.Builder
 			if (typeOperand == table.ObjectType && !table.InheritanceMapping.Any(m => m.Type == typeOperand))
 				return Convert(table, new SqlQuery.Predicate.Expr(new SqlValue(true)));
 
-			var mapping = table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => m.m.Type == typeOperand && !m.m.IsDefault).ToList();
+			return MakeIsPredicate(
+				table, table.InheritanceMapping, table.InheritanceDiscriminators, typeOperand,
+				name => table.SqlTable.Fields.Values.First(f => f.Name == name));
+		}
+
+		internal ISqlPredicate MakeIsPredicate(
+			IBuildContext                     context,
+			List<InheritanceMappingAttribute> inheritanceMapping,
+			List<string>                      inheritanceDiscriminators,
+			Type                              toType,
+			Func<string,ISqlExpression>       getSql)
+		{
+			var mapping = inheritanceMapping
+				.Select((m,i) => new { m, i })
+				.Where ( m => m.m.Type == toType && !m.m.IsDefault)
+				.ToList();
 
 			switch (mapping.Count)
 			{
-				case 0:
+				case 0 :
 					{
 						var cond = new SqlQuery.SearchCondition();
 
-						foreach (var m in table.InheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
+						foreach (var m in inheritanceMapping.Select((m,i) => new { m, i }).Where(m => !m.m.IsDefault))
 						{
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false, 
-									Convert(table,
+									Convert(context,
 										new SqlQuery.Predicate.ExprExpr(
-											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
+											getSql(inheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.NotEqual,
 											new SqlValue(m.m.Code)))));
 						}
@@ -1887,10 +1902,10 @@ namespace BLToolkit.Data.Linq.Builder
 						return cond;
 					}
 
-				case 1:
-					return Convert(table,
+				case 1 :
+					return Convert(context,
 						new SqlQuery.Predicate.ExprExpr(
-							table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[mapping[0].i]),
+							getSql(inheritanceDiscriminators[mapping[0].i]),
 							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(mapping[0].m.Code)));
 
@@ -1903,9 +1918,9 @@ namespace BLToolkit.Data.Linq.Builder
 							cond.Conditions.Add(
 								new SqlQuery.Condition(
 									false,
-									Convert(table,
+									Convert(context,
 										new SqlQuery.Predicate.ExprExpr(
-											table.SqlTable.Fields.Values.First(f => f.Name == table.InheritanceDiscriminators[m.i]),
+											getSql(inheritanceDiscriminators[m.i]),
 											SqlQuery.Predicate.Operator.Equal,
 											new SqlValue(m.m.Code))),
 									true));
@@ -2081,7 +2096,7 @@ namespace BLToolkit.Data.Linq.Builder
 									if (ctx == null)
 										return !CanBeCompiled(pi);
 
-									if (ctx.IsExpression(pi, 0, RequestFor.Object))
+									if (ctx.IsExpression(pi, 0, RequestFor.Object).Result)
 										return !CanBeCompiled(pi);
 
 									ignoredMembers = ma.Expression.GetMembers();
@@ -2144,7 +2159,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var root = expression.GetRootObject();
 
 			for (; current != null; current = current.Parent)
-				if (current.IsExpression(root, 0, RequestFor.Root))
+				if (current.IsExpression(root, 0, RequestFor.Root).Result)
 					return current;
 
 			return null;

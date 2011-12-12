@@ -128,6 +128,11 @@ namespace BLToolkit.Data.DataProvider
 			base.PrepareCommand(ref commandType, ref commandText, ref commandParameters);
 		}
 
+		public override bool CanReuseCommand(IDbCommand command, CommandType newCommandType)
+		{
+			return command.CommandType == newCommandType;
+		}
+
 		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
 		{
 			return

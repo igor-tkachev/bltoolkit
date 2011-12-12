@@ -65,7 +65,9 @@ namespace BLToolkit.ComponentModel
 		[DefaultValue(null)]
 		[Category("Data")]
 		[TypeConverter(typeof(TypeTypeConverter))]
+#if !CLIENTPROFILE
 		[Editor(typeof(Design.TypeEditor), typeof(UITypeEditor))]
+#endif
 		public  Type  ItemType
 		{
 			get { return _itemType; }
@@ -84,7 +86,9 @@ namespace BLToolkit.ComponentModel
 		[DefaultValue(null)]
 		[Category("Data")]
 		[TypeConverter(typeof(TypeTypeConverter))]
+#if !CLIENTPROFILE
 		[Editor(typeof(Design.ObjectViewTypeEditor), typeof(UITypeEditor))]
+#endif
 		public  Type  ObjectViewType
 		{
 			get { return _objectViewType; }

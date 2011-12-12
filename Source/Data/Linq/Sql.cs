@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Linq;
 using System.Globalization;
 using System.Reflection;
 
@@ -433,6 +434,22 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region Binary Functions
+
+		[SqlFunction(                             PreferServerSide = true)]
+		[SqlFunction("Access",    "Len",          PreferServerSide = true)]
+		[SqlFunction("Firebird",  "Octet_Length", PreferServerSide = true)]
+		[SqlFunction("MsSql2005", "DataLength",   PreferServerSide = true)]
+		[SqlFunction("MsSql2008", "DataLength",   PreferServerSide = true)]
+		[SqlFunction("SqlCe",     "DataLength",   PreferServerSide = true)]
+		[SqlFunction("Sybase",    "DataLength",   PreferServerSide = true)]
+		public static int? Length(Binary value)
+		{
+			return value == null ? null : (int?)value.Length;
+		}
+
+		#endregion
+
 		#region DateTime Functions
 
 		[SqlProperty("CURRENT_TIMESTAMP")]
@@ -747,7 +764,7 @@ namespace BLToolkit.Data.Linq
 		public static Decimal? RoundToEven(Decimal? value)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			return value == null ? null : (Decimal?)Math.Round(value.Value);
 #else
 			return value == null ? null : (Decimal?)Math.Round(value.Value, MidpointRounding.ToEven);
 #endif
@@ -757,7 +774,7 @@ namespace BLToolkit.Data.Linq
 		public static Double? RoundToEven(Double? value)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			return value == null ? null : (Double?) Math.Round(value.Value);
 #else
 			return value == null ? null : (Double?) Math.Round(value.Value, MidpointRounding.ToEven);
 #endif
@@ -777,7 +794,7 @@ namespace BLToolkit.Data.Linq
 		}
 
 		[SqlFunction]
-		public static Double? Round(Double?  value, int? precision)
+		public static Double? Round(Double? value, int? precision)
 		{
 #if SILVERLIGHT
 			throw new NotImplementedException();
@@ -790,7 +807,7 @@ namespace BLToolkit.Data.Linq
 		public static Decimal? RoundToEven(Decimal? value, int? precision)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value);
 #else
 			return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.ToEven);
 #endif
@@ -800,7 +817,7 @@ namespace BLToolkit.Data.Linq
 		public static Double? RoundToEven(Double?  value, int? precision)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value);
 #else
 			return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.ToEven);
 #endif

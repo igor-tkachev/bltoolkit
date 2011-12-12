@@ -17,4 +17,4 @@ using BLToolkit;
 [assembly: AssemblyFileVersion     (BLToolkitConstants.FullVersionString)]
 [assembly: CLSCompliant            (true)]
 [assembly: NeutralResourcesLanguage("en-US")]
-[assembly: AllowPartiallyTrustedCallers]
+//[assembly: AllowPartiallyTrustedCallers]

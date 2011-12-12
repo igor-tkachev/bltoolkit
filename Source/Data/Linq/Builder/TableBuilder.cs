@@ -134,7 +134,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public virtual IBuildContext Parent { get; set; }
 
-			protected Type         OriginalType;
+			public    Type         OriginalType;
 			public    Type         ObjectType;
 			protected ObjectMapper ObjectMapper;
 			public    SqlTable     SqlTable;
@@ -217,40 +217,7 @@ namespace BLToolkit.Data.Linq.Builder
 				InheritanceMapping = ObjectMapper.InheritanceMapping;
 
 				if (InheritanceMapping.Count > 0)
-				{
-					InheritanceDiscriminators = new List<string>(InheritanceMapping.Count);
-
-					foreach (var mapping in InheritanceMapping)
-					{
-						string discriminator = null;
-
-						foreach (MemberMapper mm in Builder.MappingSchema.GetObjectMapper(mapping.Type))
-						{
-							if (mm.MapMemberInfo.SqlIgnore == false && !SqlTable.Fields.Any(f => f.Value.Name == mm.MemberName))
-							{
-								var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null, mm);
-								SqlTable.Fields.Add(field);
-
-								if (mm.MapMemberInfo.IsInheritanceDiscriminator)
-									discriminator = mm.MapMemberInfo.MemberName;
-							}
-
-							if (mm.MapMemberInfo.IsInheritanceDiscriminator)
-								discriminator = mm.MapMemberInfo.MemberName;
-						}
-
-						InheritanceDiscriminators.Add(discriminator);
-					}
-
-					var dname = InheritanceDiscriminators.FirstOrDefault(s => s != null);
-
-					if (dname == null)
-						throw new LinqException("Inheritance Discriminator is not defined for the '{0}' hierarchy.", ObjectType);
-
-					for (var i = 0; i < InheritanceDiscriminators.Count; i++)
-						if (InheritanceDiscriminators[i] == null)
-							InheritanceDiscriminators[i] = dname;
-				}
+					InheritanceDiscriminators = GetInheritanceDiscriminators(Builder, SqlTable, ObjectType, InheritanceMapping);
 
 				// Original table is a parent.
 				//
@@ -261,6 +228,45 @@ namespace BLToolkit.Data.Linq.Builder
 					if (predicate.GetType() != typeof(SqlQuery.Predicate.Expr))
 						SqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 				}
+			}
+
+			internal static List<string> GetInheritanceDiscriminators(
+				ExpressionBuilder                 builder,
+				SqlTable                          sqlTable,
+				Type                              objectType,
+				List<InheritanceMappingAttribute> inheritanceMapping)
+			{
+				var inheritanceDiscriminators = new List<string>(inheritanceMapping.Count);
+
+				foreach (var mapping in inheritanceMapping)
+				{
+					string discriminator = null;
+
+					foreach (MemberMapper mm in builder.MappingSchema.GetObjectMapper(mapping.Type))
+					{
+						if (mm.MapMemberInfo.SqlIgnore == false && !sqlTable.Fields.Any(f => f.Value.Name == mm.MemberName))
+						{
+							var field = new SqlField(mm.Type, mm.MemberName, mm.Name, mm.MapMemberInfo.Nullable, int.MinValue, null, mm);
+							sqlTable.Fields.Add(field);
+						}
+
+						if (mm.MapMemberInfo.IsInheritanceDiscriminator)
+							discriminator = mm.MapMemberInfo.MemberName;
+					}
+
+					inheritanceDiscriminators.Add(discriminator);
+				}
+
+				var dname = inheritanceDiscriminators.FirstOrDefault(s => s != null);
+
+				if (dname == null)
+					throw new LinqException("Inheritance Discriminator is not defined for the '{0}' hierarchy.", objectType);
+
+				for (var i = 0; i < inheritanceDiscriminators.Count; i++)
+					if (inheritanceDiscriminators[i] == null)
+						inheritanceDiscriminators[i] = dname;
+
+				return inheritanceDiscriminators;
 			}
 
 			#endregion
@@ -609,20 +615,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildQuery(typeof(T));
-
-				if (expr.Type != typeof(T))
-					expr = Expression.Convert(expr, typeof(T));
-
-				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					Builder.BuildBlock(expr), new []
-					{
-						ExpressionBuilder.ContextParam,
-						ExpressionBuilder.DataContextParam,
-						ExpressionBuilder.DataReaderParam,
-						ExpressionBuilder.ExpressionParam,
-						ExpressionBuilder.ParametersParam,
-					});
+				var expr   = BuildQuery(typeof(T));
+				var mapper = Builder.BuildMapper<T>(expr);
 
 				query.SetQuery(mapper.Compile());
 			}
@@ -775,30 +769,30 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#region IsExpression
 
-			public bool IsExpression(Expression expression, int level, RequestFor requestFor)
+			public IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFor)
 			{
 				switch (requestFor)
 				{
 					case RequestFor.Field      :
 						{
 							var table = FindTable(expression, level, false);
-							return table != null && table.Field != null;
+							return new IsExpressionResult(table != null && table.Field != null);
 						}
 
 					case RequestFor.Table       :
 					case RequestFor.Object      :
 						{
 							var table = FindTable(expression, level, false);
-							return
+							return new IsExpressionResult(
 								table       != null &&
 								table.Field == null &&
-								(expression == null || expression.GetLevelExpression(table.Level) == expression);
+								(expression == null || expression.GetLevelExpression(table.Level) == expression));
 						}
 
 					case RequestFor.Expression :
 						{
 							if (expression == null)
-								return false;
+								return IsExpressionResult.False;
 
 							var levelExpression = expression.GetLevelExpression(level);
 
@@ -809,10 +803,10 @@ namespace BLToolkit.Data.Linq.Builder
 								case ExpressionType.Call         :
 
 									var table = FindTable(expression, level, false);
-									return table == null;
+									return new IsExpressionResult(table == null);
 							}
 
-							return true;
+							return IsExpressionResult.True;
 						}
 
 					case RequestFor.Association      :
@@ -820,18 +814,20 @@ namespace BLToolkit.Data.Linq.Builder
 							if (ObjectMapper.Associations.Count > 0)
 							{
 								var table = FindTable(expression, level, false);
-								return
+								var isat  =
 									table       != null &&
 									table.Table is AssociatedTableContext &&
 									table.Field == null &&
 									(expression == null || expression.GetLevelExpression(table.Level) == expression);
+
+								return new IsExpressionResult(isat, isat ? table.Table : null);
 							}
 
-							return false;
+							return IsExpressionResult.False;
 						}
 				}
 
-				return false;
+				return IsExpressionResult.False;
 			}
 
 			#endregion
@@ -1102,10 +1098,18 @@ namespace BLToolkit.Data.Linq.Builder
 
 			TableLevel GetAssociation(Expression expression, int level)
 			{
-				if (ObjectMapper.Associations.Count > 0)
-				{
-					var levelExpression = expression.GetLevelExpression(level);
+				var objectMapper    = ObjectMapper;
+				var levelExpression = expression.GetLevelExpression(level);
+				var inheritance     =
+					(
+						from m in InheritanceMapping
+						let om = Builder.MappingSchema.GetObjectMapper(m.Type)
+						where om.Associations.Count > 0
+						select om
+					).ToList();
 
+				if (objectMapper.Associations.Count > 0 || inheritance.Count > 0)
+				{
 					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
 						var memberExpression = (MemberExpression)levelExpression;
@@ -1115,7 +1119,7 @@ namespace BLToolkit.Data.Linq.Builder
 						if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
 						{
 							var q =
-								from a in ObjectMapper.Associations
+								from a in objectMapper.Associations.Concat(inheritance.SelectMany(om => om.Associations))
 								where TypeHelper.Equals(a.MemberAccessor.MemberInfo, memberExpression.Member)
 								select new AssociatedTableContext(Builder, this, a) { Parent = Parent };
 
@@ -1151,15 +1155,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region AssociatedTableContext
 
-		class AssociatedTableContext : TableContext
+		public class AssociatedTableContext : TableContext
 		{
-			       readonly TableContext         _parentAssociation;
+			public readonly TableContext          ParentAssociation;
 			public readonly SqlQuery.JoinedTable  ParentAssociationJoin;
+			public readonly Association           Association;
 			public readonly bool                  IsList;
 
 			public override IBuildContext Parent
 			{
-				get { return _parentAssociation.Parent; }
+				get { return ParentAssociation.Parent; }
 				set { }
 			}
 
@@ -1184,7 +1189,8 @@ namespace BLToolkit.Data.Linq.Builder
 				var psrc = parent.SqlQuery.From[parent.SqlTable];
 				var join = left ? SqlTable.WeakLeftJoin() : IsList ? SqlTable.InnerJoin() : SqlTable.WeakInnerJoin();
 
-				_parentAssociation    = parent;
+				Association           = association;
+				ParentAssociation     = parent;
 				ParentAssociationJoin = join.JoinedTable;
 
 				psrc.Joins.Add(join.JoinedTable);
@@ -1213,7 +1219,7 @@ namespace BLToolkit.Data.Linq.Builder
 				for (
 					var association = this;
 					isLeft == false && association != null;
-					association = association._parentAssociation as AssociatedTableContext)
+					association = association.ParentAssociation as AssociatedTableContext)
 				{
 					isLeft =
 						association.ParentAssociationJoin.JoinType == SqlQuery.JoinType.Left ||

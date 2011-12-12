@@ -159,6 +159,7 @@
     <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ISequenceBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\IsExpressionResult.cs" />
     <Compile Include="Data\Linq\Builder\JoinBuilder.cs" />
     <Compile Include="Data\Linq\Builder\MethodCallBuilder.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />

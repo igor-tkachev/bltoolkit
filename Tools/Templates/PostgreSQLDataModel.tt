@@ -6,13 +6,11 @@
 <#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>
 <#
 	ConnectionString     = "Server=DBHost;Port=5432;Database=BLToolkitData;User Id=postgres;Password=TestPassword;";
-	DataProviderAssembly = @"E:\Projects\Git\BLToolkit\Redist\PostgreSql\Npgsql.dll";
+	DataProviderAssembly = Host.ResolvePath(@"bin\Debug\Npgsql.dll");
 
 	Namespace = "PostgreSQLDataModel";
 
-	//Assemblies.Add("Mono.Security", @"E:\Projects\Git\BLToolkit\Redist\PostgreSql\Mono.Security.dll");
-
-	System.Reflection.Assembly.LoadFile(@"E:\Projects\Git\BLToolkit\Redist\PostgreSql\Mono.Security.dll");
+	System.Reflection.Assembly.LoadFile(Host.ResolvePath(@"bin\Debug\Mono.Security.dll"));
 
 	GenerateModel();
 #>

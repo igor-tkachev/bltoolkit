@@ -659,6 +659,40 @@ namespace Update
 		}
 
 		[Test]
+		public void InsertUnion1()
+		{
+			Child.Count();
+
+			ForEachProvider(
+				db =>
+				{
+					try
+					{
+						db.Parent.Delete(p => p.ParentID > 1000);
+
+						var q =
+							db.Child.     Select(c => new Parent { ParentID = c.ParentID,      Value1 = (int) Math.Floor(c.ChildID / 10.0) }).Union(
+							db.GrandChild.Select(c => new Parent { ParentID = c.ParentID ?? 0, Value1 = (int?)Math.Floor((c.GrandChildID ?? 0) / 100.0) }));
+
+						q.Insert(db.Parent, p => new Parent
+						{
+							ParentID = p.ParentID + 1000,
+							Value1   = p.Value1
+						});
+
+						Assert.AreEqual(
+							Child.     Select(c => new { ParentID = c.ParentID      }).Union(
+							GrandChild.Select(c => new { ParentID = c.ParentID ?? 0 })).Count(),
+							db.Parent.Count(c => c.ParentID > 1000));
+					}
+					finally
+					{
+						db.Parent.Delete(p => p.ParentID > 1000);
+					}
+				});
+		}
+
+		[Test]
 		public void InsertEnum1()
 		{
 			ForEachProvider(db =>

@@ -112,6 +112,31 @@ namespace Data.Linq
 			ForEachProvider(db => db.GetTable<TestParent>().Where(p => p.Value1 == testValue).ToList());
 		}
 
+		public enum Gender9
+		{
+			[MapValue('M')] Male,
+			[MapValue('F')] Female,
+			[MapValue('U')] Unknown,
+			[MapValue('O')] Other,
+		}
+
+		[TableName("Person")]
+		public class Person9
+		{
+			public int     PersonID;
+			public string  FirstName;
+			public string  LastName;
+			public string  MiddleName;
+			public Gender9 Gender;
+		}
+
+		[Test]
+		public void Enum9()
+		{
+			ForEachProvider(db =>
+				db.GetTable<Person9>().Where(p => p.PersonID == 1 && p.Gender == Gender9.Male).ToList());
+		}
+
 		[Test]
 		public void EditableObject()
 		{

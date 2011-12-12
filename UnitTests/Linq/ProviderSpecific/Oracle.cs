@@ -2,7 +2,10 @@
 using System.Data.Linq.Mapping;
 using System.Linq;
 
+using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 using NUnit.Framework;
@@ -16,6 +19,8 @@ namespace Data.Linq.ProviderSpecific
 	[TestFixture]
 	public class Oracle : TestBase
 	{
+		#region Sequence
+
 		[Test]
 		public void SequenceInsert()
 		{
@@ -49,6 +54,10 @@ namespace Data.Linq.ProviderSpecific
 				Assert.AreEqual(0, db.GetTable<OracleSpecific.SequenceTest>().Count(_ => _.Value == "SeqValue"));
 			}
 		}
+
+		#endregion
+
+		#region InsertBatch
 
 		[Table(Name = "stg_trade_information")]
 		public class Trade
@@ -101,5 +110,54 @@ namespace Data.Linq.ProviderSpecific
 				db.Types2.Delete(_ => _.ID > 1000);
 			}
 		}
+
+		#endregion
+
+		#region Transaction
+
+		[TableName("demo_product_info")]
+		public new class Product
+		{
+			[MapField("PRODUCT_ID"), PrimaryKey, NonUpdatable]
+			public int Id;
+
+			[MapField("PRODUCT_NAME")]
+			public string Name;
+
+			[MapField("PRODUCT_DESCRIPTION")]
+			public string Description;
+		}
+
+		public abstract class ProductEntityAccesor : DataAccessor<Product>
+		{
+			public abstract int Insert(Product product);
+			public abstract void Delete(int id);
+			public abstract Product SelectByKey(int id);
+			public abstract Product SelectByKey(DbManager db, int id);
+		}
+
+		//[Test]
+		public void CanInsertProductWithAccessorTest()
+		{
+			using (var dbManager = new TestDbManager("Oracle"))
+			{
+				var productEntityAccesor = DataAccessor.CreateInstance<ProductEntityAccesor>(dbManager);
+
+				productEntityAccesor.BeginTransaction();
+
+				var id = productEntityAccesor.Insert(new Product { Name = "product name test", Description = "product description test" });
+				//This assert fails bacause id == 0 and it does not insert until the CommitTransaction is called.
+				Assert.AreNotEqual(0, id);
+
+				Product product = productEntityAccesor.SelectByKey(id);
+				Assert.IsNotNull(product);
+
+				productEntityAccesor.Delete(id);
+
+				productEntityAccesor.CommitTransaction();
+			}
+		}
+
+		#endregion
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -92,16 +91,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr   = Expression.Convert(BuildExpression(FieldIndex), typeof(object));
-				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],object>>(
-					Builder.BuildBlock(expr), new []
-					{
-						ExpressionBuilder.ContextParam,
-						ExpressionBuilder.DataContextParam,
-						ExpressionBuilder.DataReaderParam,
-						ExpressionBuilder.ExpressionParam,
-						ExpressionBuilder.ParametersParam,
-					});
+				var expr   = BuildExpression(FieldIndex);
+				var mapper = Builder.BuildMapper<object>(expr);
 
 				query.SetElementQuery(mapper.Compile());
 			}
@@ -157,15 +148,15 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Root       : return Lambda != null && expression == Lambda.Parameters[0];
-					case RequestFor.Expression : return true;
+					case RequestFor.Root       : return new IsExpressionResult(Lambda != null && expression == Lambda.Parameters[0]);
+					case RequestFor.Expression : return IsExpressionResult.True;
 				}
 
-				return false;
+				return IsExpressionResult.False;
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)

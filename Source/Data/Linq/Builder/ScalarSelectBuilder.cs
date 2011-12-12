@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -59,15 +58,7 @@ namespace BLToolkit.Data.Linq.Builder
 			public void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				var expr   = BuildExpression(null, 0);
-				var mapper = Expression.Lambda<Func<QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
-					Builder.BuildBlock(expr), new []
-					{
-						ExpressionBuilder.ContextParam,
-						ExpressionBuilder.DataContextParam,
-						ExpressionBuilder.DataReaderParam,
-						ExpressionBuilder.ExpressionParam,
-						ExpressionBuilder.ParametersParam,
-					});
+				var mapper = Builder.BuildMapper<T>(expr);
 
 				query.SetQuery(mapper.Compile());
 			}
@@ -111,12 +102,12 @@ namespace BLToolkit.Data.Linq.Builder
 				throw new NotImplementedException();
 			}
 
-			public bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
-					case RequestFor.Expression : return true;
-					default                    : return false;
+					case RequestFor.Expression : return IsExpressionResult.True;
+					default                    : return IsExpressionResult.False;
 				}
 			}
 

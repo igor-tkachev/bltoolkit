@@ -78,6 +78,10 @@ namespace BLToolkit.Data.Linq.Builder
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
 				var expr   = BuildExpression(null, 0);
+
+			if (expr.Type != typeof(T))
+				expr = Expression.Convert(expr, typeof(T));
+
 				var mapper = Expression.Lambda<Func<int,QueryContext,IDataContext,IDataReader,Expression,object[],T>>(
 					Builder.BuildBlock(expr), new []
 					{
@@ -97,14 +101,14 @@ namespace BLToolkit.Data.Linq.Builder
 				query.SetQuery(map);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				switch (requestFlag)
 				{
 					case RequestFor.Expression :
 					case RequestFor.Root       :
 						if (expression == Lambda.Parameters[1])
-							return true;
+							return IsExpressionResult.True;
 						break;
 				}
 

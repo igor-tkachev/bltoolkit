@@ -53,10 +53,7 @@ INSERT INTO "Patient" ("PersonID", "Diagnosis") VALUES (2, 'Hallucination with P
 GO
 
 
-DROP FUNCTION reverse(text)
-GO
-
-CREATE FUNCTION reverse(text) RETURNS text
+CREATE OR REPLACE FUNCTION reverse(text) RETURNS text
 	AS $_$
 DECLARE
 original alias for $1;
@@ -71,7 +68,6 @@ RETURN reverse_str;
 END;$_$
 	LANGUAGE plpgsql IMMUTABLE;
 GO
-
 
 
 DROP TABLE "Parent"
@@ -104,4 +100,29 @@ CREATE TABLE "LinqDataTypes"
 	"IntValue"      int NULL,
 	"BigIntValue"   bigint NULL
 )
+GO
+
+
+DROP TABLE entity
+GO
+
+CREATE TABLE entity
+(
+	the_name character varying(255) NOT NULL,
+	CONSTRAINT entity_name_key UNIQUE (the_name)
+)
+GO
+
+CREATE OR REPLACE FUNCTION add_if_not_exists(p_name character varying)
+	RETURNS void AS
+$BODY$
+BEGIN
+	BEGIN
+		insert into entity(the_name) values(p_name);
+	EXCEPTION WHEN unique_violation THEN
+		-- is exists, do nothing
+	END;
+END;
+$BODY$
+	LANGUAGE plpgsql;
 GO

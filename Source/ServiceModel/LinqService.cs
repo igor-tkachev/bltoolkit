@@ -4,10 +4,10 @@ using System.Globalization;
 using System.Linq;
 using System.ServiceModel;
 using System.Web.Services;
-using BLToolkit.Data;
 
 namespace BLToolkit.ServiceModel
 {
+	using Data;
 	using Data.Linq;
 	using Data.Sql;
 
@@ -191,7 +191,7 @@ namespace BLToolkit.ServiceModel
 		public int ExecuteBatch(string queryData)
 		{
 			var data    = LinqServiceSerializer.DeserializeStringArray(queryData);
-			var queries = data.Select(LinqServiceSerializer.Deserialize).ToArray();
+			var queries = data.Select<string,LinqServiceQuery>(LinqServiceSerializer.Deserialize).ToArray();
 
 			foreach (var query in queries)
 				ValidateQuery(query);

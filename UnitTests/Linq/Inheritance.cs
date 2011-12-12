@@ -74,8 +74,9 @@ namespace Data.Linq
 		[Test]
 		public void Test8()
 		{
-			var expected = ParentInheritance.OfType<ParentInheritance1>();
-			ForEachProvider(db => AreEqual(expected, db.ParentInheritance.OfType<ParentInheritance1>()));
+			ForEachProvider(db => AreEqual(
+				   ParentInheritance.OfType<ParentInheritance1>(),
+				db.ParentInheritance.OfType<ParentInheritance1>()));
 		}
 
 		[Test]
@@ -193,7 +194,7 @@ namespace Data.Linq
 			{
 				inheritance.ForEachProvider(db => inheritance.AreEqual(
 					inheritance.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>(),
-					         db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
+							 db.Parent.Select(p => new ParentEx { Field1 = true, ParentID = p.ParentID, Value1 = p.Value1 }).Cast<Parent>()));
 			}
 		}
 
@@ -442,16 +443,24 @@ namespace Data.Linq
 			}
 		}
 
-        [TableName("Person")]
-        [InheritanceMapping(Code = Gender.Male, Type = typeof(Test17Male))]
-        [InheritanceMapping(Code = Gender.Female, Type = typeof(Test17Female))]
-        public class Test17Person
-        {
-            [PrimaryKey, NonUpdatable(IsIdentity = true, OnInsert = true, OnUpdate = true), SequenceName("PERSONID")]
-            public int PersonID { get; set; }
-            [MapField(IsInheritanceDiscriminator = true)]
-            public Gender Gender { get; set; }
-        }
+		[Test]
+		public void QuerySyntaxSimpleTest()
+		{
+			ForEachProvider(db =>
+			{
+				// db.GetTable<Parent111>().OfType<Parent222>().ToList(); - it's work!!!
+				(from p in db.GetTable<Parent111>().OfType<Parent222>() select p).ToList();
+			});
+		}
+
+		[TableName("Person")]
+		[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
+		[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
+		public class Test17Person
+		{
+			[MapField(IsInheritanceDiscriminator = true)]
+			public int PersonID { get; set; }
+		}
 
         public class Test17Male : Test17Person
         {
@@ -494,5 +503,60 @@ namespace Data.Linq
                 persons.OfType<Test17Female>().ToList();
             });
         }
+
+		[TableName("Person")]
+		[InheritanceMapping(Code = Gender.Male,   Type = typeof(Test18Male))]
+		[InheritanceMapping(Code = Gender.Female, Type = typeof(Test18Female))]
+		public class Test18Person
+		{
+			[PrimaryKey, NonUpdatable(IsIdentity = true, OnInsert = true, OnUpdate = true), SequenceName("PERSONID")]
+			public int    PersonID { get; set; }
+			[MapField(IsInheritanceDiscriminator = true)]
+			public Gender Gender   { get; set; }
+		}
+
+		public class Test18Male : Test18Person
+		{
+			public string FirstName { get; set; }
+		}
+
+		public class Test18Female : Test18Person
+		{
+			public string FirstName { get; set; }
+			public string LastName  { get; set; }
+		}
+
+		[Test]
+		public void Test18()
+		{
+			ForEachProvider(db =>
+			{
+				var ids = Enumerable.Range(0, 10).ToList();
+				var q   =
+					from p1 in db.GetTable<Test18Person>()
+					where ids.Contains(p1.PersonID)
+					join p2 in db.GetTable<Test18Person>() on p1.PersonID equals p2.PersonID
+					select p1;
+
+				var list = q.Distinct().OfType<Test18Female>().ToList();
+			});
+		}
+
+		[Test]
+		public void Test19()
+		{
+			ForEachProvider(db =>
+			{
+				var ids = Enumerable.Range(0, 10).ToList();
+				var q   =
+					from p1 in db.GetTable<Test18Person>()
+					where ids.Contains(p1.PersonID)
+					join p2 in db.GetTable<Test18Person>() on p1.PersonID equals p2.PersonID
+					select p1;
+
+				IQueryable iq   = q.Distinct();
+				var        list = iq.OfType<Test18Female>().ToList();
+			});
+		}
 	}
 }

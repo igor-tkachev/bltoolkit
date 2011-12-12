@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
-    internal class AssociationTests
+    public class AssociationTests
     {
         [TestFixtureSetUp]
         public void Setup()

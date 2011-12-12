@@ -213,6 +213,11 @@ namespace BLToolkit.Data.DataProvider
 			*/
 		}
 
+		public virtual bool CanReuseCommand(IDbCommand command, CommandType newCommandType)
+		{
+			return true;
+		}
+
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
 			if (value is System.Data.Linq.Binary)

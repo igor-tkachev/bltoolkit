@@ -90,7 +90,7 @@ namespace BLToolkit.Data.Linq.Builder
 				return Sequence.ConvertToIndex(expression, level, flags);
 			}
 
-			public override bool IsExpression(Expression expression, int level, RequestFor requestFlag)
+			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
 				return Sequence.IsExpression(expression, level, requestFlag);
 			}

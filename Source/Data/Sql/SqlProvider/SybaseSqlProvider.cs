@@ -154,7 +154,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return "@" + value;
+					{
+						var name = "@" + value;
+
+						if (name.Length > 27)
+							name = name.Substring(0, 27);
+
+						return name;
+					}
 
 				case ConvertType.NameToQueryField:
 				case ConvertType.NameToQueryFieldAlias:
@@ -162,7 +169,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var name = value.ToString();
 
-						if (name.Length > 0 && name[0] == '[')
+						if (name.Length > 28 || name.Length > 0 && name[0] == '[')
 							return value;
 					}
 

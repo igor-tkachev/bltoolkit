@@ -1,0 +1,38 @@
+﻿<#
+//Rename tables and fields according to the .NET style, i.e. "booking_number" to "BookingNumber"
+	{
+		var fieldsPrevBeforeGenerateModel = BeforeGenerateModel;
+
+		Func<string, string> getNetStyleName = (string name) =>
+		{
+			if(!string.IsNullOrEmpty(name))
+			{
+				var chars = new System.Text.StringBuilder(name);
+				for(int i=1; i<chars.Length; i++)
+					if(chars[i-1]=='_') chars[i]=char.ToUpper(chars[i]);
+				chars.Replace("_", null);
+				chars[0]=char.ToUpper(chars[0]);
+				name = chars.ToString();
+			}
+			return name;
+		};
+
+		BeforeGenerateModel = tt =>
+		{
+			fieldsPrevBeforeGenerateModel(tt);
+			Dictionary<string, string> remapper = new Dictionary<string, string>() { { "Exception", "Exceptions" } };
+
+			foreach (var t in Tables.Values)
+			{
+				t.ClassName = getNetStyleName(t.ClassName);
+				string className;
+				if(remapper.TryGetValue(t.ClassName, out className))
+					t.ClassName = className;
+				foreach (var c in t.Columns.Values)
+					c.MemberName = getNetStyleName(c.MemberName);
+			}
+		};
+	}
+
+
+#>

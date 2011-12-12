@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection;
 
 using BLToolkit.Common;
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 using BLToolkit.ComponentModel;
 using BLToolkit.EditableObjects;
 #endif
@@ -27,7 +27,7 @@ namespace BLToolkit.Reflection
 
 	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
 	public abstract class TypeAccessor : ICollection<MemberAccessor>
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 		, ITypeDescriptionProvider
 #endif
 	{
@@ -110,7 +110,7 @@ namespace BLToolkit.Reflection
 
 		internal static object CopyInternal(object source, object dest, TypeAccessor ta)
 		{
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 			var isDirty        = false;
 			var sourceEditable = source as IMemberwiseEditable;
 			var destEditable   = dest   as IMemberwiseEditable;
@@ -725,7 +725,7 @@ namespace BLToolkit.Reflection
 
 		#region TypeDescriptor
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !DATA
 
 		#region CustomTypeDescriptor
 

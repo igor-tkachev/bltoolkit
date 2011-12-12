@@ -62,11 +62,11 @@ namespace BLToolkit.Data.Linq.Builder
 				.ToArray();
 		}
 
-		public override bool IsExpression(Expression expression, int level, RequestFor testFlag)
+		public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor testFlag)
 		{
 			switch (testFlag)
 			{
-				case RequestFor.SubQuery : return true;
+				case RequestFor.SubQuery : return IsExpressionResult.True;
 			}
 
 			return base.IsExpression(expression, level, testFlag);
