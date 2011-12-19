@@ -3708,6 +3708,43 @@ namespace BLToolkit.Data.Sql
 				source;
 		}
 
+		static bool CheckColumn(Column column, ISqlExpression expr, SqlQuery query, bool optimizeValues, bool optimizeColumns)
+		{
+			if (expr is SqlField || expr is Column)
+				return false;
+
+			if (expr is SqlValue)
+				return !optimizeValues && 1.Equals(((SqlValue)expr).Value);
+
+			if (expr is SqlBinaryExpression)
+			{
+				var e = (SqlBinaryExpression)expr;
+
+				if (e.Operation == "*" && e.Expr1 is SqlValue)
+				{
+					var value = (SqlValue)e.Expr1;
+
+					if (value.Value is int && (int)value.Value == -1)
+						return CheckColumn(column, e.Expr2, query, optimizeValues, optimizeColumns);
+				}
+			}
+
+			var visitor = new QueryVisitor();
+
+			if (optimizeColumns &&
+				visitor.Find(expr, e => e is SqlQuery || IsAggregationFunction(e)) == null)
+			{
+				var n = 0;
+				var q = query.ParentSql ?? query;
+
+				visitor.VisitAll(q, e => { if (e == column) n++; });
+
+				return n > 2;
+			}
+
+			return true;
+		}
+
 		TableSource RemoveSubQuery(
 			TableSource childSource,
 			bool        concatWhere,
@@ -3725,28 +3762,9 @@ namespace BLToolkit.Data.Sql
 			if (!isQueryOK)
 				return childSource;
 
-			var isColumnsOK = 
+			var isColumnsOK =
 				(allColumns && !query.Select.Columns.Exists(c => IsAggregationFunction(c.Expression))) ||
-				!query.Select.Columns.Exists(c =>
-				{
-					if (c.Expression is SqlField || c.Expression is Column)
-						return false;
-
-					if (c.Expression is SqlValue)
-						return !optimizeValues && 1.Equals(((SqlValue)c.Expression).Value);
-
-					if (optimizeColumns && !(c.Expression is SqlQuery || IsAggregationFunction(c.Expression)))
-					{
-						var n = 0;
-						var q = query.ParentSql ?? query;
-
-						new QueryVisitor().VisitAll(q, e => { if (e == c) n++; });
-
-						return n > 2;
-					}
-
-					return true;
-				});
+				!query.Select.Columns.Exists(c => CheckColumn(c, c.Expression, query, optimizeValues, optimizeColumns));
 
 			if (!isColumnsOK)
 				return childSource;
@@ -3802,7 +3820,7 @@ namespace BLToolkit.Data.Sql
 			return query.From.Tables[0];
 		}
 
-		static bool IsAggregationFunction(ISqlExpression expr)
+		static bool IsAggregationFunction(IQueryElement expr)
 		{
 			if (expr is SqlFunction)
 				switch (((SqlFunction)expr).Name)
