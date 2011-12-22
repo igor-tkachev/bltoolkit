@@ -21,4 +21,16 @@
 		<Member Name='EnumValue2' MapValue='101' MapValue-Type='System.Int32' />
 	</Type>
 
+	<Type Name='CountryCodeEnum1'>
+		<Member Name='AF' MapValue='AF' MapValue-Type='System.String'/>
+		<Member Name='AL' MapValue='AL' MapValue-Type='System.String'/>
+		<Member Name='DZ' MapValue='DZ' MapValue-Type='System.String'/>
+		<Member Name='AS' MapValue='AS' MapValue-Type='System.String'/>
+		<Member Name='AD' MapValue='AD' MapValue-Type='System.String'/>
+	</Type>
+
+	<Type Name='OtherEnum1'>
+		<Member Name='EnumValue1' MapValue='100' MapValue-Type='System.Int32' />
+		<Member Name='EnumValue2' MapValue='101' MapValue-Type='System.Int32' />
+	</Type>
 </Types>

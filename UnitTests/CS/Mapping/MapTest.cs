@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
-
+using System.Globalization;
+using BLToolkit.Common;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -516,5 +518,32 @@ namespace Mapping
 		}
 
 		#endregion
+
+		class ObjectStr1
+		{
+			public string Field;
+		}
+
+		class ObjectDateTime1
+		{
+			public DateTime Field = DateTime.Now;
+		}
+
+		[Test]
+		public void TestConverter()
+		{
+			var prev = Convert<DateTime,string>.From;
+
+			Convert<DateTime,string>.From = str =>
+				DateTime.ParseExact(str, new[] { "yyyymmdd" }, CultureInfo.InvariantCulture, DateTimeStyles.None);
+
+			var map = Map.GetObjectMapper<List<ObjectStr1>,List<ObjectDateTime1>>();
+			var obj = map(new List<ObjectStr1> { new ObjectStr1 { Field = "20110102" } });
+
+			Assert.That(obj.Count,         Is.EqualTo(1));
+			Assert.That(obj[0].Field.Year, Is.EqualTo(2011));
+
+			Convert<DateTime,string>.From = prev;
+		}
 	}
 }
