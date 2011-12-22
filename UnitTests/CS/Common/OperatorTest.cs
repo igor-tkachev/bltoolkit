@@ -1,6 +1,7 @@
-#if ORACLE
 using System;
+#if ORACLE
 using Oracle.DataAccess.Types;
+#endif
 using NUnit.Framework;
 
 using BLToolkit.Common;
@@ -10,29 +11,6 @@ namespace Common
 	[TestFixture]
 	public class OperatorTest
 	{
-		private class OracleDecimalOp : IOperable<OracleDecimal>
-		{
-			public OracleDecimal Addition         (OracleDecimal op1, OracleDecimal op2) { return (op1 + op2); }
-			public OracleDecimal Subtraction      (OracleDecimal op1, OracleDecimal op2) { return (op1 - op2); }
-			public OracleDecimal Multiply         (OracleDecimal op1, OracleDecimal op2) { return (op1 * op2); }
-			public OracleDecimal Division         (OracleDecimal op1, OracleDecimal op2) { return (op1 / op2); }
-			public OracleDecimal Modulus          (OracleDecimal op1, OracleDecimal op2) { return (op1 % op2); }
-
-			public OracleDecimal BitwiseAnd       (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
-			public OracleDecimal BitwiseOr        (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
-			public OracleDecimal ExclusiveOr      (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
-
-			public OracleDecimal UnaryNegation    (OracleDecimal op)             { return (-op); }
-			public OracleDecimal OnesComplement   (OracleDecimal op)             { throw new InvalidOperationException(); }
-
-			public bool Equality          (OracleDecimal op1, OracleDecimal op2) { return op1 == op2; }
-			public bool Inequality        (OracleDecimal op1, OracleDecimal op2) { return op1 != op2; }
-			public bool GreaterThan       (OracleDecimal op1, OracleDecimal op2) { return op1 >  op2; }
-			public bool GreaterThanOrEqual(OracleDecimal op1, OracleDecimal op2) { return op1 >= op2; }
-			public bool LessThan          (OracleDecimal op1, OracleDecimal op2) { return op1 <  op2; }
-			public bool LessThanOrEqual   (OracleDecimal op1, OracleDecimal op2) { return op1 <= op2; }
-		}
-
 		[Test]
 		public void StringTest()
 		{
@@ -67,6 +45,30 @@ namespace Common
 			Assert.IsTrue(Operator<int>.LessThanOrEqual   (-23, 123));
 		}
 
+#if ORACLE
+		private class OracleDecimalOp : IOperable<OracleDecimal>
+		{
+			public OracleDecimal Addition         (OracleDecimal op1, OracleDecimal op2) { return (op1 + op2); }
+			public OracleDecimal Subtraction      (OracleDecimal op1, OracleDecimal op2) { return (op1 - op2); }
+			public OracleDecimal Multiply         (OracleDecimal op1, OracleDecimal op2) { return (op1 * op2); }
+			public OracleDecimal Division         (OracleDecimal op1, OracleDecimal op2) { return (op1 / op2); }
+			public OracleDecimal Modulus          (OracleDecimal op1, OracleDecimal op2) { return (op1 % op2); }
+
+			public OracleDecimal BitwiseAnd       (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
+			public OracleDecimal BitwiseOr        (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
+			public OracleDecimal ExclusiveOr      (OracleDecimal op1, OracleDecimal op2) { throw new InvalidOperationException(); }
+
+			public OracleDecimal UnaryNegation    (OracleDecimal op)             { return (-op); }
+			public OracleDecimal OnesComplement   (OracleDecimal op)             { throw new InvalidOperationException(); }
+
+			public bool Equality          (OracleDecimal op1, OracleDecimal op2) { return op1 == op2; }
+			public bool Inequality        (OracleDecimal op1, OracleDecimal op2) { return op1 != op2; }
+			public bool GreaterThan       (OracleDecimal op1, OracleDecimal op2) { return op1 >  op2; }
+			public bool GreaterThanOrEqual(OracleDecimal op1, OracleDecimal op2) { return op1 >= op2; }
+			public bool LessThan          (OracleDecimal op1, OracleDecimal op2) { return op1 <  op2; }
+			public bool LessThanOrEqual   (OracleDecimal op1, OracleDecimal op2) { return op1 <= op2; }
+		}
+
 		[Test]
 		public void ExtensionTest()
 		{
@@ -89,6 +91,6 @@ namespace Common
 			Assert.IsTrue(Operator<OracleDecimal>.LessThan          (123, 456));
 			Assert.IsTrue(Operator<OracleDecimal>.LessThanOrEqual   (123, 123));
 		}
+#endif
 	}
 }
-#endif
