@@ -640,9 +640,10 @@ namespace BLToolkit.Mapping
 
 			destMembers = destMembers.Except(dest.Select(mm => mm.MemberAccessor));
 
-			var srcMembers = from m in ((IEnumerable<MemberAccessor>)src.TypeAccessor) select m;
-
-			srcMembers = srcMembers.Except(src.Select(mm => mm.MemberAccessor));
+			var srcMembers =
+				(from m in ((IEnumerable<MemberAccessor>)src.TypeAccessor) select m)
+				.Except(src.Select(mm => mm.MemberAccessor))
+				.ToList();
 
 			foreach (var dma in destMembers)
 			{
