@@ -201,6 +201,7 @@
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
+    <None Include="Data\DataProvider\GenericDataProvider.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />

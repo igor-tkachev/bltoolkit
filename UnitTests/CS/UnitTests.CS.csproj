@@ -317,6 +317,10 @@
     <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Generic.4.csproj">
+      <Project>{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}</Project>
+      <Name>BLToolkit.Data.DataProvider.Generic.4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>

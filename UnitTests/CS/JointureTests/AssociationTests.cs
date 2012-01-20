@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
@@ -13,12 +15,20 @@ namespace UnitTests.CS.JointureTests
         [TestFixtureSetUp]
         public void Setup()
         {
-            DataProviderBase provider = new OdpDataProvider();
+            var aa = DbProviderFactories.GetFactoryClasses();
+            var bb = aa.Rows.Count;
+
+            //DataProviderBase provider = new OdpDataProvider();
+            DataProviderBase provider = new GenericDataProvider(ProviderFullName.OracleNet);
             DbManager.AddDataProvider(provider);
             DbManager.AddConnectionString(provider.Name,
-                                          string.Format(
-                                              "data source={0};User Id={1};Password={2};Incr Pool Size=1;Max Pool Size=3; Connection Timeout=15; pooling=false",
-                                              "MUSICFR01.TEST", "scurutchet", "kisscool12"));
+                                                      string.Format(
+                                                          "data source={0};User Id={1};Password={2};",
+                                                          "MUSICFR01.TEST", "scurutchet", "kisscool12"));
+            //DbManager.AddConnectionString(provider.Name,
+            //                              string.Format(
+            //                                  "data source={0};User Id={1};Password={2};Incr Pool Size=1;Max Pool Size=3; Connection Timeout=15; pooling=false",
+            //                                  "MUSICFR01.TEST", "scurutchet", "kisscool12"));
         }
 
         [Test]
@@ -83,9 +93,16 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = new MusicDB())
             {
+                //db.Prepare();
                 var query2 = new FullSqlQueryT<Artist2>(db);
-                Artist2 artist = query2.SelectByKey(2643);
-                List<Title> titles = artist.Titles;
+                var sw = new Stopwatch();
+                sw.Start();
+                for (int i = 0; i < 10000; i++)
+                {
+                    Artist2 artist = query2.SelectByKey(2643);
+                    //List<Title> titles = artist.Titles;
+                }
+                sw.Stop();                
             }
         }
 

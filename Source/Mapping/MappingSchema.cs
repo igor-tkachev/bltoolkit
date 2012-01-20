@@ -2893,10 +2893,19 @@ namespace BLToolkit.Mapping
 			IList<T>        list,
 			params object[] parameters)
 		{
-			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    ((IList)list, GetObjectMapper(typeof(T))),
-				parameters);
+
+		    try
+		    {
+
+                MapSourceListToDestinationList(
+                    CreateDataReaderListMapper(reader),
+                    CreateObjectListMapper((IList)list, GetObjectMapper(typeof(T))),
+                    parameters);
+		    }
+		    catch (Exception)
+		    {
+		        
+		    }
 
 			return list;
 		}
