@@ -271,7 +271,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression OptimizeExpression(Expression expression)
 		{
-			return expression.Convert(expr =>
+			return expression.Convert2(expr =>
 			{
 				switch (expr.NodeType)
 				{
@@ -295,7 +295,7 @@ namespace BLToolkit.Data.Linq.Builder
 										.First(m => m.Name == "Count" && m.GetParameters().Length == 1)
 										.MakeGenericMethod(TypeHelper.GetElementType(me.Expression.Type));
 
-									return Expression.Call(null, mi, me.Expression);
+									return new ExpressionHelper.ConvertInfo(Expression.Call(null, mi, me.Expression));
 								}
 							}
 
@@ -304,7 +304,7 @@ namespace BLToolkit.Data.Linq.Builder
 								var ex = ConvertIQueriable(expr);
 
 								if (ex != expr)
-									return ConvertExpressionTree(ex);
+									return new ExpressionHelper.ConvertInfo(ConvertExpressionTree(ex));
 							}
 
 							var l = ConvertMethodExpression(me.Member);
@@ -312,15 +312,15 @@ namespace BLToolkit.Data.Linq.Builder
 							if (l != null)
 							{
 								var body = l.Body.Unwrap();
-								var ex = body.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? me.Expression : wpi);
+								var ex = body.Convert2(wpi => new ExpressionHelper.ConvertInfo(wpi.NodeType == ExpressionType.Parameter ? me.Expression : wpi));
 
 								if (ex.Type != expr.Type)
 									ex = new ChangeTypeExpression(ex, expr.Type);
 
-								return OptimizeExpression(ex);
+								return new ExpressionHelper.ConvertInfo(OptimizeExpression(ex), true);
 							}
 
-							return ConvertSubquery(expr);
+							return new ExpressionHelper.ConvertInfo(ConvertSubquery(expr));
 						}
 
 					case ExpressionType.Call :
@@ -331,22 +331,22 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								switch (call.Method.Name)
 								{
-									case "Where"              : return ConvertWhere     (call);
-									case "GroupBy"            : return ConvertGroupBy   (call);
-									case "SelectMany"         : return ConvertSelectMany(call);
-									case "Select"             : return ConvertSelect    (call);
+									case "Where"              : return new ExpressionHelper.ConvertInfo(ConvertWhere     (call));
+									case "GroupBy"            : return new ExpressionHelper.ConvertInfo(ConvertGroupBy   (call));
+									case "SelectMany"         : return new ExpressionHelper.ConvertInfo(ConvertSelectMany(call));
+									case "Select"             : return new ExpressionHelper.ConvertInfo(ConvertSelect    (call));
 									case "LongCount"          :
 									case "Count"              :
 									case "Single"             :
 									case "SingleOrDefault"    :
 									case "First"              :
-									case "FirstOrDefault"     : return ConvertPredicate (call);
+									case "FirstOrDefault"     : return new ExpressionHelper.ConvertInfo(ConvertPredicate (call));
 									case "Min"                :
-									case "Max"                : return ConvertSelector  (call, true);
+									case "Max"                : return new ExpressionHelper.ConvertInfo(ConvertSelector  (call, true));
 									case "Sum"                :
-									case "Average"            : return ConvertSelector  (call, false);
+									case "Average"            : return new ExpressionHelper.ConvertInfo(ConvertSelector  (call, false));
 									case "ElementAt"          :
-									case "ElementAtOrDefault" : return ConvertElementAt (call);
+									case "ElementAtOrDefault" : return new ExpressionHelper.ConvertInfo(ConvertElementAt (call));
 								}
 							}
 							else
@@ -354,7 +354,7 @@ namespace BLToolkit.Data.Linq.Builder
 								var l = ConvertMethodExpression(call.Method);
 
 								if (l != null)
-									return OptimizeExpression(ConvertMethod(call, l));
+									return new ExpressionHelper.ConvertInfo(OptimizeExpression(ConvertMethod(call, l)));
 
 								if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
 								{
@@ -365,12 +365,12 @@ namespace BLToolkit.Data.Linq.Builder
 										var ex = ConvertIQueriable(expr);
 
 										if (ex != expr)
-											return ConvertExpressionTree(ex);
+											return new ExpressionHelper.ConvertInfo(ConvertExpressionTree(ex));
 									}
 								}
 							}
 
-							return ConvertSubquery(expr);
+							return new ExpressionHelper.ConvertInfo(ConvertSubquery(expr));
 						}
 
 					case ExpressionType.Constant :
@@ -380,13 +380,13 @@ namespace BLToolkit.Data.Linq.Builder
 							// Fix Mono behaviour.
 							//
 							if (c.Value is IExpressionQuery)
-								return ((IQueryable)c.Value).Expression;
+								return new ExpressionHelper.ConvertInfo(((IQueryable)c.Value).Expression);
 
 							break;
 						}
 				}
 
-				return expr;
+				return new ExpressionHelper.ConvertInfo(expr);
 			});
 		}
 
