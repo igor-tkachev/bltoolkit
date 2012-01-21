@@ -169,7 +169,7 @@ namespace BLToolkit.Reflection.Extension
 				{
 					var names = assembly.GetManifestResourceNames();
 
-					// Prepend file anme with a dot to avoid partial name matching.
+					// Prepare file name with a dot to avoid partial name matching.
 					//
 					xmlFile = "." + xmlFile;
 
