@@ -269,16 +269,16 @@ namespace BLToolkit.Data.Linq.Builder
 			get { return _queryableMethods ?? (_queryableMethods = typeof(Queryable).GetMethods()); }
 		}
 
-		Dictionary<Expression,Expression> _optimizeExpressions = new Dictionary<Expression,Expression>();
+		readonly Dictionary<Expression,Expression> _optimizedExpressions = new Dictionary<Expression,Expression>();
 
 		Expression OptimizeExpression(Expression expression)
 		{
 			Expression expr;
 
-			if (_optimizeExpressions.TryGetValue(expression, out expr))
+			if (_optimizedExpressions.TryGetValue(expression, out expr))
 				return expr;
 
-			_optimizeExpressions[expression] = expr = OptimizeExpressionImpl(expression);
+			_optimizedExpressions[expression] = expr = OptimizeExpressionImpl(expression);
 
 			return expr;
 		}
