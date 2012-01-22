@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.Informix</id>
-		<version>4.1.6</version>
+		<version>4.1.7</version>
 		<title>BLToolkit Informix Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />

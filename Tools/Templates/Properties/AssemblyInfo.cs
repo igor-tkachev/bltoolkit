@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("Templates")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
+[assembly: AssemblyCopyright("\xA9 2002-2012 www.bltoolkit.net")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
