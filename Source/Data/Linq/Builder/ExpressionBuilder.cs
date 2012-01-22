@@ -269,15 +269,23 @@ namespace BLToolkit.Data.Linq.Builder
 			get { return _queryableMethods ?? (_queryableMethods = typeof(Queryable).GetMethods()); }
 		}
 
-		class ExprBool
-		{
-			public Expression Expression;
-			public bool       Stop;
-		}
+		Dictionary<Expression,Expression> _optimizeExpressions = new Dictionary<Expression,Expression>();
 
 		Expression OptimizeExpression(Expression expression)
 		{
-			return expression.Convert2(expr =>
+			Expression expr;
+
+			if (_optimizeExpressions.TryGetValue(expression, out expr))
+				return expr;
+
+			_optimizeExpressions[expression] = expr = OptimizeExpressionImpl(expression);
+
+			return expr;
+		}
+
+		Expression OptimizeExpressionImpl(Expression expression)
+		{
+			return expression.Convert(expr =>
 			{
 				switch (expr.NodeType)
 				{
@@ -301,7 +309,7 @@ namespace BLToolkit.Data.Linq.Builder
 										.First(m => m.Name == "Count" && m.GetParameters().Length == 1)
 										.MakeGenericMethod(TypeHelper.GetElementType(me.Expression.Type));
 
-									return new ExpressionHelper.ConvertInfo(Expression.Call(null, mi, me.Expression));
+									return Expression.Call(null, mi, me.Expression);
 								}
 							}
 
@@ -310,7 +318,7 @@ namespace BLToolkit.Data.Linq.Builder
 								var ex = ConvertIQueriable(expr);
 
 								if (ex != expr)
-									return new ExpressionHelper.ConvertInfo(ConvertExpressionTree(ex));
+									return ConvertExpressionTree(ex);
 							}
 
 							var l = ConvertMethodExpression(me.Member);
@@ -323,10 +331,10 @@ namespace BLToolkit.Data.Linq.Builder
 								if (ex.Type != expr.Type)
 									ex = new ChangeTypeExpression(ex, expr.Type);
 
-								return new ExpressionHelper.ConvertInfo(OptimizeExpression(ex), true);
+								return OptimizeExpression(ex);
 							}
 
-							return new ExpressionHelper.ConvertInfo(ConvertSubquery(expr));
+							return ConvertSubquery(expr);
 						}
 
 					case ExpressionType.Call :
@@ -337,30 +345,22 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								switch (call.Method.Name)
 								{
-									case "Where"              : return new ExpressionHelper.ConvertInfo(ConvertWhere     (call), false);
-									case "GroupBy"            :
-										{
-											var res = ConvertGroupBy(call);
-											return new ExpressionHelper.ConvertInfo(res.Expression, res.Stop);
-										}
-									case "SelectMany"         : return new ExpressionHelper.ConvertInfo(ConvertSelectMany(call), false);
-									case "Select"             :
-										{
-											var res = ConvertSelect(call);
-											return new ExpressionHelper.ConvertInfo(res.Expression, res.Stop);
-										}
+									case "Where"              : return ConvertWhere     (call);
+									case "GroupBy"            : return ConvertGroupBy   (call);
+									case "SelectMany"         : return ConvertSelectMany(call);
+									case "Select"             : return ConvertSelect    (call);
 									case "LongCount"          :
 									case "Count"              :
 									case "Single"             :
 									case "SingleOrDefault"    :
 									case "First"              :
-									case "FirstOrDefault"     : return new ExpressionHelper.ConvertInfo(ConvertPredicate (call), false);
+									case "FirstOrDefault"     : return ConvertPredicate (call);
 									case "Min"                :
-									case "Max"                : return new ExpressionHelper.ConvertInfo(ConvertSelector  (call, true));
+									case "Max"                : return ConvertSelector  (call, true);
 									case "Sum"                :
-									case "Average"            : return new ExpressionHelper.ConvertInfo(ConvertSelector  (call, false));
+									case "Average"            : return ConvertSelector  (call, false);
 									case "ElementAt"          :
-									case "ElementAtOrDefault" : return new ExpressionHelper.ConvertInfo(ConvertElementAt (call));
+									case "ElementAtOrDefault" : return ConvertElementAt (call);
 								}
 							}
 							else
@@ -368,7 +368,7 @@ namespace BLToolkit.Data.Linq.Builder
 								var l = ConvertMethodExpression(call.Method);
 
 								if (l != null)
-									return new ExpressionHelper.ConvertInfo(OptimizeExpression(ConvertMethod(call, l)));
+									return OptimizeExpression(ConvertMethod(call, l));
 
 								if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
 								{
@@ -379,12 +379,12 @@ namespace BLToolkit.Data.Linq.Builder
 										var ex = ConvertIQueriable(expr);
 
 										if (ex != expr)
-											return new ExpressionHelper.ConvertInfo(ConvertExpressionTree(ex));
+											return ConvertExpressionTree(ex);
 									}
 								}
 							}
 
-							return new ExpressionHelper.ConvertInfo(ConvertSubquery(expr));
+							return ConvertSubquery(expr);
 						}
 
 					case ExpressionType.Constant :
@@ -394,13 +394,13 @@ namespace BLToolkit.Data.Linq.Builder
 							// Fix Mono behaviour.
 							//
 							if (c.Value is IExpressionQuery)
-								return new ExpressionHelper.ConvertInfo(((IQueryable)c.Value).Expression);
+								return ((IQueryable)c.Value).Expression;
 
 							break;
 						}
 				}
 
-				return new ExpressionHelper.ConvertInfo(expr);
+				return expr;
 			});
 		}
 
@@ -849,10 +849,10 @@ namespace BLToolkit.Data.Linq.Builder
 			return (LambdaExpression)expression;
 		}
 
-		ExprBool ConvertGroupBy(MethodCallExpression method)
+		Expression ConvertGroupBy(MethodCallExpression method)
 		{
 			if (method.Arguments[method.Arguments.Count - 1].Unwrap().NodeType != ExpressionType.Lambda)
-				return new ExprBool { Expression = method, Stop = false };
+				return method;
 
 			var types = method.Method.GetGenericMethodDefinition().GetGenericArguments()
 				.Zip(method.Method.GetGenericArguments(), (n, t) => new { n = n.Name, t })
@@ -867,7 +867,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var needSubQuery = null != ConvertExpression(keySelector.Body.Unwrap()).Find(IsExpression);
 
 			if (!needSubQuery && resultSelector == null && elementSelector != null)
-				return new ExprBool { Expression = method, Stop = false };
+				return method;
 
 			var gtype  = typeof(GroupByHelper<,,,>).MakeGenericType(
 				types["TSource"],
@@ -886,32 +886,16 @@ namespace BLToolkit.Data.Linq.Builder
 			if (method.Method.DeclaringType == typeof(Queryable))
 			{
 				if (!needSubQuery)
-					return new ExprBool
-					{
-						Expression = resultSelector == null ? helper.AddElementSelectorQ() : helper.AddResultQ(),
-						Stop       = true
-					};
+					return resultSelector == null ? helper.AddElementSelectorQ() : helper.AddResultQ();
 
-				return new ExprBool
-				{
-					Expression = resultSelector == null ? helper.WrapInSubQueryQ() : helper.WrapInSubQueryResultQ(),
-					Stop       = true
-				};
+				return resultSelector == null ? helper.WrapInSubQueryQ() : helper.WrapInSubQueryResultQ();
 			}
 			else
 			{
 				if (!needSubQuery)
-					return new ExprBool
-					{
-						Expression = resultSelector == null ? helper.AddElementSelectorE() : helper.AddResultE(),
-						Stop       = true
-					};
+					return resultSelector == null ? helper.AddElementSelectorE() : helper.AddResultE();
 
-				return new ExprBool
-				{
-					Expression = resultSelector == null ? helper.WrapInSubQueryE() : helper.WrapInSubQueryResultE(),
-					Stop       = true
-				};
+				return resultSelector == null ? helper.WrapInSubQueryE() : helper.WrapInSubQueryResultE();
 			}
 		}
 
@@ -1104,7 +1088,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertSelect
 
-		ExprBool ConvertSelect(MethodCallExpression method)
+		Expression ConvertSelect(MethodCallExpression method)
 		{
 			var sequence = OptimizeExpression(method.Arguments[0]);
 			var lambda1  = (LambdaExpression)method.Arguments[1].Unwrap();
@@ -1114,14 +1098,14 @@ namespace BLToolkit.Data.Linq.Builder
 				sequence.NodeType != ExpressionType.Call ||
 				((MethodCallExpression)sequence).Method.Name != method.Method.Name)
 			{
-				return new ExprBool { Expression = method, Stop = sequence == method.Arguments[0] && lambda == lambda1 };
+				return method;
 			}
 
 			var slambda = (LambdaExpression)((MethodCallExpression)sequence).Arguments[1].Unwrap();
 			var sbody   = slambda.Body.Unwrap();
 
 			if (slambda.Parameters.Count > 1 || sbody.NodeType != ExpressionType.MemberAccess)
-				return new ExprBool { Expression = method, Stop = false };
+				return method;
 
 			var types1 = GetMethodGenericTypes((MethodCallExpression)sequence);
 			var types2 = GetMethodGenericTypes(method);
@@ -1133,7 +1117,7 @@ namespace BLToolkit.Data.Linq.Builder
 					lambda.Body.Convert(ex => ex == lambda.Parameters[0] ? sbody : ex),
 					slambda.Parameters[0]));
 
-			return new ExprBool { Expression = expr, Stop = true };
+			return expr;
 		}
 
 		#endregion
