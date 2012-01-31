@@ -184,7 +184,7 @@ namespace BLToolkit.Data.Linq
 				{ M(() => string.Compare       ("",0,"",0,0,true)), L<S,I,S,I,I,B,I>((s1,i1,s2,i2,l,b) => b ? s1.Substring(i1,l).ToLower().CompareTo(s2.Substring(i2, l).ToLower()) : s1.Substring(i1, l).CompareTo(s2.Substring(i2, l))) },
 #endif
 
-				{ M(() => AltStuff("",0,0,"")), L<S,I?,I?,S,S>((p0, p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
+				{ M(() => AltStuff("",0,0,"")), L<S,I?,I?,S,S>((p0,p1,p2,p3) => Sql.Left(p0, p1 - 1) + p3 + Sql.Right(p0, p0.Length - (p1 + p2 - 1))) },
 
 				#endregion
 
