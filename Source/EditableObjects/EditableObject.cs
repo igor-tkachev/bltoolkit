@@ -98,7 +98,7 @@ namespace BLToolkit.EditableObjects
 
 		public virtual void RejectChanges()
 		{
-			PropertyInfo[] dirtyMembers = GetDirtyMembers();
+			var dirtyMembers = GetDirtyMembers();
 
 			if (this is IEditable)
 				((IEditable)this).RejectChanges();

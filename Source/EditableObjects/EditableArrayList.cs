@@ -295,8 +295,12 @@ namespace BLToolkit.EditableObjects
 		public virtual void AcceptChanges()
 		{
 			foreach (var o in List)
-				if (o is IEditable)
+			{
+				if (o is EditableObject)
+					((EditableObject)o).AcceptChanges();
+				else if (o is IEditable)
 					((IEditable)o).AcceptChanges();
+			}
 
 			_newItems = null;
 			_delItems = null;
@@ -315,8 +319,12 @@ namespace BLToolkit.EditableObjects
 					Remove(o);
 
 			foreach (var o in List)
-				if (o is IEditable)
+			{
+				if (o is EditableObject)
+					((EditableObject)o).RejectChanges();
+				else if (o is IEditable)
 					((IEditable)o).RejectChanges();
+			}
 
 			_noTrackingChangesCount--;
 
@@ -333,9 +341,14 @@ namespace BLToolkit.EditableObjects
 					return true;
 
 				foreach (var o in List)
-					if (o is IEditable)
+				{
+					if (o is EditableObject)
+						if (((EditableObject)o).IsDirty)
+							return true;
+					else if (o is IEditable)
 						if (((IEditable)o).IsDirty)
 							return true;
+				}
 
 				return false;
 			}
