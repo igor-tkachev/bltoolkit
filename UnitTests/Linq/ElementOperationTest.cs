@@ -210,18 +210,11 @@ namespace Data.Linq
 		[Test]
 		public void MultipleQuery()
 		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
-
 			using (var db = new NorthwindDB())
 			{
 				var q =
 					from p in db.Product
-					select
-						(
-							from zrp in db.Category.Where(x => x.CategoryID == p.CategoryID)
-							select zrp.CategoryName + "-" + zrp.CategoryName
-						).FirstOrDefault()
-					;
+					select db.Category.Select(zrp => zrp.CategoryName).FirstOrDefault();
 
 				q.ToList();
 			}
