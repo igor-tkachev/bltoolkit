@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -204,6 +204,26 @@ namespace Data.Linq
 				AreEqual(
 					   Customer.Select(c => c.Orders.Take(1).SingleOrDefault()),
 					db.Customer.Select(c => c.Orders.Take(1).SingleOrDefault()));
+			}
+		}
+
+		[Test]
+		public void MultipleQuery()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
+			using (var db = new NorthwindDB())
+			{
+				var q =
+					from p in db.Product
+					select
+						(
+							from zrp in db.Category.Where(x => x.CategoryID == p.CategoryID)
+							select zrp.CategoryName + "-" + zrp.CategoryName
+						).FirstOrDefault()
+					;
+
+				q.ToList();
 			}
 		}
 	}
