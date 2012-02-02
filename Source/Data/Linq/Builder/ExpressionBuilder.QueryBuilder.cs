@@ -122,7 +122,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (IsSubQuery(context, ce))
 							{
-								if (TypeHelper.IsSameOrParent(typeof(IEnumerable), pi.Type))
+								if (TypeHelper.IsSameOrParent(typeof(IEnumerable), pi.Type) && pi.Type != typeof(string) && !pi.Type.IsArray)
 									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
 
 								return new ExpressionHelper.ConvertInfo(GetSubQuery(context, ce).BuildExpression(null, 0));
