@@ -414,6 +414,27 @@ namespace Data.Linq
 
                 });
         }
+
+        [Test]
+        public void TestMonoConcat()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        var ds = new IdlPatientSource(db);
+                        var t = "A";
+                        var query =
+                            (from y in ds.Persons()
+                             select y.Name)
+                                .Concat(
+                                    from x in ds.Persons()
+                                    where x.Name == t
+                                    select x.Name
+                                );
+
+                        Assert.That(query.ToList(), Is.Not.Null);
+                    });
+        }
     }
 
     #region TestConvertFunction classes
