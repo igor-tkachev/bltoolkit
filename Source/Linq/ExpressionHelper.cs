@@ -227,8 +227,9 @@ namespace BLToolkit.Linq
 									Func<Expression,IQueryable> func;
 
 									if (queryableAccessorDic.TryGetValue(expr1, out func))
-										if (Compare(e1.Expression, e2.Expression, queryableAccessorDic))
-											return Compare(func(expr1).Expression, func(expr2).Expression, queryableAccessorDic);
+										return
+											Compare(e1.Expression, e2.Expression, queryableAccessorDic) &&
+											Compare(func(expr1).Expression, func(expr2).Expression, queryableAccessorDic);
 								}
 							}
 
