@@ -220,7 +220,7 @@ namespace BLToolkit.Linq
 
 						if (e1.Member == e2.Member)
 						{
-							if (e1.Expression == e2.Expression)
+							if (e1.Expression == e2.Expression /*|| e1.Expression.Type == e2.Expression.Type*/)
 							{
 								if (queryableAccessorDic.Count > 0)
 								{
