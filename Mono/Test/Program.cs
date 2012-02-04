@@ -9,77 +9,121 @@ namespace Test
 	{
 		static void Main()
 		{
+			BLToolkit.Data.DbManager.AddDataProvider(typeof(BLToolkit.Data.DataProvider.MySqlDataProvider));
+			
 			using (var db = new TestDbManager("MySql"))
 			{
-				var src = new TestDataSource(db);
-				var allParents = src.Parent;
-				var allPersons = src.Person;
+                var ds = new IdlPatientSource(db);
+                var t = "A";
+                var query =
+                    (from y in ds.Persons()
+                     select y.Name)
+                        .Concat(
+                            from x in ds.Persons()
+                            where x.Name == t
+                            select x.Name
+                        );
 
-				var @p1 = "a";
-				var query = from e in allParents
-							join c in allPersons on e.Id equals c.Id
-							where c.Name.StartsWith(@p1)
-							orderby c.Name
-							select e;
-
-				Console.WriteLine(query.Expression.ToString());
-				Console.WriteLine();
-				Console.WriteLine(query);
-
-				var result = query.ToArray();
-
-				Console.WriteLine(result.Length);
-			}
-		}
-
-		public class ClassPerson
-		{
-			public int Id;
-			public string Name;
-		}
-
-		public class ClassParent
-		{
-			public int  Id;
-			public int? Value1;
-		}
-
-		public class TestDataSource
-		{
-			private ITestDataContext m_db;
-
-			public TestDataSource(ITestDataContext db)
-			{
-				m_db = db;
-			}
-
-			public IQueryable<ClassParent> Parent
-			{
-				get
-				{
-					var query = from p in m_db.Parent
-								select new ClassParent
-								{
-									Id = p.ParentID,
-									Value1 = p.Value1,
-								};
-					return query;
-				}
-			}
-
-			public IQueryable<ClassPerson> Person
-			{
-				get
-				{
-					var query = from p in m_db.Person
-								select new ClassPerson
-								{
-									Id = p.ID,
-									Name = p.FirstName,
-								};
-					return query;
-				}
+                var list = query.ToList();
+				list.ToString();
 			}
 		}
 	}
+	
+        public struct ObjectId
+        {
+            public ObjectId(int value)
+            {
+                m_value = value;
+            }
+
+            private int m_value;
+
+            public int Value
+            {
+                get { return m_value; }
+                set { m_value = value; }
+            }
+
+            public static implicit operator int(ObjectId val)
+            {
+                return val.m_value;
+            }
+        }
+
+        public struct NullableObjectId
+        {
+            public NullableObjectId(int? value)
+            {
+                m_value = value;
+            }
+
+            private int? m_value;
+
+            public int? Value
+            {
+                get { return m_value; }
+                set { m_value = value; }
+            }
+
+            public static implicit operator int?(NullableObjectId val)
+            {
+                return val.m_value;
+            }
+        }
+	
+    public class IdlPatient
+    {
+        public ObjectId Id { get; set; }
+    }
+
+    public class IdlPerson
+    {
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class IdlGrandChild
+    {
+        public ObjectId ParentID { get; set; }
+        public ObjectId ChildID { get; set; }
+        public ObjectId GrandChildID { get; set; }
+    }
+
+    public class IdlPatientEx : IdlPatient
+    {
+        public IdlPerson Person { get; set; }
+    }
+
+    public class IdlPatientSource
+    {
+        private readonly ITestDataContext m_dc;
+
+        public IdlPatientSource(ITestDataContext dc)
+        {
+            m_dc = dc;
+        }
+
+        public IQueryable<IdlGrandChild> GrandChilds()
+        {
+                return m_dc.GrandChild.Select(x => new IdlGrandChild
+                    {
+                        ChildID = new ObjectId {Value = x.ChildID.Value},
+                        GrandChildID = new ObjectId { Value = x.GrandChildID.Value },
+                        ParentID = new ObjectId { Value = x.ParentID.Value }
+                    });
+        }
+
+        public IQueryable<IdlPatient> Patients()
+        {
+            return m_dc.Patient.Select(x => new IdlPatient { Id = new ObjectId { Value = x.PersonID }, });
+        }
+
+        public IQueryable<IdlPerson> Persons()
+        {
+            return
+                m_dc.Person.Select(
+                    x => new IdlPerson { Id = new ObjectId { Value = x.ID }, Name = x.FirstName, });
+        }
+    }
 }
