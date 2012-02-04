@@ -73,7 +73,8 @@ namespace Data.Linq
 
 			return string.Join("\n\n", commands);
 		}
-
+		
+#if !MONO		
 		[MethodExpression("Expression9")]
 		static public IQueryable<Parent> GetParent9(ITestDataContext db, Child ch)
 		{
@@ -93,5 +94,6 @@ namespace Data.Linq
 				where p.ParentID == (int)Math.Floor(ch.ChildID / 10.0)
 				select p;
 		}
+#endif		
 	}
 }
