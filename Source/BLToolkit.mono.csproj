@@ -123,41 +123,14 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="MySql.Data">
+      <HintPath>..\packages\MySql.Data.6.4.4\lib\net40\mysql.data.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Common\Convert.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Convert.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Data\DataProvider\FdpDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\MySqlDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\OdpDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\SqlCeDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\SQLiteDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\SybaseDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\SybaseAdoDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\DB2DataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\InformixDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
-    </None>
-    <None Include="Data\DataProvider\PostgreSQLDataProvider.cs">
-      <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
     <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
@@ -654,6 +627,7 @@
     <None Include="Templates\Sybase.ttinclude" />
     <None Include="Templates\VB.ttinclude" />
     <None Include="Templates\WCFAttributes.ttinclude" />
+    <Compile Include="Data\DataProvider\MySqlDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ComponentModel\Design\GetTypeDialog.resx">
