@@ -406,7 +406,7 @@ namespace BLToolkit.Linq
 			return Expression.Convert(expr, type);
 		}
 
-		static void Path<T>(IEnumerable<T> source, Expression path, MethodInfo property, Action<T,Expression> func)
+		static void Path<T>(IEnumerable<T> source, HashSet<Expression> visited, Expression path, MethodInfo property, Action<T,Expression> func)
 			where T : class
 		{
 			var prop = Expression.Property(path, property);
@@ -415,21 +415,30 @@ namespace BLToolkit.Linq
 				func(item, Expression.Call(prop, ReflectionHelper.IndexExpressor<T>.Item, new Expression[] { Expression.Constant(i++) }));
 		}
 
-		static void Path<T>(IEnumerable<T> source, Expression path, MethodInfo property, Action<Expression,Expression> func)
+		static void Path<T>(IEnumerable<T> source, HashSet<Expression> visited, Expression path, MethodInfo property, Action<Expression,Expression> func)
 			where T : Expression
 		{
 			var prop = Expression.Property(path, property);
 			var i    = 0;
 			foreach (var item in source)
-				Path(item, Expression.Call(prop, ReflectionHelper.IndexExpressor<T>.Item, new Expression[] { Expression.Constant(i++) }), func);
+				Path(item, visited, Expression.Call(prop, ReflectionHelper.IndexExpressor<T>.Item, new Expression[] { Expression.Constant(i++) }), func);
 		}
 
-		static void Path(Expression expr, Expression path, MethodInfo property, Action<Expression,Expression> func)
+		static void Path(Expression expr, HashSet<Expression> visited, Expression path, MethodInfo property, Action<Expression,Expression> func)
 		{
-			Path(expr, Expression.Property(path, property), func);
+			Path(expr, visited, Expression.Property(path, property), func);
 		}
 
 		public static void Path(this Expression expr, Expression path, Action<Expression,Expression> func)
+		{
+			Path(expr, new HashSet<Expression>(), path, func);
+		}
+
+		static void Path(
+			this Expression               expr,
+			HashSet<Expression>           visited,
+			Expression                    path,
+			Action<Expression,Expression> func)
 		{
 			if (expr == null)
 				return;
@@ -467,9 +476,9 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(BinaryExpression));
 						var e = (BinaryExpression)expr;
 
-						Path(e.Conversion, path, ReflectionHelper.Binary.Conversion, func);
-						Path(e.Left,       path, ReflectionHelper.Binary.Left,       func);
-						Path(e.Right,      path, ReflectionHelper.Binary.Right,      func);
+						Path(e.Conversion, visited, path, ReflectionHelper.Binary.Conversion, func);
+						Path(e.Left,       visited, path, ReflectionHelper.Binary.Left,       func);
+						Path(e.Right,      visited, path, ReflectionHelper.Binary.Right,      func);
 
 						break;
 					}
@@ -485,6 +494,7 @@ namespace BLToolkit.Linq
 				case ExpressionType.UnaryPlus:
 					Path(
 						((UnaryExpression)expr).Operand,
+						visited,
 						path = ConvertTo(path, typeof(UnaryExpression)),
 						ReflectionHelper.Unary.Operand,
 						func);
@@ -495,8 +505,8 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(MethodCallExpression));
 						var e = (MethodCallExpression)expr;
 
-						Path(e.Object,    path, ReflectionHelper.MethodCall.Object,    func);
-						Path(e.Arguments, path, ReflectionHelper.MethodCall.Arguments, func);
+						Path(e.Object,    visited, path, ReflectionHelper.MethodCall.Object,    func);
+						Path(e.Arguments, visited, path, ReflectionHelper.MethodCall.Arguments, func);
 
 						break;
 					}
@@ -506,9 +516,9 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(ConditionalExpression));
 						var e = (ConditionalExpression)expr;
 
-						Path(e.Test,    path, ReflectionHelper.Conditional.Test,    func);
-						Path(e.IfTrue,  path, ReflectionHelper.Conditional.IfTrue,  func);
-						Path(e.IfFalse, path, ReflectionHelper.Conditional.IfFalse, func);
+						Path(e.Test,    visited, path, ReflectionHelper.Conditional.Test,    func);
+						Path(e.IfTrue,  visited, path, ReflectionHelper.Conditional.IfTrue,  func);
+						Path(e.IfFalse, visited, path, ReflectionHelper.Conditional.IfFalse, func);
 
 						break;
 					}
@@ -518,8 +528,8 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(InvocationExpression));
 						var e = (InvocationExpression)expr;
 
-						Path(e.Expression, path, ReflectionHelper.Invocation.Expression, func);
-						Path(e.Arguments,  path, ReflectionHelper.Invocation.Arguments,  func);
+						Path(e.Expression, visited, path, ReflectionHelper.Invocation.Expression, func);
+						Path(e.Arguments,  visited, path, ReflectionHelper.Invocation.Arguments,  func);
 
 						break;
 					}
@@ -529,8 +539,8 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(LambdaExpression));
 						var e = (LambdaExpression)expr;
 
-						Path(e.Body,       path, ReflectionHelper.LambdaExpr.Body,       func);
-						Path(e.Parameters, path, ReflectionHelper.LambdaExpr.Parameters, func);
+						Path(e.Body,       visited, path, ReflectionHelper.LambdaExpr.Body,       func);
+						Path(e.Parameters, visited, path, ReflectionHelper.LambdaExpr.Parameters, func);
 
 						break;
 					}
@@ -540,8 +550,9 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(ListInitExpression));
 						var e = (ListInitExpression)expr;
 
-						Path(e.NewExpression, path, ReflectionHelper.ListInit.NewExpression, func);
-						Path(e.Initializers,  path, ReflectionHelper.ListInit.Initializers, (ex,p) => Path(ex.Arguments, p, ReflectionHelper.ElementInit.Arguments, func));
+						Path(e.NewExpression, visited, path, ReflectionHelper.ListInit.NewExpression, func);
+						Path(e.Initializers,  visited, path, ReflectionHelper.ListInit.Initializers,
+							(ex,p) => Path(ex.Arguments, visited, p, ReflectionHelper.ElementInit.Arguments, func));
 
 						break;
 					}
@@ -549,6 +560,7 @@ namespace BLToolkit.Linq
 				case ExpressionType.MemberAccess:
 					Path(
 						((MemberExpression)expr).Expression,
+						visited,
 						path = ConvertTo(path, typeof(MemberExpression)),
 						ReflectionHelper.Member.Expression,
 						func);
@@ -563,6 +575,7 @@ namespace BLToolkit.Linq
 								case MemberBindingType.Assignment:
 									Path(
 										((MemberAssignment)b).Expression,
+										visited,
 										ConvertTo(pinf, typeof(MemberAssignment)),
 										ReflectionHelper.MemberAssignmentBind.Expression,
 										func);
@@ -571,14 +584,16 @@ namespace BLToolkit.Linq
 								case MemberBindingType.ListBinding:
 									Path(
 										((MemberListBinding)b).Initializers,
+										visited,
 										ConvertTo(pinf, typeof(MemberListBinding)),
 										ReflectionHelper.MemberListBind.Initializers,
-										(p,psi) => Path(p.Arguments, psi, ReflectionHelper.ElementInit.Arguments, func));
+										(p,psi) => Path(p.Arguments, visited, psi, ReflectionHelper.ElementInit.Arguments, func));
 									break;
 
 								case MemberBindingType.MemberBinding:
 									Path(
 										((MemberMemberBinding)b).Bindings,
+										visited,
 										ConvertTo(pinf, typeof(MemberMemberBinding)),
 										ReflectionHelper.MemberMemberBind.Bindings,
 										modify);
@@ -589,8 +604,8 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(MemberInitExpression));
 						var e = (MemberInitExpression)expr;
 
-						Path(e.NewExpression, path, ReflectionHelper.MemberInit.NewExpression, func);
-						Path(e.Bindings,      path, ReflectionHelper.MemberInit.Bindings,      modify);
+						Path(e.NewExpression, visited, path, ReflectionHelper.MemberInit.NewExpression, func);
+						Path(e.Bindings,      visited, path, ReflectionHelper.MemberInit.Bindings,      modify);
 
 						break;
 					}
@@ -598,6 +613,7 @@ namespace BLToolkit.Linq
 				case ExpressionType.New:
 					Path(
 						((NewExpression)expr).Arguments,
+						visited,
 						path = ConvertTo(path, typeof(NewExpression)),
 						ReflectionHelper.New.Arguments,
 						func);
@@ -606,6 +622,7 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayBounds:
 					Path(
 						((NewArrayExpression)expr).Expressions,
+						visited,
 						path = ConvertTo(path, typeof(NewArrayExpression)),
 						ReflectionHelper.NewArray.Expressions,
 						func);
@@ -614,6 +631,7 @@ namespace BLToolkit.Linq
 				case ExpressionType.NewArrayInit:
 					Path(
 						((NewArrayExpression)expr).Expressions,
+						visited,
 						path = ConvertTo(path, typeof(NewArrayExpression)),
 						ReflectionHelper.NewArray.Expressions,
 						func);
@@ -622,6 +640,7 @@ namespace BLToolkit.Linq
 				case ExpressionType.TypeIs:
 					Path(
 						((TypeBinaryExpression)expr).Expression,
+						visited,
 						path = ConvertTo(path, typeof(TypeBinaryExpression)),
 						ReflectionHelper.TypeBinary.Expression,
 						func);
@@ -634,15 +653,32 @@ namespace BLToolkit.Linq
 						path  = ConvertTo(path, typeof(BlockExpression));
 						var e = (BlockExpression)expr;
 
-						Path(e.Expressions, path, ReflectionHelper.Block.Expressions, func);
-						Path(e.Variables,   path, ReflectionHelper.Block.Variables,   func); // ?
+						Path(e.Expressions, visited, path, ReflectionHelper.Block.Expressions, func);
+						Path(e.Variables,   visited, path, ReflectionHelper.Block.Variables,   func); // ?
 
 						break;
 					}
 
 #endif
 
-				case ExpressionType.Constant : path = ConvertTo(path, typeof(ConstantExpression));  break;
+				case ExpressionType.Constant :
+					{
+						path   = ConvertTo(path, typeof(ConstantExpression));
+						var e  = (ConstantExpression)expr;
+						var iq = e.Value as IQueryable;
+
+						if (iq != null && !visited.Contains(iq.Expression))
+						{
+							visited.Add(iq.Expression);
+
+							Expression p = Expression.Property(path, ReflectionHelper.Constant.Value);
+							p = ConvertTo(p, typeof(IQueryable));
+							Path(iq.Expression, visited, p, ReflectionHelper.QueryableInt.Expression, func);
+						}
+
+						break;
+					}
+
 				case ExpressionType.Parameter: path = ConvertTo(path, typeof(ParameterExpression)); break;
 			}
 
@@ -1917,7 +1953,7 @@ namespace BLToolkit.Linq
 
 		static public Dictionary<Expression,Expression> GetExpressionAccessors(this Expression expression, Expression path)
 		{
-			var accessors = new Dictionary<Expression, Expression>();
+			var accessors = new Dictionary<Expression,Expression>();
 
 			expression.Path(path, (e,p) =>
 			{

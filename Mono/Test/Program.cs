@@ -22,7 +22,9 @@ namespace Test
                     	);
 				
 				var list = query.ToList();
-				list.ToString();
+				
+				foreach (var i in list)
+					Console.WriteLine(i.ToString());
 			}
 		}
 	}
