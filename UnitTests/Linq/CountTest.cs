@@ -2,7 +2,7 @@
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -64,6 +64,21 @@ namespace Data.Linq
 			ForEachProvider(new[] { ProviderName.SqlCe }, db => AreEqual(
 				from p in    Parent where p.Children.Count > 2 select p,
 				from p in db.Parent where p.Children.Count > 2 select p));
+		}
+
+		[Test]
+		public void SubQueryCount()
+		{
+			using (var db = new TestDbManager())
+			{
+				AreEqual(
+					from p in Parent
+					select Parent.Where(t => t.ParentID == p.ParentID).Count()
+					,
+					from p in db.Parent
+					select Sql.AsSql(db.Parent.Count()));
+					//select Sql.AsSql(db.GetParentByID(p.ParentID).Count()));
+			}
 		}
 
 		[Test]
