@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,7 +11,6 @@ using BLToolkit.Data.Linq.Builder;
 
 namespace BLToolkit.Linq
 {
-	using Common;
 	using Data.Linq;
 	using Reflection;
 
@@ -1926,20 +1924,17 @@ namespace BLToolkit.Linq
 					case ExpressionType.Call           :
 					case ExpressionType.MemberAccess   :
 					case ExpressionType.New            :
-						Console.WriteLine("-" + e.ToString());
 						if (!accessors.ContainsKey(e))
 							accessors.Add(e, p);
 						break;
 
 					case ExpressionType.Constant       :
-						Console.WriteLine("-" + e.ToString());
 						if (!accessors.ContainsKey(e))
 							accessors.Add(e, Expression.Property(p, ReflectionHelper.Constant.Value));
 						break;
 
 					case ExpressionType.ConvertChecked :
 					case ExpressionType.Convert        :
-						Console.WriteLine("-" + e.ToString());
 						if (!accessors.ContainsKey(e))
 						{
 							var ue = (UnaryExpression)e;
