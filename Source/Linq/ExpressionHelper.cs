@@ -218,14 +218,16 @@ namespace BLToolkit.Linq
 
 						if (e1.Member == e2.Member)
 						{
-							if (e1.Expression == e2.Expression)
+							if (e1.Expression == e2.Expression || e1.Expression.Type == e2.Expression.Type)
 							{
 								if (queryableAccessorDic.Count > 0)
 								{
 									Func<Expression,IQueryable> func;
 
 									if (queryableAccessorDic.TryGetValue(expr1, out func))
-										return Compare(func(expr1).Expression, func(expr2).Expression, queryableAccessorDic);
+										return
+											Compare(e1.Expression, e2.Expression, queryableAccessorDic) &&
+											Compare(func(expr1).Expression, func(expr2).Expression, queryableAccessorDic);
 								}
 							}
 
