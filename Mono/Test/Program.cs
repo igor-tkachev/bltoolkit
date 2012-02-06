@@ -16,14 +16,11 @@ namespace Test
 				var ds = new IdlPatientSource(db);
 				var t = "A";
 				var query =
-					(from y in ds.Persons()
-					 select y.Name)
-						.Concat(
-							from x in ds.Persons()
-							where x.Name == t
-							select x.Name
-						);
-
+                    (ds.Persons().Select(y => y.Name))
+                        .Concat(
+                        	ds.Persons().Where(x => x.Name == t).Select(x => x.Name)
+                    	);
+				
 				var list = query.ToList();
 				list.ToString();
 			}

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
@@ -415,25 +417,28 @@ namespace Data.Linq
                 });
         }
 
+        public static IQueryable<TSource> Concat2<TSource>(IQueryable<TSource> source1, IEnumerable<TSource> source2)
+        {
+            return source1.Provider.CreateQuery<TSource>(
+                Expression.Call(
+                    null,
+                    typeof(Queryable).GetMethod("Concat").MakeGenericMethod(typeof(TSource)),
+                    new[] { source1.Expression, Expression.Constant(source2, typeof (IEnumerable<TSource>)) }));
+        }
+
         [Test]
         public void TestMonoConcat()
         {
-            ForMySqlProvider(
-                db =>
-                    {
-                        var ds = new IdlPatientSource(db);
-                        var t = "A";
-                        var query =
-                            (from y in ds.Persons()
-                             select y.Name)
-                                .Concat(
-                                    from x in ds.Persons()
-                                    where x.Name == t
-                                    select x.Name
-                                );
+            ForMySqlProvider(db =>
+            {
+                var ds = new IdlPatientSource(db);
+                var t  = "A";
+                var query = Concat2(
+                    from y in ds.Persons() select y.Name,
+                    from x in ds.Persons() where x.Name == t select x.Name);
 
-                        Assert.That(query.ToList(), Is.Not.Null);
-                    });
+                Assert.That(query.ToList(), Is.Not.Null);
+            });
         }
     }
 
