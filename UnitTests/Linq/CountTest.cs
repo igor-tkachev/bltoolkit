@@ -76,8 +76,8 @@ namespace Data.Linq
 					select Parent.Where(t => t.ParentID == p.ParentID).Count()
 					,
 					from p in db.Parent
-					select Sql.AsSql(db.Parent.Count()));
-					//select Sql.AsSql(db.GetParentByID(p.ParentID).Count()));
+					//select Sql.AsSql(db.Parent.Count()));
+					select Sql.AsSql(db.GetParentByID(p.ParentID).Count()));
 			}
 		}
 
