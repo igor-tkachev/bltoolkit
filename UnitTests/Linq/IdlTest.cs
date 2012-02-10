@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
@@ -415,6 +414,94 @@ namespace Data.Linq
                     Assert.That(query.ToList(), Is.Not.Null);
 
                 });
+        }
+
+        #region GenericQuery classes
+
+        public abstract class GenericQueryBase
+        {
+            private readonly IdlPatientSource m_ds;
+
+            protected GenericQueryBase(ITestDataContext ds)
+            {
+                m_ds = new IdlPatientSource(ds);
+            }
+
+            #region Object sources
+
+            protected IQueryable<IdlPerson> AllPersons
+            {
+                get { return m_ds.Persons(); }
+            }
+
+            protected IQueryable<IdlPatient> AllPatients
+            {
+                get { return m_ds.Patients(); }
+            }
+
+            protected IQueryable<IdlGrandChild> AllGrandChilds
+            {
+                get { return m_ds.GrandChilds(); }
+            }
+
+            #endregion
+
+            public abstract IEnumerable<object> Query();
+        }
+
+        public class GenericConcatQuery : GenericQueryBase
+        {
+            private System.String @p1;
+            private System.Int32 @p2;
+
+            public GenericConcatQuery(ITestDataContext ds, object[] args)
+                : base(ds)
+            {
+                @p1 = (System.String)args[0];
+                @p2 = (System.Int32)args[1];
+            }
+
+            public override IEnumerable<object> Query()
+            {
+                return (from y in AllPersons
+                        select y.Name)
+                            .Concat(
+                                from x in AllPersons
+                                from z in AllPatients
+                                where (x.Name == @p1 || z.Id == new ObjectId { Value = @p2 })
+                                select x.Name
+                            );
+            }
+        }
+
+        #endregion
+
+        [Test]
+        public void TestMono01()
+        {
+            ForMySqlProvider(
+                 db =>
+                 {
+                     var ds = new IdlPatientSource(db);
+                     var t = "A";
+                     var query =
+                         (from y in ds.Persons()
+                          select y.Name)
+                             .Concat(
+                                 from x in ds.Persons()
+                                 where x.Name == t
+                                 select x.Name
+                             );
+
+                     Assert.That(query.ToList(), Is.Not.Null);
+                 });
+        }
+
+        [Test]
+        public void TestMono03()
+        {
+            ForMySqlProvider(
+                db => Assert.That(new GenericConcatQuery(db, new object[] { "A", 1 }).Query().ToList(), Is.Not.Null));
         }
 
         public static IQueryable<TSource> Concat2<TSource>(IQueryable<TSource> source1, IEnumerable<TSource> source2)
