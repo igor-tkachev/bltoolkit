@@ -53,6 +53,15 @@ namespace BLToolkit.Linq
 
 		public static bool Compare(Expression expr1, Expression expr2, Dictionary<Expression,Func<Expression,IQueryable>> queryableAccessorDic)
 		{
+			return Compare(expr1, expr2, new HashSet<Expression>(), queryableAccessorDic);
+		}
+
+		static bool Compare(
+			Expression          expr1,
+			Expression          expr2,
+			HashSet<Expression> visited,
+			Dictionary<Expression,Func<Expression,IQueryable>> queryableAccessorDic)
+		{
 			if (expr1 == expr2)
 				return true;
 
@@ -93,9 +102,9 @@ namespace BLToolkit.Linq
 						var e2 = (BinaryExpression)expr2;
 						return
 							e1.Method == e2.Method &&
-							Compare(e1.Conversion, e2.Conversion, queryableAccessorDic) &&
-							Compare(e1.Left,       e2.Left,       queryableAccessorDic) &&
-							Compare(e1.Right,      e2.Right,      queryableAccessorDic);
+							Compare(e1.Conversion, e2.Conversion, visited, queryableAccessorDic) &&
+							Compare(e1.Left,       e2.Left,       visited, queryableAccessorDic) &&
+							Compare(e1.Right,      e2.Right,      visited, queryableAccessorDic);
 					}
 
 				case ExpressionType.ArrayLength:
@@ -110,7 +119,7 @@ namespace BLToolkit.Linq
 					{
 						var e1 = (UnaryExpression)expr1;
 						var e2 = (UnaryExpression)expr2;
-						return e1.Method == e2.Method && Compare(e1.Operand, e2.Operand, queryableAccessorDic);
+						return e1.Method == e2.Method && Compare(e1.Operand, e2.Operand, visited, queryableAccessorDic);
 					}
 
 				case ExpressionType.Call:
@@ -126,14 +135,14 @@ namespace BLToolkit.Linq
 							Func<Expression,IQueryable> func;
 
 							if (queryableAccessorDic.TryGetValue(expr1, out func))
-								return Compare(func(expr1).Expression, func(expr2).Expression, queryableAccessorDic);
+								return Compare(func(expr1).Expression, func(expr2).Expression, visited, queryableAccessorDic);
 						}
 
-						if (!Compare(e1.Object, e2.Object, queryableAccessorDic))
+						if (!Compare(e1.Object, e2.Object, visited, queryableAccessorDic))
 							return false;
 
 						for (var i = 0; i < e1.Arguments.Count; i++)
-							if (!Compare(e1.Arguments[i], e2.Arguments[i], queryableAccessorDic))
+							if (!Compare(e1.Arguments[i], e2.Arguments[i], visited, queryableAccessorDic))
 								return false;
 
 						return true;
@@ -144,9 +153,9 @@ namespace BLToolkit.Linq
 						var e1 = (ConditionalExpression)expr1;
 						var e2 = (ConditionalExpression)expr2;
 						return
-							Compare(e1.Test,    e2.Test,   queryableAccessorDic) &&
-							Compare(e1.IfTrue,  e2.IfTrue, queryableAccessorDic) &&
-							Compare(e1.IfFalse, e2.IfFalse, queryableAccessorDic);
+							Compare(e1.Test,    e2.Test,    visited, queryableAccessorDic) &&
+							Compare(e1.IfTrue,  e2.IfTrue,  visited, queryableAccessorDic) &&
+							Compare(e1.IfFalse, e2.IfFalse, visited, queryableAccessorDic);
 					}
 
 				case ExpressionType.Constant:
@@ -154,7 +163,28 @@ namespace BLToolkit.Linq
 						var e1 = (ConstantExpression)expr1;
 						var e2 = (ConstantExpression)expr2;
 
-						return e1.Value == null && e2.Value == null || IsConstant(e1.Type) ? Equals(e1.Value, e2.Value) : true;
+						if (e1.Value == null && e2.Value == null)
+							return true;
+
+						if (IsConstant(e1.Type))
+							return Equals(e1.Value, e2.Value);
+
+						if (e1.Value == null || e2.Value == null)
+							return false;
+
+						if (e1.Value is IQueryable)
+						{
+							var eq1 = ((IQueryable)e1.Value).Expression;
+							var eq2 = ((IQueryable)e2.Value).Expression;
+
+							if (!visited.Contains(eq1))
+							{
+								visited.Add(eq1);
+								return Compare(eq1, eq2, visited, queryableAccessorDic);
+							}
+						}
+
+						return true;
 					}
 
 				case ExpressionType.Invoke:
@@ -162,11 +192,11 @@ namespace BLToolkit.Linq
 						var e1 = (InvocationExpression)expr1;
 						var e2 = (InvocationExpression)expr2;
 
-						if (e1.Arguments.Count != e2.Arguments.Count || !Compare(e1.Expression, e2.Expression, queryableAccessorDic))
+						if (e1.Arguments.Count != e2.Arguments.Count || !Compare(e1.Expression, e2.Expression, visited, queryableAccessorDic))
 							return false;
 
 						for (var i = 0; i < e1.Arguments.Count; i++)
-							if (!Compare(e1.Arguments[i], e2.Arguments[i], queryableAccessorDic))
+							if (!Compare(e1.Arguments[i], e2.Arguments[i], visited, queryableAccessorDic))
 								return false;
 
 						return true;
@@ -177,11 +207,11 @@ namespace BLToolkit.Linq
 						var e1 = (LambdaExpression)expr1;
 						var e2 = (LambdaExpression)expr2;
 
-						if (e1.Parameters.Count != e2.Parameters.Count || !Compare(e1.Body, e2.Body, queryableAccessorDic))
+						if (e1.Parameters.Count != e2.Parameters.Count || !Compare(e1.Body, e2.Body, visited, queryableAccessorDic))
 							return false;
 
 						for (var i = 0; i < e1.Parameters.Count; i++)
-							if (!Compare(e1.Parameters[i], e2.Parameters[i], queryableAccessorDic))
+							if (!Compare(e1.Parameters[i], e2.Parameters[i], visited, queryableAccessorDic))
 								return false;
 
 						return true;
@@ -192,7 +222,7 @@ namespace BLToolkit.Linq
 						var e1 = (ListInitExpression)expr1;
 						var e2 = (ListInitExpression)expr2;
 
-						if (e1.Initializers.Count != e2.Initializers.Count || !Compare(e1.NewExpression, e2.NewExpression, queryableAccessorDic))
+						if (e1.Initializers.Count != e2.Initializers.Count || !Compare(e1.NewExpression, e2.NewExpression, visited, queryableAccessorDic))
 							return false;
 
 						for (var i = 0; i < e1.Initializers.Count; i++)
@@ -204,7 +234,7 @@ namespace BLToolkit.Linq
 								return false;
 
 							for (var j = 0; j < i1.Arguments.Count; j++)
-								if (!Compare(i1.Arguments[j], i2.Arguments[j], queryableAccessorDic))
+								if (!Compare(i1.Arguments[j], i2.Arguments[j], visited, queryableAccessorDic))
 									return false;
 						}
 
@@ -226,12 +256,12 @@ namespace BLToolkit.Linq
 
 									if (queryableAccessorDic.TryGetValue(expr1, out func))
 										return
-											Compare(e1.Expression, e2.Expression, queryableAccessorDic) &&
-											Compare(func(expr1).Expression, func(expr2).Expression, queryableAccessorDic);
+											Compare(e1.Expression, e2.Expression, visited, queryableAccessorDic) &&
+											Compare(func(expr1).Expression, func(expr2).Expression, visited, queryableAccessorDic);
 								}
 							}
 
-							return Compare(e1.Expression, e2.Expression, queryableAccessorDic);
+							return Compare(e1.Expression, e2.Expression, visited, queryableAccessorDic);
 						}
 
 						return false;
@@ -242,7 +272,7 @@ namespace BLToolkit.Linq
 						var e1 = (MemberInitExpression)expr1;
 						var e2 = (MemberInitExpression)expr2;
 
-						if (e1.Bindings.Count != e2.Bindings.Count || !Compare(e1.NewExpression, e2.NewExpression, queryableAccessorDic))
+						if (e1.Bindings.Count != e2.Bindings.Count || !Compare(e1.NewExpression, e2.NewExpression, visited, queryableAccessorDic))
 							return false;
 
 						Func<MemberBinding,MemberBinding,bool> compareBindings = null; compareBindings = (b1,b2) =>
@@ -256,7 +286,7 @@ namespace BLToolkit.Linq
 							switch (b1.BindingType)
 							{
 								case MemberBindingType.Assignment:
-									return Compare(((MemberAssignment)b1).Expression, ((MemberAssignment)b2).Expression, queryableAccessorDic);
+									return Compare(((MemberAssignment)b1).Expression, ((MemberAssignment)b2).Expression, visited, queryableAccessorDic);
 
 								case MemberBindingType.ListBinding:
 									var ml1 = (MemberListBinding)b1;
@@ -274,7 +304,7 @@ namespace BLToolkit.Linq
 											return false;
 
 										for (var j = 0; j < ei1.Arguments.Count; j++)
-											if (!Compare(ei1.Arguments[j], ei2.Arguments[j], queryableAccessorDic))
+											if (!Compare(ei1.Arguments[j], ei2.Arguments[j], visited, queryableAccessorDic))
 												return false;
 									}
 
@@ -337,7 +367,7 @@ namespace BLToolkit.Linq
 						}
 
 						for (var i = 0; i < e1.Arguments.Count; i++)
-							if (!Compare(e1.Arguments[i], e2.Arguments[i], queryableAccessorDic))
+							if (!Compare(e1.Arguments[i], e2.Arguments[i], visited, queryableAccessorDic))
 								return false;
 
 						return true;
@@ -353,7 +383,7 @@ namespace BLToolkit.Linq
 							return false;
 
 						for (var i = 0; i < e1.Expressions.Count; i++)
-							if (!Compare(e1.Expressions[i], e2.Expressions[i], queryableAccessorDic))
+							if (!Compare(e1.Expressions[i], e2.Expressions[i], visited, queryableAccessorDic))
 								return false;
 
 						return true;
@@ -370,7 +400,7 @@ namespace BLToolkit.Linq
 					{
 						var e1 = (TypeBinaryExpression)expr1;
 						var e2 = (TypeBinaryExpression)expr2;
-						return e1.TypeOperand == e2.TypeOperand && Compare(e1.Expression, e2.Expression, queryableAccessorDic);
+						return e1.TypeOperand == e2.TypeOperand && Compare(e1.Expression, e2.Expression, visited, queryableAccessorDic);
 					}
 
 #if FW4 || SILVERLIGHT
@@ -381,11 +411,11 @@ namespace BLToolkit.Linq
 						var e2 = (BlockExpression)expr2;
 
 						for (var i = 0; i < e1.Expressions.Count; i++)
-							if (!Compare(e1.Expressions[i], e2.Expressions[i], queryableAccessorDic))
+							if (!Compare(e1.Expressions[i], e2.Expressions[i], visited, queryableAccessorDic))
 								return false;
 
 						for (var i = 0; i < e1.Variables.Count; i++)
-							if (!Compare(e1.Variables[i], e2.Variables[i], queryableAccessorDic))
+							if (!Compare(e1.Variables[i], e2.Variables[i], visited, queryableAccessorDic))
 								return false;
 
 						return true;
