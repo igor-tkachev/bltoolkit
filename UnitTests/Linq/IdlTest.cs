@@ -527,6 +527,34 @@ namespace Data.Linq
                 Assert.That(query.ToList(), Is.Not.Null);
             });
         }
+
+        [Test]
+        public void TestMonoConcat2()
+        {
+            ForMySqlProvider(
+            db =>
+            {
+                var ds = new IdlPatientSource(db);
+                var t = "A";
+                var query1 = Concat2(
+                from y in ds.Persons() select y.Name,
+                from x in ds.Persons() where x.Name == t select x.Name);
+
+                Assert.That(query1.ToList(), Is.Not.Null);
+            });
+
+            ForMySqlProvider(
+            db =>
+            {
+                var ds = new IdlPatientSource(db);
+                var t = "A";
+                var query2 = Concat2(
+                from y in ds.Persons() select y.Name,
+                from x in ds.Persons() where x.Name == t select x.Name);
+
+                Assert.That(query2.ToList(), Is.Not.Null);
+            });
+        }
     }
 
     #region TestConvertFunction classes
