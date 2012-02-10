@@ -480,6 +480,27 @@ namespace Data.Linq
         public void TestMono01()
         {
             ForMySqlProvider(
+                 db =>
+                 {
+                     var ds = new IdlPatientSource(db);
+                     var t = "A";
+                     var query =
+                         (from y in ds.Persons()
+                          select y.Name)
+                             .Concat(
+                                 from x in ds.Persons()
+                                 where x.Name == t
+                                 select x.Name
+                             );
+
+                     Assert.That(query.ToList(), Is.Not.Null);
+                 });
+        }
+
+        [Test]
+        public void TestMono03()
+        {
+            ForMySqlProvider(
                 db => Assert.That(new GenericConcatQuery(db, new object[] { "A", 1 }).Query().ToList(), Is.Not.Null));
         }
 
