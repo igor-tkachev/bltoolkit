@@ -84,19 +84,6 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Overrides
-
-#if OVERRIDETOSTRING
-
-		public override string ToString()
-		{
-			return "Table(" + typeof (T).Name + ")";
-		}
-
-#endif
-
-		#endregion
-
 		#region IQueryable Members
 
 		Type IQueryable.ElementType

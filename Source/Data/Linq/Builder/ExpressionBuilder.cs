@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Linq.Builder
 		         public bool                       IsBlockDisable = true;
 #endif
 
-		HashSet<Expression> _visitedExpressions;
+		readonly HashSet<Expression> _visitedExpressions;
 
 		public ExpressionBuilder(
 			Query                 query,
@@ -275,6 +275,7 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		readonly Dictionary<Expression,Expression> _optimizedExpressions = new Dictionary<Expression,Expression>();
+
 		Expression OptimizeExpression(Expression expression)
 		{
 			Expression expr;
