@@ -181,7 +181,9 @@
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\WhereBuilder.cs" />
+    <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
+    <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
     <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
