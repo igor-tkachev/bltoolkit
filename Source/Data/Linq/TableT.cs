@@ -38,5 +38,18 @@ namespace BLToolkit.Data.Linq
 			: base(dataContext == null ? null : new DataContextInfo(dataContext), expression)
 		{
 		}
+
+		#region Overrides
+
+#if OVERRIDETOSTRING
+
+		public override string ToString()
+		{
+			return "Table(" + typeof (T).Name + ")";
+		}
+
+#endif
+
+		#endregion
 	}
 }

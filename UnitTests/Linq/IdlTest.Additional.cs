@@ -16,7 +16,7 @@ namespace Data.Linq
 			}
 		}
 
-		public partial class GenericConcatQuery1 : GenericQueryBase
+		public class GenericConcatQuery1 : GenericQueryBase
 		{
 			private String @p1;
 			private Int32  @p2;
