@@ -81,6 +81,8 @@ namespace BLToolkit.Data.Linq.Builder
 		         public bool                       IsBlockDisable = true;
 #endif
 
+		HashSet<Expression> _visitedExpressions;
+
 		public ExpressionBuilder(
 			Query                 query,
 			IDataContextInfo      dataContext,
@@ -93,7 +95,10 @@ namespace BLToolkit.Data.Linq.Builder
 			CompiledParameters = compiledParameters;
 			DataContextInfo    = dataContext;
 			OriginalExpression = expression;
+
+			_visitedExpressions = new HashSet<Expression>();
 			Expression         = ConvertExpressionTree(expression);
+			_visitedExpressions = null;
 		}
 
 		#endregion
@@ -270,7 +275,6 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		readonly Dictionary<Expression,Expression> _optimizedExpressions = new Dictionary<Expression,Expression>();
-
 		Expression OptimizeExpression(Expression expression)
 		{
 			Expression expr;
@@ -393,8 +397,19 @@ namespace BLToolkit.Data.Linq.Builder
 
 							// Fix Mono behaviour.
 							//
-							if (c.Value is IExpressionQuery)
-								return ((IQueryable)c.Value).Expression;
+							//if (c.Value is IExpressionQuery)
+							//	return ((IQueryable)c.Value).Expression;
+
+							if (c.Value is IQueryable && !(c.Value is ITable))
+							{
+								var e = ((IQueryable)c.Value).Expression;
+
+								if (!_visitedExpressions.Contains(e))
+								{
+									_visitedExpressions.Add(e);
+									return OptimizeExpression(e);
+								}
+							}
 
 							break;
 						}

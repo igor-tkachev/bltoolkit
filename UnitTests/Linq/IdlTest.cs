@@ -13,7 +13,7 @@ using NUnit.Framework;
 namespace Data.Linq
 {
     [TestFixture]
-    public class IdlTest : TestBase
+    public partial class IdlTest : TestBase
     {
         #region PersonWithId
 
@@ -418,7 +418,7 @@ namespace Data.Linq
 
         #region GenericQuery classes
 
-        public abstract class GenericQueryBase
+        public abstract partial class GenericQueryBase
         {
             private readonly IdlPatientSource m_ds;
 

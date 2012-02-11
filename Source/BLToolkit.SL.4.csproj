@@ -165,6 +165,7 @@
     <Compile Include="Data\Linq\CompiledTableT.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />
+    <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />
     <Compile Include="Data\Linq\Expressions.cs" />
     <Compile Include="Data\Linq\Extensions.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />
@@ -173,6 +174,7 @@
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\IQueryContext.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
+    <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\IUpdateable.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />

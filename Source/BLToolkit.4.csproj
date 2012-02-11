@@ -222,6 +222,7 @@
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
     <Compile Include="Data\Linq\CompiledTableT.cs" />
+    <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />
     <Compile Include="Data\Linq\DataContextInfo.cs" />
     <Compile Include="Data\Linq\DataContextTransaction.cs" />
@@ -237,8 +238,9 @@
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
+    <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
-    <Compile Include="Data\Linq\ExpressionQuery.cs" />
+    <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Data\Linq\IgnoreIEnumerableAttribute.cs" />
     <Compile Include="Data\Linq\IQueryContext.cs" />
@@ -285,7 +287,7 @@
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
     <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
     <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
-    <Compile Include="Data\Linq\TableT.cs" />
+    <Compile Include="Data\Linq\ExpressionQuery.cs" />
     <Compile Include="Data\Sql\ChildContainer.cs" />
     <Compile Include="Data\Sql\ICloneableElement.cs" />
     <Compile Include="Data\Sql\ISqlExpressionWalkable.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Data.Linq;
@@ -13,22 +14,70 @@ namespace Test
 			
 			using (var db = new TestDbManager("MySql"))
 			{
-				var ds = new IdlPatientSource(db);
-				var t = "A";
-				var query =
-                    (ds.Persons().Select(y => y.Name))
-                        .Concat(
-                        	ds.Persons().Where(x => x.Name == t).Select(x => x.Name)
-                    	);
-				
-				var list = query.ToList();
+				var list = new GenericConcatQuery(db, new object[] { "A", 1 }).Query().ToList();
 				
 				foreach (var i in list)
 					Console.WriteLine(i.ToString());
 			}
 		}
 	}
+	
+	public abstract class GenericQueryBase
+	{
+		private readonly IdlPatientSource m_ds;
 
+		protected GenericQueryBase(ITestDataContext ds)
+		{
+			m_ds = new IdlPatientSource(ds);
+		}
+
+		#region Object sources
+
+		protected IQueryable<IdlPerson> AllPersons
+		{
+			get { return m_ds.Persons(); }
+		}
+
+		protected IQueryable<IdlPatient> AllPatients
+		{
+			get { return m_ds.Patients(); }
+		}
+
+		protected IQueryable<IdlGrandChild> AllGrandChilds
+		{
+			get { return m_ds.GrandChilds(); }
+		}
+
+		#endregion
+
+		public abstract IEnumerable<object> Query();
+	}
+
+	public class GenericConcatQuery : GenericQueryBase
+	{
+		private System.String @p1;
+		private System.Int32 @p2;
+
+		public GenericConcatQuery(ITestDataContext ds, object[] args)
+			: base(ds)
+		{
+			@p1 = (System.String)args[0];
+			@p2 = (System.Int32)args[1];
+		}
+
+		public override IEnumerable<object> Query()
+		{
+			return (from y in AllPersons
+					select y.Name)
+						.Concat(
+							from x in AllPersons
+							from z in AllPatients
+							where (x.Name == @p1 || z.Id == new ObjectId { Value = @p2 })
+							select x.Name
+						);
+		}
+	}
+	
 	public struct ObjectId
 	{
 		public ObjectId(int value)
