@@ -231,7 +231,9 @@
     <Compile Include="Data\Linq\Builder\SqlInfo.cs" />
     <Compile Include="Data\Linq\Builder\TableAttributeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
+    <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
+    <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />
