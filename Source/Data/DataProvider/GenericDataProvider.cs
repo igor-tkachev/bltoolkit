@@ -71,6 +71,17 @@ namespace BLToolkit.Data.DataProvider
             }
         }
 
+        public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            if (Name == ProviderFullName.Oracle)
+            {
+                command.CommandText = OracleHelper.Interpret(command);
+                command.Parameters.Clear();
+            }
+    
+            return base.GetDataReader(command, commandBehavior);
+        }
+
         #endregion
 	}
 }

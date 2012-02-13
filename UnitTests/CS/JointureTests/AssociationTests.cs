@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
@@ -18,8 +19,8 @@ namespace UnitTests.CS.JointureTests
             var aa = DbProviderFactories.GetFactoryClasses();
             var bb = aa.Rows.Count;
 
-            //DataProviderBase provider = new OdpDataProvider();
-            DataProviderBase provider = new GenericDataProvider(ProviderFullName.OracleNet);
+            DataProviderBase provider = new OdpDataProvider();
+            //DataProviderBase provider = new GenericDataProvider(ProviderFullName.Oracle);
             DbManager.AddDataProvider(provider);
             DbManager.AddConnectionString(provider.Name,
                                                       string.Format(
@@ -36,6 +37,14 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = new MusicDB())
             {
+
+                var queryI = from a in db.GetTable<Artist>()
+                             where a.Id == 2471
+                             select a;
+                
+                var aaa = queryI.First();
+                var ccc = aaa.Id;
+
                 var query2 = new FullSqlQuery(db, true); //loading is automatic
                 var artist2 = (Artist2) query2.SelectByKey(typeof (Artist2), 2643);
                 List<Title> titles2 = artist2.Titles;

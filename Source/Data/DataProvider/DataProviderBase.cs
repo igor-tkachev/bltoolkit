@@ -245,6 +245,11 @@ namespace BLToolkit.Data.DataProvider
 			return dataReader;
 		}
 
+        public virtual IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            return command.ExecuteReader(commandBehavior);
+        }
+
 		public virtual bool ParameterNamesEqual(string paramName1, string paramName2)
 		{
 			// default implementation is case-insensitive, because if we make it 

@@ -6,10 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 using BLToolkit.Aspects;
@@ -603,6 +605,13 @@ namespace BLToolkit.Data.DataProvider
 				new OracleDataReaderEx((OracleDataReader)dataReader) :
 				base.GetDataReader(schema, dataReader);
 		}
+
+        public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            command.CommandText = OracleHelper.Interpret(command);
+            command.Parameters.Clear();
+            return base.GetDataReader(command, commandBehavior);
+        }
 
 		class OracleDataReaderEx: DataReaderEx<OracleDataReader>
 		{

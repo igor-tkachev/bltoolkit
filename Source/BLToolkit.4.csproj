@@ -203,6 +203,7 @@
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <None Include="Data\DataProvider\GenericDataProvider.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
+    <Compile Include="Data\DataProvider\OracleHelper.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />

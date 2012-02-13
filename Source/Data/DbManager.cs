@@ -607,7 +607,11 @@ namespace BLToolkit.Data
 			return ExecuteOperation(
 				OperationType.ExecuteReader,
 				() =>
-					_dataProvider.GetDataReader(_mappingSchema, SelectCommand.ExecuteReader(commandBehavior)));
+				    {
+				        var dataReader = _dataProvider.GetDataReader(SelectCommand, commandBehavior);
+				        LastQuery = SelectCommand.CommandText;
+				        return _dataProvider.GetDataReader(_mappingSchema, dataReader);
+				    });
 		}
 
 		private int ExecuteNonQueryInternal()
