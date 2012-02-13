@@ -474,6 +474,35 @@ namespace Data.Linq
             }
         }
 
+        public class GenericConcatJoinOrderQuery : GenericQueryBase
+        {
+            private String @p1;
+            private Int32 @p2;
+
+            public GenericConcatJoinOrderQuery(ITestDataContext ds, object[] args)
+                : base(ds)
+            {
+                @p1 = (System.String)args[0];
+                @p2 = (System.Int32)args[1];
+            }
+
+            public override IEnumerable<object> Query()
+            {
+                return (from j in
+                            (from y in AllPersons
+                             select new { FirstName = y.Name })
+                                .Concat(
+                                    from x in AllPersons
+                                    from z in AllPatients
+                                    where (x.Name == @p1 || z.Id == new ObjectId { Value = @p2 })
+                                    select new { FirstName = x.Name }
+                                )
+                        join g in AllGrandChilds on j.FirstName equals @p1
+                        orderby g.ParentID.Value
+                        select new { FirstName = g.ParentID.Value.ToString() });
+            }
+        }
+
         #endregion
 
         [Test]
@@ -502,6 +531,13 @@ namespace Data.Linq
         {
             ForMySqlProvider(
                 db => Assert.That(new GenericConcatQuery(db, new object[] { "A", 1 }).Query().ToList(), Is.Not.Null));
+        }
+
+        [Test]
+        public void TestMono04()
+        {
+            ForMySqlProvider(
+                db => Assert.That(new GenericConcatJoinOrderQuery(db, new object[] { "A", 1 }).Query().ToList(), Is.Not.Null));
         }
 
         public static IQueryable<TSource> Concat2<TSource>(IQueryable<TSource> source1, IEnumerable<TSource> source2)
