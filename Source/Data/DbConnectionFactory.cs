@@ -4,8 +4,8 @@ namespace BLToolkit.Data
 {
     public abstract class DbConnectionFactory : IDbConnectionFactory
     {
-        internal DataProviderBase Provider;
-        internal string ConnectionString { get; set; }
+        public DataProviderBase Provider;
+        public string ConnectionString { get; set; }
 
         #region IDbConnectionFactory Members
 
