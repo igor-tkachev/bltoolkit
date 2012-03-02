@@ -1,0 +1,1629 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0C325F5D-E50E-4340-8724-D29896CCC583}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BLToolkit</RootNamespace>
+    <AssemblyName>BLToolkit.4</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FW4;OVERRIDETOSTRING;MONOTOUCH</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRules>
+    </CodeAnalysisRules>
+    <CodeAnalysisRuleSet>Migrated rules for BLToolkit.4.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;FW4;OVERRIDETOSTRING;NEW_PARSER;MONOTOUCH</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRules>
+    </CodeAnalysisRules>
+    <CodeAnalysisRuleSet>Migrated rules for BLToolkit.4 (2).ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug FW 3.5|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug FW 3.5\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FW3;TRACE_PARSING1;OVERRIDETOSTRING1</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\BLToolkit.4.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>Migrated rules for BLToolkit.4.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugMono|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\DebugMono\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FW4;MONO;OVERRIDETOSTRING;NEW_PARSER</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\BLToolkit.4.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>Migrated rules for BLToolkit.4.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseMono|AnyCPU'">
+    <OutputPath>bin\ReleaseMono\</OutputPath>
+    <DefineConstants>TRACE;FW4;MONO;OVERRIDETOSTRING</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\BLToolkit.4.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>Migrated rules for BLToolkit.4 (2).ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+    </Reference>
+    <Reference Include="System.Core">
+    </Reference>
+    <Reference Include="System.Data">
+    </Reference>
+    <Reference Include="System.Data.Linq">
+    </Reference>
+    <Reference Include="System.Data.Services" />
+    <Reference Include="System.Design">
+    </Reference>
+    <Reference Include="System.Drawing">
+    </Reference>
+    <Reference Include="System.Runtime.Serialization">
+    </Reference>
+    <Reference Include="System.ServiceModel">
+    </Reference>
+    <Reference Include="System.Web">
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms">
+    </Reference>
+    <Reference Include="System.Xml">
+    </Reference>
+    <Reference Include="System.Configuration">
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Source\BLToolkit.snk">
+      <Link>BLToolkit.snk</Link>
+    </None>
+    <None Include="..\Source\Doc\BLToolkit.chm">
+      <Link>Doc\BLToolkit.chm</Link>
+    </None>
+    <None Include="..\Source\Doc\Development rules and regulations.doc">
+      <Link>Doc\Development rules and regulations.doc</Link>
+    </None>
+    <None Include="..\Source\Common\Convert.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Convert.generated.cs</LastGenOutput>
+      <Link>Common\Convert.tt</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\FdpDataProvider.cs">
+      <Link>Data\DataProvider\FdpDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\MySqlDataProvider.cs">
+      <Link>Data\DataProvider\MySqlDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\OdpDataProvider.cs">
+      <Link>Data\DataProvider\OdpDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\SqlCeDataProvider.cs">
+      <Link>Data\DataProvider\SqlCeDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\SQLiteDataProvider.cs">
+      <Link>Data\DataProvider\SQLiteDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\SybaseDataProvider.cs">
+      <Link>Data\DataProvider\SybaseDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\SybaseAdoDataProvider.cs">
+      <Link>Data\DataProvider\SybaseAdoDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\DB2DataProvider.cs">
+      <Link>Data\DataProvider\DB2DataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\InformixDataProvider.cs">
+      <Link>Data\DataProvider\InformixDataProvider.cs</Link>
+    </None>
+    <None Include="..\Source\Data\DataProvider\PostgreSQLDataProvider.cs">
+      <Link>Data\DataProvider\PostgreSQLDataProvider.cs</Link>
+    </None>
+    <Compile Include="..\Source\Aspects\AsyncAttribute.cs">
+      <Link>Aspects\AsyncAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Builders\AsyncAspectBuilder.cs">
+      <Link>Aspects\Builders\AsyncAspectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Builders\ClearCacheAspectBuilder.cs">
+      <Link>Aspects\Builders\ClearCacheAspectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Builders\InterceptorAspectBuilder.cs">
+      <Link>Aspects\Builders\InterceptorAspectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Builders\MixinAspectBuilder.cs">
+      <Link>Aspects\Builders\MixinAspectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Builders\NotNullAspectBuilder.cs">
+      <Link>Aspects\Builders\NotNullAspectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Builders\OverloadAspectBuilder.cs">
+      <Link>Aspects\Builders\OverloadAspectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CacheAspect.cs">
+      <Link>Aspects\CacheAspect.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CacheAspectItem.cs">
+      <Link>Aspects\CacheAspectItem.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CacheAspectT.cs">
+      <Link>Aspects\CacheAspectT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CacheAttribute.cs">
+      <Link>Aspects\CacheAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CallMethodInfo.cs">
+      <Link>Aspects\CallMethodInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\ClearCacheAspect.cs">
+      <Link>Aspects\ClearCacheAspect.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\ClearCacheAttribute.cs">
+      <Link>Aspects\ClearCacheAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CounterAspect.cs">
+      <Link>Aspects\CounterAspect.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\CounterAttribute.cs">
+      <Link>Aspects\CounterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\IInterceptor.cs">
+      <Link>Aspects\IInterceptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\InstanceCacheAttribute.cs">
+      <Link>Aspects\InstanceCacheAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\InterceptCallInfo.cs">
+      <Link>Aspects\InterceptCallInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\Interceptor.cs">
+      <Link>Aspects\Interceptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\InterceptorAttribute.cs">
+      <Link>Aspects\InterceptorAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\InterceptResult.cs">
+      <Link>Aspects\InterceptResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\InterceptType.cs">
+      <Link>Aspects\InterceptType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\LogAttribute.cs">
+      <Link>Aspects\LogAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\LoggingAspect.cs">
+      <Link>Aspects\LoggingAspect.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\MethodCallCounter.cs">
+      <Link>Aspects\MethodCallCounter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\MixinAttribute.cs">
+      <Link>Aspects\MixinAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\MixinOverrideAttribute.cs">
+      <Link>Aspects\MixinOverrideAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\NoCacheAttribute.cs">
+      <Link>Aspects\NoCacheAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\NoCounterAttribute.cs">
+      <Link>Aspects\NoCounterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\NoInterceptionAttribute.cs">
+      <Link>Aspects\NoInterceptionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\NoLogAttribute.cs">
+      <Link>Aspects\NoLogAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\NotNullAttribute.cs">
+      <Link>Aspects\NotNullAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Aspects\OverloadAttribute.cs">
+      <Link>Aspects\OverloadAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\ArrayT.cs">
+      <Link>Common\ArrayT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\CompoundValue.cs">
+      <Link>Common\CompoundValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\Configuration.cs">
+      <Link>Common\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\Convert.cs">
+      <Link>Common\Convert.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\ConvertT.cs">
+      <Link>Common\ConvertT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\EntityBase.cs">
+      <Link>Common\EntityBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\EntityBaseT.cs">
+      <Link>Common\EntityBaseT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\IOperable.cs">
+      <Link>Common\IOperable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\NameOrIndexParameter.cs">
+      <Link>Common\NameOrIndexParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\Operator.cs">
+      <Link>Common\Operator.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\Tuple.cs">
+      <Link>Common\Tuple.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\BindingListImpl.cs">
+      <Link>ComponentModel\BindingListImpl.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\CustomTypeDescriptorImpl.cs">
+      <Link>ComponentModel\CustomTypeDescriptorImpl.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\INotifyObjectEdit.cs">
+      <Link>ComponentModel\INotifyObjectEdit.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\IObjectView.cs">
+      <Link>ComponentModel\IObjectView.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\ISortable.cs">
+      <Link>ComponentModel\ISortable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\ITypeDescriptionProvider.cs">
+      <Link>ComponentModel\ITypeDescriptionProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\MemberPropertyDescriptor.cs">
+      <Link>ComponentModel\MemberPropertyDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\ObjectEditEventArgs.cs">
+      <Link>ComponentModel\ObjectEditEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\ObjectEditType.cs">
+      <Link>ComponentModel\ObjectEditType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\PropertyDescriptorWrapper.cs">
+      <Link>ComponentModel\PropertyDescriptorWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\TypeDescriptorExtender.cs">
+      <Link>ComponentModel\TypeDescriptorExtender.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\TypeDescriptorExtenderT.cs">
+      <Link>ComponentModel\TypeDescriptorExtenderT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\TypedListImpl.cs">
+      <Link>ComponentModel\TypedListImpl.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ComponentModel\TypeTypeConverter.cs">
+      <Link>ComponentModel\TypeTypeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Configuration\BLToolkitSection.cs">
+      <Link>Configuration\BLToolkitSection.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Configuration\DataProviderElement.cs">
+      <Link>Configuration\DataProviderElement.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Configuration\DataProviderElementCollection.cs">
+      <Link>Configuration\DataProviderElementCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Configuration\ElementBase.cs">
+      <Link>Configuration\ElementBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Configuration\ElementCollectionBase.cs">
+      <Link>Configuration\ElementCollectionBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Configuration\TypeFactoryElement.cs">
+      <Link>Configuration\TypeFactoryElement.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ActionNameAttribute.cs">
+      <Link>DataAccess\ActionNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ActionSprocNameAttribute.cs">
+      <Link>DataAccess\ActionSprocNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ActualTypeAttribute.cs">
+      <Link>DataAccess\ActualTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\CommandBehaviorAttribute.cs">
+      <Link>DataAccess\CommandBehaviorAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessException.cs">
+      <Link>DataAccess\DataAccessException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessor.cs">
+      <Link>DataAccess\DataAccessor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessorAttribute.cs">
+      <Link>DataAccess\DataAccessorAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessorBase.cs">
+      <Link>DataAccess\DataAccessorBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessorBuilder.cs">
+      <Link>DataAccess\DataAccessorBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessorT.cs">
+      <Link>DataAccess\DataAccessorT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataAccessorTA.cs">
+      <Link>DataAccess\DataAccessorTA.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DataSetTableAttribute.cs">
+      <Link>DataAccess\DataSetTableAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DbTypeAttribute.cs">
+      <Link>DataAccess\DbTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DestinationAttribute.cs">
+      <Link>DataAccess\DestinationAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\Direction.cs">
+      <Link>DataAccess\Direction.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\DiscoverParametersAttribute.cs">
+      <Link>DataAccess\DiscoverParametersAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\FormatAttribute.cs">
+      <Link>DataAccess\FormatAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\IdentityAttribute.cs">
+      <Link>DataAccess\IdentityAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\IndexAttribute.cs">
+      <Link>DataAccess\IndexAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\NoMapAttribute.cs">
+      <Link>DataAccess\NoMapAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\NonUpdatableAttribute.cs">
+      <Link>DataAccess\NonUpdatableAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ObjectTypeAttribute.cs">
+      <Link>DataAccess\ObjectTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ParamDbTypeAttribute.cs">
+      <Link>DataAccess\ParamDbTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ParamNameAttribute.cs">
+      <Link>DataAccess\ParamNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ParamNullValue.cs">
+      <Link>DataAccess\ParamNullValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ParamSizeAttribute.cs">
+      <Link>DataAccess\ParamSizeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ParamTypeNameAttribute.cs">
+      <Link>DataAccess\ParamTypeNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\PrimaryKeyAttribute.cs">
+      <Link>DataAccess\PrimaryKeyAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ScalarFieldNameAttribute.cs">
+      <Link>DataAccess\ScalarFieldNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\ScalarSourceAttribute.cs">
+      <Link>DataAccess\ScalarSourceAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SprocNameAttribute.cs">
+      <Link>DataAccess\SprocNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SprocQuery.cs">
+      <Link>DataAccess\SprocQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SprocQueryT.cs">
+      <Link>DataAccess\SprocQueryT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlIgnoreAttribute.cs">
+      <Link>DataAccess\SqlIgnoreAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlQuery.cs">
+      <Link>DataAccess\SqlQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlQueryAttribute.cs">
+      <Link>DataAccess\SqlQueryAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlQueryBase.cs">
+      <Link>DataAccess\SqlQueryBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlQueryInfo.cs">
+      <Link>DataAccess\SqlQueryInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlQueryParameterInfo.cs">
+      <Link>DataAccess\SqlQueryParameterInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\SqlQueryT.cs">
+      <Link>DataAccess\SqlQueryT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\DataAccess\TableNameAttribute.cs">
+      <Link>DataAccess\TableNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataException.cs">
+      <Link>Data\DataException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\AccessDataProvider.cs">
+      <Link>Data\DataProvider\AccessDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\ConvertType.cs">
+      <Link>Data\DataProvider\ConvertType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\FirebirdMappingSchema.cs">
+      <Link>Data\DataProvider\FirebirdMappingSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\GenericDataProvider.cs">
+      <Link>Data\DataProvider\GenericDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\OdbcDataProvider.cs">
+      <Link>Data\DataProvider\OdbcDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\OleDbDataProvider.cs">
+      <Link>Data\DataProvider\OleDbDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\OracleHelper.cs">
+      <Link>Data\DataProvider\OracleHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\ProviderName.cs">
+      <Link>Data\DataProvider\ProviderName.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\Sql2008DataProvider.cs">
+      <Link>Data\DataProvider\Sql2008DataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\SqlDataProvider.cs">
+      <Link>Data\DataProvider\SqlDataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\SqlDataProviderBase.cs">
+      <Link>Data\DataProvider\SqlDataProviderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DbConnectionFactory.cs">
+      <Link>Data\DbConnectionFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\IDataReaderEx.cs">
+      <Link>Data\IDataReaderEx.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\IDbConnectionFactory.cs">
+      <Link>Data\IDbConnectionFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\InitCommandEventArgs.cs">
+      <Link>Data\InitCommandEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\AggregationBuilder.cs">
+      <Link>Data\Linq\Builder\AggregationBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\AllAnyBuilder.cs">
+      <Link>Data\Linq\Builder\AllAnyBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\BuildInfo.cs">
+      <Link>Data\Linq\Builder\BuildInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\CastBuilder.cs">
+      <Link>Data\Linq\Builder\CastBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ChangeTypeExpression.cs">
+      <Link>Data\Linq\Builder\ChangeTypeExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ConcatUnionBuilder.cs">
+      <Link>Data\Linq\Builder\ConcatUnionBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ContainsBuilder.cs">
+      <Link>Data\Linq\Builder\ContainsBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ConvertFlags.cs">
+      <Link>Data\Linq\Builder\ConvertFlags.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\CountBuilder.cs">
+      <Link>Data\Linq\Builder\CountBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\DefaultIfEmptyBuilder.cs">
+      <Link>Data\Linq\Builder\DefaultIfEmptyBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\DeleteBuilder.cs">
+      <Link>Data\Linq\Builder\DeleteBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\DistinctBuilder.cs">
+      <Link>Data\Linq\Builder\DistinctBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ExpressionBuilder.cs">
+      <Link>Data\Linq\Builder\ExpressionBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ExpressionBuilder.QueryBuilder.cs">
+      <Link>Data\Linq\Builder\ExpressionBuilder.QueryBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ExpressionBuilder.SqlBuilder.cs">
+      <Link>Data\Linq\Builder\ExpressionBuilder.SqlBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ExpressionContext.cs">
+      <Link>Data\Linq\Builder\ExpressionContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ExpressionHoder.cs">
+      <Link>Data\Linq\Builder\ExpressionHoder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\FirstSingleBuilder.cs">
+      <Link>Data\Linq\Builder\FirstSingleBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\GroupByBuilder.cs">
+      <Link>Data\Linq\Builder\GroupByBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\IBuildContext.cs">
+      <Link>Data\Linq\Builder\IBuildContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\InsertBuilder.cs">
+      <Link>Data\Linq\Builder\InsertBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\InsertOrUpdateBuilder.cs">
+      <Link>Data\Linq\Builder\InsertOrUpdateBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\IntersectBuilder.cs">
+      <Link>Data\Linq\Builder\IntersectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ISequenceBuilder.cs">
+      <Link>Data\Linq\Builder\ISequenceBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\IsExpressionResult.cs">
+      <Link>Data\Linq\Builder\IsExpressionResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\JoinBuilder.cs">
+      <Link>Data\Linq\Builder\JoinBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\MethodCallBuilder.cs">
+      <Link>Data\Linq\Builder\MethodCallBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\OfTypeBuilder.cs">
+      <Link>Data\Linq\Builder\OfTypeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\OrderByBuilder.cs">
+      <Link>Data\Linq\Builder\OrderByBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\PassThroughBuilder.cs">
+      <Link>Data\Linq\Builder\PassThroughBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\PassThroughContext.cs">
+      <Link>Data\Linq\Builder\PassThroughContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\RequestFor.cs">
+      <Link>Data\Linq\Builder\RequestFor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\ScalarSelectBuilder.cs">
+      <Link>Data\Linq\Builder\ScalarSelectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SelectBuilder.cs">
+      <Link>Data\Linq\Builder\SelectBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SelectContext.cs">
+      <Link>Data\Linq\Builder\SelectContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SelectManyBuilder.cs">
+      <Link>Data\Linq\Builder\SelectManyBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SequenceContextBase.cs">
+      <Link>Data\Linq\Builder\SequenceContextBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SequenceConvertInfo.cs">
+      <Link>Data\Linq\Builder\SequenceConvertInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SequenceConvertPath.cs">
+      <Link>Data\Linq\Builder\SequenceConvertPath.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SqlInfo.cs">
+      <Link>Data\Linq\Builder\SqlInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\SubQueryContext.cs">
+      <Link>Data\Linq\Builder\SubQueryContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\TableAttributeBuilder.cs">
+      <Link>Data\Linq\Builder\TableAttributeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\TableBuilder.cs">
+      <Link>Data\Linq\Builder\TableBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\TakeSkipBuilder.cs">
+      <Link>Data\Linq\Builder\TakeSkipBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\UpdateBuilder.cs">
+      <Link>Data\Linq\Builder\UpdateBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Builder\WhereBuilder.cs">
+      <Link>Data\Linq\Builder\WhereBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\CompiledQuery.cs">
+      <Link>Data\Linq\CompiledQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\CompiledTableT.cs">
+      <Link>Data\Linq\CompiledTableT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\DataContext.cs">
+      <Link>Data\Linq\DataContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\DataContextInfo.cs">
+      <Link>Data\Linq\DataContextInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\DataContextTransaction.cs">
+      <Link>Data\Linq\DataContextTransaction.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\DefaultDataContextInfo.cs">
+      <Link>Data\Linq\DefaultDataContextInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\ExpressionQuery.cs">
+      <Link>Data\Linq\ExpressionQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\ExpressionQueryImpl.cs">
+      <Link>Data\Linq\ExpressionQueryImpl.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Expressions.cs">
+      <Link>Data\Linq\Expressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Extensions.cs">
+      <Link>Data\Linq\Extensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IDataContext.cs">
+      <Link>Data\Linq\IDataContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IDataContextInfo.cs">
+      <Link>Data\Linq\IDataContextInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IExpressionQuery.cs">
+      <Link>Data\Linq\IExpressionQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IgnoreIEnumerableAttribute.cs">
+      <Link>Data\Linq\IgnoreIEnumerableAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IQueryContext.cs">
+      <Link>Data\Linq\IQueryContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\ISelectInsertable.cs">
+      <Link>Data\Linq\ISelectInsertable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\ITable.cs">
+      <Link>Data\Linq\ITable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IUpdateable.cs">
+      <Link>Data\Linq\IUpdateable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\IValueInsertable.cs">
+      <Link>Data\Linq\IValueInsertable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\LinqException.cs">
+      <Link>Data\Linq\LinqException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\LinqExtensions.cs">
+      <Link>Data\Linq\LinqExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\MemberInfoComparer.cs">
+      <Link>Data\Linq\MemberInfoComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\MethodExpressionAttribute.cs">
+      <Link>Data\Linq\MethodExpressionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Query.cs">
+      <Link>Data\Linq\Query.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\QueryContext.cs">
+      <Link>Data\Linq\QueryContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\ReflectionHelper.cs">
+      <Link>Data\Linq\ReflectionHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Settings.cs">
+      <Link>Data\Linq\Settings.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\Sql.cs">
+      <Link>Data\Linq\Sql.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\SqlEnumAttribute.cs">
+      <Link>Data\Linq\SqlEnumAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\SqlExpressionAttribute.cs">
+      <Link>Data\Linq\SqlExpressionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\SqlFunctionAttribute.cs">
+      <Link>Data\Linq\SqlFunctionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\SqlPropertyAttribute.cs">
+      <Link>Data\Linq\SqlPropertyAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\TableExpressionAttribute.cs">
+      <Link>Data\Linq\TableExpressionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\TableFunctionAttribute.cs">
+      <Link>Data\Linq\TableFunctionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Linq\TableT.cs">
+      <Link>Data\Linq\TableT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\OperationExceptionEventArgs.cs">
+      <Link>Data\OperationExceptionEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\OperationType.cs">
+      <Link>Data\OperationType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\OperationTypeEventArgs.cs">
+      <Link>Data\OperationTypeEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\ScalarSourceType.cs">
+      <Link>Data\ScalarSourceType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\ChildContainer.cs">
+      <Link>Data\Sql\ChildContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\Extensions.cs">
+      <Link>Data\Sql\Extensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\IChild.cs">
+      <Link>Data\Sql\IChild.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\ICloneableElement.cs">
+      <Link>Data\Sql\ICloneableElement.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\IQueryElement.cs">
+      <Link>Data\Sql\IQueryElement.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\ISqlExpression.cs">
+      <Link>Data\Sql\ISqlExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\ISqlExpressionWalkable.cs">
+      <Link>Data\Sql\ISqlExpressionWalkable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\ISqlPredicate.cs">
+      <Link>Data\Sql\ISqlPredicate.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\ISqlTableSource.cs">
+      <Link>Data\Sql\ISqlTableSource.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\IValueContainer.cs">
+      <Link>Data\Sql\IValueContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\Join.cs">
+      <Link>Data\Sql\Join.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\JoinOn.cs">
+      <Link>Data\Sql\JoinOn.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\Precedence.cs">
+      <Link>Data\Sql\Precedence.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\QueryElementType.cs">
+      <Link>Data\Sql\QueryElementType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\QueryType.cs">
+      <Link>Data\Sql\QueryType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\QueryVisitor.cs">
+      <Link>Data\Sql\QueryVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlBinaryExpression.cs">
+      <Link>Data\Sql\SqlBinaryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlDataType.cs">
+      <Link>Data\Sql\SqlDataType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlException.cs">
+      <Link>Data\Sql\SqlException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlExpression.cs">
+      <Link>Data\Sql\SqlExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlField.cs">
+      <Link>Data\Sql\SqlField.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlFunction.cs">
+      <Link>Data\Sql\SqlFunction.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlParameter.cs">
+      <Link>Data\Sql\SqlParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\AccessSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\AccessSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\BasicSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\BasicSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\DB2SqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\DB2SqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\FirebirdSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\FirebirdSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\InformixSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\InformixSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\ISqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\ISqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\MsSql2005SqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\MsSql2005SqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\MsSql2008SqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\MsSql2008SqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\MSSqlSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\MSSqlSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\MySqlSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\MySqlSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\OracleSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\OracleSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\PostgreSQLSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\SequenceNameAttribute.cs">
+      <Link>Data\Sql\SqlProvider\SequenceNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\SqlCeSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\SqlCeSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\SQLiteSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\SQLiteSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlProvider\SybaseSqlProvider.cs">
+      <Link>Data\Sql\SqlProvider\SybaseSqlProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlQuery.cs">
+      <Link>Data\Sql\SqlQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlTable.cs">
+      <Link>Data\Sql\SqlTable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlTableT.cs">
+      <Link>Data\Sql\SqlTableT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlTableType.cs">
+      <Link>Data\Sql\SqlTableType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\Sql\SqlValue.cs">
+      <Link>Data\Sql\SqlValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableArrayList.cs">
+      <Link>EditableObjects\EditableArrayList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableList.cs">
+      <Link>EditableObjects\EditableList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableListChangedEventArgs.cs">
+      <Link>EditableObjects\EditableListChangedEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableObject.cs">
+      <Link>EditableObjects\EditableObject.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableObjectHolder.cs">
+      <Link>EditableObjects\EditableObjectHolder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableObjectT.cs">
+      <Link>EditableObjects\EditableObjectT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableValue.cs">
+      <Link>EditableObjects\EditableValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\EditableXmlDocument.cs">
+      <Link>EditableObjects\EditableXmlDocument.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\IEditable.cs">
+      <Link>EditableObjects\IEditable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\IMemberwiseEditable.cs">
+      <Link>EditableObjects\IMemberwiseEditable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\EditableObjects\IPrintDebugState.cs">
+      <Link>EditableObjects\IPrintDebugState.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Linq\ExpressionHelper.cs">
+      <Link>Linq\ExpressionHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\Association.cs">
+      <Link>Mapping\Association.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\AssociationAttribute.cs">
+      <Link>Mapping\AssociationAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DataReaderListMapper.cs">
+      <Link>Mapping\DataReaderListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DataReaderMapper.cs">
+      <Link>Mapping\DataReaderMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DataRowMapper.cs">
+      <Link>Mapping\DataRowMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DataTableMapper.cs">
+      <Link>Mapping\DataTableMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DefaultMappingSchema.cs">
+      <Link>Mapping\DefaultMappingSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DefaultMemberMapper.cs">
+      <Link>Mapping\DefaultMemberMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DefaultValueAttribute.cs">
+      <Link>Mapping\DefaultValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DictionaryIndexListMapper.cs">
+      <Link>Mapping\DictionaryIndexListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DictionaryIndexListMapperT.cs">
+      <Link>Mapping\DictionaryIndexListMapperT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DictionaryListMapper.cs">
+      <Link>Mapping\DictionaryListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DictionaryListMapperT.cs">
+      <Link>Mapping\DictionaryListMapperT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\DictionaryMapper.cs">
+      <Link>Mapping\DictionaryMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\EnumeratorMapper.cs">
+      <Link>Mapping\EnumeratorMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ExpressionMapper.cs">
+      <Link>Mapping\ExpressionMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\IMapDataDestination.cs">
+      <Link>Mapping\IMapDataDestination.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\IMapDataDestinationList.cs">
+      <Link>Mapping\IMapDataDestinationList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\IMapDataSource.cs">
+      <Link>Mapping\IMapDataSource.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\IMapDataSourceList.cs">
+      <Link>Mapping\IMapDataSourceList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\IMappingSchemaProvider.cs">
+      <Link>Mapping\IMappingSchemaProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\InheritanceMappingAttribute.cs">
+      <Link>Mapping\InheritanceMappingAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ISupportMapping.cs">
+      <Link>Mapping\ISupportMapping.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\IValueMapper.cs">
+      <Link>Mapping\IValueMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\Map.cs">
+      <Link>Mapping\Map.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapDataDestinationBase.cs">
+      <Link>Mapping\MapDataDestinationBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapDataSourceBase.cs">
+      <Link>Mapping\MapDataSourceBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapDataSourceDestinationBase.cs">
+      <Link>Mapping\MapDataSourceDestinationBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapFieldAttribute.cs">
+      <Link>Mapping\MapFieldAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapGetDataT.cs">
+      <Link>Mapping\MapGetDataT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapIgnoreAttribute.cs">
+      <Link>Mapping\MapIgnoreAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapImplicitAttribute.cs">
+      <Link>Mapping\MapImplicitAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapIndex.cs">
+      <Link>Mapping\MapIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapMemberInfo.cs">
+      <Link>Mapping\MapMemberInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapNextResult.cs">
+      <Link>Mapping\MapNextResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MappingException.cs">
+      <Link>Mapping\MappingException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MappingSchema.cs">
+      <Link>Mapping\MappingSchema.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapRelation.cs">
+      <Link>Mapping\MapRelation.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapRelationBase.cs">
+      <Link>Mapping\MapRelationBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapResultSet.cs">
+      <Link>Mapping\MapResultSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapSetDataT.cs">
+      <Link>Mapping\MapSetDataT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapValue.cs">
+      <Link>Mapping\MapValue.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MapValueAttribute.cs">
+      <Link>Mapping\MapValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MemberMapper.cs">
+      <Link>Mapping\MemberMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MemberMapperAttribute.cs">
+      <Link>Mapping\MemberMapperAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\NotNullAttribute.cs">
+      <Link>Mapping\NotNullAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\NullableAttribute.cs">
+      <Link>Mapping\NullableAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\NullDateTimeAttribute.cs">
+      <Link>Mapping\NullDateTimeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\NullDecimalAttribute.cs">
+      <Link>Mapping\NullDecimalAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\NullGuidAttribute.cs">
+      <Link>Mapping\NullGuidAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\NullValueAttribute.cs">
+      <Link>Mapping\NullValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ObjectListMapper.cs">
+      <Link>Mapping\ObjectListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ObjectMapper.cs">
+      <Link>Mapping\ObjectMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ObjectMapperAttribute.cs">
+      <Link>Mapping\ObjectMapperAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ObjectMapperT.cs">
+      <Link>Mapping\ObjectMapperT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\RelationAttribute.cs">
+      <Link>Mapping\RelationAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ScalarDataReaderMapper.cs">
+      <Link>Mapping\ScalarDataReaderMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ScalarListMapper.cs">
+      <Link>Mapping\ScalarListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ScalarListMapperT.cs">
+      <Link>Mapping\ScalarListMapperT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\SimpleDestinationListMapper.cs">
+      <Link>Mapping\SimpleDestinationListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\SimpleSourceListMapper.cs">
+      <Link>Mapping\SimpleSourceListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\TextDataListMapper.cs">
+      <Link>Mapping\TextDataListMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\TextDataMapper.cs">
+      <Link>Mapping\TextDataMapper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\TextDataReader.cs">
+      <Link>Mapping\TextDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\TextDataWriter.cs">
+      <Link>Mapping\TextDataWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\TrimmableAttribute.cs">
+      <Link>Mapping\TrimmableAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\ValueMapping.cs">
+      <Link>Mapping\ValueMapping.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Net\HttpReader.cs">
+      <Link>Net\HttpReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Patterns\DuckType.cs">
+      <Link>Patterns\DuckType.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Patterns\DuckTyping.cs">
+      <Link>Patterns\DuckTyping.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Patterns\MustImplementAttribute.cs">
+      <Link>Patterns\MustImplementAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Properties\BLToolkitConstants.cs">
+      <Link>Properties\BLToolkitConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Properties\JetBrains.Annotations.cs">
+      <Link>Properties\JetBrains.Annotations.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Properties\Revision.generated.cs">
+      <Link>Properties\Revision.generated.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Emit\AssemblyBuilderHelper.cs">
+      <Link>Reflection\Emit\AssemblyBuilderHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Emit\ConstructorBuilderHelper.cs">
+      <Link>Reflection\Emit\ConstructorBuilderHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Emit\EmitHelper.cs">
+      <Link>Reflection\Emit\EmitHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Emit\MethodBuilderBase.cs">
+      <Link>Reflection\Emit\MethodBuilderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Emit\MethodBuilderHelper.cs">
+      <Link>Reflection\Emit\MethodBuilderHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Emit\TypeBuilderHelper.cs">
+      <Link>Reflection\Emit\TypeBuilderHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\ExprMemberAccessor.cs">
+      <Link>Reflection\ExprMemberAccessor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\ExprTypeAccessor.cs">
+      <Link>Reflection\ExprTypeAccessor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\AttributeExtension.cs">
+      <Link>Reflection\Extension\AttributeExtension.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\AttributeExtensionCollection.cs">
+      <Link>Reflection\Extension\AttributeExtensionCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\AttributeNameCollection.cs">
+      <Link>Reflection\Extension\AttributeNameCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\ExtensionList.cs">
+      <Link>Reflection\Extension\ExtensionList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\MemberExtension.cs">
+      <Link>Reflection\Extension\MemberExtension.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\MemberExtensionCollection.cs">
+      <Link>Reflection\Extension\MemberExtensionCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\TypeExtension.cs">
+      <Link>Reflection\Extension\TypeExtension.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\TypeExtensionAttribute.cs">
+      <Link>Reflection\Extension\TypeExtensionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\TypeExtensionException.cs">
+      <Link>Reflection\Extension\TypeExtensionException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\Extension\ValueCollection.cs">
+      <Link>Reflection\Extension\ValueCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\GenericBinder.cs">
+      <Link>Reflection\GenericBinder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\InitContext.cs">
+      <Link>Reflection\InitContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\IObjectFactory.cs">
+      <Link>Reflection\IObjectFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\MemberAccessor.cs">
+      <Link>Reflection\MemberAccessor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\MetadataProvider\AttributeMetadataProvider.cs">
+      <Link>Reflection\MetadataProvider\AttributeMetadataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\MetadataProvider\ExtensionMetadataProvider.cs">
+      <Link>Reflection\MetadataProvider\ExtensionMetadataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\MetadataProvider\LinqMetadataProvider.cs">
+      <Link>Reflection\MetadataProvider\LinqMetadataProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\MetadataProvider\MetadataProviderBase.cs">
+      <Link>Reflection\MetadataProvider\MetadataProviderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\MetadataProvider\MetadataProviderList.cs">
+      <Link>Reflection\MetadataProvider\MetadataProviderList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\ObjectFactoryAttribute.cs">
+      <Link>Reflection\ObjectFactoryAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\TypeAccessor.cs">
+      <Link>Reflection\TypeAccessor.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\TypeAccessorT.cs">
+      <Link>Reflection\TypeAccessorT.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\TypeHelper.cs">
+      <Link>Reflection\TypeHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Reflection\XmlIncludeAbstractAttribute.cs">
+      <Link>Reflection\XmlIncludeAbstractAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\DataService.cs">
+      <Link>ServiceModel\DataService.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\ILinqService.cs">
+      <Link>ServiceModel\ILinqService.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\ILinqSoapService.cs">
+      <Link>ServiceModel\ILinqSoapService.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\LinqService.cs">
+      <Link>ServiceModel\LinqService.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\LinqServiceClient.cs">
+      <Link>ServiceModel\LinqServiceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\LinqServiceQuery.cs">
+      <Link>ServiceModel\LinqServiceQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\LinqServiceResult.cs">
+      <Link>ServiceModel\LinqServiceResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\LinqServiceSerializer.cs">
+      <Link>ServiceModel\LinqServiceSerializer.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\LinqSoapServiceClient.cs">
+      <Link>ServiceModel\LinqSoapServiceClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\RemoteDataContextBase.cs">
+      <Link>ServiceModel\RemoteDataContextBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\ServiceModelDataContext.cs">
+      <Link>ServiceModel\ServiceModelDataContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\ServiceModelDataReader.cs">
+      <Link>ServiceModel\ServiceModelDataReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\ServiceModel\SoapDataContext.cs">
+      <Link>ServiceModel\SoapDataContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\AutoImplementInterfaceAttribute.cs">
+      <Link>TypeBuilder\AutoImplementInterfaceAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\BLToolkitGeneratedAttribute.cs">
+      <Link>TypeBuilder\BLToolkitGeneratedAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\AbstractClassBuilder.cs">
+      <Link>TypeBuilder\Builders\AbstractClassBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\AbstractTypeBuilderBase.cs">
+      <Link>TypeBuilder\Builders\AbstractTypeBuilderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\AbstractTypeBuilderList.cs">
+      <Link>TypeBuilder\Builders\AbstractTypeBuilderList.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\BuildContext.cs">
+      <Link>TypeBuilder\Builders\BuildContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\BuildElement.cs">
+      <Link>TypeBuilder\Builders\BuildElement.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\BuildStep.cs">
+      <Link>TypeBuilder\Builders\BuildStep.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\DefaultTypeBuilder.cs">
+      <Link>TypeBuilder\Builders\DefaultTypeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\DuckTypeBuilder.cs">
+      <Link>TypeBuilder\Builders\DuckTypeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\FakeGetter.cs">
+      <Link>TypeBuilder\Builders\FakeGetter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\FakeMethodInfo.cs">
+      <Link>TypeBuilder\Builders\FakeMethodInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\FakeParameterInfo.cs">
+      <Link>TypeBuilder\Builders\FakeParameterInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\FakeSetter.cs">
+      <Link>TypeBuilder\Builders\FakeSetter.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\GeneratedAttributeBuilder.cs">
+      <Link>TypeBuilder\Builders\GeneratedAttributeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\IAbstractTypeBuilder.cs">
+      <Link>TypeBuilder\Builders\IAbstractTypeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\ImplementInterfaceBuilder.cs">
+      <Link>TypeBuilder\Builders\ImplementInterfaceBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\InstanceTypeBuilder.cs">
+      <Link>TypeBuilder\Builders\InstanceTypeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\ITypeBuilder.cs">
+      <Link>TypeBuilder\Builders\ITypeBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\PropertyChangedBuilder.cs">
+      <Link>TypeBuilder\Builders\PropertyChangedBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\TypeAccessorBuilder.cs">
+      <Link>TypeBuilder\Builders\TypeAccessorBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\TypeBuilderAttribute.cs">
+      <Link>TypeBuilder\Builders\TypeBuilderAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\Builders\TypeBuilderConsts.cs">
+      <Link>TypeBuilder\Builders\TypeBuilderConsts.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\DefaultInstanceTypeAttribute.cs">
+      <Link>TypeBuilder\DefaultInstanceTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\GenerateAttributeAttribute.cs">
+      <Link>TypeBuilder\GenerateAttributeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\GetValueAttribute.cs">
+      <Link>TypeBuilder\GetValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\GlobalInstanceTypeAttribute.cs">
+      <Link>TypeBuilder\GlobalInstanceTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ImplementInterfaceAttribute.cs">
+      <Link>TypeBuilder\ImplementInterfaceAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\InstanceTypeAttribute.cs">
+      <Link>TypeBuilder\InstanceTypeAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\IPropertyChanged.cs">
+      <Link>TypeBuilder\IPropertyChanged.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ISetParent.cs">
+      <Link>TypeBuilder\ISetParent.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\LazyInstanceAttribute.cs">
+      <Link>TypeBuilder\LazyInstanceAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\LazyInstancesAttribute.cs">
+      <Link>TypeBuilder\LazyInstancesAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\NoInstanceAttribute.cs">
+      <Link>TypeBuilder\NoInstanceAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ParameterAttribute.cs">
+      <Link>TypeBuilder\ParameterAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ParentAttribute.cs">
+      <Link>TypeBuilder\ParentAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\PropertyChangedAttribute.cs">
+      <Link>TypeBuilder\PropertyChangedAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\PropertyInfoAttribute.cs">
+      <Link>TypeBuilder\PropertyInfoAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ReturnIfFalseAttribute.cs">
+      <Link>TypeBuilder\ReturnIfFalseAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ReturnIfNonZeroAttribute.cs">
+      <Link>TypeBuilder\ReturnIfNonZeroAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ReturnIfNotNullAttribute.cs">
+      <Link>TypeBuilder\ReturnIfNotNullAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ReturnIfNullAttribute.cs">
+      <Link>TypeBuilder\ReturnIfNullAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ReturnIfTrueAttribute.cs">
+      <Link>TypeBuilder\ReturnIfTrueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\ReturnIfZeroAttribute.cs">
+      <Link>TypeBuilder\ReturnIfZeroAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\SetValueAttribute.cs">
+      <Link>TypeBuilder\SetValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\TypeBuilderException.cs">
+      <Link>TypeBuilder\TypeBuilderException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\TypeBuilder\TypeFactory.cs">
+      <Link>TypeBuilder\TypeFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\FriendlyNameAttribute.cs">
+      <Link>Validation\FriendlyNameAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\IValidatable.cs">
+      <Link>Validation\IValidatable.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\MaxDateValueAttribute.cs">
+      <Link>Validation\MaxDateValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\MaxLengthAttribute.cs">
+      <Link>Validation\MaxLengthAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\MaxValueAttribute.cs">
+      <Link>Validation\MaxValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\MinDateValueAttribute.cs">
+      <Link>Validation\MinDateValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\MinLengthAttribute.cs">
+      <Link>Validation\MinLengthAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\MinValueAttribute.cs">
+      <Link>Validation\MinValueAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\RegExAttribute.cs">
+      <Link>Validation\RegExAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\RequiredAttribute.cs">
+      <Link>Validation\RequiredAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\ValidatableObjectBase.cs">
+      <Link>Validation\ValidatableObjectBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\ValidationContext.cs">
+      <Link>Validation\ValidationContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\ValidationException.cs">
+      <Link>Validation\ValidationException.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\Validator.cs">
+      <Link>Validation\Validator.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Validation\ValidatorBaseAttribute.cs">
+      <Link>Validation\ValidatorBaseAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Common\Convert.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Convert.tt</DependentUpon>
+      <Link>Common\Convert.generated.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Mapping\MemberMapper.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MemberMapper.tt</DependentUpon>
+      <Link>Mapping\MemberMapper.generated.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <Link>Properties\Resources.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DataProvider\DataProviderBase.cs">
+      <Link>Data\DataProvider\DataProviderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Source\Data\DbManager.cs">
+      <Link>Data\DbManager.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\Source\Data\DbManager.Config.cs">
+      <Link>Data\DbManager.Config.cs</Link>
+      <SubType>Component</SubType>
+      <DependentUpon>DbManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\Source\Data\DbManager.Linq.cs">
+      <Link>Data\DbManager.Linq.cs</Link>
+      <SubType>Component</SubType>
+      <DependentUpon>DbManager.cs</DependentUpon>
+    </Compile>
+    <None Include="..\Source\Mapping\MemberMapper.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MemberMapper.generated.cs</LastGenOutput>
+      <Link>Mapping\MemberMapper.tt</Link>
+    </None>
+  </ItemGroup>
+  <!--<ItemGroup>
+    <EmbeddedResource Include="Reflection\Extension\TypeExtension.xsd">
+      <SubType>
+      </SubType>
+    </EmbeddedResource>
+    <None Include="Reflection\Extension\TypeExtension.xsx">
+      <DependentUpon>TypeExtension.xsd</DependentUpon>
+    </None>
+  </ItemGroup>-->
+  <ItemGroup>
+    <EmbeddedResource Include="..\Source\Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Link>Properties\Resources.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Source\Data\Sql\ReservedWords.txt">
+      <Link>Data\Sql\ReservedWords.txt</Link>
+    </Content>
+    <Content Include="..\Source\Doc\ChangeLog.txt">
+      <Link>Doc\ChangeLog.txt</Link>
+    </Content>
+    <Content Include="..\Source\Doc\License.txt">
+      <Link>Doc\License.txt</Link>
+    </Content>
+    <Content Include="..\Source\Doc\OnlineDoc.txt">
+      <Link>Doc\OnlineDoc.txt</Link>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+</Project>
