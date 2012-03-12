@@ -11,16 +11,27 @@ private void LoadServerMetadata()
 	{
 		// Load tables & vies.
 		//
-		cmd.CommandText = @"
+		string s = @"
 			SELECT
-				TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME,
+				TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME AS TABLE_FULLNAME,
 				TABLE_SCHEMA,
 				TABLE_NAME,
-				TABLE_TYPE
+				TABLE_TYPE,
+				ISNULL(CONVERT(varchar(8000), x.Value), '') AS TABLE_DESC
 			FROM
 				INFORMATION_SCHEMA.TABLES s
-					LEFT JOIN sys.tables t ON OBJECT_ID(TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME) = t.object_id
-			WHERE
+			  LEFT JOIN 
+				sys.tables t 
+			  ON 
+				OBJECT_ID(TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME) = t.object_id
+			  LEFT JOIN 
+				sys.extended_properties x 
+			  ON 
+				OBJECT_ID(TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME) = x.major_id AND 
+				x.minor_id = 0 AND 
+				x.name = 'MS_Description'
+			WHERE {0} 
+				(
 				t.object_id IS NULL OR
 				t.is_ms_shipped <> 1 AND
 				(
@@ -33,7 +44,13 @@ private void LoadServerMetadata()
 						minor_id = 0           and 
 						class    = 1           and 
 						name     = N'microsoft_database_tools_support'
-				) IS NULL";
+					) IS NULL
+				)";
+
+		if(string.IsNullOrWhiteSpace(OwnerToInclude))
+			cmd.CommandText = string.Format(s, "");
+		else
+			cmd.CommandText = string.Format(s, " TABLE_SCHEMA = '" + OwnerToInclude + "' AND ");
 
 		using (var rd = cmd.ExecuteReader())
 		{
@@ -49,6 +66,7 @@ private void LoadServerMetadata()
 						ClassName     = rd[2].ToString(),
 						IsView        = rd[3].ToString() == "VIEW",
 						BaseClassName = BaseEntityClass,
+						Description   = Convert.ToString(rd[4]),
 					}
 				};
 
@@ -58,19 +76,32 @@ private void LoadServerMetadata()
 
 		// Load columns.
 		//
-		cmd.CommandText = @"
+		s = @"
 			SELECT
 				(TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME) as id,
-				CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END         as isNullable,
+				(CASE WHEN IS_NULLABLE = 'YES' THEN 1 ELSE 0 END)         as isNullable,
 				ORDINAL_POSITION         as colid,
 				COLUMN_NAME              as name,
 				c.DATA_TYPE              as dataType,
 				CHARACTER_MAXIMUM_LENGTH as length, 
 				ISNULL(NUMERIC_PRECISION, DATETIME_PRECISION) AS prec,
 				NUMERIC_SCALE            as scale,
-				COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') as isIdentity
+				COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') as isIdentity,
+				ISNULL(CONVERT(varchar(8000), x.Value), '') AS COLUMN_DESC
 			FROM
-				INFORMATION_SCHEMA.COLUMNS c";
+				INFORMATION_SCHEMA.COLUMNS c
+			  LEFT JOIN 
+				sys.extended_properties x 
+			  ON 
+				OBJECT_ID(TABLE_CATALOG + '.' + TABLE_SCHEMA + '.' + TABLE_NAME) = x.major_id AND 
+				ORDINAL_POSITION = x.minor_id AND 
+				x.name = 'MS_Description'
+			{0}";
+
+		if(string.IsNullOrWhiteSpace(OwnerToInclude))
+			cmd.CommandText = string.Format(s, "");
+		else
+			cmd.CommandText = string.Format(s, "WHERE TABLE_SCHEMA = '" + OwnerToInclude + "' ");
 
 		using (var rd = cmd.ExecuteReader())
 		{
@@ -90,6 +121,7 @@ private void LoadServerMetadata()
 						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
 						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
 						Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
+						Description = Convert.ToString(rd["COLUMN_DESC"]),
 					}
 				};
 
@@ -161,7 +193,7 @@ private void LoadServerMetadata()
 
 		// Load PKs.
 		//
-		cmd.CommandText = @"
+		s = @"
 			SELECT
 				(k.TABLE_CATALOG + '.' + k.TABLE_SCHEMA + '.' + k.TABLE_NAME) as id,
 				k.CONSTRAINT_NAME                                             as name,
@@ -169,9 +201,20 @@ private void LoadServerMetadata()
 				k.ORDINAL_POSITION                                            as colid
 			FROM
 				INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
-					JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS c ON k.CONSTRAINT_NAME = c.CONSTRAINT_NAME
+			  JOIN 
+				INFORMATION_SCHEMA.TABLE_CONSTRAINTS c 
+			  ON 
+				k.CONSTRAINT_CATALOG = c.CONSTRAINT_CATALOG AND 
+				k.CONSTRAINT_SCHEMA = c.CONSTRAINT_SCHEMA AND 
+				k.CONSTRAINT_NAME = c.CONSTRAINT_NAME
 			WHERE
-				c.CONSTRAINT_TYPE='PRIMARY KEY'";
+				c.CONSTRAINT_TYPE='PRIMARY KEY' 
+				{0}";
+
+		if(string.IsNullOrWhiteSpace(OwnerToInclude))
+			cmd.CommandText = string.Format(s, "");
+		else
+			cmd.CommandText = string.Format(s, "AND k.TABLE_SCHEMA = '" + OwnerToInclude + "' ");
 
 		using (var rd = cmd.ExecuteReader())
 		{
@@ -187,7 +230,7 @@ private void LoadServerMetadata()
 
 		// Load FKs.
 		//
-		cmd.CommandText = @"
+		s = @"
 			SELECT
 				rc.CONSTRAINT_NAME  as Name, 
 				fk.TABLE_CATALOG + '.' + fk.TABLE_SCHEMA + '.' + fk.TABLE_NAME as ThisTable,
@@ -197,20 +240,33 @@ private void LoadServerMetadata()
 				cu.ORDINAL_POSITION as Ordinal
 			FROM
 				INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
-					JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE fk
+			  JOIN 
+				INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE fk
 					ON
 						rc.CONSTRAINT_CATALOG        = fk.CONSTRAINT_CATALOG AND
+				rc.CONSTRAINT_SCHEMA		 = fk.CONSTRAINT_SCHEMA AND
 						rc.CONSTRAINT_NAME           = fk.CONSTRAINT_NAME
-					JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE pk
+			  JOIN 
+				INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE pk
 					ON
 						rc.UNIQUE_CONSTRAINT_CATALOG = pk.CONSTRAINT_CATALOG AND
+				rc.UNIQUE_CONSTRAINT_SCHEMA	 = pk.CONSTRAINT_SCHEMA AND
 						rc.UNIQUE_CONSTRAINT_NAME    = pk.CONSTRAINT_NAME
-					JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE cu
+			  JOIN 
+				INFORMATION_SCHEMA.KEY_COLUMN_USAGE cu
 					ON
+				rc.CONSTRAINT_CATALOG = cu.CONSTRAINT_CATALOG AND
+				rc.CONSTRAINT_SCHEMA = cu.CONSTRAINT_SCHEMA AND
 						rc.CONSTRAINT_NAME = cu.CONSTRAINT_NAME
+			{0}
 			ORDER BY
 				ThisTable,
 				Ordinal";
+
+		if(string.IsNullOrWhiteSpace(OwnerToInclude))
+			cmd.CommandText = string.Format(s, "");
+		else
+			cmd.CommandText = string.Format(s, "WHERE fk.TABLE_SCHEMA = '" + OwnerToInclude + "' ");
 
 		using (var rd = cmd.ExecuteReader())
 		{
