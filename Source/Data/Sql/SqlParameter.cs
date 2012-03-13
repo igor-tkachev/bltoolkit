@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace BLToolkit.Data.Sql
@@ -14,10 +15,10 @@ namespace BLToolkit.Data.Sql
 			Name             = name;
 			SystemType       = systemType;
 			_value           = value;
+			DbType           = DbType.Object;
 
 			if (systemType != null && mappingSchema != null && systemType.IsEnum)
 			{
-				
 			}
 		}
 
@@ -42,6 +43,8 @@ namespace BLToolkit.Data.Sql
 		public string Name             { get; set; }
 		public Type   SystemType       { get; set; }
 		public bool   IsQueryParameter { get; set; }
+		public DbType DbType           { get; set; }
+		public int    DbSize           { get; set; }
 
 		private object _value;
 		public  object  Value
