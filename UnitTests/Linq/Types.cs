@@ -303,6 +303,92 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void DateTime21()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SQLite },
+				db =>
+				{
+					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = dt });
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue;
+
+					Assert.AreNotEqual(dt.Ticks, dt2.Value.Ticks);
+				});
+		}
+
+		[Test]
+		public void DateTime22()
+		{
+			ForEachProvider(
+				new[]
+				{
+					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+				},
+				db =>
+				{
+					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = dt });
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					Assert.AreEqual(dt, dt2);
+				});
+		}
+
+		[Test]
+		public void DateTime23()
+		{
+			ForEachProvider(
+				new[]
+				{
+					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+				},
+				db =>
+				{
+					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+
+					db.Types2
+						.Where(t => t.ID == 1)
+						.Set  (_ => _.DateTimeValue2, dt)
+						.Update();
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					Assert.AreEqual(dt, dt2);
+				});
+		}
+
+		[Test]
+		public void DateTime24()
+		{
+			ForEachProvider(
+				new[]
+				{
+					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+				},
+				db =>
+				{
+					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+					var tt = db.Types2.First(t => t.ID == 1);
+
+					tt.DateTimeValue2 = dt;
+
+					db.Update(tt);
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					Assert.AreEqual(dt, dt2);
+				});
+		}
+
+		[Test]
 		public void Nullable()
 		{
 			ForEachProvider(db => AreEqual(

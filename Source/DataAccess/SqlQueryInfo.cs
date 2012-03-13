@@ -80,7 +80,7 @@ namespace BLToolkit.DataAccess
 
 				if (mmi.IsDbTypeSet)
 				{
-					parameters[i] = mmi.IsDbSizeSet 
+					parameters[i] = mmi.IsDbSizeSet
 						? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize) 
 						: db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
 				}
