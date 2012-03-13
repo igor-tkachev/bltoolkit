@@ -336,8 +336,11 @@ namespace BLToolkit.Data
 
 		#region IDataContext Members
 
-		IDataContext IDataContext.Clone()
+		IDataContext IDataContext.Clone(bool forNestedQuery)
 		{
+			if (forNestedQuery && _connection != null && IsMarsEnabled)
+				return new DbManager(_dataProvider, _connection) { _mappingSchema = _mappingSchema };
+
 			return Clone();
 		}
 

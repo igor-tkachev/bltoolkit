@@ -18,7 +18,7 @@ namespace BLToolkit.Data.Linq
 		void               ReleaseQuery    (object query);
 
 		string             GetSqlText      (object query);
-		IDataContext       Clone           ();
+		IDataContext       Clone           (bool forNestedQuery);
 
 		event EventHandler OnClosing;
 	}

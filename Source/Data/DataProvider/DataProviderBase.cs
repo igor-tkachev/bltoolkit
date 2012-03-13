@@ -265,6 +265,11 @@ namespace BLToolkit.Data.DataProvider
 			return DbType.Object;
 		}
 
+		public virtual bool IsMarsEnabled(IDbConnection conn)
+		{
+			return false;
+		}
+
 		public virtual string ProviderName  { get { return ConnectionType.Namespace; } }
 		public virtual int    MaxParameters { get { return 100;   } }
 		public virtual int    MaxBatchSize  { get { return 65536; } }

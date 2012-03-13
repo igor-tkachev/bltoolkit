@@ -247,6 +247,19 @@ namespace BLToolkit.Data
 				OnClosed(this, EventArgs.Empty);
 		}
 
+		private bool? _isMarsEnabled;
+		public  bool   IsMarsEnabled
+		{
+			get
+			{
+				if (_isMarsEnabled == null)
+					_isMarsEnabled = DataProvider.IsMarsEnabled(Connection);
+
+				return _isMarsEnabled.Value;
+			}
+			set { _isMarsEnabled = value; }
+		}
+
 		#endregion
 
 		#region Transactions

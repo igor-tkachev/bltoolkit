@@ -642,6 +642,15 @@ namespace Data.Linq
 						x.Child
 					})*/;
 
+				var q4 =
+					from x in db.Parent
+					where x.Value1 > p1 && x.ParentID > p2
+					orderby x.Value1
+					select new
+					{
+						x, y = x.Children.FirstOrDefault()
+					};
+
 				foreach (var item in q1)
 				{
 				}
