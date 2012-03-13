@@ -65,6 +65,11 @@ namespace BLToolkit.ServiceModel
 			set { _sqlProviderType = value;  }
 		}
 
+		public bool IsMarsEnabled
+		{
+			get { return false; }
+		}
+
 		static readonly Dictionary<Type,Func<ISqlProvider>> _sqlProviders = new Dictionary<Type, Func<ISqlProvider>>();
 
 		Func<ISqlProvider> _createSqlProvider;
@@ -255,7 +260,7 @@ namespace BLToolkit.ServiceModel
 			return sb.ToString();
 		}
 
-		IDataContext IDataContext.Clone()
+		IDataContext IDataContext.Clone(bool forNestedQuery)
 		{
 			return Clone();
 		}

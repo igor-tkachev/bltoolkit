@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
+
 using BLToolkit.Data.Sql;
+
 using SqlException = System.Data.SqlClient.SqlException;
 using SqlParameter = System.Data.SqlClient.SqlParameter;
 
@@ -182,6 +185,20 @@ namespace BLToolkit.Data.DataProvider
 		public override int MaxBatchSize
 		{
 			get { return 65536; }
+		}
+
+		public override bool IsMarsEnabled(IDbConnection conn)
+		{
+			if (conn.ConnectionString != null)
+			{
+				return conn.ConnectionString.Split(';')
+					.Select(s => s.Split('='))
+					.Where (s => s.Length == 2 && s[0].Trim().ToLower() == "multipleactiveresultsets")
+					.Select(s => s[1].Trim().ToLower())
+					.Any   (s => s == "true" || s == "1" || s == "yes");
+			}
+
+			return false;
 		}
 
 		#region GetDataReader
