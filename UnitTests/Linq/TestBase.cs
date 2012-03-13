@@ -228,8 +228,8 @@ namespace Data.Linq
 			{
 				try
 				{
-					//if (db is DbManager)
-					//	((DbManager)db).BeginTransaction();
+					if (db is DbManager)
+						((DbManager)db).BeginTransaction();
 
 					func(db);
 					executedForAtLeastOneProvider = true;

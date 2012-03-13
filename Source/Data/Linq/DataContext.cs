@@ -204,7 +204,9 @@ namespace BLToolkit.Data.Linq
 			};
 
 			if (forNestedQuery && _dbManager != null && _dbManager.IsMarsEnabled)
-				dc._dbManager = new DbManager(DataProvider, _dbManager.Connection) { MappingSchema = MappingSchema };
+				dc._dbManager = _dbManager.Transaction != null ?
+					new DbManager(DataProvider, _dbManager.Transaction) { MappingSchema = MappingSchema } :
+					new DbManager(DataProvider, _dbManager.Connection)  { MappingSchema = MappingSchema };
 
 			return dc;
 		}
