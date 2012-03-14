@@ -309,11 +309,14 @@ namespace Data.Linq
 				new[] { ProviderName.SQLite },
 				db =>
 				{
-					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
 
 					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = dt });
 
 					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = pdt });
 
 					Assert.AreNotEqual(dt.Ticks, dt2.Value.Ticks);
 				});
@@ -330,11 +333,14 @@ namespace Data.Linq
 				},
 				db =>
 				{
-					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
 
 					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = dt });
 
 					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = pdt });
 
 					Assert.AreEqual(dt, dt2);
 				});
@@ -351,7 +357,8 @@ namespace Data.Linq
 				},
 				db =>
 				{
-					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
 
 					db.Types2
 						.Where(t => t.ID == 1)
@@ -359,6 +366,8 @@ namespace Data.Linq
 						.Update();
 
 					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = pdt });
 
 					Assert.AreEqual(dt, dt2);
 				});
@@ -375,14 +384,17 @@ namespace Data.Linq
 				},
 				db =>
 				{
-					var dt = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
-					var tt = db.Types2.First(t => t.ID == 1);
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+					var tt  = db.Types2.First(t => t.ID == 1);
 
 					tt.DateTimeValue2 = dt;
 
 					db.Update(tt);
 
 					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = pdt });
 
 					Assert.AreEqual(dt, dt2);
 				});
