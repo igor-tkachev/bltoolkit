@@ -2147,11 +2147,14 @@ namespace BLToolkit.Data.Sql
 					{
 						var field = (SqlField)column;
 
-						if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
-							p.DbType = field.MemberMapper.MapMemberInfo.DbType;
+						if (field.MemberMapper != null)
+						{
+							if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
+								p.DbType = field.MemberMapper.MapMemberInfo.DbType;
 
-						if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
-							p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
+							if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
+								p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
+						}
 					}
 				}
 			}
