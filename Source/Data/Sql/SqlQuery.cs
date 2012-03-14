@@ -3549,7 +3549,7 @@ namespace BLToolkit.Data.Sql
 					}
 				}
 
-				if (cond.Predicate is Predicate.Expr)
+				if (cond.Predicate.ElementType == QueryElementType.ExprPredicate)
 				{
 					var expr = (Predicate.Expr)cond.Predicate;
 

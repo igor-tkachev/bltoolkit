@@ -543,6 +543,30 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void BoolTest31()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where (t.BoolValue ?? false) select t,
+				from t in db.Types2 where t.BoolValue.Value      select t));
+		}
+
+		[Test]
+		public void BoolTest32()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where (t.BoolValue ?? false) select t,
+				from t in db.Types2 where t.BoolValue == true    select t));
+		}
+
+		[Test]
+		public void BoolTest33()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where (t.BoolValue ?? false) select t,
+				from t in db.Types2 where true == t.BoolValue    select t));
+		}
+
+		[Test]
 		public void LongTest1()
 		{
 			ForEachProvider(db =>
