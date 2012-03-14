@@ -126,6 +126,19 @@ EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Templates.VB", "Tools\Templates.VB\Templates.VB.vbproj", "{F2B014F7-3807-4938-8F02-3CF8247C47DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Create Scripts", "Create Scripts", "{4FDE7340-F60F-49BC-86CD-756CCD26C92A}"
+	ProjectSection(SolutionItems) = preProject
+		Data\Create Scripts\Access.sql = Data\Create Scripts\Access.sql
+		Data\Create Scripts\DB2.sql = Data\Create Scripts\DB2.sql
+		Data\Create Scripts\Firebird2.sql = Data\Create Scripts\Firebird2.sql
+		Data\Create Scripts\Informix.sql = Data\Create Scripts\Informix.sql
+		Data\Create Scripts\MsSql.sql = Data\Create Scripts\MsSql.sql
+		Data\Create Scripts\MySql.sql = Data\Create Scripts\MySql.sql
+		Data\Create Scripts\Oracle.sql = Data\Create Scripts\Oracle.sql
+		Data\Create Scripts\PostgreSQL.sql = Data\Create Scripts\PostgreSQL.sql
+		Data\Create Scripts\SqlCe.sql = Data\Create Scripts\SqlCe.sql
+		Data\Create Scripts\SQLite.sql = Data\Create Scripts\SQLite.sql
+		Data\Create Scripts\Sybase.sql = Data\Create Scripts\Sybase.sql
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.CS", "UnitTests\CS\UnitTests.CS.csproj", "{2BB4AD77-190F-4D7E-A83E-7B254A0A1FCA}"
 EndProject
