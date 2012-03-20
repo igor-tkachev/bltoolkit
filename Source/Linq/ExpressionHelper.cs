@@ -51,7 +51,7 @@ namespace BLToolkit.Linq
 
 		#region Compare
 
-		public static bool Compare(Expression expr1, Expression expr2, Dictionary<Expression,Func<Expression,IQueryable>> queryableAccessorDic)
+		internal static bool Compare(Expression expr1, Expression expr2, Dictionary<Expression,QueryableAccessor> queryableAccessorDic)
 		{
 			return Compare(expr1, expr2, new HashSet<Expression>(), queryableAccessorDic);
 		}
@@ -60,7 +60,7 @@ namespace BLToolkit.Linq
 			Expression          expr1,
 			Expression          expr2,
 			HashSet<Expression> visited,
-			Dictionary<Expression,Func<Expression,IQueryable>> queryableAccessorDic)
+			Dictionary<Expression,QueryableAccessor> queryableAccessorDic)
 		{
 			if (expr1 == expr2)
 				return true;
@@ -132,10 +132,10 @@ namespace BLToolkit.Linq
 
 						if (queryableAccessorDic.Count > 0)
 						{
-							Func<Expression,IQueryable> func;
+							QueryableAccessor qa;
 
-							if (queryableAccessorDic.TryGetValue(expr1, out func))
-								return Compare(func(expr1).Expression, func(expr2).Expression, visited, queryableAccessorDic);
+							if (queryableAccessorDic.TryGetValue(expr1, out qa))
+								return Compare(qa.Queryable.Expression, qa.Accessor(expr2).Expression, visited, queryableAccessorDic);
 						}
 
 						if (!Compare(e1.Object, e2.Object, visited, queryableAccessorDic))
@@ -252,12 +252,12 @@ namespace BLToolkit.Linq
 							{
 								if (queryableAccessorDic.Count > 0)
 								{
-									Func<Expression,IQueryable> func;
+									QueryableAccessor qa;
 
-									if (queryableAccessorDic.TryGetValue(expr1, out func))
+									if (queryableAccessorDic.TryGetValue(expr1, out qa))
 										return
 											Compare(e1.Expression, e2.Expression, visited, queryableAccessorDic) &&
-											Compare(func(expr1).Expression, func(expr2).Expression, visited, queryableAccessorDic);
+											Compare(qa.Queryable.Expression, qa.Accessor(expr2).Expression, visited, queryableAccessorDic);
 								}
 							}
 

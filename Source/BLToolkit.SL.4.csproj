@@ -182,6 +182,7 @@
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\Query.cs" />
+    <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Linq\QueryContext.cs" />
     <Compile Include="Data\Linq\ReflectionHelper.cs" />
     <Compile Include="Data\Linq\Settings.cs" />

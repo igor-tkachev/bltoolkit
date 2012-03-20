@@ -67,9 +67,9 @@ string OneToManyAssociationType = "IEnumerable<{0}>";
 
 string OwnerToInclude			= null;
 
-bool   RenderField          = false;
-bool   RenderBackReferences = true;
-bool   RenderForeignKeys    = true;
+bool   RenderField              = false;
+bool   RenderBackReferences     = true;
+bool   RenderForeignKeys        = true;
 
 bool   IsMetadataLoaded;
 
