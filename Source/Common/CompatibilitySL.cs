@@ -14,10 +14,6 @@ namespace System
 	{
 	}
 
-	class NonSerializedAttribute : Attribute
-	{
-	}
-
 	[ComVisible(true)]
 	interface ICloneable
 	{
