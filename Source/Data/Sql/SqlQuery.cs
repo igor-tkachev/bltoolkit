@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Sql
 			_orderBy            = orderBy;
 			_unions             = unions;
 			ParentSql          = parentSql;
-			ParameterDependent = parameterDependent;
+			IsParameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
 
 			foreach (var col in select.Columns)
@@ -107,8 +107,8 @@ namespace BLToolkit.Data.Sql
 			get { return _properties ?? (_properties = new List<object>()); }
 		}
 
-		public bool     ParameterDependent { get; set; }
-		public SqlQuery ParentSql          { get; set; }
+		public bool     IsParameterDependent { get; set; }
+		public SqlQuery ParentSql            { get; set; }
 
 		public bool IsSimple
 		{
@@ -3460,8 +3460,8 @@ namespace BLToolkit.Data.Sql
 					sql.ParentSql = this;
 					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
 
-					if (sql.ParameterDependent)
-						ParameterDependent = true;
+					if (sql.IsParameterDependent)
+						IsParameterDependent = true;
 				}
 			});
 
@@ -4088,7 +4088,7 @@ namespace BLToolkit.Data.Sql
 								Parameters.Add(p);
 							}
 							else
-								ParameterDependent = true;
+								IsParameterDependent = true;
 						}
 
 						break;
@@ -4154,7 +4154,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlQuery ProcessParameters()
 		{
-			if (ParameterDependent)
+			if (IsParameterDependent)
 			{
 				var query = new QueryVisitor().Convert(this, e =>
 				{
@@ -4244,88 +4244,32 @@ namespace BLToolkit.Data.Sql
 				if (pr.Value == null)
 					return new Predicate.Expr(new SqlValue(p.IsNot));
 
-				if (pr.Value is IEnumerable && p.Expr1 is ISqlTableSource)
+				if (pr.Value is IEnumerable)
 				{
-					var items = (IEnumerable)pr.Value;
-					var table = (ISqlTableSource)p.Expr1;
-					var keys  = table.GetKeys(true);
-
-					if (keys == null || keys.Count == 0)
-						throw new SqlException("Cant create IN expression.");
-
-					if (keys.Count == 1)
+					if (p.Expr1 is ISqlTableSource)
 					{
-						var values = new List<ISqlExpression>();
-						var field  = GetUnderlayingField(keys[0]);
-
-						foreach (var item in items)
-						{
-							var value = field.MemberMapper.GetValue(item);
-							values.Add(new SqlValue(value));
-						}
-
-						if (values.Count == 0)
-							return new Predicate.Expr(new SqlValue(p.IsNot));
-
-						return new Predicate.InList(keys[0], p.IsNot, values);
-					}
-
-					{
-						var sc = new SearchCondition();
-
-						foreach (var item in items)
-						{
-							var itemCond = new SearchCondition();
-
-							foreach (var key in keys)
-							{
-								var field = GetUnderlayingField(key);
-								var value = field.MemberMapper.GetValue(item);
-								var cond  = value == null ?
-									new Condition(false, new Predicate.IsNull  (field, false)) :
-									new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, new SqlValue(value)));
-
-								itemCond.Conditions.Add(cond);
-							}
-
-							sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
-						}
-
-						if (sc.Conditions.Count == 0)
-							return new Predicate.Expr(new SqlValue(p.IsNot));
-
-						if (p.IsNot)
-							return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
-
-						return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
-					}
-				}
-
-				if (pr.Value is IEnumerable && p.Expr1 is SqlExpression)
-				{
-					var expr  = (SqlExpression)p.Expr1;
-
-					if (expr.Expr.Length > 1 && expr.Expr[0] == '\x1')
-					{
-						var type  = TypeHelper.GetListItemType(pr.Value);
-						var ta    = TypeAccessor.GetAccessor(type);
 						var items = (IEnumerable)pr.Value;
-						var names = expr.Expr.Substring(1).Split(',');
+						var table = (ISqlTableSource)p.Expr1;
+						var keys  = table.GetKeys(true);
 
-						if (expr.Parameters.Length == 1)
+						if (keys == null || keys.Count == 0)
+							throw new SqlException("Cant create IN expression.");
+
+						if (keys.Count == 1)
 						{
 							var values = new List<ISqlExpression>();
+							var field  = GetUnderlayingField(keys[0]);
 
 							foreach (var item in items)
 							{
-								var value = ta[names[0]].GetValue(item);
+								var value = field.MemberMapper.GetValue(item);
 								values.Add(new SqlValue(value));
 							}
 
 							if (values.Count == 0)
 								return new Predicate.Expr(new SqlValue(p.IsNot));
 
-							return new Predicate.InList(expr.Parameters[0], p.IsNot, values);
+							return new Predicate.InList(keys[0], p.IsNot, values);
 						}
 
 						{
@@ -4335,13 +4279,13 @@ namespace BLToolkit.Data.Sql
 							{
 								var itemCond = new SearchCondition();
 
-								for (var i = 0; i < expr.Parameters.Length; i++)
+								foreach (var key in keys)
 								{
-									var sql   = expr.Parameters[i];
-									var value = ta[names[i]].GetValue(item);
+									var field = GetUnderlayingField(key);
+									var value = field.MemberMapper.GetValue(item);
 									var cond  = value == null ?
-										new Condition(false, new Predicate.IsNull  (sql, false)) :
-										new Condition(false, new Predicate.ExprExpr(sql, Predicate.Operator.Equal, new SqlValue(value)));
+										new Condition(false, new Predicate.IsNull  (field, false)) :
+										new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, new SqlValue(value)));
 
 									itemCond.Conditions.Add(cond);
 								}
@@ -4358,6 +4302,80 @@ namespace BLToolkit.Data.Sql
 							return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
 						}
 					}
+
+					if (p.Expr1 is SqlExpression)
+					{
+						var expr  = (SqlExpression)p.Expr1;
+
+						if (expr.Expr.Length > 1 && expr.Expr[0] == '\x1')
+						{
+							var type  = TypeHelper.GetListItemType(pr.Value);
+							var ta    = TypeAccessor.GetAccessor(type);
+							var items = (IEnumerable)pr.Value;
+							var names = expr.Expr.Substring(1).Split(',');
+
+							if (expr.Parameters.Length == 1)
+							{
+								var values = new List<ISqlExpression>();
+
+								foreach (var item in items)
+								{
+									var value = ta[names[0]].GetValue(item);
+									values.Add(new SqlValue(value));
+								}
+
+								if (values.Count == 0)
+									return new Predicate.Expr(new SqlValue(p.IsNot));
+
+								return new Predicate.InList(expr.Parameters[0], p.IsNot, values);
+							}
+
+							{
+								var sc = new SearchCondition();
+
+								foreach (var item in items)
+								{
+									var itemCond = new SearchCondition();
+
+									for (var i = 0; i < expr.Parameters.Length; i++)
+									{
+										var sql   = expr.Parameters[i];
+										var value = ta[names[i]].GetValue(item);
+										var cond  = value == null ?
+											new Condition(false, new Predicate.IsNull  (sql, false)) :
+											new Condition(false, new Predicate.ExprExpr(sql, Predicate.Operator.Equal, new SqlValue(value)));
+
+										itemCond.Conditions.Add(cond);
+									}
+
+									sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
+								}
+
+								if (sc.Conditions.Count == 0)
+									return new Predicate.Expr(new SqlValue(p.IsNot));
+
+								if (p.IsNot)
+									return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
+
+								return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
+							}
+						}
+					}
+
+					/*
+					var itemType = items.GetType().GetItemType();
+
+					if (itemType == typeof(DateTime)  || itemType == typeof(DateTimeOffset) ||
+						itemType == typeof(DateTime?) || itemType == typeof(DateTimeOffset?))
+					{
+						var list = new List<SqlParameter>();
+
+						foreach (var item in items)
+							list.Add(new SqlParameter(itemType, "p", item, (MappingSchema)null));
+
+						return new Predicate.InList(p.Expr1, p.IsNot, list);
+					}
+					*/
 				}
 			}
 
@@ -4399,7 +4417,7 @@ namespace BLToolkit.Data.Sql
 			_orderBy = new OrderByClause(this, clone._orderBy, objectTree, doClone);
 
 			_parameters.AddRange(clone._parameters.ConvertAll(p => (SqlParameter)p.Clone(objectTree, doClone)));
-			ParameterDependent = clone.ParameterDependent;
+			IsParameterDependent = clone.IsParameterDependent;
 
 			new QueryVisitor().Visit(this, expr =>
 			{
