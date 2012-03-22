@@ -142,7 +142,7 @@ namespace BLToolkit.ServiceModel
 		{
 			var ctx  = (QueryContext)query;
 			var q    = ctx.Query.SqlQuery.ProcessParameters();
-			var data = LinqServiceSerializer.Serialize(q, q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters());
+			var data = LinqServiceSerializer.Serialize(q, q.IsParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters());
 
 			if (_batchCounter > 0)
 			{
@@ -167,7 +167,7 @@ namespace BLToolkit.ServiceModel
 			var q = ctx.Query.SqlQuery.ProcessParameters();
 
 			return ctx.Client.ExecuteScalar(
-				LinqServiceSerializer.Serialize(q, q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()));
+				LinqServiceSerializer.Serialize(q, q.IsParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()));
 		}
 
 		IDataReader IDataContext.ExecuteReader(object query)
@@ -181,7 +181,7 @@ namespace BLToolkit.ServiceModel
 
 			var q      = ctx.Query.SqlQuery.ProcessParameters();
 			var ret    = ctx.Client.ExecuteReader(
-				LinqServiceSerializer.Serialize(q, q.ParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()));
+				LinqServiceSerializer.Serialize(q, q.IsParameterDependent ? q.Parameters.ToArray() : ctx.Query.GetParameters()));
 			var result = LinqServiceSerializer.DeserializeResult(ret);
 
 			return new ServiceModelDataReader(result);
@@ -251,7 +251,7 @@ namespace BLToolkit.ServiceModel
 				commands[i] = sb.ToString();
 			}
 
-			if (!ctx.Query.SqlQuery.ParameterDependent)
+			if (!ctx.Query.SqlQuery.IsParameterDependent)
 				ctx.Query.Context = commands;
 
 			foreach (var command in commands)

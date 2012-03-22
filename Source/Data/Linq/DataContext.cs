@@ -181,7 +181,7 @@ namespace BLToolkit.Data.Linq
 				commands[i] = sb.ToString();
 			}
 
-			if (!q.SqlQuery.ParameterDependent)
+			if (!q.SqlQuery.IsParameterDependent)
 				q.Context = commands;
 
 			foreach (var command in commands)

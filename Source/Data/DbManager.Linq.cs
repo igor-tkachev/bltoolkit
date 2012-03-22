@@ -76,7 +76,7 @@ namespace BLToolkit.Data
 			if (sql != newSql)
 			{
 				sql = newSql;
-				sql.ParameterDependent = true;
+				sql.IsParameterDependent = true;
 			}
 
 			var sqlProvider = DataProvider.CreateSqlProvider();
@@ -94,7 +94,7 @@ namespace BLToolkit.Data
 				commands[i] = sb.ToString();
 			}
 
-			if (!query.SqlQuery.ParameterDependent)
+			if (!query.SqlQuery.IsParameterDependent)
 				query.Context = commands;
 
 			return new PreparedQuery

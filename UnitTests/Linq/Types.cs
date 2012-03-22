@@ -401,6 +401,37 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void DateTimeArray1()
+		{
+			ForEachProvider(db =>
+				AreEqual(
+					from t in    Types2 where new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100) }.Contains(t.DateTimeValue) select t,
+					from t in db.Types2 where new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100) }.Contains(t.DateTimeValue) select t));
+		}
+
+		[Test]
+		public void DateTimeArray2()
+		{
+			var arr = new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100), new DateTime(2005, 5, 15, 5, 15, 25, 500) };
+
+			ForEachProvider(db =>
+				AreEqual(
+					from t in    Types2 where arr.Contains(t.DateTimeValue) select t,
+					from t in db.Types2 where arr.Contains(t.DateTimeValue) select t));
+		}
+
+		[Test]
+		public void DateTimeArray3()
+		{
+			var arr = new List<DateTime?> { new DateTime(2001, 1, 11, 1, 11, 21, 100) };
+
+			ForEachProvider(db =>
+				AreEqual(
+					from t in    Types2 where arr.Contains(t.DateTimeValue) select t,
+					from t in db.Types2 where arr.Contains(t.DateTimeValue) select t));
+		}
+
+		[Test]
 		public void Nullable()
 		{
 			ForEachProvider(db => AreEqual(

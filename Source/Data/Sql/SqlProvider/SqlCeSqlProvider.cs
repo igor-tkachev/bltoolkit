@@ -122,7 +122,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				if (element.ElementType == QueryElementType.SqlParameter)
 				{
 					((SqlParameter)element).IsQueryParameter = false;
-					sqlQuery.ParameterDependent = true;
+					sqlQuery.IsParameterDependent = true;
 				}
 			});
 
