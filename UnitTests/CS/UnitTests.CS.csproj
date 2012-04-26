@@ -183,6 +183,8 @@
     <Compile Include="JointureTests\Artist2.cs" />
     <Compile Include="JointureTests\AssociationTests.cs" />
     <Compile Include="JointureTests\Consts.cs" />
+    <Compile Include="JointureTests\ExecTimeInfo.cs" />
+    <Compile Include="JointureTests\FILE_FORM.cs" />
     <Compile Include="JointureTests\MusicDB.cs">
       <SubType>Component</SubType>
     </Compile>

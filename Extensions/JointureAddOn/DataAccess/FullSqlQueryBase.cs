@@ -13,20 +13,14 @@ namespace BLToolkit.DataAccess
 {
     public abstract class FullSqlQueryBase : SqlQueryBase
     {
-        private bool _ignoreLazyLoad;
+        private readonly bool _ignoreLazyLoad;
 
         #region Constructors
 
-        public FullSqlQueryBase(DbManager dbManager)
+        public FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(false);
-        }
-
-        public FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad)
-            : base(dbManager)
-        {
-            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad);
+            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad, mappingOrder);
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 

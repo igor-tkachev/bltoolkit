@@ -11,7 +11,12 @@ namespace BLToolkit.Data
 
         public DbManager CreateDbManager()
         {
-            return new DbManager(Provider, ConnectionString);
+            return CreateDbManager(Provider, ConnectionString);
+        }
+
+        public virtual DbManager CreateDbManager(DataProviderBase provider, string connectionString)
+        {
+            return new DbManager(provider, connectionString);
         }
 
         #endregion

@@ -13,20 +13,14 @@ namespace BLToolkit.DataAccess
 {
     public class FullSqlQuery : SqlQuery
     {
-        private bool _ignoreLazyLoad;
+        private readonly bool _ignoreLazyLoad;
 
         #region Constructors
 
-        public FullSqlQuery(DbManager dbManager)
+        public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(false);
-        }
-
-        public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad)
-            : base(dbManager)
-        {
-            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad);
+            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad, mappingOrder);
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 
@@ -330,15 +324,19 @@ namespace BLToolkit.DataAccess
         #region Constructors
 
         public FullSqlQueryT(DbManager dbManager)
-            : base(dbManager)
+            : this(dbManager, false)
         {
-            dbManager.MappingSchema = new FullMappingSchema();
         }
 
         public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad)
+            : this(dbManager, ignoreLazyLoad, MappingOrder.ByColumnIndex)
+        {
+        }
+
+        public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad, MappingOrder mappingOrder)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad);
+            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad, mappingOrder);
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 

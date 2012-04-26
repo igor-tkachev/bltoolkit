@@ -1,11 +1,4 @@
-﻿/**********************************************************************************************
- * To make a new version of the mapping, I have to set virtual the method 
- * MapDataReaderToObject (l.2177 in MappingSchema.cs).
- * 
- * 
- * *********************************************/
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -14,40 +7,42 @@ using System.Reflection;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
-using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 using Castle.DynamicProxy;
 
 namespace BLToolkit.Mapping
 {
+    public enum MappingOrder
+    {
+        ByColumnName,
+        ByColumnIndex,
+    }
+
     public class FullMappingSchema : MappingSchema
     {
         #region Private members
 
-        private static readonly object _setterHandlersLock = new object();
+        private static readonly object SetterHandlersLock = new object();
 
-        private static readonly Dictionary<Type, Dictionary<string, SetHandler>> _settersHandlers =
+        private static readonly Dictionary<Type, Dictionary<string, SetHandler>> SettersHandlers =
             new Dictionary<Type, Dictionary<string, SetHandler>>();
 
-        private static readonly Dictionary<Type, Dictionary<string, GetHandler>> _gettersHandlers =
+        private static readonly Dictionary<Type, Dictionary<string, GetHandler>> GettersHandlers =
             new Dictionary<Type, Dictionary<string, GetHandler>>();
 
-        private readonly ProxyGenerator Proxy = new ProxyGenerator();
+        private readonly ProxyGenerator _proxy = new ProxyGenerator();
 
         private readonly Dictionary<Type, FullObjectMapper> _mappers = new Dictionary<Type, FullObjectMapper>();
 
-        private bool _ignoreLazyLoad;
+        private readonly bool _ignoreLazyLoad;
+        private readonly MappingOrder _mappingOrder;
 
         #endregion
 
-        public FullMappingSchema(bool ignoreLazyLoad)
+        public FullMappingSchema(bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
         {
             _ignoreLazyLoad = ignoreLazyLoad;
-        }
-
-        public FullMappingSchema()
-            : this(false)
-        {
+            _mappingOrder = mappingOrder;
         }
 
         #region Overrides
@@ -110,42 +105,7 @@ namespace BLToolkit.Mapping
 
         private T FillObject<T>(FullObjectMapper mapper, IDataReader datareader)
         {
-            T result = mapper.ContainsLazyChild
-                           ? (T) Proxy.CreateClassProxy(typeof (T), new LazyValueLoadInterceptor(mapper, LoadLazy))
-                           : FunctionFactory.Remote.CreateInstance<T>();
-
-            foreach (IMapper map in mapper.PropertiesMapping)
-            {
-                if (map is IObjectMapper && (map as IObjectMapper).IsLazy)
-                    continue;
-
-                if (!(map.DataReaderIndex < datareader.FieldCount))
-                    continue;
-
-                if (!datareader.IsDBNull(map.DataReaderIndex))
-                {
-                    if (map is ValueMapper)
-                    {
-                        object value = datareader.GetValue(map.DataReaderIndex);
-                        map.Setter(result, value);
-                    }
-                    else if (map is FullObjectMapper)
-                    {
-                        object fillObject = FillObject((FullObjectMapper) map, datareader);
-                        map.Setter(result, fillObject);
-                    }
-                    if (map is CollectionFullObjectMapper)
-                    {
-                        object collectionInstance =
-                            Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
-                        map.Setter(result, collectionInstance);
-                        object fillObject = FillObject((CollectionFullObjectMapper) map, datareader);
-                        ((IList) collectionInstance).Add(fillObject);
-                    }
-                }
-            }
-
-            return result;
+            return (T)FillObject(mapper, datareader);
         }
 
         private object LoadLazy(IMapper mapper, object proxy, Type parentType)
@@ -219,7 +179,7 @@ namespace BLToolkit.Mapping
         private object FillObject(IObjectMapper mapper, IDataReader datareader)
         {
             object result = mapper.ContainsLazyChild
-                                ? Proxy.CreateClassProxy(mapper.PropertyType, new LazyValueLoadInterceptor(mapper, LoadLazy))
+                                ? _proxy.CreateClassProxy(mapper.PropertyType, new LazyValueLoadInterceptor(mapper, LoadLazy))
                                 : FunctionFactory.Remote.CreateInstance(mapper.PropertyType);
 
             foreach (IMapper map in mapper.PropertiesMapping)
@@ -234,13 +194,27 @@ namespace BLToolkit.Mapping
                 {
                     if (map is ValueMapper)
                     {
+                        object value = _mappingOrder == MappingOrder.ByColumnIndex
+                                           ? datareader.GetValue(map.DataReaderIndex)
+                                           : datareader[((ValueMapper)map).ColumnName];
+
                         //Type propType = (map as ValueMapper).PropertyType;
-                        object value = datareader.GetValue(map.DataReaderIndex);
                         //if (value != null && value.GetType() != propType)
                         //{
                         //    value = ConvertChangeType(value, propType);    
-                        //}                        
-                        map.Setter(result, value);
+                        //}
+                        try
+                        {
+                            map.Setter(result, value);
+                        }
+                        catch (Exception exception)
+                        {
+                            throw new Exception(
+                                string.Format("FillOject failed for field : {0} of class: {1}. Column name : {2} Db type is: {3} and value : {4}",
+                                              map.PropertyName, mapper.PropertyType,
+                                              ((ValueMapper)map).ColumnName,
+                                              value == null ? "Null" : value.GetType().ToString(), value), exception);
+                        }
                     }
 
                     if (map is FullObjectMapper)
@@ -281,13 +255,13 @@ namespace BLToolkit.Mapping
             var objectMappers = new List<IObjectMapper>();
             TableDescription tableDescription = GetTableDescription(mapperType);
 
-            lock (_setterHandlersLock)
+            lock (SetterHandlersLock)
             {
-                if (!_settersHandlers.ContainsKey(mapperType))
-                    _settersHandlers.Add(mapperType, new Dictionary<string, SetHandler>());
+                if (!SettersHandlers.ContainsKey(mapperType))
+                    SettersHandlers.Add(mapperType, new Dictionary<string, SetHandler>());
 
-                if (!_gettersHandlers.ContainsKey(mapperType))
-                    _gettersHandlers.Add(mapperType, new Dictionary<string, GetHandler>());
+                if (!GettersHandlers.ContainsKey(mapperType))
+                    GettersHandlers.Add(mapperType, new Dictionary<string, GetHandler>());
             }
 
             PropertyInfo[] properties = mapperType.GetProperties();
@@ -296,12 +270,12 @@ namespace BLToolkit.Mapping
             foreach (PropertyInfo prop in properties)
             {
                 //  Setters
-                lock (_setterHandlersLock)
+                lock (SetterHandlersLock)
                 {
-                    if (!_settersHandlers[mapper.PropertyType].ContainsKey(prop.Name))
+                    if (!SettersHandlers[mapper.PropertyType].ContainsKey(prop.Name))
                     {
                         SetHandler setHandler = FunctionFactory.Il.CreateSetHandler(mapper.PropertyType, prop);
-                        _settersHandlers[mapper.PropertyType].Add(prop.Name, setHandler /* IL.Setter*/);
+                        SettersHandlers[mapper.PropertyType].Add(prop.Name, setHandler /* IL.Setter*/);
                     }
                 }
 
@@ -325,12 +299,12 @@ namespace BLToolkit.Mapping
                             mapper.ContainsLazyChild = true;
 
                             //  Getters
-                            lock (_setterHandlersLock)
-                                if (!_gettersHandlers[mapperType].ContainsKey(primaryKeyPropInfo.Name))
+                            lock (SetterHandlersLock)
+                                if (!GettersHandlers[mapperType].ContainsKey(primaryKeyPropInfo.Name))
                                 {
                                     GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType,
                                                                                                 primaryKeyPropInfo);
-                                    _gettersHandlers[mapperType].Add(primaryKeyPropInfo.Name, getHandler);
+                                    GettersHandlers[mapperType].Add(primaryKeyPropInfo.Name, getHandler);
                                 }
                         }
                     }
@@ -345,11 +319,11 @@ namespace BLToolkit.Mapping
                     var ass = (AssociationAttribute) associationAttr[0];
 
                     //  Getters for IObjectMapper
-                    lock (_setterHandlersLock)
-                        if (!_gettersHandlers[mapperType].ContainsKey(prop.Name))
+                    lock (SetterHandlersLock)
+                        if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
                         {
                             GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, prop);
-                            _gettersHandlers[mapperType].Add(prop.Name, getHandler);
+                            GettersHandlers[mapperType].Add(prop.Name, getHandler);
                         }
 
                     bool isCollection = prop.PropertyType.GetInterfaces().ToList().Contains(typeof (IList));
@@ -370,21 +344,21 @@ namespace BLToolkit.Mapping
                         propertiesMapping = new CollectionFullObjectMapper
                                                 {
                                                     PropertyType = listElementType,
-                                                    Getter = _gettersHandlers[mapperType][prop.Name],
+                                                    Getter = GettersHandlers[mapperType][prop.Name],
                                                     TableName = colElementTableDescription.TableName,
                                                     PropertyCollectionType = prop.PropertyType,
                                                 };
 
-                        (mapper as FullObjectMapper).ColParent = true;
+                        ((FullObjectMapper)mapper).ColParent = true;
                     }
 
                     propertiesMapping.PropertyName = prop.Name;
                     propertiesMapping.IsLazy = isLazy;
-                    propertiesMapping.Setter = _settersHandlers[mapperType][prop.Name];
+                    propertiesMapping.Setter = SettersHandlers[mapperType][prop.Name];
 
                     if (propertiesMapping.IsLazy)
                     {
-                        propertiesMapping.ParentKeyGetter = _gettersHandlers[mapperType][primaryKeyPropInfo.Name];
+                        propertiesMapping.ParentKeyGetter = GettersHandlers[mapperType][primaryKeyPropInfo.Name];
                     }
                     objectMappers.Add(propertiesMapping);
                 }
@@ -405,7 +379,7 @@ namespace BLToolkit.Mapping
                                       PropertyName = prop.Name,
                                       PropertyType = prop.PropertyType,
                                       DataReaderIndex = startIndex,
-                                      Setter = _settersHandlers[mapperType][prop.Name],
+                                      Setter = SettersHandlers[mapperType][prop.Name],
                                       TableName = tableDescription.TableName,
                                       /* Optimize with Provider.BuildTableName */
                                       ColumnName =
