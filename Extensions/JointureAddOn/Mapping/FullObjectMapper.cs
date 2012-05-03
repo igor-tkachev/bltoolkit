@@ -26,6 +26,7 @@ namespace BLToolkit.Mapping
     public class ValueMapper : TableDescription, IMapper
     {
         public string ColumnName { get; set; }
+        public Type DbType { get; set; }
 
         #region IMapper Members
 

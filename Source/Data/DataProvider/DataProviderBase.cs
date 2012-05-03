@@ -303,7 +303,17 @@ namespace BLToolkit.Data.DataProvider
 			public string      GetName        (int i)           { return DataReader.GetName        (i); }
 			public string      GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
 			public Type        GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
-			public object      GetValue       (int i)           { return DataReader.GetValue       (i); }
+
+            /// <summary>
+            /// GetValue method is virtual since it can be overridden by some data provider 
+            /// (For instance, OdbDataProvider uses special methodes for clob data fetching)
+            /// </summary>
+            /// <param name="i"></param>
+            /// <returns></returns>
+			public virtual object      GetValue       (int i)
+			{
+			    return DataReader.GetValue       (i);
+			}
 			public int         GetValues      (object[] values) { return DataReader.GetValues      (values); }
 			public int         GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
 			public bool        GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
@@ -341,7 +351,10 @@ namespace BLToolkit.Data.DataProvider
 			#region Implementation of IDataReader
 
 			public void      Close         () {        DataReader.Close         (); }
-			public DataTable GetSchemaTable() { return DataReader.GetSchemaTable(); }
+			public DataTable GetSchemaTable()
+			{
+			    return DataReader.GetSchemaTable();
+			}
 			public bool      NextResult    () { return DataReader.NextResult    (); }
 			public bool      Read          () { return DataReader.Read          (); }
 			public int       Depth           { get { return DataReader.Depth;           } }

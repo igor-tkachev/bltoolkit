@@ -21,6 +21,16 @@ using BLToolkit.Reflection;
 
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
+using OracleBFile = Oracle.DataAccess.Types.OracleBFile;
+using OracleBinary = Oracle.DataAccess.Types.OracleBinary;
+using OracleCommand = Oracle.DataAccess.Client.OracleCommand;
+using OracleCommandBuilder = Oracle.DataAccess.Client.OracleCommandBuilder;
+using OracleConnection = Oracle.DataAccess.Client.OracleConnection;
+using OracleDataAdapter = Oracle.DataAccess.Client.OracleDataAdapter;
+using OracleDataReader = Oracle.DataAccess.Client.OracleDataReader;
+using OracleException = Oracle.DataAccess.Client.OracleException;
+using OracleParameter = Oracle.DataAccess.Client.OracleParameter;
+using OracleString = Oracle.DataAccess.Types.OracleString;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -51,7 +61,7 @@ namespace BLToolkit.Data.DataProvider
 				var typeTable = (Hashtable)oraDbDbTypeTableType.InvokeMember(
 					"s_table", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.GetField,
 					null, null, Type.EmptyTypes);
-
+                
 				if (null != typeTable)
 				{
 					typeTable[typeof(DateTime[])]          = OracleDbType.TimeStamp;
@@ -619,6 +629,29 @@ namespace BLToolkit.Data.DataProvider
 				: base(rd)
 			{
 			}
+
+            public override object GetValue(int i)
+            {
+                string dataTypeName = GetDataTypeName(i);
+                if (dataTypeName == "Clob")
+                {                    
+                    OracleClob clob = DataReader.GetOracleClob(i);
+                    if (!clob.IsNull)
+                    {
+                        return clob;
+                        //byte[] b = new byte[clob.Length];
+                        ////Read data from database
+                        //clob.Read(b, 0, (int)clob.Length);
+
+                        //return b;
+                        return clob.Value;
+                    }
+                    else
+                        return null;
+                }
+                else
+                    return base.GetValue(i);
+            }
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{

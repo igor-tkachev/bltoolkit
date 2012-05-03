@@ -4415,8 +4415,9 @@ namespace BLToolkit.Data
 			}
 			catch (Exception ex)
 			{
-				if (res is IDisposable)
-					((IDisposable)res).Dispose();
+			    var disposable = res as IDisposable;
+			    if (disposable != null)
+			        (disposable).Dispose();
 
 				HandleOperationException(operationType, ex);
 				throw;

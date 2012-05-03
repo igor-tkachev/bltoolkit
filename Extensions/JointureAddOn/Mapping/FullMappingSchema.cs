@@ -36,13 +36,18 @@ namespace BLToolkit.Mapping
 
         private readonly bool _ignoreLazyLoad;
         private readonly MappingOrder _mappingOrder;
+        private DataTable _schema;
+        private List<string> _schemaColumns;
 
         #endregion
 
-        public FullMappingSchema(bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
+        public FullMappingSchema(MappingSchema inheritedMappingSchema = null,  bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
         {
             _ignoreLazyLoad = ignoreLazyLoad;
             _mappingOrder = mappingOrder;
+
+            IgnoreMissingColumns = ignoreMissingColumns;
+            InheritedMappingSchema = inheritedMappingSchema;
         }
 
         #region Overrides
@@ -60,6 +65,8 @@ namespace BLToolkit.Mapping
 
             int index = 0;
             FullObjectMapper mapper = GetObjectMapper(destObjectType, ref index);
+            InitSchema(dataReader);
+
             if (mapper.ColParent)
             {
                 object result = FillObject(mapper, dataReader);
@@ -70,8 +77,7 @@ namespace BLToolkit.Mapping
 
                 return result;
             }
-            else
-                return FillObject(mapper, dataReader);
+            return FillObject(mapper, dataReader);
         }
 
 
@@ -92,6 +98,8 @@ namespace BLToolkit.Mapping
                 _mappers[typeof (T)] = mapper;
             }
 
+            InitSchema(reader);
+
             while (reader.Read())
             {
                 var result = FillObject<T>(mapper, reader);
@@ -102,6 +110,17 @@ namespace BLToolkit.Mapping
         }
 
         #endregion
+
+        public bool IgnoreMissingColumns { get; set; }
+        public MappingSchema InheritedMappingSchema { get; set; }
+
+        private void InitSchema(IDataReader reader)
+        {
+            _schemaColumns = new List<string>();
+            _schema = reader.GetSchemaTable();
+            _schema.Rows.Cast<DataRow>().ToList().ForEach(dr => _schemaColumns.Add((string)dr["ColumnName"]));
+
+        }
 
         private T FillObject<T>(FullObjectMapper mapper, IDataReader datareader)
         {
@@ -163,8 +182,7 @@ namespace BLToolkit.Mapping
                         object listInstance = collectionFullObjectMapper.Getter(result);
                         if (listInstance == null)
                         {
-                            listInstance =
-                                Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
+                            listInstance = Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
                             map.Setter(result, listInstance);
                         }
                         object fillObject = FillObject((CollectionFullObjectMapper) map, datareader);
@@ -187,16 +205,36 @@ namespace BLToolkit.Mapping
                 if (map is IObjectMapper && (map as IObjectMapper).IsLazy)
                     continue;
 
-                if (!(map.DataReaderIndex < datareader.FieldCount))
-                    continue;
+                if (_mappingOrder == MappingOrder.ByColumnIndex)
+                {
+                    if (!(map.DataReaderIndex < datareader.FieldCount))
+                        continue;
+                }
 
-                if (!datareader.IsDBNull(map.DataReaderIndex))
+                bool dbNullValue = (_mappingOrder == MappingOrder.ByColumnIndex) && datareader.IsDBNull(map.DataReaderIndex);
+
+                if (!dbNullValue)
                 {
                     if (map is ValueMapper)
                     {
-                        object value = _mappingOrder == MappingOrder.ByColumnIndex
-                                           ? datareader.GetValue(map.DataReaderIndex)
-                                           : datareader[((ValueMapper)map).ColumnName];
+                        object value = null;
+                        if (_mappingOrder == MappingOrder.ByColumnIndex)
+                        {
+                            value = datareader.GetValue(map.DataReaderIndex);
+                        }
+                        if (_mappingOrder == MappingOrder.ByColumnName)
+                        {
+                            string colName = ((ValueMapper) map).ColumnName;
+                            if (IgnoreMissingColumns && !_schemaColumns.Contains(colName))
+                            {
+                                continue;                               
+                            }
+
+                            //value = datareader[colName];
+
+                            int index = _schemaColumns.IndexOf(colName);
+                            value = datareader.GetValue(index);
+                        }
 
                         //Type propType = (map as ValueMapper).PropertyType;
                         //if (value != null && value.GetType() != propType)

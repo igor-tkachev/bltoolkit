@@ -17,10 +17,10 @@ namespace BLToolkit.DataAccess
 
         #region Constructors
 
-        public FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
+        public FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad, mappingOrder);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager.MappingSchema, ignoreLazyLoad, mappingOrder, ignoreMissingColumns);
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 

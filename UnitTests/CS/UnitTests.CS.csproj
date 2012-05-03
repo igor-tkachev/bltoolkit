@@ -91,6 +91,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Oracle.DataAccess, Version=4.112.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -185,6 +186,7 @@
     <Compile Include="JointureTests\Consts.cs" />
     <Compile Include="JointureTests\ExecTimeInfo.cs" />
     <Compile Include="JointureTests\FILE_FORM.cs" />
+    <Compile Include="JointureTests\FORM_SCRIPT.cs" />
     <Compile Include="JointureTests\MusicDB.cs">
       <SubType>Component</SubType>
     </Compile>
