@@ -31,27 +31,34 @@ namespace UnitTests.CS.JointureTests
             string database = "pitaoleronfr01.pige";
             database = "ORQUAF01.PIGE";
 
-            //"MUSICFR01.TEST", "scurutchet", "kisscool12"));
+            database = "MUSICFR01.TEST";
+            username = "scurutchet";
+            password = "kisscool12";
 
             DbManager.AddDataProvider(provider);
             DbManager.AddConnectionString(provider.Name,
                                           string.Format(
                                               "data source={0};User Id={1};Password={2};",
-                                              database, username, password));                                                          
-
+                                              database, username, password));
 
             //DbManager.TurnTraceSwitchOn();
-            //DbManager.WriteTraceLine = WriteTraceLine;
-            
-            //DbManager.AddConnectionString(provider.Name,
-            //                              string.Format(
-            //                                  "data source={0};User Id={1};Password={2};Incr Pool Size=1;Max Pool Size=3; Connection Timeout=15; pooling=false",
-            //                                  "MUSICFR01.TEST", "scurutchet", "kisscool12"));
+
         }
 
         private void WriteTraceLine(string s, string s1)
         {
             Console.WriteLine(s + " : " + s1);
+        }
+
+        [Test]
+        public void InsertArtistWithAutoSequence()
+        {
+            using (var db = new MusicDB())
+            {
+                var query = new SqlQuery(db);
+                var artist = new Artist() {Name = "TEST"};
+                query.Insert(artist);
+            }
         }
 
         [Test]
@@ -187,8 +194,12 @@ namespace UnitTests.CS.JointureTests
             "and TACCROCHE.NOMED = 2" +
             "ORDER BY FORM.ID_FORM";
 
+            var forms = new List<FILE_FORM>();
             using (var db = new MusicDB())
             {
+                //var query = from f in 
+
+
                 using (var a = new ExecTimeInfo())
                 {
                     //db.SetCommand(sql);
@@ -205,6 +216,7 @@ namespace UnitTests.CS.JointureTests
                     dbCmd.MappingSchema = new FullMappingSchema(inheritedMappingSchema: dbCmd.MappingSchema, mappingOrder: MappingOrder.ByColumnName,
                                                                 ignoreMissingColumns: true, ignoreLazyLoad: false);
                     var allMedia = dbCmd.ExecuteList<FILE_FORM>();
+                    forms = allMedia;
                     foreach (FILE_FORM fileForm in allMedia)
                     {
                         if (fileForm.SCRIPT_FIELD != null && !fileForm.SCRIPT_FIELD.IsNull)

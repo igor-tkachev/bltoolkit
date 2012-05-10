@@ -233,10 +233,18 @@ namespace BLToolkit.DataAccess
 				// as in CreateUpdateSqlText
 				//
 
-				bool isSet;
+
+                bool isSet;
 				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
-				if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.OnInsert == false)
+                bool isGeneratorSet;
+                mp.GetGeneratorType(typeExt, mm.MapMemberInfo.MemberAccessor, out isGeneratorSet);
+                if (isGeneratorSet && (nonUpdatableAttribute != null && isSet))
+                {
+                    throw new Exception("Cannont set primary key when NonUpdateable attribute is present!");
+                }
+
+			    if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.OnInsert == false)
 				{
 					sb.AppendFormat("\t{0},\n",
 						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
@@ -250,9 +258,9 @@ namespace BLToolkit.DataAccess
 
 			foreach (var mm in list)
 			{
-				var p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
-					mm.Name);
+                var p = query.AddParameter(
+                    db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
+                    mm.Name);
 
 				if (nParameter < 0)
 					sb.AppendFormat("\t{0},\n", p.ParameterName);
@@ -373,7 +381,13 @@ namespace BLToolkit.DataAccess
 			if (query == null)
 			{
 				query = CreateSqlText(db, type, actionName);
-				_actionSqlQueryInfo[key] = query;
+                query.OwnerName = GetOwnerName(type);
+			    QueryType queryType;
+                if (Enum.TryParse(actionName, out  queryType))
+			    {
+			        query.QueryType = queryType;
+			    }
+			    _actionSqlQueryInfo[key] = query;
 			}
 
 			return query;
@@ -381,4 +395,12 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 	}
+
+    public enum QueryType
+    {
+        None,
+        SelectByKey,
+        SelectAll,
+        Insert,        
+    }
 }

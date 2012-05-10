@@ -551,7 +551,15 @@ namespace BLToolkit.Data.DataProvider
 			return base.IsValueParameter(parameter);
 		}
 
-		public override IDbDataParameter CreateParameterObject(IDbCommand command)
+        public override string GetSequenceQuery(string sequenceName, string schema)
+        {
+            if (!string.IsNullOrWhiteSpace(schema))
+                return string.Format("SELECT {0}.{1}.NEXTVAL FROM DUAL", schema, sequenceName);
+
+            return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
+        }
+
+	    public override IDbDataParameter CreateParameterObject(IDbCommand command)
 		{
 			var parameter = base.CreateParameterObject(command);
 

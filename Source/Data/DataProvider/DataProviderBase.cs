@@ -218,6 +218,11 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
+        public virtual string GetSequenceQuery(string sequenceName, string schema)
+        {
+            return null;
+        }
+
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
 			if (value is System.Data.Linq.Binary)

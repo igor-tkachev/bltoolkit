@@ -561,6 +561,32 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+        public override KeyGeneratorInfo GetGeneratorType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr = member.GetAttribute<KeyGeneratorAttribute>();
+
+            if (attr != null)
+            {
+                isSet = true;
+                return attr.GeneratorInfo;
+            }
+
+            return base.GetGeneratorType(typeExtension, member, out isSet);
+        }
+
+        public override string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr = member.GetAttribute<SequenceAttribute>();
+
+            if (attr != null)
+            {
+                isSet = true;
+                return attr.Sequence;
+            }
+
+            return base.GetSequenceName(typeExtension, member, out isSet);
+        }
+
 		#region GetNonUpdatableFlag
 
 		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)

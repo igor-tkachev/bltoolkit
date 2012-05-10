@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.TypeBuilder;
 using Oracle.DataAccess.Types;
 
 namespace UnitTests.CS.JointureTests

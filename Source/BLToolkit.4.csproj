@@ -196,10 +196,13 @@
     <Compile Include="Configuration\BLToolkitSection.cs" />
     <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
+    <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
     <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
+    <Compile Include="DataAccess\KeyGeneratorAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
+    <Compile Include="DataAccess\SequenceAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <None Include="Data\DataProvider\GenericDataProvider.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
