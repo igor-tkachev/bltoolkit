@@ -168,6 +168,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestAK107.cs" />
     <Compile Include="BatchTest.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ConvertTest.cs" />

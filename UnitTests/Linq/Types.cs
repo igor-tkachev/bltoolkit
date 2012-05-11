@@ -10,6 +10,7 @@ using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -302,6 +303,135 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void DateTime21()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SQLite },
+				db =>
+				{
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = dt });
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = pdt });
+
+					Assert.AreNotEqual(dt.Ticks, dt2.Value.Ticks);
+				});
+		}
+
+		[Test]
+		public void DateTime22()
+		{
+			ForEachProvider(
+				new[]
+				{
+					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+				},
+				db =>
+				{
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = dt });
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = pdt });
+
+					Assert.AreEqual(dt, dt2);
+				});
+		}
+
+		[Test]
+		public void DateTime23()
+		{
+			ForEachProvider(
+				new[]
+				{
+					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+				},
+				db =>
+				{
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+
+					db.Types2
+						.Where(t => t.ID == 1)
+						.Set  (_ => _.DateTimeValue2, dt)
+						.Update();
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = pdt });
+
+					Assert.AreEqual(dt, dt2);
+				});
+		}
+
+		[Test]
+		public void DateTime24()
+		{
+			ForEachProvider(
+				new[]
+				{
+					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+				},
+				db =>
+				{
+					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+					var tt  = db.Types2.First(t => t.ID == 1);
+
+					tt.DateTimeValue2 = dt;
+
+					db.Update(tt);
+
+					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue2;
+
+					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue2 = pdt });
+
+					Assert.AreEqual(dt, dt2);
+				});
+		}
+
+		[Test]
+		public void DateTimeArray1()
+		{
+			ForEachProvider(db =>
+				AreEqual(
+					from t in    Types2 where new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100) }.Contains(t.DateTimeValue) select t,
+					from t in db.Types2 where new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100) }.Contains(t.DateTimeValue) select t));
+		}
+
+		[Test]
+		public void DateTimeArray2()
+		{
+			var arr = new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100), new DateTime(2005, 5, 15, 5, 15, 25, 500) };
+
+			ForEachProvider(db =>
+				AreEqual(
+					from t in    Types2 where arr.Contains(t.DateTimeValue) select t,
+					from t in db.Types2 where arr.Contains(t.DateTimeValue) select t));
+		}
+
+		[Test]
+		public void DateTimeArray3()
+		{
+			var arr = new List<DateTime?> { new DateTime(2001, 1, 11, 1, 11, 21, 100) };
+
+			ForEachProvider(db =>
+				AreEqual(
+					from t in    Types2 where arr.Contains(t.DateTimeValue) select t,
+					from t in db.Types2 where arr.Contains(t.DateTimeValue) select t));
+		}
+
+		[Test]
 		public void Nullable()
 		{
 			ForEachProvider(db => AreEqual(
@@ -441,6 +571,30 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in list                          where p.IsMale == true select p.PersonID,
 				from p in db.GetTable<PersonBoolTest>() where p.IsMale == true select p.PersonID));
+		}
+
+		[Test]
+		public void BoolTest31()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where (t.BoolValue ?? false) select t,
+				from t in db.Types2 where t.BoolValue.Value      select t));
+		}
+
+		[Test]
+		public void BoolTest32()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where (t.BoolValue ?? false) select t,
+				from t in db.Types2 where t.BoolValue == true    select t));
+		}
+
+		[Test]
+		public void BoolTest33()
+		{
+			ForEachProvider(db => AreEqual(
+				from t in    Types2 where (t.BoolValue ?? false) select t,
+				from t in db.Types2 where true == t.BoolValue    select t));
 		}
 
 		[Test]

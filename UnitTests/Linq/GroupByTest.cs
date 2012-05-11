@@ -1199,6 +1199,25 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Scalar41()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					from ch in Child
+					group ch by ch.ParentID into g
+					select new { g } into g
+					where g.g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+					select g.g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()
+					,
+					from ch in db.Child
+					group ch by ch.ParentID into g
+					select new { g } into g
+					where g.g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+					select g.g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()));
+		}
+
+		[Test]
 		public void Scalar5()
 		{
 			ForEachProvider(db => AreEqual(

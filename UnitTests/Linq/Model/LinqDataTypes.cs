@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.Linq;
 
 using BLToolkit.DataAccess;
@@ -65,9 +66,12 @@ namespace Data.Linq.Model
 	[TableName("LinqDataTypes")]
 	public class LinqDataTypes2 : IEquatable<LinqDataTypes2>, IComparable
 	{
+		[PrimaryKey]
 		public int       ID;
 		public decimal   MoneyValue;
 		public DateTime? DateTimeValue;
+		[DbType(DbType.DateTime2)]
+		public DateTime? DateTimeValue2;
 		public bool?     BoolValue;
 		public Guid?     GuidValue;
 		public short?    SmallIntValue;

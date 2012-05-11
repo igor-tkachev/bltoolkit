@@ -42,7 +42,9 @@ namespace BLToolkit.Validation
 		private readonly RegexOptions _options;
 		public           RegexOptions  Options { get { return _options; } }
 
+#if !SILVERLIGHT
 		[NonSerialized]
+#endif
 		private Regex _validator;
 		public  Regex  Validator
 		{

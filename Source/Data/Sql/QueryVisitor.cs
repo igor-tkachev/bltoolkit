@@ -1012,7 +1012,7 @@ namespace BLToolkit.Data.Sql
 							}
 						}
 
-						nq.Init(ic, uc, sc, fc, wc, gc, hc, oc, us, (SqlQuery)parent, q.ParameterDependent, ps);
+						nq.Init(ic, uc, sc, fc, wc, gc, hc, oc, us, (SqlQuery)parent, q.IsParameterDependent, ps);
 
 						_visitedElements[q] = action(nq) ?? nq;
 

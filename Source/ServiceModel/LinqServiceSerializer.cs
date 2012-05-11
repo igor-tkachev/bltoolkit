@@ -62,6 +62,22 @@ namespace BLToolkit.ServiceModel
 			protected readonly Dictionary<object,int> Dic     = new Dictionary<object,int>();
 			protected int                             Index;
 
+			string ConvertToString(Type type, object value)
+			{
+				switch (Type.GetTypeCode(type))
+				{
+					case TypeCode.Decimal  : return ((decimal) value).ToString(CultureInfo.InvariantCulture);
+					case TypeCode.Double   : return ((double)  value).ToString(CultureInfo.InvariantCulture);
+					case TypeCode.Single   : return ((float)   value).ToString(CultureInfo.InvariantCulture);
+					case TypeCode.DateTime : return ((DateTime)value).ToString("o");
+				}
+
+				if (type == typeof(DateTimeOffset))
+					return ((DateTimeOffset)value).ToString("o");
+
+				return Common.Convert.ToString(value);
+			}
+
 			protected void Append(Type type, object value)
 			{
 				Append(type);
@@ -70,19 +86,7 @@ namespace BLToolkit.ServiceModel
 					Append((string)null);
 				else if (!type.IsArray)
 				{
-					switch (Type.GetTypeCode(type))
-					{
-						case TypeCode.Decimal  : Append(((decimal) value).ToString(CultureInfo.InvariantCulture)); break;
-						case TypeCode.Double   : Append(((double)  value).ToString(CultureInfo.InvariantCulture)); break;
-						case TypeCode.Single   : Append(((float)   value).ToString(CultureInfo.InvariantCulture)); break;
-						case TypeCode.DateTime : Append(((DateTime)value).ToString("o"));                          break;
-						default                :
-							if (type == typeof(DateTimeOffset))
-								Append(((DateTimeOffset)value).ToString("o"));
-							else
-								Append(Common.Convert.ToString(value));
-							break;
-					}
+					Append(ConvertToString(type, value));
 				}
 				else
 				{
@@ -102,7 +106,10 @@ namespace BLToolkit.ServiceModel
 					else
 						foreach (var val in (IEnumerable)value)
 						{
-							Append(val == null ? null : Common.Convert.ToString(val));
+							if (val == null)
+								Append((string)null);
+							else
+								Append(ConvertToString(val.GetType(), val));
 							cnt++;
 						}
 
@@ -555,6 +562,8 @@ namespace BLToolkit.ServiceModel
 
 							Append(elem.Name);
 							Append(elem.IsQueryParameter);
+							Append((int)elem.DbType);
+							Append(elem.DbSize);
 
 							var type = elem.Value == null ? elem.SystemType : elem.Value.GetType();
 
@@ -569,31 +578,6 @@ namespace BLToolkit.ServiceModel
 
 								Append(GetArrayType(elemType), value);
 							}
-
-							/*
-							if (elem.EnumTypes == null)
-								Builder.Append(" -");
-							else
-							{
-								Append(elem.EnumTypes.Count);
-
-								foreach (var type in elem.EnumTypes)
-									Append(type);
-							}
-
-							if (elem.TakeValues == null)
-								Builder.Append(" -");
-							else
-							{
-								Append(elem.TakeValues.Count);
-
-								foreach (var type in elem.TakeValues)
-									Append(type);
-							}
-
-							Append(elem.LikeStart);
-							Append(elem.LikeEnd);
-							*/
 
 							break;
 						}
@@ -830,7 +814,7 @@ namespace BLToolkit.ServiceModel
 							Append(elem.Having);
 							Append(elem.OrderBy);
 							Append(elem.ParentSql == null ? 0 : elem.ParentSql.SourceID);
-							Append(elem.ParameterDependent);
+							Append(elem.IsParameterDependent);
 
 							if (!elem.HasUnion)
 								Builder.Append(" -");
@@ -1071,6 +1055,8 @@ namespace BLToolkit.ServiceModel
 						{
 							var name             = ReadString();
 							var isQueryParameter = ReadBool();
+							var dbType           = (DbType)ReadInt();
+							var dbSize           = ReadInt();
 							var systemType       = Read<Type>();
 							var value            = ReadValue(systemType);
 							//var enumTypes        = ReadList<Type>();
@@ -1094,6 +1080,8 @@ namespace BLToolkit.ServiceModel
 							obj = new SqlParameter(systemType, name, value, (MappingSchema)null)
 							{
 								IsQueryParameter = isQueryParameter,
+								DbType           = dbType,
+								DbSize           = dbSize,
 								//EnumTypes        = enumTypes,
 								//TakeValues       = takeValues,
 								//LikeStart        = likeStart,

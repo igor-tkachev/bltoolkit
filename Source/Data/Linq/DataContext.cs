@@ -42,6 +42,23 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
+		private bool? _isMarsEnabled;
+		public  bool   IsMarsEnabled
+		{
+			get
+			{
+				if (_isMarsEnabled == null)
+				{
+					if (_dbManager == null)
+						return false;
+					_isMarsEnabled = _dbManager.IsMarsEnabled;
+				}
+
+				return _isMarsEnabled.Value;
+			}
+			set { _isMarsEnabled = value; }
+		}
+
 		internal int LockDbManagerCounter;
 
 		string    _connectionString;
@@ -164,7 +181,7 @@ namespace BLToolkit.Data.Linq
 				commands[i] = sb.ToString();
 			}
 
-			if (!q.SqlQuery.ParameterDependent)
+			if (!q.SqlQuery.IsParameterDependent)
 				q.Context = commands;
 
 			foreach (var command in commands)
@@ -175,9 +192,9 @@ namespace BLToolkit.Data.Linq
 
 		DataContext(int n) {}
 
-		IDataContext IDataContext.Clone()
+		IDataContext IDataContext.Clone(bool forNestedQuery)
 		{
-			return new DataContext(0)
+			var dc = new DataContext(0)
 			{
 				ConfigurationString = ConfigurationString,
 				KeepConnectionAlive = KeepConnectionAlive,
@@ -185,6 +202,13 @@ namespace BLToolkit.Data.Linq
 				ContextID           = ContextID,
 				MappingSchema       = MappingSchema,
 			};
+
+			if (forNestedQuery && _dbManager != null && _dbManager.IsMarsEnabled)
+				dc._dbManager = _dbManager.Transaction != null ?
+					new DbManager(DataProvider, _dbManager.Transaction) { MappingSchema = MappingSchema } :
+					new DbManager(DataProvider, _dbManager.Connection)  { MappingSchema = MappingSchema };
+
+			return dc;
 		}
 
 		public event EventHandler OnClosing;

@@ -587,15 +587,16 @@ CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int)
 
 CREATE TABLE LinqDataTypes
 (
-	ID            int,
-	MoneyValue    decimal(10,4),
-	DateTimeValue timestamp,
-	BoolValue     smallint,
-	GuidValue     raw(16),
-	BinaryValue   blob,
-	SmallIntValue smallint,
-	IntValue      int NULL,
-	BigIntValue   number(20,0) NULL
+	ID             int,
+	MoneyValue     decimal(10,4),
+	DateTimeValue  timestamp,
+	DateTimeValue2 timestamp,
+	BoolValue      smallint,
+	GuidValue      raw(16),
+	BinaryValue    blob,
+	SmallIntValue  smallint,
+	IntValue       int NULL,
+	BigIntValue    number(20,0) NULL
 )
 /
 
@@ -623,4 +624,27 @@ CREATE TABLE "STG_TRADE_INFORMATION"
 	"VALUE_AS_INTEGER"      NUMBER,
 	"VALUE_AS_DATE"         DATE
 )
+/
+
+
+create table t_test_user
+(
+	user_id  number primary key,
+	name     varchar2(255) not null unique
+)
+/
+
+create table t_test_user_contract
+(
+	user_contract_id number primary key,
+	user_id          number not null references t_test_user on delete cascade,
+	contract_no      number not null,
+	name             varchar2(255) not null,
+	unique           (user_id, contract_no)
+)
+/
+
+create sequence sq_test_user
+/
+create sequence sq_test_user_contract
 /
