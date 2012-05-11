@@ -203,6 +203,7 @@
     <Compile Include="DataAccess\KeyGeneratorAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SequenceAttribute.cs" />
+    <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <None Include="Data\DataProvider\GenericDataProvider.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />

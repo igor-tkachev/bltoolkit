@@ -559,6 +559,14 @@ namespace BLToolkit.Data.DataProvider
             return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
         }
 
+        public override string NextSequenceQuery(string sequenceName, string schema)
+        {
+            if (!string.IsNullOrWhiteSpace(schema))
+                return string.Format("{0}.{1}.NEXTVAL", schema, sequenceName);
+
+            return string.Format("{0}.NEXTVAL", sequenceName);
+        }
+
 	    public override IDbDataParameter CreateParameterObject(IDbCommand command)
 		{
 			var parameter = base.CreateParameterObject(command);

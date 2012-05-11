@@ -283,6 +283,7 @@ namespace BLToolkit.Mapping
 					mi.DefaultValue               = GetDefaultValue(ma);
 					mi.Nullable                   = GetNullable    (ma);
 					mi.NullValue                  = GetNullValue   (ma, mi.Nullable);
+				    mi.KeyGenerator               = GetKeyGenerator(ma);
 
 					Add(CreateMemberMapper(mi));
 				}
@@ -471,6 +472,40 @@ namespace BLToolkit.Mapping
 			bool isSet;
 			return MetadataProvider.GetFieldName(Extension, memberAccessor, out isSet);
 		}
+
+        protected virtual KeyGenerator GetKeyGenerator(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            var nonUpdatableAttribute = MetadataProvider.GetNonUpdatableAttribute(memberAccessor.Type, Extension, memberAccessor, out isSet);
+
+            bool isPkSet;
+            MetadataProvider.GetPrimaryKeyOrder(memberAccessor.Type, Extension, memberAccessor, out isPkSet);
+            if (isPkSet)
+            {
+                bool isGeneratorSet;
+                KeyGeneratorInfo genInfo = MetadataProvider.GetGeneratorType(Extension, memberAccessor, out isGeneratorSet);
+                if (isGeneratorSet)
+                {
+                    if (nonUpdatableAttribute != null && isSet)
+                    {
+                        throw new Exception("Cannont set primary key when NonUpdateable attribute is present!");
+                    }
+
+                    if (genInfo.GeneratorType == PrimaryKeyGeneratorType.Sequence)
+                    {
+                        bool isSeqSet;
+                        string sequenceName = MetadataProvider.GetSequenceName(Extension, memberAccessor, out isSeqSet);
+                        if (!isSeqSet)
+                            throw new Exception("Sequence atribute is not present!");
+                        if (string.IsNullOrWhiteSpace(sequenceName))
+                            throw new Exception("SequenceName is empty");
+
+                        return new SequenceKeyGenerator(sequenceName, genInfo.RetrievePkValue);
+                    }
+                }
+            }
+            return null;
+        }
 
 		protected virtual string GetFieldStorage(MemberAccessor memberAccessor)
 		{

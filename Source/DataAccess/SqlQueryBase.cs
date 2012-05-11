@@ -236,14 +236,6 @@ namespace BLToolkit.DataAccess
 
                 bool isSet;
 				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
-
-                bool isGeneratorSet;
-                mp.GetGeneratorType(typeExt, mm.MapMemberInfo.MemberAccessor, out isGeneratorSet);
-                if (isGeneratorSet && (nonUpdatableAttribute != null && isSet))
-                {
-                    throw new Exception("Cannont set primary key when NonUpdateable attribute is present!");
-                }
-
 			    if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.OnInsert == false)
 				{
 					sb.AppendFormat("\t{0},\n",
@@ -256,20 +248,29 @@ namespace BLToolkit.DataAccess
 
 			sb.Append(") VALUES (\n");
 
-			foreach (var mm in list)
-			{
-                var p = query.AddParameter(
-                    db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
-                    mm.Name);
+            foreach (var mm in list)
+            {
+                var keyGenerator = mm.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+                if (keyGenerator != null && !keyGenerator.RetrievePkValue)
+                {
+                    string seqQuery = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence, GetOwnerName(type));
+                    sb.AppendFormat("\t{0},\n", seqQuery);
+                }
+                else
+                {
+                    var p = query.AddParameter(
+                        db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
+                        mm.Name);
 
-				if (nParameter < 0)
-					sb.AppendFormat("\t{0},\n", p.ParameterName);
-					//sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(p.ParameterName, ConvertType.NameToQueryParameter));
-				else
-					sb.AppendFormat("\t{{{0}}},\n", nParameter++);
-			}
+                    if (nParameter < 0)
+                        sb.AppendFormat("\t{0},\n", p.ParameterName);
+                        //sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(p.ParameterName, ConvertType.NameToQueryParameter));
+                    else
+                        sb.AppendFormat("\t{{{0}}},\n", nParameter++);
+                }
+            }
 
-			sb.Remove(sb.Length - 2, 1);
+		    sb.Remove(sb.Length - 2, 1);
 
 			sb.Append(")");
 
@@ -382,11 +383,6 @@ namespace BLToolkit.DataAccess
 			{
 				query = CreateSqlText(db, type, actionName);
                 query.OwnerName = GetOwnerName(type);
-			    QueryType queryType;
-                if (Enum.TryParse(actionName, out  queryType))
-			    {
-			        query.QueryType = queryType;
-			    }
 			    _actionSqlQueryInfo[key] = query;
 			}
 
@@ -395,12 +391,4 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 	}
-
-    public enum QueryType
-    {
-        None,
-        SelectByKey,
-        SelectAll,
-        Insert,        
-    }
 }

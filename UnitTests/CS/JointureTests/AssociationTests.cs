@@ -56,7 +56,7 @@ namespace UnitTests.CS.JointureTests
             using (var db = new MusicDB())
             {
                 var query = new SqlQuery(db);
-                var artist = new Artist() {Name = "TEST"};
+                var artist = new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200};
                 query.Insert(artist);
             }
         }
