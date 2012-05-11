@@ -15,7 +15,9 @@ using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Common
 {
@@ -315,7 +317,7 @@ namespace BLToolkit.Common
 		ConvertTo(        "String",                "p.IsNull ? {2} : p.ToSqlString().Value", "SqlChars");
 		ConvertTo(new[] { "String", "SqlString" }, "p.IsNull ? {2} : p.Value",               "SqlXml");
 		ConvertTo(new[] { "String", "SqlString" }, "p == null ? {2} : p.InnerXml",           "XmlDocument");
-		ConvertTo(new[] { "String", "SqlString" }, "p == null ? {2} : p.ToString()",           "XElement");
+		ConvertTo(new[] { "String", "SqlString" }, "p == null ? {2} : p.ToString()",         "XElement");
 
 		ConvertTo("SqlString", "p ?? {2}",  "String");
 		ConvertTo("SqlString", "p.To{0}()", "SqlChars");

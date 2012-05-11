@@ -10,7 +10,9 @@ using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Xml;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 using BLToolkit.Common;
 using BLToolkit.Properties;

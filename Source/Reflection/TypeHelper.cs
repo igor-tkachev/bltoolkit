@@ -7,7 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Reflection
 {

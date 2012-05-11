@@ -8,7 +8,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 using LinqBinary = System.Data.Linq.Binary;
 

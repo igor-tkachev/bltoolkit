@@ -10,7 +10,9 @@ using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Common
 {

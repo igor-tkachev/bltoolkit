@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.DataAccess
 {
@@ -530,11 +532,13 @@ namespace BLToolkit.DataAccess
 			return db.MappingSchema.ConvertToXmlDocument(value);
 		}
 
+#if !SILVERLIGHT
 		[NoInterception]
         protected virtual XElement ConvertToXElement(DbManager db, object value, object parameter)
         {
             return db.MappingSchema.ConvertToXElement(value);
         }
+#endif
 
         [NoInterception]
 		protected virtual Byte[] ConvertToByteArray(DbManager db, object value, object parameter)

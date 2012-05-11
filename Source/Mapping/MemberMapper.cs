@@ -10,7 +10,9 @@ using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
 using Convert = BLToolkit.Common.Convert;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Mapping
 {

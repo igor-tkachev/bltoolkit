@@ -10,7 +10,9 @@ using System.IO;
 using System.Xml;
 
 using Convert = BLToolkit.Common.Convert;
+#if !SILVERLIGHT
 using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Mapping
 {
