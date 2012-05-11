@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace BLToolkit.DataAccess
 {
@@ -530,6 +531,12 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
+        protected virtual XElement ConvertToXElement(DbManager db, object value, object parameter)
+        {
+            return db.MappingSchema.ConvertToXElement(value);
+        }
+
+        [NoInterception]
 		protected virtual Byte[] ConvertToByteArray(DbManager db, object value, object parameter)
 		{
 			return db.MappingSchema.ConvertToByteArray(value);

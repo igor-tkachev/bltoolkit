@@ -15,6 +15,7 @@ using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace BLToolkit.Common
 {
@@ -99,6 +100,7 @@ namespace BLToolkit.Common
 					new ToType { Name = "Binary",      Method = "ToLinqBinary",                            },
 					new ToType { Name = "XmlReader",   Method = "ToXmlReader",   NonSilverlightable = true },
 					new ToType { Name = "XmlDocument", Method = "ToXmlDocument", NonSilverlightable = true },
+					new ToType { Name = "XElement",    Method = "ToXElement",    NonSilverlightable = true },
 				}))
 			.ToDictionary(_ => _.Name);
 
@@ -313,6 +315,7 @@ namespace BLToolkit.Common
 		ConvertTo(        "String",                "p.IsNull ? {2} : p.ToSqlString().Value", "SqlChars");
 		ConvertTo(new[] { "String", "SqlString" }, "p.IsNull ? {2} : p.Value",               "SqlXml");
 		ConvertTo(new[] { "String", "SqlString" }, "p == null ? {2} : p.InnerXml",           "XmlDocument");
+		ConvertTo(new[] { "String", "SqlString" }, "p == null ? {2} : p.ToString()",           "XElement");
 
 		ConvertTo("SqlString", "p ?? {2}",  "String");
 		ConvertTo("SqlString", "p.To{0}()", "SqlChars");
@@ -374,6 +377,7 @@ namespace BLToolkit.Common
 		ConvertTo("SqlXml", "p == null ? {2} : new {0}(new XmlTextReader(new StringReader(p)))",                    "String");
 		ConvertTo("SqlXml", "p == null ? {2} : new {0}(p)",                                                         "Stream", "XmlReader");
 		ConvertTo("SqlXml", "p == null ? {2} : new {0}(new XmlTextReader(new StringReader(p.InnerXml)))",           "XmlDocument");
+		ConvertTo("SqlXml", "p == null ? {2} : new {0}(new XmlTextReader(new StringReader(p.ToString())))",         "XElement");
 		ConvertTo("SqlXml", "p == null ? {2} : new {0}(new XmlTextReader(new StringReader(new string(p))))",        "Char[]");
 		ConvertTo("SqlXml", "p == null ? {2} : new {0}(new MemoryStream(p))",                                       "Byte[]");
 		ConvertTo("SqlXml", "p == null ? {2} : new {0}(new MemoryStream(p.ToArray()))",                             "Binary");

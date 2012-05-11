@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace BLToolkit.Reflection
 {
@@ -1312,6 +1313,7 @@ namespace BLToolkit.Reflection
 				|| type == typeof(XmlReader)
 #if !SILVERLIGHT
 				|| type == typeof(XmlDocument)
+                || type == typeof(XElement)
 #endif
 				;
 		}

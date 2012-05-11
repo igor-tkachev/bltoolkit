@@ -10,6 +10,7 @@ using System.Data.SqlTypes;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace BLToolkit.Common
 {
@@ -2352,6 +2353,8 @@ namespace BLToolkit.Common
 
 		// Other Types
 		//
+		/// <summary>Converts the value from <c>XElement</c> to an equivalent <c>String</c> value.</summary>
+		public static String ToString(XElement        p) { return p == null ? Configuration.NullableValues.String : p.ToString();                                        }
 		/// <summary>Converts the value from <c>XmlDocument</c> to an equivalent <c>String</c> value.</summary>
 		public static String ToString(XmlDocument     p) { return p == null ? Configuration.NullableValues.String : p.InnerXml;                                          }
 
@@ -2446,6 +2449,7 @@ namespace BLToolkit.Common
 
 			// Other Types
 			//
+			if (p is XElement)        return ToString((XElement)       p);
 			if (p is XmlDocument)     return ToString((XmlDocument)    p);
 
 #endif
@@ -8392,6 +8396,8 @@ namespace BLToolkit.Common
 		public static SqlString ToSqlString(Byte[]          p) { return p == null ? SqlString.Null : System.Text.Encoding.UTF8.GetString(p, 0, p.Length); }
 		/// <summary>Converts the value from <c>Type</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(Type            p) { return p == null ? SqlString.Null : p.FullName;                                          }
+		/// <summary>Converts the value from <c>XElement</c> to an equivalent <c>SqlString</c> value.</summary>
+		public static SqlString ToSqlString(XElement        p) { return p == null ? SqlString.Null : p.ToString();                                        }
 		/// <summary>Converts the value from <c>XmlDocument</c> to an equivalent <c>SqlString</c> value.</summary>
 		public static SqlString ToSqlString(XmlDocument     p) { return p == null ? SqlString.Null : p.InnerXml;                                          }
 
@@ -8480,6 +8486,7 @@ namespace BLToolkit.Common
 			if (p is Binary)          return ToSqlString((Binary)         p);
 			if (p is Byte[])          return ToSqlString((Byte[])         p);
 			if (p is Type)            return ToSqlString((Type)           p);
+			if (p is XElement)        return ToSqlString((XElement)       p);
 			if (p is XmlDocument)     return ToSqlString((XmlDocument)    p);
 
 			throw CreateInvalidCastException(p.GetType(), typeof(SqlString));
@@ -8519,6 +8526,8 @@ namespace BLToolkit.Common
 		public static SqlXml ToSqlXml(Char[]      p) { return p == null ? SqlXml.Null : new SqlXml(new XmlTextReader(new StringReader(new string(p))));        }
 		/// <summary>Converts the value from <c>Stream</c> to an equivalent <c>SqlXml</c> value.</summary>
 		public static SqlXml ToSqlXml(Stream      p) { return p == null ? SqlXml.Null : new SqlXml(p);                                                         }
+		/// <summary>Converts the value from <c>XElement</c> to an equivalent <c>SqlXml</c> value.</summary>
+		public static SqlXml ToSqlXml(XElement    p) { return p == null ? SqlXml.Null : new SqlXml(new XmlTextReader(new StringReader(p.ToString())));         }
 		/// <summary>Converts the value from <c>XmlDocument</c> to an equivalent <c>SqlXml</c> value.</summary>
 		public static SqlXml ToSqlXml(XmlDocument p) { return p == null ? SqlXml.Null : new SqlXml(new XmlTextReader(new StringReader(p.InnerXml)));           }
 		/// <summary>Converts the value from <c>XmlReader</c> to an equivalent <c>SqlXml</c> value.</summary>
@@ -8559,6 +8568,7 @@ namespace BLToolkit.Common
 			if (p is Byte[])      return ToSqlXml((Byte[])     p);
 			if (p is Char[])      return ToSqlXml((Char[])     p);
 			if (p is Stream)      return ToSqlXml((Stream)     p);
+			if (p is XElement)    return ToSqlXml((XElement)   p);
 			if (p is XmlDocument) return ToSqlXml((XmlDocument)p);
 			if (p is XmlReader)   return ToSqlXml((XmlReader)  p);
 

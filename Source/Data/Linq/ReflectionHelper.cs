@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml;
+using System.Xml.Linq;
 
 using LinqBinary = System.Data.Linq.Binary;
 
@@ -222,6 +223,7 @@ namespace BLToolkit.Data.Linq
 #if !SILVERLIGHT
 				{ typeof(XmlReader),       MethodExpressor(m => m.ConvertToXmlReader             (null)) },
 				{ typeof(XmlDocument),     MethodExpressor(m => m.ConvertToXmlDocument           (null)) },
+				{ typeof(XElement),        MethodExpressor(m => m.ConvertToXElement              (null)) },
 #endif
 				{ typeof(Byte[]),          MethodExpressor(m => m.ConvertToByteArray             (null)) },
 				{ typeof(LinqBinary),      MethodExpressor(m => m.ConvertToLinqBinary            (null)) },
