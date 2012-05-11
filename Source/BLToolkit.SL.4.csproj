@@ -112,7 +112,6 @@
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
-    <Compile Include="DataAccess\SequenceAttribute.cs" />
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />

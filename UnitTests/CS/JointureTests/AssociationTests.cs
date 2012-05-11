@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
@@ -54,10 +55,14 @@ namespace UnitTests.CS.JointureTests
         public void InsertArtistWithAutoSequence()
         {
             using (var db = new MusicDB())
-            {
+            {                
                 var query = new SqlQuery(db);
                 var artist = new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200};
-                query.Insert(artist);
+
+                var labelDb = db.GetTable<Label>();
+                //var obj = labelDb.InsertWithIdentity(()=> new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200});
+
+                query.Insert(new DataImport(){Commentary = "aaaa", DeclaredProduct = "ssfsfsfsfsfsf"});
             }
         }
 

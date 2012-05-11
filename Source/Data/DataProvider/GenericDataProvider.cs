@@ -71,6 +71,34 @@ namespace BLToolkit.Data.DataProvider
             }
         }
 
+        public override string GetSequenceQuery(string sequenceName, string schema)
+        {
+            switch (Name)
+            {
+                case ProviderFullName.Oracle:
+                    if (!string.IsNullOrWhiteSpace(schema))
+                        return string.Format("SELECT {0}.{1}.NEXTVAL FROM DUAL", schema, sequenceName);
+
+                    return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
+                default:
+                    throw new Exception(string.Format("GetSequenceQuery isnt supported for this provider {0}", Name));
+            }
+        }
+
+        public override string NextSequenceQuery(string sequenceName, string schema)
+        {
+            switch (Name)
+            {
+                case ProviderFullName.Oracle:
+                   if (!string.IsNullOrWhiteSpace(schema))
+                        return string.Format("{0}.{1}.NEXTVAL", schema, sequenceName);
+
+                    return string.Format("{0}.NEXTVAL", sequenceName);
+                default:
+                    throw new Exception(string.Format("NextSequenceQuery isnt supported for this provider {0}", Name));
+            } 
+        }
+
         public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
         {
             if (Name == ProviderFullName.Oracle)
