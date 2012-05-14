@@ -223,7 +223,6 @@ namespace BLToolkit.Data.DataProvider
             return null;
         }
 
-
         public virtual string NextSequenceQuery(string sequenceName, string schema)
         {
             return null;
@@ -285,6 +284,11 @@ namespace BLToolkit.Data.DataProvider
 		public virtual int    MaxParameters { get { return 100;   } }
 		public virtual int    MaxBatchSize  { get { return 65536; } }
 		public virtual string EndOfSql      { get { return ";";   } }
+
+        /// <summary>
+        /// Use plain text query instead of using command parameters
+        /// </summary>
+        public virtual bool UseQueryText    { get { return false; } } 
 
 		#endregion
 

@@ -16,9 +16,10 @@ using System.Xml;
 
 using BLToolkit.Aspects;
 using BLToolkit.Common;
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-
+using BLToolkit.Reflection.Extension;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 using OracleBFile = Oracle.DataAccess.Types.OracleBFile;
@@ -1553,33 +1554,61 @@ namespace BLToolkit.Data.DataProvider
 				//.Replace("  ", " ")
 				+ ") VALUES (";
 
+
 			foreach (var item in collection)
 			{
 				if (sb.Length == 0)
 					sb.AppendLine("INSERT ALL");
 
-				sb.Append(str);
+				//sb.Append(str);                
+
+			    string strItem = "\t" + insertText
+			                                .Replace("INSERT INTO", "INTO")
+			                                .Replace("\r", "")
+			                                .Replace("\n", "")
+			                                .Replace("\t", " ")
+			                                .Replace("( ", "(");
 
 				foreach (var member in members)
 				{
+                    var sbItem = new StringBuilder();
+
 					var value = member.GetValue(item);
 
-					if (value is Nullable<DateTime>)
+					if (value is DateTime?)
 						value = ((DateTime?)value).Value;
 
-					if (value is DateTime)
-					{
-						var dt = (DateTime)value;
-						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
-					}
-					else
-						sp.BuildValue(sb, value);
+                    if (value is DateTime)
+                    {
+                        var dt = (DateTime)value;
+                        string dtime = string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt);                        
+                        //sb.Append(dtime);
+                        sbItem.Append(dtime);
+                    }
+                    else
+                    {
+                        var keyGenerator = member.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+                        //Retrieving PkValue on Batch insert is useless
+                        if (keyGenerator != null && !keyGenerator.RetrievePkValue)
+                        {
+                            bool isSet;
+                            string ownerName = member.MappingSchema.MetadataProvider.GetOwnerName(member.Type, new ExtensionList(), out isSet);
+                            value = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence, ownerName);
+                        }
 
-					sb.Append(", ");
+                        //sp.BuildValue(sb, value);
+                        sp.BuildValue(sbItem, value);
+                    }
+
+				    strItem = strItem.Replace(string.Format("{0}", n), sbItem.ToString());
+
+				    //sb.Append(", ");
 				}
 
-				sb.Length -= 2;
-				sb.AppendLine(")");
+			    sb.Append(strItem);
+
+                //sb.Length -= 2;
+                //sb.AppendLine(")");
 
 				n++;
 

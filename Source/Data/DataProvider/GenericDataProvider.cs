@@ -11,11 +11,13 @@ namespace BLToolkit.Data.DataProvider
     public sealed class GenericDataProvider : DataProviderBase
 	{
         private readonly string _providerName;
+        private readonly bool _useQueryText;
         private readonly DbProviderFactory _factory;
 
-        public GenericDataProvider(string providerName)
+        public GenericDataProvider(string providerName, bool useQueryText = false)
         {
             _providerName = providerName;
+            _useQueryText = useQueryText;
             _factory = DbProviderFactories.GetFactory(providerName);
         }
 
@@ -101,13 +103,18 @@ namespace BLToolkit.Data.DataProvider
 
         public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
         {
-            if (Name == ProviderFullName.Oracle)
+            if (Name == ProviderFullName.Oracle && UseQueryText)
             {
                 command.CommandText = OracleHelper.Interpret(command);
                 command.Parameters.Clear();
             }
     
             return base.GetDataReader(command, commandBehavior);
+        }
+
+        public override bool UseQueryText
+        {
+            get { return _useQueryText; }
         }
 
         #endregion

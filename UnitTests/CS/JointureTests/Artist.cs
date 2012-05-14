@@ -33,10 +33,10 @@ namespace UnitTests.CS.JointureTests
 
     public class FredCopyright
     {
-        [MapField("ID_LANGUAGE_DATA_I"), NonUpdatable]
+        [MapField("ID_LANGUAGE_DATA_I"), NonUpdatable(OnInsert = false)]
         public int IdLanguage { get; set; }
 
-        [MapField("DATE_CREATION"), NonUpdatable]
+        [MapField("DATE_CREATION"), NonUpdatable(OnInsert = false)]
         public DateTime DateCreation { get; set; }
 
         [MapField("DATE_MODIFICATION")]
@@ -57,10 +57,69 @@ namespace UnitTests.CS.JointureTests
         }
     }
 
+    public class Mapping
+    {
+        public int IdMapping { get; set; }
+
+        public String DeclaredProduct { get; set; }
+
+        public int DeclaredId { get; set; }
+
+        public Product Product { get; set; }
+
+        public ProductPending ProductPending { get; set; }
+
+        public MappingState MappingState { get; set; }
+    }
+
+    public class Product
+    {
+        public int IdProduct { get; set; }
+        public string ProductName { get; set; }
+
+        public int IdAdvertiser { get; set; }
+        public string AdvertiserName { get; set; }
+    }
+
+    public class ProductPending
+    {
+        public int IdProductPending { get; set; }
+        public string ProductName { get; set; }
+    }
+
+    public enum MappingState { Valid = 0, Todo = 1, Declared = 2, Rejected = 10, PaperClip = 6, Dead = 50, PendingSetProduct = 10, PendingValid = 0 };
+
+
+    [TableName(Name = "MAPPING_SEARCH", Owner = "PITAFR01")]
+    public class DataMapping : FredCopyright
+    {
+        [MapField("ID_MAPPING_SEARCH"), PrimaryKey, SequenceName("SEQ_IMP_SEARCH"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
+        public int IdMapping { get; set; }
+
+        [MapField("DECLARED_PRODUCT"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public string DeclaredProduct { get; set; }
+
+        [MapField("DECLARED_ID_PRODUCT"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public int DeclaredId { get; set; }
+
+        [MapField("ID_PRODUCT")]
+        public int? IdProduct { get; set; }
+
+        [MapField("ID_PRODUCT_PENDING")]
+        public int? IdProductPending { get; set; }
+
+        [MapField("ID_USER_")]
+        public int IdUser { get; set; }
+
+        [MapField("ID_USER_LOCK")]
+        public int? IdLocker { get; set; }
+
+    }
+
     [TableName(Name = "IMP_SEARCH", Owner = "PITAFR01")]
     public class DataImport : FredCopyright
     {
-        [MapField("ID_IMP_SEARCH"), PrimaryKey, SequenceName("SEQ_IMP_SEARCH"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, true)]
+        [MapField("ID_IMP_SEARCH"), PrimaryKey, SequenceName("SEQ_IMP_SEARCH"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
         public int IdImport { get; set; }
 
         [MapField("ID_MEDIA")]

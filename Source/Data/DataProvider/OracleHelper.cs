@@ -142,6 +142,8 @@ namespace BLToolkit.Data.DataProvider
             else
                 poCommand.CommandText += " ";
 
+            poCommand.CommandText = poCommand.CommandText.Replace("\r", " ");
+
             if (poCommand.Parameters.Count == 0)
                 return poCommand.CommandText;
 

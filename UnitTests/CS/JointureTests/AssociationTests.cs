@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using BLToolkit.Data;
-using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -16,34 +13,19 @@ namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
     public class AssociationTests
-    {
+    { 
+        private TestDbConnectionFactory _connectionFactory;
+
         [TestFixtureSetUp]
         public void Setup()
         {
-            var aa = DbProviderFactories.GetFactoryClasses();
-            var bb = aa.Rows.Count;
+            _connectionFactory = new TestDbConnectionFactory();
 
-            DataProviderBase provider = new OdpDataProvider();
-            
-            //DataProviderBase provider = new GenericDataProvider(ProviderFullName.Oracle);
 
-            string username = "FSIMON";
-            string password = "MAN1AGER";
-            string database = "pitaoleronfr01.pige";
-            database = "ORQUAF01.PIGE";
-
-            database = "MUSICFR01.TEST";
-            username = "scurutchet";
-            password = "kisscool12";
-
-            DbManager.AddDataProvider(provider);
-            DbManager.AddConnectionString(provider.Name,
-                                          string.Format(
-                                              "data source={0};User Id={1};Password={2};",
-                                              database, username, password));
+            DbManager.AddDataProvider(_connectionFactory.Provider);
+            DbManager.AddConnectionString(_connectionFactory.Provider.Name, _connectionFactory.ConnectionString);
 
             //DbManager.TurnTraceSwitchOn();
-
         }
 
         private void WriteTraceLine(string s, string s1)
@@ -54,15 +36,75 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertArtistWithAutoSequence()
         {
+            DbManager.TurnTraceSwitchOn();
             using (var db = new MusicDB())
             {                
                 var query = new SqlQuery(db);
                 var artist = new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200};
 
-                var labelDb = db.GetTable<Label>();
+                //var labelDb = db.GetTable<Label>();
                 //var obj = labelDb.InsertWithIdentity(()=> new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200});
 
-                query.Insert(new DataImport(){Commentary = "aaaa", DeclaredProduct = "ssfsfsfsfsfsf"});
+                //query.Insert(new DataImport()
+                //                 {
+                //                     Commentary = "aaaa",
+                //                     DeclaredProduct = "ssfsfsfsfsfsf",
+                //                     IdMedia = 2024,
+                //                     DeclaredId = 1
+                //                 });
+
+                db.InsertBatch(new[]
+                                   {
+                                       new DataImport()
+                                           {
+                                               Commentary = "aaaa",
+                                               DeclaredProduct = "cc",
+                                               IdMedia = 2024,
+                                               DeclaredId = 1,                                               
+                                           },
+                                       new DataImport()
+                                           {
+                                               Commentary = "bbb",
+                                               DeclaredProduct = "ddd",
+                                               IdMedia = 2024,
+                                               DeclaredId = 1,                                               
+                                           }
+                                   });
+            }
+        }
+
+        [Test]
+        public void SelectTest()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                IQueryable<Mapping> resultG = from d in db.GetTable<DataMapping>()
+                                              where d.IdLocker == null && d.IdLanguage == 33
+                                              select new Mapping
+                                                         {
+                                                             IdMapping = d.IdMapping,
+                                                             DeclaredId = d.DeclaredId,
+                                                             DeclaredProduct = d.DeclaredProduct,
+                                                             MappingState = (MappingState) d.Activation,
+                                                             Product = new Product
+                                                                           {
+                                                                               IdProduct =
+                                                                                   d.IdProduct == null
+                                                                                       ? 0
+                                                                                       : d.IdProduct.Value
+                                                                           },
+                                                             ProductPending = new ProductPending
+                                                                                  {
+                                                                                      IdProductPending =
+                                                                                          d.IdProductPending == null
+                                                                                              ? 0
+                                                                                              : d.IdProductPending.Value
+                                                                                  }
+                                                         };
+
+
+
+                var res = resultG.Distinct().OrderBy(p => p.IdMapping).ToList();
             }
         }
 
