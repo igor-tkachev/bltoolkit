@@ -15,11 +15,49 @@ namespace UnitTests.CS.JointureTests
         public string Name { get; set; }
     }
 
+    [TableName(Name = "RECO_RADIO", Owner = Consts.Owner)]
+    // ReSharper disable InconsistentNaming
+    public class RECO_RADIO
+    {
+        [MapField("ID_RECO_RADIO"), PrimaryKey, Identity, SequenceName("SEQ_RECO_RADIO")]
+        public long ID_RECO_RADIO { get; set; }
+
+        public long ID_MULTIMEDIA_VALIDATED { get; set; }
+        public int INPUT_STATUS { get; set; }
+        public long ID_MULTIMEDIA_FILE { get; set; }
+        public long ID_MEDIA { get; set; }
+        public DateTime DATE_MEDIA { get; set; }
+
+        /// <summary>
+        /// Offset sur le parallèle-antenne
+        /// </summary>
+        public DateTime TIME_MEDIA { get; set; }
+
+        public float TAG_MATCH_BEGINNING { get; set; }
+        public float TAG_MATCH_DURATION { get; set; }
+        public float TAG_DURATION { get; set; }
+
+        public DateTime DATE_LAST_IMPORT { get; set; }
+
+        public DateTime DATE_CREATION { get; set; }
+        public DateTime DATE_MODIFICATION { get; set; }
+        public int ACTIVATION { get; set; }
+        public string COMMENTARY { get; set; }
+        public int ID_LANGUAGE_DATA_I { get; set; }
+
+        /// <summary>
+        /// Inutilisé pour l'instant
+        /// </summary>
+        public int RATE { get; set; }
+    }
+
+
 
     [TableName(Name = "LABEL", Owner = Consts.Owner)]
     public class Label
     {
-        [MapField("ID_LABEL"), PrimaryKey, SequenceName("SEQ_LABEL"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
+        //[MapField("ID_LABEL"), PrimaryKey, SequenceName("SEQ_LABEL"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
+        [MapField("ID_LABEL"), PrimaryKey, SequenceName("SEQ_LABEL"), Identity]
         public long Id { get; set; }
 
         [MapField("LABEL")]

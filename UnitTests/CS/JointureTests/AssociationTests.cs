@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using BLToolkit.Data;
@@ -12,20 +13,21 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
-    public class AssociationTests
+    public abstract class AssociationTests
     { 
-        private TestDbConnectionFactory _connectionFactory;
+        private OleronFactory _connectionFactory;
+
+        public abstract DbConnectionFactory CreateFactory();
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            _connectionFactory = new TestDbConnectionFactory();
-
+            _connectionFactory = new OleronFactory();
 
             DbManager.AddDataProvider(_connectionFactory.Provider);
             DbManager.AddConnectionString(_connectionFactory.Provider.Name, _connectionFactory.ConnectionString);
 
-            //DbManager.TurnTraceSwitchOn();
+            DbManager.TurnTraceSwitchOn();
         }
 
         private void WriteTraceLine(string s, string s1)
@@ -34,25 +36,56 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void InsertArtistWithAutoSequence()
+        public void TestQuery()
         {
-            DbManager.TurnTraceSwitchOn();
-            using (var db = new MusicDB())
-            {                
-                var query = new SqlQuery(db);
-                var artist = new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200};
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                db.MappingSchema = new FullMappingSchema(inheritedMappingSchema: db.MappingSchema, mappingOrder: MappingOrder.ByColumnName,
+                                                                ignoreMissingColumns: true);
 
-                //var labelDb = db.GetTable<Label>();
-                //var obj = labelDb.InsertWithIdentity(()=> new Label() {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200});
+                db.SetCommand(File.ReadAllText(@"c:\requete.txt"));
+                var res = db.ExecuteList<MULTIMEDIA_DB>();
 
-                //query.Insert(new DataImport()
-                //                 {
-                //                     Commentary = "aaaa",
-                //                     DeclaredProduct = "ssfsfsfsfsfsf",
-                //                     IdMedia = 2024,
-                //                     DeclaredId = 1
-                //                 });
+                Assert.IsNotEmpty(res);
+            }
+        }
 
+        [Test]
+        public void InsertWithIdentity()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var t = db.GetTable<RECO_RADIO>();
+                var now = DateTime.Now.AddDays(30);
+                t.InsertWithIdentity(
+                    () =>
+                    new RECO_RADIO
+                    {
+                        ACTIVATION = 0,
+                        COMMENTARY = string.Empty,
+                        DATE_CREATION = DateTime.Now,
+                        DATE_LAST_IMPORT = DateTime.Today,
+                        DATE_MEDIA = DateTime.Today,
+                        DATE_MODIFICATION = DateTime.Now,
+                        ID_LANGUAGE_DATA_I = 33,
+                        ID_MEDIA = 2001,
+                        ID_MULTIMEDIA_FILE = 463413,
+                        ID_MULTIMEDIA_VALIDATED = 0,
+                        INPUT_STATUS = 0,
+                        RATE = 0,
+                        TAG_DURATION = 20,
+                        TAG_MATCH_BEGINNING = 0,
+                        TAG_MATCH_DURATION = 20,
+                        TIME_MEDIA = now
+                    });
+            }
+        }
+
+         [Test]
+        public void InsertBatch()
+         {            
+            using (var db = _connectionFactory.CreateDbManager())
+            {
                 db.InsertBatch(new[]
                                    {
                                        new DataImport()
@@ -70,6 +103,24 @@ namespace UnitTests.CS.JointureTests
                                                DeclaredId = 1,                                               
                                            }
                                    });
+            }
+         }
+
+        [Test]
+        public void InsertArtistWithAutoSequence()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = new SqlQuery(db);
+                var artist = new Label() { Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200 };
+
+                query.Insert(new DataImport()
+                                 {
+                                     Commentary = "aaaa",
+                                     DeclaredProduct = "ssfsfsfsfsfsf",
+                                     IdMedia = 2024,
+                                     DeclaredId = 1
+                                 });
             }
         }
 

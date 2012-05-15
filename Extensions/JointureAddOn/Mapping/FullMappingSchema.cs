@@ -100,10 +100,31 @@ namespace BLToolkit.Mapping
 
             InitSchema(reader);
 
+            T currentItem = default(T);
             while (reader.Read())
             {
                 var result = FillObject<T>(mapper, reader);
-                list.Add(result);
+                if (currentItem == null)
+                {
+                    currentItem = result;
+                    list.Add(result);
+                    continue;
+                }
+
+                object resultPk = mapper.PrimaryKeyValueGetter.Invoke(result);
+                object currentItemPk = mapper.PrimaryKeyValueGetter.Invoke(currentItem);
+                    
+                if (!resultPk.Equals(currentItemPk))
+                {
+                    currentItem = result;
+                    list.Add(result);
+                    continue;
+                }
+
+                if (mapper.ColParent)
+                {
+                    FillObject(currentItem, mapper, reader);
+                }               
             }
 
             return list;
@@ -156,39 +177,50 @@ namespace BLToolkit.Mapping
                 if (map is IObjectMapper && (map as IObjectMapper).IsLazy)
                     continue;
 
-                if (!datareader.IsDBNull(map.DataReaderIndex))
-                {
-                    ////IGNORE. TODO Add getter
-                    //if (map is ValueMapper)
-                    //{
-                    //    //Type propType = (map as ValueMapper).PropertyType;
-                    //    object value = datareader.GetValue(map.DataReaderIndex);
-                    //    //if (value != null && value.GetType() != propType)
-                    //    //{
-                    //    //    value = ConvertChangeType(value, propType);    
-                    //    //}                        
-                    //    map.Setter(result, value);
-                    //}
+                if (_mappingOrder == MappingOrder.ByColumnIndex && (datareader.IsDBNull(map.DataReaderIndex)))
+                    continue;
+                
+                ////IGNORE. TODO Add getter
+                //if (map is ValueMapper)
+                //{
+                //    //Type propType = (map as ValueMapper).PropertyType;
+                //    object value = datareader.GetValue(map.DataReaderIndex);
+                //    //if (value != null && value.GetType() != propType)
+                //    //{
+                //    //    value = ConvertChangeType(value, propType);    
+                //    //}                        
+                //    map.Setter(result, value);
+                //}
 
-                    ////IGNORE. TODO Add getter
-                    //if (map is FullObjectMapper)
-                    //{
-                    //    object fillObject = FillObject((FullObjectMapper)map, datareader);
-                    //    map.Setter(result, fillObject);
-                    //}
-                    if (map is CollectionFullObjectMapper)
+                ////IGNORE. TODO Add getter
+                //if (map is FullObjectMapper)
+                //{
+                //    object fillObject = FillObject((FullObjectMapper)map, datareader);
+                //    map.Setter(result, fillObject);
+                //}
+                if (map is CollectionFullObjectMapper)
+                {
+                    var collectionFullObjectMapper = (CollectionFullObjectMapper) map;
+                    object listInstance = collectionFullObjectMapper.Getter(result);
+                    if (listInstance == null)
                     {
-                        var collectionFullObjectMapper = (CollectionFullObjectMapper) map;
-                        object listInstance = collectionFullObjectMapper.Getter(result);
-                        if (listInstance == null)
-                        {
-                            listInstance = Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
-                            map.Setter(result, listInstance);
-                        }
-                        object fillObject = FillObject((CollectionFullObjectMapper) map, datareader);
-                        ((IList) listInstance).Add(fillObject);
+                        listInstance = Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
+                        map.Setter(result, listInstance);
                     }
+                    var list =  (IList) listInstance;
+                    object fillObject = FillObject((CollectionFullObjectMapper)map, datareader);
+                    if (list.Count > 0)
+                    {
+                        object lastElement = list[list.Count - 1];
+                        object lastPk = mapper.PrimaryKeyValueGetter.Invoke(lastElement);
+                        object currentPk = mapper.PrimaryKeyValueGetter.Invoke(fillObject);
+                        if (lastPk.Equals(currentPk))
+                            continue;
+                    }
+                    
+                    ((IList) listInstance).Add(fillObject);
                 }
+                
             }
 
             return result;
@@ -211,71 +243,69 @@ namespace BLToolkit.Mapping
                         continue;
                 }
 
-                bool dbNullValue = (_mappingOrder == MappingOrder.ByColumnIndex) && datareader.IsDBNull(map.DataReaderIndex);
+                if ((_mappingOrder == MappingOrder.ByColumnIndex) && datareader.IsDBNull(map.DataReaderIndex))
+                    continue;
 
-                if (!dbNullValue)
+                if (_mappingOrder == MappingOrder.ByColumnName && map is ValueMapper)
                 {
-                    if (map is ValueMapper)
+                    string colName = ((ValueMapper) map).ColumnName;
+                    if (IgnoreMissingColumns && !_schemaColumns.Contains(colName))
                     {
-                        object value = null;
-                        if (_mappingOrder == MappingOrder.ByColumnIndex)
-                        {
-                            value = datareader.GetValue(map.DataReaderIndex);
-                        }
-                        if (_mappingOrder == MappingOrder.ByColumnName)
-                        {
-                            string colName = ((ValueMapper) map).ColumnName;
-                            if (IgnoreMissingColumns && !_schemaColumns.Contains(colName))
-                            {
-                                continue;                               
-                            }
-
-                            //value = datareader[colName];
-
-                            int index = _schemaColumns.IndexOf(colName);
-                            value = datareader.GetValue(index);
-                        }
-
-                        //Type propType = (map as ValueMapper).PropertyType;
-                        //if (value != null && value.GetType() != propType)
-                        //{
-                        //    value = ConvertChangeType(value, propType);    
-                        //}
-                        try
-                        {
-                            map.Setter(result, value);
-                        }
-                        catch (Exception exception)
-                        {
-                            throw new Exception(
-                                string.Format("FillOject failed for field : {0} of class: {1}. Column name : {2} Db type is: {3} and value : {4}",
-                                              map.PropertyName, mapper.PropertyType,
-                                              ((ValueMapper)map).ColumnName,
-                                              value == null ? "Null" : value.GetType().ToString(), value), exception);
-                        }
+                        continue;
                     }
 
-                    if (map is FullObjectMapper)
+                    int index = _schemaColumns.IndexOf(colName);
+                    if (datareader.IsDBNull(index))
+                        continue;
+
+                    //value = datareader[colName];
+                    map.DataReaderIndex = index;
+                }
+
+
+                if (map is ValueMapper)
+                {
+                    object value = datareader.GetValue(map.DataReaderIndex);
+
+                    //Type propType = (map as ValueMapper).PropertyType;
+                    //if (value != null && value.GetType() != propType)
+                    //{
+                    //    value = ConvertChangeType(value, propType);
+                    //}
+                    try
                     {
-                        object fillObject = FillObject((FullObjectMapper) map, datareader);
-                        map.Setter(result, fillObject);
+                        map.Setter(result, value);
                     }
-
-                    if (map is CollectionFullObjectMapper)
+                    catch (Exception exception)
                     {
-                        var collectionFullObjectMapper = (CollectionFullObjectMapper) map;
-
-                        object listInstance = collectionFullObjectMapper.Getter(result);
-                        if (listInstance == null)
-                        {
-                            listInstance =
-                                Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
-                            map.Setter(result, listInstance);
-                        }
-                        object fillObject = FillObject((CollectionFullObjectMapper) map, datareader);
-                        ((IList) listInstance).Add(fillObject);
+                        throw new Exception(
+                            string.Format("FillOject failed for field : {0} of class: {1}.\nColumn name : {2} Db type is: {3} and value : {4}",
+                                            map.PropertyName, mapper.PropertyType,
+                                            ((ValueMapper)map).ColumnName,
+                                            value == null ? "Null" : value.GetType().ToString(), value), exception);
                     }
                 }
+
+                if (map is FullObjectMapper)
+                {
+                    object fillObject = FillObject((FullObjectMapper) map, datareader);
+                    map.Setter(result, fillObject);
+                }
+
+                if (map is CollectionFullObjectMapper)
+                {
+                    var collectionFullObjectMapper = (CollectionFullObjectMapper) map;
+
+                    object listInstance = collectionFullObjectMapper.Getter(result);
+                    if (listInstance == null)
+                    {
+                        listInstance =
+                            Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
+                        map.Setter(result, listInstance);
+                    }
+                    object fillObject = FillObject((CollectionFullObjectMapper) map, datareader);
+                    ((IList) listInstance).Add(fillObject);
+                }                
             }
 
             return result;
@@ -283,7 +313,7 @@ namespace BLToolkit.Mapping
 
         public FullObjectMapper GetObjectMapper(Type mapperType, ref int startIndex)
         {
-            var mapper = new FullObjectMapper {PropertyType = mapperType};
+            var mapper = new FullObjectMapper {PropertyType = mapperType};            
             return (FullObjectMapper) GetObjectMapper(mapper, ref startIndex);
         }
 
@@ -321,6 +351,16 @@ namespace BLToolkit.Mapping
                 if (pkFields.Length > 0)
                 {
                     primaryKeyPropInfo = prop;
+
+                    lock (SetterHandlersLock)
+                    {
+                        if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
+                        {
+                            GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, prop);
+                            GettersHandlers[mapperType].Add(prop.Name, getHandler);
+                        }
+                    }
+                    mapper.PrimaryKeyValueGetter = GettersHandlers[mapperType][prop.Name];
                 }
             }
             foreach (PropertyInfo prop in properties)

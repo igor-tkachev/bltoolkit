@@ -183,13 +183,18 @@
     <Compile Include="JointureTests\Artist.cs" />
     <Compile Include="JointureTests\Artist2.cs" />
     <Compile Include="JointureTests\AssociationTests.cs" />
+    <Compile Include="JointureTests\BasicMedia.cs" />
     <Compile Include="JointureTests\Consts.cs" />
     <Compile Include="JointureTests\ExecTimeInfo.cs" />
     <Compile Include="JointureTests\FILE_FORM.cs" />
+    <Compile Include="JointureTests\FORM_FOLLOW_UP.cs" />
     <Compile Include="JointureTests\FORM_SCRIPT.cs" />
+    <Compile Include="JointureTests\Media.cs" />
     <Compile Include="JointureTests\MusicDB.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="JointureTests\OleronTest.cs" />
+    <Compile Include="JointureTests\OrquaTest.cs" />
     <Compile Include="JointureTests\TestDbConnectionFactory.cs" />
     <Compile Include="JointureTests\Title.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
