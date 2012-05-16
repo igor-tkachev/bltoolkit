@@ -12,12 +12,6 @@ using Castle.DynamicProxy;
 
 namespace BLToolkit.Mapping
 {
-    public enum MappingOrder
-    {
-        ByColumnName,
-        ByColumnIndex,
-    }
-
     public class FullMappingSchema : MappingSchema
     {
         #region Private members
@@ -29,6 +23,9 @@ namespace BLToolkit.Mapping
 
         private static readonly Dictionary<Type, Dictionary<string, GetHandler>> GettersHandlers =
             new Dictionary<Type, Dictionary<string, GetHandler>>();
+
+        private readonly Dictionary<string, int> _columnOccurences = new Dictionary<string, int>();
+        private readonly Dictionary<string, List<string>> _columnVariations = new Dictionary<string, List<string>>();
 
         private readonly ProxyGenerator _proxy = new ProxyGenerator();
 
@@ -58,7 +55,7 @@ namespace BLToolkit.Mapping
             params object[] parameters)
         {
             // Get mapping for the type
-            if (destObjectType == null) throw new ArgumentNullException("type");
+            if (destObjectType == null) throw new ArgumentNullException("destObjectType");
 
             if (dataReader.FieldCount == 0)
                 return null;
@@ -140,7 +137,6 @@ namespace BLToolkit.Mapping
             _schemaColumns = new List<string>();
             _schema = reader.GetSchemaTable();
             _schema.Rows.Cast<DataRow>().ToList().ForEach(dr => _schemaColumns.Add((string)dr["ColumnName"]));
-
         }
 
         private T FillObject<T>(FullObjectMapper mapper, IDataReader datareader)
@@ -180,24 +176,6 @@ namespace BLToolkit.Mapping
                 if (_mappingOrder == MappingOrder.ByColumnIndex && (datareader.IsDBNull(map.DataReaderIndex)))
                     continue;
                 
-                ////IGNORE. TODO Add getter
-                //if (map is ValueMapper)
-                //{
-                //    //Type propType = (map as ValueMapper).PropertyType;
-                //    object value = datareader.GetValue(map.DataReaderIndex);
-                //    //if (value != null && value.GetType() != propType)
-                //    //{
-                //    //    value = ConvertChangeType(value, propType);    
-                //    //}                        
-                //    map.Setter(result, value);
-                //}
-
-                ////IGNORE. TODO Add getter
-                //if (map is FullObjectMapper)
-                //{
-                //    object fillObject = FillObject((FullObjectMapper)map, datareader);
-                //    map.Setter(result, fillObject);
-                //}
                 if (map is CollectionFullObjectMapper)
                 {
                     var collectionFullObjectMapper = (CollectionFullObjectMapper) map;
@@ -219,8 +197,7 @@ namespace BLToolkit.Mapping
                     }
                     
                     ((IList) listInstance).Add(fillObject);
-                }
-                
+                }                
             }
 
             return result;
@@ -249,12 +226,52 @@ namespace BLToolkit.Mapping
                 if (_mappingOrder == MappingOrder.ByColumnName && map is ValueMapper)
                 {
                     string colName = ((ValueMapper) map).ColumnName;
-                    if (IgnoreMissingColumns && !_schemaColumns.Contains(colName))
+                    int index = -1;
+                    if (!_schemaColumns.Contains(colName))
                     {
-                        continue;
+                        bool found = false;
+                        int order = 1;
+                        foreach (string key in _columnVariations.Keys)
+                        {
+                            List<string> variations = _columnVariations[key];
+                            if (variations.Contains(colName))
+                            {
+                                string orderString = colName.Replace(key + "_", "");
+                                order = int.Parse(orderString) + 1;
+                                colName = key;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found)
+                        {
+                            int i = 0, occurenceCnt = 0;
+                            foreach (string column in _schemaColumns)
+                            {
+                                if (column == colName)
+                                {
+                                    occurenceCnt++;
+                                    if (occurenceCnt == order)
+                                    {
+                                        index = i;
+                                        break;
+                                    }
+                                }
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            if (!IgnoreMissingColumns)
+                            {
+                                throw new Exception(string.Format("Couldnt find db column {0} in the query result", colName));
+                            }
+                            continue;
+                        }
                     }
+                    else
+                        index = _schemaColumns.IndexOf(colName);
 
-                    int index = _schemaColumns.IndexOf(colName);
                     if (datareader.IsDBNull(index))
                         continue;
 
@@ -299,8 +316,7 @@ namespace BLToolkit.Mapping
                     object listInstance = collectionFullObjectMapper.Getter(result);
                     if (listInstance == null)
                     {
-                        listInstance =
-                            Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
+                        listInstance = Activator.CreateInstance((map as CollectionFullObjectMapper).PropertyCollectionType);
                         map.Setter(result, listInstance);
                     }
                     object fillObject = FillObject((CollectionFullObjectMapper) map, datareader);
@@ -451,6 +467,18 @@ namespace BLToolkit.Mapping
                     if (mapFields.Length > 1)
                         throw new Exception("AssociationAttribute is used several times on the property " + prop.Name);
 
+                    string columnName = mapFields.Length > 0 ? ((MapFieldAttribute) mapFields[0]).MapName : prop.Name;
+                    int occurenceCount;
+                    if (_columnOccurences.ContainsKey(columnName))
+                    {
+                        occurenceCount = _columnOccurences[columnName] + 1;
+                        _columnOccurences[columnName] = occurenceCount;
+                    }
+                    else
+                    {
+                        _columnOccurences[columnName] = 1;
+                        occurenceCount = 1;
+                    }
 
                     var map = new ValueMapper
                                   {
@@ -460,9 +488,17 @@ namespace BLToolkit.Mapping
                                       Setter = SettersHandlers[mapperType][prop.Name],
                                       TableName = tableDescription.TableName,
                                       /* Optimize with Provider.BuildTableName */
-                                      ColumnName =
-                                          mapFields.Length > 0 ? ((MapFieldAttribute) mapFields[0]).MapName : prop.Name
+                                      ColumnName = columnName + (occurenceCount > 1 ? string.Format("_{0}", occurenceCount - 1) : "")
                                   };
+
+                    var variations = new List<string>();
+                    if (_columnVariations.ContainsKey(columnName))
+                    {
+                        variations = _columnVariations[columnName];
+                    }
+
+                    variations.Add(map.ColumnName);
+                    _columnVariations[columnName] = variations;
 
                     mapper.PropertiesMapping.Add(map);
 
@@ -494,7 +530,7 @@ namespace BLToolkit.Mapping
             }
 
             return mapper;
-        }
+        }        
 
         public static Type GetGenericType(Type t)
         {

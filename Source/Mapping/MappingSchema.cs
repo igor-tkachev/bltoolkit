@@ -1612,18 +1612,18 @@ namespace BLToolkit.Mapping
 				var comp = (IComparable)value;
 
 				foreach (MapValue mv in mapValues)
-				foreach (object mapValue in mv.MapValues)
-				{
-					try
-					{
-						if (comp.CompareTo(mapValue) == 0)
-							return mv.OrigValue;
-					}
-					catch (ArgumentException ex)
-					{
-						Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
-					}
-				}
+				    foreach (object mapValue in mv.MapValues)
+				    {
+					    try
+					    {
+						    if (comp.CompareTo(mapValue) == 0)
+							    return mv.OrigValue;
+					    }
+					    catch (ArgumentException ex)
+					    {
+						    Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
+					    }
+				    }
 			}
 
 			InvalidCastException exInvalidCast = null;

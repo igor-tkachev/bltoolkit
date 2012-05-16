@@ -53,6 +53,7 @@
     <Compile Include="Mapping\FullMappingSchema.cs" />
     <Compile Include="Mapping\FullObjectMapper.cs" />
     <Compile Include="Mapping\LazyValueLoadInterceptor.cs" />
+    <Compile Include="Mapping\MappingOrder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\FullInitContext.cs" />
   </ItemGroup>

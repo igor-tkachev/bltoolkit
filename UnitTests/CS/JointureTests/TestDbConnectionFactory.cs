@@ -26,12 +26,12 @@ namespace UnitTests.CS.JointureTests
 
     public class MusicFactory : DbConnectionFactory
     {
-        public MusicFactory()
+        public MusicFactory(bool prod)
         {
             var aa = DbProviderFactories.GetFactoryClasses();
             var bb = aa.Rows.Count;
 
-            string database = "MUSICFR01.TEST";
+            string database = prod ? "MUSIC01.PIGE" : "MUSICFR01.TEST";
             string username = "scurutchet";
             string password = "kisscool12";
 

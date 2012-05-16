@@ -342,7 +342,10 @@ namespace BLToolkit.Data.DataProvider
 			public double      GetDouble      (int i)           { return DataReader.GetDouble      (i); }
 			public string      GetString      (int i)           { return DataReader.GetString      (i); }
 			public decimal     GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
-			public DateTime    GetDateTime    (int i)           { return DataReader.GetDateTime    (i); }
+			public DateTime    GetDateTime    (int i)
+			{
+			    return DataReader.GetDateTime    (i);
+			}
 			public IDataReader GetData        (int i)           { return DataReader.GetData        (i); }
 			public bool        IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
 

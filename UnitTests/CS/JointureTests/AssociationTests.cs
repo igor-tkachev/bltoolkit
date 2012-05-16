@@ -14,15 +14,15 @@ namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
     public abstract class AssociationTests
-    { 
-        private OleronFactory _connectionFactory;
+    {
+        private DbConnectionFactory _connectionFactory;
 
         public abstract DbConnectionFactory CreateFactory();
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            _connectionFactory = new OleronFactory();
+            _connectionFactory = CreateFactory();
 
             DbManager.AddDataProvider(_connectionFactory.Provider);
             DbManager.AddConnectionString(_connectionFactory.Provider.Name, _connectionFactory.ConnectionString);
@@ -46,6 +46,40 @@ namespace UnitTests.CS.JointureTests
                 db.SetCommand(File.ReadAllText(@"c:\requete.txt"));
                 var res = db.ExecuteList<MULTIMEDIA_DB>();
 
+                Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
+        public void SelectTooLong2()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                db.SetCommand(File.ReadAllText(@"c:\requete2.txt"));
+                var res = db.ExecuteList<Monitoring>();
+
+                Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
+        public void SelectTooLong()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from dt in db.GetTable<DataDeclarativeTrack>()
+                            join dd in db.GetTable<DataDeclarativeData>() on dt.IdDeclarativeTrack equals dd.IdDeclarativeTrack
+                            join ms in db.GetTable<MediaSetting>() on dd.IdMedia equals ms.IdMedia
+                            where dt.Status == (short) DeclarativeTitleStatus.Default ||
+                                  dt.Status == (short) DeclarativeTitleStatus.Locked
+                            select new {dd.DateMedia, dt.IdDeclarativeTrack, ms.Activation};
+
+                if (false)
+                    query = query.Where(e => e.Activation == ActivationMedia.Priority);
+                else
+                    query = query.Where(e => e.Activation == ActivationMedia.Default);
+
+                var res = query.Distinct().ToList();
                 Assert.IsNotEmpty(res);
             }
         }
@@ -152,8 +186,6 @@ namespace UnitTests.CS.JointureTests
                                                                                               : d.IdProductPending.Value
                                                                                   }
                                                          };
-
-
 
                 var res = resultG.Distinct().OrderBy(p => p.IdMapping).ToList();
             }

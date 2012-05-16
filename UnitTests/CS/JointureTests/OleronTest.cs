@@ -3,26 +3,12 @@ using System.Collections.Generic;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.TypeBuilder;
 using NUnit.Framework;
 
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
     public class OleronTest : AssociationTests
-    {
-        #region Overrides of AssociationTests
-
-        public override DbConnectionFactory CreateFactory()
-        {
-            return new OleronFactory();
-        }
-
-        #endregion
-    }
-
-    [TestFixture]
-    public class MusicTest : AssociationTests
     {
         #region Overrides of AssociationTests
 
@@ -171,7 +157,7 @@ namespace UnitTests.CS.JointureTests
 
         public string FILE_NAME { get; set; }
         public string FILE_PATH { get; set; }
-        public int DURATION { get; set; }
+        public Int64 DURATION { get; set; }
         public Int64 ID_FILE_NUMBER { get; set; }
 
         public Int64 ID_USER_ { get; set; }
@@ -210,7 +196,6 @@ namespace UnitTests.CS.JointureTests
         public DateTime DATE_CREATION { get; set; }
         public string COMMENTARY { get; set; }
         public Int16 ACTIVATION { get; set; }
-
     }
 
     [TableName(Name = "DATA_ITEM_MULTIMEDIA", Owner = "PITAFR01")]
