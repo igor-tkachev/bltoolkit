@@ -240,7 +240,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var p = new SqlParameter(SystemType, Name, _value, _valueConverter) { IsQueryParameter = IsQueryParameter };
+				var p = new SqlParameter(SystemType, Name, _value, _valueConverter) { IsQueryParameter = IsQueryParameter, DbType = DbType, DbSize = DbSize };
 
 				objectTree.Add(this, clone = p);
 			}

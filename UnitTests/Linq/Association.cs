@@ -371,7 +371,6 @@ namespace Data.Linq
 			});
 		}
 
-<<<<<<< HEAD
         [TableName("CHILD")]
         [InheritanceMapping(Code = 1, IsDefault = true, Type = typeof(ChildForHeirarhy))]
         public class ChildBaseForHeirarhy
@@ -399,33 +398,33 @@ namespace Data.Linq
 	                    .Select(ch => new ChildForHeirarhy() {Parent = ch.Parent}).ToList();
 	            });
 	    }
-=======
-		[TableName("Child")]
-		[InheritanceMapping(Code = 1, IsDefault = true, Type = typeof(ChildForHeirarhy))]
-		public class ChildBaseForHeirarhy
-		{
-			[MapField(IsInheritanceDiscriminator = true)]
-			public int ChildID { get; set; }
-		}
 
-		public class ChildForHeirarhy : ChildBaseForHeirarhy
+		[Test]
+		public void LetTest1()
 		{
-			public int ParentID { get; set; }
-			[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = true)]
-			public Parent Parent { get; set; }
+			ForEachProvider(db =>
+				AreEqual(
+					from p in Parent
+					let chs = p.Children
+					select new { p.ParentID, Count = chs.Count() },
+					from p in db.Parent
+					let chs = p.Children
+					select new { p.ParentID, Count = chs.Count() }));
 		}
 
 		[Test]
-		public void AssociationInHeirarhy()
+		public void LetTest2()
 		{
 			ForEachProvider(db =>
-			{
-				db.GetTable<ChildBaseForHeirarhy>()
-					.OfType<ChildForHeirarhy>()
-					.Select(ch => new ChildForHeirarhy { Parent = ch.Parent })
-					.ToList();
-			});
+				AreEqual(
+					from p in Parent
+					select new { p } into p
+					let chs = p.p.Children
+					select new { p.p.ParentID, Count = chs.Count() },
+					from p in db.Parent
+					select new { p } into p
+					let chs = p.p.Children
+					select new { p.p.ParentID, Count = chs.Count() }));
 		}
->>>>>>> ceea1e084357b5bc361be276468a065de4a016df
 	}
 }

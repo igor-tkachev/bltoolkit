@@ -2136,24 +2136,27 @@ namespace BLToolkit.Data.Sql
 				Column     = column;
 				Expression = expression;
 
-				if (expression is SqlParameter)
-				{
-					var p = (SqlParameter)expression;
+                if (expression is SqlParameter)
+                {
+                    var p = (SqlParameter) expression;
 
-					//if (type.IsEnum)
-					//	p.SetEnumConverter(type, mappingSchema);
+                    //if (type.IsEnum)
+                    //	p.SetEnumConverter(type, mappingSchema);
 
-					if (column is SqlField)
-					{
-						var field = (SqlField)column;
+                    if (column is SqlField)
+                    {
+                        var field = (SqlField) column;
 
-						if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
-							p.DbType = field.MemberMapper.MapMemberInfo.DbType;
+                        if (field.MemberMapper != null)
+                        {
+                            if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
+                                p.DbType = field.MemberMapper.MapMemberInfo.DbType;
 
-						if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
-							p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
-					}
-				}
+                            if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
+                                p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
+                        }
+                    }
+                }
 			}
 
 			public ISqlExpression Column     { get; set; }
