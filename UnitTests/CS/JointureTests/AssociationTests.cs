@@ -65,22 +65,24 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectTooLong()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (new ExecTimeInfo())
             {
-                var query = from dt in db.GetTable<DataDeclarativeTrack>()
-                            join dd in db.GetTable<DataDeclarativeData>() on dt.IdDeclarativeTrack equals dd.IdDeclarativeTrack
-                            join ms in db.GetTable<MediaSetting>() on dd.IdMedia equals ms.IdMedia
-                            where dt.Status == (short) DeclarativeTitleStatus.Default ||
-                                  dt.Status == (short) DeclarativeTitleStatus.Locked
-                            select new {dd.DateMedia, dt.IdDeclarativeTrack, ms.Activation};
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+                    var query = from dt in db.GetTable<DataDeclarativeTrack>()
+                                join dd in db.GetTable<DataDeclarativeData>() on dt.IdDeclarativeTrack equals dd.IdDeclarativeTrack
+                                join ms in db.GetTable<MediaSetting>() on dd.IdMedia equals ms.IdMedia
+                                where dt.Status == (short)DeclarativeTitleStatus.Default ||
+                                      dt.Status == (short)DeclarativeTitleStatus.Locked
+                                select new { dd.DateMedia, dt.IdDeclarativeTrack, ms.Activation };
 
-                if (false)
-                    query = query.Where(e => e.Activation == ActivationMedia.Priority);
-                else
-                    query = query.Where(e => e.Activation == ActivationMedia.Default);
+                    query = false
+                                ? query.Where(e => e.Activation == ActivationMedia.Priority)
+                                : query.Where(e => e.Activation == ActivationMedia.Default);
 
-                var res = query.Distinct().ToList();
-                Assert.IsNotEmpty(res);
+                    var res = query.Distinct().ToList();
+                    Assert.IsNotEmpty(res);
+                }
             }
         }
 
@@ -216,7 +218,7 @@ namespace UnitTests.CS.JointureTests
                 var artist2 = (Artist2) query2.SelectByKey(typeof (Artist2), 2643);
                 List<Title> titles2 = artist2.Titles;
 
-                var query = new FullSqlQuery(db, false); // Dont ignore lazyloading
+                var query = new FullSqlQuery(db);
                 var artist = (Artist2) query.SelectByKey(typeof (Artist2), 2643);
                 List<Title> titles = artist.Titles;
                 Assert.AreEqual(titles2.Count, titles.Count);
@@ -369,10 +371,10 @@ namespace UnitTests.CS.JointureTests
             GetMediaReq(req);
 
 
-            //Console.WriteLine("------------------------------------------------------------------------------");
+            Console.WriteLine("------------------------------------------------------------------------------");
 
-            //GetMediaLinq();
-            //GetMediaLinq();
+            GetMediaLinq();
+            GetMediaLinq();
         }
 
         private static void GetMediaLinq()
