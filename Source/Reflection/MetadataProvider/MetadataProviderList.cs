@@ -303,19 +303,6 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-        public override KeyGeneratorInfo GetGeneratorType(TypeExtension typeExt, MemberAccessor member, out bool isSet)
-        {
-            foreach (var p in _list)
-            {
-                var value = p.GetGeneratorType(typeExt, member, out isSet);
-
-                if (isSet)
-                    return value;
-            }
-
-            return base.GetGeneratorType(typeExt, member, out isSet);
-        }
-
         public override string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
         {
             foreach (var p in _list)

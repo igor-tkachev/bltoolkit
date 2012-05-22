@@ -42,12 +42,6 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-        public virtual KeyGeneratorInfo GetGeneratorType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            isSet = false;
-            return null;
-        }
-
         public virtual string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
         {
             isSet = false;

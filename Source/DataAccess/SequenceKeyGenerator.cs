@@ -4,8 +4,7 @@ namespace BLToolkit.DataAccess
     {
         private readonly string _sequence;
 
-        public SequenceKeyGenerator(string sequence, bool retrievePkValue)
-            : base(retrievePkValue)
+        public SequenceKeyGenerator(string sequence)
         {
             _sequence = sequence;
         }
@@ -16,18 +15,7 @@ namespace BLToolkit.DataAccess
         }
     }
 
-    public abstract class KeyGenerator
+    public class KeyGenerator
     {
-        private readonly bool _retrievePkValue;
-
-        protected KeyGenerator(bool retrievePkValue)
-        {
-            _retrievePkValue = retrievePkValue;
-        }
-
-        public bool RetrievePkValue
-        {
-            get { return _retrievePkValue; }
-        }
     }
 }

@@ -552,20 +552,19 @@ namespace BLToolkit.Data.DataProvider
 			return base.IsValueParameter(parameter);
 		}
 
-        public override string GetSequenceQuery(string sequenceName, string schema)
+        public override string GetSequenceQuery(string sequenceName)
         {
-            if (!string.IsNullOrWhiteSpace(schema))
-                return string.Format("SELECT {0}.{1}.NEXTVAL FROM DUAL", schema, sequenceName);
-
             return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
         }
 
-        public override string NextSequenceQuery(string sequenceName, string schema)
+        public override string NextSequenceQuery(string sequenceName)
         {
-            if (!string.IsNullOrWhiteSpace(schema))
-                return string.Format("{0}.{1}.NEXTVAL", schema, sequenceName);
-
             return string.Format("{0}.NEXTVAL", sequenceName);
+        }
+
+        public override string GetReturningInto(string columnName)
+        {
+            return string.Format("returning {0} into :IDENTITY_PARAMETER", columnName);
         }
 
 	    public override IDbDataParameter CreateParameterObject(IDbCommand command)
@@ -635,10 +634,13 @@ namespace BLToolkit.Data.DataProvider
 
         public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
         {
-            command.CommandText = OracleHelper.Interpret(command);
-            command.Parameters.Clear();
+            if (UseQueryText)
+            {
+                command.CommandText = OracleHelper.Interpret(command);
+                command.Parameters.Clear();
+            }
             return base.GetDataReader(command, commandBehavior);
-        }
+        }    
 
 		class OracleDataReaderEx: DataReaderEx<OracleDataReader>
 		{
@@ -1568,7 +1570,7 @@ namespace BLToolkit.Data.DataProvider
 			                                .Replace("\n", "")
 			                                .Replace("\t", " ")
 			                                .Replace("( ", "(");
-
+			    int mCnt = 0;
 				foreach (var member in members)
 				{
                     var sbItem = new StringBuilder();
@@ -1587,20 +1589,21 @@ namespace BLToolkit.Data.DataProvider
                     }
                     else
                     {
-                        var keyGenerator = member.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
-                        //Retrieving PkValue on Batch insert is useless
-                        if (keyGenerator != null && !keyGenerator.RetrievePkValue)
-                        {
-                            bool isSet;
-                            string ownerName = member.MappingSchema.MetadataProvider.GetOwnerName(member.Type, new ExtensionList(), out isSet);
-                            value = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence, ownerName);
-                        }
+                        //var keyGenerator = member.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+                        ////Retrieving PkValue on Batch insert is useless
+                        //if (keyGenerator != null && !keyGenerator.RetrievePkValue)
+                        //{
+                        //    bool isSet;
+                        //    string ownerName = member.MappingSchema.MetadataProvider.GetOwnerName(member.Type, new ExtensionList(), out isSet);
+                        //    value = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
+                        //}
 
                         //sp.BuildValue(sb, value);
                         sp.BuildValue(sbItem, value);
                     }
 
-				    strItem = strItem.Replace(string.Format("{0}", n), sbItem.ToString());
+                    strItem = strItem.Replace(string.Format("{{{0}}}", mCnt), sbItem.ToString());
+				    mCnt++;
 
 				    //sb.Append(", ");
 				}
@@ -1609,6 +1612,7 @@ namespace BLToolkit.Data.DataProvider
 
                 //sb.Length -= 2;
                 //sb.AppendLine(")");
+			    sb.AppendLine();
 
 				n++;
 

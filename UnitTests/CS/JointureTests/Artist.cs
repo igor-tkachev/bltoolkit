@@ -8,7 +8,7 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "ARTIST", Owner = Consts.Owner)]
     public class Artist
     {
-        [MapField("ID_ARTIST"), PrimaryKey, KeyGenerator(PrimaryKeyGeneratorType.Sequence, true)]
+        [MapField("ID_ARTIST"), PrimaryKey, Identity]
         public long Id { get; set; }
 
         [MapField("ARTIST")]
@@ -69,12 +69,38 @@ namespace UnitTests.CS.JointureTests
         public int ACTIVATION { get; set; }
     }
 
+    [TableName(Name = "PRODUCT_PENDING", Owner = "PITAFR01")]
+    public class DataProductPending : FredCopyright
+    {
+        [MapField("ID_PRODUCT_PENDING"), PrimaryKey, SequenceName("PITAFR01.SEQ_PRODUCT_PENDING"), Identity]
+        public int IdProductPending { get; set; }
+
+        [MapField("ID_PRODUCT"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public int? IdProduct { get; set; }
+
+        [MapField("ID_USER_"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public int IdUser { get; set; }
+
+        [MapField("ID_USER_CREATE"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public int IdUserCreate { get; set; }
+
+        [MapField("PRODUCT_PENDING"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public string ProductPending { get; set; }
+
+        [MapField("VISUAL_PATH"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public string VisualPath { get; set; }
+
+        [MapField("USER_PROGRAM"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        public string UserProgram { get; set; }
+    }
+
+
     public class FredCopyright
     {
-        [MapField("ID_LANGUAGE_DATA_I"), NonUpdatable(OnInsert = false)]
+        [MapField("ID_LANGUAGE_DATA_I"), NonUpdatable(OnUpdate = true, OnInsert = false)]
         public int IdLanguage { get; set; }
 
-        [MapField("DATE_CREATION"), NonUpdatable(OnInsert = false)]
+        [MapField("DATE_CREATION"), NonUpdatable(OnUpdate = true, OnInsert = false)]
         public DateTime DateCreation { get; set; }
 
         [MapField("DATE_MODIFICATION")]
@@ -94,6 +120,7 @@ namespace UnitTests.CS.JointureTests
             IdLanguage = 33;
         }
     }
+
 
     public class Mapping
     {
@@ -131,7 +158,7 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "MAPPING_SEARCH", Owner = "PITAFR01")]
     public class DataMapping : FredCopyright
     {
-        [MapField("ID_MAPPING_SEARCH"), PrimaryKey, SequenceName("SEQ_IMP_SEARCH"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
+        [MapField("ID_MAPPING_SEARCH"), PrimaryKey, SequenceName("SEQ_IMP_SEARCH"), Identity]
         public int IdMapping { get; set; }
 
         [MapField("DECLARED_PRODUCT"), NonUpdatable(OnInsert = false, OnUpdate = true)]
@@ -157,7 +184,7 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "IMP_SEARCH", Owner = "PITAFR01")]
     public class DataImport : FredCopyright
     {
-        [MapField("ID_IMP_SEARCH"), PrimaryKey, SequenceName("SEQ_IMP_SEARCH"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
+        [MapField("ID_IMP_SEARCH"), PrimaryKey, Identity, SequenceName("SEQ_IMP_SEARCH"), Identity]
         public int IdImport { get; set; }
 
         [MapField("ID_MEDIA")]

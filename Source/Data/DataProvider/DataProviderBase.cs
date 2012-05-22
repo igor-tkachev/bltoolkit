@@ -218,12 +218,17 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
-        public virtual string GetSequenceQuery(string sequenceName, string schema)
+        public virtual string GetSequenceQuery(string sequenceName)
         {
             return null;
         }
 
-        public virtual string NextSequenceQuery(string sequenceName, string schema)
+        public virtual string NextSequenceQuery(string sequenceName)
+        {
+            return null;
+        }
+
+        public virtual string GetReturningInto(string columnName)
         {
             return null;
         }
@@ -285,10 +290,10 @@ namespace BLToolkit.Data.DataProvider
 		public virtual int    MaxBatchSize  { get { return 65536; } }
 		public virtual string EndOfSql      { get { return ";";   } }
 
-        /// <summary>
-        /// Use plain text query instead of using command parameters
-        /// </summary>
-        public virtual bool UseQueryText    { get { return false; } } 
+	    /// <summary>
+	    /// Use plain text query instead of using command parameters
+	    /// </summary>
+        public virtual bool UseQueryText { get; set; } 
 
 		#endregion
 

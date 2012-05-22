@@ -477,32 +477,17 @@ namespace BLToolkit.Mapping
         {
             bool isSet;
             var nonUpdatableAttribute = MetadataProvider.GetNonUpdatableAttribute(memberAccessor.Type, Extension, memberAccessor, out isSet);
-
-            bool isPkSet;
-            MetadataProvider.GetPrimaryKeyOrder(memberAccessor.Type, Extension, memberAccessor, out isPkSet);
-            if (isPkSet)
+            if (isSet && nonUpdatableAttribute is IdentityAttribute)
             {
-                bool isGeneratorSet;
-                KeyGeneratorInfo genInfo = MetadataProvider.GetGeneratorType(Extension, memberAccessor, out isGeneratorSet);
-                if (isGeneratorSet)
-                {
-                    if (nonUpdatableAttribute != null && isSet)
-                    {
-                        throw new Exception("Cannont set primary key when NonUpdateable attribute is present!");
-                    }
+                bool isSeqSet;
+                string sequenceName = MetadataProvider.GetSequenceName(Extension, memberAccessor, out isSeqSet);
+                if (!isSeqSet)
+                    throw new NotImplementedException("Identity without sequence");
 
-                    if (genInfo.GeneratorType == PrimaryKeyGeneratorType.Sequence)
-                    {
-                        bool isSeqSet;
-                        string sequenceName = MetadataProvider.GetSequenceName(Extension, memberAccessor, out isSeqSet);
-                        if (!isSeqSet)
-                            throw new Exception("Sequence atribute is not present!");
-                        if (string.IsNullOrWhiteSpace(sequenceName))
-                            throw new Exception("SequenceName is empty");
+                if (string.IsNullOrWhiteSpace(sequenceName))
+                    throw new Exception("SequenceName is empty");
 
-                        return new SequenceKeyGenerator(sequenceName, genInfo.RetrievePkValue);
-                    }
-                }
+                return new SequenceKeyGenerator(sequenceName);                                   
             }
             return null;
         }

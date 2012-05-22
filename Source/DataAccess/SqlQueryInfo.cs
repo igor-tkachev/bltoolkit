@@ -21,6 +21,7 @@ namespace BLToolkit.DataAccess
 		}
 
         public string OwnerName { get; set; }
+        public string ActionName { get; set; }
 		public string       QueryText    { get; set; }
 		public ObjectMapper ObjectMapper { get; private set; }
 
@@ -91,30 +92,10 @@ namespace BLToolkit.DataAccess
                     parameters[i] = db.Parameter(info.ParameterName, val);
                 }
 
-               var keyGenerator = mmi.KeyGenerator as SequenceKeyGenerator;
-               if (keyGenerator != null && keyGenerator.RetrievePkValue)
-               {
-                   string seqQuery = db.DataProvider.GetSequenceQuery(keyGenerator.Sequence, OwnerName);
-                   val = db.SetCommand(seqQuery).ExecuteScalar();
-                   parameters[i] = db.Parameter(info.ParameterName, val);
-               }
-
-				if (val == null && mmi.Nullable/* && mmi.NullValue == null*/)
-				{
-					//replace value with DbNull
-					val = DBNull.Value;
-				}
-
-				if (mmi.IsDbTypeSet)
-				{
-					parameters[i] = mmi.IsDbSizeSet
-						? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize) 
-						: db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
-				}
-				else
-				{
-					parameters[i] = db.Parameter(info.ParameterName, val);
-				}
+                if (mmi.KeyGenerator is SequenceKeyGenerator && ActionName == "InsertWithIdentity")
+                {
+                    parameters[i] = db.OutputParameter(info.ParameterName, val);
+                }
 			}
 
 			return parameters;

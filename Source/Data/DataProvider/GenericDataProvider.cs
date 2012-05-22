@@ -11,13 +11,11 @@ namespace BLToolkit.Data.DataProvider
     public sealed class GenericDataProvider : DataProviderBase
 	{
         private readonly string _providerName;
-        private readonly bool _useQueryText;
         private readonly DbProviderFactory _factory;
 
-        public GenericDataProvider(string providerName, bool useQueryText = false)
+        public GenericDataProvider(string providerName)
         {
             _providerName = providerName;
-            _useQueryText = useQueryText;
             _factory = DbProviderFactories.GetFactory(providerName);
         }
 
@@ -73,31 +71,36 @@ namespace BLToolkit.Data.DataProvider
             }
         }
 
-        public override string GetSequenceQuery(string sequenceName, string schema)
+        public override string GetSequenceQuery(string sequenceName)
         {
             switch (Name)
             {
                 case ProviderFullName.Oracle:
-                    if (!string.IsNullOrWhiteSpace(schema))
-                        return string.Format("SELECT {0}.{1}.NEXTVAL FROM DUAL", schema, sequenceName);
-
                     return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
                 default:
                     throw new Exception(string.Format("GetSequenceQuery isnt supported for this provider {0}", Name));
             }
         }
 
-        public override string NextSequenceQuery(string sequenceName, string schema)
+        public override string NextSequenceQuery(string sequenceName)
         {
             switch (Name)
             {
                 case ProviderFullName.Oracle:
-                   if (!string.IsNullOrWhiteSpace(schema))
-                        return string.Format("{0}.{1}.NEXTVAL", schema, sequenceName);
-
                     return string.Format("{0}.NEXTVAL", sequenceName);
                 default:
                     throw new Exception(string.Format("NextSequenceQuery isnt supported for this provider {0}", Name));
+            } 
+        }
+
+        public override string GetReturningInto(string columnName)
+        {
+            switch (Name)
+            {
+                case ProviderFullName.Oracle:
+                    return string.Format("returning {0} into :IDENTITY_PARAMETER", columnName);
+                default:
+                    throw new Exception(string.Format("GetReturningInto isnt supported for this provider {0}", Name));
             } 
         }
 
@@ -112,9 +115,13 @@ namespace BLToolkit.Data.DataProvider
             return base.GetDataReader(command, commandBehavior);
         }
 
-        public override bool UseQueryText
+        public override int InsertBatch<T>(DbManager db, string insertText, System.Collections.Generic.IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
         {
-            get { return _useQueryText; }
+            if (Name == ProviderFullName.Oracle)
+            {
+                var sp = new OracleSqlProvider();
+            }
+            return base.InsertBatch<T>(db, insertText, collection, members, maxBatchSize, getParameters);
         }
 
         #endregion
