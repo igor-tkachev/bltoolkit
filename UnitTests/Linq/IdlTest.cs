@@ -87,7 +87,12 @@ namespace Data.Linq
 
         #region ObjectId
 
-        public struct ObjectId
+        public interface IObjectId
+        {
+            ObjectId Id { get; set; }
+        }
+
+        public struct ObjectId : IObjectId
         {
             public ObjectId(int value)
             {
@@ -105,6 +110,12 @@ namespace Data.Linq
             public static implicit operator int(ObjectId val)
             {
                 return val.m_value;
+            }
+
+            public ObjectId Id
+            {
+                get { return this; }
+                set { Value = value; }
             }
         }
 
@@ -429,6 +440,26 @@ namespace Data.Linq
 
                         Assert.That(result, Is.Not.Null);
                     });
+        }
+
+        [Test]
+        public void TestQueryWithInterface()
+        {
+            ForMySqlProvider(
+                db =>
+                {
+                    var personIds =
+                    from p in db.Person
+                    select new ObjectId { Value = p.ID, };
+
+                    var r = GetFromSourceById(personIds, 1).ToArray();
+                    Assert.That(r, Is.Not.Null);
+                });
+        }
+
+        private IQueryable<T> GetFromSourceById<T>(IQueryable<T> source, int id) where T : IObjectId
+        {
+            return from x in source where x.Id == id select x;
         }
 
         #region GenericQuery classes
