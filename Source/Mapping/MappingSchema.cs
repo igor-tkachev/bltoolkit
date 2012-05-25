@@ -2114,7 +2114,7 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-        //NOTE changed to virtual
+		//NOTE changed to virtual
 		public virtual object MapDataReaderToObject(
 			IDataReader     dataReader,
 			Type            destObjectType,
@@ -2887,7 +2887,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-        //NOTE changed to virtual
+		//NOTE changed to virtual
 		public virtual IList<T> MapDataReaderToList<T>(
 			IDataReader     reader,
 			IList<T>        list,

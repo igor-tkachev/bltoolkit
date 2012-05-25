@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -354,7 +355,33 @@ namespace BLToolkit.Data.Linq
 		void SetParameters(Expression expr, object[] parameters, int idx)
 		{
 			foreach (var p in Queries[idx].Parameters)
-				p.SqlParameter.Value = p.Accessor(expr, parameters);
+			{
+				var value = p.Accessor(expr, parameters);
+
+				if (value is IEnumerable)
+				{
+					var type  = value.GetType();
+					var etype = TypeHelper.GetElementType(type);
+
+					if (etype == null || etype == typeof(object) ||
+						etype.IsEnum ||
+						(TypeHelper.IsNullableType(etype) && etype.GetGenericArguments()[0].IsEnum))
+					{
+						var values = new List<object>();
+
+						foreach (var v in (IEnumerable)value)
+						{
+							values.Add(v != null && v.GetType().IsEnum ?
+								MappingSchema.MapEnumToValue(v, true) :
+								v);
+						}
+
+						value = values;
+					}
+				}
+
+				p.SqlParameter.Value = value;
+			}
 		}
 
 		#endregion
