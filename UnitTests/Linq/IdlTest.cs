@@ -495,6 +495,22 @@ namespace Data.Linq
             return from x in source where x.Id == id select x;
         }
 
+        [Test]
+        public void TestComparePropertyOfEnumTypeToVaribleInSubquery()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        var gender = Gender.Other;
+                        var q = from x in db.Patient
+                                join y in db.Person.Where(x => x.Gender == gender) on x.PersonID equals y.ID
+                                select x;
+
+                        var r = q.ToList();
+                        Assert.That(r, Is.Not.Null);
+                    });
+        }
+
         #region GenericQuery classes
 
         public abstract partial class GenericQueryBase
