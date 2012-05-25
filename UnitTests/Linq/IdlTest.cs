@@ -87,12 +87,17 @@ namespace Data.Linq
 
         #region ObjectId
 
-        public interface IObjectId
+        public interface IHasObjectId2
         {
             ObjectId Id { get; set; }
         }
 
-        public struct ObjectId : IObjectId
+        public interface IHasObjectId1
+        {
+            ObjectId Id { get; set; }
+        }
+
+        public struct ObjectId
         {
             public ObjectId(int value)
             {
@@ -111,12 +116,16 @@ namespace Data.Linq
             {
                 return val.m_value;
             }
+        }
 
-            public ObjectId Id
-            {
-                get { return this; }
-                set { Value = value; }
-            }
+        public class WithObjectIdBase : IHasObjectId1
+        {
+            public ObjectId Id { get; set; }
+        }
+        
+        public class PersonWithObjectId : WithObjectIdBase, IHasObjectId2
+        {
+            public string FistName { get; set; }
         }
 
         public struct NullableObjectId
@@ -139,6 +148,7 @@ namespace Data.Linq
                 return val.m_value;
             }
         }
+
         #endregion
 
         [Test]
@@ -447,19 +457,58 @@ namespace Data.Linq
         {
             ForMySqlProvider(
                 db =>
-                {
-                    var personIds =
-                    from p in db.Person
-                    select new ObjectId { Value = p.ID, };
+                    {
+                        var persons =
+                            from x in db.Person
+                            select new PersonWithObjectId
+                                {
+                                    Id = new ObjectId { Value = x.ID },
+                                    FistName = x.FirstName,
+                                };
 
-                    var r = GetFromSourceById(personIds, 1).ToArray();
-                    Assert.That(r, Is.Not.Null);
-                });
+                        // this works
+                        var r1 = FilterSourceByIdDefinedInBaseClass(persons, 5).ToArray();
+                        Assert.That(r1, Is.Not.Null);
+
+                        // and this works
+                        var r2 = FilterSourceByIdDefinedInInterface1(persons, 5).ToArray();
+                        Assert.That(r2, Is.Not.Null);
+
+                        // but this fails
+                        var r3 = FilterSourceByIdDefinedInInterface2(persons, 5).ToArray();
+                        Assert.That(r3, Is.Not.Null);
+                    });
         }
 
-        private IQueryable<T> GetFromSourceById<T>(IQueryable<T> source, int id) where T : IObjectId
+        private IQueryable<T> FilterSourceByIdDefinedInBaseClass<T>(IQueryable<T> source, int id) where T : WithObjectIdBase
         {
             return from x in source where x.Id == id select x;
+        }
+
+        private IQueryable<T> FilterSourceByIdDefinedInInterface1<T>(IQueryable<T> source, int id) where T : IHasObjectId1
+        {
+            return from x in source where x.Id == id select x;
+        }
+
+        private IQueryable<T> FilterSourceByIdDefinedInInterface2<T>(IQueryable<T> source, int id) where T : IHasObjectId2
+        {
+            return from x in source where x.Id == id select x;
+        }
+
+        [Test]
+        public void TestComparePropertyOfEnumTypeToVaribleInSubquery()
+        {
+            ForMySqlProvider(
+                db =>
+                    {
+                        var gender = Gender.Other;
+                        var q = from x in db.Patient
+                                join y in db.Person.Where(x => x.Gender == gender) on x.PersonID equals y.ID
+                                select x;
+
+                        var r = q.ToList();
+                        Assert.That(r, Is.Not.Null);
+                    });
         }
 
         #region GenericQuery classes
