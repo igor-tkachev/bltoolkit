@@ -200,7 +200,6 @@
     <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
-    <Compile Include="DataAccess\KeyGeneratorAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />

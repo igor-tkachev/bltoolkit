@@ -102,7 +102,7 @@ namespace UnitTests.CS.JointureTests
         public long ID_SESSION_DETAIL { get; set; }
         public long? ID_MEDIA_PRICING { get; set; }
 
-        [Association]
+        [Association(ThisKey = "ID_DATA_VERSION", OtherKey = "ID_DATA_VERSION")]
         public DATA_RADIO DataRadio { get; set; }
     }
 
@@ -133,17 +133,17 @@ namespace UnitTests.CS.JointureTests
         public Int16 ACTIVATION { get; set; }
         public string COMMENTARY { get; set; }
 
-        [Association]
+        [Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
         public DATA_VERSION DataVersion { get; set; }
 
-        [Association]
+        [Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
         public List<MULTIMEDIA_FILE> MultimediaFiles { get; set; }
 
-        [Association]
-        public List<MULTIMEDIA_COBRANDING> MultimediaCobrandings { get; set; }
+        //[Association]
+        //public List<MULTIMEDIA_COBRANDING> MultimediaCobrandings { get; set; }
 
-        [Association]
-        public List<MULTIMEDIA_DATA_ITEM> MultimediaDataItems { get; set; }
+        //[Association]
+        //public List<MULTIMEDIA_DATA_ITEM> MultimediaDataItems { get; set; }
     }
 
     [TableName(Name = "MULTIMEDIA_FILE", Owner = "PITAFR01")]

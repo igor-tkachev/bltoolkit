@@ -36,7 +36,7 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void TestQuery()
+        public void TestQueryAssociation()
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
@@ -45,7 +45,26 @@ namespace UnitTests.CS.JointureTests
 
                 db.SetCommand(File.ReadAllText(@"c:\requete.txt"));
                 var res = db.ExecuteList<MULTIMEDIA_DB>();
+                Assert.IsNotEmpty(res);
+            }
+        }
 
+        [Test]
+        public void TestLinqAssociation()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from m in db.GetTable<MULTIMEDIA_DB>()
+                            where m.ID_MULTIMEDIA == 31265081
+                            select new 
+                            {
+                                //m.MultimediaFiles,
+                                m.DataVersion.DataRadio,
+                                m.DataVersion,
+                                m
+                            };
+
+                var res = query.ToList();
                 Assert.IsNotEmpty(res);
             }
         }
@@ -166,7 +185,7 @@ namespace UnitTests.CS.JointureTests
         public void InsertWithIdentityProductPending()
         {
             using (var db = _connectionFactory.CreateDbManager())
-            {
+            {                
                 var t = db.GetTable<DataProductPending>();
                 var now = DateTime.Now.AddDays(30);
                 var res =  t.InsertWithIdentity(
