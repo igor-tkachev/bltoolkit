@@ -206,6 +206,8 @@ namespace BLToolkit.Data.DataProvider
                         strQuery = strQuery.Replace(strParameter, ((float)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                     else if (param.Value is double)
                         strQuery = strQuery.Replace(strParameter, ((double)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    else if (param.Value is TimeSpan)
+                        strQuery = strQuery.Replace(strParameter, "'" + ((TimeSpan)param.Value).ToString() + "' ");
                     else
                         throw new NotImplementedException(param.Value.GetType() + " is not implemented yet.");
                 }

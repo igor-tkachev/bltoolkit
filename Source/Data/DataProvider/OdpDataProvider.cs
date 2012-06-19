@@ -16,6 +16,7 @@ using System.Xml;
 
 using BLToolkit.Aspects;
 using BLToolkit.Common;
+using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
@@ -46,9 +47,12 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public class OdpDataProvider : DataProviderBase
 	{
+	    private readonly DataProviderInterpreterBase _interpreterBase;
+
 		public OdpDataProvider()
 		{
 			MappingSchema = new OdpMappingSchema();
+            _interpreterBase = new OracleDataProviderInterpreter();
 		}
 
 		static OdpDataProvider()
@@ -522,6 +526,11 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
+        public override void SetParameterValue(IDbDataParameter parameter, object value)
+        {
+            _interpreterBase.SetParameterValue(parameter, value);
+        }
+
 		private static Stream CopyStream(Stream stream, OracleCommand cmd)
 		{
 			return CopyStream(Common.Convert.ToByteArray(stream), cmd);
@@ -554,17 +563,17 @@ namespace BLToolkit.Data.DataProvider
 
         public override string GetSequenceQuery(string sequenceName)
         {
-            return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
+            return _interpreterBase.GetSequenceQuery(sequenceName);
         }
 
         public override string NextSequenceQuery(string sequenceName)
         {
-            return string.Format("{0}.NEXTVAL", sequenceName);
+            return _interpreterBase.NextSequenceQuery(sequenceName);
         }
 
         public override string GetReturningInto(string columnName)
         {
-            return string.Format("returning {0} into :IDENTITY_PARAMETER", columnName);
+            return _interpreterBase.GetReturningInto(columnName);
         }
 
 	    public override IDbDataParameter CreateParameterObject(IDbCommand command)

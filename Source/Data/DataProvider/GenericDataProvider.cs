@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Data.Common;
+using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.DataProvider
@@ -12,11 +13,25 @@ namespace BLToolkit.Data.DataProvider
 	{
         private readonly string _providerName;
         private readonly DbProviderFactory _factory;
+        private readonly DataProviderInterpreterBase _dataProviderInterpreter;
 
         public GenericDataProvider(string providerName)
         {
             _providerName = providerName;
             _factory = DbProviderFactories.GetFactory(providerName);
+
+            switch (Name)
+            {
+                case ProviderFullName.Oracle:
+                case ProviderFullName.OracleNet:
+                    _dataProviderInterpreter = new OracleDataProviderInterpreter();
+                    break;
+                case ProviderFullName.SQLite:
+                    _dataProviderInterpreter = new SqliteDataProviderInterpreter();
+                    break;                    
+                default:
+                    throw new Exception(string.Format("The sql provider {0} isnt supported in the DataProviderInterpreterBase", Name));
+            }
         }
 
         #region Overrides of DataProviderBase
@@ -71,37 +86,24 @@ namespace BLToolkit.Data.DataProvider
             }
         }
 
+        public override void SetParameterValue(IDbDataParameter parameter, object value)
+        {
+            _dataProviderInterpreter.SetParameterValue(parameter, value);
+        }
+
         public override string GetSequenceQuery(string sequenceName)
         {
-            switch (Name)
-            {
-                case ProviderFullName.Oracle:
-                    return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
-                default:
-                    throw new Exception(string.Format("GetSequenceQuery isnt supported for this provider {0}", Name));
-            }
+            return _dataProviderInterpreter.GetSequenceQuery(sequenceName);
         }
 
         public override string NextSequenceQuery(string sequenceName)
         {
-            switch (Name)
-            {
-                case ProviderFullName.Oracle:
-                    return string.Format("{0}.NEXTVAL", sequenceName);
-                default:
-                    throw new Exception(string.Format("NextSequenceQuery isnt supported for this provider {0}", Name));
-            } 
+            return _dataProviderInterpreter.NextSequenceQuery(sequenceName);
         }
 
         public override string GetReturningInto(string columnName)
         {
-            switch (Name)
-            {
-                case ProviderFullName.Oracle:
-                    return string.Format("returning {0} into :IDENTITY_PARAMETER", columnName);
-                default:
-                    throw new Exception(string.Format("GetReturningInto isnt supported for this provider {0}", Name));
-            } 
+            return _dataProviderInterpreter.GetReturningInto(columnName);
         }
 
         public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)

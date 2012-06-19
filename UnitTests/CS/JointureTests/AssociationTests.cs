@@ -50,6 +50,20 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void TestGetDataRadioWithTimeSpan()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from m in db.GetTable<DATA_VERSION>()
+                            where m.DATE_CREATION.TimeOfDay > TimeSpan.FromHours(11)
+                            select m;
+                query = query.Take(5);
+                var res = query.ToList();
+                Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
         public void TestLinqAssociation()
         {
             using (var db = _connectionFactory.CreateDbManager())

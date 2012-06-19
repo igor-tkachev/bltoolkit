@@ -194,7 +194,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="JointureTests\MusicTest.cs" />
+    <Compile Include="JointureTests\OleronFactory.cs" />
     <Compile Include="JointureTests\OleronTest.cs" />
+    <Compile Include="JointureTests\OrquaFactory.cs" />
     <Compile Include="JointureTests\OrquaTest.cs" />
     <Compile Include="JointureTests\TestDbConnectionFactory.cs" />
     <Compile Include="JointureTests\Title.cs" />
