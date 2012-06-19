@@ -508,13 +508,18 @@ namespace BLToolkit.Data.Linq.Builder
 						return expr.Arguments
 							.Select((arg,i) =>
 							{
-								var sql = ConvertToSql(context, arg);
+								var info = ConvertExpressions(context, arg, queryConvertFlag)[0];
+								//var sql = ConvertToSql(context, arg);
 								var mi  = expr.Members[i];
 
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								return new SqlInfo { Sql = sql, Member = mi };
+								//return new SqlInfo { Sql = sql, Member = mi };
+
+								info.Member = mi;
+
+								return info;
 							})
 							.ToArray();
 					}
