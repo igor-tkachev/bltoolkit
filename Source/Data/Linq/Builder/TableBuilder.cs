@@ -1052,7 +1052,7 @@ namespace BLToolkit.Data.Linq.Builder
 								ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
 							{
 								throw new LinqException("Member '{0}.{1}' is not a table column.",
-									memberExpression.Member.Name, memberExpression.Member.Name);
+									memberExpression.Member.DeclaringType.Name, memberExpression.Member.Name);
 							}
 						}
 					}

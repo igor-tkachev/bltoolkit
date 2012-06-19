@@ -645,7 +645,24 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								case ExpressionType.MemberAccess :
 									{
-										var memberExpression = Members[((MemberExpression)levelExpression).Member];
+										var member = ((MemberExpression)levelExpression).Member;
+
+										Expression memberExpression;
+
+										if (!Members.TryGetValue(member, out memberExpression))
+										{
+											var nm = Members.Keys.FirstOrDefault(m => m.Name == member.Name);
+
+											if (nm != null && member.DeclaringType.IsInterface)
+												if (TypeHelper.IsSameOrParent(member.DeclaringType, nm.DeclaringType))
+													memberExpression = Members[nm];
+
+											//var pm = member.DeclaringType.GetInterfaceMap();
+
+											if (memberExpression == null)
+												throw new InvalidOperationException(
+													string.Format("Invalid member '{0}.{1}'", member.DeclaringType, member.Name));
+										}
 
 										if (levelExpression == expression)
 										{

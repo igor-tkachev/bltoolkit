@@ -508,13 +508,18 @@ namespace BLToolkit.Data.Linq.Builder
 						return expr.Arguments
 							.Select((arg,i) =>
 							{
-								var sql = ConvertToSql(context, arg);
+								var info = ConvertExpressions(context, arg, queryConvertFlag)[0];
+								//var sql = ConvertToSql(context, arg);
 								var mi  = expr.Members[i];
 
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								return new SqlInfo { Sql = sql, Member = mi };
+								//return new SqlInfo { Sql = sql, Member = mi };
+
+								info.Member = mi;
+
+								return info;
 							})
 							.ToArray();
 					}
@@ -532,13 +537,18 @@ namespace BLToolkit.Data.Linq.Builder
 							.OrderBy(b => dic[b.Member])
 							.Select (a =>
 							{
-								var sql = ConvertToSql(context, a.Expression);
+								var info = ConvertExpressions(context, a.Expression, queryConvertFlag)[0];
+								//var sql = ConvertToSql(context, a.Expression);
 								var mi  = a.Member;
 
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								return new SqlInfo { Sql = sql, Member = mi };
+								//return new SqlInfo { Sql = sql, Member = mi };
+
+								info.Member = mi;
+
+								return info;
 							})
 							.ToArray();
 					}
