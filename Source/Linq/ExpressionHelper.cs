@@ -1893,10 +1893,14 @@ namespace BLToolkit.Linq
 							return exp.Expression;
 
 						var e  = expr as NewArrayExpression;
-						var ex = Convert2(e.Expressions, func);
+						var et = e.Type.GetElementType();
+						var ex = Convert2(e.Expressions, func)
+							.Select(ee => et == typeof(object) && ee.Type.IsValueType ?
+								Expression.Convert(ee, typeof(object)) :
+								ee);
 
 						return ex != e.Expressions ?
-							Expression.NewArrayInit(e.Type.GetElementType(), ex) :
+							Expression.NewArrayInit(et, ex) :
 							expr;
 					}
 
