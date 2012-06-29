@@ -111,6 +111,9 @@ namespace BLToolkit.Data
 		{
 			get
 			{
+				var innerException = InnerException as DataException;
+				if (innerException != null)
+					return (innerException).Number;
 				return (int?)(_dbManager == null? null:
 					_dbManager.DataProvider.Convert(
 						InnerException, ConvertType.ExceptionToErrorNumber));
