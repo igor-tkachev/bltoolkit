@@ -656,10 +656,18 @@ namespace BLToolkit.Data.Linq.Builder
 											var nm = Members.Keys.FirstOrDefault(m => m.Name == member.Name);
 
 											if (nm != null && member.DeclaringType.IsInterface)
+											{
 												if (TypeHelper.IsSameOrParent(member.DeclaringType, nm.DeclaringType))
 													memberExpression = Members[nm];
+												else
+												{
+													var mdt = TypeHelper.GetDefiningTypes(member.DeclaringType, member).ToList();
+													var ndt = TypeHelper.GetDefiningTypes(Body.Type, nm).ToList();
 
-											//var pm = member.DeclaringType.GetInterfaceMap();
+													if (mdt.Intersect(ndt).Any())
+														memberExpression = Members[nm];
+												}
+											}
 
 											if (memberExpression == null)
 												throw new InvalidOperationException(
