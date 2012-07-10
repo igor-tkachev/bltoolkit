@@ -351,6 +351,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		SqlInfo[] ConvertMember(MemberInfo member, Expression expression, ConvertFlags flags)
 		{
+			/*
 			switch (expression.NodeType)
 			{
 				case ExpressionType.MemberAccess :
@@ -362,8 +363,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return new[] { new SqlInfo { Sql = sql.Sql, Member = member, Query = sql.Query } };
 			}
+			*/
 
-			var exprs =  ConvertExpressions(expression, flags);
+			var exprs = ConvertExpressions(expression, flags);
 
 			if (exprs.Length == 1)
 				exprs[0].Member = member;
