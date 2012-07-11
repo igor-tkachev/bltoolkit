@@ -187,6 +187,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+		
+		 public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
+	        {
+	            if (table.SequenceAttributes != null)
+	            {
+	                var attr = GetSequenceNameAttribute(table, false);
+	
+	                if (attr != null)
+	                    return new SqlExpression("nextval('" + attr.SequenceName+"')", Precedence.Primary);
+	            }
+	            return base.GetIdentityExpression(table, identityField, forReturning);
+	        }
 
 		//protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		//{
