@@ -8,7 +8,7 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "ARTIST", Owner = Consts.Owner)]
     public class Artist
     {
-        [MapField("ID_ARTIST"), PrimaryKey, Identity]
+        [MapField("ID_ARTIST"), PrimaryKey, Identity, SequenceName("SEQ_ARTIST")]
         public long Id { get; set; }
 
         [MapField("ARTIST")]

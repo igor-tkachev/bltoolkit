@@ -19,7 +19,7 @@ namespace UnitTests.CS.JointureTests
             password = "smsmms8";
 
             //Provider = new OdpDataProvider();
-            Provider = new GenericDataProvider(ProviderFullName.Oracle) { UseQueryText = false};
+            Provider = new GenericDataProvider(ProviderFullName.Oracle) { UseQueryText = true};
 
             ConnectionString = string.Format(
                 "data source={0};User Id={1};Password={2};Pooling=True;Connection Timeout=120;Max Pool Size=150;",

@@ -619,7 +619,9 @@ namespace BLToolkit.Data.Sql
 			{
 				Condition = (SearchCondition)((ISqlExpressionWalkable)Condition).Walk(skipColumns, action);
 
+#pragma warning disable 0618
 				Table.Walk(skipColumns, action);
+#pragma warning restore 0618
 
 				return null;
 			}
@@ -787,7 +789,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					Expr2 = Expr2.Walk(skipColumns, func);
 				}
 
@@ -857,7 +861,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					Expr2 = Expr2.Walk(skipColumns, func);
 
 					if (Escape != null)
@@ -917,7 +923,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					Expr2 = Expr2.Walk(skipColumns, func);
 					Expr3 = Expr3.Walk(skipColumns, func);
 				}
@@ -1009,7 +1017,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					SubQuery = (SqlQuery)((ISqlExpression)SubQuery).Walk(skipColumns, func);
 				}
 
@@ -1068,7 +1078,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, action);
+#pragma warning restore 0618
 					for (var i = 0; i < _values.Count; i++)
 						_values[i] = _values[i].Walk(skipColumns, action);
 				}
@@ -2049,7 +2061,9 @@ namespace BLToolkit.Data.Sql
 				for (var i = 0; i < Columns.Count; i++)
 				{
 					var col  = Columns[i];
+#pragma warning disable 0618
 					var expr = col.Walk(skipColumns, func);
+#pragma warning restore 0618
 
 					if (expr is Column)
 						Columns[i] = (Column)expr;
@@ -2136,27 +2150,27 @@ namespace BLToolkit.Data.Sql
 				Column     = column;
 				Expression = expression;
 
-                if (expression is SqlParameter)
-                {
-                    var p = (SqlParameter) expression;
+				if (expression is SqlParameter)
+				{
+					var p = (SqlParameter)expression;
 
-                    //if (type.IsEnum)
-                    //	p.SetEnumConverter(type, mappingSchema);
+					//if (type.IsEnum)
+					//	p.SetEnumConverter(type, mappingSchema);
 
-                    if (column is SqlField)
-                    {
-                        var field = (SqlField) column;
+					if (column is SqlField)
+					{
+						var field = (SqlField)column;
 
-                        if (field.MemberMapper != null)
-                        {
-                            if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
-                                p.DbType = field.MemberMapper.MapMemberInfo.DbType;
+						if (field.MemberMapper != null)
+						{
+							if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
+								p.DbType = field.MemberMapper.MapMemberInfo.DbType;
 
-                            if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
-                                p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
-                        }
-                    }
-                }
+							if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
+								p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
+						}
+					}
+				}
 			}
 
 			public ISqlExpression Column     { get; set; }
@@ -2981,8 +2995,10 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
+#pragma warning disable 0618
 				foreach (var t in Items)
 					t.Walk(skipColumns, func);
+#pragma warning restore 0618
 				return null;
 			}
 

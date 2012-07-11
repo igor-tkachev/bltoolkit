@@ -2,6 +2,7 @@
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BLToolkit.Data.DataProvider
@@ -137,20 +138,54 @@ namespace BLToolkit.Data.DataProvider
 
         public static string Interpret(IDbCommand poCommand)
         {
-            if (poCommand.CommandText.EndsWith("\r\n"))
-                poCommand.CommandText = poCommand.CommandText.Substring(0, poCommand.CommandText.Length - 2) + " \r\n";
-            else
-                poCommand.CommandText += " ";
-
-            poCommand.CommandText = poCommand.CommandText.Replace("\r", " ");
-
             if (poCommand.Parameters.Count == 0)
                 return poCommand.CommandText;
 
-            var oRegex = new Regex(@"(?<Parameters>:[\da-zA-Z0-9_]+ )([\s]*|([,\)]|AND|OR)|$)");
+            var oRegex = new Regex(@"(?<string>'[^']+')|(?<Parameters>:[a-zA-Z0-9_]+)");
             MatchCollection oMatchCollection = oRegex.Matches(poCommand.CommandText);
 
-            if (oMatchCollection.Count != poCommand.Parameters.Count)
+            string strQuery = poCommand.CommandText;
+            int matchCount = 0;
+
+            for (int i = 0; i < oMatchCollection.Count; i++)
+            {
+                if (oMatchCollection[i].Groups["string"].Success)
+                    continue;
+
+                string strParameter = oMatchCollection[i].Groups["Parameters"].Captures[0].Value;
+
+                var param = (IDbDataParameter)poCommand.Parameters[matchCount];
+                if (param.Value is DateTime)
+                {
+                    var dt = (DateTime)param.Value;
+                    strQuery = strQuery.Replace(strParameter,
+                                                dt.Date == dt
+                                                    ? SQLConvertDate(dt) + " "
+                                                    : SQLConvertDateTime(dt) + " ");
+                }
+                else if (param.Value is string)
+                    strQuery = strQuery.Replace(strParameter, SQLConvertString(param.Value.ToString()) + " ");
+                else if (param.Value is Int16)
+                    strQuery = strQuery.Replace(strParameter, ((Int16)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                else if (param.Value is Int32)
+                    strQuery = strQuery.Replace(strParameter, ((Int32)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                else if (param.Value is Int64)
+                    strQuery = strQuery.Replace(strParameter, ((Int64)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                else if (param.Value is decimal)
+                    strQuery = strQuery.Replace(strParameter, ((decimal)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                else if (param.Value is float)
+                    strQuery = strQuery.Replace(strParameter, ((float)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                else if (param.Value is double)
+                    strQuery = strQuery.Replace(strParameter, ((double)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                else if (param.Value is TimeSpan)
+                    strQuery = strQuery.Replace(strParameter, "'" + ((TimeSpan)param.Value).ToString() + "' ");
+                else
+                    throw new NotImplementedException(param.Value.GetType() + " is not implemented yet.");
+
+                matchCount++;
+            }
+
+            if (matchCount != poCommand.Parameters.Count)
             {
                 // ReSharper disable InvocationIsSkipped
                 Debug.WriteLine(
@@ -176,42 +211,6 @@ namespace BLToolkit.Data.DataProvider
                 throw new Exception(msg);
             }
 
-            string strQuery = poCommand.CommandText;
-
-            for (int i = 0; i < oMatchCollection.Count; i++)
-            {
-                string strParameter = oMatchCollection[i].Groups["Parameters"].Captures[0].Value;
-                if (!string.IsNullOrEmpty(strParameter))
-                {
-                    var param = (IDbDataParameter)poCommand.Parameters[i];
-                    if (param.Value is DateTime)
-                    {
-                        var dt = (DateTime)param.Value;
-                        strQuery = strQuery.Replace(strParameter,
-                                                    dt.Date == dt
-                                                        ? SQLConvertDate(dt) + " "
-                                                        : SQLConvertDateTime(dt) + " ");
-                    }
-                    else if (param.Value is string)
-                        strQuery = strQuery.Replace(strParameter, SQLConvertString(param.Value.ToString()) + " ");
-                    else if (param.Value is Int16)
-                        strQuery = strQuery.Replace(strParameter, ((Int16)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
-                    else if (param.Value is Int32)
-                        strQuery = strQuery.Replace(strParameter, ((Int32)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
-                    else if (param.Value is Int64)
-                        strQuery = strQuery.Replace(strParameter, ((Int64)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
-                    else if (param.Value is decimal)
-                        strQuery = strQuery.Replace(strParameter, ((decimal)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
-                    else if (param.Value is float)
-                        strQuery = strQuery.Replace(strParameter, ((float)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
-                    else if (param.Value is double)
-                        strQuery = strQuery.Replace(strParameter, ((double)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
-                    else if (param.Value is TimeSpan)
-                        strQuery = strQuery.Replace(strParameter, "'" + ((TimeSpan)param.Value).ToString() + "' ");
-                    else
-                        throw new NotImplementedException(param.Value.GetType() + " is not implemented yet.");
-                }
-            }
             return strQuery;
         }
 

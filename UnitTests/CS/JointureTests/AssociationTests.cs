@@ -120,6 +120,49 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void SelectInPeriod()
+        {
+            using (new ExecTimeInfo())
+            {
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+
+                    var beginMinute = 0;
+                    var beginHour = 0;
+
+                    var endMinute = 50;
+                    var endHour = 23;
+
+                    IQueryable<TitleQuery> queryTitle = from data in db.GetTable<DataMusic>()
+                                                        join title in db.GetTable<Title>() on data.TitleId equals
+                                                            title.Id
+                                                        join artist in db.GetTable<Artist>() on title.ArtistID
+                                                            equals artist.Id
+                                                        where data.MediaId == 2002
+                                                              &&
+                                                              data.DateMedia >=
+                                                              DateTime.Today
+                                                              &&
+                                                              data.DateMedia <=
+                                                              DateTime.Today
+                                                              &&
+                                                              data.DateSpot.TimeOfDay >=
+                                                              new TimeSpan(beginHour, beginMinute, 0)
+                                                              &&
+                                                              data.DateSpot.TimeOfDay <=
+                                                              new TimeSpan(endHour, endMinute, 0)
+                                                        select new TitleQuery
+                                                                   {
+                                                                       Title = title,
+                                                                       Artist = artist,
+                                                                   };
+                    var res = queryTitle.ToList();
+                }
+            }
+        }
+
+
+        [Test]
         public void InsertWithIdentity()
         {
             using (var db = _connectionFactory.CreateDbManager())

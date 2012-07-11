@@ -198,7 +198,7 @@
     <Compile Include="JointureTests\OleronTest.cs" />
     <Compile Include="JointureTests\OrquaFactory.cs" />
     <Compile Include="JointureTests\OrquaTest.cs" />
-    <Compile Include="JointureTests\TestDbConnectionFactory.cs" />
+    <Compile Include="JointureTests\MusicFactory.cs" />
     <Compile Include="JointureTests\Title.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />
