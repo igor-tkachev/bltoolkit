@@ -661,8 +661,8 @@ namespace BLToolkit.Data.Linq.Builder
 													memberExpression = Members[nm];
 												else
 												{
-													var mdt = TypeHelper.GetDefiningTypes(member.DeclaringType, member).ToList();
-													var ndt = TypeHelper.GetDefiningTypes(Body.Type, nm).ToList();
+													var mdt = TypeHelper.GetDefiningTypes(member.DeclaringType, member);
+													var ndt = TypeHelper.GetDefiningTypes(Body.Type,            nm);
 
 													if (mdt.Intersect(ndt).Any())
 														memberExpression = Members[nm];
