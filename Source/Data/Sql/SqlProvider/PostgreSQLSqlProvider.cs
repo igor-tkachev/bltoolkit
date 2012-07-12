@@ -187,7 +187,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
-		
+
 		public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
 		{
 			if (table.SequenceAttributes != null)
