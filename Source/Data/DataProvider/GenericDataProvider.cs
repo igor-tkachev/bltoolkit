@@ -18,8 +18,11 @@ namespace BLToolkit.Data.DataProvider
         public GenericDataProvider(string providerName)
         {
             _providerName = providerName;
-            _factory = DbProviderFactories.GetFactory(providerName);
-
+            using (var ts = new TransactionScope())
+            {
+                _factory = DbProviderFactories.GetFactory(providerName);
+            }
+            
             switch (Name)
             {
                 case ProviderFullName.Oracle:
