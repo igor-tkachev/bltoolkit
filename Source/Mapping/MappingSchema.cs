@@ -10,6 +10,9 @@ using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Xml;
+#if !SILVERLIGHT
+using System.Xml.Linq;
+#endif
 
 using BLToolkit.Common;
 using BLToolkit.Properties;
@@ -169,6 +172,7 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			DefaultXmlReaderNullValue      = (XmlReader)     GetNullValue(typeof(XmlReader));
 			DefaultXmlDocumentNullValue    = (XmlDocument)   GetNullValue(typeof(XmlDocument));
+            DefaultXElementNullValue       = (XElement)      GetNullValue(typeof(XElement));
 #endif
 		}
 
@@ -403,6 +407,16 @@ namespace BLToolkit.Mapping
 				value == null || value is DBNull? DefaultXmlDocumentNullValue:
 					Convert.ToXmlDocument(value);
 		}
+
+        public XElement DefaultXElementNullValue { get; set; }
+
+        public virtual XElement ConvertToXElement(object value)
+        {
+            return
+                value is XElement ? (XElement)value :
+                value == null || value is DBNull ? DefaultXElementNullValue :
+                    XElement.Parse(value.ToString());
+        }
 
 #endif
 
@@ -732,6 +746,7 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			if (typeof(XmlReader)      == typeof(T)) return (T)(object)DefaultXmlReaderNullValue;
 			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)DefaultXmlDocumentNullValue;
+            if (typeof(XElement)       == typeof(T)) return (T)(object)DefaultXElementNullValue;
 #endif
 			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)DefaultDateTimeOffsetNullValue;
 
@@ -893,6 +908,7 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			if (typeof(XmlReader)      == conversionType) return ConvertToXmlReader     (value);
 			if (typeof(XmlDocument)    == conversionType) return ConvertToXmlDocument   (value);
+            if (typeof(XElement)       == conversionType) return ConvertToXElement      (value);
 #endif
 			if (typeof(byte[])         == conversionType) return ConvertToByteArray     (value);
 			if (typeof(Binary)         == conversionType) return ConvertToLinqBinary    (value);
@@ -2114,7 +2130,7 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-        //NOTE changed to virtual
+		//NOTE changed to virtual
 		public virtual object MapDataReaderToObject(
 			IDataReader     dataReader,
 			Type            destObjectType,
@@ -2887,7 +2903,7 @@ namespace BLToolkit.Mapping
 			return list;
 		}
 
-        //NOTE changed to virtual
+		//NOTE changed to virtual
 		public virtual IList<T> MapDataReaderToList<T>(
 			IDataReader     reader,
 			IList<T>        list,

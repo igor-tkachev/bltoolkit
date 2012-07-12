@@ -1,7 +1,10 @@
 ﻿using System.Linq;
 
 using BLToolkit.Data.DataProvider;
-
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
+using BLToolkit.Validation;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -590,6 +593,35 @@ namespace Data.Linq
 						(x, y) => new { x.Parent, Child = x.Child.FirstOrDefault() })
 					.Where(x => x.Parent.ParentID == 1 && x.Parent.Value1 != null)
 					.OrderBy(x => x.Parent.ParentID)));
+		}
+
+		public enum EnumInt
+		{
+			[MapValue(1)] One
+		}
+
+		[TableName("Child")]
+		public class EnumChild
+		{
+			public int     ParentID;
+			public EnumInt ChildID;
+		}
+
+		[Test]
+		public void LeftJoin5()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from p in db.Parent
+						join ch in new Table<EnumChild>(db) on p.ParentID equals ch.ParentID into lj1
+						from ch in lj1.DefaultIfEmpty()
+					where ch == null
+					select new { p, ch };
+
+				var list = q.ToList();
+				list.ToString();
+			});
 		}
 
 		[Test]

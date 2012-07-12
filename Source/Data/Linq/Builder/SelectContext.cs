@@ -351,6 +351,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		SqlInfo[] ConvertMember(MemberInfo member, Expression expression, ConvertFlags flags)
 		{
+			/*
 			switch (expression.NodeType)
 			{
 				case ExpressionType.MemberAccess :
@@ -362,8 +363,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 					return new[] { new SqlInfo { Sql = sql.Sql, Member = member, Query = sql.Query } };
 			}
+			*/
 
-			var exprs =  ConvertExpressions(expression, flags);
+			var exprs = ConvertExpressions(expression, flags);
 
 			if (exprs.Length == 1)
 				exprs[0].Member = member;
@@ -645,7 +647,32 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								case ExpressionType.MemberAccess :
 									{
-										var memberExpression = Members[((MemberExpression)levelExpression).Member];
+										var member = ((MemberExpression)levelExpression).Member;
+
+										Expression memberExpression;
+
+										if (!Members.TryGetValue(member, out memberExpression))
+										{
+											var nm = Members.Keys.FirstOrDefault(m => m.Name == member.Name);
+
+											if (nm != null && member.DeclaringType.IsInterface)
+											{
+												if (TypeHelper.IsSameOrParent(member.DeclaringType, nm.DeclaringType))
+													memberExpression = Members[nm];
+												else
+												{
+													var mdt = TypeHelper.GetDefiningTypes(member.DeclaringType, member);
+													var ndt = TypeHelper.GetDefiningTypes(Body.Type,            nm);
+
+													if (mdt.Intersect(ndt).Any())
+														memberExpression = Members[nm];
+												}
+											}
+
+											if (memberExpression == null)
+												throw new InvalidOperationException(
+													string.Format("Invalid member '{0}.{1}'", member.DeclaringType, member.Name));
+										}
 
 										if (levelExpression == expression)
 										{

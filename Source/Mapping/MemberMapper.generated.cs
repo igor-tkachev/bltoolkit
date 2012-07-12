@@ -10,6 +10,9 @@ using System.IO;
 using System.Xml;
 
 using Convert = BLToolkit.Common.Convert;
+#if !SILVERLIGHT
+using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Mapping
 {
@@ -1039,6 +1042,38 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
+
+        class XElementMapper : MemberMapper
+        {
+            XElement _nullValue;
+
+            public override void SetValue(object o, object value)
+            {
+                MemberAccessor.SetValue(
+                    o,
+                    value is XElement ? value :
+                    value == null ? _nullValue : MappingSchema.ConvertToXElement(value));
+            }
+
+            public override void Init(MapMemberInfo mapMemberInfo)
+            {
+                if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+                if (mapMemberInfo.NullValue != null)
+                    _nullValue = mapMemberInfo.MappingSchema.ConvertToXElement(mapMemberInfo.NullValue);
+
+                base.Init(mapMemberInfo);
+            }
+
+            public class Nullable : XElementMapper
+            {
+                public override object GetValue(object o)
+                {
+                    var value = MemberAccessor.GetValue(o);
+                    return value == _nullValue ? null : (object)value;
+                }
+            }
+        }
 
 		class SqlByteMapper : MemberMapper
 		{
