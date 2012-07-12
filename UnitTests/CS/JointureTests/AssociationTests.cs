@@ -84,6 +84,23 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void TestLinqAssociation2()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from m in db.GetTable<Artist2>()
+                            where m.Id == 1833
+                            select new
+                            {
+                                m.Name, m.Titles
+                            };
+
+                var res = query.ToList();
+                Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
         public void SelectTooLong2()
         {
             using (var db = _connectionFactory.CreateDbManager())

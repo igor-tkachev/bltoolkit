@@ -20,13 +20,13 @@ namespace UnitTests.CS.JointureTests
         #endregion
     }
 
-    [TableName(Name = "DATA_RADIO", Owner = "PITAFR01")]
+    [TableName(Owner = "PITAFR01")]
     public class DATA_RADIO
     {
-        [MapField("ID_DATA_RADIO"), PrimaryKey]
+        [PrimaryKey]
         public long ID_DATA_RADIO { get; set; }
 
-        [MapField("ID_COBRANDING_ADVERTISER"), PrimaryKey]
+        [PrimaryKey]
         public Int64 ID_COBRANDING_ADVERTISER { get; set; }
 
         public long ID_DATA_VERSION { get; set; }
@@ -65,10 +65,10 @@ namespace UnitTests.CS.JointureTests
 
     }
 
-    [TableName(Name = "DATA_VERSION", Owner = "PITAFR01")]
+    [TableName(Owner = "PITAFR01")]
     public class DATA_VERSION
     {
-        [MapField("ID_DATA_VERSION"), PrimaryKey]
+        [PrimaryKey]
         public long ID_DATA_VERSION { get; set; }
 
         public long ID_DATA_MEDIA { get; set; }
@@ -109,7 +109,7 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "MULTIMEDIA", Owner = "PITAFR01")]
     public class MULTIMEDIA_DB
     {
-        [MapField("ID_MULTIMEDIA"), PrimaryKey]
+        [PrimaryKey]
         public long ID_MULTIMEDIA { get; set; }
 
         public string MULTIMEDIA { get; set; }
