@@ -536,7 +536,7 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue2 datetime,
 	BoolValue      bit,
 	GuidValue      uniqueidentifier,
-	BinaryValue    varbinary(5000),
+	BinaryValue    varbinary(5000) NULL,
 	SmallIntValue  smallint,
 	IntValue       int NULL,
 	BigIntValue    bigint NULL

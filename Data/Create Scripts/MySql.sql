@@ -94,7 +94,7 @@ GO
 CREATE Procedure Person_SelectByKey(id int)
 BEGIN
 
-    SELECT * FROM Person WHERE PersonID = id;
+	SELECT * FROM Person WHERE PersonID = id;
 
 END
 GO
@@ -311,10 +311,10 @@ GO
 
 CREATE Procedure OutRefTest
 (
-	    ID             int,
+		ID             int,
 	OUT outputID       int,
 	OUT inputOutputID  int,
-	    str            varchar(50),
+		str            varchar(50),
 	OUT outputStr      varchar(50),
 	OUT inputOutputStr varchar(50)
 )
@@ -335,7 +335,7 @@ GO
 
 CREATE Procedure OutRefEnumTest
 (
-	    str            varchar(50),
+		str            varchar(50),
 	OUT outputStr      varchar(50),
 	OUT inputOutputStr varchar(50)
 )
@@ -417,8 +417,8 @@ INSERT INTO DataTypeTest
 	 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
 VALUES
 	(   NULL,        0,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
+		NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+		NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
 GO
 
 INSERT INTO DataTypeTest
@@ -461,7 +461,7 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue2 datetime NULL,
 	BoolValue      boolean,
 	GuidValue      char(36),
-	BinaryValue    varbinary(5000),
+	BinaryValue    varbinary(5000) NULL,
 	SmallIntValue  smallint,
 	IntValue       int NULL,
 	BigIntValue    bigint NULL

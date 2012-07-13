@@ -244,6 +244,20 @@ namespace BLToolkit.ServiceModel
 				return minus ? -value : value;
 			}
 
+			protected int? ReadNullOrInt()
+			{
+				Get(' ');
+
+				var minus = Get('-');
+				var value = 0;
+				var pos   = Pos;
+
+				for (var c = Peek(); char.IsDigit(c); c = Next())
+					value = value * 10 + (c - '0');
+
+				return minus ? pos == Pos ? (int?)null : -value : value;
+			}
+
 			protected int? ReadCount()
 			{
 				Get(' ');
@@ -350,11 +364,15 @@ namespace BLToolkit.ServiceModel
 			{
 				public object GetArray(DeserializerBase deserializer)
 				{
-					var count = deserializer.ReadInt();
-					var arr   = new T[count];
+					var count = deserializer.ReadNullOrInt();
+
+					if (count == null)
+						return null;
+
+					var arr   = new T[count.Value];
 					var type  = typeof(T);
 
-					for (var i = 0; i < count; i++)
+					for (var i = 0; i < count.Value; i++)
 						arr[i] = (T)deserializer.ReadValue(type);
 
 					return arr;
@@ -373,7 +391,7 @@ namespace BLToolkit.ServiceModel
 				{
 					var elem = type.GetElementType();
 
-					Func<DeserializerBase, object > deserializer;
+					Func<DeserializerBase,object> deserializer;
 
 					lock (_arrayDeserializers)
 					{
