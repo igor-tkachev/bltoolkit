@@ -1339,7 +1339,7 @@ namespace BLToolkit.Reflection
 				|| type == typeof(XmlReader)
 #if !SILVERLIGHT
 				|| type == typeof(XmlDocument)
-                || type == typeof(XElement)
+				|| type == typeof(XElement)
 #endif
 				;
 		}

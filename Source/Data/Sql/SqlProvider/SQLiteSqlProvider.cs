@@ -150,6 +150,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else
 				base.BuildValue(sb, value);
 		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb
+				.Append(string.Format("'{0:yyyy-MM-dd HH:mm:ss.fff}", value).TrimEnd('0'))
+				.Append('\'');
+		}
+
 		public override object Convert(object value, ConvertType convertType)
 		{
 			switch (convertType)
