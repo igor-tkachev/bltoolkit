@@ -549,7 +549,8 @@ CREATE TABLE LinqDataTypes
 )
 COMMIT;
 
-DROP GENERATOR SequenceTestSeq COMMIT;
+DROP GENERATOR SequenceTestSeq
+COMMIT;
 
 CREATE GENERATOR SequenceTestSeq
 COMMIT;
@@ -558,7 +559,7 @@ DROP TABLE SequenceTest COMMIT;
 
 CREATE TABLE SequenceTest
 (
-	ID                 int NOT NULL PRIMARY KEY,
+	ID     int         NOT NULL PRIMARY KEY,
 	Value_ VARCHAR(50) NOT NULL
 )
 COMMIT;

@@ -10,7 +10,7 @@ using UnitTests.Linq.Interface.Model;
 namespace Data.Linq.ProviderSpecific
 {
 	[TestFixture]
-    public class Firebird : TestBase
+	public class Firebird : TestBase
 	{
 		[Test]
 		public void SequenceInsert()

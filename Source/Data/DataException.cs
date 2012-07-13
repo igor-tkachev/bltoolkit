@@ -113,7 +113,7 @@ namespace BLToolkit.Data
 			{
 				var innerException = InnerException as DataException;
 				if (innerException != null)
-					return (innerException).Number;
+					return innerException.Number;
 				if (_dbManager == null) return null;
 				return _dbManager.DataProvider.Convert(InnerException, ConvertType.ExceptionToErrorNumber) as int?;
 			}
