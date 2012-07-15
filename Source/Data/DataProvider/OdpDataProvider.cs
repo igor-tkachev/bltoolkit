@@ -6,19 +6,33 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 using BLToolkit.Aspects;
 using BLToolkit.Common;
+using BLToolkit.Data.DataProvider.Interpreters;
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-
+using BLToolkit.Reflection.Extension;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
+using OracleBFile = Oracle.DataAccess.Types.OracleBFile;
+using OracleBinary = Oracle.DataAccess.Types.OracleBinary;
+using OracleCommand = Oracle.DataAccess.Client.OracleCommand;
+using OracleCommandBuilder = Oracle.DataAccess.Client.OracleCommandBuilder;
+using OracleConnection = Oracle.DataAccess.Client.OracleConnection;
+using OracleDataAdapter = Oracle.DataAccess.Client.OracleDataAdapter;
+using OracleDataReader = Oracle.DataAccess.Client.OracleDataReader;
+using OracleException = Oracle.DataAccess.Client.OracleException;
+using OracleParameter = Oracle.DataAccess.Client.OracleParameter;
+using OracleString = Oracle.DataAccess.Types.OracleString;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -33,9 +47,12 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public class OdpDataProvider : DataProviderBase
 	{
+	    private readonly DataProviderInterpreterBase _interpreterBase;
+
 		public OdpDataProvider()
 		{
 			MappingSchema = new OdpMappingSchema();
+            _interpreterBase = new OracleDataProviderInterpreter();
 		}
 
 		static OdpDataProvider()
@@ -49,7 +66,7 @@ namespace BLToolkit.Data.DataProvider
 				var typeTable = (Hashtable)oraDbDbTypeTableType.InvokeMember(
 					"s_table", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.GetField,
 					null, null, Type.EmptyTypes);
-
+                
 				if (null != typeTable)
 				{
 					typeTable[typeof(DateTime[])]          = OracleDbType.TimeStamp;
@@ -243,7 +260,16 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToCommandParameter:
+                case ConvertType.NameToQueryParameter:
+                    var qname = (string)value;
+                    if (qname.Length > 30)
+                    {
+                        qname = qname.Substring(0, 30);
+                        return SqlProvider.Convert(qname, convertType);
+                    }
+			        return SqlProvider.Convert(value, convertType);
+
+			    case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
@@ -500,6 +526,11 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
+        public override void SetParameterValue(IDbDataParameter parameter, object value)
+        {
+            _interpreterBase.SetParameterValue(parameter, value);
+        }
+
 		private static Stream CopyStream(Stream stream, OracleCommand cmd)
 		{
 			return CopyStream(Common.Convert.ToByteArray(stream), cmd);
@@ -530,7 +561,22 @@ namespace BLToolkit.Data.DataProvider
 			return base.IsValueParameter(parameter);
 		}
 
-		public override IDbDataParameter CreateParameterObject(IDbCommand command)
+        public override string GetSequenceQuery(string sequenceName)
+        {
+            return _interpreterBase.GetSequenceQuery(sequenceName);
+        }
+
+        public override string NextSequenceQuery(string sequenceName)
+        {
+            return _interpreterBase.NextSequenceQuery(sequenceName);
+        }
+
+        public override string GetReturningInto(string columnName)
+        {
+            return _interpreterBase.GetReturningInto(columnName);
+        }
+
+	    public override IDbDataParameter CreateParameterObject(IDbCommand command)
 		{
 			var parameter = base.CreateParameterObject(command);
 
@@ -595,12 +641,45 @@ namespace BLToolkit.Data.DataProvider
 				base.GetDataReader(schema, dataReader);
 		}
 
+        public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            if (UseQueryText)
+            {
+                command.CommandText = OracleHelper.Interpret(command);
+                command.Parameters.Clear();
+            }
+            return base.GetDataReader(command, commandBehavior);
+        }    
+
 		class OracleDataReaderEx: DataReaderEx<OracleDataReader>
 		{
 			public OracleDataReaderEx(OracleDataReader rd)
 				: base(rd)
 			{
 			}
+
+            public override object GetValue(int i)
+            {
+                string dataTypeName = GetDataTypeName(i);
+                if (dataTypeName == "Clob")
+                {                    
+                    OracleClob clob = DataReader.GetOracleClob(i);
+                    if (!clob.IsNull)
+                    {
+                        return clob;
+                        //byte[] b = new byte[clob.Length];
+                        ////Read data from database
+                        //clob.Read(b, 0, (int)clob.Length);
+
+                        //return b;
+                        return clob.Value;
+                    }
+                    else
+                        return null;
+                }
+                else
+                    return base.GetValue(i);
+            }
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{
@@ -1486,33 +1565,63 @@ namespace BLToolkit.Data.DataProvider
 				//.Replace("  ", " ")
 				+ ") VALUES (";
 
+
 			foreach (var item in collection)
 			{
 				if (sb.Length == 0)
 					sb.AppendLine("INSERT ALL");
 
-				sb.Append(str);
+				//sb.Append(str);                
 
+			    string strItem = "\t" + insertText
+			                                .Replace("INSERT INTO", "INTO")
+			                                .Replace("\r", "")
+			                                .Replace("\n", "")
+			                                .Replace("\t", " ")
+			                                .Replace("( ", "(");
+			    int mCnt = 0;
 				foreach (var member in members)
 				{
+                    var sbItem = new StringBuilder();
+
 					var value = member.GetValue(item);
 
-					if (value is Nullable<DateTime>)
+					if (value is DateTime?)
 						value = ((DateTime?)value).Value;
 
-					if (value is DateTime)
-					{
-						var dt = (DateTime)value;
-						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
-					}
-					else
-						sp.BuildValue(sb, value);
+                    if (value is DateTime)
+                    {
+                        var dt = (DateTime)value;
+                        string dtime = string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt);                        
+                        //sb.Append(dtime);
+                        sbItem.Append(dtime);
+                    }
+                    else
+                    {
+                        //var keyGenerator = member.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+                        ////Retrieving PkValue on Batch insert is useless
+                        //if (keyGenerator != null && !keyGenerator.RetrievePkValue)
+                        //{
+                        //    bool isSet;
+                        //    string ownerName = member.MappingSchema.MetadataProvider.GetOwnerName(member.Type, new ExtensionList(), out isSet);
+                        //    value = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
+                        //}
 
-					sb.Append(", ");
+                        //sp.BuildValue(sb, value);
+                        sp.BuildValue(sbItem, value);
+                    }
+
+                    strItem = strItem.Replace(string.Format("{{{0}}}", mCnt), sbItem.ToString());
+				    mCnt++;
+
+				    //sb.Append(", ");
 				}
 
-				sb.Length -= 2;
-				sb.AppendLine(")");
+			    sb.Append(strItem);
+
+                //sb.Length -= 2;
+                //sb.AppendLine(")");
+			    sb.AppendLine();
 
 				n++;
 

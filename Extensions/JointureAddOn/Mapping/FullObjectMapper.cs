@@ -26,6 +26,7 @@ namespace BLToolkit.Mapping
     public class ValueMapper : TableDescription, IMapper
     {
         public string ColumnName { get; set; }
+        public Type DbType { get; set; }
 
         #region IMapper Members
 
@@ -67,6 +68,7 @@ namespace BLToolkit.Mapping
         public bool IsLazy { get; set; }
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
+        public GetHandler PrimaryKeyValueGetter { get; set; }
 
         #endregion
 
@@ -86,7 +88,11 @@ namespace BLToolkit.Mapping
     {
         bool IsLazy { get; set; }
         bool ContainsLazyChild { get; set; }
+        /// <summary>
+        /// Is set only for CollectionFullObjectMapper. TODO : Should refactor this?
+        /// </summary>
         GetHandler Getter { get; set; }
+        GetHandler PrimaryKeyValueGetter { get; set; }
     }
 
     public interface IPropertiesMapping
@@ -132,6 +138,7 @@ namespace BLToolkit.Mapping
         #region ILazyMapper
 
         public GetHandler ParentKeyGetter { get; set; }
+        public GetHandler PrimaryKeyValueGetter { get; set; }
 
         #endregion
     }

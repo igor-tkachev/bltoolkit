@@ -42,6 +42,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+        public virtual string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            isSet = false;
+            return null;
+        }
+
 		#region GetFieldStorage
 
 		public virtual string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)

@@ -4,6 +4,7 @@ using System.Data;
 
 using BLToolkit.Data;
 using BLToolkit.Mapping;
+using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
@@ -19,6 +20,8 @@ namespace BLToolkit.DataAccess
 			ObjectMapper = objectMapper;
 		}
 
+        public string OwnerName { get; set; }
+        public string ActionName { get; set; }
 		public string       QueryText    { get; set; }
 		public ObjectMapper ObjectMapper { get; private set; }
 
@@ -71,23 +74,28 @@ namespace BLToolkit.DataAccess
 
 				var mmi = info.MemberMapper.MapMemberInfo;
 				var val = info.MemberMapper.GetValue(obj);
+               
+                if (val == null && mmi.Nullable/* && mmi.NullValue == null*/)
+                {
+                    //replace value with DbNull
+                    val = DBNull.Value;
+                }
 
-				if (val == null && mmi.Nullable/* && mmi.NullValue == null*/)
-				{
-					//replace value with DbNull
-					val = DBNull.Value;
-				}
+                if (mmi.IsDbTypeSet)
+                {
+                    parameters[i] = mmi.IsDbSizeSet
+                        ? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize)
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
+                }
+                else
+                {
+                    parameters[i] = db.Parameter(info.ParameterName, val);
+                }
 
-				if (mmi.IsDbTypeSet)
-				{
-					parameters[i] = mmi.IsDbSizeSet
-						? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize) 
-						: db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
-				}
-				else
-				{
-					parameters[i] = db.Parameter(info.ParameterName, val);
-				}
+                if (mmi.KeyGenerator is SequenceKeyGenerator && ActionName == "InsertWithIdentity")
+                {
+                    parameters[i] = db.OutputParameter(info.ParameterName, val);
+                }
 			}
 
 			return parameters;
@@ -95,12 +103,12 @@ namespace BLToolkit.DataAccess
 
 		public MemberMapper[] GetMemberMappers()
 		{
-			var members = new MemberMapper[Parameters.Count];
+            var members = new MemberMapper[Parameters.Count];
 
-			for (var i = 0; i < Parameters.Count; i++)
-				members[i] = Parameters[i].MemberMapper;
+            for (var i = 0; i < Parameters.Count; i++)
+                members[i] = Parameters[i].MemberMapper;
 
-			return members;
+            return members;
 		}
 	}
 }

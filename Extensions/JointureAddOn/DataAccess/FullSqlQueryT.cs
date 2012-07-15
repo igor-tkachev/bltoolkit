@@ -13,20 +13,14 @@ namespace BLToolkit.DataAccess
 {
     public class FullSqlQuery : SqlQuery
     {
-        private bool _ignoreLazyLoad;
+        private readonly bool _ignoreLazyLoad;
 
         #region Constructors
 
-        public FullSqlQuery(DbManager dbManager)
+        public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(false);
-        }
-
-        public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad)
-            : base(dbManager)
-        {
-            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager.MappingSchema, ignoreLazyLoad, mappingOrder, ignoreMissingColumns);
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 
@@ -46,6 +40,23 @@ namespace BLToolkit.DataAccess
                 default:
                     return base.CreateSqlText(db, type, actionName);
             }
+        }
+
+        private readonly Hashtable _actionSqlQueryInfo = new Hashtable();
+
+        [NoInterception]
+        public override SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
+        {    
+            var key = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
+            var query = (SqlQueryInfo)_actionSqlQueryInfo[key];
+
+            if (query == null)
+            {
+                query = CreateSqlText(db, type, actionName);
+                _actionSqlQueryInfo[key] = query;
+            }
+
+            return query;
         }
 
         #endregion
@@ -308,20 +319,14 @@ namespace BLToolkit.DataAccess
 
     public class FullSqlQueryT<T> : SqlQuery<T>
     {
-        private bool _ignoreLazyLoad;
+        private readonly bool _ignoreLazyLoad;
 
         #region Constructors
 
-        public FullSqlQueryT(DbManager dbManager)
+        public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema();
-        }
-
-        public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad)
-            : base(dbManager)
-        {
-            dbManager.MappingSchema = new FullMappingSchema(ignoreLazyLoad);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager.MappingSchema, ignoreLazyLoad, mappingOrder, ignoreMissingColumns);
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 
