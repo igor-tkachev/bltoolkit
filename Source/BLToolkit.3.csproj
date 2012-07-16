@@ -185,6 +185,7 @@
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
+    <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Linq\TableExpressionAttribute.cs" />
     <Compile Include="Data\Linq\TableFunctionAttribute.cs" />
     <Compile Include="Data\Linq\DataContext.cs" />

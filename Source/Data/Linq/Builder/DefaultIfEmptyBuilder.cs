@@ -74,6 +74,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var defaultValue = _defaultValue ?? Expression.Constant(null, expr.Type);
 
+#if FW4 || SILVERLIGHT
+
 					if (expr.NodeType == ExpressionType.Parameter)
 					{
 						var par  = (ParameterExpression)expr;
@@ -100,6 +102,8 @@ namespace BLToolkit.Data.Linq.Builder
 							}
 						}
 					}
+
+#endif
 
 					expr = Expression.Condition(e, defaultValue, expr);
 				}

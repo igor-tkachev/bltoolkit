@@ -687,6 +687,65 @@ namespace Update
 			});
 		}
 
+		[TableName("LinqDataTypes")]
+		public class LinqDataTypesArrayTest
+		{
+			public int      ID;
+			public decimal  MoneyValue;
+			public DateTime DateTimeValue;
+			public bool     BoolValue;
+			public Guid     GuidValue;
+			public byte[]   BinaryValue;
+			public short    SmallIntValue;
+		}
+
+		[Test]
+		public void InsertArray1()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var types = db.GetTable<LinqDataTypesArrayTest>();
+
+					types.Delete(t => t.ID > 1000);
+					types.Insert(() => new LinqDataTypesArrayTest { ID = 1001, BoolValue = true, BinaryValue = null });
+
+					Assert.IsNull(types.Single(t => t.ID == 1001).BinaryValue);
+				}
+				finally
+				{
+					db.GetTable<LinqDataTypesArrayTest>().Delete(t => t.ID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void InsertArray2()
+		{
+			ForEachProvider(db =>
+			{
+				try
+				{
+					var types = db.GetTable<LinqDataTypesArrayTest>();
+
+					types.Delete(t => t.ID > 1000);
+
+					byte[] arr = null;
+
+					types.Insert(() => new LinqDataTypesArrayTest { ID = 1001, BoolValue = true, BinaryValue = arr });
+
+					var res = types.Single(t => t.ID == 1001).BinaryValue;
+
+					Assert.IsNull(res);
+				}
+				finally
+				{
+					db.GetTable<LinqDataTypesArrayTest>().Delete(t => t.ID > 1000);
+				}
+			});
+		}
+
 		[Test]
 		public void InsertUnion1()
 		{
