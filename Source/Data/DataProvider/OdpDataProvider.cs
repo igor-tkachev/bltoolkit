@@ -672,7 +672,7 @@ namespace BLToolkit.Data.DataProvider
                         //clob.Read(b, 0, (int)clob.Length);
 
                         //return b;
-                        return clob.Value;
+                        //return clob.Value;
                     }
                     else
                         return null;

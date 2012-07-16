@@ -108,7 +108,6 @@
     <Compile Include="Common\NameOrIndexParameter.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\IdentityAttribute.cs" />
-    <Compile Include="DataAccess\KeyGeneratorAttribute.cs" />
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
