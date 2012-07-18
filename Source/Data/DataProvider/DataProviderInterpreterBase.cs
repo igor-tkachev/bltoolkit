@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -19,6 +21,11 @@ namespace BLToolkit.Data.DataProvider
             }
             else
                 parameter.Value = value;
+        }
+
+        public virtual List<string> GetInsertBatchSqlList<T>(string insertText, IEnumerable<T> collection, MemberMapper[] members, int maxBatchSize)
+        {
+            return new List<string>();
         }
 
         public virtual string GetSequenceQuery(string sequenceName)

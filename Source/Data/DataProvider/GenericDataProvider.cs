@@ -19,7 +19,7 @@ namespace BLToolkit.Data.DataProvider
         public GenericDataProvider(string providerName)
         {
             _providerName = providerName;
-            using (var ts = new TransactionScope())
+            using (new TransactionScope())
             {
                 _factory = DbProviderFactories.GetFactory(providerName);
             }
@@ -127,7 +127,7 @@ namespace BLToolkit.Data.DataProvider
             {
                 var sp = new OracleSqlProvider();
             }
-            return base.InsertBatch<T>(db, insertText, collection, members, maxBatchSize, getParameters);
+            return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
         }
 
         #endregion

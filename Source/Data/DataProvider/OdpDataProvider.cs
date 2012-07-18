@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml;
 
 using BLToolkit.Aspects;
@@ -1548,72 +1547,17 @@ namespace BLToolkit.Data.DataProvider
 			int            maxBatchSize,
 			DbManager.ParameterProvider<T> getParameters)
 		{
-			var sb  = new StringBuilder();
-			var sp  = new OracleSqlProvider();
-			var n   = 0;
 			var cnt = 0;
 
-            // TODO : use UseQueryText parameter to generate a plain text query or use command parameters
+		    List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
 
-			foreach (var item in collection)
-			{                
-				if (sb.Length == 0)
-					sb.AppendLine("INSERT ALL");
+		    foreach (string sql in sqlList)
+		    {
+                if (DbManager.TraceSwitch.TraceInfo)
+                    DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
 
-			    string strItem = "\t" + insertText
-			                                .Replace("INSERT INTO", "INTO")
-			                                .Replace("\r", "")
-			                                .Replace("\n", "")
-			                                .Replace("\t", " ")
-			                                .Replace("( ", "(");
-
-                var values = new List<object>();
-				foreach (var member in members)
-				{
-                    var sbItem = new StringBuilder();
-
-					var value = member.GetValue(item);
-
-					if (value is DateTime?)
-						value = ((DateTime?)value).Value;
-                                
-                    sp.BuildValue(sbItem, value);                   
-
-                    values.Add(sbItem.ToString());
-				}
-
-			    sb.AppendFormat(strItem, values.ToArray());
-			    sb.AppendLine();
-
-				n++;
-
-				if (n >= maxBatchSize)
-				{
-					sb.AppendLine("SELECT * FROM dual");
-
-					var sql = sb.ToString();
-
-					if (DbManager.TraceSwitch.TraceInfo)
-						DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
-
-					cnt += db.SetCommand(sql).ExecuteNonQuery();
-
-					n = 0;
-					sb.Length = 0;
-				}
-			}
-
-			if (n > 0)
-			{
-				sb.AppendLine("SELECT * FROM dual");
-
-				var sql = sb.ToString();
-
-				if (DbManager.TraceSwitch.TraceInfo)
-					DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
-
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
-			}
+                cnt += db.SetCommand(sql).ExecuteNonQuery();
+		    }
 
 			return cnt;
 		}

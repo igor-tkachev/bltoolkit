@@ -237,7 +237,7 @@ namespace BLToolkit.DataAccess
 
                 bool isSet;
 				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
-                if (nonUpdatableAttribute is IdentityAttribute && insertWithIdentity)
+                if (insertWithIdentity && nonUpdatableAttribute is IdentityAttribute)
                 {                    
                     sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
                     list.Add(mm);
@@ -262,8 +262,6 @@ namespace BLToolkit.DataAccess
                 var keyGenerator = mm.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
                 if (keyGenerator != null && insertWithIdentity)
                 {
-                    var p = query.AddParameter("IDENTITY_PARAMETER", mm.Name);
-
                     string seqQuery = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
                     sb.AppendFormat("\t{0},\n", seqQuery);
                     identityMember = mm;
