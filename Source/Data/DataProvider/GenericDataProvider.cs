@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Transactions;
@@ -121,11 +122,23 @@ namespace BLToolkit.Data.DataProvider
             return base.GetDataReader(command, commandBehavior);
         }
 
-        public override int InsertBatch<T>(DbManager db, string insertText, System.Collections.Generic.IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
+        public override int InsertBatch<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
         {
-            if (Name == ProviderFullName.Oracle)
+            if (UseQueryText && Name == ProviderFullName.Oracle)
             {
-                var sp = new OracleSqlProvider();
+                var cnt = 0;
+
+                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+
+                foreach (string sql in sqlList)
+                {
+                    if (DbManager.TraceSwitch.TraceInfo)
+                        DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+
+                    cnt += db.SetCommand(sql).ExecuteNonQuery();
+                }
+
+                return cnt;
             }
             return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
         }
