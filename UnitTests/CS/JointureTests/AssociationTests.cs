@@ -30,11 +30,6 @@ namespace UnitTests.CS.JointureTests
             DbManager.TurnTraceSwitchOn();
         }
 
-        private void WriteTraceLine(string s, string s1)
-        {
-            Console.WriteLine(s + " : " + s1);
-        }
-
         [Test]
         public void TestQueryAssociation()
         {
@@ -178,7 +173,6 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-
         [Test]
         public void InsertWithIdentity()
         {
@@ -305,14 +299,14 @@ namespace UnitTests.CS.JointureTests
             {
                 db.InsertBatch(new[]
                                    {
-                                       new DataImport()
+                                       new DataImport
                                            {
                                                Commentary = "aaaa",
                                                DeclaredProduct = "cc",
                                                IdMedia = 2024,
                                                DeclaredId = 1,
                                            },
-                                       new DataImport()
+                                       new DataImport
                                            {
                                                Commentary = "bbb",
                                                DeclaredProduct = "ddd",

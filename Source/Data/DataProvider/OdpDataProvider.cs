@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -17,10 +16,8 @@ using System.Xml;
 using BLToolkit.Aspects;
 using BLToolkit.Common;
 using BLToolkit.Data.DataProvider.Interpreters;
-using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-using BLToolkit.Reflection.Extension;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 using OracleBFile = Oracle.DataAccess.Types.OracleBFile;
@@ -1555,23 +1552,13 @@ namespace BLToolkit.Data.DataProvider
 			var sp  = new OracleSqlProvider();
 			var n   = 0;
 			var cnt = 0;
-			var str = "\t" + insertText
-				.Substring(0, insertText.IndexOf(") VALUES ("))
-				.Substring(7)
-				.Replace("\r", "")
-				.Replace("\n", "")
-				.Replace("\t", " ")
-				.Replace("( ", "(")
-				//.Replace("  ", " ")
-				+ ") VALUES (";
 
+            // TODO : use UseQueryText parameter to generate a plain text query or use command parameters
 
 			foreach (var item in collection)
-			{
+			{                
 				if (sb.Length == 0)
 					sb.AppendLine("INSERT ALL");
-
-				//sb.Append(str);                
 
 			    string strItem = "\t" + insertText
 			                                .Replace("INSERT INTO", "INTO")
@@ -1579,7 +1566,8 @@ namespace BLToolkit.Data.DataProvider
 			                                .Replace("\n", "")
 			                                .Replace("\t", " ")
 			                                .Replace("( ", "(");
-			    int mCnt = 0;
+
+                var values = new List<object>();
 				foreach (var member in members)
 				{
                     var sbItem = new StringBuilder();
@@ -1588,39 +1576,13 @@ namespace BLToolkit.Data.DataProvider
 
 					if (value is DateTime?)
 						value = ((DateTime?)value).Value;
+                                
+                    sp.BuildValue(sbItem, value);                   
 
-                    if (value is DateTime)
-                    {
-                        var dt = (DateTime)value;
-                        string dtime = string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt);                        
-                        //sb.Append(dtime);
-                        sbItem.Append(dtime);
-                    }
-                    else
-                    {
-                        //var keyGenerator = member.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
-                        ////Retrieving PkValue on Batch insert is useless
-                        //if (keyGenerator != null && !keyGenerator.RetrievePkValue)
-                        //{
-                        //    bool isSet;
-                        //    string ownerName = member.MappingSchema.MetadataProvider.GetOwnerName(member.Type, new ExtensionList(), out isSet);
-                        //    value = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
-                        //}
-
-                        //sp.BuildValue(sb, value);
-                        sp.BuildValue(sbItem, value);
-                    }
-
-                    strItem = strItem.Replace(string.Format("{{{0}}}", mCnt), sbItem.ToString());
-				    mCnt++;
-
-				    //sb.Append(", ");
+                    values.Add(sbItem.ToString());
 				}
 
-			    sb.Append(strItem);
-
-                //sb.Length -= 2;
-                //sb.AppendLine(")");
+			    sb.AppendFormat(strItem, values.ToArray());
 			    sb.AppendLine();
 
 				n++;

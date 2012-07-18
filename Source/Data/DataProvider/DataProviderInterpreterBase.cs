@@ -2,6 +2,9 @@
 
 namespace BLToolkit.Data.DataProvider
 {
+    /// <summary>
+    /// BasicSqlProvider equivalent for the non-linq DAL
+    /// </summary>
     public abstract class DataProviderInterpreterBase
     {
         public virtual void SetParameterValue(IDbDataParameter parameter, object value)

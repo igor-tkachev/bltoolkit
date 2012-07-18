@@ -2,7 +2,6 @@
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BLToolkit.Data.DataProvider
@@ -16,7 +15,7 @@ namespace BLToolkit.Data.DataProvider
         /// </summary>
         /// <param name="value">Text</param>
         /// <returns>Text converted for oracle query</returns>
-        public static string SQLConvertString(string value)
+        public static string SqlConvertString(string value)
         {
             if (!string.IsNullOrEmpty(value))
             {
@@ -38,7 +37,7 @@ namespace BLToolkit.Data.DataProvider
         /// </summary>
         /// <param name="value">Date</param>
         /// <returns>Date converted for oracle query</returns>
-        public static string SQLConvertDate(DateTime value)
+        public static string SqlConvertDate(DateTime value)
         {
             return string.Format("TO_DATE('{0}','YYYYMMDD')", value.ToString("yyyyMMdd"));
         }
@@ -48,7 +47,7 @@ namespace BLToolkit.Data.DataProvider
         /// </summary>
         /// <param name="value">DateTime</param>
         /// <returns>DateTime converted for oracle query</returns>
-        public static string SQLConvertDateTime(DateTime value)
+        public static string SqlConvertDateTime(DateTime value)
         {
             return string.Format("TO_DATE('{0}','YYYYMMDDHH24MISS')", value.ToString("yyyyMMddHHmmss"));
         }
@@ -58,7 +57,7 @@ namespace BLToolkit.Data.DataProvider
         /// </summary>
         /// <param name="value">DateTime</param>
         /// <returns>DateTime converted for oracle query</returns>
-        public static string SQLConvertTimeStamp(DateTime value)
+        public static string SqlConvertTimeStamp(DateTime value)
         {
             return string.Format("TO_TIMESTAMP('{0}','YYYYMMDDHH24MISSFF3')", value.ToString("yyyyMMddHHmmssfff"));
         }
@@ -68,7 +67,7 @@ namespace BLToolkit.Data.DataProvider
         /// </summary>
         /// <param name="value">DateTime</param>
         /// <returns>DateTime converted for oracle query</returns>
-        public static string SQLConvertDateToChar(DateTime value)
+        public static string SqlConvertDateToChar(DateTime value)
         {
             return string.Format("TO_CHAR(TO_DATE('{0}','YYYYMMDD'))", value.ToString("yyyyMMdd"));
         }
@@ -87,8 +86,7 @@ namespace BLToolkit.Data.DataProvider
         /// <param name="sid">Database SID</param>
         /// <param name="port">Port of the server. Default value is 1521</param>
         /// <returns>Default connection string</returns>
-        public static string GetFullConnectionString(string userName, string password, string server, string sid,
-                                                     int port = 1521)
+        public static string GetFullConnectionString(string userName, string password, string server, string sid, int port = 1521)
         {
             return
                 string.Format(
@@ -125,13 +123,9 @@ namespace BLToolkit.Data.DataProvider
         /// <param name="sid">Database SID</param>
         /// <param name="port">Port of the server. Default value is 1521</param>
         /// <returns>Default connection string</returns>
-        public static string GetFullConnectionString(string userName, string password, string server, string sid,
-                                                     int timeOutInSecond, int port = 1521)
+        public static string GetFullConnectionString(string userName, string password, string server, string sid, int timeOutInSecond, int port = 1521)
         {
-            return
-                string.Format(
-                    "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = {1})))(CONNECT_DATA = (SID = {2})));User Id={3};Password={4};Connection Timeout={5}",
-                    server, port, sid, userName, password, timeOutInSecond);
+            return GetFullConnectionString(userName, password, server, sid, TimeSpan.FromSeconds(timeOutInSecond), port);
         }
 
         #endregion
@@ -160,11 +154,11 @@ namespace BLToolkit.Data.DataProvider
                     var dt = (DateTime)param.Value;
                     strQuery = strQuery.Replace(strParameter,
                                                 dt.Date == dt
-                                                    ? SQLConvertDate(dt) + " "
-                                                    : SQLConvertDateTime(dt) + " ");
+                                                    ? SqlConvertDate(dt) + " "
+                                                    : SqlConvertDateTime(dt) + " ");
                 }
                 else if (param.Value is string)
-                    strQuery = strQuery.Replace(strParameter, SQLConvertString(param.Value.ToString()) + " ");
+                    strQuery = strQuery.Replace(strParameter, SqlConvertString(param.Value.ToString()) + " ");
                 else if (param.Value is Int16)
                     strQuery = strQuery.Replace(strParameter, ((Int16)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int32)
