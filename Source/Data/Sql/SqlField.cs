@@ -82,14 +82,19 @@ namespace BLToolkit.Data.Sql
 
 		#region ISqlExpression Members
 
-		public int Precedence
-		{
-			get { return Sql.Precedence.Primary; }
-		}
-
 		public bool CanBeNull()
 		{
 			return Nullable;
+		}
+
+		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+		{
+			return this == other;
+		}
+
+		public int Precedence
+		{
+			get { return Sql.Precedence.Primary; }
 		}
 
 		#endregion
