@@ -93,10 +93,28 @@ namespace BLToolkit.Data.DataProvider
                     "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = {1})))(CONNECT_DATA = (SID = {2})));User Id={3};Password={4};",
                     server, port, sid, userName, password);
         }
+        
+                /// <summary>
+        /// Generate the minimum connection string. The connection string looks like
+        /// Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = server)(PORT = port)))(CONNECT_DATA = (SID = sid)));User Id=username;Password=password;Pooling=False;
+        /// </summary>
+        /// <param name="userName">Username</param>
+        /// <param name="password">Password</param>
+        /// <param name="server">Server name</param>
+        /// <param name="sid">Database SID</param>
+        /// <param name="port">Port of the server. Default value is 1521</param>
+        /// <returns>Default connection string</returns>
+        public static string GetFullConnectionStringWithoutPooling(string userName, string password, string server, string sid, int port = 1521)
+        {
+            return
+                string.Format(
+                    "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = {1})))(CONNECT_DATA = (SID = {2})));User Id={3};Password={4};Pooling=False;",
+                    server, port, sid, userName, password);
+        }
 
         /// <summary>
         /// Generate the minimum connection string. The connection string looks like
-        /// Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = server)(PORT = port)))(CONNECT_DATA = (SID = sid)));User Id=username;Password=password;
+        /// Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = server)(PORT = port)))(CONNECT_DATA = (SID = sid)));User Id=username;Password=password;Connection Timeout=timeout;
         /// </summary>
         /// <param name="userName">Username</param>
         /// <param name="password">Password</param>
@@ -109,13 +127,32 @@ namespace BLToolkit.Data.DataProvider
         {
             return
                 string.Format(
-                    "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = {1})))(CONNECT_DATA = (SID = {2})));User Id={3};Password={4};Connection Timeout={5}",
+                    "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = {1})))(CONNECT_DATA = (SID = {2})));User Id={3};Password={4};Connection Timeout={5};",
+                    server, port, sid, userName, password, (int)timeOut.TotalSeconds);
+        }
+        
+                /// <summary>
+        /// Generate the minimum connection string. The connection string looks like
+        /// Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = server)(PORT = port)))(CONNECT_DATA = (SID = sid)));User Id=username;Password=password;Connection Timeout=timeout;Pooling=False;
+        /// </summary>
+        /// <param name="userName">Username</param>
+        /// <param name="password">Password</param>
+        /// <param name="server">Server name</param>
+        /// <param name="sid">Database SID</param>
+        /// <param name="port">Port of the server. Default value is 1521</param>
+        /// <returns>Default connection string</returns>
+        public static string GetFullConnectionStringWithoutPooling(string userName, string password, string server, string sid,
+                                                     TimeSpan timeOut, int port = 1521)
+        {
+            return
+                string.Format(
+                    "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {0})(PORT = {1})))(CONNECT_DATA = (SID = {2})));User Id={3};Password={4};Connection Timeout={5};Pooling=False;",
                     server, port, sid, userName, password, (int)timeOut.TotalSeconds);
         }
 
         /// <summary>
         /// Generate the minimum connection string. The connection string looks like
-        /// Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = server)(PORT = port)))(CONNECT_DATA = (SID = sid)));User Id=username;Password=password;
+        /// Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = server)(PORT = port)))(CONNECT_DATA = (SID = sid)));User Id=username;Password=password;Connection Timeout=timeout;
         /// </summary>
         /// <param name="userName">Username</param>
         /// <param name="password">Password</param>
