@@ -200,6 +200,22 @@ namespace BLToolkit.Data.Sql
 
 			#region ISqlExpression Members
 
+			public bool CanBeNull()
+			{
+				return Expression.CanBeNull();
+			}
+
+			public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+			{
+				if (this == other)
+					return true;
+
+				return
+					other is Column &&
+					Expression.Equals(((Column)other).Expression, comparer) &&
+					comparer(this, other);
+			}
+
 			public int Precedence
 			{
 				get { return Sql.Precedence.Primary; }
@@ -208,11 +224,6 @@ namespace BLToolkit.Data.Sql
 			public Type SystemType
 			{
 				get { return Expression.SystemType; }
-			}
-
-			public bool CanBeNull()
-			{
-				return Expression.CanBeNull();
 			}
 
 			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -535,6 +546,11 @@ namespace BLToolkit.Data.Sql
 			public bool CanBeNull()
 			{
 				return Source.CanBeNull();
+			}
+
+			public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+			{
+				return this == other;
 			}
 
 			public int  Precedence { get { return Source.Precedence; } }
@@ -1444,6 +1460,11 @@ namespace BLToolkit.Data.Sql
 						return true;
 
 				return false;
+			}
+
+			public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+			{
+				return this == other;
 			}
 
 			#endregion
@@ -2964,7 +2985,11 @@ namespace BLToolkit.Data.Sql
 			void Add(ISqlExpression expr, bool isDescending)
 			{
 				foreach (var item in Items)
-					if (item.Expression.Equals(expr))
+					if (item.Expression.Equals(expr, (x, y) =>
+					{
+						var col = x as Column;
+						return col == null || !col.Parent.HasUnion || x == y;
+					}))
 						return;
 
 				Items.Add(new OrderByItem(expr, isDescending));
@@ -4507,6 +4532,11 @@ namespace BLToolkit.Data.Sql
 		public bool CanBeNull()
 		{
 			return true;
+		}
+
+		public bool Equals(ISqlExpression other, Func<ISqlExpression, ISqlExpression, bool> comparer)
+		{
+			return this == other;
 		}
 
 		public int Precedence

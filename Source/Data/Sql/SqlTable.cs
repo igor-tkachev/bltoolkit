@@ -388,6 +388,11 @@ namespace BLToolkit.Data.Sql
 			return true;
 		}
 
+		public bool Equals(ISqlExpression other, Func<ISqlExpression, ISqlExpression, bool> comparer)
+		{
+			return this == other;
+		}
+
 		int ISqlExpression.Precedence
 		{
 			get { return Precedence.Unknown; }

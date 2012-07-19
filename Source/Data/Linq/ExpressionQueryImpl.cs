@@ -15,13 +15,13 @@ namespace BLToolkit.Data.Linq
 		//	get { return base.SqlText; }
 		//}
 
-#if OVERRIDETOSTRING
+//#if OVERRIDETOSTRING
 
 		public override string ToString()
 		{
 			return base.SqlText;
 		}
 
-#endif
+//#endif
 	}
 }

@@ -77,9 +77,14 @@ namespace BLToolkit.Data.Sql
 			return Value == null;
 		}
 
+		public bool Equals(ISqlExpression other, Func<ISqlExpression, ISqlExpression, bool> comparer)
+		{
+			return ((ISqlExpression)this).Equals(other) && comparer(this, other);
+		}
+
 		#endregion
 
-		#region ISqlExpression Members
+		#region ICloneableElement Members
 
 		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
