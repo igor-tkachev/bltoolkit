@@ -534,5 +534,154 @@ namespace Data.Linq
 						).Count()
 					}));
 		}
+
+		[Test]
+		public void LetTest1()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch = p.Children
+					where ch.FirstOrDefault() != null
+					select ch.FirstOrDefault().ParentID
+					,
+					from p in db.Parent
+					let ch = p.Children
+					where ch.FirstOrDefault() != null
+					select ch.FirstOrDefault().ParentID));
+		}
+
+		[Test]
+		public void LetTest2()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch = p.Children
+					where ch.FirstOrDefault() != null
+					select p
+					,
+					from p in db.Parent
+					let ch = p.Children
+					where ch.FirstOrDefault() != null
+					select p));
+		}
+
+		[Test]
+		public void LetTest3()
+		{
+			ForEachProvider(
+				new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch = Child
+					select ch.FirstOrDefault().ParentID
+					,
+					from p in db.Parent
+					let ch = db.Child
+					select ch.FirstOrDefault().ParentID));
+		}
+
+		[Test]
+		public void LetTest4()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
+			ForEachProvider(
+				new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					select new
+					{
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch2.FirstOrDefault(c => c.ParentID > 0),
+						First2 = ch2.FirstOrDefault()
+					}
+					,
+					from p in db.Parent
+					let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					select new
+					{
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch2.FirstOrDefault(c => c.ParentID > 0),
+						First2 = ch2.FirstOrDefault()
+					}));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+		}
+
+		[Test]
+		public void LetTest5()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
+			ForEachProvider(
+				new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					select new
+					{
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+						First2 = ch2.FirstOrDefault()
+					}
+					,
+					from p in db.Parent
+					let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					select new
+					{
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+						First2 = ch2.FirstOrDefault()
+					}));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+		}
+
+		//[Test]
+		public void LetTest6()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
+			ForEachProvider(
+				db => AreEqual(
+					from p in Parent
+					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					let ch3	= ch2.FirstOrDefault(c => c.ParentID > 0)
+					select new
+					{
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch3 == null ? 0 : ch3.ParentID,
+						First2 = ch2.FirstOrDefault()
+					}
+					,
+					from p in db.Parent
+					let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					let ch3	= ch2.FirstOrDefault(c => c.ParentID > 0)
+					select new
+					{
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch3 == null ? 0 : ch3.ParentID,
+						First2 = ch2.FirstOrDefault()
+					}));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+		}
 	}
 }

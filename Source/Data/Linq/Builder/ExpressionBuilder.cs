@@ -1169,6 +1169,10 @@ namespace BLToolkit.Data.Linq.Builder
 				var p    = Expression.Parameter(typeof(Expression), "exp");
 				var exas = expression.GetExpressionAccessors(p);
 				var expr = ReplaceParameter(exas, expression, _ => {});
+
+				if (expr.Find(e => e.NodeType == ExpressionType.Parameter && e != p) != null)
+					return expression;
+
 				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
 				var n    = _query.AddQueryableAccessors(expression, l);
 
