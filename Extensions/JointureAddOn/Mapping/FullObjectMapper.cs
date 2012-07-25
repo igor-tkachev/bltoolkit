@@ -25,6 +25,7 @@ namespace BLToolkit.Mapping
 
     public class ValueMapper : TableDescription, IMapper
     {
+        public string ColumnAlias { get; set; }
         public string ColumnName { get; set; }
         public Type DbType { get; set; }
 
@@ -69,6 +70,7 @@ namespace BLToolkit.Mapping
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
         public GetHandler PrimaryKeyValueGetter { get; set; }
+        public AssociationAttribute Association { get; set; }
 
         #endregion
 
@@ -93,6 +95,7 @@ namespace BLToolkit.Mapping
         /// </summary>
         GetHandler Getter { get; set; }
         GetHandler PrimaryKeyValueGetter { get; set; }
+        AssociationAttribute Association { get; set; }
     }
 
     public interface IPropertiesMapping
@@ -124,6 +127,7 @@ namespace BLToolkit.Mapping
         public SetHandler Setter { get; set; }
         public Type PropertyType { get; set; }
         public string PropertyName { get; set; }
+        public AssociationAttribute Association { get; set; }
 
         #endregion
 

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\FullSqlQuery.cs" />
     <Compile Include="DataAccess\FullSqlQueryBase.cs" />
     <Compile Include="DataAccess\FullSqlQueryInfo.cs" />
     <Compile Include="DataAccess\FullSqlQueryParameterInfo.cs" />

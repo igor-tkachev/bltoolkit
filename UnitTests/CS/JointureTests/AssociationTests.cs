@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -405,63 +404,56 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = new MusicDB())
             {
-                DbManager dbCmd =
-                    db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
+                DbManager dbCmd = db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
                 dbCmd.MappingSchema = new FullMappingSchema();
 
+                // ExecuteList works only with LazyLoadingTrue
                 List<Artist2> art = dbCmd.ExecuteList<Artist2>();
 
                 foreach (Artist2 artist in art)
-                {
-                    List<Title> titles = artist.Titles;   
+                {                   
+                    List<Title> titles = artist.Titles;
+                    Console.WriteLine(titles.Count);
                     break;
-                }                
-
-                var query2 = new FullSqlQueryT<Artist2>(db);
-                List<Artist2> artists = query2.SelectAll();
-                Artist2 artist2 = artists[0];
-                List<Title> titles2 = artist2.Titles;
+                }
             }
         }
 
         [Test]
-        public void SelectAllTitlesFull()
+        public void SelectAllTitlesFullQueryAssociation()
         {
             using (var db = new MusicDB())
             {
                 var query = new FullSqlQueryT<Title>(db);
-                var titles1 = query.SelectAll<List<Title>>();
                 List<Title> titles2 = query.SelectAll();
                 Assert.IsTrue(titles2.Count > 0);
             }
         }
 
         [Test]
-        public void SelectAllTitlesFull2()
+        public void SelectTitleWithArtistQueryAssociation()
         {
             using (var db = new MusicDB())
             {
-                var query2 = new FullSqlQuery(db);
-                List<Title> titles = query2.SelectAll<Title>();
-                var title = (Title) query2.SelectByKey(typeof (Title), 137653);
+                var query = new FullSqlQuery(db);
+                var title = (Title) query.SelectByKey(typeof (Title), 137653);
+                Console.WriteLine(title.Name);
+
+                var query2 = new FullSqlQueryT<Title>(db);
+                var title2 = query2.SelectByKey(137653);
+                Console.WriteLine(title2.Name);
             }
         }
 
         [Test]
-        public void SelectArtistFullWithLazyLoadingTitles()
+        public void SelectArtistWithTitlesLazyLoadingOnQueryAssociation()
         {
             using (var db = new MusicDB())
             {
-                //db.Prepare();
                 var query2 = new FullSqlQueryT<Artist2>(db);
-                var sw = new Stopwatch();
-                sw.Start();
-                for (int i = 0; i < 10000; i++)
-                {
-                    Artist2 artist = query2.SelectByKey(2643);
-                    //List<Title> titles = artist.Titles;
-                }
-                sw.Stop();                
+                Artist2 artist = query2.SelectByKey(2643);
+                List<Title> titles = artist.Titles;
+                Console.WriteLine(titles.Count);              
             }
         }
 

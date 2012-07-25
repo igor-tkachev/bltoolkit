@@ -7,7 +7,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
-	public class SqlQuery<T> : SqlQueryBase
+	public class SqlQuery<T> : SqlQueryBase, ISqlQueryT<T>
 	{
 		#region Constructors
 

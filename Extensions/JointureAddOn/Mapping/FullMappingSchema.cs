@@ -377,8 +377,16 @@ namespace BLToolkit.Mapping
                         }
                     }
                     mapper.PrimaryKeyValueGetter = GettersHandlers[mapperType][prop.Name];
+
+                    if (mapper.Association != null && string.IsNullOrWhiteSpace(mapper.Association.OtherKey))
+                    {
+                        mapper.Association.OtherKey = prop.Name;
+                    }
                 }
             }
+            if (primaryKeyPropInfo == null)
+                throw new Exception("PrimaryKey attribute not found on type: " + mapperType);
+
             foreach (PropertyInfo prop in properties)
             {
                 bool isLazy = false;
@@ -396,8 +404,7 @@ namespace BLToolkit.Mapping
                             lock (SetterHandlersLock)
                                 if (!GettersHandlers[mapperType].ContainsKey(primaryKeyPropInfo.Name))
                                 {
-                                    GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType,
-                                                                                                primaryKeyPropInfo);
+                                    GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, primaryKeyPropInfo);
                                     GettersHandlers[mapperType].Add(primaryKeyPropInfo.Name, getHandler);
                                 }
                         }
@@ -411,7 +418,7 @@ namespace BLToolkit.Mapping
                     if (associationAttr.Length > 1)
                         throw new Exception("AssociationAttribute is used several times on the property " + prop.Name);
                     var ass = (AssociationAttribute) associationAttr[0];
-
+                    
                     //  Getters for IObjectMapper
                     lock (SetterHandlersLock)
                         if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
@@ -446,6 +453,10 @@ namespace BLToolkit.Mapping
                         ((FullObjectMapper)mapper).ColParent = true;
                     }
 
+                    if (string.IsNullOrWhiteSpace(ass.ThisKey))
+                        ass.ThisKey = primaryKeyPropInfo.Name;
+
+                    propertiesMapping.Association = ass;
                     propertiesMapping.PropertyName = prop.Name;
                     propertiesMapping.IsLazy = isLazy;
                     propertiesMapping.Setter = SettersHandlers[mapperType][prop.Name];
@@ -462,23 +473,13 @@ namespace BLToolkit.Mapping
                     if (nomapAttr.Length > 0)
                         continue;
 
-
                     object[] mapFields = prop.GetCustomAttributes(typeof (MapFieldAttribute), true);
                     if (mapFields.Length > 1)
                         throw new Exception("AssociationAttribute is used several times on the property " + prop.Name);
 
                     string columnName = mapFields.Length > 0 ? ((MapFieldAttribute) mapFields[0]).MapName : prop.Name;
-                    int occurenceCount;
-                    if (_columnOccurences.ContainsKey(columnName))
-                    {
-                        occurenceCount = _columnOccurences[columnName] + 1;
-                        _columnOccurences[columnName] = occurenceCount;
-                    }
-                    else
-                    {
-                        _columnOccurences[columnName] = 1;
-                        occurenceCount = 1;
-                    }
+
+                    var mapColumnName = GetColumnName(columnName);
 
                     var map = new ValueMapper
                                   {
@@ -487,19 +488,10 @@ namespace BLToolkit.Mapping
                                       DataReaderIndex = startIndex,
                                       Setter = SettersHandlers[mapperType][prop.Name],
                                       TableName = tableDescription.TableName,
-                                      /* Optimize with Provider.BuildTableName */
-                                      ColumnName = columnName + (occurenceCount > 1 ? string.Format("_{0}", occurenceCount - 1) : "")
+                                      ColumnName = columnName,
+                                      ColumnAlias = columnName == mapColumnName ? null : mapColumnName,
                                   };
-
-                    var variations = new List<string>();
-                    if (_columnVariations.ContainsKey(columnName))
-                    {
-                        variations = _columnVariations[columnName];
-                    }
-
-                    variations.Add(map.ColumnName);
-                    _columnVariations[columnName] = variations;
-
+  
                     mapper.PropertiesMapping.Add(map);
 
                     object[] pkFields = prop.GetCustomAttributes(typeof (PrimaryKeyAttribute), true);
@@ -526,11 +518,38 @@ namespace BLToolkit.Mapping
 
                 objMap.ParentMapping = mapper;
                 mapper.PropertiesMapping.Add(GetObjectMapper(objMap, ref startIndex));
-                //TODO startIndex++ ??? If we dont show the association column, dont increase the index
             }
 
             return mapper;
-        }        
+        }
+
+        private string GetColumnName(string columnName)
+        {
+            int occurenceCount;
+            if (_columnOccurences.ContainsKey(columnName))
+            {
+                occurenceCount = _columnOccurences[columnName] + 1;
+                _columnOccurences[columnName] = occurenceCount;
+            }
+            else
+            {
+                _columnOccurences[columnName] = 1;
+                occurenceCount = 1;
+            }
+
+            string res = columnName + (occurenceCount > 1 ? string.Format("_{0}", occurenceCount - 1) : "");
+
+            var variations = new List<string>();
+            if (_columnVariations.ContainsKey(columnName))
+            {
+                variations = _columnVariations[columnName];
+            }
+
+            variations.Add(res);
+            _columnVariations[columnName] = variations;
+
+            return res;
+        }
 
         public static Type GetGenericType(Type t)
         {
