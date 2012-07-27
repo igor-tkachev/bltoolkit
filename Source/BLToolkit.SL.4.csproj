@@ -143,6 +143,7 @@
     <Compile Include="Data\Linq\Builder\ISequenceBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IsExpressionResult.cs" />
     <Compile Include="Data\Linq\Builder\JoinBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\LinqBuilderException.cs" />
     <Compile Include="Data\Linq\Builder\MethodCallBuilder.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\OrderByBuilder.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="Data\Linq\Builder\TableAttributeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TableBuilder.cs" />
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\TestSourceGenerator.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\WhereBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />

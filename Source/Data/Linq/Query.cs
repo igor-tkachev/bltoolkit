@@ -130,7 +130,19 @@ namespace BLToolkit.Data.Linq
 
 					if (query == null)
 					{
-						query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
+						try
+						{
+							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
+						}
+						catch (Exception ex)
+						{
+							string testFile = null;
+
+							if (Configuration.Linq.GenerateTestSourceOnException)
+								testFile = new TestSourceGenerator().GenerateSource(expr);
+
+							throw new LinqBuilderException(ex, testFile);
+						}
 
 						query.Next = _first;
 						_first = query;

@@ -650,10 +650,11 @@ namespace Data.Linq
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
-		//[Test]
+		[Test]
 		public void LetTest6()
 		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery            = true;
+			BLToolkit.Common.Configuration.Linq.GenerateTestSourceOnException = true;
 
 			ForEachProvider(
 				db => AreEqual(
