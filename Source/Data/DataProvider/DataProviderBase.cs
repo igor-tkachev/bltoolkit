@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.Linq;
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -218,6 +216,21 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
+        public virtual string GetSequenceQuery(string sequenceName)
+        {
+            return null;
+        }
+
+        public virtual string NextSequenceQuery(string sequenceName)
+        {
+            return null;
+        }
+
+        public virtual string GetReturningInto(string columnName)
+        {
+            return null;
+        }
+
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
 			if (value is System.Data.Linq.Binary)
@@ -245,6 +258,11 @@ namespace BLToolkit.Data.DataProvider
 			return dataReader;
 		}
 
+        public virtual IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            return command.ExecuteReader(commandBehavior);
+        }
+
 		public virtual bool ParameterNamesEqual(string paramName1, string paramName2)
 		{
 			// default implementation is case-insensitive, because if we make it 
@@ -269,6 +287,11 @@ namespace BLToolkit.Data.DataProvider
 		public virtual int    MaxParameters { get { return 100;   } }
 		public virtual int    MaxBatchSize  { get { return 65536; } }
 		public virtual string EndOfSql      { get { return ";";   } }
+
+	    /// <summary>
+	    /// Use plain text query instead of using command parameters
+	    /// </summary>
+        public virtual bool UseQueryText { get; set; } 
 
 		#endregion
 
@@ -298,7 +321,17 @@ namespace BLToolkit.Data.DataProvider
 			public string      GetName        (int i)           { return DataReader.GetName        (i); }
 			public string      GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
 			public Type        GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
-			public object      GetValue       (int i)           { return DataReader.GetValue       (i); }
+
+            /// <summary>
+            /// GetValue method is virtual since it can be overridden by some data provider 
+            /// (For instance, OdbDataProvider uses special methodes for clob data fetching)
+            /// </summary>
+            /// <param name="i"></param>
+            /// <returns></returns>
+			public virtual object      GetValue       (int i)
+			{
+			    return DataReader.GetValue       (i);
+			}
 			public int         GetValues      (object[] values) { return DataReader.GetValues      (values); }
 			public int         GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
 			public bool        GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
@@ -312,7 +345,10 @@ namespace BLToolkit.Data.DataProvider
 			public double      GetDouble      (int i)           { return DataReader.GetDouble      (i); }
 			public string      GetString      (int i)           { return DataReader.GetString      (i); }
 			public decimal     GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
-			public DateTime    GetDateTime    (int i)           { return DataReader.GetDateTime    (i); }
+			public DateTime    GetDateTime    (int i)
+			{
+			    return DataReader.GetDateTime    (i);
+			}
 			public IDataReader GetData        (int i)           { return DataReader.GetData        (i); }
 			public bool        IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
 
@@ -336,7 +372,10 @@ namespace BLToolkit.Data.DataProvider
 			#region Implementation of IDataReader
 
 			public void      Close         () {        DataReader.Close         (); }
-			public DataTable GetSchemaTable() { return DataReader.GetSchemaTable(); }
+			public DataTable GetSchemaTable()
+			{
+			    return DataReader.GetSchemaTable();
+			}
 			public bool      NextResult    () { return DataReader.NextResult    (); }
 			public bool      Read          () { return DataReader.Read          (); }
 			public int       Depth           { get { return DataReader.Depth;           } }

@@ -37,13 +37,12 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\FullSqlQuery.cs" />
     <Compile Include="DataAccess\FullSqlQueryBase.cs" />
     <Compile Include="DataAccess\FullSqlQueryInfo.cs" />
     <Compile Include="DataAccess\FullSqlQueryParameterInfo.cs" />
@@ -53,6 +52,7 @@
     <Compile Include="Mapping\FullMappingSchema.cs" />
     <Compile Include="Mapping\FullObjectMapper.cs" />
     <Compile Include="Mapping\LazyValueLoadInterceptor.cs" />
+    <Compile Include="Mapping\MappingOrder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reflection\FullInitContext.cs" />
   </ItemGroup>

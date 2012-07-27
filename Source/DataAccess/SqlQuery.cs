@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
-
+using System.Data;
+using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Reflection.Extension;
 
@@ -202,9 +203,40 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
-		#region Insert
+        #region InsertWithIdentity
 
-		public virtual int Insert(DbManager db, object obj)
+        public virtual object InsertWithIdentity(DbManager db, object obj)
+        {
+            var query = GetSqlQueryInfo(db, obj.GetType(), "InsertWithIdentity");
+
+            var parameters = query.GetParameters(db, obj);
+
+            db.SetCommand(query.QueryText, parameters).ExecuteNonQuery();
+
+            var outputParameter = parameters.ToList().First(e => e.Direction == ParameterDirection.Output);
+            return outputParameter.Value;
+        }
+
+        public virtual object InsertWithIdentity(object obj)
+        {
+            var db = GetDbManager();
+
+            try
+            {
+                return InsertWithIdentity(db, obj);
+            }
+            finally
+            {
+                Dispose(db);
+            }
+        }
+
+
+        #endregion
+
+        #region Insert
+
+        public virtual int Insert(DbManager db, object obj)
 		{
 			var query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 

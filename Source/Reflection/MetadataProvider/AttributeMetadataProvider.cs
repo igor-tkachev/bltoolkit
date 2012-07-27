@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
@@ -560,6 +561,19 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+        public override string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr = member.GetAttribute<SequenceNameAttribute>();
+
+            if (attr != null)
+            {
+                isSet = true;
+                return attr.SequenceName;
+            }
+
+            return base.GetSequenceName(typeExtension, member, out isSet);
+        }
 
 		#region GetNonUpdatableFlag
 

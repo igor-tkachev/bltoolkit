@@ -14,11 +14,21 @@ using System.Xml;
 
 using BLToolkit.Aspects;
 using BLToolkit.Common;
+using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
+using OracleBFile = Oracle.DataAccess.Types.OracleBFile;
+using OracleBinary = Oracle.DataAccess.Types.OracleBinary;
+using OracleCommand = Oracle.DataAccess.Client.OracleCommand;
+using OracleCommandBuilder = Oracle.DataAccess.Client.OracleCommandBuilder;
+using OracleConnection = Oracle.DataAccess.Client.OracleConnection;
+using OracleDataAdapter = Oracle.DataAccess.Client.OracleDataAdapter;
+using OracleDataReader = Oracle.DataAccess.Client.OracleDataReader;
+using OracleException = Oracle.DataAccess.Client.OracleException;
+using OracleParameter = Oracle.DataAccess.Client.OracleParameter;
+using OracleString = Oracle.DataAccess.Types.OracleString;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -33,9 +43,12 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public class OdpDataProvider : DataProviderBase
 	{
+	    private readonly DataProviderInterpreterBase _interpreterBase;
+
 		public OdpDataProvider()
 		{
 			MappingSchema = new OdpMappingSchema();
+            _interpreterBase = new OracleDataProviderInterpreter();
 		}
 
 		static OdpDataProvider()
@@ -49,7 +62,7 @@ namespace BLToolkit.Data.DataProvider
 				var typeTable = (Hashtable)oraDbDbTypeTableType.InvokeMember(
 					"s_table", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.GetField,
 					null, null, Type.EmptyTypes);
-
+                
 				if (null != typeTable)
 				{
 					typeTable[typeof(DateTime[])]          = OracleDbType.TimeStamp;
@@ -243,7 +256,16 @@ namespace BLToolkit.Data.DataProvider
 		{
 			switch (convertType)
 			{
-				case ConvertType.NameToCommandParameter:
+                case ConvertType.NameToQueryParameter:
+                    var qname = (string)value;
+                    if (qname.Length > 30)
+                    {
+                        qname = qname.Substring(0, 30);
+                        return SqlProvider.Convert(qname, convertType);
+                    }
+			        return SqlProvider.Convert(value, convertType);
+
+			    case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
 					return ParameterPrefix == null? value: ParameterPrefix + value;
 
@@ -500,6 +522,11 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
+        public override void SetParameterValue(IDbDataParameter parameter, object value)
+        {
+            _interpreterBase.SetParameterValue(parameter, value);
+        }
+
 		private static Stream CopyStream(Stream stream, OracleCommand cmd)
 		{
 			return CopyStream(Common.Convert.ToByteArray(stream), cmd);
@@ -530,7 +557,22 @@ namespace BLToolkit.Data.DataProvider
 			return base.IsValueParameter(parameter);
 		}
 
-		public override IDbDataParameter CreateParameterObject(IDbCommand command)
+        public override string GetSequenceQuery(string sequenceName)
+        {
+            return _interpreterBase.GetSequenceQuery(sequenceName);
+        }
+
+        public override string NextSequenceQuery(string sequenceName)
+        {
+            return _interpreterBase.NextSequenceQuery(sequenceName);
+        }
+
+        public override string GetReturningInto(string columnName)
+        {
+            return _interpreterBase.GetReturningInto(columnName);
+        }
+
+	    public override IDbDataParameter CreateParameterObject(IDbCommand command)
 		{
 			var parameter = base.CreateParameterObject(command);
 
@@ -595,12 +637,45 @@ namespace BLToolkit.Data.DataProvider
 				base.GetDataReader(schema, dataReader);
 		}
 
+        public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            if (UseQueryText)
+            {
+                command.CommandText = OracleHelper.Interpret(command);
+                command.Parameters.Clear();
+            }
+            return base.GetDataReader(command, commandBehavior);
+        }    
+
 		class OracleDataReaderEx: DataReaderEx<OracleDataReader>
 		{
 			public OracleDataReaderEx(OracleDataReader rd)
 				: base(rd)
 			{
 			}
+
+            public override object GetValue(int i)
+            {
+                string dataTypeName = GetDataTypeName(i);
+                if (dataTypeName == "Clob")
+                {                    
+                    OracleClob clob = DataReader.GetOracleClob(i);
+                    if (!clob.IsNull)
+                    {
+                        return clob;
+                        //byte[] b = new byte[clob.Length];
+                        ////Read data from database
+                        //clob.Read(b, 0, (int)clob.Length);
+
+                        //return b;
+                        //return clob.Value;
+                    }
+                    else
+                        return null;
+                }
+                else
+                    return base.GetValue(i);
+            }
 
 			public override DateTimeOffset GetDateTimeOffset(int i)
 			{
@@ -1472,77 +1547,17 @@ namespace BLToolkit.Data.DataProvider
 			int            maxBatchSize,
 			DbManager.ParameterProvider<T> getParameters)
 		{
-			var sb  = new StringBuilder();
-			var sp  = new OracleSqlProvider();
-			var n   = 0;
 			var cnt = 0;
-			var str = "\t" + insertText
-				.Substring(0, insertText.IndexOf(") VALUES ("))
-				.Substring(7)
-				.Replace("\r", "")
-				.Replace("\n", "")
-				.Replace("\t", " ")
-				.Replace("( ", "(")
-				//.Replace("  ", " ")
-				+ ") VALUES (";
 
-			foreach (var item in collection)
-			{
-				if (sb.Length == 0)
-					sb.AppendLine("INSERT ALL");
+		    List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
 
-				sb.Append(str);
+		    foreach (string sql in sqlList)
+		    {
+                if (DbManager.TraceSwitch.TraceInfo)
+                    DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
 
-				foreach (var member in members)
-				{
-					var value = member.GetValue(item);
-
-					if (value is Nullable<DateTime>)
-						value = ((DateTime?)value).Value;
-
-					if (value is DateTime)
-					{
-						var dt = (DateTime)value;
-						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
-					}
-					else
-						sp.BuildValue(sb, value);
-
-					sb.Append(", ");
-				}
-
-				sb.Length -= 2;
-				sb.AppendLine(")");
-
-				n++;
-
-				if (n >= maxBatchSize)
-				{
-					sb.AppendLine("SELECT * FROM dual");
-
-					var sql = sb.ToString();
-
-					if (DbManager.TraceSwitch.TraceInfo)
-						DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
-
-					cnt += db.SetCommand(sql).ExecuteNonQuery();
-
-					n = 0;
-					sb.Length = 0;
-				}
-			}
-
-			if (n > 0)
-			{
-				sb.AppendLine("SELECT * FROM dual");
-
-				var sql = sb.ToString();
-
-				if (DbManager.TraceSwitch.TraceInfo)
-					DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
-
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
-			}
+                cnt += db.SetCommand(sql).ExecuteNonQuery();
+		    }
 
 			return cnt;
 		}
