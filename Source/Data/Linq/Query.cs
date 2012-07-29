@@ -136,12 +136,15 @@ namespace BLToolkit.Data.Linq
 						}
 						catch (Exception ex)
 						{
-							string testFile = null;
-
 							if (Configuration.Linq.GenerateTestSourceOnException)
-								testFile = new TestSourceGenerator().GenerateSource(expr);
+							{
+								var testFile = new TestSourceGenerator().GenerateSource(expr);
+								throw new LinqException(ex.Message + Environment.NewLine + "Test code generated. See '" + testFile + "'", ex);
+							}
 
-							throw new LinqBuilderException(ex, testFile);
+							throw new LinqException(
+								ex.Message + Environment.NewLine + "To generate test code to diagnose the problem set 'BLToolkit.Common.Configuration.Linq.GenerateTestSourceOnException = true'.",
+								ex);
 						}
 
 						query.Next = _first;

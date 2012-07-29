@@ -209,7 +209,6 @@
     <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
     <Compile Include="Data\Linq\Builder\IsExpressionResult.cs" />
-    <Compile Include="Data\Linq\Builder\LinqBuilderException.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\PassThroughContext.cs" />
