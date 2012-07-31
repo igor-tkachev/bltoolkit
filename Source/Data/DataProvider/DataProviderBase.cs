@@ -403,6 +403,17 @@ namespace BLToolkit.Data.DataProvider
 
 		#region InsertBatch
 
+        public virtual int InsertBatchWithIdentity<T>(
+            DbManager db,
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize,
+            DbManager.ParameterProvider<T> getParameters)
+        {
+            throw new NotImplementedException("Insert batch with identity is not implemented!");
+        }
+
 		public virtual int InsertBatch<T>(
 			DbManager      db,
 			string         insertText,
@@ -414,6 +425,17 @@ namespace BLToolkit.Data.DataProvider
 			db.SetCommand(insertText);
 			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
 		}
+
+        public int ExecuteSqlList(DbManager db, List<string> sqlList)
+        {
+            var cnt = 0;
+            foreach (string sql in sqlList)
+            {
+                cnt += db.SetCommand(sql).ExecuteNonQuery();
+            }
+
+            return cnt;
+        }
 
 		#endregion
 	}

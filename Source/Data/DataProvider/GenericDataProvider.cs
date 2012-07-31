@@ -122,23 +122,22 @@ namespace BLToolkit.Data.DataProvider
             return base.GetDataReader(command, commandBehavior);
         }
 
+        public override int InsertBatchWithIdentity<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
+        {
+            if (UseQueryText && Name == ProviderFullName.Oracle)
+            {
+                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+                return ExecuteSqlList(db, sqlList);
+            }
+            return base.InsertBatchWithIdentity(db, insertText, collection, members, maxBatchSize, getParameters);
+        }
+
         public override int InsertBatch<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
         {
             if (UseQueryText && Name == ProviderFullName.Oracle)
             {
-                var cnt = 0;
-
                 List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
-
-                foreach (string sql in sqlList)
-                {
-                    if (DbManager.TraceSwitch.TraceInfo)
-                        DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
-
-                    cnt += db.SetCommand(sql).ExecuteNonQuery();
-                }
-
-                return cnt;
+                return ExecuteSqlList(db, sqlList);
             }
             return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
         }

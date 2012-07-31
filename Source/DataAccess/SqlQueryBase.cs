@@ -212,7 +212,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertWithIdentity = false)
+		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertAutoSequence = false)
 		{
 			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			var om      = db.MappingSchema.GetObjectMapper(type);
@@ -237,14 +237,14 @@ namespace BLToolkit.DataAccess
 
                 bool isSet;
 				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
-                if (insertWithIdentity && nonUpdatableAttribute is IdentityAttribute)
+                if (insertAutoSequence && nonUpdatableAttribute is IdentityAttribute)
                 {                    
                     sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
                     list.Add(mm);
                 }
                 else
                 {
-                    if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.OnInsert == false)
+                    if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.IsIdentity || nonUpdatableAttribute.OnInsert == false)
                     {
                         sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
                         list.Add(mm);
@@ -260,11 +260,11 @@ namespace BLToolkit.DataAccess
             foreach (var mm in list)
             {
                 var keyGenerator = mm.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
-                if (keyGenerator != null && insertWithIdentity)
+                if (keyGenerator != null && insertAutoSequence)
                 {
                     string seqQuery = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
                     sb.AppendFormat("\t{0},\n", seqQuery);
-                    identityMember = mm;
+                    identityMember = mm;                    
                 }
                 else
                 {
@@ -373,10 +373,13 @@ namespace BLToolkit.DataAccess
 			switch (actionName)
 			{
 				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
-				case "SelectAll":   return CreateSelectAllSqlText  (db, type);                
+				case "SelectAll":   return CreateSelectAllSqlText  (db, type);      
+          
 				case "Insert":      return CreateInsertSqlText     (db, type, -1);                
 				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
+                case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.DataProvider.UseQueryText);
                 case "InsertWithIdentity": return CreateInsertSqlText(db, type, -1, true);
+
 				case "Update":      return CreateUpdateSqlText     (db, type, -1);
 				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);
 				case "Delete":      return CreateDeleteSqlText     (db, type, -1);

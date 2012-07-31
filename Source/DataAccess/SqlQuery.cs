@@ -231,7 +231,6 @@ namespace BLToolkit.DataAccess
             }
         }
 
-
         #endregion
 
         #region Insert
