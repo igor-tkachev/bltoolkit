@@ -653,8 +653,8 @@ namespace Data.Linq
 		[Test]
 		public void LetTest6()
 		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery            = true;
-			BLToolkit.Common.Configuration.Linq.GenerateTestSourceOnException = true;
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery     = true;
+			//BLToolkit.Common.Configuration.Linq.GenerateExpressionTest = true;
 
 			ForEachProvider(
 				new[] { ProviderName.Informix, ProviderName.Sybase },
