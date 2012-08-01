@@ -56,7 +56,6 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "LABEL", Owner = Consts.Owner)]
     public class Label
     {
-        //[MapField("ID_LABEL"), PrimaryKey, SequenceName("SEQ_LABEL"), KeyGenerator(PrimaryKeyGeneratorType.Sequence, false)]
         [MapField("ID_LABEL"), PrimaryKey, SequenceName("SEQ_LABEL"), Identity]
         public long Id { get; set; }
 
@@ -184,8 +183,8 @@ namespace UnitTests.CS.JointureTests
     [TableName(Name = "IMP_SEARCH", Owner = "PITAFR01")]
     public class DataImport : FredCopyright
     {
-        [MapField("ID_IMP_SEARCH"), PrimaryKey, Identity, SequenceName("SEQ_IMP_SEARCH"), Identity]
-        public int IdImport { get; set; }
+        [MapField("ID_IMP_SEARCH"), PrimaryKey, Identity, SequenceName("PITAFR01.SEQ_IMP_SEARCH")]
+        public Int64 IdImport { get; set; }
 
         [MapField("ID_MEDIA")]
         public int IdMedia { get; set; }

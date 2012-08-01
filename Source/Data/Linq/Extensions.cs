@@ -233,6 +233,11 @@ namespace BLToolkit.Data.Linq
 			return InsertBatch(dataContext, int.MaxValue, list);
 		}
 
+        public static int InsertBatchWithIdentity<T>(this DbManager dataContext, IEnumerable<T> list)
+        {
+            return new SqlQuery<T>().InsertBatchWithIdentity(dataContext, int.MaxValue, list);
+        }
+
 		public static int InsertBatch<T>(this DbManager dataContext, T[] list)
 		{
 			return InsertBatch(dataContext, int.MaxValue, list);

@@ -8,12 +8,14 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.IO;
+using  System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
 
 using BLToolkit.Aspects;
 using BLToolkit.Common;
+using BLToolkit.DataAccess;
 using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
@@ -1547,21 +1549,268 @@ namespace BLToolkit.Data.DataProvider
 			int            maxBatchSize,
 			DbManager.ParameterProvider<T> getParameters)
 		{
-			var cnt = 0;
-
-		    List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
-
-		    foreach (string sql in sqlList)
-		    {
-                if (DbManager.TraceSwitch.TraceInfo)
-                    DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
-
-                cnt += db.SetCommand(sql).ExecuteNonQuery();
-		    }
-
-			return cnt;
+            if (UseQueryText)
+            {
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+                return ExecuteSqlList(db, sqlList);
+            }
+            else
+            {
+                return OracleInserBulk(db, insertText, collection, members, maxBatchSize, getParameters);
+            }
 		}
 
+        public override int InsertBatchWithIdentity<T>(
+            DbManager db,
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize,
+            DbManager.ParameterProvider<T> getParameters)
+        {
+            if (UseQueryText)
+            {
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100);
+                return ExecuteSqlList(db, sqlList);
+            }
+            else
+            {
+                // Note : OracleBulkCopyOptions UseInternalTransaction
+                if (db.Transaction != null)
+                    return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
+
+                MemberMapper primaryKeyMapper = null;
+                SequenceKeyGenerator keyGenerator = null;
+                foreach (var mapper in members)
+                {
+                    keyGenerator = mapper.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+                    if (keyGenerator != null)
+                    {
+                        primaryKeyMapper = mapper;
+                        break;
+                    }
+                }
+
+                if (primaryKeyMapper == null)
+                    throw new Exception("The class mapping should contain a pk column!");
+
+                var rowCount = collection.Count();
+                var sequenceIds = ReserveSequenceValues(db, rowCount, _interpreterBase.NextSequenceQuery(keyGenerator.Sequence));
+
+                int i = 0;
+                foreach (var element in collection)
+                {
+                    primaryKeyMapper.SetInt64(element, sequenceIds[i]);
+                    i++;
+                }
+
+                return OracleInserBulk(db, insertText, collection, members, maxBatchSize, getParameters);
+            }
+        }
+
+        private int OracleInserBulk<T>(
+            DbManager db,
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize,
+            DbManager.ParameterProvider<T> getParameters)
+        {
+            var idx = insertText.IndexOf('\n');
+            var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
+            var rd = new BulkCopyReader(members, collection);
+            var bc = new OracleBulkCopy((OracleConnection)db.Connection)
+            {
+                BatchSize = 1000,
+                DestinationTableName = tbl,
+            };
+
+            foreach (var memberMapper in members)
+                bc.ColumnMappings.Add(new OracleBulkCopyColumnMapping(memberMapper.Ordinal, memberMapper.Name));
+
+            bc.WriteToServer(rd);
+
+            return rd.Count;
+        }
+
+        private List<Int64> ReserveSequenceValues(DbManager db, int count, string sequenceName)
+        {
+            List<long> results = new List<long>();
+
+            foreach (var page in Enumerable.Range(1, count).ToPages(1000))
+            {
+                StringBuilder sql = new StringBuilder("SELECT " + sequenceName + " FROM (");
+                for (int i = 1; i < page.Count(); i++)
+                    sql.Append("SELECT 0 FROM DUAL UNION ALL ");
+
+                sql.Append("SELECT 0 FROM DUAL)");
+
+                db.SetCommand(sql.ToString());
+
+                var result = db.ExecuteScalarList<long>();
+                results.AddRange(result);
+            }
+
+            return results;
+        }
+
 		#endregion
+
+        class BulkCopyReader : IDataReader
+        {
+            readonly MemberMapper[] _members;
+            readonly IEnumerable _collection;
+            readonly IEnumerator _enumerator;
+
+            public int Count;
+
+            public BulkCopyReader(MemberMapper[] members, IEnumerable collection)
+            {
+                _members = members;
+                _collection = collection;
+                _enumerator = _collection.GetEnumerator();
+            }
+
+            #region Implementation of IDisposable
+
+            public void Dispose()
+            {
+            }
+
+            #endregion
+
+            #region Implementation of IDataRecord
+
+            public string GetName(int i)
+            {
+                return _members[i].Name;
+            }
+
+            public Type GetFieldType(int i)
+            {
+                if (_members[i].Type.IsGenericType && _members[i].Type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    return Nullable.GetUnderlyingType(_members[i].Type);
+                else
+                    return _members[i].Type;
+            }
+
+            public object GetValue(int i)
+            {
+                var value = _members[i].GetValue(_enumerator.Current);
+
+                return value ?? DBNull.Value;
+            }
+
+            public int FieldCount
+            {
+                get { return _members.Length; }
+            }
+
+            public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+            {
+                throw new NotImplementedException();
+            }
+
+            public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetDataTypeName(int i) { throw new NotImplementedException(); }
+            public int GetValues(object[] values) { throw new NotImplementedException(); }
+            public int GetOrdinal(string name) { throw new NotImplementedException(); }
+            public bool GetBoolean(int i) { throw new NotImplementedException(); }
+            public byte GetByte(int i) { throw new NotImplementedException(); }
+            public char GetChar(int i) { throw new NotImplementedException(); }
+            public Guid GetGuid(int i) { throw new NotImplementedException(); }
+            public short GetInt16(int i) { throw new NotImplementedException(); }
+            public int GetInt32(int i) { throw new NotImplementedException(); }
+            public long GetInt64(int i) { throw new NotImplementedException(); }
+            public float GetFloat(int i) { throw new NotImplementedException(); }
+            public double GetDouble(int i) { throw new NotImplementedException(); }
+            public string GetString(int i) { throw new NotImplementedException(); }
+            public decimal GetDecimal(int i) { throw new NotImplementedException(); }
+            public DateTime GetDateTime(int i) { throw new NotImplementedException(); }
+            public IDataReader GetData(int i) { throw new NotImplementedException(); }
+            public bool IsDBNull(int i) { throw new NotImplementedException(); }
+
+            object IDataRecord.this[int i]
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            object IDataRecord.this[string name]
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
+
+            #region Implementation of IDataReader
+
+            public void Close()
+            {
+                throw new NotImplementedException();
+            }
+
+            public DataTable GetSchemaTable()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool NextResult()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Read()
+            {
+                var b = _enumerator.MoveNext();
+
+                if (b)
+                    Count++;
+
+                return b;
+            }
+
+            public int Depth
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsClosed
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public int RecordsAffected
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
+        }
 	}
+
+    public static class EnumerableExtensions
+    {
+        public static IEnumerable<IEnumerable<T>> ToPages<T>(this IEnumerable<T> source, int pageSize)
+        {
+            var page = new List<T>(pageSize);
+            foreach (var x in source)
+            {
+                page.Add(x);
+                if (page.Count < pageSize) continue;
+
+                yield return page;
+                page = new List<T>(pageSize);
+            }
+
+            // Last page
+            if (page.Any())
+                yield return page;
+        }
+    }
+
+
 }

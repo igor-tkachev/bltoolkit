@@ -64,7 +64,7 @@ namespace UnitTests.CS.JointureTests
             {
                 var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
                             where m.ID_MULTIMEDIA == 31265081
-                            select new 
+                            select new
                             {
                                 //m.MultimediaFiles,
                                 m.DataVersion.DataRadio,
@@ -86,7 +86,8 @@ namespace UnitTests.CS.JointureTests
                             where m.Id == 1833
                             select new
                             {
-                                m.Name, m.Titles
+                                m.Name,
+                                m.Titles
                             };
 
                 var res = query.ToList();
@@ -222,7 +223,7 @@ namespace UnitTests.CS.JointureTests
                 var query = new SqlQuery(db);
                 var res = query.InsertWithIdentity(dataProduct);
                 Console.WriteLine(res);
-                Console.WriteLine(db.LastQuery);                
+                Console.WriteLine(db.LastQuery);
             }
         }
 
@@ -252,10 +253,10 @@ namespace UnitTests.CS.JointureTests
         public void InsertWithIdentityProductPending()
         {
             using (var db = _connectionFactory.CreateDbManager())
-            {                
+            {
                 var t = db.GetTable<DataProductPending>();
                 var now = DateTime.Now.AddDays(30);
-                var res =  t.InsertWithIdentity(
+                var res = t.InsertWithIdentity(
                     () =>
                     new DataProductPending()
                     {
@@ -292,29 +293,32 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void InsertBatch()
-         {            
+        public void InsertBatchWithIdentity()
+        {
+            var list = new List<DataImport>();
+            for (int i = 0; i < 10*1000; i++)
+            {
+                list.Add(new DataImport
+                {
+                    DeclaredProduct = "zzz" + i,
+                    IdMedia = 2024,
+                    DeclaredId = i,
+                });
+            }
+
             using (var db = _connectionFactory.CreateDbManager())
             {
-                db.InsertBatch(new[]
-                                   {
-                                       new DataImport
-                                           {
-                                               Commentary = "aaaa",
-                                               DeclaredProduct = "cc",
-                                               IdMedia = 2024,
-                                               DeclaredId = 1,
-                                           },
-                                       new DataImport
-                                           {
-                                               Commentary = "bbb",
-                                               DeclaredProduct = "ddd",
-                                               IdMedia = 2024,
-                                               DeclaredId = 1,
-                                           }
-                                   });
+                db.InsertBatchWithIdentity(list.Take(2));
             }
-         }
+
+            using (new ExecTimeInfo())
+            {
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+                    db.InsertBatchWithIdentity(list);
+                }
+            }
+        }
 
         [Test]
         public void InsertArtistWithAutoSequence()
@@ -346,7 +350,7 @@ namespace UnitTests.CS.JointureTests
                                                              IdMapping = d.IdMapping,
                                                              DeclaredId = d.DeclaredId,
                                                              DeclaredProduct = d.DeclaredProduct,
-                                                             MappingState = (MappingState) d.Activation,
+                                                             MappingState = (MappingState)d.Activation,
                                                              Product = new Product
                                                                            {
                                                                                IdProduct =
@@ -375,12 +379,12 @@ namespace UnitTests.CS.JointureTests
                 var queryI = from a in db.GetTable<Artist>()
                              where a.Id == 2471
                              select a;
-                
+
                 var aaa = queryI.First();
                 aaa.Name = "JE NE SUIS PAS UN HÃƒÂ‰ROS";
-                
 
-                var data = new byte[]{0x4A,0x45,0x20,0x4E,0x45,0x20,0x53,0x55,0x49,0x53,0x20,0x50,0x41,0x53,0x20,0x55,0x4E,0x20,0x48,0xC3,0x83,0xC2,0x89,0x52,0x4F,0x53};
+
+                var data = new byte[] { 0x4A, 0x45, 0x20, 0x4E, 0x45, 0x20, 0x53, 0x55, 0x49, 0x53, 0x20, 0x50, 0x41, 0x53, 0x20, 0x55, 0x4E, 0x20, 0x48, 0xC3, 0x83, 0xC2, 0x89, 0x52, 0x4F, 0x53 };
                 aaa.Name = Encoding.UTF8.GetString(data);
 
                 var updateQuery = new SqlQuery(db);
@@ -389,11 +393,11 @@ namespace UnitTests.CS.JointureTests
                 var ccc = aaa.Id;
 
                 var query2 = new FullSqlQuery(db, true); //loading is automatic
-                var artist2 = (Artist2) query2.SelectByKey(typeof (Artist2), 2643);
+                var artist2 = (Artist2)query2.SelectByKey(typeof(Artist2), 2643);
                 List<Title> titles2 = artist2.Titles;
 
                 var query = new FullSqlQuery(db);
-                var artist = (Artist2) query.SelectByKey(typeof (Artist2), 2643);
+                var artist = (Artist2)query.SelectByKey(typeof(Artist2), 2643);
                 List<Title> titles = artist.Titles;
                 Assert.AreEqual(titles2.Count, titles.Count);
             }
@@ -411,7 +415,7 @@ namespace UnitTests.CS.JointureTests
                 List<Artist2> art = dbCmd.ExecuteList<Artist2>();
 
                 foreach (Artist2 artist in art)
-                {                   
+                {
                     List<Title> titles = artist.Titles;
                     Console.WriteLine(titles.Count);
                     break;
@@ -436,7 +440,7 @@ namespace UnitTests.CS.JointureTests
             using (var db = new MusicDB())
             {
                 var query = new FullSqlQuery(db);
-                var title = (Title) query.SelectByKey(typeof (Title), 137653);
+                var title = (Title)query.SelectByKey(typeof(Title), 137653);
                 Console.WriteLine(title.Name);
 
                 var query2 = new FullSqlQueryT<Title>(db);
@@ -453,7 +457,7 @@ namespace UnitTests.CS.JointureTests
                 var query2 = new FullSqlQueryT<Artist2>(db);
                 Artist2 artist = query2.SelectByKey(2643);
                 List<Title> titles = artist.Titles;
-                Console.WriteLine(titles.Count);              
+                Console.WriteLine(titles.Count);
             }
         }
 
@@ -502,7 +506,7 @@ namespace UnitTests.CS.JointureTests
             string req = " select m.ID_MEDIA, m.ID_BASIC_MEDIA, m.ACTIVATION from PITAFR01.MEDIA m " +
                          " inner join PITAFR01.BASIC_MEDIA bm on m.ID_BASIC_MEDIA  = bm.ID_BASIC_MEDIA " +
                          " where m.ACTIVATION = 0 and bm.ACTIVATION = 0 and bm.ID_CATEGORY IN (21, 24, 25, 27, 38, 221) ";
-        
+
             GetMediaReq(req);
             GetMediaReq(req);
 
