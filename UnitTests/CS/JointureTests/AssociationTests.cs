@@ -321,6 +321,38 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void InsertBatchWithIdentityAnTransaction()
+        {
+            var list = new List<DataImport>();
+            for (int i = 0; i < 1000; i++)
+            {
+                list.Add(new DataImport
+                {
+                    DeclaredProduct = "zzz" + i,
+                    IdMedia = 2024,
+                    DeclaredId = i,
+                });
+            }
+
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                db.BeginTransaction();
+                db.InsertBatchWithIdentity(list.Take(2));
+                db.RollbackTransaction();
+            }
+
+            using (new ExecTimeInfo())
+            {
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+                    db.BeginTransaction();
+                    db.InsertBatchWithIdentity(list);
+                    db.RollbackTransaction();
+                }
+            }
+        }
+
+        [Test]
         public void InsertArtistWithAutoSequence()
         {
             using (var db = _connectionFactory.CreateDbManager())

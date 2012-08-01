@@ -18,7 +18,7 @@ namespace UnitTests.CS.JointureTests
             username = "pitafr01_proc_11";
             password = "smsmms8";
 
-            Provider = new OdpDataProvider {UseQueryText = true};
+            Provider = new OdpDataProvider {UseQueryText = false};
             //Provider = new GenericDataProvider(ProviderFullName.Oracle) { UseQueryText = true};
 
             ConnectionString = string.Format(
