@@ -27,7 +27,7 @@ namespace UnitTests.CS.JointureTests
         public long ID_DATA_RADIO { get; set; }
 
         [PrimaryKey]
-        public Int64 ID_COBRANDING_ADVERTISER { get; set; }
+        public long ID_COBRANDING_ADVERTISER { get; set; }
 
         public long ID_DATA_VERSION { get; set; }
         public long ID_MEDIA { get; set; }
@@ -101,7 +101,11 @@ namespace UnitTests.CS.JointureTests
         public long? ID_DATA_SOURCE { get; set; }
         public long ID_SESSION_DETAIL { get; set; }
         public long? ID_MEDIA_PRICING { get; set; }
+    }
 
+    [TableName(Owner = "PITAFR01")]
+    public class DATA_VERSION_DATA_RADIO : DATA_VERSION
+    {
         [Association(ThisKey = "ID_DATA_VERSION", OtherKey = "ID_DATA_VERSION")]
         public DATA_RADIO DataRadio { get; set; }
     }
@@ -132,12 +136,16 @@ namespace UnitTests.CS.JointureTests
         public Int64 ID_VEHICLE_I { get; set; }
         public Int16 ACTIVATION { get; set; }
         public string COMMENTARY { get; set; }
+    }
 
+    [TableName(Name = "MULTIMEDIA", Owner = "PITAFR01")]
+    public class MULTIMEDIA_DATA_VERSION : MULTIMEDIA_DB
+    {
         [Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
-        public DATA_VERSION DataVersion { get; set; }
+        public DATA_VERSION_DATA_RADIO DataVersion { get; set; }
 
-        [Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
-        public List<MULTIMEDIA_FILE> MultimediaFiles { get; set; }
+        //[Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
+        //public List<MULTIMEDIA_FILE> MultimediaFiles { get; set; }
 
         //[Association]
         //public List<MULTIMEDIA_COBRANDING> MultimediaCobrandings { get; set; }

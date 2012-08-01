@@ -236,11 +236,14 @@ namespace BLToolkit.Mapping
                             List<string> variations = _columnVariations[key];
                             if (variations.Contains(colName))
                             {
-                                string orderString = colName.Replace(key + "_", "");
-                                order = int.Parse(orderString) + 1;
-                                colName = key;
-                                found = true;
-                                break;
+                                if (colName.Contains(key + "_"))
+                                {
+                                    string orderString = colName.Replace(key + "_", "");
+                                    order = int.Parse(orderString) + 1;
+                                    colName = key;
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
                         if (found)

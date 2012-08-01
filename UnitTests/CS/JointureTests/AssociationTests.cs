@@ -36,9 +36,9 @@ namespace UnitTests.CS.JointureTests
             {
                 db.MappingSchema = new FullMappingSchema(inheritedMappingSchema: db.MappingSchema, mappingOrder: MappingOrder.ByColumnName,
                                                                 ignoreMissingColumns: true);
-
-                db.SetCommand(File.ReadAllText(@"c:\requete.txt"));
-                var res = db.ExecuteList<MULTIMEDIA_DB>();
+                string requete = File.ReadAllText(@"c:\requete3.txt");
+                db.SetCommand(requete);
+                var res = db.ExecuteList<MULTIMEDIA_DATA_VERSION>();
                 Assert.IsNotEmpty(res);
             }
         }
@@ -62,7 +62,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
-                var query = from m in db.GetTable<MULTIMEDIA_DB>()
+                var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
                             where m.ID_MULTIMEDIA == 31265081
                             select new 
                             {
