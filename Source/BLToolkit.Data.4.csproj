@@ -270,16 +270,15 @@
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionTestGenerator.cs" />
     <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
     <Compile Include="Data\Linq\Builder\IsExpressionResult.cs" />
-    <Compile Include="Data\Linq\Builder\LinqBuilderException.cs" />
     <Compile Include="Data\Linq\Builder\OfTypeBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IntersectBuilder.cs" />
     <Compile Include="Data\Linq\Builder\PassThroughContext.cs" />
     <Compile Include="Data\Linq\Builder\SequenceConvertInfo.cs" />
     <Compile Include="Data\Linq\Builder\SequenceConvertPath.cs" />
-    <Compile Include="Data\Linq\Builder\TestSourceGenerator.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />

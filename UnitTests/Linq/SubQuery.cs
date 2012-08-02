@@ -653,8 +653,82 @@ namespace Data.Linq
 		[Test]
 		public void LetTest6()
 		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery            = true;
-			BLToolkit.Common.Configuration.Linq.GenerateTestSourceOnException = true;
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery     = true;
+			//BLToolkit.Common.Configuration.Linq.GenerateExpressionTest = true;
+
+			ForEachProvider(
+				new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					select new
+					{
+						p.ParentID,
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+						First2 = ch2.FirstOrDefault()
+					}
+					,
+					(
+						from p in db.Parent
+						let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
+						let ch2 = ch1.Where(c => c.ChildID > -100)
+						select new
+						{
+							p.ParentID,
+							Any    = ch2.Any(),
+							Count  = ch2.Count(),
+							First1 = ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+							First2 = ch2.FirstOrDefault()
+						}
+					).Where(t => t.ParentID > 0)));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+		}
+
+		[Test]
+		public void LetTest7()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
+			ForEachProvider(
+				new[] { ProviderName.Informix, ProviderName.Sybase },
+				db => AreEqual(
+					from p in Parent
+					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+					let ch2 = ch1.Where(c => c.ChildID > -100)
+					select new
+					{
+						p.ParentID,
+						Any    = ch2.Any(),
+						Count  = ch2.Count(),
+						First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+						First2 = ch2.FirstOrDefault()
+					}
+					,
+					(
+						from p in db.Parent
+						let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
+						let ch2 = ch1.Where(c => c.ChildID > -100)
+						select new
+						{
+							p.ParentID,
+							Any    = ch2.Any(),
+							Count  = ch2.Count(),
+							First1 = ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+							First2 = ch2.FirstOrDefault()
+						}
+					).Where(t => t.ParentID > 0).Take(5000)));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+		}
+
+		//[Test]
+		public void LetTest8()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
 
 			ForEachProvider(
 				db => AreEqual(

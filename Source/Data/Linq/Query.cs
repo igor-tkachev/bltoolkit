@@ -130,18 +130,29 @@ namespace BLToolkit.Data.Linq
 
 					if (query == null)
 					{
+						if (Configuration.Linq.GenerateExpressionTest)
+						{
+							var testFile = new ExpressionTestGenerator().GenerateSource(expr);
+#if !SILVERLIGHT
+							DbManager.WriteTraceLine(
+								"Expression test code generated: '" + testFile + "'.", 
+								DbManager.TraceSwitch.DisplayName);
+#endif
+						}
+
 						try
 						{
 							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
-							string testFile = null;
-
-							if (Configuration.Linq.GenerateTestSourceOnException)
-								testFile = new TestSourceGenerator().GenerateSource(expr);
-
-							throw new LinqBuilderException(ex, testFile);
+							if (!Configuration.Linq.GenerateExpressionTest)
+#if !SILVERLIGHT
+								DbManager.WriteTraceLine(
+									"To generate test code to diagnose the problem set 'BLToolkit.Common.Configuration.Linq.GenerateExpressionTest = true'.",
+									DbManager.TraceSwitch.DisplayName);
+#endif
+							throw;
 						}
 
 						query.Next = _first;

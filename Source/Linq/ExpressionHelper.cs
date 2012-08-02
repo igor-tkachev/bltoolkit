@@ -177,11 +177,8 @@ namespace BLToolkit.Linq
 							var eq1 = ((IQueryable)e1.Value).Expression;
 							var eq2 = ((IQueryable)e2.Value).Expression;
 
-							if (!visited.Contains(eq1))
-							{
-								visited.Add(eq1);
+							if (visited.Add(eq1))
 								return Compare(eq1, eq2, visited, queryableAccessorDic);
-							}
 						}
 
 						return true;
