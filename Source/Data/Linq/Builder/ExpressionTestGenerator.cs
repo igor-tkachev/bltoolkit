@@ -115,12 +115,14 @@ namespace BLToolkit.Data.Linq.Builder
 						return false;
 					}
 
-				/*case ExpressionType.New:
+				case ExpressionType.New:
 					{
 						var ne = (NewExpression)expr;
 
+						
+
 						return false;
-					}*/
+					}
 
 				case ExpressionType.Quote :
 					return true;

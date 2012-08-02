@@ -414,14 +414,14 @@ namespace BLToolkit.Data.Sql
 				get { return _joins;  }
 			}
 
-			public void ForEach(Action<TableSource> action)
+			public void ForEach(Action<TableSource> action, HashSet<SqlQuery> visitedQueries)
 			{
 				action(this);
 				foreach (var join in Joins)
-					join.ForEach(action);
+					join.Table.ForEach(action, visitedQueries);
 
-				if (Source is SqlQuery)
-					((SqlQuery)Source).ForEachTable(action);
+				if (Source is SqlQuery && visitedQueries.Contains((SqlQuery)Source))
+					((SqlQuery)Source).ForEachTable(action, visitedQueries);
 			}
 
 			public int GetJoinNumber()
@@ -508,6 +508,9 @@ namespace BLToolkit.Data.Sql
 
 			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
+				if (sb.Length > 500)
+					return sb;
+
 				if (dic.ContainsKey(this))
 					return sb.Append("...");
 
@@ -612,11 +615,6 @@ namespace BLToolkit.Data.Sql
 						(SearchCondition)Condition.Clone(objectTree, doClone)));
 
 				return clone;
-			}
-
-			public void ForEach(Action<TableSource> action)
-			{
-				Table.ForEach(action);
 			}
 
 #if OVERRIDETOSTRING
@@ -3140,7 +3138,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
+			FinalizeAndValidateInternal(isApplySupported, optimizeColumns, true);
 			ResolveFields();
 			SetAliases();
 
@@ -3167,7 +3165,7 @@ namespace BLToolkit.Data.Sql
 		{
 			var data = new QueryData { Query = this };
 
-			new QueryVisitor().Visit(this, true, e =>
+			new QueryVisitor().VisitParentFirst(this, e =>
 			{
 				switch (e.ElementType)
 				{
@@ -3280,7 +3278,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			if (dic.Count > 0)
-				new QueryVisitor().Visit(data.Query, true, e =>
+				new QueryVisitor().VisitParentFirst(data.Query, e =>
 				{
 					ISqlExpression ex;
 
@@ -3481,16 +3479,19 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns)
+		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns, bool optimizeSearchCondition)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
 
-			ForEachTable(table =>
+			if (optimizeSearchCondition)
 			{
-				foreach (var join in table.Joins)
-					OptimizeSearchCondition(join.Condition);
-			});
+				ForEachTable(table =>
+				{
+					foreach (var join in table.Joins)
+						OptimizeSearchCondition(join.Condition);
+				}, new HashSet<SqlQuery>());
+			}
 
 			new QueryVisitor().Visit(this, e =>
 			{
@@ -3499,7 +3500,7 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
+					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns, false);
 
 					if (sql.IsParameterDependent)
 						IsParameterDependent = true;
@@ -3643,14 +3644,18 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void ForEachTable(Action<TableSource> action)
+		void ForEachTable(Action<TableSource> action, HashSet<SqlQuery> visitedQueries)
 		{
-			From.Tables.ForEach(tbl => tbl.ForEach(action));
+			if (!visitedQueries.Add(this))
+				return;
+
+			foreach (var table in From.Tables)
+				table.ForEach(action, visitedQueries);
 
 			new QueryVisitor().Visit(this, e =>
 			{
 				if (e is SqlQuery && e != this)
-					((SqlQuery)e).ForEachTable(action);
+					((SqlQuery)e).ForEachTable(action, visitedQueries);
 			});
 		}
 
@@ -3733,7 +3738,7 @@ namespace BLToolkit.Data.Sql
 						}
 					}
 				}
-			});
+			}, new HashSet<SqlQuery>());
 		}
 
 		TableSource OptimizeSubQuery(
