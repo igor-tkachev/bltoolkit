@@ -1554,10 +1554,8 @@ namespace BLToolkit.Data.DataProvider
                 List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
                 return ExecuteSqlList(db, sqlList);
             }
-            else
-            {
-                return OracleInserBulk(db, insertText, collection, members, maxBatchSize, getParameters);
-            }
+
+            return OracleInsertBulk(db, insertText, collection, members, 1000, getParameters);
         }
 
         public override int InsertBatchWithIdentity<T>(
@@ -1601,10 +1599,10 @@ namespace BLToolkit.Data.DataProvider
                 i++;
             }
 
-            return OracleInserBulk(db, insertText, collection, members, maxBatchSize, getParameters);
+            return OracleInsertBulk(db, insertText, collection, members, 1000, getParameters);
         }
 
-        private int OracleInserBulk<T>(
+        private int OracleInsertBulk<T>(
             DbManager db,
             string insertText,
             IEnumerable<T> collection,
@@ -1617,7 +1615,7 @@ namespace BLToolkit.Data.DataProvider
             var rd = new BulkCopyReader(members, collection);
             var bc = new OracleBulkCopy((OracleConnection)db.Connection)
             {
-                BatchSize = 1000,
+                BatchSize = maxBatchSize,
                 DestinationTableName = tbl,
             };
 
@@ -1631,11 +1629,11 @@ namespace BLToolkit.Data.DataProvider
 
         private List<Int64> ReserveSequenceValues(DbManager db, int count, string sequenceName)
         {
-            List<long> results = new List<long>();
+            var results = new List<long>();
 
             foreach (var page in Enumerable.Range(1, count).ToPages(1000))
             {
-                StringBuilder sql = new StringBuilder("SELECT " + sequenceName + " FROM (");
+                var sql = new StringBuilder("SELECT " + sequenceName + " FROM (");
                 for (int i = 1; i < page.Count(); i++)
                     sql.Append("SELECT 0 FROM DUAL UNION ALL ");
 
