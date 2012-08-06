@@ -659,17 +659,19 @@ namespace Data.Linq
 			ForEachProvider(
 				new[] { ProviderName.Informix, ProviderName.Sybase },
 				db => AreEqual(
-					from p in Parent
-					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					select new
-					{
-						p.ParentID,
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-						First2 = ch2.FirstOrDefault()
-					}
+					(
+						from p in Parent
+						let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+						let ch2 = ch1.Where(c => c.ChildID > -100)
+						select new
+						{
+							p.ParentID,
+							Any    = ch2.Any(),
+							Count  = ch2.Count(),
+							First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+							First2 = ch2.FirstOrDefault()
+						}
+					).Where(t => t.ParentID > 0)
 					,
 					(
 						from p in db.Parent
@@ -696,17 +698,19 @@ namespace Data.Linq
 			ForEachProvider(
 				new[] { ProviderName.Informix, ProviderName.Sybase },
 				db => AreEqual(
-					from p in Parent
-					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					select new
-					{
-						p.ParentID,
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-						First2 = ch2.FirstOrDefault()
-					}
+					(
+						from p in Parent
+						let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+						let ch2 = ch1.Where(c => c.ChildID > -100)
+						select new
+						{
+							p.ParentID,
+							Any    = ch2.Any(),
+							Count  = ch2.Count(),
+							First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
+							First2 = ch2.FirstOrDefault()
+						}
+					).Where(t => t.ParentID > 0).Take(5000)
 					,
 					(
 						from p in db.Parent
@@ -725,7 +729,7 @@ namespace Data.Linq
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
-		//[Test]
+		[Test]
 		public void LetTest8()
 		{
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
@@ -755,6 +759,36 @@ namespace Data.Linq
 						First1 = ch3 == null ? 0 : ch3.ParentID,
 						First2 = ch2.FirstOrDefault()
 					}));
+
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+		}
+
+		[Test]
+		public void LetTest9()
+		{
+			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
+
+			ForEachProvider(
+				db => AreEqual(
+					(
+						from p in Parent
+						let ch1 = Child.Where(c => c.ParentID == p.ParentID)
+						let ch2 = ch1.Where(c => c.ChildID > -100)
+						select new
+						{
+							First = ch2.FirstOrDefault()
+						}
+					).Take(10)
+					,
+					(
+						from p in db.Parent
+						let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
+						let ch2 = ch1.Where(c => c.ChildID > -100)
+						select new
+						{
+							First = ch2.FirstOrDefault()
+						}
+					).Take(10)));
 
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
