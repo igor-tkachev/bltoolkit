@@ -436,6 +436,40 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void DateTimeParams()
+		{
+			var arr = new List<DateTime?>
+			{
+				new DateTime(1992, 1, 11, 1, 11, 21, 100),
+				new DateTime(1993, 1, 11, 1, 11, 21, 100)
+			};
+
+			ForEachProvider(
+				db =>
+				{
+					foreach (var dateTime in arr)
+					{
+						var dt = DateTimeParams(db, dateTime);
+						Assert.AreEqual(dateTime, dt);
+					}
+				});
+		}
+
+		static DateTime DateTimeParams(ITestDataContext db, DateTime? dateTime)
+		{
+			var q =
+				from t in db.Types2
+				where t.DateTimeValue > dateTime
+				select new
+					{
+						t.DateTimeValue,
+						dateTime.Value
+					};
+
+			return q.First().Value;
+		}
+
+		[Test]
 		public void Nullable()
 		{
 			ForEachProvider(db => AreEqual(

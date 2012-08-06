@@ -59,8 +59,7 @@ namespace BLToolkit.Data.Linq
 
 		public Expression GetIQueryable(int n, Expression expr)
 		{
-			//return _queryableAccessorList[n].Accessor(expr).Expression;
-			return _queryableAccessorList[n].Queryable.Expression;
+			return _queryableAccessorList[n].Accessor(expr).Expression;
 		}
 
 		#endregion
@@ -147,11 +146,14 @@ namespace BLToolkit.Data.Linq
 						catch (Exception)
 						{
 							if (!Configuration.Linq.GenerateExpressionTest)
+							{
 #if !SILVERLIGHT
 								DbManager.WriteTraceLine(
 									"To generate test code to diagnose the problem set 'BLToolkit.Common.Configuration.Linq.GenerateExpressionTest = true'.",
 									DbManager.TraceSwitch.DisplayName);
 #endif
+							}
+
 							throw;
 						}
 
