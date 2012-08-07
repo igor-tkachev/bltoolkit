@@ -131,7 +131,12 @@ namespace BLToolkit.Data.Linq
 					{
 						if (Configuration.Linq.GenerateExpressionTest)
 						{
+#if FW4 || SILVERLIGHT
 							var testFile = new ExpressionTestGenerator().GenerateSource(expr);
+#else
+							var testFile = "";
+#endif
+
 #if !SILVERLIGHT
 							DbManager.WriteTraceLine(
 								"Expression test code generated: '" + testFile + "'.", 

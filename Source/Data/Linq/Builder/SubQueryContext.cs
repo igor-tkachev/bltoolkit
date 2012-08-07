@@ -59,7 +59,7 @@ namespace BLToolkit.Data.Linq.Builder
 							Expression.Lambda(
 								Expression.New(
 									ne.Constructor,
-									ne.Members.Select(m => Expression.MakeMemberAccess(p, m)),
+									ne.Members.Select(m => Expression.MakeMemberAccess(p, m)).ToArray(),
 									ne.Members),
 								p),
 							this);
@@ -80,11 +80,12 @@ namespace BLToolkit.Data.Linq.Builder
 							var seq = new SelectContext(
 								Parent,
 								Expression.Lambda(
-								Expression.MemberInit(
-									mi.NewExpression,
-									mi.Bindings
-										.OfType<MemberAssignment>()
-										.Select(ma => Expression.Bind(ma.Member, Expression.MakeMemberAccess(p, ma.Member)))),
+									Expression.MemberInit(
+										mi.NewExpression,
+										mi.Bindings
+											.OfType<MemberAssignment>()
+											.Select(ma => Expression.Bind(ma.Member, Expression.MakeMemberAccess(p, ma.Member)))
+											.ToArray()),
 									p),
 								this);
 
