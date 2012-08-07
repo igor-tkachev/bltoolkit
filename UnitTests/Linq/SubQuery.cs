@@ -534,5 +534,30 @@ namespace Data.Linq
 						).Count()
 					}));
 		}
+
+		[Test]
+		public void Count1()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					from p in
+						from p in Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p));
+		}
 	}
 }
