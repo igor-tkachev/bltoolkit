@@ -74,8 +74,8 @@ namespace UnitTests.CS.JointureTests
         [MapField("ID_PRODUCT_PENDING"), PrimaryKey, SequenceName("PITAFR01.SEQ_PRODUCT_PENDING"), Identity]
         public int IdProductPending { get; set; }
 
-        [MapField("ID_PRODUCT"), NonUpdatable(OnInsert = false, OnUpdate = true)]
-        public int? IdProduct { get; set; }
+        //[MapField("ID_PRODUCT"), NonUpdatable(OnInsert = false, OnUpdate = true)]
+        //public int? IdProduct { get; set; }
 
         [MapField("ID_USER_"), NonUpdatable(OnInsert = false, OnUpdate = true)]
         public int IdUser { get; set; }

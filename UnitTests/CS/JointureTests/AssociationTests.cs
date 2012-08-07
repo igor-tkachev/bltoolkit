@@ -209,7 +209,9 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
-                var dataProduct = new DataProductPending()
+                db.BeginTransaction();
+
+                var dataProduct = new DataProductPending
                     {
                         Activation = 0,
                         Commentary = "Valeriu",
@@ -222,6 +224,9 @@ namespace UnitTests.CS.JointureTests
 
                 var query = new SqlQuery(db);
                 var res = query.InsertWithIdentity(dataProduct);
+
+                db.RollbackTransaction();
+
                 Console.WriteLine(res);
                 Console.WriteLine(db.LastQuery);
             }
@@ -232,7 +237,9 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
-                var dataProduct = new DataProductPending()
+                db.BeginTransaction();
+
+                var dataProduct = new DataProductPending
                 {
                     Activation = 0,
                     Commentary = "Valeriu",
@@ -244,13 +251,16 @@ namespace UnitTests.CS.JointureTests
                 };
 
                 var res = db.InsertWithIdentity(dataProduct);
+
+                db.RollbackTransaction();
+
                 Console.WriteLine(res);
                 Console.WriteLine(db.LastQuery);
             }
         }
 
         [Test]
-        public void InsertWithIdentityProductPending()
+        public void InsertWithIdentityLinq()
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
@@ -258,7 +268,7 @@ namespace UnitTests.CS.JointureTests
                 var now = DateTime.Now.AddDays(30);
                 var res = t.InsertWithIdentity(
                     () =>
-                    new DataProductPending()
+                    new DataProductPending
                     {
                         Activation = 0,
                         Commentary = "Valeriu",
@@ -294,34 +304,6 @@ namespace UnitTests.CS.JointureTests
 
         [Test]
         public void InsertBatchWithIdentity()
-        {
-            var list = new List<DataImport>();
-            for (int i = 0; i < 10*1000; i++)
-            {
-                list.Add(new DataImport
-                {
-                    DeclaredProduct = "zzz" + i,
-                    IdMedia = 2024,
-                    DeclaredId = i,
-                });
-            }
-
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                db.InsertBatchWithIdentity(list.Take(2));
-            }
-
-            using (new ExecTimeInfo())
-            {
-                using (var db = _connectionFactory.CreateDbManager())
-                {
-                    db.InsertBatchWithIdentity(list);
-                }
-            }
-        }
-
-        [Test]
-        public void InsertBatchWithIdentityAnTransaction()
         {
             var list = new List<DataImport>();
             for (int i = 0; i < 1000; i++)
@@ -373,6 +355,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectTest()
         {
+            using (new ExecTimeInfo())
             using (var db = _connectionFactory.CreateDbManager())
             {
                 IQueryable<Mapping> resultG = from d in db.GetTable<DataMapping>()

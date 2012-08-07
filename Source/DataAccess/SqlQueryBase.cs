@@ -264,7 +264,7 @@ namespace BLToolkit.DataAccess
                 {
                     string seqQuery = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
                     sb.AppendFormat("\t{0},\n", seqQuery);
-                    identityMember = mm;                    
+                    identityMember = mm;
                 }
                 else
                 {
@@ -287,6 +287,10 @@ namespace BLToolkit.DataAccess
             if (identityMember != null)
             {
                 sb.AppendFormat("\r\n{0}", db.DataProvider.GetReturningInto(identityMember.Name));
+
+                query.AddParameter(
+                    db.DataProvider.Convert("IDENTITY_PARAMETER", ConvertType.NameToQueryParameter).ToString(),
+                    identityMember.Name);
             }
 
 			query.QueryText = sb.ToString();
@@ -375,10 +379,10 @@ namespace BLToolkit.DataAccess
 				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
 				case "SelectAll":   return CreateSelectAllSqlText  (db, type);      
           
-				case "Insert":      return CreateInsertSqlText     (db, type, -1);                
-				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
-                case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.DataProvider.UseQueryText || db.Transaction != null);
+				case "Insert":      return CreateInsertSqlText     (db, type, -1);
                 case "InsertWithIdentity": return CreateInsertSqlText(db, type, -1, true);
+				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
+                case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.DataProvider.UseQueryText || db.Transaction != null);                
 
 				case "Update":      return CreateUpdateSqlText     (db, type, -1);
 				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);
