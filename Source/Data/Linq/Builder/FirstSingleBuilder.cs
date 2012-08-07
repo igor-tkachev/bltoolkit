@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	class FirstSingleBuilder : MethodCallBuilder
 	{
+		public static string[] MethodNames = new[] { "First", "FirstOrDefault", "Single", "SingleOrDefault" };
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return 
-				methodCall.IsQueryable("First", "FirstOrDefault", "Single", "SingleOrDefault") &&
+				methodCall.IsQueryable(MethodNames) &&
 				methodCall.Arguments.Count == 1;
 		}
 

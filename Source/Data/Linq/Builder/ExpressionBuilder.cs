@@ -214,17 +214,54 @@ namespace BLToolkit.Data.Linq.Builder
 			expr = ExposeExpression  (expr);
 			expr = OptimizeExpression(expr);
 
-			if (SequenceParameter == null)
-				SequenceParameter = Expression.Parameter(expr.Type, "cp");
+			var paramType   = expr.Type;
+			var isQueryable = false;
+
+			if (expression.NodeType == ExpressionType.Call)
+			{
+				var call = (MethodCallExpression)expression;
+
+				if (call.IsQueryable() && call.Object == null && call.Arguments.Count > 0 && call.Type.IsGenericType)
+				{
+					var type = call.Type.GetGenericTypeDefinition();
+
+					if (type == typeof(IQueryable<>) || type == typeof(IEnumerable<>))
+					{
+						var arg = call.Type.GetGenericArguments();
+
+						if (arg.Length == 1)
+						{
+							paramType   = arg[0];
+							isQueryable = true;
+						}
+					}
+				}
+			}
+
+			SequenceParameter = Expression.Parameter(paramType, "cp");
 
 			var sequence = ConvertSequence(new BuildInfo((IBuildContext)null, expr, new SqlQuery()), SequenceParameter);
 
 			if (sequence != null)
 			{
-				expr = sequence.Expression;
+				if (sequence.Expression.Type != expr.Type)
+				{
+					if (isQueryable)
+					{
+						var p = sequence.ExpressionsToReplace.SingleOrDefault(s => s.Path.NodeType == ExpressionType.Parameter);
 
-				if (sequence.Parameter.Type != SequenceParameter.Type)
+						return Expression.Call(
+							((MethodCallExpression)expr).Method.DeclaringType,
+							"Select",
+							new[] { p.Path.Type, paramType },
+							sequence.Expression,
+							Expression.Lambda(p.Expr, (ParameterExpression)p.Path));
+					}
+
 					throw new InvalidOperationException();
+				}
+
+				return sequence.Expression;
 			}
 
 			return expr;
@@ -493,27 +530,7 @@ namespace BLToolkit.Data.Linq.Builder
 									case "SingleOrDefault" :
 									case "First"           :
 									case "FirstOrDefault"  :
-										{
-											var param    = Expression.Parameter(call.Type, "p");
-											var selector = expr.Convert(e => e == call ? param : e);
-											var method   = GetQueriableMethodInfo(call, (m,_) => m.Name == call.Method.Name && m.GetParameters().Length == 1);
-											var select   = call.Method.DeclaringType == typeof(Enumerable) ?
-												EnumerableMethods
-													.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
-													.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
-												QueryableMethods
-													.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
-													.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
-
-											call   = (MethodCallExpression)OptimizeExpression(call);
-											select = select.MakeGenericMethod(call.Type, expr.Type);
-											method = method.MakeGenericMethod(expr.Type);
-
-											return Expression.Call(null, method,
-												Expression.Call(null, select,
-													call.Arguments[0],
-													Expression.Lambda(selector, param)));
-										}
+										return ConvertSingleOrFirst(expr, call);
 								}
 
 								return expr;
@@ -527,6 +544,29 @@ namespace BLToolkit.Data.Linq.Builder
 			}
 
 			return expr;
+		}
+
+		Expression ConvertSingleOrFirst(Expression expr, MethodCallExpression call)
+		{
+			var param = Expression.Parameter(call.Type, "p");
+			var selector = expr.Convert(e => e == call ? param : e);
+			var method = GetQueriableMethodInfo(call, (m, _) => m.Name == call.Method.Name && m.GetParameters().Length == 1);
+			var select = call.Method.DeclaringType == typeof(Enumerable) ?
+				EnumerableMethods
+					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
+				QueryableMethods
+					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
+
+			call = (MethodCallExpression)OptimizeExpression(call);
+			select = select.MakeGenericMethod(call.Type, expr.Type);
+			method = method.MakeGenericMethod(expr.Type);
+
+			return Expression.Call(null, method,
+				Expression.Call(null, select,
+					call.Arguments[0],
+					Expression.Lambda(selector, param)));
 		}
 
 		#endregion
