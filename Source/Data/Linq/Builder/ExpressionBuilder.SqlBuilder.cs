@@ -539,7 +539,7 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								var info = ConvertExpressions(context, a.Expression, queryConvertFlag)[0];
 								//var sql = ConvertToSql(context, a.Expression);
-								var mi  = a.Member;
+								var mi   = a.Member;
 
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);

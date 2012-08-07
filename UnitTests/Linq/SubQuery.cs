@@ -539,6 +539,7 @@ namespace Data.Linq
 		public void Count1()
 		{
 			ForEachProvider(
+				new[] { ProviderName.SqlCe },
 				db => AreEqual(
 					from p in
 						from p in Parent
@@ -555,6 +556,58 @@ namespace Data.Linq
 						{
 							p.ParentID,
 							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p));
+		}
+
+		[Test]
+		public void Count2()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from p in
+						from p in Parent
+						select new Parent
+						{
+							ParentID = p.ParentID,
+							Value1   = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Value1 > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new Parent
+						{
+							ParentID = p.ParentID,
+							Value1   = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Value1 > 1
+					select p));
+		}
+
+		[Test]
+		public void Count3()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from p in
+						from p in Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Sum(t => t.ParentID) / 2,
 						}
 					where p.Sum > 1
 					select p));
