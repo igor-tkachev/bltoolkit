@@ -89,6 +89,31 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsParameter4()
+		{
+			ForEachProvider(db =>
+				AreEqual(
+					from p in Person
+					select new
+					{
+						p,
+						Field1 = p.FirstName.Contains("Jo")
+					} into p
+					where p.Field1
+					orderby p.Field1
+					select p,
+					from p in db.Person
+					select new
+					{
+						p,
+						Field1 = p.FirstName.Contains("Jo")
+					} into p
+					where p.Field1
+					orderby p.Field1
+					select p));
+		}
+
+		[Test]
 		public void StartsWith1()
 		{
 			ForEachProvider(db => 
