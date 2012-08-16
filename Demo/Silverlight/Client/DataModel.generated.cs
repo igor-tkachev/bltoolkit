@@ -23,15 +23,21 @@ using BLToolkit.ServiceModel;
 
 namespace Client
 {
-	public partial class DataModel : SoapDataContext // ServiceModelDataContext
+	public partial class DataModel : SoapDataContext
 	{
 		public Table<AlphabeticalListOfProducts> AlphabeticalListOfProducts { get { return this.GetTable<AlphabeticalListOfProducts>(); } }
+		/// <summary>
+		/// Description for Categories table.
+		/// </summary>
 		public Table<Categories>                 Categories                 { get { return this.GetTable<Categories>();                 } }
 		public Table<CategorySalesFor1997>       CategorySalesFor1997       { get { return this.GetTable<CategorySalesFor1997>();       } }
 		public Table<CurrentProductList>         CurrentProductList         { get { return this.GetTable<CurrentProductList>();         } }
 		public Table<CustomerAndSuppliersByCity> CustomerAndSuppliersByCity { get { return this.GetTable<CustomerAndSuppliersByCity>(); } }
 		public Table<CustomerCustomerDemo>       CustomerCustomerDemo       { get { return this.GetTable<CustomerCustomerDemo>();       } }
 		public Table<CustomerDemographics>       CustomerDemographics       { get { return this.GetTable<CustomerDemographics>();       } }
+		/// <summary>
+		/// Description of Customers table.
+		/// </summary>
 		public Table<Customers>                  Customers                  { get { return this.GetTable<Customers>();                  } }
 		public Table<Employees>                  Employees                  { get { return this.GetTable<Employees>();                  } }
 		public Table<EmployeeTerritories>        EmployeeTerritories        { get { return this.GetTable<EmployeeTerritories>();        } }
@@ -158,9 +164,15 @@ namespace Client
 		           public string   CategoryName    { get; set; } // nvarchar(15)
 	}
 
+	/// <summary>
+	/// Description for Categories table.
+	/// </summary>
 	[TableName(Name="Categories")]
 	public partial class Categories
 	{
+		/// <summary>
+		/// Description of Categories.CategoryID field.
+		/// </summary>
 		[Identity, PrimaryKey(1)] public int    CategoryID   { get; set; } // int(10)
 		                          public string CategoryName { get; set; } // nvarchar(15)
 		[Nullable               ] public string Description  { get; set; } // ntext(1073741823)
@@ -223,10 +235,19 @@ namespace Client
 		public IEnumerable<CustomerCustomerDemo> CustomerCustomerDemos { get; set; }
 	}
 
+	/// <summary>
+	/// Description of Customers table.
+	/// </summary>
 	[TableName(Name="Customers")]
 	public partial class Customers
 	{
+		/// <summary>
+		/// Just ID.
+		/// </summary>
 		[          PrimaryKey(1)] public string CustomerID   { get; set; } // nchar(5)
+		/// <summary>
+		/// Name of the Company.
+		/// </summary>
 		                          public string CompanyName  { get; set; } // nvarchar(40)
 		[Nullable               ] public string ContactName  { get; set; } // nvarchar(30)
 		[Nullable               ] public string ContactTitle { get; set; } // nvarchar(30)
@@ -390,17 +411,17 @@ namespace Client
 		[Nullable               ] public string    ShipPostalCode { get; set; } // nvarchar(10)
 		[Nullable               ] public string    ShipCountry    { get; set; } // nvarchar(15)
 
-		// FK_Orders_Customers
-		[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=true)]
-		public Customers Customers { get; set; }
+		// FK_Orders_Shippers
+		[Association(ThisKey="ShipVia", OtherKey="ShipperID", CanBeNull=true)]
+		public Shippers Shippers { get; set; }
 
 		// FK_Orders_Employees
 		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID", CanBeNull=true)]
 		public Employees Employees { get; set; }
 
-		// FK_Orders_Shippers
-		[Association(ThisKey="ShipVia", OtherKey="ShipperID", CanBeNull=true)]
-		public Shippers Shippers { get; set; }
+		// FK_Orders_Customers
+		[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=true)]
+		public Customers Customers { get; set; }
 
 		// FK_Order_Details_Orders_BackReference
 		[Association(ThisKey="OrderID", OtherKey="OrderID", CanBeNull=true)]
@@ -456,13 +477,13 @@ namespace Client
 		[Nullable               ] public short?   ReorderLevel    { get; set; } // smallint(5)
 		                          public bool     Discontinued    { get; set; } // bit
 
-		// FK_Products_Categories
-		[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=true)]
-		public Categories Categories { get; set; }
-
 		// FK_Products_Suppliers
 		[Association(ThisKey="SupplierID", OtherKey="SupplierID", CanBeNull=true)]
 		public Suppliers Suppliers { get; set; }
+
+		// FK_Products_Categories
+		[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=true)]
+		public Categories Categories { get; set; }
 
 		// FK_Order_Details_Products_BackReference
 		[Association(ThisKey="ProductID", OtherKey="ProductID", CanBeNull=true)]
@@ -611,9 +632,8 @@ namespace Client
 				ReceiveTimeout         = new TimeSpan(00, 10, 00),
 				SendTimeout            = new TimeSpan(00, 10, 00),
 			},
-			//new EndpointAddress("http://localhost:31020/TestLinqService.svc"))
-			new EndpointAddress("http://localhost:31020/TestLinqWebService.asmx"))
-			//base("TestLinqWebServiceSoap")
+			new EndpointAddress("http://localhost:31020/LinqWebService.asmx"))
+			// base("TestLinqWebServiceSoap")
 		{
 		}
 	}

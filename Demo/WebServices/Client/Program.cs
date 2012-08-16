@@ -11,7 +11,7 @@ namespace Demo.WebServices.Client
 	{
 		static void Main(string[] args)
 		{
-			WebClientBase.BaseUrl = args.Length == 0? "localhost": args[0];
+			WebClientBase.BaseUrl = args.Length == 0? "localhost:59179": args[1];
 
 			foreach (var p in PersonClient.Instance.SelectAll())
 			{
