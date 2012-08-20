@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
@@ -344,7 +344,7 @@ namespace BLToolkit.Data.Linq
 
         public static int ContainsExactly(this string s, string value)
         {
-            return s.IndexOf(value);
+            return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value)).Count; 
         }
 
         #endregion

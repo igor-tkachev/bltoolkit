@@ -277,7 +277,7 @@ namespace BLToolkit.Data.Linq
             if (str == null || value == null)
                 return null;
 
-            return str.IndexOf(value) + 1;
+            return str.ContainsExactly(value);
         }
 
 		[SqlFunction]

@@ -539,6 +539,8 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectTest3()
         {
+            Console.WriteLine("Hello1 Hello2".ContainsExactly("Hello2"));
+
             Console.WriteLine(Math.Round(0.5));
 
             var creationDate = new DateTime(2012, 1, 1);

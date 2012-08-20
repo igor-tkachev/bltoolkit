@@ -1805,6 +1805,4 @@ namespace BLToolkit.Data.DataProvider
                 yield return page;
         }
     }
-
-
 }
