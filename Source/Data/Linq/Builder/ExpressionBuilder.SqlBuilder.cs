@@ -1798,9 +1798,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#endregion
 
-		#region LIKE predicate
+        #region LIKE predicate
 
-		ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression, string start, string end)
+        ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression, string start, string end)
 		{
 			var e = expression;
 			var o = ConvertToSql(context, e.Object);

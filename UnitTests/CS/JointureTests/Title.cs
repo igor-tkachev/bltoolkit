@@ -15,7 +15,7 @@ namespace UnitTests.CS.JointureTests
         [MapField("ID_ARTIST")]
         public long? ArtistID { get; set; }
 
-        [Association(ThisKey = "ArtistID", OtherKey = "Id", CanBeNull = false)]
+        [Association(CanBeNull = false, ThisKey = "ArtistID", OtherKey = "Id")]
         public Artist Artist { get; set; }
     }
 }

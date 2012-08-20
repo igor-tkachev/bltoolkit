@@ -91,6 +91,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Oracle.DataAccess, Version=4.112.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -182,10 +183,22 @@
     <Compile Include="JointureTests\Artist.cs" />
     <Compile Include="JointureTests\Artist2.cs" />
     <Compile Include="JointureTests\AssociationTests.cs" />
+    <Compile Include="JointureTests\BasicMedia.cs" />
     <Compile Include="JointureTests\Consts.cs" />
+    <Compile Include="JointureTests\ExecTimeInfo.cs" />
+    <Compile Include="JointureTests\FILE_FORM.cs" />
+    <Compile Include="JointureTests\FORM_FOLLOW_UP.cs" />
+    <Compile Include="JointureTests\FORM_SCRIPT.cs" />
+    <Compile Include="JointureTests\Media.cs" />
     <Compile Include="JointureTests\MusicDB.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="JointureTests\MusicTest.cs" />
+    <Compile Include="JointureTests\OleronFactory.cs" />
+    <Compile Include="JointureTests\OleronTest.cs" />
+    <Compile Include="JointureTests\OrquaFactory.cs" />
+    <Compile Include="JointureTests\OrquaTest.cs" />
+    <Compile Include="JointureTests\MusicFactory.cs" />
     <Compile Include="JointureTests\Title.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />
@@ -318,6 +331,10 @@
     <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Generic.4.csproj">
+      <Project>{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}</Project>
+      <Name>BLToolkit.Data.DataProvider.Generic.4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
@@ -325,6 +342,10 @@
     <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj">
+      <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
+      <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\BLToolkit.4.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>

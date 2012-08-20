@@ -15,7 +15,7 @@ namespace UnitTests.CS.JointureTests
         public string Name { get; set; }
 
         [LazyInstance(true)]
-        [Association(ThisKey = "Id", OtherKey = "ArtistID", CanBeNull = false)]
+        [Association(ThisKey = "Id", OtherKey = "ArtistID")]
         public virtual List<Title> Titles { get; set; }
     }
 }

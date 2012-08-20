@@ -69,9 +69,9 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-		#region Delete
+        #region Delete
 
-		public static int Delete<T>([NotNull] this IQueryable<T> source)
+        public static int Delete<T>([NotNull] this IQueryable<T> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 

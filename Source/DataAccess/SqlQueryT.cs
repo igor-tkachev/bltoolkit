@@ -7,7 +7,7 @@ using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
-	public class SqlQuery<T> : SqlQueryBase
+	public class SqlQuery<T> : SqlQueryBase, ISqlQueryT<T>
 	{
 		#region Constructors
 
@@ -164,9 +164,22 @@ namespace BLToolkit.DataAccess
 			}
 		}
 
+        public virtual int InsertBatchWithIdentity(DbManager db, int maxBatchSize, IEnumerable<T> list)
+        {
+            var query = GetSqlQueryInfo(db, typeof(T), "InsertBatchWithIdentity");
+
+            return db.DataProvider.InsertBatchWithIdentity(
+                db,
+                query.QueryText,
+                list,
+                query.GetMemberMappers(),
+                maxBatchSize,
+                obj => query.GetParameters(db, obj));
+        }
+
 		public virtual int Insert(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			var query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
+            var query = GetSqlQueryInfo(db, typeof(T), "InsertBatch");
 
 			return db.DataProvider.InsertBatch(
 				db,

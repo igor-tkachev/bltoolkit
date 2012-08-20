@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
@@ -233,6 +233,11 @@ namespace BLToolkit.Data.Linq
 			return InsertBatch(dataContext, int.MaxValue, list);
 		}
 
+        public static int InsertBatchWithIdentity<T>(this DbManager dataContext, IEnumerable<T> list)
+        {
+            return new SqlQuery<T>().InsertBatchWithIdentity(dataContext, int.MaxValue, list);
+        }
+
 		public static int InsertBatch<T>(this DbManager dataContext, T[] list)
 		{
 			return InsertBatch(dataContext, int.MaxValue, list);
@@ -334,5 +339,14 @@ namespace BLToolkit.Data.Linq
 		#endregion
 
 		#endregion
-	}
+
+        #region String Extensions
+
+        public static int ContainsExactly(this string s, string value)
+        {
+            return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value)).Count; 
+        }
+
+        #endregion
+    }
 }
