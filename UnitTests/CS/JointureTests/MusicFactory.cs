@@ -12,10 +12,10 @@ namespace UnitTests.CS.JointureTests
             var bb = aa.Rows.Count;
 
             string database = prod ? "MUSIC01.PIGE" : "MUSICFR01.TEST";
-            string username = "scurutchet";
-            string password = "kisscool12";
+            const string username = "scurutchet";
+            const string password = "kisscool12";
 
-            Provider = new OdpDataProvider();
+            Provider = new OdpDataProvider {UseQueryText = true};
             //Provider = new GenericDataProvider(ProviderFullName.Oracle){UseQueryText = true};
 
             ConnectionString = string.Format(

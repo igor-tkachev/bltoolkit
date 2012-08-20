@@ -84,7 +84,12 @@ namespace BLToolkit.Data
 			var cc = sqlProvider.CommandCount(sql);
 			var sb = new StringBuilder();
 
-			var commands = new string[cc];
+            if (DataProvider.UseQueryText)
+            {
+                // Use oracleHelper for OdpDataProvider to generate sql
+            }
+
+            var commands = new string[cc];
 
 			for (var i = 0; i < cc; i++)
 			{

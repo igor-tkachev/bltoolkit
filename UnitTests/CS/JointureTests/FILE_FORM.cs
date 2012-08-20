@@ -6,6 +6,17 @@ using Oracle.DataAccess.Types;
 
 namespace UnitTests.CS.JointureTests
 {
+    [TableName(Name = "SCRIPT", Owner = "ORQUAFR01")]
+    public class SCRIPT_TABLE
+    {
+        [PrimaryKey, NonUpdatable]
+        public long ID_FORM { get; set; }
+
+        public string SCRIPT { get; set; }
+
+        public DateTime DATE_CREATION { get; set; }
+    }
+
     [TableName(Name = "FORM", Owner = "ORQUAFR01")]
     public class FILE_FORM
     {

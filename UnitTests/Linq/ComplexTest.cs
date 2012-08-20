@@ -285,7 +285,7 @@ namespace Data.Linq
 			Expression<Func<Northwind.Customer,bool>> pred2 = cust=>cust.Country=="France";
 
 			var param = Expression.Parameter(typeof(Northwind.Customer), "x");
-			var final = Expression.Lambda<Func<Northwind.Customer, bool>>(
+			var final = Expression.Lambda<Func<Northwind.Customer,bool>>(
 				Expression.OrElse(
 					Expression.Invoke(pred1, param),
 					Expression.Invoke(pred2, param)
@@ -304,7 +304,7 @@ namespace Data.Linq
 			Expression<Func<Parent,bool>> pred2 = _=>_.Value1   == 1 || _.Value1 == null;
 
 			var param = Expression.Parameter(typeof(Parent), "x");
-			var final = Expression.Lambda<Func<Parent, bool>>(
+			var final = Expression.Lambda<Func<Parent,bool>>(
 				Expression.AndAlso(
 					Expression.Invoke(pred1, param),
 					Expression.Invoke(pred2, param)

@@ -24,12 +24,18 @@ namespace NorthwindDS
 	public partial class DataContext : DbManager
 	{
 		public Table<AlphabeticalListOfProduct>  AlphabeticalListOfProducts   { get { return this.GetTable<AlphabeticalListOfProduct>();  } }
+		/// <summary>
+		/// Description for Categories table.
+		/// </summary>
 		public Table<Category>                   Categories                   { get { return this.GetTable<Category>();                   } }
 		public Table<CategorySalesFor1997>       CategorySalesFor1997         { get { return this.GetTable<CategorySalesFor1997>();       } }
 		public Table<CurrentProductList>         CurrentProductLists          { get { return this.GetTable<CurrentProductList>();         } }
 		public Table<CustomerAndSuppliersByCity> CustomerAndSuppliersByCities { get { return this.GetTable<CustomerAndSuppliersByCity>(); } }
 		public Table<CustomerCustomerDemo>       CustomerCustomerDemos        { get { return this.GetTable<CustomerCustomerDemo>();       } }
 		public Table<CustomerDemographic>        CustomerDemographics         { get { return this.GetTable<CustomerDemographic>();        } }
+		/// <summary>
+		/// Description of Customers table.
+		/// </summary>
 		public Table<Customer>                   Customers                    { get { return this.GetTable<Customer>();                   } }
 		public Table<Employee>                   Employees                    { get { return this.GetTable<Employee>();                   } }
 		public Table<EmployeeTerritory>          EmployeeTerritories          { get { return this.GetTable<EmployeeTerritory>();          } }
@@ -156,9 +162,15 @@ namespace NorthwindDS
 		           public string   CategoryName    { get; set; } // nvarchar(15)
 	}
 
+	/// <summary>
+	/// Description for Categories table.
+	/// </summary>
 	[TableName(Name="Categories")]
 	public partial class Category
 	{
+		/// <summary>
+		/// Description of Categories.CategoryID field.
+		/// </summary>
 		[Identity, PrimaryKey(1)] public int    CategoryID   { get; set; } // int(10)
 		                          public string CategoryName { get; set; } // nvarchar(15)
 		[Nullable               ] public string Description  { get; set; } // ntext(1073741823)
@@ -221,10 +233,19 @@ namespace NorthwindDS
 		public IEnumerable<CustomerCustomerDemo> CustomerCustomerDemos { get; set; }
 	}
 
+	/// <summary>
+	/// Description of Customers table.
+	/// </summary>
 	[TableName(Name="Customers")]
 	public partial class Customer
 	{
+		/// <summary>
+		/// Just ID.
+		/// </summary>
 		[          PrimaryKey(1)] public string CustomerID   { get; set; } // nchar(5)
+		/// <summary>
+		/// Name of the Company.
+		/// </summary>
 		                          public string CompanyName  { get; set; } // nvarchar(40)
 		[Nullable               ] public string ContactName  { get; set; } // nvarchar(30)
 		[Nullable               ] public string ContactTitle { get; set; } // nvarchar(30)
@@ -388,17 +409,17 @@ namespace NorthwindDS
 		[Nullable               ] public string    ShipPostalCode { get; set; } // nvarchar(10)
 		[Nullable               ] public string    ShipCountry    { get; set; } // nvarchar(15)
 
-		// FK_Orders_Customers
-		[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=true)]
-		public Customer Customer { get; set; }
+		// FK_Orders_Shippers
+		[Association(ThisKey="ShipVia", OtherKey="ShipperID", CanBeNull=true)]
+		public Shipper Shipper { get; set; }
 
 		// FK_Orders_Employees
 		[Association(ThisKey="EmployeeID", OtherKey="EmployeeID", CanBeNull=true)]
 		public Employee Employee { get; set; }
 
-		// FK_Orders_Shippers
-		[Association(ThisKey="ShipVia", OtherKey="ShipperID", CanBeNull=true)]
-		public Shipper Shipper { get; set; }
+		// FK_Orders_Customers
+		[Association(ThisKey="CustomerID", OtherKey="CustomerID", CanBeNull=true)]
+		public Customer Customer { get; set; }
 
 		// FK_Order_Details_Orders_BackReference
 		[Association(ThisKey="OrderID", OtherKey="OrderID", CanBeNull=true)]
@@ -454,13 +475,13 @@ namespace NorthwindDS
 		[Nullable                                                          ] public short?   ReorderLevel    { get; set; } // smallint(5)
 		[                         MapField(IsInheritanceDiscriminator=true)] public bool     Discontinued    { get; set; } // bit
 
-		// FK_Products_Categories
-		[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=true)]
-		public Category Category { get; set; }
-
 		// FK_Products_Suppliers
 		[Association(ThisKey="SupplierID", OtherKey="SupplierID", CanBeNull=true)]
 		public Supplier Supplier { get; set; }
+
+		// FK_Products_Categories
+		[Association(ThisKey="CategoryID", OtherKey="CategoryID", CanBeNull=true)]
+		public Category Category { get; set; }
 
 		// FK_Order_Details_Products_BackReference
 		[Association(ThisKey="ProductID", OtherKey="ProductID", CanBeNull=true)]

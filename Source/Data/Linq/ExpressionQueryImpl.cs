@@ -6,8 +6,8 @@ namespace BLToolkit.Data.Linq
 	class ExpressionQueryImpl<T> : ExpressionQuery<T>, IExpressionQuery
 	{
 		public ExpressionQueryImpl(IDataContextInfo dataContext, Expression expression)
-			: base(dataContext, expression)
 		{
+			Init(dataContext, expression);
 		}
 
 		//public new string SqlText

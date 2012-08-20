@@ -339,5 +339,14 @@ namespace BLToolkit.Data.Linq
 		#endregion
 
 		#endregion
-	}
+
+        #region String Extensions
+
+        public static int ContainsExactly(this string s, string value)
+        {
+            return s.IndexOf(value);
+        }
+
+        #endregion
+    }
 }

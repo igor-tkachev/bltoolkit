@@ -108,6 +108,38 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void SelectDataEntries()
+        {
+            using (new ExecTimeInfo())
+            {
+                DateTime beginSpotPeriod = new DateTime(2012, 08, 09);
+                DateTime endSpotPeriod = new DateTime(2012, 08, 09);
+                using (var pitagorDb = _connectionFactory.CreateDbManager())
+                {
+                    var dbQuery = from dr in pitagorDb.GetTable<DATA_RADIO>()
+                                  join dv in pitagorDb.GetTable<DATA_VERSION>() on dr.ID_DATA_VERSION equals
+                                      dv.ID_DATA_VERSION
+                                  where dr.DATE_MEDIA >= beginSpotPeriod && dr.DATE_MEDIA <= endSpotPeriod
+                                        && dr.DATE_SPOT_BEGINNING >= beginSpotPeriod &&
+                                        dr.DATE_SPOT_END <= endSpotPeriod
+                                  select
+                                      new DataEntryBroadcast
+                                          {
+                                              Id = dr.ID_DATA_VERSION,
+                                              VersionId = dv.ID_MULTIMEDIA,
+                                              DateMedia = dr.DATE_MEDIA,
+                                              MediaId = dr.ID_MEDIA,
+                                              SpotBegin = dr.DATE_SPOT_BEGINNING,
+                                              SpotEnd = dr.DATE_SPOT_END,
+                                          };
+
+                    var res =  dbQuery.ToList();
+                    Console.WriteLine(res.Count);
+                }
+            }
+        }
+
+        [Test]
         public void SelectTooLong()
         {
             using (new ExecTimeInfo())
@@ -303,7 +335,7 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void InsertBatchWithIdentity()
+        public void InsertBatchWithIdentityWithTransaction()
         {
             var list = new List<DataImport>();
             for (int i = 0; i < 1000; i++)
@@ -330,6 +362,34 @@ namespace UnitTests.CS.JointureTests
                     db.BeginTransaction();
                     db.InsertBatchWithIdentity(list);
                     db.RollbackTransaction();
+                }
+            }
+        }
+
+        [Test]
+        public void InsertBatchWithIdentity()
+        {
+            var list = new List<DataImport>();
+            for (int i = 0; i < 1000; i++)
+            {
+                list.Add(new DataImport
+                {
+                    DeclaredProduct = "zzz" + i,
+                    IdMedia = 2024,
+                    DeclaredId = i,
+                });
+            }
+
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                db.InsertBatchWithIdentity(list.Take(2));
+            }
+
+            using (new ExecTimeInfo())
+            {
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+                    db.InsertBatchWithIdentity(list);
                 }
             }
         }
@@ -473,6 +533,24 @@ namespace UnitTests.CS.JointureTests
                 Artist2 artist = query2.SelectByKey(2643);
                 List<Title> titles = artist.Titles;
                 Console.WriteLine(titles.Count);
+            }
+        }
+
+        [Test]
+        public void SelectTest3()
+        {
+            Console.WriteLine(Math.Round(0.5));
+
+            var creationDate = new DateTime(2012, 1, 1);
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from s in db.GetTable<SCRIPT_TABLE>()
+                            where s.DATE_CREATION > creationDate && s.SCRIPT.ContainsExactly("station") > 0
+                            select s;
+                
+                var res = query.ToList();
+                Console.WriteLine(res.Count);
+                Console.WriteLine(db.LastQuery);
             }
         }
 

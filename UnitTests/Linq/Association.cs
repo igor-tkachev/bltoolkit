@@ -249,7 +249,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void DoulbeJoin()
+		public void DoubleJoin()
 		{
 			ForEachProvider(db => AreEqual(
 				from g in    GrandChild where g.Child.Parent.Value1 == 1 select g,

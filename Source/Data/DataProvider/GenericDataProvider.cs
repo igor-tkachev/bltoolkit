@@ -134,10 +134,14 @@ namespace BLToolkit.Data.DataProvider
 
         public override int InsertBatch<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
         {
-            if (UseQueryText && Name == ProviderFullName.Oracle)
+            if (Name == ProviderFullName.Oracle)
             {
-                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
-                return ExecuteSqlList(db, sqlList);
+                if (UseQueryText)
+                {
+                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+                    return ExecuteSqlList(db, sqlList);
+                }
+                throw new NotSupportedException("Set UseQueryText = true on the current generic data provider!");                
             }
             return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
         }

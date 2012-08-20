@@ -62,7 +62,65 @@ namespace UnitTests.CS.JointureTests
         public Int64 ID_REGION_DATA { get; set; }
         public string COMMENTARY { get; set; }
         public Int16 ACTIVATION { get; set; }
+    }
 
+    public class DataEntryBroadcast : LightBroadcast
+    {
+        public long? VersionId { get; set; }
+    }
+
+    public class LightBroadcast
+    {
+        public long Id { get; set; } // correspond à ID_DATA_VERSION
+        public long RecognitionId { get; set; } // correspond à ID_RECO_RADIO (passage à valider ou invalider)
+
+        public DateTime SpotBegin { get; set; }
+        public DateTime SpotEnd { get; set; }
+
+        public long MediaId { get; set; }
+        public DateTime DateMedia { get; set; }
+
+        public BroadcastType BroadcastType { get; set; }
+
+        public override string ToString()
+        {
+            string id;
+            switch (BroadcastType)
+            {
+                case BroadcastType.DataEntry:
+                    id = Convert.ToString(Id);
+                    break;
+                default:
+                    id = Convert.ToString(RecognitionId);
+                    break;
+            }
+
+            return string.Format("Id: {0} Type: {1} Begin: {2} End: {3}", id, BroadcastType, SpotBegin, SpotEnd);
+        }
+    }
+
+    [Flags]
+    public enum BroadcastType
+    {
+        Recognition = 1,
+        DataEntry = 2,
+
+        Block = 4,
+        Nat = 8,
+        Box = 16,
+        WithoutPub = 32,
+        OutOfScreen = 64,
+        WrongVersion = 128,
+        Isolated = 256,
+
+        DataEntryNat = DataEntry | Nat,
+        DataEntryBox = DataEntry | Box,
+        DataEntryWithoutPub = DataEntry | WithoutPub,
+
+        IsolatedAutoPromotions = Recognition | OutOfScreen | Isolated,
+        RecognitionBlock = Recognition | Block,
+        //RecognitionOutOfScreen = Recognition | OutOfScreen,
+        RecognitionWrongVersion = Recognition | WrongVersion,
     }
 
     [TableName(Owner = "PITAFR01")]

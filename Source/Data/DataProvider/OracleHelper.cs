@@ -175,7 +175,7 @@ namespace BLToolkit.Data.DataProvider
             var oRegex = new Regex(@"(?<string>'[^']+')|(?<Parameters>:[a-zA-Z0-9_]+)");
             MatchCollection oMatchCollection = oRegex.Matches(poCommand.CommandText);
 
-            string strQuery = poCommand.CommandText;
+            string strQuery = poCommand.CommandText + " ";
             int matchCount = 0;
 
             for (int i = 0; i < oMatchCollection.Count; i++)
@@ -189,7 +189,8 @@ namespace BLToolkit.Data.DataProvider
                 if (param.Value is DateTime)
                 {
                     var dt = (DateTime)param.Value;
-                    strQuery = strQuery.Replace(strParameter,
+
+                    strQuery = strQuery.Replace(strParameter + " ",
                                                 dt.Date == dt
                                                     ? SqlConvertDate(dt) + " "
                                                     : SqlConvertDateTime(dt) + " ");
