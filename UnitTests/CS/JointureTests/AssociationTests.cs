@@ -551,6 +551,15 @@ namespace UnitTests.CS.JointureTests
                             select s;
                 
                 var res = query.ToList();
+                foreach (SCRIPT_TABLE e in res)
+                {
+                    if (e.SCRIPT.ContainsExactly("station") <= 0)
+                    {
+                        Console.WriteLine("");    
+                    }
+                }
+
+                Assert.IsTrue(res.All(e => e.SCRIPT.ContainsExactly("station") > 0));
                 Console.WriteLine(res.Count);
                 Console.WriteLine(db.LastQuery);
             }

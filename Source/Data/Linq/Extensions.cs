@@ -344,7 +344,7 @@ namespace BLToolkit.Data.Linq
 
         public static int ContainsExactly(this string s, string value)
         {
-            return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value)).Count; 
+            return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value), RegexOptions.IgnoreCase).Count; 
         }
 
         #endregion

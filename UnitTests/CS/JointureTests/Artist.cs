@@ -153,6 +153,17 @@ namespace UnitTests.CS.JointureTests
 
     public enum MappingState { Valid = 0, Todo = 1, Declared = 2, Rejected = 10, PaperClip = 6, Dead = 50, PendingSetProduct = 10, PendingValid = 0 };
 
+    [TableName(Name = "USER_", Owner = "PITAFRLOCK1")]
+    public class PitagorUSER_
+    {
+        [MapField("ID_USER_"), PrimaryKey, NonUpdatable]
+        public int UserId { get; set; }
+
+        [MapField("USER_")]
+        public string UserName { get; set; }
+
+        public long ACTIVATION { set; get; }
+    }
 
     [TableName(Name = "MAPPING_SEARCH", Owner = "PITAFR01")]
     public class DataMapping : FredCopyright
