@@ -625,7 +625,7 @@ namespace BLToolkit.Mapping
 				var bind = Expression.Bind(
 					dma.MemberInfo,
 					GetValueMapper(
-						Expression.MakeMemberAccess(source, sma.MemberInfo),
+						Expression.PropertyOrField(source, sma.Name),
 						dma.Type,
 						true,
 						dmm.MapMemberInfo.NullValue,

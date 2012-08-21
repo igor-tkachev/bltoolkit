@@ -120,7 +120,6 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Negate:
 				case ExpressionType.NegateChecked:
 					{
-						var e = (UnaryExpression)expr;
 						_exprBuilder.Append("-");
 						return true;
 					}
