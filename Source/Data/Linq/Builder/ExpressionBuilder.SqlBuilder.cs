@@ -512,9 +512,7 @@ namespace BLToolkit.Data.Linq.Builder
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								// TODO remove Take
-								//
-								return ConvertExpressions(context, arg, queryConvertFlag).Select(si => si.Clone(mi)).Take(1);
+								return ConvertExpressions(context, arg, queryConvertFlag).Select(si => si.Clone(mi));
 							})
 							.SelectMany(si => si)
 							.ToArray();
@@ -537,9 +535,7 @@ namespace BLToolkit.Data.Linq.Builder
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								// TODO remove Take
-								//
-								return ConvertExpressions(context, a.Expression, queryConvertFlag).Select(si => si.Clone(mi)).Take(1);
+								return ConvertExpressions(context, a.Expression, queryConvertFlag).Select(si => si.Clone(mi));
 							})
 							.SelectMany(si => si)
 							.ToArray();
@@ -1585,7 +1581,7 @@ namespace BLToolkit.Data.Linq.Builder
 				ISqlExpression rcol = null;
 
 				// TODO check if 0
-				var lmember = lcol.Members[0];
+				var lmember = lcol.Members[0];//lcol.Members.Count - 1];
 
 				if (sr)
 				{
@@ -1752,6 +1748,7 @@ namespace BLToolkit.Data.Linq.Builder
 					expr = sql[0].Sql;
 				else
 					expr = new SqlExpression(
+						// TODO check s.Members[0]
 						'\x1' + string.Join(",", sql.Select(s => s.Members[0].Name).ToArray()),
 						sql.Select(s => s.Sql).ToArray());
 			}
