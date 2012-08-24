@@ -796,7 +796,7 @@ namespace BLToolkit.Data.Linq
 		public static Decimal? Round(Decimal? value, int? precision)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero);
 #endif
@@ -806,7 +806,7 @@ namespace BLToolkit.Data.Linq
 		public static Double? Round(Double? value, int? precision)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero);
 #endif
@@ -861,7 +861,7 @@ namespace BLToolkit.Data.Linq
 		public static Decimal? Truncate(Decimal? value)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null ? null : (Decimal?)decimal.Truncate(value.Value);
 #endif
@@ -880,7 +880,7 @@ namespace BLToolkit.Data.Linq
 		public static Double? Truncate(Double? value)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null ? null : (Double?) Math.Truncate(value.Value);
 #endif

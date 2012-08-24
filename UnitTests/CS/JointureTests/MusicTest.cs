@@ -19,7 +19,53 @@ namespace UnitTests.CS.JointureTests
 
         #endregion
     }
-    
+
+
+
+    [TableName(Name = "PITAFR01.MEDIA")]
+    public class DataMedia
+    {
+        [MapField("ID_MEDIA"), PrimaryKey]
+        public Int64 IdMedia { get; set; }
+
+        [MapField("MEDIA")]
+        public String Media { get; set; }
+
+        [MapField("ID_LANGUAGE_DATA")]
+        public Int64 IdLanguageData { get; set; }
+
+        [MapField("ACTIVATION")]
+        public Int16 Activation { get; set; }
+    }
+
+    [TableName(Name = "PITAFR01.MEDIA_SETTING")]
+    public class DataMediaSetting
+    {
+        [MapField("ID_MEDIA"), PrimaryKey]
+        public Int64 IdMedia { get; set; }
+
+        [MapField("CAPTURE_CODE")]
+        public String CaptureCode { get; set; }
+
+        [MapField("ID_LANGUAGE_DATA_I")]
+        public Int64 IdLanguageDataI { get; set; }
+
+        [MapField("ID_USER_")]
+        public Int64 IdUser { get; set; }
+
+        [MapField("DATE_CREATION")]
+        public DateTime DateCreation { get; set; }
+
+        [MapField("DATE_MODIFICATION")]
+        public DateTime DateModification { get; set; }
+
+        [MapField("COMMENTARY")]
+        public String Commentary { get; set; }
+
+        [MapField("ACTIVATION")]
+        public Int16 Activation { get; set; }
+    }
+
 
     [TableName(Name = "DECLARATIVE_TRACK", Owner = Consts.MusicOwner)]
     public class DataDeclarativeTrack

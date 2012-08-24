@@ -119,7 +119,7 @@ namespace BLToolkit.Data.Linq.Builder
 					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -139,7 +139,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 	}

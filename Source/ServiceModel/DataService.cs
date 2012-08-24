@@ -233,7 +233,7 @@ namespace BLToolkit.ServiceModel
 
 			public ResourceAssociationSet GetResourceAssociationSet(ResourceSet resourceSet, ResourceType resourceType, ResourceProperty resourceProperty)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public bool TryResolveResourceType(string name, out ResourceType resourceType)
@@ -308,22 +308,22 @@ namespace BLToolkit.ServiceModel
 
 			public object GetPropertyValue(object target, ResourceProperty resourceProperty)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public object GetOpenPropertyValue(object target, string propertyName)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public IEnumerable<KeyValuePair<string,object>> GetOpenPropertyValues(object target)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public object InvokeServiceOperation(ServiceOperation serviceOperation, object[] parameters)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public object CurrentDataSource         { get; set; }
@@ -372,12 +372,12 @@ namespace BLToolkit.ServiceModel
 
 			public void SetConcurrencyValues(object resourceCookie, bool? checkForEquality, IEnumerable<KeyValuePair<string,object>> concurrencyValues)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public void AddReferenceToCollection(object targetResource, string propertyName, object resourceToBeAdded)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public void ClearChanges()
@@ -426,7 +426,7 @@ namespace BLToolkit.ServiceModel
 
 			public void RemoveReferenceFromCollection(object targetResource, string propertyName, object resourceToBeRemoved)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public object ResetResource(object resource)
@@ -442,12 +442,12 @@ namespace BLToolkit.ServiceModel
 
 			public void SaveChanges()
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public void SetReference(object targetResource, string propertyName, object propertyValue)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public void SetValue(object targetResource, string propertyName, object propertyValue)

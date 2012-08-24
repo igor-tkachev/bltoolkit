@@ -127,18 +127,22 @@ namespace BLToolkit.Data.Linq.Builder
 
 				foreach (var info in sqlInfo)
 				{
-					if (info.Member == null)
+					if (info.Members.Count == 0)
 						throw new LinqException("Object initializer expected for insert statement.");
 
-					var pe     = Expression.MakeMemberAccess(path, info.Member);
+					if (info.Members.Count != 1)
+						throw new InvalidOperationException();
+
+					var member = info.Members[0];
+					var pe     = Expression.MakeMemberAccess(path, member);
 					var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
 					var expr   = info.Sql;
 
 					if (expr is SqlParameter)
 					{
-						var type = info.Member.MemberType == MemberTypes.Field ?
-							((FieldInfo)   info.Member).FieldType :
-							((PropertyInfo)info.Member).PropertyType;
+						var type = member.MemberType == MemberTypes.Field ? 
+							((FieldInfo)   member).FieldType :
+							((PropertyInfo)member).PropertyType;
 
 						if (type.IsEnum)
 							((SqlParameter)expr).SetEnumConverter(type, builder.MappingSchema);
@@ -316,27 +320,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 

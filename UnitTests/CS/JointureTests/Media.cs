@@ -9,5 +9,9 @@ namespace UnitTests.CS.JointureTests
         public long ID_BASIC_MEDIA { get; set; }
         public string MEDIA { get; set; }
         public int ACTIVATION { get; set; }
+
+        public string CaptureCode { get; set; }
+
+        public bool IsActivate { get; set; }
     }
 }

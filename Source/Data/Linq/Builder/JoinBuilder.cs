@@ -188,10 +188,9 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var n = SqlQuery.Select.Add(idx.Sql);
 
-						return new SqlInfo
+						return new SqlInfo(idx.Members)
 						{
 							Sql    = SqlQuery.Select.Columns[n],
-							Member = idx.Member,
 							Index  = n
 						};
 					})
@@ -338,7 +337,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		internal class GroupJoinSubQueryContext : SubQueryContext
 		{
-			readonly MethodCallExpression _methodCall;
+			//readonly MethodCallExpression _methodCall;
 
 			public SqlQuery.JoinedTable Join;
 			public SqlQuery             CounterSql;
@@ -347,7 +346,7 @@ namespace BLToolkit.Data.Linq.Builder
 			public GroupJoinSubQueryContext(IBuildContext subQuery, MethodCallExpression methodCall)
 				: base(subQuery)
 			{
-				_methodCall = methodCall;
+				//_methodCall = methodCall;
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)

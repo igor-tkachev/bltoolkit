@@ -120,7 +120,6 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Negate:
 				case ExpressionType.NegateChecked:
 					{
-						var e = (UnaryExpression)expr;
 						_exprBuilder.Append("-");
 						return true;
 					}
@@ -147,7 +146,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case ExpressionType.UnaryPlus:
 					{
-						var e = (UnaryExpression)expr;
 						_exprBuilder.Append("+");
 						return true;
 					}
@@ -262,7 +260,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var le = (LambdaExpression)expr;
 						var ps = le.Parameters
 							.Select(p => (GetTypeName(p.Type) + " " + p.Name).TrimStart())
-							.Aggregate("", (p1, p2) => p1 + ", " + p2);
+							.Aggregate("", (p1, p2) => p1 + ", " + p2, p => p.TrimStart(',', ' '));
 
 						_exprBuilder.Append("(").Append(ps).Append(") => ");
 
@@ -335,7 +333,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				case ExpressionType.MemberInit:
 					{
-						Func<MemberBinding,bool> modify = null; modify = b =>
+						Func<MemberBinding,bool> modify = b =>
 						{
 							switch (b.BindingType)
 							{
@@ -527,9 +525,9 @@ namespace BLToolkit.Data.Linq.Builder
 				var ps    = c.GetParameters().Select(p => GetTypeName(p.ParameterType) + " " + p.Name).ToArray();
 				return string.Format(
 					"{0}\n\t\tpublic {1}({2})\n\t\t{{\n\t\t\tthrow new NotImplementedException();\n\t\t}}",
-					attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate("", (a1,a2) => a1 + a2) : "",
+					attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate((a1,a2) => a1 + a2) : "",
 					name,
-					ps.Length == 0 ? "" : ps.Aggregate("", (s,t) => s + ", " + t));
+					ps.Length == 0 ? "" : ps.Aggregate((s,t) => s + ", " + t));
 			}).ToList();
 
 			if (ctors.Count == 1 && ctors[0].IndexOf("()") >= 0)
@@ -544,7 +542,7 @@ namespace BLToolkit.Data.Linq.Builder
 #endif
 				return string.Format(
 					"{0}\n\t\tpublic {1} {2};",
-					attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate("", (a1,a2) => a1 + a2) : "",
+					attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate((a1,a2) => a1 + a2) : "",
 					GetTypeName(f.FieldType),
 					f.Name);
 			})
@@ -558,7 +556,7 @@ namespace BLToolkit.Data.Linq.Builder
 #endif
 					return string.Format(
 						"{0}\n\t\t{3}{1} {2} {{ get; set; }}",
-						attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate("", (a1,a2) => a1 + a2) : "",
+						attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate((a1,a2) => a1 + a2) : "",
 						GetTypeName(p.PropertyType),
 						p.Name,
 						type.IsInterface ? "" : "public ");
@@ -574,10 +572,10 @@ namespace BLToolkit.Data.Linq.Builder
 					var ps    = m.GetParameters().Select(p => GetTypeName(p.ParameterType) + " " + p.Name).ToArray();
 					return string.Format(
 						"{0}\n\t\t{5}{4}{1} {2}({3})\n\t\t{{\n\t\t\tthrow new NotImplementedException();\n\t\t}}",
-						attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate("", (a1,a2) => a1 + a2) : "",
+						attrs.Count > 0 ? attrs.Select(a => "\n\t\t" + a.ToString()).Aggregate((a1,a2) => a1 + a2) : "",
 						GetTypeName(m.ReturnType),
 						m.Name,
-						ps.Length == 0 ? "" : ps.Aggregate("", (s,t) => s + ", " + t),
+						ps.Length == 0 ? "" : ps.Aggregate((s,t) => s + ", " + t),
 						m.IsStatic   ? "static "   :
 						m.IsVirtual  ? "virtual "  :
 						m.IsAbstract ? "abstract " :
@@ -616,20 +614,20 @@ namespace {0}
 					type.IsInterface ? "interface" : type.IsClass ? "class" : "struct",
 					name,
 					type.IsGenericType ? GetTypeNames(type.GetGenericArguments(), ",") : null,
-					ctors.Count == 0 ? "" : ctors.Aggregate("", (s,t) => s + "\n" + t),
+					ctors.Count == 0 ? "" : ctors.Aggregate((s,t) => s + "\n" + t),
 					baseClasses.Length == 0 ? "" : " : " + GetTypeNames(baseClasses),
 					type.IsPublic ? "public " : "",
 					type.IsAbstract && !type.IsInterface ? "abstract " : "",
-					attrs.Count > 0 ? attrs.Select(a => "\n\t" + a.ToString()).Aggregate("", (a1,a2) => a1 + a2) : "",
+					attrs.Count > 0 ? attrs.Select(a => "\n\t" + a.ToString()).Aggregate((a1,a2) => a1 + a2) : "",
 					members.Length > 0 ?
-						(ctors.Count != 0 ? "\n" : "") + members.Aggregate("", (f1,f2) => f1 + "\n" + f2) :
+						(ctors.Count != 0 ? "\n" : "") + members.Aggregate((f1,f2) => f1 + "\n" + f2) :
 						"");
 			}
 		}
 
 		string GetTypeNames(IEnumerable<Type> types, string separator = ", ")
 		{
-			return types.Select(GetTypeName).Aggregate("", (t1,t2) => t1 + separator + t2);
+			return types.Select(GetTypeName).Aggregate("", (t1,t2) => t1 + separator + t2, p => p.TrimStart(separator.ToCharArray()));
 		}
 
 		bool IsAnonymous(Type type)
@@ -680,7 +678,7 @@ namespace {0}
 				{
 					name = string.Format("{0}<{1}>",
 						name,
-						args.Select(GetTypeName).Aggregate("", (s,t) => s + "," + t));
+						args.Select(GetTypeName).Aggregate("", (s,t) => s + "," + t, p => p.TrimStart(',')));
 				}
 
 				_typeNames[type] = name;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
@@ -76,6 +78,67 @@ namespace UnitTests.CS.JointureTests
                 Assert.IsNotEmpty(res);
             }
         }
+
+        [Test]
+        public void SelectGetMediaSettingMultiple()
+        {
+            SimulateWork(GetMediaSetting, _connectionFactory, 20, 1);
+        }
+
+        public void SimulateWork(Action<DbManager> action, IDbConnectionFactory connectionFactory, int maxUsers = 5, int execCount = 3)
+        {
+            int count = 0;
+            while (count <= execCount)
+            {
+                var tasks = new List<Task>();
+                for (int i = 0; i < maxUsers; i++)
+                {
+                    var task = Task.Factory.StartNew(o =>
+                    {
+                        using (var dbManager = connectionFactory.CreateDbManager())
+                        {
+                            action(dbManager);
+                        }
+                    }, i, TaskCreationOptions.LongRunning);
+
+                    tasks.Add(task);
+                }
+                Task.WaitAll(tasks.ToArray());
+                Thread.Sleep(1000);
+
+                count++;
+            }
+        }
+
+        private void GetMediaSetting(DbManager db)
+        {
+            var query = from m in db.GetTable<DataMedia>()
+                        join s in db.GetTable<DataMediaSetting>() on m.IdMedia equals s.IdMedia
+                        where m.IdLanguageData == 33 && s.IdLanguageDataI == 33
+                        orderby m.Media
+                        select
+                            new
+                            {
+                                s.Activation,
+                                m.IdMedia,
+                                m.Media,
+                                s.CaptureCode
+                            };
+
+            if (!true)
+                query = query.Where(r => r.Activation < 10);
+
+            var res = query.ToList();
+
+            var mediae = res.Select(r => new Media
+            {
+                ID_MEDIA =  r.IdMedia,
+                MEDIA = r.Media,
+                CaptureCode = r.CaptureCode,
+                IsActivate = r.Activation < 10,
+            }).ToList();
+        }
+
 
         [Test]
         public void TestLinqAssociation2()
@@ -551,15 +614,6 @@ namespace UnitTests.CS.JointureTests
                             select s;
                 
                 var res = query.ToList();
-                foreach (SCRIPT_TABLE e in res)
-                {
-                    if (e.SCRIPT.ContainsExactly("station") <= 0)
-                    {
-                        Console.WriteLine("");    
-                    }
-                }
-
-                Assert.IsTrue(res.All(e => e.SCRIPT.ContainsExactly("station") > 0));
                 Console.WriteLine(res.Count);
                 Console.WriteLine(db.LastQuery);
             }

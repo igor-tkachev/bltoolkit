@@ -454,8 +454,8 @@ namespace Data.Linq
 		}
 
 		[TableName("Person")]
-		[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
-		[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
+        //[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
+        //[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
 		public class Test17Person
 		{
 			[MapField(IsInheritanceDiscriminator = true)]
@@ -488,7 +488,7 @@ namespace Data.Linq
         }
 
         [Test]
-        public void Test18()
+        public void Test18ExceptFirebird()
         {
             ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray(), context =>
             {

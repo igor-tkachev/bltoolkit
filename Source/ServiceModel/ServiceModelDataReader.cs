@@ -38,19 +38,19 @@ namespace BLToolkit.ServiceModel
 
 		public DataTable GetSchemaTable()
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 #endif
 
 		public bool IsClosed
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new InvalidOperationException(); }
 		}
 
 		public bool NextResult()
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public bool Read()
@@ -69,7 +69,7 @@ namespace BLToolkit.ServiceModel
 
 		public int RecordsAffected
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new InvalidOperationException(); }
 		}
 
 		#endregion
@@ -101,7 +101,7 @@ namespace BLToolkit.ServiceModel
 
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public char GetChar(int i)
@@ -111,12 +111,12 @@ namespace BLToolkit.ServiceModel
 
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public IDataReader GetData(int i)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public string GetDataTypeName(int i)
@@ -203,7 +203,7 @@ namespace BLToolkit.ServiceModel
 
 		public int GetValues(object[] values)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public bool IsDBNull(int i)

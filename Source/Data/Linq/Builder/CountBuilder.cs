@@ -110,7 +110,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case ConvertFlags.Field : return new[] { new SqlInfo { Query = Parent.SqlQuery, Sql = Sql } };
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
@@ -124,7 +124,7 @@ namespace BLToolkit.Data.Linq.Builder
 						});
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
