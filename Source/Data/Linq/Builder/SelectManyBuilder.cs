@@ -164,7 +164,7 @@ namespace BLToolkit.Data.Linq.Builder
 				if (Collection == null)
 					base.BuildQuery(query, queryParameter);
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)

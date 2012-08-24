@@ -55,7 +55,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			throw new InvalidOperationException();

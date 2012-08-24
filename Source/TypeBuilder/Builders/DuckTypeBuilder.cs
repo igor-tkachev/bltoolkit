@@ -245,7 +245,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 						emit
 							.ldstr  (message)
-							.newobj (typeof(NotImplementedException), typeof(string))
+							.newobj (typeof(InvalidOperationException), typeof(string))
 							.@throw
 							.end();
 					}

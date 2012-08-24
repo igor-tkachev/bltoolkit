@@ -32,7 +32,7 @@ namespace BLTgen
 
 		public override int GetOrdinal(string name)
 		{
-			throw new NotImplementedException("IMapDataSource.GetOrdinal(string)");
+			throw new InvalidOperationException("IMapDataSource.GetOrdinal(string)");
 		}
 
 		public override object GetValue(object o, int index)
@@ -42,7 +42,7 @@ namespace BLTgen
 
 		public override object GetValue(object o, string name)
 		{
-			throw new NotImplementedException("IMapDataSource.GetValue(object, string)");
+			throw new InvalidOperationException("IMapDataSource.GetValue(object, string)");
 		}
 
 		#endregion

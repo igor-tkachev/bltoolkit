@@ -339,7 +339,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			ISqlExpression ConvertEnumerable(MethodCallExpression call)
@@ -414,7 +414,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 						else
 						{
-							throw new NotImplementedException();
+							throw new InvalidOperationException();
 						}
 					}
 				}
@@ -479,7 +479,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			readonly Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]> _expressionIndex = new Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]>();
@@ -610,7 +610,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 
