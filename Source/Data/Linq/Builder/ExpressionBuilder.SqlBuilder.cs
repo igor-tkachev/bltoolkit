@@ -1580,8 +1580,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				ISqlExpression rcol = null;
 
-				// TODO check if 0
-				var lmember = lcol.Members[0];//lcol.Members.Count - 1];
+				var lmember = lcol.Members[lcol.Members.Count - 1];
 
 				if (sr)
 				{
@@ -1748,8 +1747,7 @@ namespace BLToolkit.Data.Linq.Builder
 					expr = sql[0].Sql;
 				else
 					expr = new SqlExpression(
-						// TODO check s.Members[0]
-						'\x1' + string.Join(",", sql.Select(s => s.Members[0].Name).ToArray()),
+						'\x1' + string.Join(",", sql.Select(s => s.Members[s.Members.Count - 1].Name).ToArray()),
 						sql.Select(s => s.Sql).ToArray());
 			}
 

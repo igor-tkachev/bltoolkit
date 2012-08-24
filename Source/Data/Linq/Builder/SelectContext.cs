@@ -305,12 +305,8 @@ namespace BLToolkit.Data.Linq.Builder
 												var memberExpression = GetMemberExpression(
 													member, levelExpression == expression, levelExpression.Type);
 
-												sql = ConvertExpressions(memberExpression, flags);
-
-												// TODO remove the condition
-												//
-												if (sql.Length == 1 && flags != ConvertFlags.Key)
-													sql = sql.Select(si => si.Clone(member)).ToArray();
+												sql = ConvertExpressions(memberExpression, flags)
+													.Select(si => si.Clone(member)).ToArray();
 
 												_sql.Add(member, sql);
 											}
