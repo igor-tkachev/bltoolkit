@@ -104,7 +104,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			return SubQuery
 				.ConvertToIndex(expression, level, flags)
-				.Select(idx => new SqlInfo { Sql = SubQuery.SqlQuery.Select.Columns[idx.Index], Member = idx.Member })
+				.Select(idx => new SqlInfo(idx.Members) { Sql = SubQuery.SqlQuery.Select.Columns[idx.Index] })
 				.ToArray();
 		}
 
