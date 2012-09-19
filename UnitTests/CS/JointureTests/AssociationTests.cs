@@ -600,6 +600,20 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void SelectClobField()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from s in db.GetTable<FORM_SCRIPT>()
+                            where s.DATE_CREATION > new DateTime(2012, 07, 01)
+                            select s;
+
+                var res = query.ToList();
+                Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
         public void SelectTest3()
         {
             Console.WriteLine("Hello1 Hello2".ContainsExactly("Hello2"));
@@ -655,6 +669,37 @@ namespace UnitTests.CS.JointureTests
                         }
                     }
                 }
+            }
+        }
+
+        [Test]
+        public void TestSelection()
+        {
+            DateTime beginSpotPeriod = new DateTime(2012, 09, 03);
+
+            using (var pitagorDb = new MusicDB())
+            {
+                pitagorDb.DataProvider.UseQueryText = true;
+
+                var dbQuery = from dr in pitagorDb.GetTable<DATA_RADIO>()
+                              join dv in pitagorDb.GetTable<DATA_VERSION>() on dr.ID_DATA_VERSION equals dv.ID_DATA_VERSION
+                              where dr.DATE_MEDIA == beginSpotPeriod
+                              select
+                                  new DataEntryBroadcast
+                                      {
+                                          Id = dr.ID_DATA_VERSION,
+                                          VersionId = dv.ID_MULTIMEDIA,
+                                          DateMedia = dr.DATE_MEDIA,
+                                          MediaId = dr.ID_MEDIA,
+                                          SpotBegin = dr.DATE_SPOT_BEGINNING,
+                                          SpotEnd = dr.DATE_SPOT_END,
+                                      };
+
+               
+                dbQuery = dbQuery.Where(e => e.MediaId == 2015);                
+
+                var res = dbQuery.ToList();
+                Assert.IsNotEmpty(res);
             }
         }
 

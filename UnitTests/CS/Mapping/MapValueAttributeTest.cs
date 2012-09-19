@@ -83,6 +83,8 @@ namespace Mapping
 			[MapValue(Enum1.Value1, "10")]
 			[MapValue(Enum1.Value2, "20")]
 			[MapValue(Enum1.Value3, "30")]
+			[MapValue(Enum1.Value3, "32")]
+			[MapValue(Enum1.Value3, "31")]
 			public Enum1 Enum3;
 			public Enum1 Enum4;
 		}
@@ -103,6 +105,12 @@ namespace Mapping
 			Assert.AreEqual(Enum1.Value2, o.Enum2);
 			Assert.AreEqual(Enum1.Value3, o.Enum3);
 			Assert.AreEqual(Enum1.Value4, o.Enum4);
+
+			om.SetValue(o, "Enum3", "31");
+			Assert.AreEqual(Enum1.Value3, o.Enum3);
+
+			om.SetValue(o, "Enum3", "32");
+			Assert.AreEqual(Enum1.Value3, o.Enum3);
 
 			Assert.AreEqual("1",  om.GetValue(o, "Enum1"));
 			Assert.AreEqual("2",  om.GetValue(o, "Enum2"));
