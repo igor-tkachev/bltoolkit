@@ -163,6 +163,22 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void StartsWith5()
+		{
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Access },
+				db => AreEqual(
+					from p1 in    Person
+					from p2 in    Person
+					where p1.ID == p2.ID && p1.FirstName.Replace("J", "%").StartsWith(p2.FirstName.Replace("J", "%"))
+					select p1,
+					from p1 in db.Person
+					from p2 in db.Person
+					where p1.ID == p2.ID && p1.FirstName.Replace("J", "%").StartsWith(p2.FirstName.Replace("J", "%"))
+					select p1));
+		}
+
+		[Test]
 		public void EndsWith()
 		{
 			ForEachProvider(db => 
