@@ -371,9 +371,21 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void SetParameterValue(IDbDataParameter parameter, object value)
 		{
-			if (value is ushort)
+			if (value is sbyte)
+			{
+				parameter.Value = (byte)(sbyte)value;
+			}
+			else if (value is ushort)
 			{
 				parameter.Value = (short)(ushort)value;
+			}
+			else if (value is uint)
+			{
+				parameter.Value = (int)(uint)value;
+			}
+			else if (value is ulong)
+			{
+				parameter.Value = (long)(ulong)value;
 			}
 			else
 			{
