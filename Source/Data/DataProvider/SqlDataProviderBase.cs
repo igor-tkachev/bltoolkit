@@ -368,5 +368,17 @@ namespace BLToolkit.Data.DataProvider
 
 			#endregion
 		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is ushort)
+			{
+				parameter.Value = (short)(ushort)value;
+			}
+			else
+			{
+				base.SetParameterValue(parameter, value);
+			}
+		}
 	}
 }
