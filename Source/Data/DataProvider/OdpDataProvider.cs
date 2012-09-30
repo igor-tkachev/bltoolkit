@@ -36,6 +36,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+#if !MANAGED
 	public class OdpDataProvider : DataProviderBase
 	{
 		public OdpDataProvider()
@@ -43,11 +44,30 @@ namespace BLToolkit.Data.DataProvider
 			MappingSchema = new OdpMappingSchema();
 		}
 
+		public const string NameString = DataProvider.ProviderName.Oracle;
+
+		private const string DbTypeTableName = "Oracle.DataAccess.Client.OraDb_DbTypeTable";
+
 		static OdpDataProvider()
 		{
+#else
+	public class OdpManagedDataProvider : DataProviderBase
+	{
+		public OdpManagedDataProvider()
+		{
+			MappingSchema = new OdpMappingSchema();
+		}
+
+		public const string NameString = DataProvider.ProviderName.OracleManaged;
+
+		private const string DbTypeTableName = "Oracle.ManagedDataAccess.Client.OraDb_DbTypeTable";
+
+		static OdpManagedDataProvider()
+		{
+#endif
 			// Fix Oracle.Net bug #1: Array types are not handled.
 			//
-			var oraDbDbTypeTableType = typeof(OracleParameter).Assembly.GetType("Oracle.DataAccess.Client.OraDb_DbTypeTable");
+			var oraDbDbTypeTableType = typeof(OracleParameter).Assembly.GetType(DbTypeTableName);
 
 			if (null != oraDbDbTypeTableType)
 			{
@@ -581,8 +601,6 @@ namespace BLToolkit.Data.DataProvider
 		{
 			get { return typeof(OracleConnection); }
 		}
-
-		public const string NameString = DataProvider.ProviderName.Oracle;
 
 		/// <summary>
 		/// Returns the data provider name.
