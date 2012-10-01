@@ -1339,7 +1339,7 @@ namespace BLToolkit.Reflection
 				|| type == typeof(System.Data.Linq.Binary)
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
-                || type.GetCustomAttributes(typeof(UserDefinedTypeAttribute),true).Any() // If the type is a UDT pass it as is
+				|| type.GetCustomAttributes(typeof(ScalarAttribute),true).Any() // If the type is a UDT pass it as is
 #if !SILVERLIGHT
 				|| type == typeof(XmlDocument)
 				|| type == typeof(XElement)
