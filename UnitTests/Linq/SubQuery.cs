@@ -144,14 +144,41 @@ namespace Data.Linq
 		public void Test7()
 		{
 			ForEachProvider(db => AreEqual(
-				from c in Child select new
-				{
-					Count = GrandChild.Where(g => g.ChildID == c.ChildID).Count(),
-				},
-				from c in db.Child select new
-				{
-					Count = db.GrandChild.Where(g => g.ChildID == c.ChildID).Count(),
-				}));
+				from c in    Child select new { Count =    GrandChild.Where(g => g.ChildID == c.ChildID).Count(), },
+				from c in db.Child select new { Count = db.GrandChild.Where(g => g.ChildID == c.ChildID).Count(), }));
+		}
+
+		[Test]
+		public void Test8()
+		{
+			ForEachProvider(db =>
+			{
+				var parent  =
+					from p in db.Parent
+					where p.ParentID == 1
+					select p.ParentID;
+
+				var chilren =
+					from c in db.Child
+					where parent.Contains(c.ParentID)
+					select c;
+
+				var chs1 = chilren.ToList();
+
+				parent  =
+					from p in db.Parent
+					where p.ParentID == 2
+					select p.ParentID;
+
+				chilren =
+					from c in db.Child
+					where parent.Contains(c.ParentID)
+					select c;
+
+				var chs2 = chilren.ToList();
+
+				Assert.AreEqual(chs2.Count, chs2.Except(chs1).Count());
+			});
 		}
 
 		[Test]
@@ -506,6 +533,84 @@ namespace Data.Linq
 							select c
 						).Count()
 					}));
+		}
+
+		[Test]
+		public void Count1()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from p in
+						from p in Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p));
+		}
+
+		[Test]
+		public void Count2()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from p in
+						from p in Parent
+						select new Parent
+						{
+							ParentID = p.ParentID,
+							Value1   = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Value1 > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new Parent
+						{
+							ParentID = p.ParentID,
+							Value1   = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Value1 > 1
+					select p));
+		}
+
+		[Test]
+		public void Count3()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe },
+				db => AreEqual(
+					from p in
+						from p in Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p));
 		}
 	}
 }

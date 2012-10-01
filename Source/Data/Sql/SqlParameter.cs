@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace BLToolkit.Data.Sql
@@ -14,10 +15,10 @@ namespace BLToolkit.Data.Sql
 			Name             = name;
 			SystemType       = systemType;
 			_value           = value;
+			DbType           = DbType.Object;
 
 			if (systemType != null && mappingSchema != null && systemType.IsEnum)
 			{
-				
 			}
 		}
 
@@ -42,6 +43,8 @@ namespace BLToolkit.Data.Sql
 		public string Name             { get; set; }
 		public Type   SystemType       { get; set; }
 		public bool   IsQueryParameter { get; set; }
+		public DbType DbType           { get; set; }
+		public int    DbSize           { get; set; }
 
 		private object _value;
 		public  object  Value
@@ -84,14 +87,21 @@ namespace BLToolkit.Data.Sql
 			set { _valueConverter = value; }
 		}
 
+		bool _isEnumConverterSet;
+
 		internal void SetEnumConverter(Type type, MappingSchema ms)
 		{
-			if (EnumTypes == null)
-				EnumTypes = new List<Type>();
+			if (!_isEnumConverterSet)
+			{
+				_isEnumConverterSet = true;
 
-			EnumTypes.Add(type);
+				if (EnumTypes == null)
+					EnumTypes = new List<Type>();
 
-			SetEnumConverterInternal(type, ms);
+				EnumTypes.Add(type);
+
+				SetEnumConverterInternal(type, ms);
+			}
 		}
 
 		void SetEnumConverterInternal(Type type, MappingSchema ms)
@@ -224,11 +234,16 @@ namespace BLToolkit.Data.Sql
 			return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
 		}
 
+		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+		{
+			return ((ISqlExpression)this).Equals(other) && comparer(this, other);
+		}
+
 		#endregion
 
 		#region ICloneableElement Members
 
-		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+		public ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 		{
 			if (!doClone(this))
 				return this;
@@ -237,7 +252,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var p = new SqlParameter(SystemType, Name, _value, _valueConverter) { IsQueryParameter = IsQueryParameter };
+				var p = new SqlParameter(SystemType, Name, _value, _valueConverter) { IsQueryParameter = IsQueryParameter, DbType = DbType, DbSize = DbSize };
 
 				objectTree.Add(this, clone = p);
 			}

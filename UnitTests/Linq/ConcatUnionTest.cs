@@ -4,6 +4,7 @@ using System.Linq;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -498,6 +499,97 @@ namespace Data.Linq
 				var list = db.GetTable<AbstractParent>().Union(db.GetTable<AbstractParent>()).ToList();
 				Assert.AreEqual(Parent.Count(), list.Count);
 			});
+		}
+
+		[Test]
+		public void ObjectUnion1()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					(from p1 in    Parent where p1.ParentID >  3 select p1).Union(
+					(from p2 in    Parent where p2.ParentID <= 3 select p2)),
+					(from p1 in db.Parent where p1.ParentID >  3 select p1).Union(
+					(from p2 in db.Parent where p2.ParentID <= 3 select p2))));
+		}
+
+		[Test]
+		public void ObjectUnion2()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					(from p1 in    Parent where p1.ParentID >  3 select p1).Union(
+					(from p2 in    Parent where p2.ParentID <= 3 select (Parent)null)),
+					(from p1 in db.Parent where p1.ParentID >  3 select p1).Union(
+					(from p2 in db.Parent where p2.ParentID <= 3 select (Parent)null))));
+		}
+
+		[Test]
+		public void ObjectUnion3()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					(from p1 in    Parent where p1.ParentID >  3 select new { p = p1 }).Union(
+					(from p2 in    Parent where p2.ParentID <= 3 select new { p = p2 })),
+					(from p1 in db.Parent where p1.ParentID >  3 select new { p = p1 }).Union(
+					(from p2 in db.Parent where p2.ParentID <= 3 select new { p = p2 }))));
+		}
+
+		[Test]
+		public void ObjectUnion4()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					(from p1 in    Parent where p1.ParentID >  3 select new { p = new { p = p1, p1.ParentID } }).Union(
+					(from p2 in    Parent where p2.ParentID <= 3 select new { p = new { p = p2, p2.ParentID } })),
+					(from p1 in db.Parent where p1.ParentID >  3 select new { p = new { p = p1, p1.ParentID } }).Union(
+					(from p2 in db.Parent where p2.ParentID <= 3 select new { p = new { p = p2, p2.ParentID } }))));
+		}
+
+		[Test]
+		public void ObjectUnion5()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					(from p1 in    Parent where p1.ParentID >  3 select new { p = new { p = p1, ParentID = p1.ParentID + 1 } }).Union(
+					(from p2 in    Parent where p2.ParentID <= 3 select new { p = new { p = p2, ParentID = p2.ParentID + 1 } })),
+					(from p1 in db.Parent where p1.ParentID >  3 select new { p = new { p = p1, ParentID = p1.ParentID + 1 } }).Union(
+					(from p2 in db.Parent where p2.ParentID <= 3 select new { p = new { p = p2, ParentID = p2.ParentID + 1 } }))));
+		}
+
+		[Test]
+		public void ObjectUnion()
+		{
+			using (var db = new NorthwindDB())
+			{
+				var q1 =
+					from p in db.Product
+					join c in db.Category on p.CategoryID equals c.CategoryID into g
+					from c in g.DefaultIfEmpty()
+					select new
+					{
+						p,
+						c.CategoryName,
+						p.ProductName
+					};
+
+				var q2 =
+					from p in db.Product
+					join c in db.Category on p.CategoryID equals c.CategoryID into g
+					from c in g.DefaultIfEmpty()
+					select new
+					{
+						p,
+						c.CategoryName,
+						p.ProductName
+					};
+
+				var q = q1.Union(q2).Take(5);
+
+				foreach (var item in q)
+				{
+					Console.WriteLine(item);
+				}
+			}
 		}
 	}
 }

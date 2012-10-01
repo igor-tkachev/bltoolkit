@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -37,17 +38,18 @@ namespace BLToolkit.Data.Linq
 				ExpressionHelper.Compare(Expression, expr, _queryableAccessorDic);
 		}
 
-		readonly Dictionary<Expression,Func<Expression,IQueryable>> _queryableAccessorDic  = new Dictionary<Expression,Func<Expression,IQueryable>>();
-		readonly List<Func<Expression,IQueryable>>                  _queryableAccessorList = new List<Func<Expression,IQueryable>>();
+		readonly Dictionary<Expression,QueryableAccessor> _queryableAccessorDic  = new Dictionary<Expression,QueryableAccessor>();
+		readonly List<QueryableAccessor>                  _queryableAccessorList = new List<QueryableAccessor>();
 
-		public int AddQueryableAccessors(Expression expr, Expression<Func<Expression,IQueryable>> qe)
+		internal int AddQueryableAccessors(Expression expr, Expression<Func<Expression,IQueryable>> qe)
 		{
-			Func<Expression,IQueryable> e;
+			QueryableAccessor e;
 
 			if (_queryableAccessorDic.TryGetValue(expr, out e))
 				return _queryableAccessorList.IndexOf(e);
 
-			e = qe.Compile();
+			e = new QueryableAccessor { Accessor = qe.Compile() };
+			e.Queryable = e.Accessor(expr);
 
 			_queryableAccessorDic. Add(expr, e);
 			_queryableAccessorList.Add(e);
@@ -57,7 +59,7 @@ namespace BLToolkit.Data.Linq
 
 		public Expression GetIQueryable(int n, Expression expr)
 		{
-			return _queryableAccessorList[n](expr).Expression;
+			return _queryableAccessorList[n].Accessor(expr).Expression;
 		}
 
 		#endregion
@@ -127,7 +129,38 @@ namespace BLToolkit.Data.Linq
 
 					if (query == null)
 					{
-						query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
+						if (Configuration.Linq.GenerateExpressionTest)
+						{
+#if FW4 || SILVERLIGHT
+							var testFile = new ExpressionTestGenerator().GenerateSource(expr);
+#else
+							var testFile = "";
+#endif
+
+#if !SILVERLIGHT
+							DbManager.WriteTraceLine(
+								"Expression test code generated: '" + testFile + "'.", 
+								DbManager.TraceSwitch.DisplayName);
+#endif
+						}
+
+						try
+						{
+							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
+						}
+						catch (Exception)
+						{
+							if (!Configuration.Linq.GenerateExpressionTest)
+							{
+#if !SILVERLIGHT
+								DbManager.WriteTraceLine(
+									"To generate test code to diagnose the problem set 'BLToolkit.Common.Configuration.Linq.GenerateExpressionTest = true'.",
+									DbManager.TraceSwitch.DisplayName);
+#endif
+							}
+
+							throw;
+						}
 
 						query.Next = _first;
 						_first = query;
@@ -352,7 +385,33 @@ namespace BLToolkit.Data.Linq
 		void SetParameters(Expression expr, object[] parameters, int idx)
 		{
 			foreach (var p in Queries[idx].Parameters)
-				p.SqlParameter.Value = p.Accessor(expr, parameters);
+			{
+				var value = p.Accessor(expr, parameters);
+
+				if (value is IEnumerable)
+				{
+					var type  = value.GetType();
+					var etype = TypeHelper.GetElementType(type);
+
+					if (etype == null || etype == typeof(object) ||
+						etype.IsEnum ||
+						(TypeHelper.IsNullableType(etype) && etype.GetGenericArguments()[0].IsEnum))
+					{
+						var values = new List<object>();
+
+						foreach (var v in (IEnumerable)value)
+						{
+							values.Add(v != null && v.GetType().IsEnum ?
+								MappingSchema.MapEnumToValue(v, true) :
+								v);
+						}
+
+						value = values;
+					}
+				}
+
+				p.SqlParameter.Value = value;
+			}
 		}
 
 		#endregion

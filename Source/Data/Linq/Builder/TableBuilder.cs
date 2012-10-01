@@ -673,7 +673,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (table.Field == null)
 								return table.Table.SqlTable.Fields.Values
-									.Select(_ => new SqlInfo { Sql = _, Member = _.MemberMapper.MemberAccessor.MemberInfo })
+									.Select(_ => new SqlInfo(_.MemberMapper.MemberAccessor.MemberInfo) { Sql = _ })
 									.ToArray();
 
 							break;
@@ -689,7 +689,7 @@ namespace BLToolkit.Data.Linq.Builder
 									from f in table.Table.SqlTable.Fields.Values
 									where f.IsPrimaryKey
 									orderby f.PrimaryKeyOrder
-									select new SqlInfo { Sql = f, Member = f.MemberMapper.MemberAccessor.MemberInfo };
+									select new SqlInfo(f.MemberMapper.MemberAccessor.MemberInfo) { Sql = f };
 
 								var key = q.ToArray();
 
@@ -706,14 +706,14 @@ namespace BLToolkit.Data.Linq.Builder
 							if (table.Field != null)
 								return new[]
 								{
-									new SqlInfo { Sql = table.Field, Member = table.Field.MemberMapper.MemberAccessor.MemberInfo }
+									new SqlInfo(table.Field.MemberMapper.MemberAccessor.MemberInfo) { Sql = table.Field }
 								};
 
 							break;
 						}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			#endregion
@@ -762,7 +762,7 @@ namespace BLToolkit.Data.Linq.Builder
 						return info;
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			#endregion
@@ -1052,7 +1052,7 @@ namespace BLToolkit.Data.Linq.Builder
 								ObjectMapper.TypeAccessor.OriginalType == memberExpression.Member.DeclaringType)
 							{
 								throw new LinqException("Member '{0}.{1}' is not a table column.",
-									memberExpression.Member.Name, memberExpression.Member.Name);
+									memberExpression.Member.DeclaringType.Name, memberExpression.Member.Name);
 							}
 						}
 					}

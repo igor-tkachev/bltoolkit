@@ -290,7 +290,7 @@ CREATE TABLE BinaryData
 	BinaryDataID int             IDENTITY,
 	Stamp        timestamp       NOT NULL,
 	Data         varbinary(1024) NOT NULL,
-    CONSTRAINT PK_BinaryData PRIMARY KEY CLUSTERED (BinaryDataID)
+	CONSTRAINT PK_BinaryData PRIMARY KEY CLUSTERED (BinaryDataID)
 )
 GO
 
@@ -404,7 +404,7 @@ CREATE TABLE DataTypeTest
 	UInt32_         int              NULL,
 	UInt64_         bigint           NULL,
 	Xml_            nvarchar(1000)   NULL,
-    CONSTRAINT PK_DataType PRIMARY KEY CLUSTERED (DataTypeID)
+	CONSTRAINT PK_DataType PRIMARY KEY CLUSTERED (DataTypeID)
 )
 GO
 
@@ -414,8 +414,8 @@ INSERT INTO DataTypeTest
 	 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
 VALUES
 	(   NULL,        0,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
+		NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+		NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
 GO
 
 INSERT INTO DataTypeTest
@@ -452,14 +452,15 @@ GO
 
 CREATE TABLE LinqDataTypes
 (
-	ID            int,
-	MoneyValue    decimal(10,4) NULL,
-	DateTimeValue datetime      NULL,
-	BoolValue     bit,
-	GuidValue     char(36)      NULL,
-	BinaryValue   binary(500)   NULL,
-	SmallIntValue smallint      NULL,
-	IntValue      int           NULL,
-	BigIntValue   bigint NULL
+	ID             int,
+	MoneyValue     decimal(10,4) NULL,
+	DateTimeValue  datetime      NULL,
+	DateTimeValue2 datetime      NULL,
+	BoolValue      bit,
+	GuidValue      char(36)      NULL,
+	BinaryValue    binary(500)   NULL,
+	SmallIntValue  smallint      NULL,
+	IntValue       int           NULL,
+	BigIntValue    bigint        NULL
 )
 GO

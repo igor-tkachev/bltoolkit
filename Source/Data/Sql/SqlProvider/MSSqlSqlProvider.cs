@@ -198,5 +198,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
 		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("'{0:yyyy-MM-ddTHH:mm:ss.fff}'", value));
+		}
 	}
 }

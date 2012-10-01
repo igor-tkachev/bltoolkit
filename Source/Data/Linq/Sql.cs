@@ -598,14 +598,14 @@ namespace BLToolkit.Data.Linq
 
 		[CLSCompliant(false)]
 		[SqlFunction]
-		[DatePart("DB2",        "{0}",                               false, new[] { null,     null,  null,   null,      null,   null,   "DayOfWeek", null,   null,   null,   null   }, 0, 1)]
+		[DatePart("DB2",        "{0}",                               false, new[] { null,     null,  null,   null,      null,   null,   "DayOfWeek", null,     null,   null,   null   }, 0, 1)]
 		[DatePart("Informix",   "{0}",                                      0, 1)]
 		[DatePart("MySql",      "Extract({0} from {{0}})",           true,  0, 1)]
-		[DatePart("PostgreSQL", "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "DOY",     null,   null,   "DOW",       null,   null,   null,   null   }, 0, 1)]
-		[DatePart("Firebird",   "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "YearDay", null,   null,   null,        null,   null,   null,   null   }, 0, 1)]
-		[DatePart("Oracle",     "To_Number(To_Char({{0}}, {0}))",    true,  new[] { "'YYYY'", "'Q'", "'MM'", "'DDD'",   "'DD'", "'WW'", "'D'",       "'HH'", "'MI'", "'SS'", "'FF'" }, 0, 1)]
-		[DatePart("SQLite",     "Cast(StrFTime({0}, {{0}}) as int)", true,  new[] { "'%Y'",   null,  "'%m'", "'%j'",    "'%d'", "'%W'", "'%w'",      "'%H'", "'%M'", "'%S'", "'%f'" }, 0, 1)]
-		[DatePart("Access",     "DatePart({0}, {{0}})",              true,  new[] { "'yyyy'", "'q'", "'m'",  "'y'",     "'d'",  "'ww'", "'w'",       "'h'",  "'n'",  "'s'",  null   }, 0, 1)]
+		[DatePart("PostgreSQL", "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "DOY",     null,   null,   "DOW",       null,     null,   null,   null   }, 0, 1)]
+		[DatePart("Firebird",   "Extract({0} from {{0}})",           true,  new[] { null,     null,  null,   "YearDay", null,   null,   null,        null,     null,   null,   null   }, 0, 1)]
+		[DatePart("Oracle",     "To_Number(To_Char({{0}}, {0}))",    true,  new[] { "'YYYY'", "'Q'", "'MM'", "'DDD'",   "'DD'", "'WW'", "'D'",       "'HH24'", "'MI'", "'SS'", "'FF'" }, 0, 1)]
+		[DatePart("SQLite",     "Cast(StrFTime({0}, {{0}}) as int)", true,  new[] { "'%Y'",   null,  "'%m'", "'%j'",    "'%d'", "'%W'", "'%w'",      "'%H'",   "'%M'", "'%S'", "'%f'" }, 0, 1)]
+		[DatePart("Access",     "DatePart({0}, {{0}})",              true,  new[] { "'yyyy'", "'q'", "'m'",  "'y'",     "'d'",  "'ww'", "'w'",       "'h'",    "'n'",  "'s'",  null   }, 0, 1)]
 		public static int? DatePart(DateParts part, DateTime? date)
 		{
 			if (date == null)
@@ -787,7 +787,7 @@ namespace BLToolkit.Data.Linq
 		public static Decimal? Round(Decimal? value, int? precision)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null || precision == null? null : (Decimal?)Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero);
 #endif
@@ -797,7 +797,7 @@ namespace BLToolkit.Data.Linq
 		public static Double? Round(Double? value, int? precision)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null || precision == null? null : (Double?) Math.Round(value.Value, precision.Value, MidpointRounding.AwayFromZero);
 #endif
@@ -852,7 +852,7 @@ namespace BLToolkit.Data.Linq
 		public static Decimal? Truncate(Decimal? value)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null ? null : (Decimal?)decimal.Truncate(value.Value);
 #endif
@@ -871,7 +871,7 @@ namespace BLToolkit.Data.Linq
 		public static Double? Truncate(Double? value)
 		{
 #if SILVERLIGHT
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 #else
 			return value == null ? null : (Double?) Math.Truncate(value.Value);
 #endif

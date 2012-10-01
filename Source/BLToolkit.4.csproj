@@ -218,6 +218,7 @@
     <Compile Include="Data\Linq\Builder\PassThroughContext.cs" />
     <Compile Include="Data\Linq\Builder\SequenceConvertInfo.cs" />
     <Compile Include="Data\Linq\Builder\SequenceConvertPath.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionTestGenerator.cs" />
     <Compile Include="Data\Linq\Builder\UpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\DeleteBuilder.cs" />
     <Compile Include="Data\Linq\CompiledQuery.cs" />
@@ -238,6 +239,7 @@
     <Compile Include="Data\Linq\Builder\TakeSkipBuilder.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
+    <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />

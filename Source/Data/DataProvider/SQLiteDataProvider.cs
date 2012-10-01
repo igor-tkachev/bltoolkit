@@ -121,6 +121,14 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (parameter.DbType == DbType.DateTime2)
+				parameter.DbType = DbType.DateTime;
+
+			base.SetParameterValue(parameter, value);
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new SQLiteSqlProvider();

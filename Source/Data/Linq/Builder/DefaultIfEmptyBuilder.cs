@@ -74,6 +74,37 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var defaultValue = _defaultValue ?? Expression.Constant(null, expr.Type);
 
+#if FW4 || SILVERLIGHT
+
+					if (expr.NodeType == ExpressionType.Parameter)
+					{
+						var par  = (ParameterExpression)expr;
+						var pidx = Builder.BlockVariables.IndexOf(par);
+
+						if (pidx >= 0)
+						{
+							var ex = Builder.BlockExpressions[pidx];
+
+							if (ex.NodeType == ExpressionType.Assign)
+							{
+								var bex = (BinaryExpression)ex;
+
+								if (bex.Left == expr)
+								{
+									if (bex.Right.NodeType != ExpressionType.Conditional)
+									{
+										Builder.BlockExpressions[pidx] =
+											Expression.Assign(
+											bex.Left,
+											Expression.Condition(e, defaultValue, bex.Right));
+									}
+								}
+							}
+						}
+					}
+
+#endif
+
 					expr = Expression.Condition(e, defaultValue, expr);
 				}
 

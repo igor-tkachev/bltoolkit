@@ -110,7 +110,7 @@ namespace BLToolkit.Data.Linq.Builder
 					return new[] { new SqlInfo { Query = query, Sql = sql } };
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
@@ -134,12 +134,12 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			ISqlExpression _subQuerySql;

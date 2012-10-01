@@ -91,33 +91,33 @@ namespace BLToolkit.Data.Linq.Builder
 
 				foreach (var info in info1)
 				{
-					if (info.Member == null)
+					if (info.Members.Count == 0)
 						throw new InvalidOperationException();
 
 					var member = new Member
 					{
 						SequenceInfo     = info,
-						MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Member)
+						MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Members[0])
 					};
 
-					if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
-						throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
+					//if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
+					//	throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
 
 					members.Add(new UnionMember { Member = member, Info1 = info });
 				}
 
 				foreach (var info in info2)
 				{
-					if (info.Member == null)
+					if (info.Members.Count == 0)
 						throw new InvalidOperationException();
 
 					var em = members.FirstOrDefault(m =>
 						m.Member.SequenceInfo != null &&
-						m.Member.SequenceInfo.Member == info.Member);
+						m.Member.SequenceInfo.CompareMembers(info));
 
 					if (em == null)
 					{
-						var member = new Member { MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Member) };
+						var member = new Member { MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Members[0]) };
 
 						if (sequence2.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
 							throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
@@ -139,11 +139,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 					if (member.Info1 == null)
 					{
-						member.Info1 = new SqlInfo
+						member.Info1 = new SqlInfo(member.Info2.Members)
 						{
 							Sql    = new SqlValue(null),
 							Query  = sequence1.SqlQuery,
-							Member = member.Info2.Member
 						};
 
 						member.Member.SequenceInfo = member.Info1;
@@ -151,11 +150,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 					if (member.Info2 == null)
 					{
-						member.Info2 = new SqlInfo
+						member.Info2 = new SqlInfo(member.Info1.Members)
 						{
 							Sql    = new SqlValue(null),
 							Query  = sequence2.SqlQuery,
-							Member = member.Info1.Member
 						};
 					}
 
@@ -166,7 +164,7 @@ namespace BLToolkit.Data.Linq.Builder
 					//member.Info1.Index = i;
 					//member.Info2.Index = i;
 
-					_members.Add(member.Member.MemberExpression.Member, member.Member);
+					_members[member.Member.MemberExpression.Member] = member.Member;
 				}
 
 				foreach (var key in sequence1.ColumnIndexes.Keys.ToList())
@@ -214,7 +212,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var member = new Member
 				{
 					SequenceInfo     = info,
-					MemberExpression = Expression.PropertyOrField(_unionParameter, info.Member.Name)
+					MemberExpression = Expression.PropertyOrField(_unionParameter, info.Members[0].Name)
 				};
 
 				if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
@@ -374,12 +372,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 									if (member.SqlQueryInfo == null)
 									{
-										member.SqlQueryInfo = new SqlInfo
+										member.SqlQueryInfo = new SqlInfo(member.MemberExpression.Member)
 										{
 											Index  = -2,
 											Sql    = SubQuery.SqlQuery.Select.Columns[member.SequenceInfo.Index],
 											Query  = SqlQuery,
-											Member = member.MemberExpression.Member,
 										};
 									}
 

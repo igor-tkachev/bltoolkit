@@ -8,7 +8,7 @@ namespace Data.Linq
 	[TestFixture]
 	public class MultipleQuery : TestBase
 	{
-		[Test]
+		//[Test]
 		public void Test1()
 		{
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
@@ -20,7 +20,7 @@ namespace Data.Linq
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}
 
-		[Test]
+		//[Test]
 		public void Test2()
 		{
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
@@ -40,7 +40,7 @@ namespace Data.Linq
 				from p in db.Parent select db.Child));
 		}
 
-		[Test]
+		//[Test]
 		public void Test4()
 		{
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;

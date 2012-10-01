@@ -594,6 +594,69 @@ namespace Data.Linq
 					.SelectMany(ch => ch.p.GrandChildren, (ch, t) => new { t, ch })));
 		}
 
+		[Test]
+		public void DoubleConntectionTest()
+		{
+			ForEachProvider(db =>
+			{
+				var p1 = 1;
+				var p2 = 1;
+
+				var q1 = db.Parent
+					.GroupJoin(
+						db.Child,
+						x => new { x.ParentID },
+						y => new { y.ParentID },
+						(x,y) => new { Parent = x, Child = y })
+					.SelectMany(
+						y => y.Child.DefaultIfEmpty(),
+						(x,y) => new { x.Parent, Child = x.Child.FirstOrDefault() })
+					.Where(x => x.Parent.Value1 > p1 && x.Parent.ParentID > p2)
+					.OrderBy(x => x.Parent.Value1);
+
+				var q2 =
+					from x in db.Parent
+					join y in db.Child on new { x.ParentID } equals new { y.ParentID } into g
+					from y in g.DefaultIfEmpty()
+					where x.Value1 > p1 && x.ParentID > p2
+					orderby x.Value1
+					select new
+					{
+						x, y
+					};
+
+				var q3 = db.Parent
+					.GroupJoin(
+						db.Child,
+						x => new { x.ParentID },
+						y => new { y.ParentID },
+						(x,y) => new { Parent = x, Child = y })
+					.SelectMany(
+						y => y.Child.DefaultIfEmpty(),
+						(x,y) => new { x.Parent, Child = y })
+					.Where  (x => x.Parent.Value1 > p1 && x.Parent.ParentID > p2)
+					.OrderBy(x => x.Parent.Value1)
+					/*.Select (x => new
+					{
+						x.Parent,
+						x.Child
+					})*/;
+
+				var q4 =
+					from x in db.Parent
+					where x.Value1 > p1 && x.ParentID > p2
+					orderby x.Value1
+					select new
+					{
+						x, y = x.Children.FirstOrDefault()
+					};
+
+				foreach (var item in q1)
+				{
+				}
+			});
+		}
+
 		void Foo(Expression<Func<object[],object>> func)
 		{
 			/*

@@ -237,7 +237,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MemberInit()
+		public void MemberInit1()
 		{
 			ForEachProvider(db => AreEqual(
 				from ch in Child
@@ -245,6 +245,56 @@ namespace Data.Linq
 				select g.Key,
 				from ch in db.Child
 				group ch by new Child { ParentID = ch.ParentID } into g
+				select g.Key));
+		}
+
+		class GroupByInfo
+		{
+			public GroupByInfo Prev;
+			public object      Field;
+
+			public override bool Equals(object obj)
+			{
+				return Equals(obj as GroupByInfo);
+			}
+
+			public bool Equals(GroupByInfo other)
+			{
+				if (ReferenceEquals(null, other)) return false;
+				if (ReferenceEquals(this, other)) return true;
+				return Equals(other.Prev, Prev) && Equals(other.Field, Field);
+			}
+
+			public override int GetHashCode()
+			{
+				unchecked
+				{
+					return ((Prev != null ? Prev.GetHashCode() : 0) * 397) ^ (Field != null ? Field.GetHashCode() : 0);
+				}
+			}
+		}
+
+		[Test]
+		public void MemberInit2()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by new GroupByInfo { Prev = new GroupByInfo { Field = ch.ParentID }, Field = ch.ChildID } into g
+				select g.Key,
+				from ch in db.Child
+				group ch by new GroupByInfo { Prev = new GroupByInfo { Field = ch.ParentID }, Field = ch.ChildID } into g
+				select g.Key));
+		}
+
+		[Test]
+		public void MemberInit3()
+		{
+			ForEachProvider(db => AreEqual(
+				from ch in Child
+				group ch by new { Prev = new { Field = ch.ParentID }, Field = ch.ChildID } into g
+				select g.Key,
+				from ch in db.Child
+				group ch by new { Prev = new { Field = ch.ParentID }, Field = ch.ChildID } into g
 				select g.Key));
 		}
 
@@ -1199,6 +1249,25 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Scalar41()
+		{
+			ForEachProvider(
+				new[] { ProviderName.SqlCe, ProviderName.Access, ProviderName.Informix },
+				db => AreEqual(
+					from ch in Child
+					group ch by ch.ParentID into g
+					select new { g } into g
+					where g.g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+					select g.g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()
+					,
+					from ch in db.Child
+					group ch by ch.ParentID into g
+					select new { g } into g
+					where g.g.Where(ch => ch.ParentID > 2).Select(ch => (int?)ch.ChildID).Min() != null
+					select g.g.Where(ch => ch.ParentID > 2).Select(ch => ch.ChildID).Min()));
+		}
+
+		[Test]
 		public void Scalar5()
 		{
 			ForEachProvider(db => AreEqual(
@@ -1314,6 +1383,80 @@ namespace Data.Linq
 				// check that our field does not present in the GROUP BY clause second time
 				Assert.AreEqual(-1, lastQuery.IndexOf(fieldName, fieldPos + 1));
 			}
+		}
+
+		[Test]
+		public void DoubleGroupBy1()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					from t in
+						from p in Parent
+						where p.Value1 != null
+						group p by p.ParentID into g
+						select new
+						{
+							ID  = g.Key,
+							Max = g.Max(t => t.Value1)
+						}
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					},
+					from t in
+						from p in db.Parent
+						where p.Value1 != null
+						group p by p.ParentID into g
+						select new
+						{
+							ID  = g.Key,
+							Max = g.Max(t => t.Value1)
+						}
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					}));
+			
+		}
+
+		[Test]
+		public void DoubleGroupBy2()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					from p in Parent
+					where p.Value1 != null
+					group p by p.ParentID into g
+					select new
+					{
+						ID  = g.Key,
+						Max = g.Max(t => t.Value1)
+					} into t
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					},
+					from p in db.Parent
+					where p.Value1 != null
+					group p by p.ParentID into g
+					select new
+					{
+						ID  = g.Key,
+						Max = g.Max(t => t.Value1)
+					} into t
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					}));
+			
 		}
 	}
 }

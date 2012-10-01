@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
-	using Data.Sql;
 
 	class OrderByBuilder : MethodCallBuilder
 	{

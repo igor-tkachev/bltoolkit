@@ -109,16 +109,48 @@ namespace BLToolkit.Data.Linq.Builder
 			List<SqlQuery.SetExpression> items,
 			IBuildContext                sequence)
 		{
-			if (setter.Body.NodeType != ExpressionType.MemberInit)
-				throw new LinqException("Object initializer expected for insert statement.");
+			var path = Expression.Parameter(setter.Body.Type, "p");
+			var ctx  = new ExpressionContext(buildInfo.Parent, sequence, setter);
 
-			var ex  = (MemberInitExpression)setter.Body;
-			var p   = sequence.Parent;
-			var ctx = new ExpressionContext(buildInfo.Parent, sequence, setter);
+			if (setter.Body.NodeType == ExpressionType.MemberInit)
+			{
+				var ex  = (MemberInitExpression)setter.Body;
+				var p   = sequence.Parent;
 
-			BuildSetter(builder, into, items, ctx, ex, Expression.Parameter(ex.Type, "p"));
+				BuildSetter(builder, into, items, ctx, ex, path);
 
-			builder.ReplaceParent(ctx, p);
+				builder.ReplaceParent(ctx, p);
+			}
+			else
+			{
+				var sqlInfo = ctx.ConvertToSql(setter.Body, 0, ConvertFlags.All);
+
+				foreach (var info in sqlInfo)
+				{
+					if (info.Members.Count == 0)
+						throw new LinqException("Object initializer expected for insert statement.");
+
+					if (info.Members.Count != 1)
+						throw new InvalidOperationException();
+
+					var member = info.Members[0];
+					var pe     = Expression.MakeMemberAccess(path, member);
+					var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
+					var expr   = info.Sql;
+
+					if (expr is SqlParameter)
+					{
+						var type = member.MemberType == MemberTypes.Field ? 
+							((FieldInfo)   member).FieldType :
+							((PropertyInfo)member).PropertyType;
+
+						if (type.IsEnum)
+							((SqlParameter)expr).SetEnumConverter(type, builder.MappingSchema);
+					}
+
+					items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+				}
+			}
 		}
 
 		static void BuildSetter(
@@ -288,27 +320,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 

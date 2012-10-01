@@ -19,10 +19,10 @@ namespace BLToolkit.Data.Linq
 			CompiledParameters = compiledParameters;
 		}
 
-		public IDataContextInfo        RootDataContext;
-		public Expression              Expression;
-		public object[]                CompiledParameters;
-		public int                     Counter;
+		public IDataContextInfo RootDataContext;
+		public Expression       Expression;
+		public object[]         CompiledParameters;
+		public int              Counter;
 
 		List<DataContextContext> _contexts;
 
@@ -43,7 +43,7 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
-			var ctx = new DataContextContext { DataContextInfo = RootDataContext.Clone(), InUse = true };
+			var ctx = new DataContextContext { DataContextInfo = RootDataContext.Clone(true), InUse = true };
 
 			_contexts.Add(ctx);
 

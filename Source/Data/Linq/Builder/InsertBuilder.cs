@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
@@ -74,6 +75,27 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 			}
 
+			var insert = sequence.SqlQuery.Insert;
+
+			var q = insert.Into.Fields.Values.Cast<ISqlExpression>().Except(insert.Items.Select(e => e.Column))
+				.OfType<SqlField>()
+				.Where(f => f.IsIdentity);
+
+			foreach (var field in q)
+			{
+				var expr = builder.SqlProvider.GetIdentityExpression(insert.Into, field, false);
+
+				if (expr != null)
+				{
+					insert.Items.Insert(0, new SqlQuery.SetExpression(field, expr));
+
+					if (methodCall.Arguments.Count == 3)
+					{
+						sequence.SqlQuery.Select.Columns.Insert(0, new SqlQuery.Column(sequence.SqlQuery, insert.Items[0].Expression));
+					}
+				}
+			}
+
 			sequence.SqlQuery.QueryType           = QueryType.Insert;
 			sequence.SqlQuery.Insert.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
 
@@ -108,27 +130,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 

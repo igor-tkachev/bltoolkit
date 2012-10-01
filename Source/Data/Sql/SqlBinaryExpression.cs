@@ -27,9 +27,10 @@ namespace BLToolkit.Data.Sql
 		}
 
 		public ISqlExpression Expr1      { get; internal set; }
-		public string         Operation  { get; private set; }
+		public string         Operation  { get; private set;  }
 		public ISqlExpression Expr2      { get; internal set; }
-		public Type           SystemType { get; private set; }
+		public Type           SystemType { get; private set;  }
+
 		public int            Precedence { get; private set; }
 
 		#region Overrides
@@ -64,17 +65,7 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
-			if (this == other)
-				return true;
-
-			var expr = other as SqlBinaryExpression;
-
-			return
-				expr        != null &&
-				Operation  == expr.Operation &&
-				SystemType == expr.SystemType &&
-				Expr1.Equals(expr.Expr1) &&
-				Expr2.Equals(expr.Expr2);
+			return Equals(other, SqlExpression.DefaultComparer);
 		}
 
 		#endregion
@@ -84,6 +75,22 @@ namespace BLToolkit.Data.Sql
 		public bool CanBeNull()
 		{
 			return Expr1.CanBeNull() || Expr2.CanBeNull();
+		}
+
+		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+		{
+			if (this == other)
+				return true;
+
+			var expr = other as SqlBinaryExpression;
+
+			return
+				expr        != null                &&
+				Operation  == expr.Operation       &&
+				SystemType == expr.SystemType      &&
+				Expr1.Equals(expr.Expr1, comparer) &&
+				Expr2.Equals(expr.Expr2, comparer) &&
+				comparer(this, other);
 		}
 
 		#endregion

@@ -22,12 +22,12 @@ namespace BLToolkit.Reflection
 		public override MethodBase BindToMethod(BindingFlags bindingAttr, MethodBase[] match, ref object[] args,
 			ParameterModifier[] modifiers, CultureInfo culture, string[] names, out object state)
 		{
-			throw new NotImplementedException("GenericBinder.BindToMethod");
+			throw new InvalidOperationException("GenericBinder.BindToMethod");
 		}
 
 		public override FieldInfo BindToField(BindingFlags bindingAttr, FieldInfo[] match, object value, CultureInfo culture)
 		{
-			throw new NotImplementedException("GenericBinder.BindToField");
+			throw new InvalidOperationException("GenericBinder.BindToField");
 		}
 
 		public override MethodBase SelectMethod(
@@ -59,17 +59,17 @@ namespace BLToolkit.Reflection
 		public override PropertyInfo SelectProperty(BindingFlags bindingAttr, PropertyInfo[] match, Type returnType,
 			Type[] indexes, ParameterModifier[] modifiers)
 		{
-			throw new NotImplementedException("GenericBinder.SelectProperty");
+			throw new InvalidOperationException("GenericBinder.SelectProperty");
 		}
 
 		public override object ChangeType(object value, Type type, CultureInfo culture)
 		{
-			throw new NotImplementedException("GenericBinder.ChangeType");
+			throw new InvalidOperationException("GenericBinder.ChangeType");
 		}
 
 		public override void ReorderArgumentArray(ref object[] args, object state)
 		{
-			throw new NotImplementedException("GenericBinder.ReorderArgumentArray");
+			throw new InvalidOperationException("GenericBinder.ReorderArgumentArray");
 		}
 
 		#endregion

@@ -89,6 +89,31 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsParameter4()
+		{
+			ForEachProvider(db =>
+				AreEqual(
+					from p in Person
+					select new
+					{
+						p,
+						Field1 = p.FirstName.Contains("Jo")
+					} into p
+					where p.Field1
+					orderby p.Field1
+					select p,
+					from p in db.Person
+					select new
+					{
+						p,
+						Field1 = p.FirstName.Contains("Jo")
+					} into p
+					where p.Field1
+					orderby p.Field1
+					select p));
+		}
+
+		[Test]
 		public void StartsWith1()
 		{
 			ForEachProvider(db => 
@@ -134,6 +159,22 @@ namespace Data.Linq
 					from p2 in db.Person
 					where p1.ID == p2.ID && 
 						Sql.Like(p1.FirstName, p2.FirstName.Replace("%", "~%"), '~')
+					select p1));
+		}
+
+		[Test]
+		public void StartsWith5()
+		{
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Access },
+				db => AreEqual(
+					from p1 in    Person
+					from p2 in    Person
+					where p1.ID == p2.ID && p1.FirstName.Replace("J", "%").StartsWith(p2.FirstName.Replace("J", "%"))
+					select p1,
+					from p1 in db.Person
+					from p2 in db.Person
+					where p1.ID == p2.ID && p1.FirstName.Replace("J", "%").StartsWith(p2.FirstName.Replace("J", "%"))
 					select p1));
 		}
 

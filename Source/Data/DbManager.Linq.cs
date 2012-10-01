@@ -76,7 +76,7 @@ namespace BLToolkit.Data
 			if (sql != newSql)
 			{
 				sql = newSql;
-				sql.ParameterDependent = true;
+				sql.IsParameterDependent = true;
 			}
 
 			var sqlProvider = DataProvider.CreateSqlProvider();
@@ -94,7 +94,7 @@ namespace BLToolkit.Data
 				commands[i] = sb.ToString();
 			}
 
-			if (!query.SqlQuery.ParameterDependent)
+			if (!query.SqlQuery.IsParameterDependent)
 				query.Context = commands;
 
 			return new PreparedQuery
@@ -157,7 +157,12 @@ namespace BLToolkit.Data
 
 			if (value != null)
 			{
-				parms.Add(Parameter(name, value));
+				if (parm.DbType == DbType.Object)
+					parms.Add(Parameter(name, value));
+				else if (parm.DbSize == 0)
+					parms.Add(Parameter(name, value, parm.DbType));
+				else
+					parms.Add(Parameter(name, value, parm.DbType, parm.DbSize));
 			}
 			else
 			{
@@ -331,8 +336,11 @@ namespace BLToolkit.Data
 
 		#region IDataContext Members
 
-		IDataContext IDataContext.Clone()
+		IDataContext IDataContext.Clone(bool forNestedQuery)
 		{
+			if (forNestedQuery && _connection != null && IsMarsEnabled)
+				return new DbManager(_dataProvider, _connection) { _mappingSchema = _mappingSchema, _transaction = _transaction };
+
 			return Clone();
 		}
 

@@ -20,6 +20,15 @@
 static Dictionary<string,string> Assemblies = new Dictionary<string,string>();
 
 static Action<GeneratedTextTransformation,string> WriteComment        = (tt,s) => tt.WriteLine("//{0}", s);
+static Action<GeneratedTextTransformation,string> WriteSummary        = (tt,s) => 
+{
+	if (!string.IsNullOrWhiteSpace(s))
+	{
+		tt.WriteLine("/// <summary>");
+		tt.WriteLine("/// {0}", s);
+		tt.WriteLine("/// </summary>");
+	}
+};
 static Action<GeneratedTextTransformation,string> WriteUsing          = (tt,s) => tt.WriteLine("using {0};", s);
 static Action<GeneratedTextTransformation,string> WriteBeginNamespace = (tt,s) => { tt.WriteLine("namespace {0}", s); tt.WriteLine("{"); };
 static Action<GeneratedTextTransformation>        WriteEndNamespace   =  tt    => tt.WriteLine("}");
@@ -35,10 +44,11 @@ static Action<GeneratedTextTransformation>        WriteEndClass       =  tt   =>
 static Func<string,string,string>                 MakeGenericType     = (c,t) => string.Format("{0}<{1}>", c, t);
 static Func<string,string>                        MakeType            = t     => t;
 
-delegate void WriteTablePropertyAction(GeneratedTextTransformation tt, string name, string pname, int maxlen, int maxplen);
+delegate void WriteTablePropertyAction(GeneratedTextTransformation tt, string name, string pname, int maxlen, int maxplen, string desc);
 
-static WriteTablePropertyAction WriteTableProperty = (tt,name,pname,maxlen,maxplen) =>
+static WriteTablePropertyAction WriteTableProperty = (tt,name,pname,maxlen,maxplen,desc) =>
 {
+	WriteSummary(tt,desc);
 	tt.WriteLine("public Table<{0}>{1} {2}{3} {{ get {{ return this.GetTable<{0}>();{1} }} }}", name, tt.LenDiff(maxlen, name), pname, tt.LenDiff(maxplen, pname));
 };
 static Action<GeneratedTextTransformation,string> WriteAttribute      = (tt,a) => tt.Write("[{0}]", a);
@@ -55,9 +65,11 @@ string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
 string OneToManyAssociationType = "IEnumerable<{0}>";
 
-bool   RenderField          = false;
-bool   RenderBackReferences = true;
-bool   RenderForeignKeys    = true;
+string OwnerToInclude			= null;
+
+bool   RenderField              = false;
+bool   RenderBackReferences     = true;
+bool   RenderForeignKeys        = true;
 
 bool   IsMetadataLoaded;
 
@@ -66,6 +78,8 @@ int MaxColumnMemberLen;
 
 static Action<GeneratedTextTransformation,Column,int[],string[]> RenderColumn = (tt,c,maxLens,attrs) =>
 {
+	WriteSummary(tt,c.Description);
+	
 	if (maxLens.Sum() > 0)
 	{
 		if (attrs.Any(_ => _ != null))
@@ -163,6 +177,8 @@ static Action<GeneratedTextTransformation,ForeignKey> RenderForeignKey = (tt,key
 
 static Action<GeneratedTextTransformation,Table, bool> RenderTable = (tt,t, renderForeignKeys) =>
 {
+	WriteSummary(tt,t.Description);
+
 	if (t.IsView)
 	{
 		WriteComment(tt, " View");
@@ -309,7 +325,7 @@ void GenerateModel()
 	BeforeWriteTableProperty(this);
 
 	foreach (var t in tlist)
-		WriteTableProperty(this, t.ClassName, t.DataContextPropertyName ?? t.ClassName, maxlen, maxplen);
+		WriteTableProperty(this, t.ClassName, t.DataContextPropertyName ?? t.ClassName, maxlen, maxplen, t.Description);
 
 	AfterWriteTableProperty(this);
 
@@ -521,6 +537,7 @@ public partial class Table
 	public string       DataContextPropertyName;
 	public string       BaseClassName;
 	public bool         IsView;
+	public string		Description;
 	public List<string> Attributes = new List<string>();
 
 	public Dictionary<string,Column>     Columns     = new Dictionary<string,Column>();
@@ -542,6 +559,7 @@ public partial class Column
 	public long         Length;
 	public int          Precision;
 	public int          Scale;
+	public string		Description;
 
 	public int          PKIndex = -1;
 	public List<string> Attributes = new List<string>();

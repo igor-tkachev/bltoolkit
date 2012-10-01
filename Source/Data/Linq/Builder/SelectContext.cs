@@ -214,7 +214,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		#endregion
@@ -279,7 +279,7 @@ namespace BLToolkit.Data.Linq.Builder
 						return q.ToArray();
 					}
 
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 				}
 
 				switch (flags)
@@ -305,10 +305,8 @@ namespace BLToolkit.Data.Linq.Builder
 												var memberExpression = GetMemberExpression(
 													member, levelExpression == expression, levelExpression.Type);
 
-												sql = ConvertExpressions(memberExpression, flags);
-
-												if (sql.Length == 1 && flags != ConvertFlags.Key)
-													sql[0].Member = member;
+												sql = ConvertExpressions(memberExpression, flags)
+													.Select(si => si.Clone(member)).ToArray();
 
 												_sql.Add(member, sql);
 											}
@@ -346,29 +344,14 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		SqlInfo[] ConvertMember(MemberInfo member, Expression expression, ConvertFlags flags)
 		{
-			switch (expression.NodeType)
-			{
-				case ExpressionType.MemberAccess :
-				case ExpressionType.Parameter :
-					if (IsExpression(expression, 0, RequestFor.Field).Result)
-						flags = ConvertFlags.Field;
-
-					var sql = ConvertToSql(expression, 0, flags)[0];
-
-					return new[] { new SqlInfo { Sql = sql.Sql, Member = member, Query = sql.Query } };
-			}
-
-			var exprs =  ConvertExpressions(expression, flags);
-
-			if (exprs.Length == 1)
-				exprs[0].Member = member;
-
-			return exprs;
+			return ConvertExpressions(expression, flags)
+				.Select(si => si.Clone(member))
+				.ToArray();
 		}
 
 		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
@@ -404,24 +387,19 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				info = ConvertToIndexInternal(expression, level, flags);
 
-				var newInfo = new SqlInfo[info.Length];
-
-				for (var i = 0; i < info.Length; i++)
-				{
-					var ni = info[i];
-
-					if (ni.Query != SqlQuery)
+				var newInfo = info
+					.Select(i =>
 					{
-						ni = new SqlInfo
-						{
-							Query  = SqlQuery,
-							Member = ni.Member,
-							Index  = SqlQuery.Select.Add(ni.Query.Select.Columns[ni.Index])
-						};
-					}
+						if (i.Query == SqlQuery)
+							return i;
 
-					newInfo[i] = ni;
-				}
+						return new SqlInfo(i.Members)
+						{
+							Query = SqlQuery,
+							Index = SqlQuery.Select.Add(i.Query.Select.Columns[i.Index])
+						};
+					})
+					.ToArray();
 
 				_expressionIndex.Add(key, newInfo);
 
@@ -478,7 +456,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					switch (flags)
 					{
-						case ConvertFlags.Field : throw new NotImplementedException();
+						case ConvertFlags.Field : throw new InvalidOperationException();
 						case ConvertFlags.Key   :
 						case ConvertFlags.All   :
 							{
@@ -491,13 +469,7 @@ namespace BLToolkit.Data.Linq.Builder
 										Sql    = ConvertToIndex(Expression.MakeMemberAccess(p, m), 1, flags),
 										Member = m
 									} into mm
-									from m in mm.Sql.Select(s => new SqlInfo
-										{
-											Sql    = s.Sql,
-											Index  = s.Index,
-											Member = mm.Member,
-											Query  = s.Query
-										})
+									from m in mm.Sql.Select(s => s.Clone(mm.Member))
 									select m;
 
 								return q.ToArray();
@@ -570,7 +542,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		void SetInfo(SqlInfo info)
@@ -645,7 +617,32 @@ namespace BLToolkit.Data.Linq.Builder
 							{
 								case ExpressionType.MemberAccess :
 									{
-										var memberExpression = Members[((MemberExpression)levelExpression).Member];
+										var member = ((MemberExpression)levelExpression).Member;
+
+										Expression memberExpression;
+
+										if (!Members.TryGetValue(member, out memberExpression))
+										{
+											var nm = Members.Keys.FirstOrDefault(m => m.Name == member.Name);
+
+											if (nm != null && member.DeclaringType.IsInterface)
+											{
+												if (TypeHelper.IsSameOrParent(member.DeclaringType, nm.DeclaringType))
+													memberExpression = Members[nm];
+												else
+												{
+													var mdt = TypeHelper.GetDefiningTypes(member.DeclaringType, member);
+													var ndt = TypeHelper.GetDefiningTypes(Body.Type,            nm);
+
+													if (mdt.Intersect(ndt).Any())
+														memberExpression = Members[nm];
+												}
+											}
+
+											if (memberExpression == null)
+												throw new InvalidOperationException(
+													string.Format("Invalid member '{0}.{1}'", member.DeclaringType, member.Name));
+										}
 
 										if (levelExpression == expression)
 										{
@@ -692,7 +689,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		#endregion
@@ -710,7 +707,7 @@ namespace BLToolkit.Data.Linq.Builder
 					expression,
 					level,
 					(ctx, ex, l) => ctx.GetContext(ex, l, buildInfo),
-					() => { throw new NotImplementedException(); });
+					() => { throw new InvalidOperationException(); });
 			}
 			else
 			{
@@ -720,6 +717,24 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					case ExpressionType.MemberAccess :
 						{
+							if (levelExpression == expression && Sequence.Length == 1 && !(Sequence[0] is GroupByBuilder.GroupByContext))
+							{
+								var memberExpression = GetMemberExpression(
+									((MemberExpression)levelExpression).Member,
+									levelExpression == expression,
+									levelExpression.Type);
+
+								//var sequence = GetSequence(memberExpression, 0);
+								//return sequence.GetContext(memberExpression, 1, new BuildInfo(buildInfo, memberExpression));
+
+								var ctx = GetContext(memberExpression, 0, new BuildInfo(this, memberExpression, buildInfo.SqlQuery));
+
+								if (ctx != null)
+								{
+									return ctx;
+								}
+							}
+
 							var context = ProcessMemberAccess(
 								expression,
 								(MemberExpression)levelExpression,
@@ -729,7 +744,7 @@ namespace BLToolkit.Data.Linq.Builder
 									ctx.GetContext(ex, l, buildInfo));
 
 							if (context == null)
-								throw new NotImplementedException();
+								throw new InvalidOperationException();
 
 							return context;
 						}
@@ -758,7 +773,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		#endregion
@@ -840,7 +855,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		T ProcessMemberAccess<T>(Expression expression, MemberExpression levelExpression, int level,
@@ -864,7 +879,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Parameter    :
 					if (sequence != null)
 						return action(2, sequence, newExpression, 1, memberExpression);
-					throw new NotImplementedException();
+					throw new InvalidOperationException();
 
 				case ExpressionType.New          :
 				case ExpressionType.MemberInit   :
@@ -931,7 +946,7 @@ namespace BLToolkit.Data.Linq.Builder
 					if (root == Lambda.Parameters[i])
 						return Sequence[i];
 
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		static Expression GetExpression(Expression expression, Expression levelExpression, Expression memberExpression)

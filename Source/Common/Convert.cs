@@ -4,6 +4,9 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Threading;
 using System.Xml;
+#if !SILVERLIGHT
+using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Common
 {
@@ -748,6 +751,100 @@ namespace BLToolkit.Common
 			if (p is Binary)          return ToXmlDocument(((Binary)p).ToArray());
 
 			throw CreateInvalidCastException(p.GetType(), typeof(XmlDocument));
+		}
+
+#endif
+
+		#endregion
+
+		#region XElement
+
+#if !SILVERLIGHT
+
+		// Scalar Types.
+		// 
+		/// <summary>Converts the value from <c>String</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(String p)
+		{
+			if (string.IsNullOrEmpty(p)) return null;
+
+			var doc = XElement.Parse(p);
+
+			return doc;
+		}
+
+		// SqlTypes
+		// 
+		/// <summary>Converts the value from <c>SqlString</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(SqlString p) { return p.IsNull ? null : ToXElement(p.Value); }
+		/// <summary>Converts the value from <c>SqlXml</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(SqlXml p) { return p.IsNull ? null : ToXElement(p.Value); }
+		/// <summary>Converts the value from <c>SqlChars</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(SqlChars p) { return p.IsNull ? null : ToXElement(p.ToSqlString().Value); }
+		/// <summary>Converts the value from <c>SqlBinary</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(SqlBinary p) { return p.IsNull ? null : ToXElement(new MemoryStream(p.Value)); }
+
+		// Other Types.
+		// 
+		/// <summary>Converts the value from <c>Stream</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(Stream p)
+		{
+			if (p == null) return null;
+
+			using (XmlReader r = XmlReader.Create(p))
+				return XElement.Load(r); 
+		}
+
+		/// <summary>Converts the value from <c>TextReader</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(TextReader p)
+		{
+			if (p == null) return null;
+
+			var doc = XElement.Load(p);
+
+			return doc;
+		}
+
+		/// <summary>Converts the value from <c>XmlReader</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(XmlReader p)
+		{
+			if (p == null) return null;
+
+			var doc = XElement.Load(p);
+
+			return doc;
+		}
+
+		/// <summary>Converts the value from <c>Char[]</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(Char[] p) { return p == null || p.Length == 0 ? null : ToXElement(new string(p)); }
+		/// <summary>Converts the value from <c>Byte[]</c> to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(Byte[] p) { return p == null || p.Length == 0 ? null : ToXElement(new MemoryStream(p)); }
+		public static XElement ToXElement(Binary p) { return p == null || p.Length == 0 ? null : ToXElement(new MemoryStream(p.ToArray())); }
+
+		/// <summary>Converts the value of a specified object to an equivalent <c>XElement</c> value.</summary>
+		public static XElement ToXElement(object p)
+		{
+			if (p == null || p is DBNull) return null;
+
+			if (p is XElement) return (XElement)p;
+
+			// Scalar Types.
+			//
+			if (p is String) return ToXElement((String)p);
+
+			// SqlTypes
+			//
+			if (p is SqlChars) return ToXElement((SqlChars)p);
+			if (p is SqlBinary) return ToXElement((SqlBinary)p);
+
+			// Other Types.
+			//
+
+			if (p is Char[]) return ToXElement((Char[])p);
+			if (p is Byte[]) return ToXElement((Byte[])p);
+			if (p is Binary) return ToXElement(((Binary)p).ToArray());
+
+			throw CreateInvalidCastException(p.GetType(), typeof(XElement));
 		}
 
 #endif

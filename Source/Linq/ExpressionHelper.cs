@@ -51,7 +51,7 @@ namespace BLToolkit.Linq
 
 		#region Compare
 
-		public static bool Compare(Expression expr1, Expression expr2, Dictionary<Expression,Func<Expression,IQueryable>> queryableAccessorDic)
+		internal static bool Compare(Expression expr1, Expression expr2, Dictionary<Expression,QueryableAccessor> queryableAccessorDic)
 		{
 			return Compare(expr1, expr2, new HashSet<Expression>(), queryableAccessorDic);
 		}
@@ -60,7 +60,7 @@ namespace BLToolkit.Linq
 			Expression          expr1,
 			Expression          expr2,
 			HashSet<Expression> visited,
-			Dictionary<Expression,Func<Expression,IQueryable>> queryableAccessorDic)
+			Dictionary<Expression,QueryableAccessor> queryableAccessorDic)
 		{
 			if (expr1 == expr2)
 				return true;
@@ -132,10 +132,10 @@ namespace BLToolkit.Linq
 
 						if (queryableAccessorDic.Count > 0)
 						{
-							Func<Expression,IQueryable> func;
+							QueryableAccessor qa;
 
-							if (queryableAccessorDic.TryGetValue(expr1, out func))
-								return Compare(func(expr1).Expression, func(expr2).Expression, visited, queryableAccessorDic);
+							if (queryableAccessorDic.TryGetValue(expr1, out qa))
+								return Compare(qa.Queryable.Expression, qa.Accessor(expr2).Expression, visited, queryableAccessorDic);
 						}
 
 						if (!Compare(e1.Object, e2.Object, visited, queryableAccessorDic))
@@ -177,11 +177,8 @@ namespace BLToolkit.Linq
 							var eq1 = ((IQueryable)e1.Value).Expression;
 							var eq2 = ((IQueryable)e2.Value).Expression;
 
-							if (!visited.Contains(eq1))
-							{
-								visited.Add(eq1);
+							if (visited.Add(eq1))
 								return Compare(eq1, eq2, visited, queryableAccessorDic);
-							}
 						}
 
 						return true;
@@ -252,12 +249,12 @@ namespace BLToolkit.Linq
 							{
 								if (queryableAccessorDic.Count > 0)
 								{
-									Func<Expression,IQueryable> func;
+									QueryableAccessor qa;
 
-									if (queryableAccessorDic.TryGetValue(expr1, out func))
+									if (queryableAccessorDic.TryGetValue(expr1, out qa))
 										return
 											Compare(e1.Expression, e2.Expression, visited, queryableAccessorDic) &&
-											Compare(func(expr1).Expression, func(expr2).Expression, visited, queryableAccessorDic);
+											Compare(qa.Queryable.Expression, qa.Accessor(expr2).Expression, visited, queryableAccessorDic);
 								}
 							}
 
@@ -1352,7 +1349,7 @@ namespace BLToolkit.Linq
 						var a = Convert(e.Arguments, func);
 
 						return o != e.Object || a != e.Arguments ? 
-							Expression.Call(o, e.Method, a) : 
+							Expression.Call(o, e.Method, a) :
 							expr;
 					}
 
@@ -1644,6 +1641,8 @@ namespace BLToolkit.Linq
 			if (expr == null)
 				return null;
 
+			ConvertInfo ci;
+
 			switch (expr.NodeType)
 			{
 				case ExpressionType.Add:
@@ -1674,9 +1673,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.Subtract:
 				case ExpressionType.SubtractChecked:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as BinaryExpression;
 						var c = Convert2(e.Conversion, func);
@@ -1698,9 +1697,9 @@ namespace BLToolkit.Linq
 				case ExpressionType.TypeAs:
 				case ExpressionType.UnaryPlus:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as UnaryExpression;
 						var o = Convert2(e.Operand, func);
@@ -1712,9 +1711,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Call:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as MethodCallExpression;
 						var o = Convert2(e.Object,    func);
@@ -1727,9 +1726,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Conditional:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as ConditionalExpression;
 						var s = Convert2(e.Test,    func);
@@ -1743,9 +1742,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Invoke:
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as InvocationExpression;
 						var ex = Convert2(e.Expression, func);
@@ -1756,22 +1755,22 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Lambda:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as LambdaExpression;
 						var b = Convert2(e.Body,       func);
 						var p = Convert2(e.Parameters, func);
 
-						return b != e.Body || p != e.Parameters ? Expression.Lambda(ex.Expression.Type, b, p.ToArray()) : expr;
+						return b != e.Body || p != e.Parameters ? Expression.Lambda(ci.Expression.Type, b, p.ToArray()) : expr;
 					}
 
 				case ExpressionType.ListInit:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as ListInitExpression;
 						var n = Convert2(e.NewExpression, func);
@@ -1788,9 +1787,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.MemberAccess:
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as MemberExpression;
 						var ex = Convert2(e.Expression, func);
@@ -1800,9 +1799,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.MemberInit:
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						Func<MemberBinding,MemberBinding> modify = null; modify = b =>
 						{
@@ -1860,9 +1859,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.New:
 					{
-						var ex = func(expr);
-						if (ex.Stop || ex.Expression != expr)
-							return ex.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e = expr as NewExpression;
 						var a = Convert2(e.Arguments, func);
@@ -1876,9 +1875,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.NewArrayBounds:
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as NewArrayExpression;
 						var ex = Convert2(e.Expressions, func);
@@ -1888,23 +1887,27 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.NewArrayInit:
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as NewArrayExpression;
-						var ex = Convert2(e.Expressions, func);
+						var et = e.Type.GetElementType();
+						var ex = Convert2(e.Expressions, func)
+							.Select(ee => et == typeof(object) && ee.Type.IsValueType ?
+								Expression.Convert(ee, typeof(object)) :
+								ee);
 
 						return ex != e.Expressions ?
-							Expression.NewArrayInit(e.Type.GetElementType(), ex) :
+							Expression.NewArrayInit(et, ex) :
 							expr;
 					}
 
 				case ExpressionType.TypeIs :
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as TypeBinaryExpression;
 						var ex = Convert2(e.Expression, func);
@@ -1916,9 +1919,9 @@ namespace BLToolkit.Linq
 
 				case ExpressionType.Block :
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as BlockExpression;
 						var ex = Convert2(e.Expressions, func);
@@ -1934,9 +1937,9 @@ namespace BLToolkit.Linq
 
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
 					{
-						var exp = func(expr);
-						if (exp.Stop || exp.Expression != expr)
-							return exp.Expression;
+						ci = func(expr);
+						if (ci.Stop || ci.Expression != expr)
+							return ci.Expression;
 
 						var e  = expr as ChangeTypeExpression;
 						var ex = Convert2(e.Expression, func);

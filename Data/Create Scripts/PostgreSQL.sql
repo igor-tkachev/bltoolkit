@@ -6,11 +6,6 @@ GO
 
 DROP TABLE "Person"
 GO
---DROP SEQUENCE Seq
---GO
-
---CREATE SEQUENCE Seq INCREMENT 1 START 1
---GO
 
 CREATE TABLE "Person"
 ( 
@@ -90,15 +85,16 @@ GO
 
 CREATE TABLE "LinqDataTypes"
 (
-	"ID"            int,
-	"MoneyValue"    decimal(10,4),
-	"DateTimeValue" timestamp,
-	"BoolValue"     boolean,
-	"GuidValue"     uuid,
-	"BinaryValue"   bytea,
-	"SmallIntValue" smallint,
-	"IntValue"      int NULL,
-	"BigIntValue"   bigint NULL
+	"ID"             int,
+	"MoneyValue"     decimal(10,4),
+	"DateTimeValue"  timestamp,
+	"DateTimeValue2" timestamp,
+	"BoolValue"      boolean,
+	"GuidValue"      uuid,
+	"BinaryValue"    bytea  NULL,
+	"SmallIntValue"  smallint,
+	"IntValue"       int    NULL,
+	"BigIntValue"    bigint NULL
 )
 GO
 
@@ -125,4 +121,47 @@ BEGIN
 END;
 $BODY$
 	LANGUAGE plpgsql;
+GO
+
+
+DROP TABLE "SequenceTest1"
+GO
+
+DROP TABLE "SequenceTest2"
+GO
+
+DROP TABLE "SequenceTest3"
+GO
+
+DROP SEQUENCE SequenceTestSeq
+GO
+
+CREATE SEQUENCE SequenceTestSeq INCREMENT 1 START 1
+GO
+
+DROP SEQUENCE "SequenceTest2_ID_seq"
+GO
+
+CREATE SEQUENCE "SequenceTest2_ID_seq" INCREMENT 1 START 1
+GO
+
+CREATE TABLE "SequenceTest1"
+(
+	"ID"    INTEGER PRIMARY KEY,
+	"Value" VARCHAR(50)
+)
+GO
+
+CREATE TABLE "SequenceTest2"
+(
+	"ID"    INTEGER PRIMARY KEY DEFAULT NEXTVAL('"SequenceTest2_ID_seq"'),
+	"Value" VARCHAR(50)
+)
+GO
+
+CREATE TABLE "SequenceTest3"
+(
+	"ID"    INTEGER PRIMARY KEY DEFAULT NEXTVAL('SequenceTestSeq'),
+	"Value" VARCHAR(50)
+)
 GO

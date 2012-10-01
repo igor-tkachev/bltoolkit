@@ -536,19 +536,21 @@ DROP TABLE LinqDataTypes COMMIT;
 
 CREATE TABLE LinqDataTypes
 (
-	ID            int,
-	MoneyValue    decimal(10,4),
-	DateTimeValue timestamp,
-	BoolValue     char(1),
-	GuidValue     char(38),
-	BinaryValue   blob,
-	SmallIntValue smallint,
-	IntValue      int,
-	BigIntValue   bigint
+	ID             int,
+	MoneyValue     decimal(10,4),
+	DateTimeValue  timestamp,
+	DateTimeValue2 timestamp,
+	BoolValue      char(1),
+	GuidValue      char(38),
+	BinaryValue    blob,
+	SmallIntValue  smallint,
+	IntValue       int,
+	BigIntValue    bigint
 )
 COMMIT;
 
-DROP GENERATOR SequenceTestSeq COMMIT;
+DROP GENERATOR SequenceTestSeq
+COMMIT;
 
 CREATE GENERATOR SequenceTestSeq
 COMMIT;
@@ -557,7 +559,7 @@ DROP TABLE SequenceTest COMMIT;
 
 CREATE TABLE SequenceTest
 (
-	ID                 int NOT NULL PRIMARY KEY,
+	ID     int         NOT NULL PRIMARY KEY,
 	Value_ VARCHAR(50) NOT NULL
 )
 COMMIT;

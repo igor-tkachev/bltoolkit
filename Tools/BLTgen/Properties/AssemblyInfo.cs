@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BLTgen")]
 [assembly: AssemblyDescription("Business Logic Toolkit Extension Assembly Generator")]
 [assembly: AssemblyProduct("Business Logic Toolkit")]
-[assembly: AssemblyCopyright("\xA9 2002-2011 www.bltoolkit.net")]
+[assembly: AssemblyCopyright("\xA9 2002-2012 www.bltoolkit.net")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

@@ -40,6 +40,7 @@ using BLToolkit;
 // Web page that should be running under restricted permissions.
 #if !SILVERLIGHT
 [assembly: AllowPartiallyTrustedCallers]
+//[assembly: SecurityRules(SecurityRuleSet.Level2, SkipVerificationInFullTrust = true)]
 #endif
 
 [assembly: CLSCompliant(true)]

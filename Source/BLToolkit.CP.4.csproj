@@ -206,6 +206,7 @@
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionTestGenerator.cs" />
     <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
     <Compile Include="Data\Linq\Builder\IsExpressionResult.cs" />
@@ -235,6 +236,7 @@
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
+    <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />

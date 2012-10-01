@@ -81,7 +81,7 @@ namespace BLToolkit.Data.Sql
 			_orderBy            = orderBy;
 			_unions             = unions;
 			ParentSql          = parentSql;
-			ParameterDependent = parameterDependent;
+			IsParameterDependent = parameterDependent;
 			_parameters.AddRange(parameters);
 
 			foreach (var col in select.Columns)
@@ -107,8 +107,8 @@ namespace BLToolkit.Data.Sql
 			get { return _properties ?? (_properties = new List<object>()); }
 		}
 
-		public bool     ParameterDependent { get; set; }
-		public SqlQuery ParentSql          { get; set; }
+		public bool     IsParameterDependent { get; set; }
+		public SqlQuery ParentSql            { get; set; }
 
 		public bool IsSimple
 		{
@@ -200,6 +200,22 @@ namespace BLToolkit.Data.Sql
 
 			#region ISqlExpression Members
 
+			public bool CanBeNull()
+			{
+				return Expression.CanBeNull();
+			}
+
+			public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+			{
+				if (this == other)
+					return true;
+
+				return
+					other is Column &&
+					Expression.Equals(((Column)other).Expression, comparer) &&
+					comparer(this, other);
+			}
+
 			public int Precedence
 			{
 				get { return Sql.Precedence.Primary; }
@@ -208,11 +224,6 @@ namespace BLToolkit.Data.Sql
 			public Type SystemType
 			{
 				get { return Expression.SystemType; }
-			}
-
-			public bool CanBeNull()
-			{
-				return Expression.CanBeNull();
 			}
 
 			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
@@ -403,14 +414,14 @@ namespace BLToolkit.Data.Sql
 				get { return _joins;  }
 			}
 
-			public void ForEach(Action<TableSource> action)
+			public void ForEach(Action<TableSource> action, HashSet<SqlQuery> visitedQueries)
 			{
 				action(this);
 				foreach (var join in Joins)
-					join.ForEach(action);
+					join.Table.ForEach(action, visitedQueries);
 
-				if (Source is SqlQuery)
-					((SqlQuery)Source).ForEachTable(action);
+				if (Source is SqlQuery && visitedQueries.Contains((SqlQuery)Source))
+					((SqlQuery)Source).ForEachTable(action, visitedQueries);
 			}
 
 			public int GetJoinNumber()
@@ -497,6 +508,9 @@ namespace BLToolkit.Data.Sql
 
 			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 			{
+				if (sb.Length > 500)
+					return sb;
+
 				if (dic.ContainsKey(this))
 					return sb.Append("...");
 
@@ -535,6 +549,11 @@ namespace BLToolkit.Data.Sql
 			public bool CanBeNull()
 			{
 				return Source.CanBeNull();
+			}
+
+			public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+			{
+				return this == other;
 			}
 
 			public int  Precedence { get { return Source.Precedence; } }
@@ -598,11 +617,6 @@ namespace BLToolkit.Data.Sql
 				return clone;
 			}
 
-			public void ForEach(Action<TableSource> action)
-			{
-				Table.ForEach(action);
-			}
-
 #if OVERRIDETOSTRING
 
 			public override string ToString()
@@ -619,7 +633,9 @@ namespace BLToolkit.Data.Sql
 			{
 				Condition = (SearchCondition)((ISqlExpressionWalkable)Condition).Walk(skipColumns, action);
 
+#pragma warning disable 0618
 				Table.Walk(skipColumns, action);
+#pragma warning restore 0618
 
 				return null;
 			}
@@ -787,7 +803,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					Expr2 = Expr2.Walk(skipColumns, func);
 				}
 
@@ -857,7 +875,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					Expr2 = Expr2.Walk(skipColumns, func);
 
 					if (Escape != null)
@@ -917,7 +937,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					Expr2 = Expr2.Walk(skipColumns, func);
 					Expr3 = Expr3.Walk(skipColumns, func);
 				}
@@ -1009,7 +1031,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, func);
+#pragma warning restore 0618
 					SubQuery = (SqlQuery)((ISqlExpression)SubQuery).Walk(skipColumns, func);
 				}
 
@@ -1068,7 +1092,9 @@ namespace BLToolkit.Data.Sql
 				[Obsolete]
 				protected override void Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> action)
 				{
+#pragma warning disable 0618
 					base.Walk(skipColumns, action);
+#pragma warning restore 0618
 					for (var i = 0; i < _values.Count; i++)
 						_values[i] = _values[i].Walk(skipColumns, action);
 				}
@@ -1432,6 +1458,11 @@ namespace BLToolkit.Data.Sql
 						return true;
 
 				return false;
+			}
+
+			public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+			{
+				return this == other;
 			}
 
 			#endregion
@@ -2049,7 +2080,9 @@ namespace BLToolkit.Data.Sql
 				for (var i = 0; i < Columns.Count; i++)
 				{
 					var col  = Columns[i];
+#pragma warning disable 0618
 					var expr = col.Walk(skipColumns, func);
+#pragma warning restore 0618
 
 					if (expr is Column)
 						Columns[i] = (Column)expr;
@@ -2135,6 +2168,28 @@ namespace BLToolkit.Data.Sql
 			{
 				Column     = column;
 				Expression = expression;
+
+				if (expression is SqlParameter)
+				{
+					var p = (SqlParameter)expression;
+
+					//if (type.IsEnum)
+					//	p.SetEnumConverter(type, mappingSchema);
+
+					if (column is SqlField)
+					{
+						var field = (SqlField)column;
+
+						if (field.MemberMapper != null)
+						{
+							if (field.MemberMapper.MapMemberInfo.IsDbTypeSet)
+								p.DbType = field.MemberMapper.MapMemberInfo.DbType;
+
+							if (field.MemberMapper.MapMemberInfo.IsDbSizeSet)
+								p.DbSize = field.MemberMapper.MapMemberInfo.DbSize;
+						}
+					}
+				}
 			}
 
 			public ISqlExpression Column     { get; set; }
@@ -2928,7 +2983,11 @@ namespace BLToolkit.Data.Sql
 			void Add(ISqlExpression expr, bool isDescending)
 			{
 				foreach (var item in Items)
-					if (item.Expression.Equals(expr))
+					if (item.Expression.Equals(expr, (x, y) =>
+					{
+						var col = x as Column;
+						return col == null || !col.Parent.HasUnion || x == y;
+					}))
 						return;
 
 				Items.Add(new OrderByItem(expr, isDescending));
@@ -2959,8 +3018,10 @@ namespace BLToolkit.Data.Sql
 			[Obsolete]
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
+#pragma warning disable 0618
 				foreach (var t in Items)
 					t.Walk(skipColumns, func);
+#pragma warning restore 0618
 				return null;
 			}
 
@@ -3077,7 +3138,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
+			FinalizeAndValidateInternal(isApplySupported, optimizeColumns, true);
 			ResolveFields();
 			SetAliases();
 
@@ -3104,7 +3165,7 @@ namespace BLToolkit.Data.Sql
 		{
 			var data = new QueryData { Query = this };
 
-			new QueryVisitor().Visit(this, true, e =>
+			new QueryVisitor().VisitParentFirst(this, e =>
 			{
 				switch (e.ElementType)
 				{
@@ -3217,7 +3278,7 @@ namespace BLToolkit.Data.Sql
 			}
 
 			if (dic.Count > 0)
-				new QueryVisitor().Visit(data.Query, true, e =>
+				new QueryVisitor().VisitParentFirst(data.Query, e =>
 				{
 					ISqlExpression ex;
 
@@ -3418,16 +3479,19 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns)
+		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns, bool optimizeSearchCondition)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
 
-			ForEachTable(table =>
+			if (optimizeSearchCondition)
 			{
-				foreach (var join in table.Joins)
-					OptimizeSearchCondition(join.Condition);
-			});
+				ForEachTable(table =>
+				{
+					foreach (var join in table.Joins)
+						OptimizeSearchCondition(join.Condition);
+				}, new HashSet<SqlQuery>());
+			}
 
 			new QueryVisitor().Visit(this, e =>
 			{
@@ -3436,10 +3500,10 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns);
+					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns, false);
 
-					if (sql.ParameterDependent)
-						ParameterDependent = true;
+					if (sql.IsParameterDependent)
+						IsParameterDependent = true;
 				}
 			});
 
@@ -3527,7 +3591,7 @@ namespace BLToolkit.Data.Sql
 					}
 				}
 
-				if (cond.Predicate is Predicate.Expr)
+				if (cond.Predicate.ElementType == QueryElementType.ExprPredicate)
 				{
 					var expr = (Predicate.Expr)cond.Predicate;
 
@@ -3580,14 +3644,18 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		void ForEachTable(Action<TableSource> action)
+		void ForEachTable(Action<TableSource> action, HashSet<SqlQuery> visitedQueries)
 		{
-			From.Tables.ForEach(tbl => tbl.ForEach(action));
+			if (!visitedQueries.Add(this))
+				return;
+
+			foreach (var table in From.Tables)
+				table.ForEach(action, visitedQueries);
 
 			new QueryVisitor().Visit(this, e =>
 			{
 				if (e is SqlQuery && e != this)
-					((SqlQuery)e).ForEachTable(action);
+					((SqlQuery)e).ForEachTable(action, visitedQueries);
 			});
 		}
 
@@ -3670,7 +3738,7 @@ namespace BLToolkit.Data.Sql
 						}
 					}
 				}
-			});
+			}, new HashSet<SqlQuery>());
 		}
 
 		TableSource OptimizeSubQuery(
@@ -4066,7 +4134,7 @@ namespace BLToolkit.Data.Sql
 								Parameters.Add(p);
 							}
 							else
-								ParameterDependent = true;
+								IsParameterDependent = true;
 						}
 
 						break;
@@ -4132,7 +4200,7 @@ namespace BLToolkit.Data.Sql
 
 		public SqlQuery ProcessParameters()
 		{
-			if (ParameterDependent)
+			if (IsParameterDependent)
 			{
 				var query = new QueryVisitor().Convert(this, e =>
 				{
@@ -4222,88 +4290,32 @@ namespace BLToolkit.Data.Sql
 				if (pr.Value == null)
 					return new Predicate.Expr(new SqlValue(p.IsNot));
 
-				if (pr.Value is IEnumerable && p.Expr1 is ISqlTableSource)
+				if (pr.Value is IEnumerable)
 				{
-					var items = (IEnumerable)pr.Value;
-					var table = (ISqlTableSource)p.Expr1;
-					var keys  = table.GetKeys(true);
-
-					if (keys == null || keys.Count == 0)
-						throw new SqlException("Cant create IN expression.");
-
-					if (keys.Count == 1)
+					if (p.Expr1 is ISqlTableSource)
 					{
-						var values = new List<ISqlExpression>();
-						var field  = GetUnderlayingField(keys[0]);
-
-						foreach (var item in items)
-						{
-							var value = field.MemberMapper.GetValue(item);
-							values.Add(new SqlValue(value));
-						}
-
-						if (values.Count == 0)
-							return new Predicate.Expr(new SqlValue(p.IsNot));
-
-						return new Predicate.InList(keys[0], p.IsNot, values);
-					}
-
-					{
-						var sc = new SearchCondition();
-
-						foreach (var item in items)
-						{
-							var itemCond = new SearchCondition();
-
-							foreach (var key in keys)
-							{
-								var field = GetUnderlayingField(key);
-								var value = field.MemberMapper.GetValue(item);
-								var cond  = value == null ?
-									new Condition(false, new Predicate.IsNull  (field, false)) :
-									new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, new SqlValue(value)));
-
-								itemCond.Conditions.Add(cond);
-							}
-
-							sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
-						}
-
-						if (sc.Conditions.Count == 0)
-							return new Predicate.Expr(new SqlValue(p.IsNot));
-
-						if (p.IsNot)
-							return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
-
-						return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
-					}
-				}
-
-				if (pr.Value is IEnumerable && p.Expr1 is SqlExpression)
-				{
-					var expr  = (SqlExpression)p.Expr1;
-
-					if (expr.Expr.Length > 1 && expr.Expr[0] == '\x1')
-					{
-						var type  = TypeHelper.GetListItemType(pr.Value);
-						var ta    = TypeAccessor.GetAccessor(type);
 						var items = (IEnumerable)pr.Value;
-						var names = expr.Expr.Substring(1).Split(',');
+						var table = (ISqlTableSource)p.Expr1;
+						var keys  = table.GetKeys(true);
 
-						if (expr.Parameters.Length == 1)
+						if (keys == null || keys.Count == 0)
+							throw new SqlException("Cant create IN expression.");
+
+						if (keys.Count == 1)
 						{
 							var values = new List<ISqlExpression>();
+							var field  = GetUnderlayingField(keys[0]);
 
 							foreach (var item in items)
 							{
-								var value = ta[names[0]].GetValue(item);
+								var value = field.MemberMapper.GetValue(item);
 								values.Add(new SqlValue(value));
 							}
 
 							if (values.Count == 0)
 								return new Predicate.Expr(new SqlValue(p.IsNot));
 
-							return new Predicate.InList(expr.Parameters[0], p.IsNot, values);
+							return new Predicate.InList(keys[0], p.IsNot, values);
 						}
 
 						{
@@ -4313,13 +4325,13 @@ namespace BLToolkit.Data.Sql
 							{
 								var itemCond = new SearchCondition();
 
-								for (var i = 0; i < expr.Parameters.Length; i++)
+								foreach (var key in keys)
 								{
-									var sql   = expr.Parameters[i];
-									var value = ta[names[i]].GetValue(item);
+									var field = GetUnderlayingField(key);
+									var value = field.MemberMapper.GetValue(item);
 									var cond  = value == null ?
-										new Condition(false, new Predicate.IsNull  (sql, false)) :
-										new Condition(false, new Predicate.ExprExpr(sql, Predicate.Operator.Equal, new SqlValue(value)));
+										new Condition(false, new Predicate.IsNull  (field, false)) :
+										new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, new SqlValue(value)));
 
 									itemCond.Conditions.Add(cond);
 								}
@@ -4336,6 +4348,80 @@ namespace BLToolkit.Data.Sql
 							return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
 						}
 					}
+
+					if (p.Expr1 is SqlExpression)
+					{
+						var expr  = (SqlExpression)p.Expr1;
+
+						if (expr.Expr.Length > 1 && expr.Expr[0] == '\x1')
+						{
+							var type  = TypeHelper.GetListItemType(pr.Value);
+							var ta    = TypeAccessor.GetAccessor(type);
+							var items = (IEnumerable)pr.Value;
+							var names = expr.Expr.Substring(1).Split(',');
+
+							if (expr.Parameters.Length == 1)
+							{
+								var values = new List<ISqlExpression>();
+
+								foreach (var item in items)
+								{
+									var value = ta[names[0]].GetValue(item);
+									values.Add(new SqlValue(value));
+								}
+
+								if (values.Count == 0)
+									return new Predicate.Expr(new SqlValue(p.IsNot));
+
+								return new Predicate.InList(expr.Parameters[0], p.IsNot, values);
+							}
+
+							{
+								var sc = new SearchCondition();
+
+								foreach (var item in items)
+								{
+									var itemCond = new SearchCondition();
+
+									for (var i = 0; i < expr.Parameters.Length; i++)
+									{
+										var sql   = expr.Parameters[i];
+										var value = ta[names[i]].GetValue(item);
+										var cond  = value == null ?
+											new Condition(false, new Predicate.IsNull  (sql, false)) :
+											new Condition(false, new Predicate.ExprExpr(sql, Predicate.Operator.Equal, new SqlValue(value)));
+
+										itemCond.Conditions.Add(cond);
+									}
+
+									sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));
+								}
+
+								if (sc.Conditions.Count == 0)
+									return new Predicate.Expr(new SqlValue(p.IsNot));
+
+								if (p.IsNot)
+									return new Predicate.NotExpr(sc, true, Sql.Precedence.LogicalNegation);
+
+								return new Predicate.Expr(sc, Sql.Precedence.LogicalDisjunction);
+							}
+						}
+					}
+
+					/*
+					var itemType = items.GetType().GetItemType();
+
+					if (itemType == typeof(DateTime)  || itemType == typeof(DateTimeOffset) ||
+						itemType == typeof(DateTime?) || itemType == typeof(DateTimeOffset?))
+					{
+						var list = new List<SqlParameter>();
+
+						foreach (var item in items)
+							list.Add(new SqlParameter(itemType, "p", item, (MappingSchema)null));
+
+						return new Predicate.InList(p.Expr1, p.IsNot, list);
+					}
+					*/
 				}
 			}
 
@@ -4377,7 +4463,7 @@ namespace BLToolkit.Data.Sql
 			_orderBy = new OrderByClause(this, clone._orderBy, objectTree, doClone);
 
 			_parameters.AddRange(clone._parameters.ConvertAll(p => (SqlParameter)p.Clone(objectTree, doClone)));
-			ParameterDependent = clone.ParameterDependent;
+			IsParameterDependent = clone.IsParameterDependent;
 
 			new QueryVisitor().Visit(this, expr =>
 			{
@@ -4451,6 +4537,11 @@ namespace BLToolkit.Data.Sql
 		public bool CanBeNull()
 		{
 			return true;
+		}
+
+		public bool Equals(ISqlExpression other, Func<ISqlExpression, ISqlExpression, bool> comparer)
+		{
+			return this == other;
 		}
 
 		public int Precedence

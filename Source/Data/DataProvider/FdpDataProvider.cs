@@ -114,7 +114,8 @@ namespace BLToolkit.Data.DataProvider
 					{
 						var ex = (FbException) value;
 						if (ex.Errors.Count > 0)
-							return ex.Errors[0].Number;
+							foreach (FbError error in ex.Errors)
+								return error.Number;
 					}
 
 					break;
