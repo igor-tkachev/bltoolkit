@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Xml;
 #if !SILVERLIGHT
 using System.Xml.Linq;
+using BLToolkit.DataAccess;
+
 #endif
 
 namespace BLToolkit.Reflection
@@ -1337,6 +1339,7 @@ namespace BLToolkit.Reflection
 				|| type == typeof(System.Data.Linq.Binary)
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
+                || type.GetCustomAttributes(typeof(UserDefinedTypeAttribute),true).Any() // If the type is a UDT pass it as is
 #if !SILVERLIGHT
 				|| type == typeof(XmlDocument)
 				|| type == typeof(XElement)
