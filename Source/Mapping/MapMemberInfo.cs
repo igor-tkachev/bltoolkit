@@ -88,6 +88,9 @@ namespace BLToolkit.Mapping
 			foreach (var mv in MapValues)
 			{
 				// previous behaviour - first wins!
+				// yah, no...
+				// any wins - attributes order is not specified
+				// and memberInfo.GetCustomAttributes(...) order and can differ
 				if (!_origValueCache.ContainsKey(mv.OrigValue))
 					_origValueCache[mv.OrigValue] = mv.MapValues[0];
 			}

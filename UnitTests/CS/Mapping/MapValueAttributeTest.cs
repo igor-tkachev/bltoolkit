@@ -112,10 +112,10 @@ namespace Mapping
 			om.SetValue(o, "Enum3", "32");
 			Assert.AreEqual(Enum1.Value3, o.Enum3);
 
-			Assert.AreEqual("1",  om.GetValue(o, "Enum1"));
-			Assert.AreEqual("2",  om.GetValue(o, "Enum2"));
-			Assert.AreEqual("30", om.GetValue(o, "Enum3"));
-			Assert.IsNull  (      om.GetValue(o, "Enum4"));
+			Assert.AreEqual("1",                     om.GetValue(o, "Enum1"));
+			Assert.AreEqual("2",                     om.GetValue(o, "Enum2"));
+			Assert.Contains(om.GetValue(o, "Enum3"), new[] {"30", "31", "32", "3"});
+			Assert.IsNull  (                         om.GetValue(o, "Enum4"));
 		}
 
 		[MapValue(typeof(DayOfWeek), DayOfWeek.Monday, "M")]
