@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+
 #if !SILVERLIGHT
 using System.Xml.Linq;
 #endif
@@ -16,6 +17,7 @@ namespace BLToolkit.Reflection
 #if !SILVERLIGHT && !DATA
 	using EditableObjects;
 #endif
+	using DataAccess;
 	using TypeBuilder;
 
 	/// <summary>
@@ -1337,6 +1339,7 @@ namespace BLToolkit.Reflection
 				|| type == typeof(System.Data.Linq.Binary)
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
+				|| type.GetCustomAttributes(typeof(ScalarAttribute),true).Any() // If the type is a UDT pass it as is
 #if !SILVERLIGHT
 				|| type == typeof(XmlDocument)
 				|| type == typeof(XElement)

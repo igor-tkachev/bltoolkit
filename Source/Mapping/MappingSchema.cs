@@ -882,6 +882,7 @@ namespace BLToolkit.Mapping
 
 				if (typeof(Guid)           == conversionType) return ConvertToNullableGuid(value);
 				if (typeof(DateTimeOffset) == conversionType) return ConvertToNullableDateTimeOffset(value);
+				if (typeof(TimeSpan)       == conversionType) return ConvertToNullableTimeSpan(value);	
 			}
 
 			switch (Type.GetTypeCode(conversionType))
@@ -914,6 +915,7 @@ namespace BLToolkit.Mapping
 			if (typeof(Binary)         == conversionType) return ConvertToLinqBinary    (value);
 			if (typeof(DateTimeOffset) == conversionType) return ConvertToDateTimeOffset(value);
 			if (typeof(char[])         == conversionType) return ConvertToCharArray     (value);
+			if (typeof(TimeSpan)       == conversionType) return ConvertToTimeSpan      (value);
 
 #if !SILVERLIGHT
 

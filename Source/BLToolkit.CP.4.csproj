@@ -197,8 +197,12 @@
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ISqlQueryT.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
+
     <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
+
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
+
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />

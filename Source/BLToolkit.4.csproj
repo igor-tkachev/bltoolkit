@@ -205,6 +205,8 @@
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <None Include="Data\DataProvider\GenericDataProvider.cs" />
+
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\DataProvider\DataProviderInterpreterBase.cs" />
     <Compile Include="Data\DataProvider\Interpreters\OracleDataProviderInterpreter.cs" />
