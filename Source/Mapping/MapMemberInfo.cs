@@ -36,14 +36,14 @@ namespace BLToolkit.Mapping
 		public DbType          DbType                     { get; set; }
 
 		private MapValue[] _mapValues;
-		public MapValue[] MapValues
+		public  MapValue[]  MapValues
 		{
 			get { return _mapValues; }
 			set
 			{
 				_mapValues = value;
 				if (value != null)
-					Cache();
+					CacheMapValues();
 				else
 				{
 					_mapValueCache  = new Dictionary<object, object>();
@@ -52,21 +52,23 @@ namespace BLToolkit.Mapping
 			}
 		}
 
-		private Dictionary<object, object> _mapValueCache;
+		private Dictionary<object,object> _mapValueCache;
+
 		public bool TryGetOrigValue(object mapedValue, out object origValue)
 		{
 			return _mapValueCache.TryGetValue(mapedValue, out origValue);
 		}
 
-		private Dictionary<object, object> _origValueCache;
+		private Dictionary<object,object> _origValueCache;
+
 		public bool TryGetMapValue(object origValue, out object mapValue)
 		{
 			return _origValueCache.TryGetValue(origValue, out mapValue);
 		}
 
-		private void Cache()
+		private void CacheMapValues()
 		{
-			_mapValueCache = new Dictionary<object, object>();
+			_mapValueCache = new Dictionary<object,object>();
 
 			foreach (var mv in MapValues)
 			foreach (var mapValue in mv.MapValues)
