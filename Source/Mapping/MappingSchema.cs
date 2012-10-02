@@ -186,6 +186,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is SByte ? (SByte)value :
+				value is Byte ? (SByte)(Byte)value :
 				value == null ? DefaultSByteNullValue :
 					Convert.ToSByte(value);
 		}
@@ -238,6 +239,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt16? (UInt16)value:
+				value is Int16? (UInt16)(Int16)value:
 				value == null || value is DBNull? DefaultUInt16NullValue:
 					Convert.ToUInt16(value);
 		}
@@ -250,6 +252,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt32? (UInt32)value:
+				value is Int32? (UInt32)(Int32)value:
 				value == null || value is DBNull? DefaultUInt32NullValue:
 					Convert.ToUInt32(value);
 		}
@@ -262,6 +265,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt64? (UInt64)value:
+				value is Int64? (UInt64)(Int64)value:
 				value == null || value is DBNull? DefaultUInt64NullValue:
 					Convert.ToUInt64(value);
 		}
@@ -445,6 +449,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is SByte? (SByte?)value:
+				value is Byte? (SByte?)(Byte)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableSByte(value);
 		}
@@ -486,6 +491,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt16? (UInt16?)value:
+				value is Int16? (UInt16?)(Int16)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableUInt16(value);
 		}
@@ -495,6 +501,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt32? (UInt32?)value:
+				value is Int32? (UInt32?)(Int32)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableUInt32(value);
 		}
@@ -504,6 +511,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt64? (UInt64?)value:
+				value is Int64? (UInt64?)(Int64)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableUInt64(value);
 		}

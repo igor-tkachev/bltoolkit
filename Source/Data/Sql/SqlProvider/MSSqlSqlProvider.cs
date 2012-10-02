@@ -203,5 +203,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			sb.Append(string.Format("'{0:yyyy-MM-ddTHH:mm:ss.fff}'", value));
 		}
+
+		public override void BuildValue(StringBuilder sb, object value)
+		{
+			if (value is sbyte) sb.Append((byte)(sbyte)value);
+			else if (value is ushort) sb.Append((short)(ushort)value);
+			else if (value is uint) sb.Append((int)(uint)value);
+			else if (value is ulong) sb.Append((long)(ulong)value);
+			else base.BuildValue(sb, value);
+		}
 	}
 }
