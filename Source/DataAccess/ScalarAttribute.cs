@@ -10,6 +10,7 @@ namespace BLToolkit.DataAccess
 	/// 
 	/// Another solution is to convert your UDT to a Struct which also causes BLToolkits 'IsScaler()' Method to return true.
 	/// </summary>
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class ScalarAttribute : Attribute
 	{
 	}

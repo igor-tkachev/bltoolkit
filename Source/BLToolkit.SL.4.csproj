@@ -110,6 +110,7 @@
     <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Data\DataProvider\ConvertType.cs" />

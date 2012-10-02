@@ -134,6 +134,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Convert.tt</DependentUpon>
     </Compile>
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\Linq\Builder\AggregationBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
