@@ -344,6 +344,10 @@
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.OracleManaged.4.csproj">
+      <Project>{785ce174-0a91-465f-9e41-65e6e05a0ec9}</Project>
+      <Name>BLToolkit.Data.DataProvider.OracleManaged.4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj">
       <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
       <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
