@@ -133,6 +133,9 @@
       <HintPath>..\..\Redist\Oracle\Oracle.DataAccess.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Oracle.ManagedDataAccess">
+      <HintPath>..\..\Redist\Oracle\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="Sybase.AdoNet2.AseClient, Version=1.15.192.0, Culture=neutral, PublicKeyToken=95d94fac46c88e1e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Redist\Sybase\Sybase.AdoNet2.AseClient.dll</HintPath>
@@ -147,13 +150,13 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data.Services" />
-    <Reference Include="System.Data.SQLite, Version=1.0.81.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+    <Reference Include="System.Data.SQLite, Version=1.0.82.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.81.1\lib\net40\System.Data.SQLite.dll</HintPath>
+      <HintPath>..\..\packages\System.Data.SQLite.1.0.82.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.SQLite.Linq, Version=1.0.81.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.82.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.81.1\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
+      <HintPath>..\..\packages\System.Data.SQLite.1.0.82.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -270,6 +273,10 @@
     <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.OracleManaged.4.csproj">
+      <Project>{785ce174-0a91-465f-9e41-65e6e05a0ec9}</Project>
+      <Name>BLToolkit.Data.DataProvider.OracleManaged.4</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj">
       <Project>{5A556D57-0D68-433B-AD78-02849583582B}</Project>

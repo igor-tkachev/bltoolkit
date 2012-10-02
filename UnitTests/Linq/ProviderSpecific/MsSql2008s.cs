@@ -24,5 +24,16 @@ namespace Data.Linq.ProviderSpecific
 				}
 			}
 		}
+
+		[Test]
+		public void SqlTypeTest()
+		{
+			using (var db = new TestDbManager("Sql2008"))
+			{
+				var value = db.SetCommand(@"SELECT SmallIntValue FROM LinqDataTypes WHERE ID = 1").ExecuteScalar<short>();
+
+				db.SetCommand(@"UPDATE LinqDataTypes SET SmallIntValue = @value WHERE ID = 1", db.Parameter("value", (ushort)value)).ExecuteNonQuery();
+			}
+		}
 	}
 }
