@@ -425,6 +425,8 @@ namespace BLToolkit.DataAccess
 			if (attrs.Length != 0)
 				_objectType = ((ObjectTypeAttribute)attrs[0]).ObjectType;
 
+
+			// why not _objectType =  mi.ReturnType ? 
 			if (_objectType == null)
 			{
 				Type[] types = TypeHelper.GetGenericArguments(mi.DeclaringType, typeof(DataAccessor));
