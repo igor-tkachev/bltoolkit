@@ -382,7 +382,7 @@ namespace BLToolkit.DataAccess
 				case "Insert":      return CreateInsertSqlText     (db, type, -1);
                 case "InsertWithIdentity": return CreateInsertSqlText(db, type, -1, true);
 				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
-                case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.DataProvider.UseQueryText || db.Transaction != null);                
+                case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.UseQueryText || db.Transaction != null);                
 
 				case "Update":      return CreateUpdateSqlText     (db, type, -1);
 				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);

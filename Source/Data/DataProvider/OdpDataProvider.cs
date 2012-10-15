@@ -685,16 +685,6 @@ namespace BLToolkit.Data.DataProvider
                 base.GetDataReader(schema, dataReader);
         }
 
-        public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
-        {
-            if (UseQueryText)
-            {
-                command.CommandText = OracleHelper.Interpret(command);
-                command.Parameters.Clear();
-            }
-            return base.GetDataReader(command, commandBehavior);
-        }
-
         class OracleDataReaderEx : DataReaderEx<OracleDataReader>
         {
             public OracleDataReaderEx(OracleDataReader rd)
@@ -1608,7 +1598,7 @@ namespace BLToolkit.Data.DataProvider
             int maxBatchSize,
             DbManager.ParameterProvider<T> getParameters)
         {
-            if (UseQueryText)
+            if (db.UseQueryText)
             {
                 List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
                 return ExecuteSqlList(db, sqlList);
@@ -1629,7 +1619,7 @@ namespace BLToolkit.Data.DataProvider
             int maxBatchSize,
             DbManager.ParameterProvider<T> getParameters)
         {
-            if (UseQueryText || db.Transaction != null)
+            if (db.UseQueryText || db.Transaction != null)
             {
                 List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100);
                 return ExecuteSqlList(db, sqlList);

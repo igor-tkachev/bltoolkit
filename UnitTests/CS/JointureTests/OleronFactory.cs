@@ -14,12 +14,12 @@ namespace UnitTests.CS.JointureTests
             string username = "FSIMON";
             string password = "MAN1AGER";
             string database = "pitaoleronfr01.pige";
-            database = "PITAFEROEFR01.PIGE";
+            //database = "PITAFEROEFR01.PIGE";
 
             //username = "pitafr01_proc_11";
             //password = "smsmms8";
 
-            Provider = new OdpDataProvider {UseQueryText = false};
+            Provider = new OdpDataProvider();
             //Provider = new GenericDataProvider(ProviderFullName.Oracle) { UseQueryText = true};
 
             ConnectionString = string.Format(

@@ -679,7 +679,7 @@ namespace UnitTests.CS.JointureTests
 
             using (var pitagorDb = new MusicDB())
             {
-                pitagorDb.DataProvider.UseQueryText = true;
+                pitagorDb.UseQueryText = true;
 
                 var dbQuery = from dr in pitagorDb.GetTable<DATA_RADIO>()
                               join dv in pitagorDb.GetTable<DATA_VERSION>() on dr.ID_DATA_VERSION equals dv.ID_DATA_VERSION

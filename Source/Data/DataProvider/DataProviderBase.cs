@@ -288,11 +288,6 @@ namespace BLToolkit.Data.DataProvider
 		public virtual int    MaxBatchSize  { get { return 65536; } }
 		public virtual string EndOfSql      { get { return ";";   } }
 
-	    /// <summary>
-	    /// Use plain text query instead of using command parameters
-	    /// </summary>
-        public virtual bool UseQueryText { get; set; } 
-
 		#endregion
 
 		#region DataReaderEx

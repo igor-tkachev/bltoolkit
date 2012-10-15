@@ -111,20 +111,9 @@ namespace BLToolkit.Data.DataProvider
             return _dataProviderInterpreter.GetReturningInto(columnName);
         }
 
-        public override IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
-        {
-            if (Name == ProviderFullName.Oracle && UseQueryText)
-            {
-                command.CommandText = OracleHelper.Interpret(command);
-                command.Parameters.Clear();
-            }
-    
-            return base.GetDataReader(command, commandBehavior);
-        }
-
         public override int InsertBatchWithIdentity<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
         {
-            if (UseQueryText && Name == ProviderFullName.Oracle)
+            if (db.UseQueryText && Name == ProviderFullName.Oracle)
             {
                 List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
                 return ExecuteSqlList(db, sqlList);
@@ -136,7 +125,7 @@ namespace BLToolkit.Data.DataProvider
         {
             if (Name == ProviderFullName.Oracle)
             {
-                if (UseQueryText)
+                if (db.UseQueryText)
                 {
                     List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
                     return ExecuteSqlList(db, sqlList);
