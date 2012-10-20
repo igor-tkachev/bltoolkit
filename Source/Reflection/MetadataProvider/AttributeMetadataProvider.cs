@@ -28,7 +28,7 @@ namespace BLToolkit.Reflection.MetadataProvider
 			}
 		}
 
-		object[] GetMapFieldAttributes(TypeAccessor typeAccessor)
+		protected object[] GetMapFieldAttributes(TypeAccessor typeAccessor)
 		{
 			lock (_sync)
 			{
