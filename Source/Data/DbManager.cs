@@ -4386,37 +4386,67 @@ namespace BLToolkit.Data
 
 		private void ExecuteOperation(OperationType operationType, Action operation)
 		{
+            Random Rnd = new Random();
+
+            var success = false;
+            var retried = 0;
+
+            while (!success)
+            {
 			try
 			{
 				OnBeforeOperation(operationType);
 				operation();
 				OnAfterOperation (operationType);
+                    success = true;
 			}
 			catch (Exception ex)
 			{
+                    if (ex.Message.ToLower().Contains("deadlock") && retried++ < 100)
+                    {
+                        System.Threading.Thread.Sleep(Rnd.Next(1000, 5000));
+                        continue;
+                    }
+
 				HandleOperationException(operationType, ex);
 				throw;
 			}
 		}
 
+        }
+
 		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
 		{
 			var res = default(T);
+            Random Rnd = new Random();
 
+            var success = false;
+            var retried = 0;
+
+            while (!success)
+            {
 			try
 			{
 				OnBeforeOperation(operationType);
 				res = operation();
 				OnAfterOperation (operationType);
+                    success = true;
 			}
 			catch (Exception ex)
 			{
 				if (res is IDisposable)
 					((IDisposable)res).Dispose();
 
+                    if (ex.Message.ToLower().Contains("deadlock") && retried++ < 100)
+                    {
+                        System.Threading.Thread.Sleep(Rnd.Next(1000, 5000));
+                        continue;
+                    }
+
 				HandleOperationException(operationType, ex);
 				throw;
 			}
+            }
 
 			return res;
 		}
