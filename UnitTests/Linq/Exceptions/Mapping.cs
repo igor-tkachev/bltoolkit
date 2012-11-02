@@ -35,10 +35,7 @@ namespace Data.Exceptions
 		public void MapIgnore2()
 		{
 			ForEachProvider(typeof(LinqException), db =>
-				db.GetTable<TestPerson1>()
-					.Where (_ => _.PersonID == 1)
-					.Select(_ => _.FirstName)
-					.FirstOrDefault());
+				db.GetTable<TestPerson1>().FirstOrDefault(_ => _.FirstName == null));
 		}
 	}
 }

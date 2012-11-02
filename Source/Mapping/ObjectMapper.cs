@@ -177,7 +177,6 @@ namespace BLToolkit.Mapping
 					}
 
 					return mm;
-					
 				}
 			}
 		}
