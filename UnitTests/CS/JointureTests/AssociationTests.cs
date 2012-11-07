@@ -300,6 +300,45 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void TestSlowUpdate()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                db.BeginTransaction();                
+
+                var beginSpot = new DateTime(2008, 08, 01, 6, 33, 31, DateTimeKind.Local);
+   
+                db.GetTable<Test_Query_Update_Duration.DbTypes.DataMusic>().Where(dm => dm.Id == 1459952)
+                    .Set(dm => dm.DateSpot, beginSpot)
+                    .Set(dm => dm.DurationInSeconds, 60)
+                    .Set(dm => dm.UserId, 2)
+                    .Set(dm => dm.ModifiedAt, DateTime.Now)
+                    .Update();
+
+                db.RollbackTransaction();
+            }
+
+            using (new ExecTimeInfo())
+            {
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+                    db.BeginTransaction();
+
+                    var beginSpot = new DateTime(2008, 08, 01, 6, 33, 31, DateTimeKind.Local);
+
+                    db.GetTable<Test_Query_Update_Duration.DbTypes.DataMusic>().Where(dm => dm.Id == 1459952)
+                        .Set(dm => dm.DateSpot, beginSpot)
+                        .Set(dm => dm.DurationInSeconds, 60)
+                        .Set(dm => dm.UserId, 2)
+                        .Set(dm => dm.ModifiedAt, DateTime.Now)
+                        .Update();
+
+                    db.RollbackTransaction();
+                }
+            }
+        }
+
+        [Test]
         public void InsertWithIdentityQuery()
         {
             using (var db = _connectionFactory.CreateDbManager())
@@ -359,6 +398,8 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
+                db.BeginTransaction();
+
                 var t = db.GetTable<DataProductPending>();
                 var now = DateTime.Now.AddDays(30);
                 var res = t.InsertWithIdentity(
@@ -373,6 +414,10 @@ namespace UnitTests.CS.JointureTests
                         IdUserCreate = 0,
                         UserProgram = "Valeriu"
                     });
+
+
+                db.RollbackTransaction();
+
                 Console.WriteLine(res);
                 Console.WriteLine(db.LastQuery);
             }
@@ -411,26 +456,19 @@ namespace UnitTests.CS.JointureTests
                 });
             }
 
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                db.BeginTransaction();
-                db.InsertBatchWithIdentity(list.Take(2));
-                db.RollbackTransaction();
-            }
-
             using (new ExecTimeInfo())
             {
                 using (var db = _connectionFactory.CreateDbManager())
                 {
                     db.BeginTransaction();
-                    db.InsertBatchWithIdentity(list);
+                    db.InsertBatchWithIdentity(list.Take(10));
                     db.RollbackTransaction();
                 }
             }
         }
 
         [Test]
-        public void InsertBatchWithIdentity()
+        public void InsertBatchWithIdentityWithoutTransaction()
         {
             var list = new List<DataImport>();
             for (int i = 0; i < 1000; i++)
@@ -447,14 +485,6 @@ namespace UnitTests.CS.JointureTests
             {
                 db.InsertBatchWithIdentity(list.Take(2));
             }
-
-            using (new ExecTimeInfo())
-            {
-                using (var db = _connectionFactory.CreateDbManager())
-                {
-                    db.InsertBatchWithIdentity(list);
-                }
-            }
         }
 
         [Test]
@@ -463,7 +493,7 @@ namespace UnitTests.CS.JointureTests
             using (var db = _connectionFactory.CreateDbManager())
             {
                 var query = new SqlQuery(db);
-                var artist = new Label() { Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200 };
+                var artist = new Label { Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200 };
 
                 query.Insert(new DataImport()
                                  {

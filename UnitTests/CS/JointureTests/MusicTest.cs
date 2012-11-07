@@ -14,12 +14,11 @@ namespace UnitTests.CS.JointureTests
 
         public override DbConnectionFactory CreateFactory()
         {
-            return new MusicFactory(true);
+            return new MusicFactory(false);
         }
 
         #endregion
     }
-
 
 
     [TableName(Name = "PITAFR01.MEDIA")]
@@ -189,7 +188,6 @@ namespace UnitTests.CS.JointureTests
         public DateTime DateMedia { get; set; }
     }
 
-
     public enum DeclarativeTitleStatus : short
     {
         Default = 0,
@@ -204,6 +202,51 @@ namespace UnitTests.CS.JointureTests
         //public DateTime DATEMEDIA { get; set; }
         public long IDDECLARATIVETRACK { get; set; }
         public Int16 ACTIVATION { get; set; }
+    }
+
+}
+
+namespace Test_Query_Update_Duration.DbTypes
+{
+    [TableName(Name = "PITAFR01.DATA_MUSIC")]
+    public class DataMusic
+    {
+        [MapField("ID_DATA_MUSIC"), PrimaryKey]
+        public Int64 Id { get; set; }
+
+        [MapField("ID_MEDIA")]
+        public Int64 IdMedia { get; set; }
+
+        [MapField("ID_LANGUAGE_DATA_I")]
+        public Int64 IdLanguageDataI { get; set; }
+
+        [MapField("ID_TRACK")]
+        public Int64 IdTrack { get; set; }
+
+        [MapField("DURATION")]
+        public Int64 DurationInSeconds { get; set; }
+
+        [MapField("ID_USER_")]
+        public Int64 UserId { get; set; }
+
+        [MapField("DATE_SPOT")]
+        public DateTime DateSpot { get; set; }
+
+        [MapField("DATE_MEDIA")]
+        public DateTime DateMedia { get; set; }
+
+        [MapField("DATE_CREATION")]
+        public DateTime DateCreation { get; set; }
+
+        [MapField("DATE_MODIFICATION")]
+        public DateTime ModifiedAt { get; set; }
+
+        [MapField("COMMENTARY")]
+        public String Commentary { get; set; }
+
+        [MapField("ACTIVATION")]
+        public Int16 Activation { get; set; }
+
     }
 
 }
