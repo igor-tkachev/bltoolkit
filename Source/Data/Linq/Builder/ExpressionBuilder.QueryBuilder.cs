@@ -24,6 +24,9 @@ namespace BLToolkit.Data.Linq.Builder
 				if (_skippedExpressions.Contains(pi))
 					return new ExpressionHelper.ConvertInfo(pi, true);
 
+				if (pi.Find(IsNoneSqlMember) != null)
+					return new ExpressionHelper.ConvertInfo(pi);
+
 				switch (pi.NodeType)
 				{
 					case ExpressionType.MemberAccess:
@@ -35,18 +38,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (SqlProvider.ConvertMember(ma.Member) != null)
 								break;
-
-							/*
-							var res = context.IsExpression(pi, 0, RequestFor.Association);
-
-							if (res.Result)
-							{
-								var table = (TableBuilder.AssociatedTableContext)res.Context;
-
-								if (table.IsList)
-									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
-							}
-							*/
 
 							var ctx = GetContext(context, pi);
 
@@ -225,6 +216,31 @@ namespace BLToolkit.Data.Linq.Builder
 		public Expression BuildSql(Type type, int idx)
 		{
 			return BuildSql(type, idx, null, null);
+		}
+
+		#endregion
+
+		#region IsNonSqlMember
+
+		bool IsNoneSqlMember(Expression expr)
+		{
+			switch (expr.NodeType)
+			{
+				case ExpressionType.MemberAccess:
+					{
+						var me = (MemberExpression)expr;
+
+						var om = (
+							from c in Contexts.OfType<TableBuilder.TableContext>()
+							where c.ObjectType == me.Member.DeclaringType
+							select c.ObjectMapper
+						).FirstOrDefault();
+
+						return om != null && om.Associations.All(a => a.MemberAccessor.MemberInfo != me.Member) && om[me.Member.Name] == null;
+					}
+			}
+
+			return false;
 		}
 
 		#endregion
