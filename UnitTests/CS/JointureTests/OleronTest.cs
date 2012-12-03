@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BLToolkit.Data;
+using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
@@ -23,11 +24,12 @@ namespace UnitTests.CS.JointureTests
     [TableName(Owner = "PITAFR01")]
     public class DATA_RADIO
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity, SequenceName("PITAFR01.SEQ_DATA_RADIO")]
         public long ID_DATA_RADIO { get; set; }
 
         [PrimaryKey]
-        public long ID_COBRANDING_ADVERTISER { get; set; }
+        [MapField("ID_COBRANDING_ADVERTISER")]
+        public long IdCobAdvert { get; set; }
 
         public long ID_DATA_VERSION { get; set; }
         public long ID_MEDIA { get; set; }
@@ -46,7 +48,8 @@ namespace UnitTests.CS.JointureTests
         // Without Auto Promo (ref 180000)
         public int? RANK_WAP { get; set; }
         public int? NUMBER_SPOT_WAP { get; set; }
-        public int? DURATION_COMMERCIAL_BREAK_WAP { get; set; }
+        [MapField("DURATION_COMMERCIAL_BREAK_WAP")]
+        public int? DurComBreakWap { get; set; }
         // Valorisation (recalcul)        
         public decimal? EXPENDITURE { get; set; }			// divisé par le nbre de participants
         public decimal? EXPENDITURE_EURO { get; set; }

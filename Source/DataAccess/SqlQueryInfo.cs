@@ -4,7 +4,6 @@ using System.Data;
 
 using BLToolkit.Data;
 using BLToolkit.Mapping;
-using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {

@@ -203,6 +203,36 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void InsertDataRadio()
+        {
+            using (new ExecTimeInfo())
+            {
+                using (var db = _connectionFactory.CreateDbManager())
+                {
+                    try
+                    {
+                        var baseData = db.GetTable<DATA_RADIO>()
+                                                             .Single(d => d.ID_DATA_VERSION == 242000147724 &&
+                                                                          d.IdCobAdvert == 1);
+
+                        baseData.ID_DATA_RADIO = 0; // Optional
+                        baseData.IdCobAdvert = 2;
+                        baseData.ID_PRODUCT = 180000;
+                        baseData.DATE_MODIFICATION = DateTime.Now;
+
+                        var query = new SqlQuery(db);
+                        var count = (long)query.InsertWithIdentity(baseData);
+                        Console.WriteLine(count + " -> " + db.LastQuery);   
+                    }
+                    catch (Exception ex)
+                    {                        
+                        throw;
+                    }                    
+                }
+            }
+        }
+
+        [Test]
         public void SelectTooLong()
         {
             using (new ExecTimeInfo())
@@ -275,27 +305,28 @@ namespace UnitTests.CS.JointureTests
             {
                 var t = db.GetTable<RECO_RADIO>();
                 var now = DateTime.Now.AddDays(30);
-                t.InsertWithIdentity(
+                var id = t.InsertWithIdentity(
                     () =>
                     new RECO_RADIO
-                    {
-                        ACTIVATION = 0,
-                        COMMENTARY = string.Empty,
-                        DATE_CREATION = DateTime.Now,
-                        DATE_LAST_IMPORT = DateTime.Today,
-                        DATE_MEDIA = DateTime.Today,
-                        DATE_MODIFICATION = DateTime.Now,
-                        ID_LANGUAGE_DATA_I = 33,
-                        ID_MEDIA = 2001,
-                        ID_MULTIMEDIA_FILE = 463413,
-                        ID_MULTIMEDIA_VALIDATED = 0,
-                        INPUT_STATUS = 0,
-                        RATE = 0,
-                        TAG_DURATION = 20,
-                        TAG_MATCH_BEGINNING = 0,
-                        TAG_MATCH_DURATION = 20,
-                        TIME_MEDIA = now
-                    });
+                        {
+                            ACTIVATION = 0,
+                            COMMENTARY = string.Empty,
+                            DATE_CREATION = DateTime.Now,
+                            DATE_LAST_IMPORT = DateTime.Today,
+                            DATE_MEDIA = DateTime.Today,
+                            DATE_MODIFICATION = DateTime.Now,
+                            ID_LANGUAGE_DATA_I = 33,
+                            ID_MEDIA = 2001,
+                            ID_MULTIMEDIA_FILE = 463413,
+                            IdMultVal = 0,
+                            INPUT_STATUS = 0,
+                            RATE = 0,
+                            TAG_DURATION = 20,
+                            TAG_MATCH_BEGINNING = 0,
+                            TAG_MATCH_DURATION = 20,
+                            TIME_MEDIA = now
+                        });
+                Console.WriteLine(id + " : " + id.GetType() + " ->" + db.LastQuery);
             }
         }
 

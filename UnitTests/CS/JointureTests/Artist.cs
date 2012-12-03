@@ -22,7 +22,8 @@ namespace UnitTests.CS.JointureTests
         [MapField("ID_RECO_RADIO"), PrimaryKey, Identity, SequenceName("SEQ_RECO_RADIO")]
         public long ID_RECO_RADIO { get; set; }
 
-        public long ID_MULTIMEDIA_VALIDATED { get; set; }
+        [MapField("ID_MULTIMEDIA_VALIDATED")]
+        public long IdMultVal { get; set; }
         public int INPUT_STATUS { get; set; }
         public long ID_MULTIMEDIA_FILE { get; set; }
         public long ID_MEDIA { get; set; }

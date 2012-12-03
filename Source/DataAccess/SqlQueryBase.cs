@@ -268,8 +268,9 @@ namespace BLToolkit.DataAccess
                 }
                 else
                 {
+                    // Previously : mm.Name
                     var p = query.AddParameter(
-                        db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
+                        db.DataProvider.Convert(mm.MemberName + "_P", ConvertType.NameToQueryParameter).ToString(),
                         mm.Name);
 
                     if (nParameter < 0)
@@ -386,6 +387,7 @@ namespace BLToolkit.DataAccess
 
 				case "Update":      return CreateUpdateSqlText     (db, type, -1);
 				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);
+
 				case "Delete":      return CreateDeleteSqlText     (db, type, -1);
 				case "DeleteBatch": return CreateDeleteSqlText     (db, type,  0);
 				default:
