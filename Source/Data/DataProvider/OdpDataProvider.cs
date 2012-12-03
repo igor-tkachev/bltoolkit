@@ -293,6 +293,13 @@ namespace BLToolkit.Data.DataProvider
             {
                 case ConvertType.NameToQueryParameter:
                     var qname = (string)value;
+
+                    //
+                    // Avoid "ORA-00972: identifier is too long" error
+                    // Cause error : You tried to reference a table, cluster, view, index, synonym, tablespace, or username with a value that was longer than 30 characters.
+                    // Resolution : Names for tables, clusters, views, indexes, synonyms, tablespaces, and usernames must be 30 characters or less. 
+                    // You must shorten the name to no more than 30 characters for these objects.
+                    //
                     if (qname.Length > 30)
                     {
                         qname = qname.Substring(0, 30);

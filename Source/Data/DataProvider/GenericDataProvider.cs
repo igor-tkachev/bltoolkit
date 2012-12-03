@@ -111,6 +111,33 @@ namespace BLToolkit.Data.DataProvider
             return _dataProviderInterpreter.GetReturningInto(columnName);
         }
 
+        public override object Convert(object value, ConvertType convertType)
+        {
+            if (Name == ProviderFullName.Oracle)
+            {
+                switch (convertType)
+                {
+                    case ConvertType.NameToQueryParameter:
+                        var qname = (string) value;
+
+                        //
+                        // Avoid "ORA-00972: identifier is too long" error
+                        // Cause error : You tried to reference a table, cluster, view, index, synonym, tablespace, or username with a value that was longer than 30 characters.
+                        // Resolution : Names for tables, clusters, views, indexes, synonyms, tablespaces, and usernames must be 30 characters or less. 
+                        // You must shorten the name to no more than 30 characters for these objects.
+                        //
+                        if (qname.Length > 30)
+                        {
+                            qname = qname.Substring(0, 30);
+                            return SqlProvider.Convert(qname, convertType);
+                        }
+                        return SqlProvider.Convert(value, convertType);
+                }
+            }
+
+            return base.Convert(value, convertType);
+        }
+
         public override int InsertBatchWithIdentity<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
         {
             if (db.UseQueryText && Name == ProviderFullName.Oracle)

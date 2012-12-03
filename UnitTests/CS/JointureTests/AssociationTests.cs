@@ -209,25 +209,31 @@ namespace UnitTests.CS.JointureTests
             {
                 using (var db = _connectionFactory.CreateDbManager())
                 {
+                    db.BeginTransaction();
+
                     try
                     {
                         var baseData = db.GetTable<DATA_RADIO>()
-                                                             .Single(d => d.ID_DATA_VERSION == 242000147724 &&
-                                                                          d.IdCobAdvert == 1);
+                                         .Single(d => d.ID_DATA_VERSION == 242000147724 &&
+                                                      d.IdCobAdvert == 1);
 
                         baseData.ID_DATA_RADIO = 0; // Optional
-                        baseData.IdCobAdvert = 2;
+                        baseData.IdCobAdvert = 3;
                         baseData.ID_PRODUCT = 180000;
                         baseData.DATE_MODIFICATION = DateTime.Now;
 
                         var query = new SqlQuery(db);
-                        var count = (long)query.InsertWithIdentity(baseData);
-                        Console.WriteLine(count + " -> " + db.LastQuery);   
+                        var count = (long) query.InsertWithIdentity(baseData);
+                        Console.WriteLine(count + " -> " + db.LastQuery);
                     }
                     catch (Exception ex)
-                    {                        
+                    {
                         throw;
-                    }                    
+                    }
+                    finally
+                    {
+                        db.RollbackTransaction();
+                    }
                 }
             }
         }
