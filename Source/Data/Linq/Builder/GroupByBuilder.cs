@@ -65,7 +65,9 @@ namespace BLToolkit.Data.Linq.Builder
 			var key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
 			var groupSql = builder.ConvertExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
-			if (sequence.SqlQuery.GroupBy.Items.Count > 0 || groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
+			if (sequence.SqlQuery.Select.IsDistinct       ||
+			    sequence.SqlQuery.GroupBy.Items.Count > 0 ||
+			    groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 			{
 				sequence = new SubQueryContext(sequence);
 				key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
