@@ -640,8 +640,9 @@ namespace BLToolkit.Data.Linq.Builder
 											}
 
 											if (memberExpression == null)
-												throw new InvalidOperationException(
-													string.Format("Invalid member '{0}.{1}'", member.DeclaringType, member.Name));
+												return new IsExpressionResult(requestFlag == RequestFor.Expression);
+												//throw new InvalidOperationException(
+												//	string.Format("Invalid member '{0}.{1}'", member.DeclaringType, member.Name));
 										}
 
 										if (levelExpression == expression)

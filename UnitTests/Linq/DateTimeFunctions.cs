@@ -550,5 +550,49 @@ namespace Data.Linq
 		}
 
 		#endregion
+
+		[Test]
+		public void GetDateTest1()
+		{
+			ForEachProvider(
+				new[] { ProviderName.PostgreSQL },
+				db =>
+				{
+					var dates =
+						from v in db.Parent
+							join s in db.Child on v.ParentID equals s.ParentID
+						where v.Value1 > 0
+						select Sql.GetDate().Date;
+
+					var countByDates =
+						from v in dates
+						group v by v into g
+						select new { g.Key, Count = g.Count() };
+
+					countByDates.Take(5).ToList();
+				});
+		}
+
+		[Test]
+		public void GetDateTest2()
+		{
+			ForEachProvider(
+				//new[] { ProviderName.PostgreSQL },
+				db =>
+				{
+					var dates =
+						from v in db.Parent
+							join s in db.Child on v.ParentID equals s.ParentID
+						where v.Value1 > 0
+						select Sql.CurrentTimestamp.Date;
+
+					var countByDates =
+						from v in dates
+						group v by v into g
+						select new { g.Key, Count = g.Count() };
+
+					countByDates.Take(5).ToList();
+				});
+		}
 	}
 }
