@@ -110,6 +110,7 @@
       <DependentUpon>MySqlDataModel.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="MSSqlDataModel.generated.cs">
       <AutoGen>True</AutoGen>
@@ -127,6 +128,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SybaseDataModel.tt</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
