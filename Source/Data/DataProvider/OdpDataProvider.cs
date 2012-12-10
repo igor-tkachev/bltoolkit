@@ -1573,7 +1573,7 @@ namespace BLToolkit.Data.DataProvider
 					var sql = sb.ToString();
 
 					if (DbManager.TraceSwitch.TraceInfo)
-						DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+						DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
 					cnt += db.SetCommand(sql).ExecuteNonQuery();
 
@@ -1589,7 +1589,7 @@ namespace BLToolkit.Data.DataProvider
 				var sql = sb.ToString();
 
 				if (DbManager.TraceSwitch.TraceInfo)
-					DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+					DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
 				cnt += db.SetCommand(sql).ExecuteNonQuery();
 			}
