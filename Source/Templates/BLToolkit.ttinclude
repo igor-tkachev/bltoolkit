@@ -54,9 +54,9 @@ static WriteTablePropertyAction WriteTableProperty = (tt,name,pname,maxlen,maxpl
 static Action<GeneratedTextTransformation,string> WriteAttribute      = (tt,a) => tt.Write("[{0}]", a);
 static Action<GeneratedTextTransformation>        WriteAttributeLine  =  tt    => tt.WriteLine("");
 
-string ConnectionString;
-string ConnectionType;
-string DataProviderAssembly = null;
+static string ConnectionString;
+static string ConnectionType;
+static string DataProviderAssembly = null;
 
 string DatabaseName             = null;
 string DataContextName          = null;
@@ -366,7 +366,7 @@ List<T> CreateList<T>(T item)
 	return new List<T>();
 }
 
-System.Data.IDbConnection GetConnection()
+Func<System.Data.IDbConnection> GetConnectionObject = () =>
 {
 	Type connType = null;
 
@@ -385,7 +385,12 @@ System.Data.IDbConnection GetConnection()
 	if (connType == null)
 		connType = Type.GetType(ConnectionType);
 
-	var conn = (System.Data.IDbConnection)Activator.CreateInstance(connType);
+	return (System.Data.IDbConnection)Activator.CreateInstance(connType);
+};
+
+System.Data.IDbConnection GetConnection()
+{
+	var conn = GetConnectionObject();
 
 	conn.ConnectionString = ConnectionString;
 	conn.Open();

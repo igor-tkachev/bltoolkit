@@ -1,5 +1,5 @@
 ﻿<#
-	ConnectionType = "Npgsql.NpgsqlConnection";
+	ConnectionType = "Npgsql.NpgsqlConnection, Npgsql";
 #><#+
 private void LoadServerMetadata()
 {
