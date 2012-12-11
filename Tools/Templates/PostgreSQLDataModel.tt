@@ -1,16 +1,15 @@
 ﻿<#@ template language="C#" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs" #>
-<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"   #>
-<#@ include file="$(SolutionDir)\Source\Templates\BLT4Toolkit.ttinclude" #>
-<#@ include file="$(SolutionDir)\Source\Templates\PostgreSql.ttinclude"  #>
+<#@ assembly name="$(SolutionDir)\packages\Npgsql.2.0.11\lib\Net40\Npgsql.dll" #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"  #>
+<#@ include file="$(SolutionDir)\Source\Templates\PostgreSql.ttinclude" #>
 <#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>
 <#
-	ConnectionString     = "Server=DBHost;Port=5432;Database=BLToolkitData;User Id=postgres;Password=TestPassword;";
-	DataProviderAssembly = Host.ResolvePath(@"bin\Debug\Npgsql.dll");
+	GetConnectionObject = () => new Npgsql.NpgsqlConnection();
+	ConnectionString    = "Server=DBHost;Port=5432;Database=TestData;User Id=postgres;Password=TestPassword;";
 
-	Namespace = "PostgreSQLDataModel";
-
-	System.Reflection.Assembly.LoadFile(Host.ResolvePath(@"bin\Debug\Mono.Security.dll"));
+	DataContextName     = "PostgreSqlDataContext";
+	Namespace           = "PostgreSqlDataModel";
 
 	GenerateModel();
 #>

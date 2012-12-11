@@ -1364,5 +1364,27 @@ namespace Update
 					}
 				});
 		}
+
+		[Test]
+		public void InsertSingleIdentity()
+		{
+			ForEachProvider(
+				new [] { ProviderName.Informix, ProviderName.SqlCe },
+				db =>
+				{
+					try
+					{
+						db.TestIdentity.Delete();
+
+						var id = db.TestIdentity.InsertWithIdentity(() => new TestIdentity {});
+
+						Assert.NotNull(id);
+					}
+					finally
+					{
+						db.TestIdentity.Delete();
+					}
+				});
+		}
 	}
 }

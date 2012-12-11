@@ -106,6 +106,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MySqlDataModel.generated.cs">
+      <DependentUpon>MySqlDataModel.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MSSqlDataModel.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -153,6 +159,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="MySqlDataModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MySqlDataModel.generated.cs</LastGenOutput>
+    </None>
     <None Include="MSSqlDataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MSSqlDataModel.generated.cs</LastGenOutput>

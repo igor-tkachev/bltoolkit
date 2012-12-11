@@ -292,5 +292,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			sb.AppendLine();
 		}
+
+		protected override void BuildEmptyInsert(StringBuilder sb)
+		{
+			sb.AppendLine("() VALUES ()");
+		}
 	}
 }

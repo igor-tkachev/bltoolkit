@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.Oracle</id>
-		<version>4.1.15</version>
+		<version>4.1.16</version>
 		<title>BLToolkit Oracle Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />

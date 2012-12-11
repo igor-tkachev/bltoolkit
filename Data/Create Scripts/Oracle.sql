@@ -628,3 +628,31 @@ create sequence sq_test_user
 /
 create sequence sq_test_user_contract
 /
+
+
+DROP SEQUENCE TestIdentitySeq
+/
+DROP TABLE TestIdentity
+/
+
+CREATE TABLE TestIdentity (
+	ID NUMBER NOT NULL PRIMARY KEY
+)
+/
+
+CREATE SEQUENCE TestIdentitySeq
+/
+
+CREATE OR REPLACE TRIGGER TestIdentity_Add
+BEFORE INSERT
+ON TestIdentity
+FOR EACH ROW
+BEGIN
+SELECT
+	TestIdentitySeq.NEXTVAL
+INTO
+	:NEW.ID
+FROM
+	dual;
+END;
+/

@@ -24,18 +24,6 @@ using BLToolkit.Reflection;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 #else
-
-using OracleBFile = Oracle.DataAccess.Types.OracleBFile;
-using OracleBinary = Oracle.DataAccess.Types.OracleBinary;
-using OracleCommand = Oracle.DataAccess.Client.OracleCommand;
-using OracleCommandBuilder = Oracle.DataAccess.Client.OracleCommandBuilder;
-using OracleConnection = Oracle.DataAccess.Client.OracleConnection;
-using OracleDataAdapter = Oracle.DataAccess.Client.OracleDataAdapter;
-using OracleDataReader = Oracle.DataAccess.Client.OracleDataReader;
-using OracleException = Oracle.DataAccess.Client.OracleException;
-using OracleParameter = Oracle.DataAccess.Client.OracleParameter;
-using OracleString = Oracle.DataAccess.Types.OracleString;
-
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 #endif
