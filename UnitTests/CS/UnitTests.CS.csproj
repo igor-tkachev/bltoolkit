@@ -87,6 +87,9 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
@@ -180,6 +183,8 @@
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
     <Compile Include="EditableObjects\NotifyPropertyChangedTest.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressFactory.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressTest.cs" />
     <Compile Include="JointureTests\Artist.cs" />
     <Compile Include="JointureTests\Artist2.cs" />
     <Compile Include="JointureTests\AssociationTests.cs" />
@@ -193,12 +198,12 @@
     <Compile Include="JointureTests\MusicDB.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="JointureTests\MusicTest.cs" />
-    <Compile Include="JointureTests\OleronFactory.cs" />
-    <Compile Include="JointureTests\OleronTest.cs" />
-    <Compile Include="JointureTests\OrquaFactory.cs" />
-    <Compile Include="JointureTests\OrquaTest.cs" />
-    <Compile Include="JointureTests\MusicFactory.cs" />
+    <Compile Include="JointureTests\Factories\MusicTest.cs" />
+    <Compile Include="JointureTests\Factories\OleronFactory.cs" />
+    <Compile Include="JointureTests\Factories\OleronTest.cs" />
+    <Compile Include="JointureTests\Factories\OrquaFactory.cs" />
+    <Compile Include="JointureTests\Factories\OrquaTest.cs" />
+    <Compile Include="JointureTests\Factories\MusicFactory.cs" />
     <Compile Include="JointureTests\Title.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />

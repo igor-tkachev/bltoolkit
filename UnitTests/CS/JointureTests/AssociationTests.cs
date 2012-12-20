@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,8 @@ using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
+using Oracle.DataAccess.Client;
+using Oracle.DataAccess.Types;
 
 namespace UnitTests.CS.JointureTests
 {
@@ -56,6 +59,61 @@ namespace UnitTests.CS.JointureTests
                 query = query.Take(5);
                 var res = query.ToList();
                 Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
+        public void InsertBlob()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                SqlQuery sqlQuery = new SqlQuery(db);
+
+                var session = new static_nav_session();
+                session.PDF_USER_FILENAME = "PDF_USER_FILENAME";
+                session.ID_LOGIN = 1;
+                session.STATUS = 3;
+                session.PDF_NAME = "COCO";
+                session.ID_PDF_RESULT_TYPE = 29;
+                session.STATIC_NAV_SESSION = 
+                    Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(new DataMedia {Activation = 2, IdLanguageData = 123, IdMedia = 2002, Media = "COCO"}));
+
+                var sessionId = sqlQuery.InsertWithIdentity(session);
+                Console.WriteLine(sessionId);
+            }
+        }
+
+        [Test]
+        public void SelectBlob()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from n in db.GetTable<static_nav_session>()
+                            where n.ID_STATIC_NAV_SESSION == 102959
+                            select n;
+
+                var res = query.ToList();
+
+                SqlQuery sqlQuery = new SqlQuery(db);
+                var element = sqlQuery.SelectByKey<static_nav_session>(102959);
+
+                //var blob = element.STATIC_NAV_SESSION;
+                //byte[] buffer = new byte[blob.Length];
+                //blob.Read(buffer, 0, buffer.Length);
+
+                byte[] buffer = element.STATIC_NAV_SESSION;
+
+                var dateMedia = Newtonsoft.Json.JsonConvert.DeserializeObject<DataMedia>(Encoding.UTF8.GetString(buffer));
+                Console.WriteLine(dateMedia);
+
+                //MemoryStream memoryStream = new MemoryStream(buffer);
+                //BinaryFormatter binaryFormatter = new BinaryFormatter();
+                //var dede = binaryFormatter.Deserialize(memoryStream);
+                //Console.WriteLine(dede);
+
+                Console.WriteLine(element);
+
+                Console.WriteLine(res.Count);
             }
         }
 

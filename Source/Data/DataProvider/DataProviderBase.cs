@@ -421,7 +421,7 @@ namespace BLToolkit.Data.DataProvider
 			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
 		}
 
-        public int ExecuteSqlList(DbManager db, List<string> sqlList)
+	    protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
         {
             var cnt = 0;
             foreach (string sql in sqlList)

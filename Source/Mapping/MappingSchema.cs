@@ -2145,7 +2145,7 @@ namespace BLToolkit.Mapping
 			IDataReader     dataReader,
 			Type            destObjectType,
 			params object[] parameters)
-		{
+		{            
 			InitContext ctx = new InitContext();
 
 			ctx.MappingSchema = this;
