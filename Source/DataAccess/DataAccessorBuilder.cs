@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -1925,10 +1926,17 @@ namespace BLToolkit.DataAccess
             }
             else if (pi.IsRefCursor())
             {
+                // Make sure the parameter is a List
+                if (!type.GetInterfaces().Contains(typeof(IList)))
+                {
+                    throw new Exception("The argument '" + pi.Name + "' must be of type 'IList'");
+                }
+                //Get the generic type of the list
+                Type genericType = type.GetGenericArguments().First();
 
+
+                // Get the data reader to the ref cursor
                 var dataReader = emit.DeclareLocal(typeof(IDataReader));
-
-
                 emit
                     .ldloc(_locManager)
                     .callvirt(typeof(DbManager).GetProperty("DataProvider").GetGetMethod())
@@ -1939,20 +1947,22 @@ namespace BLToolkit.DataAccess
                     .stloc(dataReader)
                     ;
 
-                emit
-                    .ldloc(dataReader)
-                    .callvirt(typeof(IDataReader), "Read")
-                    .pop
-                    .end();
+                // Create the generic methos info to invoke
+                var mapDataReaderToListMethodInfo = typeof (MappingSchema).GetMethod("MapDataReaderToList",
+                                                                                     new[]
+                                                                                         {
+                                                                                             typeof (IDataReader),
+                                                                                             typeof (object[])
+                                                                                         })
+                    .MakeGenericMethod(genericType);
 
+                // Run MapDataReaderToList
                 emit
                     .ldloc(_locManager)
                     .callvirt(typeof(DbManager).GetProperty("MappingSchema").GetGetMethod())
                     .ldloc(dataReader)
-                    .LoadType(type)
                     .ldnull
-                    .callvirt(typeof(MappingSchema), "MapDataReaderToObject", typeof(IDataReader), typeof(Type), typeof(object[]))
-                    .CastFromObject(type)
+                    .callvirt(mapDataReaderToListMethodInfo)
                     ;
             }
             else
