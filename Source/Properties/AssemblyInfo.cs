@@ -9,11 +9,13 @@ using BLToolkit;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle      (BLToolkitConstants.ProductName)]
-[assembly: AssemblyDescription(BLToolkitConstants.ProductDescription)]
-[assembly: AssemblyProduct    (BLToolkitConstants.ProductName)]
-[assembly: AssemblyCopyright  (BLToolkitConstants.Copyright)]
-[assembly: AssemblyCulture    ("")]
+[assembly: AssemblyTitle        (BLToolkitConstants.ProductName)]
+[assembly: AssemblyDescription  (BLToolkitConstants.ProductDescription)]
+[assembly: AssemblyProduct      (BLToolkitConstants.ProductName)]
+[assembly: AssemblyCopyright    (BLToolkitConstants.Copyright)]
+[assembly: AssemblyCulture      ("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany      (BLToolkitConstants.ProductName)]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM componenets.  If you need to access a type in this assembly from 
