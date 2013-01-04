@@ -615,6 +615,7 @@
     <Compile Include="TypeBuilder\ParentAttribute.cs" />
     <Compile Include="TypeBuilder\PropertyChangedAttribute.cs" />
     <Compile Include="TypeBuilder\PropertyInfoAttribute.cs" />
+    <Compile Include="TypeBuilder\RefCursorAttribute.cs" />
     <Compile Include="TypeBuilder\ReturnIfFalseAttribute.cs" />
     <Compile Include="TypeBuilder\ReturnIfNonZeroAttribute.cs" />
     <Compile Include="TypeBuilder\ReturnIfNotNullAttribute.cs" />

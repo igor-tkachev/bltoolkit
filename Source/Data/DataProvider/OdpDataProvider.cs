@@ -275,6 +275,21 @@ namespace BLToolkit.Data.DataProvider
             return false;
         }
 
+        /// <summary>
+        /// Open an <see cref="IDataReader"/> into the given <see cref="OracleRefCursor"/> object
+        /// </summary>
+        /// <param name="refCursor">an <see cref="OracleRefCursor"/> to perform GetDataReader() on</param>
+        /// <returns>The <see cref="IDataReader"/> into the returned by GetDataReader()</returns>
+        public override IDataReader GetRefCursorDataReader(object refCursor)
+        {
+            OracleRefCursor oracleRefCursor = refCursor as OracleRefCursor;
+            if (oracleRefCursor == null)
+            {
+                throw new ArgumentException("Argument must be of type 'OracleRefCursor'", "refCursor");
+            }
+            return oracleRefCursor.GetDataReader();
+        }
+
         public override object Convert(object value, ConvertType convertType)
         {
             switch (convertType)
