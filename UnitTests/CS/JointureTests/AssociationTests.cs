@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -63,20 +64,46 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void InsertBatchWithGenericDataProvider()
+        {
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var day = new DateTime(1950, 1, 1);
+
+                var pageViews = new List<ValoNbPagesEvaliant> {new ValoNbPagesEvaliant {DateMedia = day, IdMedia = 10633, NbPages = 200}, new ValoNbPagesEvaliant {DateMedia = day, IdMedia = 10634, NbPages = 300},};
+
+                pageViews.ForEach(e =>
+                    {
+                        e.Activation = 0;
+                        e.DateCreation = DateTime.Now;
+                        e.DateModification = DateTime.Now;
+                        e.IdLanguageDataI = 33;
+
+                        e.IdSessionDetail = 0;
+                    });
+
+                db.UseQueryText = true;
+                db.InsertBatch(pageViews);
+                db.UseQueryText = false;
+            }
+        }
+
+        [Test]
         public void InsertBlob()
         {
             using (var db = _connectionFactory.CreateDbManager())
             {
                 SqlQuery sqlQuery = new SqlQuery(db);
 
-                var session = new static_nav_session();
-                session.PDF_USER_FILENAME = "PDF_USER_FILENAME";
-                session.ID_LOGIN = 1;
-                session.STATUS = 3;
-                session.PDF_NAME = "COCO";
-                session.ID_PDF_RESULT_TYPE = 29;
-                session.STATIC_NAV_SESSION = 
-                    Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(new DataMedia {Activation = 2, IdLanguageData = 123, IdMedia = 2002, Media = "COCO"}));
+                var session = new static_nav_session
+                    {
+                        PDF_USER_FILENAME = "PDF_USER_FILENAME", 
+                        ID_LOGIN = 1, 
+                        STATUS = 3, 
+                        PDF_NAME = "COCO", 
+                        ID_PDF_RESULT_TYPE = 29, 
+                        STATIC_NAV_SESSION = Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(new DataMedia {Activation = 2, IdLanguageData = 123, IdMedia = 2002, Media = "COCO"}))
+                    };
 
                 var sessionId = sqlQuery.InsertWithIdentity(session);
                 Console.WriteLine(sessionId);
@@ -143,7 +170,7 @@ namespace UnitTests.CS.JointureTests
             SimulateWork(GetMediaSetting, _connectionFactory, 20, 1);
         }
 
-        public void SimulateWork(Action<DbManager> action, IDbConnectionFactory connectionFactory, int maxUsers = 5, int execCount = 3)
+        private void SimulateWork(Action<DbManager> action, IDbConnectionFactory connectionFactory, int maxUsers = 5, int execCount = 3)
         {
             int count = 0;
             while (count <= execCount)
@@ -196,7 +223,6 @@ namespace UnitTests.CS.JointureTests
                 IsActivate = r.Activation < 10,
             }).ToList();
         }
-
 
         [Test]
         public void TestLinqAssociation2()
@@ -555,6 +581,9 @@ namespace UnitTests.CS.JointureTests
             {
                 using (var db = _connectionFactory.CreateDbManager())
                 {
+                    if (_connectionFactory.Provider is GenericDataProvider)
+                        db.UseQueryText = true;
+
                     db.BeginTransaction();
                     db.InsertBatchWithIdentity(list.Take(10));
                     db.RollbackTransaction();
@@ -562,7 +591,10 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        [Test]
+        /// <summary>
+        /// Fastest method
+        /// </summary>
+        [Test]        
         public void InsertBatchWithIdentityWithoutTransaction()
         {
             var list = new List<DataImport>();
@@ -578,6 +610,9 @@ namespace UnitTests.CS.JointureTests
 
             using (var db = _connectionFactory.CreateDbManager())
             {
+                if (_connectionFactory.Provider is GenericDataProvider)
+                    db.UseQueryText = true;
+
                 db.InsertBatchWithIdentity(list.Take(2));
             }
         }
@@ -590,7 +625,7 @@ namespace UnitTests.CS.JointureTests
                 var query = new SqlQuery(db);
                 var artist = new Label { Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200 };
 
-                query.Insert(new DataImport()
+                query.InsertWithIdentity(new DataImport
                                  {
                                      Commentary = "aaaa",
                                      DeclaredProduct = "ssfsfsfsfsfsf",

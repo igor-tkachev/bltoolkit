@@ -184,6 +184,7 @@
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
     <Compile Include="EditableObjects\NotifyPropertyChangedTest.cs" />
     <Compile Include="JointureTests\Factories\AdExpressFactory.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressOleronFactoryTest.cs" />
     <Compile Include="JointureTests\Factories\AdExpressTest.cs" />
     <Compile Include="JointureTests\Artist.cs" />
     <Compile Include="JointureTests\Artist2.cs" />
