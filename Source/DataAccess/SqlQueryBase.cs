@@ -212,7 +212,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertAutoSequence = false)
+		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertAutoSequence)
 		{
 			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			var om      = db.MappingSchema.GetObjectMapper(type);
@@ -380,9 +380,9 @@ namespace BLToolkit.DataAccess
 				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
 				case "SelectAll":   return CreateSelectAllSqlText  (db, type);      
           
-				case "Insert":      return CreateInsertSqlText     (db, type, -1);
+				case "Insert":      return CreateInsertSqlText     (db, type, -1, false);
                 case "InsertWithIdentity": return CreateInsertSqlText(db, type, -1, true);
-				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
+                case "InsertBatch": return CreateInsertSqlText(db, type, 0, false);
                 case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.UseQueryText || db.Transaction != null);                
 
 				case "Update":      return CreateUpdateSqlText     (db, type, -1);

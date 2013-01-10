@@ -1601,16 +1601,16 @@ namespace BLToolkit.Data.DataProvider
         #region InsertBatch
 
         public override int InsertBatch<T>(
-            DbManager db,
-            string insertText,
-            IEnumerable<T> collection,
-            MemberMapper[] members,
-            int maxBatchSize,
-            DbManager.ParameterProvider<T> getParameters)
+            DbManager                       db,
+            string                          insertText,
+            IEnumerable<T>                  collection,
+            MemberMapper[]                  members,
+            int                             maxBatchSize,
+            DbManager.ParameterProvider<T>  getParameters)
         {
             if (db.UseQueryText)
             {
-                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false);
                 return ExecuteSqlList(db, sqlList);
             }
 
@@ -1631,7 +1631,7 @@ namespace BLToolkit.Data.DataProvider
         {
             if (db.UseQueryText || db.Transaction != null)
             {
-                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100);
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100, true);
                 return ExecuteSqlList(db, sqlList);
             }
 

@@ -138,23 +138,35 @@ namespace BLToolkit.Data.DataProvider
             return base.Convert(value, convertType);
         }
 
-        public override int InsertBatchWithIdentity<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
+        public override int InsertBatchWithIdentity<T>(
+            DbManager                       db, 
+            string                          insertText, 
+            IEnumerable<T>                  collection, 
+            Mapping.MemberMapper[]          members, 
+            int                             maxBatchSize, 
+            DbManager.ParameterProvider<T>  getParameters)
         {
             if (db.UseQueryText && Name == ProviderFullName.Oracle)
             {
-                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, true);
                 return ExecuteSqlList(db, sqlList);
             }
             return base.InsertBatchWithIdentity(db, insertText, collection, members, maxBatchSize, getParameters);
         }
 
-        public override int InsertBatch<T>(DbManager db, string insertText, IEnumerable<T> collection, Mapping.MemberMapper[] members, int maxBatchSize, DbManager.ParameterProvider<T> getParameters)
+        public override int InsertBatch<T>(
+            DbManager                       db, 
+            string                          insertText, 
+            IEnumerable<T>                  collection, 
+            Mapping.MemberMapper[]          members, 
+            int                             maxBatchSize, 
+            DbManager.ParameterProvider<T>  getParameters)
         {
             if (Name == ProviderFullName.Oracle)
             {
                 if (db.UseQueryText)
                 {
-                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize);
+                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false);
                     return ExecuteSqlList(db, sqlList);
                 }
                 throw new NotSupportedException("Set UseQueryText = true on the current generic data provider!");                

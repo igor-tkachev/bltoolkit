@@ -409,23 +409,23 @@ namespace BLToolkit.Data.DataProvider
 		#region InsertBatch
 
         public virtual int InsertBatchWithIdentity<T>(
-            DbManager db,
-            string insertText,
-            IEnumerable<T> collection,
-            MemberMapper[] members,
-            int maxBatchSize,
-            DbManager.ParameterProvider<T> getParameters)
+            DbManager                       db,
+            string                          insertText,
+            IEnumerable<T>                  collection,
+            MemberMapper[]                  members,
+            int                             maxBatchSize,
+            DbManager.ParameterProvider<T>  getParameters)
         {
-            throw new NotImplementedException("Insert batch with identity is not implemented!");
+            throw new NotImplementedException("Insert batch with identity is not implemented! If you use the GenericDataProvider and Oracle make sur to set UseQueryText to true");
         }
 
 		public virtual int InsertBatch<T>(
-			DbManager      db,
-			string         insertText,
-			IEnumerable<T> collection,
-			MemberMapper[] members,
-			int            maxBatchSize,
-			DbManager.ParameterProvider<T> getParameters)
+			DbManager                       db,
+			string                          insertText,
+			IEnumerable<T>                  collection,
+			MemberMapper[]                  members,
+			int                             maxBatchSize,
+			DbManager.ParameterProvider<T>  getParameters)
 		{
 			db.SetCommand(insertText);
 			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
