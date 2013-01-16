@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.4", "Source\BLToolkit.4.csproj", "{0C325F5D-E50E-4340-8724-D29896CCC583}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2CC0A340-512C-4F0D-A5E6-87C042EE13B9}"
@@ -151,6 +151,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{4A9C0E31-8697-48BA-A46B-6A5EE78424D6}"
 	ProjectSection(SolutionItems) = preProject
 		NuGet\BLToolkit.DB2.nuspec = NuGet\BLToolkit.DB2.nuspec
+		NuGet\BLToolkit.DevartOraclePro.nuspec = NuGet\BLToolkit.DevartOraclePro.nuspec
 		NuGet\BLToolkit.Firebird.nuspec = NuGet\BLToolkit.Firebird.nuspec
 		NuGet\BLToolkit.Informix.nuspec = NuGet\BLToolkit.Informix.nuspec
 		NuGet\BLToolkit.MySql.nuspec = NuGet\BLToolkit.MySql.nuspec
@@ -170,6 +171,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NorthwindDataService", "Demo\WebServices\NorthwindDataService\NorthwindDataService.csproj", "{87FB4F28-5DCC-4F21-B83E-59C85E1A7423}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.OracleManaged.4", "DataProviders\Oracle\BLToolkit.Data.DataProvider.OracleManaged.4.csproj", "{785CE174-0A91-465F-9E41-65E6E05A0EC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DevartOraclePro.4", "DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOraclePro.4.csproj", "{CB303F0B-0AA3-4589-850A-95E985A09492}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1928,6 +1931,48 @@ Global
 		{785CE174-0A91-465F-9E41-65E6E05A0EC9}.Template|Win32.ActiveCfg = ReleaseMono|Any CPU
 		{785CE174-0A91-465F-9E41-65E6E05A0EC9}.Template|x64.ActiveCfg = ReleaseMono|Any CPU
 		{785CE174-0A91-465F-9E41-65E6E05A0EC9}.Template|x86.ActiveCfg = ReleaseMono|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|Any CPU.Build.0 = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|Win32.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|x64.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug FW 3.5|x86.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|Any CPU.Build.0 = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|Win32.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|x64.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.DebugMono|x86.ActiveCfg = Debug|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|Win32.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|x64.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Release|x86.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|Any CPU.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|Any CPU.Build.0 = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|Mixed Platforms.Build.0 = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|Win32.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|x64.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.ReleaseMono|x86.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|Any CPU.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|Any CPU.Build.0 = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|Mixed Platforms.Build.0 = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|Win32.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|x64.ActiveCfg = Release|Any CPU
+		{CB303F0B-0AA3-4589-850A-95E985A09492}.Template|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1952,6 +1997,7 @@ Global
 		{3E414663-B673-47A8-AB59-0E08FE43DA86} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
 		{6CD8CC3D-643D-4D09-8660-A26085C44FBC} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
 		{785CE174-0A91-465F-9E41-65E6E05A0EC9} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
+		{CB303F0B-0AA3-4589-850A-95E985A09492} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
 		{83C0070F-E639-4D65-B392-34F621165A1C} = {B75C60BF-F5B7-472E-A0A8-8A12DDDDAA7D}
 		{0F3F166F-9927-4BC0-855F-ADB0D20218F1} = {B75C60BF-F5B7-472E-A0A8-8A12DDDDAA7D}
 		{35E61C2A-2B8C-4AF4-AD21-353936581EF5} = {B75C60BF-F5B7-472E-A0A8-8A12DDDDAA7D}
