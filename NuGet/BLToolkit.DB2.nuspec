@@ -17,7 +17,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.DB2.3.dll" target="lib\net35" />
-		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.DB2.4.dll" target="lib\net40" />
+		<file src="..\DataProviders\DB2\bin\Release\BLToolkit.Data.DataProvider.DB2.3.dll" target="lib\net35" />
+		<file src="..\DataProviders\DB2\bin\Release\BLToolkit.Data.DataProvider.DB2.4.dll" target="lib\net40" />
 	</files>
 </package>

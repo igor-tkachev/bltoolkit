@@ -21,23 +21,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Templates", "Tools\Template
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataProviders", "DataProviders", "{E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DB2.4", "DataProviders\BLToolkit.Data.DataProvider.DB2.4.csproj", "{86BF4F10-3606-4016-9919-84C3335813B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DB2.4", "DataProviders\DB2\BLToolkit.Data.DataProvider.DB2.4.csproj", "{86BF4F10-3606-4016-9919-84C3335813B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Firebird.4", "DataProviders\BLToolkit.Data.DataProvider.Firebird.4.csproj", "{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Firebird.4", "DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.4.csproj", "{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Informix.4", "DataProviders\BLToolkit.Data.DataProvider.Informix.4.csproj", "{B1DEA25C-7667-471B-BBAD-64D017FDD104}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Informix.4", "DataProviders\Informix\BLToolkit.Data.DataProvider.Informix.4.csproj", "{B1DEA25C-7667-471B-BBAD-64D017FDD104}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.MySql.4", "DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj", "{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.MySql.4", "DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj", "{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Oracle.4", "DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj", "{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Oracle.4", "DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.4.csproj", "{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.PostgreSQL.4", "DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj", "{5A556D57-0D68-433B-AD78-02849583582B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.PostgreSQL.4", "DataProviders\PostgreSQL\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj", "{5A556D57-0D68-433B-AD78-02849583582B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SqlCe.4", "DataProviders\BLToolkit.Data.DataProvider.SqlCe.4.csproj", "{85E90F57-8DE1-4912-8414-28578F4D71CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SqlCe.4", "DataProviders\SqlCe\BLToolkit.Data.DataProvider.SqlCe.4.csproj", "{85E90F57-8DE1-4912-8414-28578F4D71CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SQLite.4", "DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj", "{3E414663-B673-47A8-AB59-0E08FE43DA86}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SQLite.4", "DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.4.csproj", "{3E414663-B673-47A8-AB59-0E08FE43DA86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.4", "DataProviders\BLToolkit.Data.DataProvider.Sybase.4.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.4", "DataProviders\Sybase\BLToolkit.Data.DataProvider.Sybase.4.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.SL.4", "Source\BLToolkit.SL.4.csproj", "{663D4BFC-F565-41F7-9409-510B560CCEE8}"
 EndProject
@@ -169,7 +169,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.CP.4", "Source\BL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NorthwindDataService", "Demo\WebServices\NorthwindDataService\NorthwindDataService.csproj", "{87FB4F28-5DCC-4F21-B83E-59C85E1A7423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.OracleManaged.4", "DataProviders\BLToolkit.Data.DataProvider.OracleManaged.4.csproj", "{785CE174-0A91-465F-9E41-65E6E05A0EC9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.OracleManaged.4", "DataProviders\Oracle\BLToolkit.Data.DataProvider.OracleManaged.4.csproj", "{785CE174-0A91-465F-9E41-65E6E05A0EC9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

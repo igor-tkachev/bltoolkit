@@ -25,23 +25,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Linq", "Linq", "{4ABA64DA-8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataProviders", "DataProviders", "{9F229425-A623-4066-9A92-84F31DD54FD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DB2.3", "DataProviders\BLToolkit.Data.DataProvider.DB2.3.csproj", "{86BF4F10-3606-4016-9919-84C3335813B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DB2.3", "DataProviders\DB2\BLToolkit.Data.DataProvider.DB2.3.csproj", "{86BF4F10-3606-4016-9919-84C3335813B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Firebird.3", "DataProviders\BLToolkit.Data.DataProvider.Firebird.3.csproj", "{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Firebird.3", "DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.3.csproj", "{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Informix.3", "DataProviders\BLToolkit.Data.DataProvider.Informix.3.csproj", "{B1DEA25C-7667-471B-BBAD-64D017FDD104}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Informix.3", "DataProviders\Informix\BLToolkit.Data.DataProvider.Informix.3.csproj", "{B1DEA25C-7667-471B-BBAD-64D017FDD104}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.MySql.3", "DataProviders\BLToolkit.Data.DataProvider.MySql.3.csproj", "{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.MySql.3", "DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.3.csproj", "{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Oracle.3", "DataProviders\BLToolkit.Data.DataProvider.Oracle.3.csproj", "{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Oracle.3", "DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.3.csproj", "{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.PostgreSQL.3", "DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.3.csproj", "{5A556D57-0D68-433B-AD78-02849583582B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.PostgreSQL.3", "DataProviders\PostgreSQL\BLToolkit.Data.DataProvider.PostgreSQL.3.csproj", "{5A556D57-0D68-433B-AD78-02849583582B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SqlCe.3", "DataProviders\BLToolkit.Data.DataProvider.SqlCe.3.csproj", "{85E90F57-8DE1-4912-8414-28578F4D71CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SqlCe.3", "DataProviders\SqlCe\BLToolkit.Data.DataProvider.SqlCe.3.csproj", "{85E90F57-8DE1-4912-8414-28578F4D71CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SQLite.3", "DataProviders\BLToolkit.Data.DataProvider.SQLite.3.csproj", "{3E414663-B673-47A8-AB59-0E08FE43DA86}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SQLite.3", "DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.3.csproj", "{3E414663-B673-47A8-AB59-0E08FE43DA86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.3", "DataProviders\BLToolkit.Data.DataProvider.Sybase.3.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.3", "DataProviders\Sybase\BLToolkit.Data.DataProvider.Sybase.3.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq.Demo.2008", "Demo\Linq\Demo\Linq.Demo.2008.csproj", "{57CE5505-44CB-42E4-A346-3471F68A5B60}"
 EndProject
