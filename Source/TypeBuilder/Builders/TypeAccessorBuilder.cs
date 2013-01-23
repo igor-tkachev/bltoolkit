@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
@@ -72,7 +74,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			if (!_originalType.Type.IsVisible && !_friendlyAssembly)
+			if (!_originalType.Type.IsVisible && !_friendlyAssembly || 
+				(
+					from p in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+					from a in p.GetCustomAttributes(typeof(MapFieldAttribute), true).Cast<MapFieldAttribute>()
+					where a.Storage != null
+					select a
+				).Any())
 				return typeof (ExprTypeAccessor<,>).MakeGenericType(_type, _originalType);
 
 			var typeName = GetTypeName();

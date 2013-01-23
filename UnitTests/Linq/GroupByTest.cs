@@ -1469,6 +1469,5 @@ namespace Data.Linq
 					db.Doctor.GroupBy(s => s.PersonID).Select(s => s.Select(d => d.Taxonomy).First()));
 			}
 		}
-
 	}
 }
