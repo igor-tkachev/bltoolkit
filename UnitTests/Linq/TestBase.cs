@@ -27,6 +27,16 @@ namespace Data.Linq
 	{
 		static TestBase()
 		{
+			var providerListFile =
+				File.Exists(@"..\..\UserDataProviders.txt") ?
+					@"..\..\UserDataProviders.txt" :
+					@"..\..\DefaultDataProviders.txt";
+
+			UserProviders.AddRange(
+				File.ReadAllLines(providerListFile)
+					.Select(s => s.Trim())
+					.Where (s => s.Length > 0 && !s.StartsWith("--")));
+
 			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
 			{
 				string assembly;
@@ -151,9 +161,10 @@ namespace Data.Linq
 			public readonly string Type;
 			public          bool   Loaded;
 			public          int    IP;
+			public          bool   Skip;
 		}
 
-		[CLSCompliant(false)]
+		public static readonly List<string>       UserProviders = new List<string>();
 		public static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                          "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
@@ -195,6 +206,66 @@ namespace Data.Linq
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
 				yield return dx;
+			}
+		}
+
+		[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+		public class DataContextsAttribute : ValuesAttribute
+		{
+			public DataContextsAttribute(params string[] except)
+			{
+				Except = except;
+			}
+
+			const bool IncludeLinqService = true;
+
+			public string[] Except             { get; set; }
+			public string[] Include            { get; set; }
+			public bool     ExcludeLinqService { get; set; }
+
+			public override IEnumerable GetData(ParameterInfo parameter)
+			{
+				if (Include != null)
+				{
+					var list = Include.Intersect(
+						IncludeLinqService ? 
+							UserProviders.Concat(UserProviders.Select(p => p + ".LinqService")) :
+							UserProviders).
+						ToArray();
+
+					return list;
+				}
+
+				var providers = new List<string>();
+
+				foreach (var info in Providers)
+				{
+					if (info.Skip && Include == null)
+						continue;
+
+					if (Except != null && Except.Contains(info.Name))
+						continue;
+
+					if (!UserProviders.Contains(info.Name))
+						continue;
+
+					providers.Add(info.Name);
+
+					if (IncludeLinqService && !ExcludeLinqService)
+					{
+						providers.Add(info.Name + ".LinqService");
+					}
+				}
+
+				return providers.ToArray();
+			}
+		}
+
+		public class IncludeDataContextsAttribute : DataContextsAttribute
+		{
+			public IncludeDataContextsAttribute(params string[] include)
+			{
+				Include = include;
 			}
 		}
 
@@ -380,6 +451,21 @@ namespace Data.Linq
 				}
 
 				return _patient;
+			}
+		}
+
+		private   List<Doctor> _doctor;
+		protected List<Doctor>  Doctor
+		{
+			get
+			{
+				if (_doctor == null)
+				{
+					using (var db = new TestDbManager("Sql2008"))
+						_doctor = db.Doctor.ToList();
+				}
+
+				return _doctor;
 			}
 		}
 
