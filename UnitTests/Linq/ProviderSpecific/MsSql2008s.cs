@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Linq;
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 namespace Data.Linq.ProviderSpecific
@@ -30,6 +31,15 @@ namespace Data.Linq.ProviderSpecific
 		{
 			using (var db = new TestDbManager("Sql2008"))
 			{
+				var q =
+					from p in db.Parent
+					join c in db.Child on p.ParentID equals c.ParentID into g
+					from c in g.DefaultIfEmpty()
+					select new {p, b = Sql.AsSql((int?)c.ParentID) };
+
+				var list = q.ToList();
+
+
 				var value = db.SetCommand(@"SELECT SmallIntValue FROM LinqDataTypes WHERE ID = 1").ExecuteScalar<short>();
 
 				db.SetCommand(@"UPDATE LinqDataTypes SET SmallIntValue = @value WHERE ID = 1", db.Parameter("value", (ushort)value)).ExecuteNonQuery();

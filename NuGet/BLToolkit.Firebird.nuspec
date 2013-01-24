@@ -18,7 +18,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.Firebird.3.dll" target="lib\net35" />
-		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.Firebird.4.dll" target="lib\net40" />
+		<file src="..\DataProviders\Firebird\bin\Release\BLToolkit.Data.DataProvider.Firebird.3.dll" target="lib\net35" />
+		<file src="..\DataProviders\Firebird\bin\Release\BLToolkit.Data.DataProvider.Firebird.4.dll" target="lib\net40" />
 	</files>
 </package>

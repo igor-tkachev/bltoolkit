@@ -981,7 +981,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
+		Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> GetQuery()
 		{
 			FinalizeQuery();
 
@@ -1030,6 +1030,12 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
+			return query;
+		}
+
+		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
+		{
+			var query = GetQuery();
 			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
 		}
 
@@ -1046,6 +1052,29 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var dr in data)
 				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+		}
+
+		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)
+		{
+			var query = GetQuery();
+			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
+		}
+
+		static IEnumerable<T> Map(
+			IEnumerable<IDataReader> data,
+			QueryContext             queryContext,
+			IDataContextInfo         dataContextInfo,
+			Expression               expr,
+			object[]                 ps,
+			Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)
+		{
+			if (queryContext == null)
+				queryContext = new QueryContext(dataContextInfo, expr, ps);
+
+			var counter = 0;
+
+			foreach (var dr in data)
+				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps, counter++);
 		}
 
 		#endregion

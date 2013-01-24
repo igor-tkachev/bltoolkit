@@ -102,6 +102,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
+    <Reference Include="Devart.Data, Version=5.0.605.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Devart\dotConnect\Oracle\Devart.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.Oracle, Version=7.4.146.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Devart\dotConnect\Oracle\Devart.Data.Oracle.dll</HintPath>
+    </Reference>
     <Reference Include="FirebirdSql.Data.FirebirdClient, Version=3.0.2.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.3.0.2.1\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
@@ -155,13 +163,13 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data.Services" />
-    <Reference Include="System.Data.SQLite, Version=1.0.82.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+    <Reference Include="System.Data.SQLite, Version=1.0.84.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.82.0\lib\net40\System.Data.SQLite.dll</HintPath>
+      <HintPath>..\..\packages\System.Data.SQLite.1.0.84.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.SQLite.Linq, Version=1.0.82.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.84.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.82.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
+      <HintPath>..\..\packages\System.Data.SQLite.1.0.84.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -259,43 +267,43 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.DB2.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\DB2\BLToolkit.Data.DataProvider.DB2.4.csproj">
       <Project>{86BF4F10-3606-4016-9919-84C3335813B6}</Project>
       <Name>BLToolkit.Data.DataProvider.DB2.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Firebird.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOraclePro.4.csproj">
+      <Project>{cb303f0b-0aa3-4589-850a-95e985a09492}</Project>
+      <Name>BLToolkit.Data.DataProvider.DevartOraclePro.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.4.csproj">
       <Project>{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}</Project>
       <Name>BLToolkit.Data.DataProvider.Firebird.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Informix.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Informix\BLToolkit.Data.DataProvider.Informix.4.csproj">
       <Project>{B1DEA25C-7667-471B-BBAD-64D017FDD104}</Project>
       <Name>BLToolkit.Data.DataProvider.Informix.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.OracleManaged.4.csproj">
-      <Project>{785ce174-0a91-465f-9e41-65e6e05a0ec9}</Project>
-      <Name>BLToolkit.Data.DataProvider.OracleManaged.4</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\PostgreSQL\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj">
       <Project>{5A556D57-0D68-433B-AD78-02849583582B}</Project>
       <Name>BLToolkit.Data.DataProvider.PostgreSQL.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SqlCe.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\SqlCe\BLToolkit.Data.DataProvider.SqlCe.4.csproj">
       <Project>{85E90F57-8DE1-4912-8414-28578F4D71CD}</Project>
       <Name>BLToolkit.Data.DataProvider.SqlCe.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.4.csproj">
       <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
       <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Sybase.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Sybase\BLToolkit.Data.DataProvider.Sybase.4.csproj">
       <Project>{6CD8CC3D-643D-4D09-8660-A26085C44FBC}</Project>
       <Name>BLToolkit.Data.DataProvider.Sybase.4</Name>
     </ProjectReference>

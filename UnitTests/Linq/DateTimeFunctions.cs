@@ -393,7 +393,7 @@ namespace Data.Linq
 		public void SubDateDay()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           (int)(t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalDays,
 					from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalDays)));
@@ -403,7 +403,7 @@ namespace Data.Linq
 		public void DateDiffDay()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           Sql.DateDiff(Sql.DateParts.Day, t.DateTimeValue, t.DateTimeValue.AddHours(100)),
 					from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Day, t.DateTimeValue, t.DateTimeValue.AddHours(100)))));
@@ -413,7 +413,7 @@ namespace Data.Linq
 		public void SubDateHour()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           (int)(t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalHours,
 					from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddHours(100) - t.DateTimeValue).TotalHours)));
@@ -423,7 +423,7 @@ namespace Data.Linq
 		public void DateDiffHour()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           Sql.DateDiff(Sql.DateParts.Hour, t.DateTimeValue, t.DateTimeValue.AddHours(100)),
 					from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Hour, t.DateTimeValue, t.DateTimeValue.AddHours(100)))));
@@ -433,7 +433,7 @@ namespace Data.Linq
 		public void SubDateMinute()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           (int)(t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalMinutes,
 					from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalMinutes)));
@@ -443,7 +443,7 @@ namespace Data.Linq
 		public void DateDiffMinute()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           Sql.DateDiff(Sql.DateParts.Minute, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)),
 					from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Minute, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)))));
@@ -453,7 +453,7 @@ namespace Data.Linq
 		public void SubDateSecond()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           (int)(t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalSeconds,
 					from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddMinutes(100) - t.DateTimeValue).TotalSeconds)));
@@ -463,7 +463,7 @@ namespace Data.Linq
 		public void DateDiffSecond()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           Sql.DateDiff(Sql.DateParts.Second, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)),
 					from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Second, t.DateTimeValue, t.DateTimeValue.AddMinutes(100)))));
@@ -473,7 +473,7 @@ namespace Data.Linq
 		public void SubDateMillisecond()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           (int)(t.DateTimeValue.AddSeconds(1) - t.DateTimeValue).TotalMilliseconds,
 					from t in db.Types select (int)Sql.AsSql((t.DateTimeValue.AddSeconds(1) - t.DateTimeValue).TotalMilliseconds)));
@@ -483,7 +483,7 @@ namespace Data.Linq
 		public void DateDiffMillisecond()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
+				new[] { ProviderName.Informix, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access },
 				db => AreEqual(
 					from t in    Types select           Sql.DateDiff(Sql.DateParts.Millisecond, t.DateTimeValue, t.DateTimeValue.AddSeconds(1)),
 					from t in db.Types select Sql.AsSql(Sql.DateDiff(Sql.DateParts.Millisecond, t.DateTimeValue, t.DateTimeValue.AddSeconds(1)))));

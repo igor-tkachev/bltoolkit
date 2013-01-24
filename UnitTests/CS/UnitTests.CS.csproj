@@ -338,23 +338,19 @@
     <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Generic.4.csproj">
-      <Project>{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}</Project>
+    <ProjectReference Include="..\..\DataProviders\Generic\BLToolkit.Data.DataProvider.Generic.4.csproj">
+      <Project>{6e7fe7fc-551f-4273-aceb-72dc0d01120e}</Project>
       <Name>BLToolkit.Data.DataProvider.Generic.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.OracleManaged.4.csproj">
-      <Project>{785ce174-0a91-465f-9e41-65e6e05a0ec9}</Project>
-      <Name>BLToolkit.Data.DataProvider.OracleManaged.4</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.4.csproj">
       <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
       <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
     </ProjectReference>
