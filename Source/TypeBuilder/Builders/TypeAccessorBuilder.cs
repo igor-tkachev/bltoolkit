@@ -4,10 +4,10 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using BLToolkit.Mapping;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
+	using Mapping;
 	using Reflection;
 	using Reflection.Emit;
 
