@@ -638,7 +638,7 @@ namespace BLToolkit.Mapping
 
 			var destMembers = from m in ((IEnumerable<MemberAccessor>)dest.TypeAccessor) select m;
 
-			destMembers = destMembers.Except(dest.Select(mm => mm.MemberAccessor));
+			destMembers = destMembers.Except(dest.Select(mm => mm.MemberAccessor)).ToList();
 
 			var srcMembers =
 				(from m in ((IEnumerable<MemberAccessor>)src.TypeAccessor) select m)

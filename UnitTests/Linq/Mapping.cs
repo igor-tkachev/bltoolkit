@@ -3,6 +3,7 @@ using System.Linq;
 
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
+using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 
 using NUnit.Framework;
@@ -346,6 +347,35 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				              Parent    .Select(p => new { p.ParentID, Value = 2            }),
 				db.GetTable<MyParent1>().Select(p => new { p.ParentID, Value = p.GetValue() })));
+		}
+
+		[TableName("Parent")]
+		public abstract class AbsParent : EditableObject
+		{
+			public abstract int  ParentID { get; set; }
+			public abstract int? Value1   { get; set; }
+		}
+
+		[TableName("Child")]
+		public abstract class AbsChild : EditableObject
+		{
+			public abstract int ParentID { get; set; }
+			public abstract int ChildID  { get; set; }
+
+			[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
+			public AbsParent Parent;
+		}
+
+		[Test]
+		public void MapAbstract()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q = from a in db.GetTable<AbsChild>()
+				select new { a.ChildID, a.Parent.Value1 };
+
+				var ql = q.ToList();
+			}
 		}
 	}
 }

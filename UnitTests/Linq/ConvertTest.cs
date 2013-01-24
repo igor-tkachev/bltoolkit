@@ -361,11 +361,12 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ToSqlTime()
+		public void ToSqlTime([DataContexts(ProviderName.SQLite)] string context)
 		{
-			ForEachProvider(new[] { ProviderName.SQLite }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01"),
-				from t in db.Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01")));
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from t in    Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01"),
+					from t in db.Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01"));
 		}
 
 		DateTime ToDateTime(DateTimeOffset dto)

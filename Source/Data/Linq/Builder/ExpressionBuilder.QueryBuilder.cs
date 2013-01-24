@@ -236,7 +236,7 @@ namespace BLToolkit.Data.Linq.Builder
 							select c.ObjectMapper
 						).FirstOrDefault();
 
-						return om != null && om.Associations.All(a => a.MemberAccessor.MemberInfo != me.Member) && om[me.Member.Name, true] == null;
+						return om != null && om.Associations.All(a => !TypeHelper.Equals(a.MemberAccessor.MemberInfo, me.Member)) && om[me.Member.Name, true] == null;
 					}
 			}
 
