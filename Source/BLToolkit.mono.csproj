@@ -159,9 +159,13 @@
     <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
+    <Compile Include="DataAccess\ISqlQueryT.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
+    <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
+    <Compile Include="Data\DataProvider\OracleHelper.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
@@ -170,6 +174,7 @@
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionTestGenerator.cs" />
     <Compile Include="Data\Linq\Builder\InsertOrUpdateBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
     <Compile Include="Data\Linq\Builder\IsExpressionResult.cs" />
@@ -199,6 +204,7 @@
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
+    <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
