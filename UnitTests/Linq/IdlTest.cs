@@ -15,6 +15,24 @@ namespace Data.Linq
     [TestFixture]
     public partial class IdlTest : TestBase
     {
+        private readonly TestCaseData[] m_idlProviders = new[]
+            {
+                new TestCaseData(ProviderName.SQLite).SetName("SQLite"),
+                new TestCaseData(ProviderName.MySql).SetName("MySql"),
+                new TestCaseData("Sql2005").SetName("Sql2005"),
+                new TestCaseData("Sql2008").SetName("Sql2008")
+            };
+
+        private void ForProvider(string providerName, Action<ITestDataContext> func)
+        {
+            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { providerName }).ToArray(), func);
+        }
+
+        private void ForMySqlProvider(Action<ITestDataContext> func)
+        {
+            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
+        }
+
         #region PersonWithId
 
         public interface IHasID
@@ -154,12 +172,13 @@ namespace Data.Linq
 
         #endregion
 
-        [Test]
-        public void TestComplexExpression()
+        [TestCaseSource("m_idlProviders")]
+        public void TestComplexExpression(string providerName)
         {
             // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' 
             //   cannot be converted to SQL.
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var source = from child in db.GrandChild
@@ -175,14 +194,15 @@ namespace Data.Linq
                         Assert.That(result, Is.Not.Null);
                     });
         }
-        
-        [Test]
-        public void TestJoin()
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestJoin(string providerName)
         {
             // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than 
             //   the size of the collection.
             // Parameter name: index
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var source = from p1 in db.Person
@@ -197,11 +217,12 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestNullableExpression()
+        [TestCaseSource("m_idlProviders")]
+        public void TestNullableExpression(string providerName)
         {
             // failed with System.NullReferenceException : Object reference not set to an instance of an object.
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var source = from obj in db.Person select new { Id = obj.ID, };
@@ -216,10 +237,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestLookupWithInterfaceProperty()
+        [TestCaseSource("m_idlProviders")]
+        public void TestLookupWithInterfaceProperty(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var r = GetById<PersonWithId>(db, 1).SingleOrDefault();
@@ -241,10 +263,11 @@ namespace Data.Linq
 
         #endregion
 
-        [Test]
-        public void TestForObjectExt()
+        [TestCaseSource("m_idlProviders")]
+        public void TestForObjectExt(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var r = from p in db.Parent
@@ -269,10 +292,12 @@ namespace Data.Linq
             }
         }
 
-        [Test]
-        public void TestForGroupBy()
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestForGroupBy(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         /* no error in first call */
@@ -292,10 +317,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestLinqMax()
+        [TestCaseSource("m_idlProviders")]
+        public void TestLinqMax(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         Assert.That(db.Patient.Where(x => x.PersonID < 0).Select(x => (int?)x.PersonID).Max(), Is.Null);
@@ -307,10 +333,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestConvertFunction()
+        [TestCaseSource("m_idlProviders")]
+        public void TestConvertFunction(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var ds = new IdlPatientSource(db);
@@ -326,10 +353,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestJoinOrder()
+        [TestCaseSource("m_idlProviders")]
+        public void TestJoinOrder(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var source = new IdlPatientSource(db);
@@ -364,20 +392,31 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestDistinctWithGroupBy()
+        [TestCaseSource("m_idlProviders")]
+        public void TestDistinctWithGroupBy(string providerName)
         {
-            ForIdlProviders(
+            ForProvider(
+                providerName,
                 db =>
                     {
-                        var source = db.Parent.ToList();
-                        // Ensure that the data source has duplicate values.
-                        Assert.That(source.GroupBy(x => x.Value1, (key, x) => x.Count()).Any(x => x > 1), Is.True);
-                        // Success when query is executed in memory
-                        TestDistinctWithGroupBy(source.AsQueryable());
+                        const int parentId = 10000;
+                        db.Parent.Insert(() => new Parent { ParentID = parentId, Value1 = 1 });
+                        db.Parent.Insert(() => new Parent { ParentID = parentId, Value1 = 1 });
 
-                        // Failed when query is executed on sql server
-                        TestDistinctWithGroupBy(db.Parent);
+                        try
+                        {
+                            var source = db.Parent.ToList();
+
+                            // Success when query is executed in memory
+                            TestDistinctWithGroupBy(source.AsQueryable());
+
+                            // Failed when query is executed on sql server
+                            TestDistinctWithGroupBy(db.Parent);
+                        }
+                        finally
+                        {
+                            db.Parent.Delete(x => x.ParentID == parentId);
+                        }
                     });
         }
 
@@ -400,23 +439,11 @@ namespace Data.Linq
             return db.GetTable<T>().Where(obj => obj.ID == id);
         }
 
-        private void ForMySqlProvider(Action<ITestDataContext> func)
+        [TestCaseSource("m_idlProviders")]
+        public void ImplicitCastTest(string providerName)
         {
-            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.MySql }).ToArray(), func);
-        }
-
-        private void ForIdlProviders(Action<ITestDataContext> func)
-        {
-            ForEachProvider(
-                Providers.Select(p => p.Name)
-                    .Except(new[] { ProviderName.SQLite, ProviderName.MySql }).ToArray(),
-                func);
-        }
-
-        [Test]
-        public void ImplicitCastTest()
-        {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var people =
@@ -434,10 +461,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void ListvsArrayTest()
+        [TestCaseSource("m_idlProviders")]
+        public void ListvsArrayTest(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var st = "John";
@@ -456,10 +484,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void ConcatJoinOrderByTest()
+        [TestCaseSource("m_idlProviders")]
+        public void ConcatJoinOrderByTest(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var query = from y in
@@ -479,12 +508,13 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestIsContainedInArrayOfEnumValues()
+        [TestCaseSource("m_idlProviders")]
+        public void TestIsContainedInArrayOfEnumValues(string providerName)
         {
             var types2 = new[] { TypeValue.Value2, TypeValue.Value3, TypeValue.Value4 };
 
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var result = (from x in db.Parent4 where types2.Contains(x.Value1) select x)
@@ -494,10 +524,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void TestQueryWithInterface()
+        [TestCaseSource("m_idlProviders")]
+        public void TestQueryWithInterface(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var persons =
@@ -540,10 +571,11 @@ namespace Data.Linq
             return from x in source where x.Id == id select x;
         }
 
-        [Test]
-        public void TestComparePropertyOfEnumTypeToVaribleInSubquery()
+        [TestCaseSource("m_idlProviders")]
+        public void TestComparePropertyOfEnumTypeToVaribleInSubquery(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var gender = Gender.Other;
@@ -556,10 +588,11 @@ namespace Data.Linq
                     });
         }
 
-        [Test]
-        public void ConcatOrderByTest()
+        [TestCaseSource("m_idlProviders")]
+        public void ConcatOrderByTest(string providerName)
         {
-            ForMySqlProvider(
+            ForProvider(
+                providerName,
                 db =>
                     {
                         var q = from p in db.Person
