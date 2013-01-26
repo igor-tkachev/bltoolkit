@@ -553,6 +553,24 @@ namespace Data.Linq
                     });
         }
 
+        [TestCaseSource("m_idlProviders")]
+        public void TestBugCountWithOrderBy(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        var q1 = db.Person.OrderBy(x => x.ID);
+
+                        var q2 = from p in q1
+                                 join p2 in db.Person on p.ID equals p2.ID
+                                 select p2;
+
+                        Assert.DoesNotThrow(() => q2.Max(x => x.ID));
+                        Assert.DoesNotThrow(() => q2.Count());
+                    });
+        }
+
         private IQueryable<T> FilterSourceByIdDefinedInBaseClass<T>(IQueryable<T> source, int id)
             where T : WithObjectIdBase
         {
