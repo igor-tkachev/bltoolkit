@@ -2127,6 +2127,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					}
 
 					sql.Parameters.AddRange(sqlQuery.Parameters);
+					sql.Update.Table = sqlQuery.Update.Table;
 
 					sqlQuery.Parameters.Clear();
 					sqlQuery.Update.Items.Clear();
