@@ -2129,12 +2129,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
 						});
 
-//						((ISqlExpressionWalkable)item).Walk(false, expr =>
-//						{
-//							var fld = expr as SqlField;
-//							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
-//						});
-
 						sql.Update.Items.Add(ex);
 					}
 
