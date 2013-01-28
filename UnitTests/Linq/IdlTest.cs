@@ -595,7 +595,7 @@ namespace Data.Linq
                         try
                         {
                             db.Parent.Insert(() => new Parent { ParentID = parentId });
-                            db.Child.Insert(() => new Child { ChildID = childId, ParentID = parentId });
+                            db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
 
                             var parents = from child in db.Child
                                           where child.ChildID == childId
@@ -611,7 +611,7 @@ namespace Data.Linq
                                   // this works with MySql but failed for SQLite and MS SQL
                                 Assert.DoesNotThrow(() => parents.Set(x => x.Value1, 5).Update());
                             }
-                          }
+                        }
                         finally
                         {
                             db.Child.Delete(x => x.ChildID == childId);

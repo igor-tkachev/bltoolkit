@@ -2089,7 +2089,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected SqlQuery GetAlternativeUpdate(SqlQuery sqlQuery)
 		{
-			if (sqlQuery.IsUpdate && sqlQuery.From.Tables[0].Source is SqlTable)
+			if (sqlQuery.IsUpdate && (sqlQuery.From.Tables[0].Source is SqlTable || sqlQuery.Update.Table != null))
 			{
 				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
 				{
@@ -2098,8 +2098,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					sqlQuery.ParentSql = sql;
 					sqlQuery.QueryType = QueryType.Select;
 
-					var table = (SqlTable)sqlQuery.From.Tables[0].Source;
-					var copy  = new SqlTable(table);
+					var table = sqlQuery.Update.Table ?? (SqlTable)sqlQuery.From.Tables[0].Source;
+
+					if (sqlQuery.Update.Table != null)
+						if (new QueryVisitor().Find(sqlQuery.From, t => t == table) == null)
+							table = (SqlTable)new QueryVisitor().Find(sqlQuery.From,
+								ex => ex is SqlTable && ((SqlTable)ex).ObjectType == table.ObjectType) ?? table;
+
+					var copy = new SqlTable(table);
 
 					var tableKeys = table.GetKeys(true);
 					var copyKeys  = copy. GetKeys(true);
@@ -2117,13 +2123,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					foreach (var item in sqlQuery.Update.Items)
 					{
-						((ISqlExpressionWalkable)item).Walk(false, expr =>
+						var ex = new QueryVisitor().Convert(item, expr =>
 						{
 							var fld = expr as SqlField;
 							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
 						});
 
-						sql.Update.Items.Add(item);
+//						((ISqlExpressionWalkable)item).Walk(false, expr =>
+//						{
+//							var fld = expr as SqlField;
+//							return fld != null && map.TryGetValue(fld, out fld) ? fld : expr;
+//						});
+
+						sql.Update.Items.Add(ex);
 					}
 
 					sql.Parameters.AddRange(sqlQuery.Parameters);
