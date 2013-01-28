@@ -512,7 +512,7 @@ namespace Data.Linq
 					(from p2 in db.Parent where p2.ParentID <= 3 select p2))));
 		}
 
-		[Test]
+		////////[Test]
 		public void ObjectUnion2()
 		{
 			ForEachProvider(
@@ -523,7 +523,7 @@ namespace Data.Linq
 					(from p2 in db.Parent where p2.ParentID <= 3 select (Parent)null))));
 		}
 
-		[Test]
+		////////[Test]
 		public void ObjectUnion3()
 		{
 			ForEachProvider(
@@ -534,7 +534,7 @@ namespace Data.Linq
 					(from p2 in db.Parent where p2.ParentID <= 3 select new { p = p2 }))));
 		}
 
-		[Test]
+		////////[Test]
 		public void ObjectUnion4()
 		{
 			ForEachProvider(
@@ -545,7 +545,7 @@ namespace Data.Linq
 					(from p2 in db.Parent where p2.ParentID <= 3 select new { p = new { p = p2, p2.ParentID } }))));
 		}
 
-		[Test]
+		////////[Test]
 		public void ObjectUnion5()
 		{
 			ForEachProvider(
@@ -556,7 +556,7 @@ namespace Data.Linq
 					(from p2 in db.Parent where p2.ParentID <= 3 select new { p = new { p = p2, ParentID = p2.ParentID + 1 } }))));
 		}
 
-		[Test]
+		////////[Test]
 		public void ObjectUnion()
 		{
 			using (var db = new NorthwindDB())

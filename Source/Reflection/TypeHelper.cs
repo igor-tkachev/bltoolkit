@@ -1552,7 +1552,7 @@ namespace BLToolkit.Reflection
 				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
 
-		public static bool Equals(MemberInfo member1, MemberInfo member2)
+		public static bool Equals(MemberInfo member1, MemberInfo member2, Type declaringType = null)
 		{
 			if (ReferenceEquals(member1, member2))
 				return true;
@@ -1565,20 +1565,27 @@ namespace BLToolkit.Reflection
 				if (member1.DeclaringType == member2.DeclaringType)
 					return true;
 
-				var isSubclass = IsSameOrParent(member1.DeclaringType, member2.DeclaringType);
-
-				if (!isSubclass && IsSameOrParent(member2.DeclaringType, member1.DeclaringType))
+				if (member1 is PropertyInfo)
 				{
-					isSubclass = true;
+					var isSubclass =
+						IsSameOrParent(member1.DeclaringType, member2.DeclaringType) ||
+						IsSameOrParent(member2.DeclaringType, member1.DeclaringType);
 
-					var member = member1;
-					member1 = member2;
-					member2 = member;
-				}
+					if (isSubclass)
+						return true;
 
-				if (isSubclass)
-				{
-					return member1 is PropertyInfo;
+					if (declaringType != null && member2.DeclaringType.IsInterface)
+					{
+						var getter1 = ((PropertyInfo)member1).GetGetMethod();
+						var getter2 = ((PropertyInfo)member2).GetGetMethod();
+
+						var map = declaringType.GetInterfaceMap(member2.DeclaringType);
+
+						for (var i = 0; i < map.InterfaceMethods.Length; i++)
+							if (getter2.Name == map.InterfaceMethods[i].Name && getter2.DeclaringType == map.InterfaceMethods[i].DeclaringType &&
+								getter1.Name == map.TargetMethods   [i].Name && getter1.DeclaringType == map.TargetMethods   [i].DeclaringType)
+								return true;
+					}
 				}
 			}
 

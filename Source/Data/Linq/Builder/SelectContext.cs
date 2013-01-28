@@ -1022,6 +1022,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (!Members.TryGetValue(member, out memberExpression))
 			{
+				foreach (var m in Members)
+				{
+					if (m.Key.Name == member.Name)
+					{
+						if (TypeHelper.Equals(m.Key, member, IsScalar ? null : Body.Type))
+							return m.Value;
+					}
+				}
+
 				if (add && TypeHelper.IsSameOrParent(member.DeclaringType, Body.Type))
 				{
 					memberExpression = Expression.Constant(

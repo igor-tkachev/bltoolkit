@@ -3820,7 +3820,7 @@ namespace BLToolkit.Data.Sql
 			bool        optimizeValues,
 			bool        optimizeColumns)
 		{
-			var query = (SqlQuery)childSource. Source;
+			var query = (SqlQuery)childSource.Source;
 
 			var isQueryOK = query.From.Tables.Count == 1;
 
@@ -4010,9 +4010,10 @@ namespace BLToolkit.Data.Sql
 				{
 					var sql = From.Tables[i].Source as SqlQuery;
 
-					if (sql != null && sql.OrderBy.Items.Count > 0)
-						foreach (var item in sql.OrderBy.Items)
-							OrderBy.Expr(item.Expression, item.IsDescending);
+					if (!Select.Columns.All(c => IsAggregationFunction(c.Expression)))
+						if (sql != null && sql.OrderBy.Items.Count > 0)
+							foreach (var item in sql.OrderBy.Items)
+								OrderBy.Expr(item.Expression, item.IsDescending);
 
 					From.Tables[i] = table;
 				}
