@@ -542,10 +542,10 @@ namespace Data.Linq
                         // this works
                         var r1 = FilterSourceByIdDefinedInBaseClass(persons, 5).ToArray();
                         Assert.That(r1, Is.Not.Null);
-
-                        // and this works
-                        var r2 = FilterSourceByIdDefinedInInterface1(persons, 5).ToArray();
-                        Assert.That(r2, Is.Not.Null);
+//
+//                        // and this works
+//                        var r2 = FilterSourceByIdDefinedInInterface1(persons, 5).ToArray();
+//                        Assert.That(r2, Is.Not.Null);
 
                         // but this fails
                         var r3 = FilterSourceByIdDefinedInInterface2(persons, 5).ToArray();
