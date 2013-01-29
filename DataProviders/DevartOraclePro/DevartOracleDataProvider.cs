@@ -11,13 +11,8 @@ using Devart.Data.Oracle;
 
 namespace BLToolkit.Data.DataProvider
 {
-	public class DevartOracleProDataProvider : DataProviderBase
+	public class DevartOracleDataProvider : DataProviderBase
 	{
-		public DevartOracleProDataProvider()
-		{
-			//OracleUtils.OracleClientCompatible = true;
-		}
-
 		public override Type ConnectionType
 		{
 			get { return typeof(OracleConnection); }
@@ -25,7 +20,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "DevartOraclePro"; }
+			get { return "DevartOracle"; }
 		}
 
 		public override IDbConnection CreateConnectionObject()

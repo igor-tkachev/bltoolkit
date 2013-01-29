@@ -542,10 +542,10 @@ namespace Data.Linq
                         // this works
                         var r1 = FilterSourceByIdDefinedInBaseClass(persons, 5).ToArray();
                         Assert.That(r1, Is.Not.Null);
-//
-//                        // and this works
-//                        var r2 = FilterSourceByIdDefinedInInterface1(persons, 5).ToArray();
-//                        Assert.That(r2, Is.Not.Null);
+
+                        // and this works
+                        var r2 = FilterSourceByIdDefinedInInterface1(persons, 5).ToArray();
+                        Assert.That(r2, Is.Not.Null);
 
                         // but this fails
                         var r3 = FilterSourceByIdDefinedInInterface2(persons, 5).ToArray();
@@ -570,6 +570,56 @@ namespace Data.Linq
                         Assert.DoesNotThrow(() => q2.Count());
                     });
         }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestUpdateWithTargetByAssociationProperty(string providerName)
+        {
+            TestUpdateByAssociationProperty(providerName,true);
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestSetUpdateWithoutTargetByAssociationProperty(string providerName)
+        {
+            TestUpdateByAssociationProperty(providerName, false);
+        }
+        
+        private void TestUpdateByAssociationProperty(string providerName, bool useUpdateWithTarget)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        const int childId = 10000;
+                        const int parentId = 20000;
+
+                        try
+                        {
+                            db.Parent.Insert(() => new Parent { ParentID = parentId });
+                            db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
+
+                            var parents = from child in db.Child
+                                          where child.ChildID == childId
+                                          select child.Parent;
+
+                            if (useUpdateWithTarget)
+                            {
+                                // this failed for MySql and SQLite but works with MS SQL
+                                Assert.DoesNotThrow(() => parents.Update(db.Parent, x => new Parent { Value1 = 5 }));
+                            }
+                            else
+                            {
+                                  // this works with MySql but failed for SQLite and MS SQL
+                                Assert.DoesNotThrow(() => parents.Set(x => x.Value1, 5).Update());
+                            }
+                        }
+                        finally
+                        {
+                            db.Child.Delete(x => x.ChildID == childId);
+                            db.Parent.Delete(x => x.ParentID == parentId);
+                        }
+                    });
+        }
+
 
         private IQueryable<T> FilterSourceByIdDefinedInBaseClass<T>(IQueryable<T> source, int id)
             where T : WithObjectIdBase

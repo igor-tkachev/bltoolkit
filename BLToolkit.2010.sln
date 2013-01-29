@@ -174,7 +174,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NorthwindDataService", "Dem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.OracleManaged.4", "DataProviders\Oracle\BLToolkit.Data.DataProvider.OracleManaged.4.csproj", "{61985B06-67FD-4941-B1B0-7F3794FD237C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DevartOraclePro.4", "DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOraclePro.4.csproj", "{CB303F0B-0AA3-4589-850A-95E985A09492}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DevartOracle.4", "DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOracle.4.csproj", "{CB303F0B-0AA3-4589-850A-95E985A09492}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Generic.4", "DataProviders\Generic\BLToolkit.Data.DataProvider.Generic.4.csproj", "{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}"
 EndProject

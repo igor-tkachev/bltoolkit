@@ -102,13 +102,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="Devart.Data, Version=5.0.605.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data, Version=5.0.623.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Devart\dotConnect\Oracle\Devart.Data.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.7.5.164\lib\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.Oracle, Version=7.4.146.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data.Oracle, Version=7.5.164.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Devart\dotConnect\Oracle\Devart.Data.Oracle.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.7.5.164\lib\Devart.Data.Oracle.dll</HintPath>
     </Reference>
     <Reference Include="FirebirdSql.Data.FirebirdClient, Version=3.0.2.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -126,9 +126,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Npgsql.2.0.12.1\lib\net40\Mono.Security.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.5.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+    <Reference Include="MySql.Data, Version=6.6.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MySql.Data.6.5.4\lib\net40\MySql.Data.dll</HintPath>
+      <HintPath>..\..\packages\MySql.Data.6.6.4\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=2.0.12.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -271,9 +271,9 @@
       <Project>{86BF4F10-3606-4016-9919-84C3335813B6}</Project>
       <Name>BLToolkit.Data.DataProvider.DB2.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOraclePro.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOracle.4.csproj">
       <Project>{cb303f0b-0aa3-4589-850a-95e985a09492}</Project>
-      <Name>BLToolkit.Data.DataProvider.DevartOraclePro.4</Name>
+      <Name>BLToolkit.Data.DataProvider.DevartOracle.4</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.4.csproj">
       <Project>{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}</Project>

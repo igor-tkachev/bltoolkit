@@ -189,7 +189,7 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy23()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, "Oracle", "DevartOraclePro", ProviderName.Sybase, ProviderName.Access }, db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe, "Oracle", "DevartOracle", ProviderName.Sybase, ProviderName.Access }, db => AreEqual(
 				from p in
 					from p in Parent select new { ParentID = p.ParentID + 1, p.Value1 }
 				where p.ParentID + 1 > 1

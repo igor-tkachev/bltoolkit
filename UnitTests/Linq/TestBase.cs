@@ -178,7 +178,7 @@ namespace Data.Linq
 			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",        "BLToolkit.Data.DataProvider.InformixDataProvider"),
 			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",        "BLToolkit.Data.DataProvider.FdpDataProvider"),
 			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",          "BLToolkit.Data.DataProvider.OdpDataProvider"),
-			new ProviderInfo("DevartOraclePro",       "BLToolkit.Data.DataProvider.DevartOraclePro", "BLToolkit.Data.DataProvider.DevartOracleProDataProvider"),
+			new ProviderInfo("DevartOracle",          "BLToolkit.Data.DataProvider.DevartOracle",    "BLToolkit.Data.DataProvider.DevartOracleDataProvider"),
 			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),
 			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL",      "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
 			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",           "BLToolkit.Data.DataProvider.MySqlDataProvider"),

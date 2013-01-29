@@ -26,10 +26,13 @@ namespace BLToolkit.Data.Linq.Builder
 			switch (methodCall.Arguments.Count)
 			{
 				case 1 : // int Update<T>(this IUpdateable<T> source)
+					CheckAssociation(sequence);
 					break;
 
 				case 2 : // int Update<T>(this IQueryable<T> source, Expression<Func<T,T>> setter)
 					{
+						CheckAssociation(sequence);
+
 						BuildSetter(
 							builder,
 							buildInfo,
@@ -50,6 +53,8 @@ namespace BLToolkit.Data.Linq.Builder
 							//
 							sequence = builder.BuildWhere(buildInfo.Parent, sequence, (LambdaExpression)methodCall.Arguments[1].Unwrap(), false);
 
+							CheckAssociation(sequence);
+
 							BuildSetter(
 								builder,
 								buildInfo,
@@ -63,6 +68,10 @@ namespace BLToolkit.Data.Linq.Builder
 							// static int Update<TSource,TTarget>(this IQueryable<TSource> source, Table<TTarget> target, Expression<Func<TSource,TTarget>> setter)
 							//
 							var into = builder.BuildSequence(new BuildInfo(buildInfo, expr, new SqlQuery()));
+
+							sequence.ConvertToIndex(null, 0, ConvertFlags.All);
+							sequence.SqlQuery.ResolveWeakJoins();
+							sequence.SqlQuery.Select.Columns.Clear();
 
 							BuildSetter(
 								builder,
@@ -89,6 +98,22 @@ namespace BLToolkit.Data.Linq.Builder
 			sequence.SqlQuery.QueryType = QueryType.Update;
 
 			return new UpdateContext(buildInfo.Parent, sequence);
+		}
+
+		void CheckAssociation(IBuildContext sequence)
+		{
+			var ctx = sequence as SelectContext;
+
+			if (ctx != null && ctx.IsScalar)
+			{
+				var res = ctx.IsExpression(null, 0, RequestFor.Association);
+
+				if (res.Result && res.Context is TableBuilder.AssociatedTableContext)
+				{
+					var atc = (TableBuilder.AssociatedTableContext)res.Context;
+					sequence.SqlQuery.Update.Table = atc.SqlTable;
+				}
+			}
 		}
 
 		protected override SequenceConvertInfo Convert(
