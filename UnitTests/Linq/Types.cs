@@ -327,7 +327,7 @@ namespace Data.Linq
 				new[]
 				{
 					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
-					ProviderName.Firebird, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
 				{
@@ -351,7 +351,7 @@ namespace Data.Linq
 				new[]
 				{
 					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
-					ProviderName.Firebird, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
 				{
@@ -378,7 +378,7 @@ namespace Data.Linq
 				new[]
 				{
 					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
-					ProviderName.Firebird, "Oracle", "DevartOraclePro", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
 				{
@@ -478,7 +478,7 @@ namespace Data.Linq
 		[Test]
 		public void Unicode()
 		{
-			ForEachProvider(new[] { "DevartOraclePro", ProviderName.Informix, ProviderName.Firebird, ProviderName.Sybase }, db =>
+			ForEachProvider(new[] { "DevartOracle", ProviderName.Informix, ProviderName.Firebird, ProviderName.Sybase }, db =>
 			{
 				try
 				{

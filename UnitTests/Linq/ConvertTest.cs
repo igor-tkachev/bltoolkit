@@ -413,7 +413,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOraclePro", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
@@ -429,7 +429,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultVarChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOraclePro", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
@@ -445,7 +445,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultNChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOraclePro", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
@@ -461,7 +461,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultNVarChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOraclePro", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
