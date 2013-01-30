@@ -1552,7 +1552,12 @@ namespace BLToolkit.Reflection
 				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
 
-		public static bool Equals(MemberInfo member1, MemberInfo member2, Type declaringType = null)
+		public static bool Equals(MemberInfo member1, MemberInfo member2)
+		{
+			return Equals(member1, member2, null);
+		}
+
+		public static bool Equals(MemberInfo member1, MemberInfo member2, Type declaringType)
 		{
 			if (ReferenceEquals(member1, member2))
 				return true;
