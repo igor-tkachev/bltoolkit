@@ -333,7 +333,11 @@ namespace BLToolkit.DataAccess
             if (pType.IsByRef)
                 pType = pType.GetElementType();
 
-            if (TypeHelper.IsScalar(pType) || pi.IsRefCursor())
+            if (TypeHelper.IsScalar(pType)
+#if FW4
+                || pi.IsRefCursor()
+#endif
+                )
                 _paramList.Add(pi);
             else if (pType == typeof(DbManager) || pType.IsSubclassOf(typeof(DbManager)))
                 _createManager = false;
@@ -1924,6 +1928,7 @@ namespace BLToolkit.DataAccess
                     .CastFromObject(type)
                     ;
             }
+#if FW4
             else if (pi.IsRefCursor())
             {
                 // Make sure the parameter is a List
@@ -1965,6 +1970,7 @@ namespace BLToolkit.DataAccess
                     .callvirt(mapDataReaderToListMethodInfo)
                     ;
             }
+#endif
             else
             {
                 emit
