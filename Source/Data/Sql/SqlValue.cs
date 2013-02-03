@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BLToolkit.Data.Sql
 {
-	public class SqlValue : ISqlExpression, IValueContainer
+    public class SqlValue : SqlValueBase, ISqlExpression
 	{
 		public SqlValue(Type systemType, object value)
 		{
@@ -20,7 +20,6 @@ namespace BLToolkit.Data.Sql
 				_systemType = value.GetType();
 		}
 
-		readonly object _value;      public object  Value      { get { return _value;      } }
 		readonly Type   _systemType; public Type    SystemType { get { return _systemType; } }
 
 		#region Overrides

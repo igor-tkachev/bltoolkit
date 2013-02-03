@@ -656,8 +656,17 @@ namespace BLToolkit.Data.Linq.Builder
 				var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 				var idx  = ConvertToParentIndex(info.Index, null);
 
+                if (expression is MemberExpression)
+                {
+                    var me = (MemberExpression)expression;
+                    var memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+                    return Builder.BuildSql(memberAccessor, idx);
+                }
+                else
+                {
 				return Builder.BuildSql(expression.Type, idx);
 			}
+            }
 
 			#endregion
 

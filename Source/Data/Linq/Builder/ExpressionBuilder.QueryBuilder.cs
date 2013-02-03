@@ -169,6 +169,50 @@ namespace BLToolkit.Data.Linq.Builder
 			return field;
 		}
 
+        public Expression BuildSql(MemberAccessor ma, int idx, MethodInfo checkNullFunction, Expression context)
+        {
+            var expr = Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx));
+
+            if (checkNullFunction != null)
+                expr = Expression.Call(null, checkNullFunction, expr, context);
+
+            Expression mapper;
+
+            if (ma.Type.IsEnum)
+            {
+                mapper =
+                    Expression.Convert(
+                        Expression.Call(
+                            Expression.Constant(MappingSchema),
+                            ReflectionHelper.MapSchema.MapValueToEnumWithMemberAccessor,
+                                expr,
+                                Expression.Constant(ma)),
+                        ma.Type);
+            }
+            else
+            {
+                MethodInfo mi;
+
+                if (!ReflectionHelper.MapSchema.Converters.TryGetValue(ma.Type, out mi))
+                {
+                    mapper =
+                        Expression.Convert(
+                            Expression.Call(
+                                Expression.Constant(MappingSchema),
+                                ReflectionHelper.MapSchema.ChangeType,
+                                    expr,
+                                    Expression.Constant(ma.Type)),
+                            ma.Type);
+                }
+                else
+                {
+                    mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+                }
+            }
+
+            return mapper;
+        }
+
 		public Expression BuildSql(Type type, int idx, MethodInfo checkNullFunction, Expression context)
 		{
 			var expr = Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx));
@@ -217,6 +261,11 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			return BuildSql(type, idx, null, null);
 		}
+
+        public Expression BuildSql(MemberAccessor ma, int idx)
+        {
+            return BuildSql(ma, idx, null, null);
+        }
 
 		#endregion
 

@@ -1052,12 +1052,12 @@ namespace BLToolkit.Data.Linq.Builder
 			var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object)));
 			var v      = lambda.Compile()();
 
-			if (v != null && v.GetType().IsEnum)
-			{
-				var attrs = v.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
+            //if (v != null && v.GetType().IsEnum)
+            //{
+            //    var attrs = v.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
 
-				v = Map.EnumToValue(v, attrs.Length == 0);
-			}
+            //    v = Map.EnumToValue(v, attrs.Length == 0);
+            //}
 
 			value = new SqlValue(v);
 
@@ -1430,23 +1430,35 @@ namespace BLToolkit.Data.Linq.Builder
 // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
 						var    origValue = Enum.Parse(type, name, false);
-						object mapValue;
+                        object mapValue = origValue;
 
+                        if (!(operand is MemberExpression))
+                        {
 						if (!dic.TryGetValue(origValue, out mapValue))
 							return null;
+                        }
 
 						ISqlExpression l, r;
+
+                        SqlValue sqlValue = null;
 
 						if (left.NodeType == ExpressionType.Convert)
 						{
 							l = ConvertToSql(context, operand);
-							r = new SqlValue(mapValue);
+                            r = sqlValue = new SqlValue(mapValue);
 						}
 						else
 						{
 							r = ConvertToSql(context, operand);
-							l = new SqlValue(mapValue);
+                            l = sqlValue = new SqlValue(mapValue);
 						}
+                        if (operand is MemberExpression)
+                        {
+                            var me = (MemberExpression)operand;
+                            MemberAccessor memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+                            sqlValue.SetEnumConverter(memberAccessor, MappingSchema);
+                        }
+
 
 						return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
