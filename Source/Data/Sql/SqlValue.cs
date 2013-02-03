@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Sql
 		public SqlValue(Type systemType, object value)
 		{
 			_systemType = systemType;
-			_value      = value;
+            _value = value;
 		}
 
 		public SqlValue(object value)
@@ -64,7 +64,7 @@ namespace BLToolkit.Data.Sql
 			return
 				value       != null              &&
 				_systemType == value._systemType &&
-				(_value == null && value._value == null || _value != null && _value.Equals(value._value));
+                (_value == null && value._value == null || _value != null && _value.Equals(value._value));
 		}
 
 		#endregion
@@ -93,7 +93,7 @@ namespace BLToolkit.Data.Sql
 			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
-				objectTree.Add(this, clone = new SqlValue(_systemType, _value));
+                objectTree.Add(this, clone = new SqlValue(_systemType, _value));
 
 			return clone;
 		}
@@ -106,16 +106,16 @@ namespace BLToolkit.Data.Sql
 
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
-			return 
-				_value == null ?
+			return
+                Value == null ?
 					sb.Append("NULL") :
-				_value is string ?
+                Value is string ?
 					sb
 						.Append('\'')
-						.Append(_value.ToString().Replace("\'", "''"))
+                        .Append(Value.ToString().Replace("\'", "''"))
 						.Append('\'')
 				:
-					sb.Append(_value);
+                    sb.Append(Value);
 		}
 
 		#endregion

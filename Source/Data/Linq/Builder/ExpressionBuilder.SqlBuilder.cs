@@ -1774,8 +1774,24 @@ namespace BLToolkit.Data.Linq.Builder
 
 						var exprs  = new ISqlExpression[newArr.Expressions.Count];
 
-						for (var i = 0; i < newArr.Expressions.Count; i++)
-							exprs[i] = ConvertToSql(context, newArr.Expressions[i]);
+                        MemberAccessor memberAccessor = null;
+                        if (arg is MemberExpression)
+                        {
+                            var me = (MemberExpression)arg;
+                            if (me.Type.IsEnum)
+                            {
+                                memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+                            }
+                        }
+
+                        for (var i = 0; i < newArr.Expressions.Count; i++)
+                        {
+                            exprs[i] = ConvertToSql(context, newArr.Expressions[i]);
+                            if (memberAccessor != null && exprs[i] is SqlValue)
+                            {
+                                ((SqlValue)exprs[i]).SetEnumConverter(memberAccessor, MappingSchema);
+                            }
+                        }
 
 						return new SqlQuery.Predicate.InList(expr, false, exprs);
 					}

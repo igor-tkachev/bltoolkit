@@ -14,7 +14,7 @@ namespace BLToolkit.Data.Sql
 			IsQueryParameter = true;
 			Name             = name;
 			SystemType       = systemType;
-			_value           = value;
+            _value           = value;
 			DbType           = DbType.Object;
 
 			if (systemType != null && mappingSchema != null && systemType.IsEnum)
@@ -94,10 +94,10 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-			if (SystemType == null && _value == null)
+            if (SystemType == null && _value == null)
 				return true;
 
-			return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
+            return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
 		}
 
 		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)

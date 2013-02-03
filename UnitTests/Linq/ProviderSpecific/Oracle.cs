@@ -16,7 +16,7 @@ namespace Data.Linq.ProviderSpecific
 {
 	using Model;
 
-	[TestFixture]
+    [TestFixture, Category("Oracle")]
 	public class Oracle : TestBase
 	{
 		#region Sequence

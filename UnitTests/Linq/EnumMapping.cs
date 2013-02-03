@@ -68,6 +68,27 @@ namespace Data.Linq
             public int Int32Field;
         }
 
+        class Cleaner : IDisposable
+        {
+            ITestDataContext _db;
+            public Cleaner(ITestDataContext db)
+            {
+                _db = db;
+            }
+
+            public void Dispose()
+            {
+                try
+                {
+                    // rollback emulation for WCF :)
+                    _db.GetTable<RawTable>().Where(r => !new int[] { 1, 2 }.Contains(r.Id)).Delete();
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
         [Test]
         public void EnumMapInsert1()
         {
@@ -77,7 +98,10 @@ namespace Data.Linq
                 {
                     TestField = TestEnum1.Value2
                 });
-                Assert.True(db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Count() == 1);
+                using (new Cleaner(db))
+                {
+                    Assert.True(db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Count() == 1);
+                }
             });
         }
 
@@ -90,7 +114,10 @@ namespace Data.Linq
                 {
                     TestField = TestEnum2.Value2
                 });
-                Assert.True(db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Count() == 1);
+                using (new Cleaner(db))
+                {
+                    Assert.True(db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Count() == 1);
+                }
             });
         }
 
@@ -104,8 +131,11 @@ namespace Data.Linq
                     TestField = "VAL2"
                 });
 
-                var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == TestEnum1.Value2);
+                using (new Cleaner(db))
+                {
+                    var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == TestEnum1.Value2);
+                }
             });
         }
 
@@ -119,8 +149,11 @@ namespace Data.Linq
                     TestField = "VAL2"
                 });
 
-                var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == TestEnum2.Value2);
+                using (new Cleaner(db))
+                {
+                    var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == TestEnum2.Value2);
+                }
             });
         }
 
@@ -134,11 +167,14 @@ namespace Data.Linq
                     TestField = "VAL1"
                 });
 
-                db.GetTable<TestTable1>()
-                    .Where(r => r.TestField == TestEnum1.Value1)
-                    .Update(r => new TestTable1 { TestField = TestEnum1.Value2 });
-                var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == TestEnum1.Value2);
+                using (new Cleaner(db))
+                {
+                    db.GetTable<TestTable1>()
+                        .Where(r => r.TestField == TestEnum1.Value1)
+                        .Update(r => new TestTable1 { TestField = TestEnum1.Value2 });
+                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == "VAL2");
+                }
             });
         }
 
@@ -152,11 +188,14 @@ namespace Data.Linq
                     TestField = "VAL1"
                 });
 
-                db.GetTable<TestTable2>()
-                    .Where(r => r.TestField == TestEnum2.Value1)
-                    .Update(r => new TestTable2 { TestField = TestEnum2.Value2 });
-                var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == TestEnum2.Value2);
+                using (new Cleaner(db))
+                {
+                    db.GetTable<TestTable2>()
+                        .Where(r => r.TestField == TestEnum2.Value1)
+                        .Update(r => new TestTable2 { TestField = TestEnum2.Value2 });
+                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == "VAL2");
+                }
             });
         }
 
@@ -170,9 +209,12 @@ namespace Data.Linq
                     TestField = "VAL2"
                 });
 
-                var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => new { r.TestField }).FirstOrDefault();
-                Assert.NotNull(result);
-                Assert.True(result.TestField == TestEnum1.Value2);
+                using (new Cleaner(db))
+                {
+                    var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => new { r.TestField }).FirstOrDefault();
+                    Assert.NotNull(result);
+                    Assert.True(result.TestField == TestEnum1.Value2);
+                }
             });
         }
 
@@ -186,43 +228,12 @@ namespace Data.Linq
                     TestField = "VAL2"
                 });
 
-                var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => new { r.TestField }).FirstOrDefault();
-                Assert.NotNull(result);
-                Assert.True(result.TestField == TestEnum2.Value2);
-            });
-        }
-
-        [Test]
-        public void EnumMapUpdate3()
-        {
-            ForEachProvider(db =>
-            {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
+                using (new Cleaner(db))
                 {
-                    TestField = "VAL1"
-                });
-
-                db.GetTable<TestTable1>()
-                    .Update(r => new TestTable1 { TestField = TestEnum1.Value2 });
-                var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == "VAL2");
-            });
-        }
-
-        [Test]
-        public void EnumMapUpdate4()
-        {
-            ForEachProvider(db =>
-            {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL1"
-                });
-
-                db.GetTable<TestTable2>()
-                    .Update(r => new TestTable2 { TestField = TestEnum2.Value2 });
-                var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == "VAL2");
+                    var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => new { r.TestField }).FirstOrDefault();
+                    Assert.NotNull(result);
+                    Assert.True(result.TestField == TestEnum2.Value2);
+                }
             });
         }
 
@@ -235,7 +246,10 @@ namespace Data.Linq
                 {
                     TestField = "VAL2"
                 });
-                Assert.True(1 == db.GetTable<TestTable1>().Delete(r => r.TestField == TestEnum1.Value2));
+                using (new Cleaner(db))
+                {
+                    Assert.True(1 == db.GetTable<TestTable1>().Delete(r => r.TestField == TestEnum1.Value2));
+                }
             });
         }
 
@@ -249,7 +263,52 @@ namespace Data.Linq
                     TestField = "VAL2"
                 });
 
-                Assert.True(1 == db.GetTable<TestTable2>().Delete(r => r.TestField == TestEnum2.Value2));
+                using (new Cleaner(db))
+                {
+                    Assert.True(1 == db.GetTable<TestTable2>().Delete(r => r.TestField == TestEnum2.Value2));
+                }
+            });
+        }
+
+        [Test]
+        public void EnumMapUpdate3()
+        {
+            ForEachProvider(db =>
+            {
+                db.GetTable<RawTable>().Insert(() => new RawTable()
+                {
+                    TestField = "VAL1"
+                });
+
+                using (new Cleaner(db))
+                {
+                    db.GetTable<TestTable1>()
+                        .Where(r => r.TestField == TestEnum1.Value1)
+                        .Set(r => r.TestField, TestEnum1.Value2).Update();
+                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == "VAL2");
+                }
+            });
+        }
+
+        [Test]
+        public void EnumMapUpdate4()
+        {
+            ForEachProvider(db =>
+            {
+                db.GetTable<RawTable>().Insert(() => new RawTable()
+                {
+                    TestField = "VAL1"
+                });
+
+                using (new Cleaner(db))
+                {
+                    db.GetTable<TestTable2>()
+                        .Where(r => r.TestField == TestEnum2.Value1)
+                        .Set(r => r.TestField, TestEnum2.Value2).Update();
+                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == "VAL2");
+                }
             });
         }
 
@@ -260,47 +319,50 @@ namespace Data.Linq
             {
                 db.GetTable<RawTable>().Insert(() => new RawTable()
                 {
-                    TestField = "VAL1"
-                });
-
-                db.GetTable<TestTable1>()
-                    .Set(r => r.TestField, TestEnum1.Value2).Update();
-                var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == "VAL2");
-            });
-        }
-
-        [Test]
-        public void EnumMapUpdate6()
-        {
-            ForEachProvider(db =>
-            {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL1"
-                });
-
-                db.GetTable<TestTable2>()
-                    .Set(r => r.TestField, TestEnum2.Value2).Update();
-                var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                Assert.True(result == "VAL2");
-            });
-        }
-
-        [Test]
-        public void EnumMapUpdate7()
-        {
-            ForEachProvider(db =>
-            {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
                     Int32Field = 3
                 });
 
-                db.GetTable<TestTable2>()
-                    .Where(r => r.Int32Field == TestEnum3.Value1)
-                    .Set(r => r.Int32Field, () => TestEnum3.Value2).Update();
-                Assert.True(1 == db.GetTable<RawTable>().Where(r => r.Int32Field == 4).Count());
+                using (new Cleaner(db))
+                {
+                    db.GetTable<TestTable2>()
+                        .Where(r => r.Int32Field == TestEnum3.Value1)
+                        .Set(r => r.Int32Field, () => TestEnum3.Value2).Update();
+                    Assert.True(1 == db.GetTable<RawTable>().Where(r => r.Int32Field == 4).Count());
+                }
+            });
+        }
+
+        [Test]
+        public void EnumMapWhere3()
+        {
+            ForEachProvider(db =>
+            {
+                db.GetTable<RawTable>().Insert(() => new RawTable()
+                {
+                    TestField = "VAL2"
+                });
+
+                using (new Cleaner(db))
+                {
+                    Assert.True(1 == db.GetTable<TestTable1>().Where(r => new[] { TestEnum1.Value2 }.Contains(r.TestField)).Count());
+                }
+            });
+        }
+
+        [Test]
+        public void EnumMapWhere4()
+        {
+            ForEachProvider(db =>
+            {
+                db.GetTable<RawTable>().Insert(() => new RawTable()
+                {
+                    TestField = "VAL2"
+                });
+
+                using (new Cleaner(db))
+                {
+                    Assert.True(1 == db.GetTable<TestTable2>().Where(r => new[] { TestEnum2.Value2 }.Contains(r.TestField)).Count());
+                }
             });
         }
     }
