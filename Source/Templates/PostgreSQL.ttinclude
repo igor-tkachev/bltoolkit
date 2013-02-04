@@ -5,6 +5,11 @@ private void LoadServerMetadata()
 {
 	var tables  = CreateList(new { ID = 0, Table  = new Table()  });
 	var columns = CreateList(new { ID = 0, Column = new Column() });
+	
+	if (!string.IsNullOrEmpty(DataProviderAssembly)) 
+	{
+		System.Reflection.Assembly.LoadFile(DataProviderAssembly.Replace("Npgsql.dll", "Mono.Security.dll"));
+	}
 
 	using (var conn = GetConnection())
 	using (var cmd  = conn.CreateCommand())
