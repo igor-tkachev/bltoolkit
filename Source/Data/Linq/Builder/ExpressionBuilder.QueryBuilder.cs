@@ -178,7 +178,7 @@ namespace BLToolkit.Data.Linq.Builder
 
             Expression mapper;
 
-            if (ma.Type.IsEnum)
+            if (TypeHelper.IsEnumOrNullableEnum(ma.Type))
             {
                 mapper =
                     Expression.Convert(

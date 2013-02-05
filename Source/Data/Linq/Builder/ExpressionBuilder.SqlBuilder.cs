@@ -1399,7 +1399,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var operand = conv.Operand;
 			var type    = operand.Type;
 
-			if (!type.IsEnum)
+			if (!TypeHelper.IsEnumOrNullableEnum(type))
 				return null;
 
 			var dic = new Dictionary<object, object>();
@@ -1455,7 +1455,7 @@ namespace BLToolkit.Data.Linq.Builder
                         if (operand is MemberExpression)
                         {
                             var me = (MemberExpression)operand;
-                            MemberAccessor memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+                            var memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
                             sqlValue.SetEnumConverter(memberAccessor, MappingSchema);
                         }
 
@@ -1470,8 +1470,35 @@ namespace BLToolkit.Data.Linq.Builder
 						var l = ConvertToSql(context, operand);
 						var r = ConvertToSql(context, value);
 
-						if (l is SqlParameter) ((SqlParameter)l).SetEnumConverter(type, MappingSchema);
-						if (r is SqlParameter) ((SqlParameter)r).SetEnumConverter(type, MappingSchema);
+                        MemberAccessor memberAccessor = null;
+                        if (operand is MemberExpression)
+                        {
+                            var me = (MemberExpression)operand;
+                            memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+                        }
+
+                        if (l is SqlValueBase)
+                        {
+                            if (memberAccessor != null)
+                            {
+                                ((SqlValueBase)l).SetEnumConverter(memberAccessor, MappingSchema);
+                            }
+                            else
+                            {
+                                ((SqlValueBase)l).SetEnumConverter(type, MappingSchema);
+                            }
+                        }
+                        if (r is SqlValueBase)
+                        {
+                            if (memberAccessor != null)
+                            {
+                                ((SqlValueBase)r).SetEnumConverter(memberAccessor, MappingSchema);
+                            }
+                            else
+                            {
+                                ((SqlValueBase)r).SetEnumConverter(type, MappingSchema);
+                            }
+                        }
 
 						return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
@@ -1778,7 +1805,7 @@ namespace BLToolkit.Data.Linq.Builder
                         if (arg is MemberExpression)
                         {
                             var me = (MemberExpression)arg;
-                            if (me.Type.IsEnum)
+                            if (TypeHelper.IsEnumOrNullableEnum(me.Type))
                             {
                                 memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
                             }

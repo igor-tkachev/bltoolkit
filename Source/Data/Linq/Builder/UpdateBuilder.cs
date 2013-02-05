@@ -212,7 +212,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
 						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression);
 
-                        if (expr is SqlValueBase && ma.Expression.Type.IsEnum)
+                        if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(ma.Expression.Type))
                         {
                             MemberAccessor memberAccessor = TypeAccessor.GetAccessor(ma.Member.DeclaringType)[ma.Member.Name];
                             ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
@@ -284,7 +284,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			builder.ReplaceParent(ctx, sp);
 
-			if (expr is SqlValueBase && update.Body.Type.IsEnum)
+			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Body.Type))
             {
                 var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
                 ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
@@ -327,7 +327,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var expr   = builder.ConvertToSql(select, update);
 
-            if (expr is SqlValueBase && update.Type.IsEnum)
+            if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
             {
                 var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
                 ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);

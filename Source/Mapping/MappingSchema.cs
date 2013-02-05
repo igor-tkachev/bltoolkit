@@ -1723,7 +1723,7 @@ namespace BLToolkit.Mapping
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public virtual object MapValueToEnum(object value, MemberAccessor ma)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
                 return GetNullValue(ma.Type);
 
             MapValue[] mapValues = GetMapValues(ma);
@@ -1884,8 +1884,10 @@ namespace BLToolkit.Mapping
                 }
             }
 
+            var memberAccessorType = TypeHelper.UnwrapNullableType(memberAccessor.Type);
+
             return convertToUnderlyingType ?
-                System.Convert.ChangeType(value, Enum.GetUnderlyingType(memberAccessor.Type), Thread.CurrentThread.CurrentCulture) :
+                System.Convert.ChangeType(value, Enum.GetUnderlyingType(memberAccessorType), Thread.CurrentThread.CurrentCulture) :
 				value;
 		}
 
