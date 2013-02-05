@@ -574,7 +574,7 @@ namespace Data.Linq
         [TestCaseSource("m_idlProviders")]
         public void TestUpdateWithTargetByAssociationProperty(string providerName)
         {
-            TestUpdateByAssociationProperty(providerName,true);
+            TestUpdateByAssociationProperty(providerName, true);
         }
 
         [TestCaseSource("m_idlProviders")]
@@ -582,7 +582,7 @@ namespace Data.Linq
         {
             TestUpdateByAssociationProperty(providerName, false);
         }
-        
+
         private void TestUpdateByAssociationProperty(string providerName, bool useUpdateWithTarget)
         {
             ForProvider(
@@ -595,7 +595,7 @@ namespace Data.Linq
                         try
                         {
                             db.Parent.Insert(() => new Parent { ParentID = parentId });
-                            db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
+                            db.Child.Insert(() => new Child { ChildID = childId, ParentID = parentId });
 
                             var parents = from child in db.Child
                                           where child.ChildID == childId
@@ -608,7 +608,7 @@ namespace Data.Linq
                             }
                             else
                             {
-                                  // this works with MySql but failed for SQLite and MS SQL
+                                // this works with MySql but failed for SQLite and MS SQL
                                 Assert.DoesNotThrow(() => parents.Set(x => x.Value1, 5).Update());
                             }
                         }
@@ -679,6 +679,83 @@ namespace Data.Linq
                             (resultquery.Substring(rqr + "ORDER BY".Length).Split(',')).Select(p => p.Trim()).ToArray();
 
                         Assert.That(rqp.Count(), Is.EqualTo(3));
+                    });
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestContainsForNullableDateTimeWithOnlyNullValue1(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        var dates = new DateTime?[] { null };
+
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => dates.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
+
+                        var result = db.Types2.Count(x => dates.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
+                    });
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestContainsForNullableDateTimeWithOnlyNullValue2(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => new DateTime?[] { null }.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
+
+                        var result = db.Types2.Count(x => new DateTime?[] { null }.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
+                    });
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestContainsForNullableDateTimeWithNullAndNotNullValues1(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        var date  = new DateTime(2009,  9,  24,  9, 19, 29,  90);
+                        var dates = new DateTime?[] { null, date };
+
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => dates.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
+
+                        var result = db.Types2.Count(x => dates.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
+                    });
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestContainsForNullableDateTimeWithNullAndNotNullValues2(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => new DateTime?[] { null, new DateTime(2009,  9,  24,  9, 19, 29,  90) }.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
+
+                        var result = db.Types2.Count(x => new DateTime?[] { null, new DateTime(2009,  9,  24,  9, 19, 29,  90) }.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
                     });
         }
 
