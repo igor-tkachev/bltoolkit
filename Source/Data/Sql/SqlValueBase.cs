@@ -10,7 +10,7 @@ namespace BLToolkit.Data.Sql
     public abstract class SqlValueBase: IValueContainer
     {
         protected object _value;
-        public object Value
+        public virtual object Value
         {
             get
             {

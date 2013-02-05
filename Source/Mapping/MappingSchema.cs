@@ -1666,9 +1666,16 @@ namespace BLToolkit.Mapping
 				{
 					try
 					{
-						if (comp.CompareTo(mapValue) == 0)
-							return mv.OrigValue;
-					}
+                        // well, this is a fix for Access
+                        // data reader for Access returns int for a field with type long
+                        if (comp is int && mapValue is long)
+                        {
+                            if (comp.CompareTo((int)(long)mapValue) == 0)
+                                return mv.OrigValue;
+                        }
+                        else if (comp.CompareTo(mapValue) == 0)
+                            return mv.OrigValue;
+                    }
 					catch (ArgumentException ex)
 					{
 						Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
@@ -1730,7 +1737,14 @@ namespace BLToolkit.Mapping
                     {
                         try
                         {
-                            if (comp.CompareTo(mapValue) == 0)
+                            // well, this is a fix for Access
+                            // data reader for Access returns int for a field with type long
+                            if (comp is int && mapValue is long)
+                            {
+                                if (comp.CompareTo((int)(long)mapValue) == 0)
+                                    return mv.OrigValue;
+                            }
+                            else if (comp.CompareTo(mapValue) == 0)
                                 return mv.OrigValue;
                         }
                         catch (ArgumentException ex)

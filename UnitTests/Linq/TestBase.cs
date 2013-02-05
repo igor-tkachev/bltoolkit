@@ -25,25 +25,10 @@ namespace Data.Linq
     using System.Globalization;
     using System.Threading;
 
+    // fix for failing tests due to use of "," vs "." in numbers parsing for some cultures
+    [SetCulture("")]
 	public class TestBase
 	{
-        #region REMOVE IT!
-        CultureInfo _oldCulture;
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            // TODO: remove. temporary solution for "," vs "." in numbers parsing
-            _oldCulture = Thread.CurrentThread.CurrentCulture;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown()
-        {
-            Thread.CurrentThread.CurrentCulture = _oldCulture;
-        }
-        #endregion
-
         static TestBase()
 		{
 			var providerListFile =
@@ -323,7 +308,8 @@ namespace Data.Linq
 			if (ex != null)
 				throw ex;
 
-            if (!executedForAtLeastOneProvider)                throw new ApplicationException("Delegate function has not been executed.");        }
+            if (!executedForAtLeastOneProvider)
+                throw new ApplicationException("Delegate function has not been executed.");}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
 		{

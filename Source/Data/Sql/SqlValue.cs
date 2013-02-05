@@ -20,7 +20,19 @@ namespace BLToolkit.Data.Sql
 				_systemType = value.GetType();
 		}
 
-		readonly Type   _systemType; public Type    SystemType { get { return _systemType; } }
+        public override object Value
+        {
+            get
+            {
+                var rv = base.Value;
+                if (rv != null && rv.GetType() != _systemType)
+                {
+                    _systemType = rv.GetType();
+                }
+                return rv;
+            }
+        }
+		Type   _systemType; public Type    SystemType { get { return _systemType; } }
 
 		#region Overrides
 
