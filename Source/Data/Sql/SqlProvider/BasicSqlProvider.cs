@@ -2101,9 +2101,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				var tableKeys = table.GetKeys(true);
 				var copyKeys  = copy. GetKeys(true);
 
-				for (var i = 0; i < tableKeys.Count; i++)
-					sqlQuery.Where
-						.Expr(copyKeys[i]).Equal.Expr(tableKeys[i]);
+				if (sqlQuery.Where.SearchCondition.Conditions.Any(c => c.IsOr))
+				{
+					var sc1 = new SqlQuery.SearchCondition(sqlQuery.Where.SearchCondition.Conditions);
+					var sc2 = new SqlQuery.SearchCondition();
+
+					for (var i = 0; i < tableKeys.Count; i++)
+					{
+						sc2.Conditions.Add(new SqlQuery.Condition(
+							false,
+							new SqlQuery.Predicate.ExprExpr(copyKeys[i], SqlQuery.Predicate.Operator.Equal, tableKeys[i])));
+					}
+
+					sqlQuery.Where.SearchCondition.Conditions.Clear();
+					sqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, sc1));
+					sqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, sc2));
+				}
+				else
+				{
+					for (var i = 0; i < tableKeys.Count; i++)
+						sqlQuery.Where.Expr(copyKeys[i]).Equal.Expr(tableKeys[i]);
+				}
 
 				sql.From.Table(copy).Where.Exists(sqlQuery);
 				sql.Parameters.AddRange(sqlQuery.Parameters);
