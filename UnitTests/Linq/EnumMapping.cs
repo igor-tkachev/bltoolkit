@@ -14,9 +14,9 @@ namespace Data.Linq
     {
         enum TestEnum1
         {
-            [MapValue("VAL1")]
+            [MapValue(11L)]
             Value1 = 3,
-            [MapValue("VAL2")]
+            [MapValue(12L)]
             Value2,
         }
         enum TestEnum2
@@ -30,41 +30,41 @@ namespace Data.Linq
             Value2,
         }
 
-        [TableName("DataTypeTest")]
+        [TableName("LinqDataTypes")]
         class TestTable1
         {
-            [PrimaryKey, MapField("DataTypeID")]
+            [PrimaryKey, MapField("ID")]
             public int Id;
 
-            [MapField("String_")]
+            [MapField("BigIntValue")]
             public TestEnum1 TestField;
         }
 
-        [MapValue(TestEnum2.Value2, "VAL2")]
-        [TableName("DataTypeTest")]
+        [MapValue(TestEnum2.Value2, 12L)]
+        [TableName("LinqDataTypes")]
         class TestTable2
         {
-            [PrimaryKey, MapField("DataTypeID")]
+            [PrimaryKey, MapField("ID")]
             public int Id;
 
-            [MapValue(TestEnum2.Value1, "VAL1")]
-            [MapField("String_")]
+            [MapValue(TestEnum2.Value1, 11L)]
+            [MapField("BigIntValue")]
             public TestEnum2 TestField;
 
-            [MapField("Int32_")]
+            [MapField("IntValue")]
             public TestEnum3 Int32Field;
         }
 
-        [TableName("DataTypeTest")]
+        [TableName("LinqDataTypes")]
         class RawTable
         {
-            [PrimaryKey, MapField("DataTypeID")]
+            [PrimaryKey, MapField("ID")]
             public int Id;
 
-            [MapField("String_")]
-            public string TestField;
+            [MapField("BigIntValue")]
+            public long TestField;
 
-            [MapField("Int32_")]
+            [MapField("IntValue")]
             public int Int32Field;
         }
 
@@ -74,14 +74,20 @@ namespace Data.Linq
             public Cleaner(ITestDataContext db)
             {
                 _db = db;
+                Clean();
+            }
+
+            private void Clean()
+            {
+                _db.GetTable<RawTable>().Where(r => r.Id == RID).Delete();
             }
 
             public void Dispose()
             {
                 try
                 {
-                    // rollback emulation for WCF :)
-                    _db.GetTable<RawTable>().Where(r => !new int[] { 1, 2 }.Contains(r.Id)).Delete();
+                    // rollback emulation for WCF
+                    Clean();
                 }
                 catch (Exception)
                 {
@@ -89,18 +95,24 @@ namespace Data.Linq
             }
         }
 
+        const long VAL2 = 12;
+        const long VAL1 = 11;
+        const int RID = 101;
+
         [Test]
         public void EnumMapInsert1()
         {
             ForEachProvider(db =>
             {
-                db.GetTable<TestTable1>().Insert(() => new TestTable1
-                {
-                    TestField = TestEnum1.Value2
-                });
                 using (new Cleaner(db))
                 {
-                    Assert.True(db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Count() == 1);
+                    db.GetTable<TestTable1>().Insert(() => new TestTable1
+                    {
+                        Id = RID,
+                        TestField = TestEnum1.Value2
+                    });
+
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Count());
                 }
             });
         }
@@ -110,13 +122,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<TestTable2>().Insert(() => new TestTable2
-                {
-                    TestField = TestEnum2.Value2
-                });
                 using (new Cleaner(db))
                 {
-                    Assert.True(db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Count() == 1);
+                    db.GetTable<TestTable2>().Insert(() => new TestTable2
+                    {
+                        Id = RID,
+                        TestField = TestEnum2.Value2
+                    });
+
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Count());
                 }
             });
         }
@@ -126,14 +140,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => r.TestField).FirstOrDefault();
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var result = db.GetTable<TestTable1>().Where(r => r.Id == RID && r.TestField == TestEnum1.Value2).Select(r => r.TestField).FirstOrDefault();
                     Assert.True(result == TestEnum1.Value2);
                 }
             });
@@ -144,14 +159,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => r.TestField).FirstOrDefault();
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var result = db.GetTable<TestTable2>().Where(r => r.Id == RID && r.TestField == TestEnum2.Value2).Select(r => r.TestField).FirstOrDefault();
                     Assert.True(result == TestEnum2.Value2);
                 }
             });
@@ -162,18 +178,24 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL1"
-                });
-
                 using (new Cleaner(db))
                 {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL1
+                    });
+
                     db.GetTable<TestTable1>()
-                        .Where(r => r.TestField == TestEnum1.Value1)
+                        .Where(r => r.Id == RID && r.TestField == TestEnum1.Value1)
                         .Update(r => new TestTable1 { TestField = TestEnum1.Value2 });
-                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                    Assert.True(result == "VAL2");
+
+                    var result = db.GetTable<RawTable>()
+                        .Where(r => r.Id == RID && r.TestField == VAL2)
+                        .Select(r => r.TestField)
+                        .FirstOrDefault();
+
+                    Assert.True(result == VAL2);
                 }
             });
         }
@@ -183,18 +205,24 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL1"
-                });
-
                 using (new Cleaner(db))
                 {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL1
+                    });
+
                     db.GetTable<TestTable2>()
-                        .Where(r => r.TestField == TestEnum2.Value1)
+                        .Where(r => r.Id == RID && r.TestField == TestEnum2.Value1)
                         .Update(r => new TestTable2 { TestField = TestEnum2.Value2 });
-                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                    Assert.True(result == "VAL2");
+
+                    var result = db.GetTable<RawTable>()
+                        .Where(r => r.Id == RID && r.TestField == VAL2)
+                        .Select(r => r.TestField)
+                        .FirstOrDefault();
+
+                    Assert.True(result == VAL2);
                 }
             });
         }
@@ -204,14 +232,19 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    var result = db.GetTable<TestTable1>().Where(r => r.TestField == TestEnum1.Value2).Select(r => new { r.TestField }).FirstOrDefault();
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var result = db.GetTable<TestTable1>()
+                        .Where(r => r.Id == RID && r.TestField == TestEnum1.Value2)
+                        .Select(r => new { r.TestField })
+                        .FirstOrDefault();
+
                     Assert.NotNull(result);
                     Assert.True(result.TestField == TestEnum1.Value2);
                 }
@@ -223,14 +256,19 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    var result = db.GetTable<TestTable2>().Where(r => r.TestField == TestEnum2.Value2).Select(r => new { r.TestField }).FirstOrDefault();
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var result = db.GetTable<TestTable2>()
+                        .Where(r => r.Id == RID && r.TestField == TestEnum2.Value2)
+                        .Select(r => new { r.TestField })
+                        .FirstOrDefault();
+
                     Assert.NotNull(result);
                     Assert.True(result.TestField == TestEnum2.Value2);
                 }
@@ -242,13 +280,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
                 using (new Cleaner(db))
                 {
-                    Assert.True(1 == db.GetTable<TestTable1>().Delete(r => r.TestField == TestEnum1.Value2));
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<TestTable1>().Delete(r => r.Id == RID && r.TestField == TestEnum1.Value2));
                 }
             });
         }
@@ -258,14 +298,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    Assert.True(1 == db.GetTable<TestTable2>().Delete(r => r.TestField == TestEnum2.Value2));
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<TestTable2>().Delete(r => r.Id == RID && r.TestField == TestEnum2.Value2));
                 }
             });
         }
@@ -275,18 +316,19 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL1"
-                });
-
                 using (new Cleaner(db))
                 {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL1
+                    });
+
                     db.GetTable<TestTable1>()
-                        .Where(r => r.TestField == TestEnum1.Value1)
+                        .Where(r => r.Id == RID && r.TestField == TestEnum1.Value1)
                         .Set(r => r.TestField, TestEnum1.Value2).Update();
-                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                    Assert.True(result == "VAL2");
+                    var result = db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == VAL2);
                 }
             });
         }
@@ -296,18 +338,19 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL1"
-                });
-
                 using (new Cleaner(db))
                 {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL1
+                    });
+
                     db.GetTable<TestTable2>()
-                        .Where(r => r.TestField == TestEnum2.Value1)
+                        .Where(r => r.Id == RID && r.TestField == TestEnum2.Value1)
                         .Set(r => r.TestField, TestEnum2.Value2).Update();
-                    var result = db.GetTable<RawTable>().Where(r => r.TestField == "VAL2").Select(r => r.TestField).FirstOrDefault();
-                    Assert.True(result == "VAL2");
+                    var result = db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Select(r => r.TestField).FirstOrDefault();
+                    Assert.True(result == VAL2);
                 }
             });
         }
@@ -317,17 +360,18 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    Int32Field = 3
-                });
-
                 using (new Cleaner(db))
                 {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        Int32Field = 3
+                    });
+
                     db.GetTable<TestTable2>()
-                        .Where(r => r.Int32Field == TestEnum3.Value1)
+                        .Where(r => r.Id == RID && r.Int32Field == TestEnum3.Value1)
                         .Set(r => r.Int32Field, () => TestEnum3.Value2).Update();
-                    Assert.True(1 == db.GetTable<RawTable>().Where(r => r.Int32Field == 4).Count());
+                    Assert.True(1 == db.GetTable<RawTable>().Where(r => r.Id == RID && r.Int32Field == 4).Count());
                 }
             });
         }
@@ -337,14 +381,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    Assert.True(1 == db.GetTable<TestTable1>().Where(r => new[] { TestEnum1.Value2 }.Contains(r.TestField)).Count());
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<TestTable1>().Where(r => r.Id == RID && new[] { TestEnum1.Value2 }.Contains(r.TestField)).Count());
                 }
             });
         }
@@ -354,14 +399,15 @@ namespace Data.Linq
         {
             ForEachProvider(db =>
             {
-                db.GetTable<RawTable>().Insert(() => new RawTable()
-                {
-                    TestField = "VAL2"
-                });
-
                 using (new Cleaner(db))
                 {
-                    Assert.True(1 == db.GetTable<TestTable2>().Where(r => new[] { TestEnum2.Value2 }.Contains(r.TestField)).Count());
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<TestTable2>().Where(r => r.Id == RID && new[] { TestEnum2.Value2 }.Contains(r.TestField)).Count());
                 }
             });
         }

@@ -54,7 +54,7 @@ namespace Data.Linq
 				db.Parent.SelectMany(p => db.Child.Select(_ => _.ParentID + 1).Where(_ => p.ParentID == _))));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Basic5()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -78,7 +78,7 @@ namespace Data.Linq
 				db.Parent.SelectMany(p => p.Children.Select(_ => _.ParentID + 1).Where(_ => _ > 1 || _ > 2)).Where(_ => _ > 0 || _ > 3)));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Basic62()
 		{
 			ForEachProvider(new[] { ProviderName.Access },
@@ -111,7 +111,7 @@ namespace Data.Linq
 				db.Parent.SelectMany(p => p.Children.SelectMany(t => p.GrandChildren))));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Basic10()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -119,7 +119,7 @@ namespace Data.Linq
 				db.Child.GroupBy(o => o.ParentID2).SelectMany(g => g.Select(o => o.Parent))));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Basic11()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -296,7 +296,7 @@ namespace Data.Linq
 				db.Parent.SelectMany(p => p.Children).Where(t => t.ParentID == 1).Select(t => t)));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void OneParam3()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -339,7 +339,7 @@ namespace Data.Linq
 				select ch));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void SelectManyLeftJoin3()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -401,7 +401,7 @@ namespace Data.Linq
 				select p));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test3()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => Assert.AreEqual(
@@ -433,7 +433,7 @@ namespace Data.Linq
 				select c).Count()));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test5()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>
@@ -448,7 +448,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test6()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>
@@ -464,7 +464,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test7()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -482,7 +482,7 @@ namespace Data.Linq
 				select r));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test8()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>
@@ -524,7 +524,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test9()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>
@@ -555,7 +555,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void Test91()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>
