@@ -683,7 +683,7 @@ namespace Data.Linq
         }
 
         [TestCaseSource("m_idlProviders")]
-        public void TestContainsForNullableDateTimeWithOnlyNullValue(string providerName)
+        public void TestContainsForNullableDateTimeWithOnlyNullValue1(string providerName)
         {
             ForProvider(
                 providerName,
@@ -703,32 +703,59 @@ namespace Data.Linq
         }
 
         [TestCaseSource("m_idlProviders")]
-        public void TestContainsForNullableDateTimeWithNullAndNotNullValues(string providerName)
+        public void TestContainsForNullableDateTimeWithOnlyNullValue2(string providerName)
         {
             ForProvider(
                 providerName,
                 db =>
                     {
-                        var date = DateTime.Now;
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => new DateTime?[] { null }.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
+
+                        var result = db.Types2.Count(x => new DateTime?[] { null }.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
+                    });
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestContainsForNullableDateTimeWithNullAndNotNullValues1(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        var date  = new DateTime(2009,  9,  24,  9, 19, 29,  90);
                         var dates = new DateTime?[] { null, date };
-                        var id = db.Types2.Max(x => x.ID) + 1;
-                        try
-                        {
-                            db.Types2.Insert(() => new LinqDataTypes2 { ID = id, DateTimeValue2 = date });
 
-                            // Ensures that  the query works properly in memory
-                            // ReSharper disable RemoveToList.2
-                            var resultCount = db.Types2.ToList().Count(x => dates.Contains(x.DateTimeValue2));
-                            // ReSharper restore RemoveToList.2
-                            Assert.That(resultCount, Is.GreaterThan(0));
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => dates.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
 
-                            var result = db.Types2.Count(x => dates.Contains(x.DateTimeValue2));
-                            Assert.That(result, Is.EqualTo(resultCount));
-                        }
-                        finally
-                        {
-                            db.Types2.Delete(x => x.ID == id);
-                        }
+                        var result = db.Types2.Count(x => dates.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
+                    });
+        }
+
+        [TestCaseSource("m_idlProviders")]
+        public void TestContainsForNullableDateTimeWithNullAndNotNullValues2(string providerName)
+        {
+            ForProvider(
+                providerName,
+                db =>
+                    {
+                        // Ensures that  the query works properly in memory
+                        // ReSharper disable RemoveToList.2
+                        var resultCount = db.Types2.ToList().Count(x => new DateTime?[] { null, new DateTime(2009,  9,  24,  9, 19, 29,  90) }.Contains(x.DateTimeValue2));
+                        // ReSharper restore RemoveToList.2
+                        Assert.That(resultCount, Is.GreaterThan(0));
+
+                        var result = db.Types2.Count(x => new DateTime?[] { null, new DateTime(2009,  9,  24,  9, 19, 29,  90) }.Contains(x.DateTimeValue2));
+                        Assert.That(result, Is.EqualTo(resultCount));
                     });
         }
 
