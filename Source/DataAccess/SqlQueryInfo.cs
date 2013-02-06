@@ -78,16 +78,18 @@ namespace BLToolkit.DataAccess
 					val = DBNull.Value;
 				}
 
-				if (mmi.IsDbTypeSet)
-				{
-					parameters[i] = mmi.IsDbSizeSet
-						? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize) 
-						: db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
-				}
-				else
-				{
-					parameters[i] = db.Parameter(info.ParameterName, val);
-				}
+                if (mmi.IsDbTypeSet)
+                {
+                    parameters[i] = mmi.IsDbSizeSet
+                        ? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize)
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
+                }
+                else
+                {
+                    parameters[i] = val != DBNull.Value
+                        ? db.Parameter(info.ParameterName, val)
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.GetDbType());
+                }
 			}
 
 			return parameters;

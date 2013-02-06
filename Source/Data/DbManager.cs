@@ -2612,17 +2612,19 @@ namespace BLToolkit.Data
 
 						IDbDataParameter p;
 
-						if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
-						{
-							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
-						}
-						else
-						{
-							if (value != null && value.GetType().IsEnum)
-								value = MappingSchema.MapEnumToValue(value, true);
+                        if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+                        {
+                            p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
+                        }
+                        else
+                        {
+                            if (value != null && value.GetType().IsEnum)
+                                value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
-						}
+                            p = value != null
+                                ? Parameter(baseParameters[i].ParameterName + nRows, value)
+                                : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
+                        }
 
 						parameters.Add(p);
 						hasValue.Add(value != null);
