@@ -3,7 +3,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Data" #>
 <#@ import namespace="System.Linq" #>
-<#@ import namespace="System.IO"   #> 
+<#@ import namespace="System.IO"   #>
 <#
 	AppDomain.CurrentDomain.AssemblyResolve += (_,args) =>
 	{
