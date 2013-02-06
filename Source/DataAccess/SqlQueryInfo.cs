@@ -73,12 +73,12 @@ namespace BLToolkit.DataAccess
 
 				var mmi = info.MemberMapper.MapMemberInfo;
 				var val = info.MemberMapper.GetValue(obj);
-               
-                if (val == null && mmi.Nullable/* && mmi.NullValue == null*/)
-                {
-                    //replace value with DbNull
-                    val = DBNull.Value;
-                }
+
+				if (val == null && mmi.Nullable/* && mmi.NullValue == null*/)
+				{
+					//replace value with DbNull
+					val = DBNull.Value;
+				}
 
                 if (mmi.IsDbTypeSet)
                 {
@@ -88,7 +88,9 @@ namespace BLToolkit.DataAccess
                 }
                 else
                 {
-                    parameters[i] = db.Parameter(info.ParameterName, val);
+                    parameters[i] = val != DBNull.Value
+                        ? db.Parameter(info.ParameterName, val)
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.GetDbType());
                 }
 
                 if (mmi.KeyGenerator is SequenceKeyGenerator && ActionName == "InsertWithIdentity")
