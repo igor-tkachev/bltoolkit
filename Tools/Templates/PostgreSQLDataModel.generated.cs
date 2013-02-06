@@ -12,10 +12,13 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Validation;
 
+using NpgsqlTypes;
+
 namespace PostgreSqlDataModel
 {
 	public partial class PostgreSqlDataContext : DbManager
 	{
+		public Table<alltypes>      alltypes      { get { return this.GetTable<alltypes>();      } }
 		public Table<Child>         Child         { get { return this.GetTable<Child>();         } }
 		public Table<Doctor>        Doctor        { get { return this.GetTable<Doctor>();        } }
 		public Table<entity>        entity        { get { return this.GetTable<entity>();        } }
@@ -28,6 +31,42 @@ namespace PostgreSqlDataModel
 		public Table<SequenceTest2> SequenceTest2 { get { return this.GetTable<SequenceTest2>(); } }
 		public Table<SequenceTest3> SequenceTest3 { get { return this.GetTable<SequenceTest3>(); } }
 		public Table<TestIdentity>  TestIdentity  { get { return this.GetTable<TestIdentity>();  } }
+	}
+
+	[TableName(Owner="public", Name="alltypes")]
+	public partial class alltypes
+	{
+		[Identity, PrimaryKey(1), Required] public Int32             id                  { get; set; } // integer
+		[Nullable                         ] public Int64?            bigintdatatype      { get; set; } // bigint
+		[Nullable                         ] public Decimal?          numericdatatype     { get; set; } // numeric
+		[Nullable                         ] public Int16?            smallintdatatype    { get; set; } // smallint
+		[Nullable                         ] public Int32?            intdatatype         { get; set; } // integer
+		[Nullable                         ] public Decimal?          moneydatatype       { get; set; } // money
+		[Nullable                         ] public Double?           doubledatatype      { get; set; } // double precision
+		[Nullable                         ] public Single?           realdatatype        { get; set; } // real
+		[Nullable                         ] public DateTime?         timestampdatatype   { get; set; } // timestamp without time zone
+		[Nullable                         ] public DateTime?         timestamptzdatatype { get; set; } // timestamp with time zone
+		[Nullable                         ] public DateTime?         datedatatype        { get; set; } // date
+		[Nullable                         ] public DateTime?         timedatatype        { get; set; } // time without time zone
+		[Nullable                         ] public DateTime?         timetzdatatype      { get; set; } // time with time zone
+		[Nullable                         ] public NpgsqlInterval?   intervaldatatype    { get; set; } // interval
+		[                         Required] public String            chardatatype        { get; set; } // character(1)(1)
+		[                         Required] public String            varchardatatype     { get; set; } // character varying(20)(20)
+		[                         Required] public String            textdatatype        { get; set; } // text
+		[                         Required] public Byte[]            binarydatatype      { get; set; } // bytea
+		[Nullable                         ] public Guid?             uuiddatatype        { get; set; } // uuid
+		[Nullable                         ] public BitString?        bitdatatype         { get; set; } // bit(3)(3)
+		[Nullable                         ] public Boolean?          booleandatatype     { get; set; } // boolean
+		[Nullable                         ] public object            colordatatype       { get; set; } // color
+		[Nullable                         ] public NpgsqlPoint?      pointdatatype       { get; set; } // point
+		[Nullable                         ] public NpgsqlLSeg?       lsegdatatype        { get; set; } // lseg
+		[Nullable                         ] public NpgsqlBox?        boxdatatype         { get; set; } // box
+		[Nullable                         ] public NpgsqlPath?       pathdatatype        { get; set; } // path
+		[Nullable                         ] public NpgsqlPolygon?    polygondatatype     { get; set; } // polygon
+		[Nullable                         ] public NpgsqlCircle?     circledatatype      { get; set; } // circle
+		[Nullable                         ] public NpgsqlInet?       inetdatatype        { get; set; } // inet
+		[Nullable                         ] public NpgsqlMacAddress? macaddrdatatype     { get; set; } // macaddr
+		[Nullable                         ] public String            xmldatatype         { get; set; } // xml
 	}
 
 	[TableName(Owner="public", Name="Child")]
