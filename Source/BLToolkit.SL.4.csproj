@@ -242,6 +242,7 @@
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlTableType.cs" />
     <Compile Include="Data\Sql\SqlValue.cs" />
+    <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Mapping\Association.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />

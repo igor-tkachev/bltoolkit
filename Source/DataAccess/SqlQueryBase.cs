@@ -212,7 +212,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertAutoSequence)
+		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertAutoSequence = false)
 		{
 			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			var om      = db.MappingSchema.GetObjectMapper(type);

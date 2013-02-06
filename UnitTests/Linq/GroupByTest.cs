@@ -1357,7 +1357,7 @@ namespace Data.Linq
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20))));
 		}
 
-		[Test]
+		[Test, Category("MySql")]
 		public void GroupByExtraFieldBugTest()
 		{
 			// https://github.com/igor-tkachev/bltoolkit/issues/42

@@ -221,18 +221,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 			attrs = member.GetTypeAttributes(typeof(MapValueAttribute));
 
+            var memberType = TypeHelper.UnwrapNullableType(member.Type);
+
 			if (attrs != null && attrs.Length > 0)
 			{
 				if (list == null)
 					list = new List<MapValue>(attrs.Length);
 
 				foreach (MapValueAttribute a in attrs)
-					if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == member.Type ||
-						a.Type is Type && (Type)a.Type == member.Type)
+                    if (a.Type == null && a.OrigValue != null && a.OrigValue.GetType() == memberType ||
+						a.Type is Type && (Type)a.Type == memberType)
 						list.Add(new MapValue(a.OrigValue, a.Values));
 			}
 
-			var typeMapValues = GetMapValues(typeExtension, member.Type, out isSet);
+			var typeMapValues = GetMapValues(typeExtension, memberType, out isSet);
 
 			if (list == null)
 				return typeMapValues;

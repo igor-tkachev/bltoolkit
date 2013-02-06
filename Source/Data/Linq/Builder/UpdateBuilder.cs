@@ -212,8 +212,11 @@ namespace BLToolkit.Data.Linq.Builder
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
 						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression);
 
-						if (expr is SqlParameter && ma.Expression.Type.IsEnum)
-							((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
+                        if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(ma.Expression.Type))
+                        {
+                            MemberAccessor memberAccessor = TypeAccessor.GetAccessor(ma.Member.DeclaringType)[ma.Member.Name];
+                            ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+                        }
 
 						items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 					}
@@ -281,8 +284,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			builder.ReplaceParent(ctx, sp);
 
-			if (expr is SqlParameter && update.Body.Type.IsEnum)
-				((SqlParameter)expr).SetEnumConverter(update.Body.Type, builder.MappingSchema);
+			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Body.Type))
+            {
+                var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
+                ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+            }
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
@@ -321,8 +327,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var expr   = builder.ConvertToSql(select, update);
 
-			if (expr is SqlParameter && update.Type.IsEnum)
-				((SqlParameter)expr).SetEnumConverter(update.Type, builder.MappingSchema);
+            if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
+            {
+                var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
+                ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+            }
 
 			items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 		}

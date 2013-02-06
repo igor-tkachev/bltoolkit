@@ -193,19 +193,19 @@ namespace Data.Linq
 			TestOneJohn(db => from p in db.Person where p.ID * 10 - 9 == 1 select p);
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void BinaryXor()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID ^ 2) == 3 select p);
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void BinaryAnd()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID & 3) == 1 select p);
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void BinaryOr()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID | 2) == 3 select p);

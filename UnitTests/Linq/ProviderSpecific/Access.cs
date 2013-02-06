@@ -6,7 +6,7 @@ using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq.ProviderSpecific
 {
-	[TestFixture]
+	[TestFixture, Category("Access")]
 	public class Access : TestBase
 	{
 		[Test]

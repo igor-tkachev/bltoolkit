@@ -116,7 +116,7 @@ namespace Data.Linq
 				select t));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void InnerJoin9()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -648,7 +648,7 @@ namespace Data.Linq
 				select p));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void ReferenceJoin1()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -656,7 +656,7 @@ namespace Data.Linq
 				from c in db.Child join g in db.GrandChild on c equals g.Child select new { c.ParentID, g.GrandChildID }));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void ReferenceJoin2()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -668,7 +668,7 @@ namespace Data.Linq
 				select new { c.ParentID, g.GrandChildID }));
 		}
 
-		[Test]
+        [Test, Category("Access")]
 		public void JoinByAnonymousTest()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
