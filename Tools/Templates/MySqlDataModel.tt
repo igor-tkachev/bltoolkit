@@ -1,6 +1,6 @@
 ﻿<#@ template language="C#" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs" #>
-<#@ assembly name="$(SolutionDir)\packages\MySql.Data.6.5.4\lib\Net40\MySql.Data.dll" #>
+<#@ assembly name="$(SolutionDir)\packages\MySql.Data.6.6.4\lib\Net40\MySql.Data.dll" #>
 <#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude" #>
 <#@ include file="$(SolutionDir)\Source\Templates\MySql.ttinclude"     #>
 <#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>

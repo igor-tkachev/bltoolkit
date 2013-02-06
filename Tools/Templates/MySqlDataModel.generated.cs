@@ -16,6 +16,7 @@ namespace MySqlDataModel
 {
 	public partial class MySqlDataContext : DbManager
 	{
+		public Table<alltypes>      alltypes      { get { return this.GetTable<alltypes>();      } }
 		public Table<binarydata>    binarydata    { get { return this.GetTable<binarydata>();    } }
 		public Table<child>         child         { get { return this.GetTable<child>();         } }
 		public Table<datatypetest>  datatypetest  { get { return this.GetTable<datatypetest>();  } }
@@ -26,6 +27,37 @@ namespace MySqlDataModel
 		public Table<patient>       patient       { get { return this.GetTable<patient>();       } }
 		public Table<person>        person        { get { return this.GetTable<person>();        } }
 		public Table<testidentity>  testidentity  { get { return this.GetTable<testidentity>();  } }
+	}
+
+	[TableName(Name="alltypes")]
+	public partial class alltypes
+	{
+		[Identity, PrimaryKey(1), Required        ] public int       ID                { get; set; } // int(10)
+		[Nullable                                 ] public long?     bigintDataType    { get; set; } // bigint(19)
+		[Nullable                                 ] public short?    smallintDataType  { get; set; } // smallint(5)
+		[Nullable                                 ] public sbyte?    tinyintDataType   { get; set; } // tinyint(3)
+		[Nullable                                 ] public int?      mediumintDataType { get; set; } // mediumint(7)
+		[Nullable                                 ] public int?      intDataType       { get; set; } // int(10)
+		[Nullable                                 ] public decimal?  numericDataType   { get; set; } // decimal(10)
+		[Nullable                                 ] public decimal?  decimalDataType   { get; set; } // decimal(10)
+		[Nullable                                 ] public double?   doubleDataType    { get; set; } // double(22)
+		[Nullable                                 ] public float?    floatDataType     { get; set; } // float(12)
+		[Nullable                                 ] public DateTime? dateDataType      { get; set; } // date
+		[Nullable                                 ] public DateTime? datetimeDataType  { get; set; } // datetime
+		[Nullable                                 ] public DateTime? timestampDataType { get; set; } // timestamp
+		[Nullable                                 ] public DateTime? timeDataType      { get; set; } // time
+		[Nullable                                 ] public DateTime? yearDataType      { get; set; } // year
+		[Nullable                                 ] public DateTime? year2DataType     { get; set; } // year
+		[Nullable                                 ] public DateTime? year4DataType     { get; set; } // year
+		[Nullable,                MaxLength(    1)] public string    charDataType      { get; set; } // char(1)
+		[Nullable,                MaxLength(   20)] public string    varcharDataType   { get; set; } // varchar(20)
+		[Nullable,                MaxLength(65535)] public string    textDataType      { get; set; } // text(65535)
+		[Nullable                                 ] public byte[]    binaryDataType    { get; set; } // binary(3)
+		[Nullable                                 ] public byte[]    varbinaryDataType { get; set; } // varbinary(5)
+		[Nullable                                 ] public byte[]    blobDataType      { get; set; } // blob(65535)
+		[Nullable                                 ] public bool?     bitDataType       { get; set; } // bit(3)
+		[Nullable,                MaxLength(    5)] public string    enumDataType      { get; set; } // enum(5)
+		[Nullable,                MaxLength(    7)] public string    setDataType       { get; set; } // set(7)
 	}
 
 	[TableName(Name="binarydata")]

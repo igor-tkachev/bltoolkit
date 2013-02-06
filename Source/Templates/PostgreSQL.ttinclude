@@ -5,6 +5,11 @@ private void LoadServerMetadata()
 {
 	var tables  = CreateList(new { ID = 0, Table  = new Table()  });
 	var columns = CreateList(new { ID = 0, Column = new Column() });
+	
+	if (!string.IsNullOrEmpty(DataProviderAssembly)) 
+	{
+		System.Reflection.Assembly.LoadFile(DataProviderAssembly.Replace("Npgsql.dll", "Mono.Security.dll"));
+	}
 
 	using (var conn = GetConnection())
 	using (var cmd  = conn.CreateCommand())
@@ -81,6 +86,8 @@ private void LoadServerMetadata()
 				pg_attribute.attnum > 0 AND
 				NOT pg_attribute.attisdropped"; 
 
+		bool addNpgsqlTypes = false;
+
 		using (var rd = cmd.ExecuteReader())
 		{
 			while (rd.Read())
@@ -102,36 +109,54 @@ private void LoadServerMetadata()
 					}
 				};
 
-				var c = col.Column;
+				var c   = col.Column;
+				var oid = Convert.ToInt32(rd["type"]);
 
-				switch (Convert.ToInt32(rd["type"]))
+				c.Type      = "object";
+				c.DbType    = DbType.Object;
+				c.SqlDbType = SqlDbType.Variant;
+
+				switch (oid)
 				{
-					case   16 /* bool     */ : c.Type = "Boolean";  c.DbType = DbType.Boolean;  c.SqlDbType = SqlDbType.Bit;              break;
-					case   17 /* bytea    */ : c.Type = "Byte[]";   c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.Binary;           break;
-					case   20 /* int8     */ : c.Type = "Int64";    c.DbType = DbType.Int64;    c.SqlDbType = SqlDbType.BigInt;           break;
-					case   21 /* int2     */ : c.Type = "Int16";    c.DbType = DbType.Int16;    c.SqlDbType = SqlDbType.SmallInt;         break;
-					case   23 /* int4     */ : c.Type = "Int32";    c.DbType = DbType.Int32;    c.SqlDbType = SqlDbType.Int;              break;
-					case   25 /* text     */ : c.Type = "String";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.Text;             break;
-					case  142 /* xml      */ : c.Type = "Xml";      c.DbType = DbType.Xml;      c.SqlDbType = SqlDbType.Xml;              break;
-					case  700 /* float4   */ : c.Type = "Single";   c.DbType = DbType.Single;   c.SqlDbType = SqlDbType.Real;             break;
-					case  701 /* float8   */ : c.Type = "Double";   c.DbType = DbType.Double;   c.SqlDbType = SqlDbType.Float;            break;
-					case  790 /* money    */ : c.Type = "Decimal";  c.DbType = DbType.Decimal;  c.SqlDbType = SqlDbType.Money;            break;
-					case 1042 /* char     */ : c.Type = "String";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.Char;             break;
-					case 1043 /* varchar  */ : c.Type = "String";   c.DbType = DbType.String;   c.SqlDbType = SqlDbType.VarChar;          break;
-					case 1082 /* date     */ : c.Type = "DateTime"; c.DbType = DbType.Date;     c.SqlDbType = SqlDbType.Date;             break;
-					case 1083 /* time     */ : c.Type = "DateTime"; c.DbType = DbType.Time;     c.SqlDbType = SqlDbType.Time;             break;
-					case 1114 /* datetime */ : c.Type = "DateTime"; c.DbType = DbType.DateTime; c.SqlDbType = SqlDbType.DateTime;         break;
-					case 1700 /* numeric  */ : c.Type = "Decimal";  c.DbType = DbType.Decimal;  c.SqlDbType = SqlDbType.Decimal;          break;
-					case 2950 /* Guid     */ : c.Type = "Guid";     c.DbType = DbType.Binary;   c.SqlDbType = SqlDbType.UniqueIdentifier; break;
-
+					case   16 /* bool                     */ : c.Type = "Boolean";          c.DbType = DbType.Boolean;   c.SqlDbType = SqlDbType.Bit;              break;
+					case   17 /* bytea                    */ : c.Type = "Byte[]";           c.DbType = DbType.Binary;    c.SqlDbType = SqlDbType.Binary;           break;
+					case   20 /* int8                     */ : c.Type = "Int64";            c.DbType = DbType.Int64;     c.SqlDbType = SqlDbType.BigInt;           break;
+					case   21 /* int2                     */ : c.Type = "Int16";            c.DbType = DbType.Int16;     c.SqlDbType = SqlDbType.SmallInt;         break;
+					case   23 /* int4                     */ : c.Type = "Int32";            c.DbType = DbType.Int32;     c.SqlDbType = SqlDbType.Int;              break;
+					case   25 /* text                     */ : c.Type = "String";           c.DbType = DbType.String;    c.SqlDbType = SqlDbType.Text;             break;
+					case  142 /* xml                      */ : c.Type = "String";           c.DbType = DbType.Xml;       c.SqlDbType = SqlDbType.Xml;              break;
+					case  600 /* point                    */ : c.Type = "NpgsqlPoint";      addNpgsqlTypes = true;                                                 break;
+					case  601 /* lseg                     */ : c.Type = "NpgsqlLSeg";       addNpgsqlTypes = true;                                                 break;
+					case  602 /* path                     */ : c.Type = "NpgsqlPath";       addNpgsqlTypes = true;                                                 break;
+					case  603 /* box                      */ : c.Type = "NpgsqlBox";        addNpgsqlTypes = true;                                                 break;
+					case  604 /* polygon                  */ : c.Type = "NpgsqlPolygon";    addNpgsqlTypes = true;                                                 break;
+					case  700 /* float4                   */ : c.Type = "Single";           c.DbType = DbType.Single;    c.SqlDbType = SqlDbType.Real;             break;
+					case  701 /* float8                   */ : c.Type = "Double";           c.DbType = DbType.Double;    c.SqlDbType = SqlDbType.Float;            break;
+					case  718 /* circle                   */ : c.Type = "NpgsqlCircle";     addNpgsqlTypes = true;                                                 break;
+					case  790 /* money                    */ : c.Type = "Decimal";          c.DbType = DbType.Decimal;   c.SqlDbType = SqlDbType.Money;            break;
+					case  829 /* macaddr                  */ : c.Type = "NpgsqlMacAddress"; addNpgsqlTypes = true;                                                 break;
+					case  869 /* inet                     */ : c.Type = "NpgsqlInet";       addNpgsqlTypes = true;                                                 break;
+					case 1042 /* char                     */ : c.Type = "String";           c.DbType = DbType.String;    c.SqlDbType = SqlDbType.Char;             break;
+					case 1043 /* varchar                  */ : c.Type = "String";           c.DbType = DbType.String;    c.SqlDbType = SqlDbType.VarChar;          break;
+					case 1082 /* date                     */ : c.Type = "DateTime";         c.DbType = DbType.Date;      c.SqlDbType = SqlDbType.Date;             break;
+					case 1083 /* time                     */ : c.Type = "DateTime";         c.DbType = DbType.Time;      c.SqlDbType = SqlDbType.Time;             break;
+					case 1114 /* datetime                 */ : c.Type = "DateTime";         c.DbType = DbType.DateTime;  c.SqlDbType = SqlDbType.DateTime;         break;
+					case 1560 /* bit                      */ : c.Type = "BitString";        addNpgsqlTypes = true;                                                 break;
+					case 1700 /* numeric                  */ : c.Type = "Decimal";          c.DbType = DbType.Decimal;   c.SqlDbType = SqlDbType.Decimal;          break;
+					case 1186 /* interval                 */ : c.Type = "NpgsqlInterval";   addNpgsqlTypes = true;                                                 break;
+					case 1184 /* timestamp with time zone */ :
+					case 1266 /* timestamp with time zone */ : c.Type = "DateTime";         c.DbType = DbType.DateTime2; c.SqlDbType = SqlDbType.DateTime2;        break;
+					case 2950 /* Guid                     */ : c.Type = "Guid";             c.DbType = DbType.Binary;    c.SqlDbType = SqlDbType.UniqueIdentifier; break;
 					default:
-						throw new Exception(string.Format("Type '{0}' is not expected in PostgreSQL.tt",rd["typename"].ToString()));
-						//break;
+						if (oid < 100000)
+							throw new Exception(string.Format("Type '{0}' ({1}) is not expected in PostgreSQL.tt", rd["typename"], rd["type"]));
+						break;
 				}
 
 				switch (c.Type)
 				{
-					case "string" :
+					case "object" :
+					case "String" :
 					case "byte[]" : c.IsClass = true; break;
 				}
 
@@ -141,6 +166,9 @@ private void LoadServerMetadata()
 				columns.Add(col);
 			}
 		}
+
+		if (addNpgsqlTypes)
+			Usings.Add("NpgsqlTypes");
 
 		// Load PKs.
 		//
