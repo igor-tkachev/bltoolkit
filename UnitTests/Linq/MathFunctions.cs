@@ -18,7 +18,7 @@ namespace Data.Linq
 				from t in from p in db.Types select Math.Abs(p.MoneyValue) where t > 0 select t));
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void Acos()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -26,7 +26,7 @@ namespace Data.Linq
 				from t in from p in db.Types select Math.Floor(Math.Acos((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void Asin()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -42,7 +42,7 @@ namespace Data.Linq
 				from t in from p in db.Types select Math.Floor(Math.Atan((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void Atan2()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(

@@ -93,6 +93,8 @@ namespace BLToolkit.Data.Sql
                 var converter = _valueConverter;
                 _valueConverter = o => ms.MapEnumToValue(converter(o), ma, true);
             }
+            // update system type in SqlValue :-/
+            var tmp = Value;
         }
 
         void SetEnumConverterInternal(Type type, MappingSchema ms)
@@ -106,6 +108,8 @@ namespace BLToolkit.Data.Sql
                 var converter = _valueConverter;
                 _valueConverter = o => ms.MapEnumToValue(converter(o), type, true);
             }
+            // update system type in SqlValue :-/
+            var tmp = Value;
         }
 
         internal void SetTakeConverter(int take)

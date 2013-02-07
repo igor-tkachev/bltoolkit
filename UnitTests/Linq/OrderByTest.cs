@@ -160,7 +160,7 @@ namespace Data.Linq
 			});
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void OrderBySelectMany1()
 		{
 			var expected =
@@ -202,7 +202,7 @@ namespace Data.Linq
 			});
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void OrderBySelectMany3()
 		{
 			var expected =

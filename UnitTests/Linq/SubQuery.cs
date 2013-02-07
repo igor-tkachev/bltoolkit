@@ -181,7 +181,7 @@ namespace Data.Linq
 			});
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void ObjectCompare()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(

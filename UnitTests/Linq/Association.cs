@@ -103,7 +103,7 @@ namespace Data.Linq
 				db.Parent.SelectMany(p => db.Child.Select(ch => p))));
 		}
 
-		[Test, Category("Access")]
+		[Test]
 		public void SelectMany3()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -117,7 +117,7 @@ namespace Data.Linq
 					.SelectMany(g => g.Select(ch => ch.Parent))));
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void SelectMany4()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
