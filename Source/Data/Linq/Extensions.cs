@@ -225,7 +225,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int InsertBatch<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
-			return new SqlQuery<T>().Insert(dataContext, maxBatchSize, list);
+            return new SqlQuery<T>(dataContext).Insert(dataContext, maxBatchSize, list);
 		}
 
 		public static int InsertBatch<T>(this DbManager dataContext, IEnumerable<T> list)
