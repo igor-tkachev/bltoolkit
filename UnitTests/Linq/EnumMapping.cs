@@ -6,6 +6,9 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Data.Linq;
 using NUnit.Framework;
+using Data.Linq.Model;
+using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Sql.SqlProvider;
 
 namespace Data.Linq
 {
@@ -822,6 +825,263 @@ namespace Data.Linq
                 }
             });
         }
-        
+
+        [Test]
+        public void EnumMapInsertObject1()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.Insert(new TestTable1
+                    {
+                        Id = RID,
+                        TestField = TestEnum1.Value2
+                    });
+
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Count());
+                }
+            });
+        }
+        [Test]
+        public void EnumMapInsertObject2()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.Insert(new TestTable2
+                    {
+                        Id = RID,
+                        TestField = TestEnum2.Value2
+                    });
+
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Count());
+                }
+            });
+        }
+        [Test]
+        public void EnumMapInsertObject3()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.Insert(new NullableTestTable1
+                    {
+                        Id = RID,
+                        TestField = TestEnum1.Value2
+                    });
+
+                    Assert.AreEqual(1, db.GetTable<RawTable>()
+                        .Where(r => r.Id == RID && r.TestField == VAL2).Count());
+                }
+            });
+        }
+        [Test]
+        public void EnumMapInsertObject4()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.Insert(new NullableTestTable2
+                    {
+                        Id = RID,
+                        TestField = TestEnum2.Value2
+                    });
+
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL2).Count());
+                }
+            });
+        }
+
+        [Test]
+        public void EnumMapInsertFromSelectWithParam1()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var param = TestEnum1.Value1;
+
+                    var result = db.GetTable<TestTable1>()
+                        .Where(r => r.Id == RID && r.TestField == TestEnum1.Value2)
+                        .Select(r => new TestTable1
+                        {
+                            Id = r.Id,
+                            TestField = param
+                        })
+                        .Insert(db.GetTable<TestTable1>(), r => r);
+
+                    Assert.AreEqual(1, result);
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL1).Count());
+                }
+            });
+        }
+        [Test]
+        public void EnumMapInsertFromSelectWithParam2()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var param = TestEnum2.Value1;
+
+                    var result = db.GetTable<TestTable2>()
+                        .Where(r => r.Id == RID && r.TestField == TestEnum2.Value2)
+                        .Select(r => new TestTable2
+                        {
+                            Id = r.Id,
+                            TestField = param
+                        })
+                        .Insert(db.GetTable<TestTable2>(), r => r);
+
+                    Assert.AreEqual(1, result);
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL1).Count());
+                }
+            });
+        }
+        [Test]
+        public void EnumMapInsertFromSelectWithParam3()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var param = TestEnum1.Value1;
+
+                    var result = db.GetTable<NullableTestTable1>()
+                        .Where(r => r.Id == RID && r.TestField == TestEnum1.Value2)
+                        .Select(r => new NullableTestTable1
+                        {
+                            Id = r.Id,
+                            TestField = param
+                        })
+                        .Insert(db.GetTable<NullableTestTable1>(), r => r);
+
+                    Assert.AreEqual(1, result);
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL1).Count());
+                }
+            });
+        }
+        [Test]
+        public void EnumMapInsertFromSelectWithParam4()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    var param = TestEnum2.Value1;
+
+                    var result = db.GetTable<NullableTestTable2>()
+                        .Where(r => r.Id == RID && r.TestField == TestEnum2.Value2)
+                        .Select(r => new NullableTestTable2
+                        {
+                            Id = r.Id,
+                            TestField = param
+                        })
+                        .Insert(db.GetTable<NullableTestTable2>(), r => r);
+
+                    Assert.AreEqual(1, result);
+                    Assert.AreEqual(1, db.GetTable<RawTable>().Where(r => r.Id == RID && r.TestField == VAL1).Count());
+                }
+            });
+        }
+
+        [Test]
+        public void EnumMapDeleteEquals1()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<TestTable1>().Delete(r => r.Id == RID && r.TestField.Equals(TestEnum1.Value2)));
+                }
+            });
+        }
+        [Test]
+        public void EnumMapDeleteEquals2()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<TestTable2>().Delete(r => r.Id == RID && r.TestField.Equals(TestEnum2.Value2)));
+                }
+            });
+        }
+        [Test]
+        public void EnumMapDeleteEquals3()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<NullableTestTable1>()
+                        .Delete(r => r.Id == RID && r.TestField.Equals(TestEnum1.Value2)));
+                }
+            });
+        }
+        [Test]
+        public void EnumMapDeleteEquals4()
+        {
+            ForEachProvider(db =>
+            {
+                using (new Cleaner(db))
+                {
+                    db.GetTable<RawTable>().Insert(() => new RawTable()
+                    {
+                        Id = RID,
+                        TestField = VAL2
+                    });
+
+                    Assert.True(1 == db.GetTable<NullableTestTable2>()
+                        .Delete(r => r.Id == RID && r.TestField.Equals(TestEnum2.Value2)));
+                }
+            });
+        }
     }
 }
