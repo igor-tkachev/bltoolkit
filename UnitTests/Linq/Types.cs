@@ -208,7 +208,7 @@ namespace Data.Linq
 				});
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void BinaryLength()
 		{
 			ForEachProvider(
@@ -407,7 +407,7 @@ namespace Data.Linq
 					from t in db.Types2 where new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100) }.Contains(t.DateTimeValue) select t));
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void DateTimeArray2()
 		{
 			var arr = new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100), new DateTime(2012, 11, 7, 19, 19, 29, 90) };
@@ -420,7 +420,7 @@ namespace Data.Linq
 						from t in db.Types2 where arr.Contains(t.DateTimeValue) select t));
 		}
 
-        [Test, Category("Access")]
+        [Test]
 		public void DateTimeArray3()
 		{
 			var arr = new List<DateTime?> { new DateTime(2001, 1, 11, 1, 11, 21, 100) };

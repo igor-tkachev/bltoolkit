@@ -169,8 +169,11 @@ namespace BLToolkit.Data.Linq.Builder
 							((FieldInfo)   member).FieldType :
 							((PropertyInfo)member).PropertyType;
 
-						if (type.IsEnum)
-							((SqlParameter)expr).SetEnumConverter(type, builder.MappingSchema);
+                        if (TypeHelper.IsEnumOrNullableEnum(type))
+                        {
+                            var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
+                            ((SqlParameter)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+                        }
 					}
 
 					items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));

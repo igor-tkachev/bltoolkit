@@ -1052,13 +1052,6 @@ namespace BLToolkit.Data.Linq.Builder
 			var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object)));
 			var v      = lambda.Compile()();
 
-            //if (v != null && v.GetType().IsEnum)
-            //{
-            //    var attrs = v.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
-
-            //    v = Map.EnumToValue(v, attrs.Length == 0);
-            //}
-
 			value = new SqlValue(v);
 
 			_constants.Add(expr, value);
@@ -1382,22 +1375,40 @@ namespace BLToolkit.Data.Linq.Builder
 
 		ISqlPredicate ConvertEnumConversion(IBuildContext context, Expression left, SqlQuery.Predicate.Operator op, Expression right)
 		{
-			UnaryExpression conv;
 			Expression      value;
+            Expression      operand;
 
-			if (left.NodeType == ExpressionType.Convert)
-			{
-				conv  = (UnaryExpression)left;
-				value = right;
-			}
+            if (left is MemberExpression)
+            {
+                operand = left;
+                value = right;
+            }
+            else if (left.NodeType == ExpressionType.Convert && ((UnaryExpression)left).Operand is MemberExpression)
+            {
+                operand = ((UnaryExpression)left).Operand;
+                value = right;
+            }
+            else if (right is MemberExpression)
+            {
+                operand = right;
+                value = left;
+            }
+            else if (right.NodeType == ExpressionType.Convert && ((UnaryExpression)right).Operand is MemberExpression)
+            {
+                operand = ((UnaryExpression)right).Operand;
+                value = left;
+            }
+            else if (left.NodeType == ExpressionType.Convert)
+            {
+                operand = ((UnaryExpression)left).Operand;
+                value = right;
+            }
 			else
 			{
-				conv  = (UnaryExpression)right;
+                operand = ((UnaryExpression)right).Operand;
 				value = left;
 			}
-
-			var operand = conv.Operand;
-			var type    = operand.Type;
+            var type = operand.Type;
 
 			if (!TypeHelper.IsEnumOrNullableEnum(type))
 				return null;
@@ -1434,8 +1445,8 @@ namespace BLToolkit.Data.Linq.Builder
 
                         if (!(operand is MemberExpression))
                         {
-						if (!dic.TryGetValue(origValue, out mapValue))
-							return null;
+                            if (!dic.TryGetValue(origValue, out mapValue))
+                                return null;
                         }
 
 						ISqlExpression l, r;
@@ -1473,6 +1484,11 @@ namespace BLToolkit.Data.Linq.Builder
                         MemberAccessor memberAccessor = null;
                         if (operand is MemberExpression)
                         {
+                            // is it even possible that operand is not MemberExpression?
+                            // if no, then we can remove this two last uses of SetEnumConverter(type, map)
+                            // and other depending code
+                            // At least currently there is no test coverage for this method and I didn't
+                            // manage to create such test
                             var me = (MemberExpression)operand;
                             memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
                         }
@@ -1502,6 +1518,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 						return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
+
 			}
 
 			return null;
