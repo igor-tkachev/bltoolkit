@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
-	[TestFixture]
+    [TestFixture, Category("Oracle")]
 	public class TestAK107 : TestBase
 	{
 		[TableName(Name = "t_test_user")]

@@ -9,7 +9,7 @@ using UnitTests.Linq.Interface.Model;
 
 namespace Data.Linq.ProviderSpecific
 {
-	[TestFixture]
+	[TestFixture, Category("Firebird")]
 	public class Firebird : TestBase
 	{
 		[Test]

@@ -117,7 +117,7 @@ namespace Data.Linq
 					.SelectMany(g => g.Select(ch => ch.Parent))));
 		}
 
-		[Test]
+        [Test]
 		public void SelectMany4()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(

@@ -1111,6 +1111,30 @@ namespace BLToolkit.Mapping
 			}
 		}
 
+        private readonly Dictionary<MemberAccessor, MapValue[]> _memberMapValues = new Dictionary<MemberAccessor, MapValue[]>();
+
+        public virtual MapValue[] GetMapValues([JetBrains.Annotations.NotNull] MemberAccessor memberAccessor)
+        {
+            if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
+
+            lock (_memberMapValues)
+            {
+                MapValue[] mapValues;
+
+                if (_memberMapValues.TryGetValue(memberAccessor, out mapValues))
+                    return mapValues;
+
+                var typeExt = TypeExtension.GetTypeExtension(memberAccessor.Type, Extensions);
+                bool isSet;
+
+                mapValues = MetadataProvider.GetMapValues(typeExt, memberAccessor, out isSet);
+
+                _memberMapValues.Add(memberAccessor, mapValues);
+
+                return mapValues;
+            }
+        }
+
 		#endregion
 
 		#region GetDefaultValue
@@ -1642,9 +1666,16 @@ namespace BLToolkit.Mapping
 				{
 					try
 					{
-						if (comp.CompareTo(mapValue) == 0)
-							return mv.OrigValue;
-					}
+                        // well, this is a fix for Access
+                        // data reader for Access returns int for a field with type long
+                        if (comp is int && mapValue is long)
+                        {
+                            if (comp.CompareTo((int)(long)mapValue) == 0)
+                                return mv.OrigValue;
+                        }
+                        else if (comp.CompareTo(mapValue) == 0)
+                            return mv.OrigValue;
+                    }
 					catch (ArgumentException ex)
 					{
 						Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
@@ -1690,6 +1721,77 @@ namespace BLToolkit.Mapping
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public virtual object MapValueToEnum(object value, MemberAccessor ma)
+        {
+            if (value == null || value is DBNull)
+                return GetNullValue(ma.Type);
+
+            MapValue[] mapValues = GetMapValues(ma);
+
+            if (mapValues != null)
+            {
+                var comp = (IComparable)value;
+
+                foreach (MapValue mv in mapValues)
+                    foreach (object mapValue in mv.MapValues)
+                    {
+                        try
+                        {
+                            // well, this is a fix for Access
+                            // data reader for Access returns int for a field with type long
+                            if (comp is int && mapValue is long)
+                            {
+                                if (comp.CompareTo((int)(long)mapValue) == 0)
+                                    return mv.OrigValue;
+                            }
+                            else if (comp.CompareTo(mapValue) == 0)
+                                return mv.OrigValue;
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
+                        }
+                    }
+            }
+
+            InvalidCastException exInvalidCast = null;
+
+            try
+            {
+                value = ConvertChangeType(value, Enum.GetUnderlyingType(ma.Type));
+
+                if (Enum.IsDefined(ma.Type, value))
+                {
+                    // Regular (known) enum field w/o explicit mapping defined.
+                    //
+                    return Enum.ToObject(ma.Type, value);
+                }
+            }
+            catch (InvalidCastException ex)
+            {
+                exInvalidCast = ex;
+            }
+
+            // Default value.
+            //
+            object defaultValue = GetDefaultValue(ma.Type);
+
+            if (defaultValue != null)
+                return defaultValue;
+
+            if (exInvalidCast != null)
+            {
+                // Rethrow an InvalidCastException when no default value specified.
+                //
+                throw exInvalidCast;
+            }
+
+            // At this point we have an undefined enum value.
+            //
+            return Enum.ToObject(ma.Type, value);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		public virtual object MapEnumToValue(object value, [JetBrains.Annotations.NotNull] Type type, bool convertToUnderlyingType)
 		{
 			if (value == null)
@@ -1735,7 +1837,57 @@ namespace BLToolkit.Mapping
 			}
 
 			return convertToUnderlyingType ?
-				System.Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType()), Thread.CurrentThread.CurrentCulture) :
+                System.Convert.ChangeType(value, Enum.GetUnderlyingType(type), Thread.CurrentThread.CurrentCulture) :
+                value;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public virtual object MapEnumToValue(object value, [JetBrains.Annotations.NotNull] MemberAccessor memberAccessor, bool convertToUnderlyingType)
+        {
+            if (value == null)
+                return null;
+
+            if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
+
+            object nullValue = GetNullValue(memberAccessor.Type);
+
+            if (nullValue != null)
+            {
+                IComparable comp = (IComparable)value;
+
+                try
+                {
+                    if (comp.CompareTo(nullValue) == 0)
+                        return null;
+                }
+                catch
+                {
+                }
+            }
+
+            MapValue[] mapValues = GetMapValues(memberAccessor);
+
+            if (mapValues != null)
+            {
+                IComparable comp = (IComparable)value;
+
+                foreach (MapValue mv in mapValues)
+                {
+                    try
+                    {
+                        if (comp.CompareTo(mv.OrigValue) == 0)
+                            return mv.MapValues[0];
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            var memberAccessorType = TypeHelper.UnwrapNullableType(memberAccessor.Type);
+
+            return convertToUnderlyingType ?
+                System.Convert.ChangeType(value, Enum.GetUnderlyingType(memberAccessorType), Thread.CurrentThread.CurrentCulture) :
 				value;
 		}
 
