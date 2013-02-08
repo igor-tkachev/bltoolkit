@@ -14,7 +14,7 @@ namespace BLToolkit.Data.Sql
 			IsQueryParameter = true;
 			Name             = name;
 			SystemType       = systemType;
-            _value           = value;
+			_value           = value;
 			DbType           = DbType.Object;
 
 			if (systemType != null && mappingSchema != null && systemType.IsEnum)
@@ -25,7 +25,7 @@ namespace BLToolkit.Data.Sql
 		public SqlParameter(Type systemType, string name, object value, Converter<object,object> valueConverter)
 			: this(systemType, name, value, (MappingSchema)null)
 		{
-            ValueConverter = valueConverter;
+			ValueConverter = valueConverter;
 		}
 
 		[Obsolete]
@@ -94,10 +94,10 @@ namespace BLToolkit.Data.Sql
 
 		public bool CanBeNull()
 		{
-            if (SystemType == null && _value == null)
+			if (SystemType == null && _value == null)
 				return true;
 
-            return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
+			return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
 		}
 
 		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
@@ -118,7 +118,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-                var p = new SqlParameter(SystemType, Name, _value, ValueConverter) { IsQueryParameter = IsQueryParameter, DbType = DbType, DbSize = DbSize };
+				var p = new SqlParameter(SystemType, Name, _value, ValueConverter) { IsQueryParameter = IsQueryParameter, DbType = DbType, DbSize = DbSize };
 
 				objectTree.Add(this, clone = p);
 			}

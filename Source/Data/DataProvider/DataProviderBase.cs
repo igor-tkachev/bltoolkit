@@ -173,15 +173,15 @@ namespace BLToolkit.Data.DataProvider
 
 		#region Virtual Members
 
-        /// <summary>
-        /// Open an <see cref="IDataReader"/> into the given RefCursor object
-        /// </summary>
-        /// <param name="refCursor">The refcursor to open an <see cref="IDataReader"/> to</param>
-        /// <returns>The <see cref="IDataReader"/> into the refcursor</returns>
-        public virtual IDataReader GetRefCursorDataReader(object refCursor)
-        {
-            throw new NotSupportedException("Operation not supported on this DataProvider");
-        }
+		/// <summary>
+		/// Open an <see cref="IDataReader"/> into the given RefCursor object
+		/// </summary>
+		/// <param name="refCursor">The refcursor to open an <see cref="IDataReader"/> to</param>
+		/// <returns>The <see cref="IDataReader"/> into the refcursor</returns>
+		public virtual IDataReader GetRefCursorDataReader(object refCursor)
+		{
+			throw new NotSupportedException("Operation not supported on this DataProvider");
+		}
 
 		public virtual object Convert(object value, ConvertType convertType)
 		{

@@ -9,7 +9,7 @@ namespace BLToolkit.Data.Sql
 		public SqlValue(Type systemType, object value)
 		{
 			_systemType = systemType;
-            _value = value;
+			_value = value;
 		}
 
 		public SqlValue(object value)
@@ -20,19 +20,22 @@ namespace BLToolkit.Data.Sql
 				_systemType = value.GetType();
 		}
 
-        public override object Value
-        {
-            get
-            {
-                var rv = base.Value;
-                if (rv != null && rv.GetType() != _systemType)
-                {
-                    _systemType = rv.GetType();
-                }
-                return rv;
-            }
-        }
-		Type   _systemType; public Type    SystemType { get { return _systemType; } }
+		public override object Value
+		{
+			get
+			{
+				var rv = base.Value;
+
+				if (rv != null && rv.GetType() != _systemType)
+				{
+					_systemType = rv.GetType();
+				}
+
+				return rv;
+			}
+		}
+
+		Type _systemType; public Type    SystemType { get { return _systemType; } }
 
 		#region Overrides
 
@@ -76,7 +79,7 @@ namespace BLToolkit.Data.Sql
 			return
 				value       != null              &&
 				_systemType == value._systemType &&
-                (_value == null && value._value == null || _value != null && _value.Equals(value._value));
+				(_value == null && value._value == null || _value != null && _value.Equals(value._value));
 		}
 
 		#endregion
@@ -105,7 +108,7 @@ namespace BLToolkit.Data.Sql
 			ICloneableElement clone;
 
 			if (!objectTree.TryGetValue(this, out clone))
-                objectTree.Add(this, clone = new SqlValue(_systemType, _value));
+				objectTree.Add(this, clone = new SqlValue(_systemType, _value));
 
 			return clone;
 		}
@@ -119,15 +122,15 @@ namespace BLToolkit.Data.Sql
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{
 			return
-                Value == null ?
+				Value == null ?
 					sb.Append("NULL") :
-                Value is string ?
+				Value is string ?
 					sb
 						.Append('\'')
-                        .Append(Value.ToString().Replace("\'", "''"))
+						.Append(Value.ToString().Replace("\'", "''"))
 						.Append('\'')
 				:
-                    sb.Append(Value);
+					sb.Append(Value);
 		}
 
 		#endregion
