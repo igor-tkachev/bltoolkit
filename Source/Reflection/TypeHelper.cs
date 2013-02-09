@@ -920,6 +920,16 @@ namespace BLToolkit.Reflection
 			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
 		}
 
+        public static bool IsNullableEnum(Type type)
+        {
+            return IsNullableType(type) && type.GetGenericArguments()[0].IsEnum;
+        }
+        
+        public static bool IsEnumOrNullableEnum(Type type)
+        {
+            return type.IsEnum || IsNullableEnum(type);
+        }
+
 		/// <summary>
 		/// Returns the underlying type argument of the specified type.
 		/// </summary>
@@ -943,6 +953,13 @@ namespace BLToolkit.Reflection
 
 			return type;
 		}
+
+        public static Type UnwrapNullableType(Type type)
+        {
+            if (type == null) throw new ArgumentNullException("type");
+
+            return IsNullableType(type) ? type.GetGenericArguments()[0] : type;
+        }
 
 		public static IEnumerable<Type> GetDefiningTypes(Type child, MemberInfo member)
 		{

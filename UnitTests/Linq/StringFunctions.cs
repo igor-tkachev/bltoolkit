@@ -490,7 +490,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test]
 		public void Replace()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>

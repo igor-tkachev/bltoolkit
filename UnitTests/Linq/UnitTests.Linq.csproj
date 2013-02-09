@@ -188,6 +188,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnumMapping.cs" />
     <Compile Include="DeleteTest.cs" />
     <Compile Include="Exceptions\DataExceptionTest.cs" />
     <Compile Include="TestAK107.cs" />

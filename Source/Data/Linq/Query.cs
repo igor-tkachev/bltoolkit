@@ -525,8 +525,10 @@ namespace BLToolkit.Data.Linq
 				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema)
 			};
 
-			if (field.SystemType.IsEnum)
-				param.SqlParameter.SetEnumConverter(field.SystemType, dataContext.MappingSchema);
+            if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))
+            {
+                param.SqlParameter.SetEnumConverter(field.MemberMapper.ComplexMemberAccessor, dataContext.MappingSchema);
+            }
 
 			return param;
 		}

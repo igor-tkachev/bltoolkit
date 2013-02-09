@@ -12,7 +12,7 @@ using UnitTests.Linq.Interface.Model;
 
 namespace Data.Linq.ProviderSpecific
 {
-	[TestFixture]
+    [TestFixture, Category("PostgreSQL")]
 	public class PostgreSQL : TestBase
 	{
 		[TableName(Owner="public", Name="entity")]
