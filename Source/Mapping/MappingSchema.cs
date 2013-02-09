@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.Linq;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
@@ -1113,6 +1114,19 @@ namespace BLToolkit.Mapping
 
         private readonly Dictionary<MemberAccessor, MapValue[]> _memberMapValues = new Dictionary<MemberAccessor, MapValue[]>();
 
+        private Type GetMapValueType(MapValue[] mapValues)
+        {
+            if (mapValues != null)
+            {
+                var value = mapValues.SelectMany(mv => mv.MapValues).FirstOrDefault();
+                if (value != null)
+                {
+                    return value.GetType();
+                }
+            }
+            return null;
+        }
+
         public virtual MapValue[] GetMapValues([JetBrains.Annotations.NotNull] MemberAccessor memberAccessor)
         {
             if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
@@ -1657,6 +1671,12 @@ namespace BLToolkit.Mapping
 
 			MapValue[] mapValues = GetMapValues(type);
 
+            var mapValueType = GetMapValueType(mapValues);
+            if (mapValueType != null && value.GetType() != mapValueType)
+            {
+                value = ConvertChangeType(value, mapValueType);
+            }
+
 			if (mapValues != null)
 			{
 				var comp = (IComparable)value;
@@ -1666,14 +1686,7 @@ namespace BLToolkit.Mapping
 				{
 					try
 					{
-                        // well, this is a fix for Access
-                        // data reader for Access returns int for a field with type long
-                        if (comp is int && mapValue is long)
-                        {
-                            if (comp.CompareTo((int)(long)mapValue) == 0)
-                                return mv.OrigValue;
-                        }
-                        else if (comp.CompareTo(mapValue) == 0)
+                        if (comp.CompareTo(mapValue) == 0)
                             return mv.OrigValue;
                     }
 					catch (ArgumentException ex)
@@ -1728,6 +1741,12 @@ namespace BLToolkit.Mapping
 
             MapValue[] mapValues = GetMapValues(ma);
 
+            var mapValueType = GetMapValueType(mapValues);
+            if (mapValueType != null && value.GetType() != mapValueType)
+            {
+                value = ConvertChangeType(value, mapValueType);
+            }
+
             if (mapValues != null)
             {
                 var comp = (IComparable)value;
@@ -1737,14 +1756,7 @@ namespace BLToolkit.Mapping
                     {
                         try
                         {
-                            // well, this is a fix for Access
-                            // data reader for Access returns int for a field with type long
-                            if (comp is int && mapValue is long)
-                            {
-                                if (comp.CompareTo((int)(long)mapValue) == 0)
-                                    return mv.OrigValue;
-                            }
-                            else if (comp.CompareTo(mapValue) == 0)
+                            if (comp.CompareTo(mapValue) == 0)
                                 return mv.OrigValue;
                         }
                         catch (ArgumentException ex)

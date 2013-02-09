@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.Data.Linq;
 using NUnit.Framework;
-using Data.Linq.Model;
-using BLToolkit.Data.DataProvider;
-using BLToolkit.Data.Sql.SqlProvider;
 
 namespace Data.Linq
 {
