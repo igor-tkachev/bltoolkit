@@ -1,8 +1,8 @@
 ﻿<#@ template language="C#" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs" #>
-<#@ assembly name="$(SolutionDir)\packages\Npgsql.2.0.11\lib\Net40\Npgsql.dll" #>
-<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"  #>
-<#@ include file="$(SolutionDir)\Source\Templates\PostgreSql.ttinclude" #>
+<#@ assembly name="$(SolutionDir)\packages\Npgsql.2.0.12.1\lib\Net40\Npgsql.dll"  #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"            #>
+<#@ include file="$(SolutionDir)\Source\Templates\PostgreSql.ttinclude"           #>
 <#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>
 <#
 	GetConnectionObject = () => new Npgsql.NpgsqlConnection();

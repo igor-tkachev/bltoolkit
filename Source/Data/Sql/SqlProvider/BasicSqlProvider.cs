@@ -1127,13 +1127,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 					if (pr.Value is IEnumerable)
 					{
-						var items      = (IEnumerable)pr.Value;
-						var firstValue = true;
+						var items = (IEnumerable)pr.Value;
 
 						if (p.Expr1 is ISqlTableSource)
 						{
-							var table = (ISqlTableSource)p.Expr1;
-							var keys  = table.GetKeys(true);
+							var firstValue = true;
+							var table      = (ISqlTableSource)p.Expr1;
+							var keys       = table.GetKeys(true);
 
 							if (keys == null || keys.Count == 0)
 								throw new SqlException("Cannot create IN expression.");
@@ -1208,48 +1208,77 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								if (!firstValue)
 									sb.Remove(sb.Length - rem, rem);
 							}
+
+							if (firstValue)
+								BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(p.IsNot)));
+							else
+								sb.Remove(sb.Length - 2, 2).Append(')');
 						}
 						else
-							foreach (var item in items)
-							{
-								if (firstValue)
-								{
-									firstValue = false;
-									BuildExpression(sb, GetPrecedence(p), p.Expr1);
-									sb.Append(p.IsNot ? " NOT IN (" : " IN (");
-								}
-
-								if (item is ISqlExpression)
-									BuildExpression(sb, (ISqlExpression)item);
-								else
-									BuildValue(sb, item);
-
-								sb.Append(", ");
-							}
-
-						if (firstValue)
-							BuildPredicate(sb, new SqlQuery.Predicate.Expr(new SqlValue(p.IsNot)));
-						else
-							sb.Remove(sb.Length - 2, 2).Append(')');
+						{
+							BuildInListValues(sb, p, items);
+						}
 
 						return;
 					}
 				}
 
-				BuildExpression(sb, GetPrecedence(p), p.Expr1);
-				sb.Append(p.IsNot ? " NOT IN (" : " IN (");
+				BuildInListValues(sb, p, values);
+			}
+		}
 
-				foreach (var value in values)
+		void BuildInListValues(StringBuilder sb, SqlQuery.Predicate.InList predicate, IEnumerable values)
+		{
+			var firstValue = true;
+			var len        = sb.Length;
+			var hasNull    = false;
+
+			foreach (var value in values)
+			{
+				var val = value;
+
+				if (val is IValueContainer)
+					val = ((IValueContainer)value).Value;
+
+				if (val == null)
 				{
-					if (value is ISqlExpression)
-						BuildExpression(sb, (ISqlExpression)value);
-					else
-						BuildValue(sb, value);
-
-					sb.Append(", ");
+					hasNull = true;
+					continue;
 				}
 
+				if (firstValue)
+				{
+					firstValue = false;
+					BuildExpression(sb, GetPrecedence(predicate), predicate.Expr1);
+					sb.Append(predicate.IsNot ? " NOT IN (" : " IN (");
+				}
+
+				if (value is ISqlExpression)
+					BuildExpression(sb, (ISqlExpression)value);
+				else
+					BuildValue(sb, value);
+
+				sb.Append(", ");
+			}
+
+			if (firstValue)
+			{
+				BuildPredicate(sb,
+					hasNull ?
+						new SqlQuery.Predicate.IsNull(predicate.Expr1, predicate.IsNot) :
+						new SqlQuery.Predicate.Expr(new SqlValue(predicate.IsNot)));
+			}
+			else
+			{
 				sb.Remove(sb.Length - 2, 2).Append(')');
+
+				if (hasNull)
+				{
+					sb.Insert(len, "(");
+					sb.Append(" OR ");
+					BuildPredicate(sb, new SqlQuery.Predicate.IsNull(predicate.Expr1, predicate.IsNot));
+					sb.Append(")");
+				}
 			}
 		}
 
@@ -2072,9 +2101,27 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				var tableKeys = table.GetKeys(true);
 				var copyKeys  = copy. GetKeys(true);
 
-				for (var i = 0; i < tableKeys.Count; i++)
-					sqlQuery.Where
-						.Expr(copyKeys[i]).Equal.Expr(tableKeys[i]);
+				if (sqlQuery.Where.SearchCondition.Conditions.Any(c => c.IsOr))
+				{
+					var sc1 = new SqlQuery.SearchCondition(sqlQuery.Where.SearchCondition.Conditions);
+					var sc2 = new SqlQuery.SearchCondition();
+
+					for (var i = 0; i < tableKeys.Count; i++)
+					{
+						sc2.Conditions.Add(new SqlQuery.Condition(
+							false,
+							new SqlQuery.Predicate.ExprExpr(copyKeys[i], SqlQuery.Predicate.Operator.Equal, tableKeys[i])));
+					}
+
+					sqlQuery.Where.SearchCondition.Conditions.Clear();
+					sqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, sc1));
+					sqlQuery.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, sc2));
+				}
+				else
+				{
+					for (var i = 0; i < tableKeys.Count; i++)
+						sqlQuery.Where.Expr(copyKeys[i]).Equal.Expr(tableKeys[i]);
+				}
 
 				sql.From.Table(copy).Where.Exists(sqlQuery);
 				sql.Parameters.AddRange(sqlQuery.Parameters);
