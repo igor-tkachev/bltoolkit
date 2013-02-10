@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.Data.Linq;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -115,7 +117,7 @@ namespace Data.Linq
 
 		const long VAL2 = 12;
 		const long VAL1 = 11;
-		const int  RID  = 101;
+		const int RID = 101;
 
 		[Test]
 		public void EnumMapInsert1()

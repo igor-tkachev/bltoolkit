@@ -1158,6 +1158,25 @@ namespace BLToolkit.Data.DataProvider
 				return base.MapValueToEnum(value, type);
 			}
 
+			public override object MapValueToEnum(object value, MemberAccessor ma)
+			{
+				if (value is OracleString)
+				{
+					var oracleValue = (OracleString)value;
+					value = oracleValue.IsNull ? null : oracleValue.Value;
+				}
+				else if (value is OracleDecimal)
+				{
+					var oracleValue = (OracleDecimal)value;
+					if (oracleValue.IsNull)
+						value = null;
+					else
+						value = oracleValue.Value;
+				}
+
+				return base.MapValueToEnum(value, ma);
+			}
+
 			public override object ConvertChangeType(object value, Type conversionType)
 			{
 				// Handle OracleDecimal with IsNull == true case
