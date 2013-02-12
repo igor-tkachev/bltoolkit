@@ -169,11 +169,11 @@ namespace BLToolkit.Data.Linq.Builder
 							((FieldInfo)   member).FieldType :
 							((PropertyInfo)member).PropertyType;
 
-                        if (TypeHelper.IsEnumOrNullableEnum(type))
-                        {
-                            var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
-                            ((SqlParameter)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-                        }
+						if (TypeHelper.IsEnumOrNullableEnum(type))
+						{
+							var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
+							((SqlParameter)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+						}
 					}
 
 					items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
@@ -215,11 +215,11 @@ namespace BLToolkit.Data.Linq.Builder
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
 						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression);
 
-                        if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(ma.Expression.Type))
-                        {
-                            MemberAccessor memberAccessor = TypeAccessor.GetAccessor(ma.Member.DeclaringType)[ma.Member.Name];
-                            ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-                        }
+						if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(ma.Expression.Type))
+						{
+							var memberAccessor = TypeAccessor.GetAccessor(ma.Member.DeclaringType)[ma.Member.Name];
+							((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+						}
 
 						items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 					}
@@ -288,10 +288,10 @@ namespace BLToolkit.Data.Linq.Builder
 			builder.ReplaceParent(ctx, sp);
 
 			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Body.Type))
-            {
-                var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
-                ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-            }
+			{
+				var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
+				((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+			}
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
@@ -330,11 +330,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var expr   = builder.ConvertToSql(select, update);
 
-            if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
-            {
-                var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
-                ((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-            }
+			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
+			{
+				var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
+				((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+			}
 
 			items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 		}

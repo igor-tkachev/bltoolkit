@@ -187,9 +187,15 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+<<<<<<< HEAD
   <ItemGroup>
     <Compile Include="DeleteTest.cs" />
     <Compile Include="EnumMapping.cs" />
+=======
+  <ItemGroup>
+    <Compile Include="DeleteTest.cs" />
+    <Compile Include="EnumMapping.cs" />
+>>>>>>> 557afff4f9e72f2633bf5438b64d3d482e0780e3
     <Compile Include="Exceptions\DataExceptionTest.cs" />
     <Compile Include="TestAK107.cs" />
     <Compile Include="BatchTest.cs" />
