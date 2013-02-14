@@ -90,7 +90,8 @@ namespace Data.Linq
 
 		class Cleaner : IDisposable
 		{
-			ITestDataContext _db;
+			readonly ITestDataContext _db;
+
 			public Cleaner(ITestDataContext db)
 			{
 				_db = db;
@@ -117,7 +118,7 @@ namespace Data.Linq
 
 		const long VAL2 = 12;
 		const long VAL1 = 11;
-		const int RID = 101;
+		const int  RID  = 101;
 
 		[Test]
 		public void EnumMapInsert1()
@@ -136,6 +137,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsert2()
 		{
@@ -153,6 +155,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsert3()
 		{
@@ -171,6 +174,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsert4()
 		{
@@ -196,7 +200,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -207,6 +211,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapWhere2()
 		{
@@ -214,7 +219,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -225,6 +230,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapWhere3()
 		{
@@ -232,7 +238,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -245,6 +251,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapWhere4()
 		{
@@ -252,7 +259,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -273,7 +280,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -292,6 +299,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapUpdate2()
 		{
@@ -299,7 +307,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -318,6 +326,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapUpdate3()
 		{
@@ -325,7 +334,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -344,6 +353,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapUpdate4()
 		{
@@ -351,7 +361,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -378,7 +388,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -402,7 +412,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -418,6 +428,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSelectAnon3()
 		{
@@ -425,7 +436,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -441,6 +452,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSelectAnon4()
 		{
@@ -448,7 +460,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -472,7 +484,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -482,6 +494,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapDelete2()
 		{
@@ -489,7 +502,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -499,6 +512,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapDelete3()
 		{
@@ -506,7 +520,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -517,6 +531,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapDelete4()
 		{
@@ -524,7 +539,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -543,7 +558,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -557,6 +572,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSet2()
 		{
@@ -564,7 +580,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -578,6 +594,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSet3()
 		{
@@ -585,7 +602,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						Int32Field = 3
@@ -598,6 +615,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSet4()
 		{
@@ -605,7 +623,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -619,6 +637,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSet5()
 		{
@@ -626,7 +645,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL1
@@ -640,6 +659,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSet6()
 		{
@@ -647,7 +667,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						Int32Field = 3
@@ -668,7 +688,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -679,6 +699,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapContains2()
 		{
@@ -686,7 +707,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -696,6 +717,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapContains3()
 		{
@@ -703,7 +725,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -714,6 +736,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapContains4()
 		{
@@ -721,7 +744,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -740,7 +763,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID
 					});
@@ -755,6 +778,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapSelectNull2()
 		{
@@ -762,7 +786,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID
 					});
@@ -785,7 +809,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID
 					});
@@ -798,6 +822,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapWhereNull2()
 		{
@@ -805,7 +830,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID
 					});
@@ -836,6 +861,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsertObject2()
 		{
@@ -853,6 +879,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsertObject3()
 		{
@@ -871,6 +898,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsertObject4()
 		{
@@ -896,7 +924,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -918,6 +946,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsertFromSelectWithParam2()
 		{
@@ -925,7 +954,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -947,6 +976,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsertFromSelectWithParam3()
 		{
@@ -954,7 +984,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -976,6 +1006,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapInsertFromSelectWithParam4()
 		{
@@ -983,7 +1014,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -1013,7 +1044,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -1023,6 +1054,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapDeleteEquals2()
 		{
@@ -1030,7 +1062,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -1040,6 +1072,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapDeleteEquals3()
 		{
@@ -1047,7 +1080,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
@@ -1058,6 +1091,7 @@ namespace Data.Linq
 				}
 			});
 		}
+
 		[Test]
 		public void EnumMapDeleteEquals4()
 		{
@@ -1065,7 +1099,7 @@ namespace Data.Linq
 			{
 				using (new Cleaner(db))
 				{
-					db.GetTable<RawTable>().Insert(() => new RawTable()
+					db.GetTable<RawTable>().Insert(() => new RawTable
 					{
 						Id = RID,
 						TestField = VAL2
