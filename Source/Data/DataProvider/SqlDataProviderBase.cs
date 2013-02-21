@@ -6,11 +6,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 
-using BLToolkit.Data.Sql;
-
-using SqlException = System.Data.SqlClient.SqlException;
-using SqlParameter = System.Data.SqlClient.SqlParameter;
-
 namespace BLToolkit.Data.DataProvider
 {
 	using Mapping;
