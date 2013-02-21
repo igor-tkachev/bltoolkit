@@ -151,6 +151,89 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void ComplexSelect()
+        {
+//select id_distributor, package_number,
+//( select count(*)
+//                from MEDIADISC01.ALBUM_FOLLOWED  a
+//                where f.id_distributor = a.id_distributor and f.package_number = a.package_number ) as Total,
+//( select count(*)
+//                from MEDIADISC01.ALBUM_FOLLOWED  a
+//                where f.id_distributor = a.id_distributor and f.package_number = a.package_number and a.date_numerisation is not null ) as Done
+//from (
+//                select distinct id_distributor, package_number
+//                from MEDIADISC01.ALBUM_FOLLOWED
+//                where date_numerisation is null
+//) f
+
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query2 = from m in db.GetTable<ALBUM_FOLLOWED>()
+                             group m by new { m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER } into gn
+                             select new
+                             {
+                                 gn.Key.ID_DISTRIBUTOR,
+                                 gn.Key.PACKAGE_NUMBER,
+                                 Done = gn.Count(e => e.DATE_NUMERISATION != null),
+                                 //Total = gn.Count(),
+                             };
+
+                var res = query2.ToList();
+                Console.WriteLine(res);
+            }
+
+            using (var db = _connectionFactory.CreateDbManager())
+            {
+                var query = from m in db.GetTable<ALBUM_FOLLOWED>()
+                            where m.DATE_NUMERISATION == null
+                            select new
+                                {
+                                    m.ID_DISTRIBUTOR,
+                                    m.PACKAGE_NUMBER
+                                };
+
+                query = query.Distinct();
+
+                var query2 = from m in query
+                             join n in db.GetTable<ALBUM_FOLLOWED>() on new { m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER } equals new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER}
+                             group n by new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER} into gn
+                             select new
+                                 {
+                                     gn.Key.ID_DISTRIBUTOR,
+                                     gn.Key.PACKAGE_NUMBER,
+                                     Total = gn.Count()
+                                 };
+
+                var query3 = from m in query
+                             join n in db.GetTable<ALBUM_FOLLOWED>() on new { m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER } equals new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER }
+                             where n.DATE_NUMERISATION != null
+                             group n by new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER } into gn
+                             select new
+                             {
+                                 gn.Key.ID_DISTRIBUTOR,
+                                 gn.Key.PACKAGE_NUMBER,
+                                 Done = gn.Count()
+                             };
+
+                var query4 = from m in query2
+                             join n in query3 on new {m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER} equals new {n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER} into mn
+                             from n in mn.DefaultIfEmpty()
+                             select new
+                                 {
+                                     m.ID_DISTRIBUTOR,
+                                     m.PACKAGE_NUMBER,
+                                     m.Total,
+                                     n.Done
+                                 };
+
+                var res = query4.ToList();
+
+                Console.WriteLine(res.Count);
+
+            }
+        }
+
+        [Test]
         public void SelectLeftJoin()
         {
             using (var db = _connectionFactory.CreateDbManager())

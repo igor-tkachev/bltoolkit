@@ -19,8 +19,27 @@ namespace UnitTests.CS.JointureTests
             //username = "pitafr01_proc_11";
             //password = "smsmms8";
 
-            //Provider = new OdpDataProvider();
-            Provider = new GenericDataProvider(ProviderFullName.Oracle);
+            Provider = new OdpDataProvider();
+            //Provider = new GenericDataProvider(ProviderFullName.Oracle);
+
+            ConnectionString = string.Format(
+                "data source={0};User Id={1};Password={2};Pooling=True;Connection Timeout=120;Max Pool Size=150;",
+                database, username, password);
+        }
+    }
+
+    public class MediaDiscFactory : DbConnectionFactory
+    {
+        public MediaDiscFactory()
+        {
+            var aa = DbProviderFactories.GetFactoryClasses();
+            var bb = aa.Rows.Count;
+
+            string username = "mediadisc01_proc_1";
+            string password = "proki36";
+            string database = "mediadiscfr01.prod";
+
+            Provider = new OdpDataProvider();
 
             ConnectionString = string.Format(
                 "data source={0};User Id={1};Password={2};Pooling=True;Connection Timeout=120;Max Pool Size=150;",

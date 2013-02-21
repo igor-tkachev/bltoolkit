@@ -21,6 +21,24 @@ namespace UnitTests.CS.JointureTests
         #endregion
     }
 
+    [TableName(Owner = "MEDIADISC01")]
+    public class ALBUM_FOLLOWED
+    {
+        public string BARCODE { get; set; }
+        public string ID_DISTRIBUTOR { get; set; }
+        public DateTime? DATE_REQUEST { get; set; }
+        public DateTime? DATE_RECEPTION { get; set; }
+        public DateTime? DATE_NUMERISATION { get; set; }
+        public DateTime? DATE_RETURN { get; set; }
+        public decimal? REASON { get; set; }
+        public decimal? PACKAGE_NUMBER { get; set; }
+        public decimal? NB_DISK { get; set; }
+        public Decimal? NB_DISK_DONE { get; set; }
+        public DateTime DATE_CREATION { get; set; }
+        public DateTime DATE_MODIFICATION { get; set; }
+        public String COMMENTARY { get; set; }
+    }
+
     [TableName(Owner = "PITAFR01")]
     public class DATA_RADIO
     {
