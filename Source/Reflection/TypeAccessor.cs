@@ -250,7 +250,7 @@ namespace BLToolkit.Reflection
 			set { TypeFactory.LoadTypes = value; }
 		}
 
-		static readonly Dictionary<Type,TypeAccessor> _accessors = new Dictionary<Type,TypeAccessor>(10);
+		private static readonly Dictionary<Type,TypeAccessor> _accessors = new Dictionary<Type,TypeAccessor>(10);
 
 		public static TypeAccessor GetAccessor(Type originalType)
 		{
@@ -272,10 +272,10 @@ namespace BLToolkit.Reflection
 
 				accessor = (TypeAccessor)Activator.CreateInstance(accessorType);
 
-				_accessors[originalType] = accessor;
+				_accessors.Add(originalType, accessor);
 
 				if (originalType != instanceType)
-					_accessors[instanceType] = accessor;
+					_accessors.Add(instanceType, accessor);
 
 				return accessor;
 			}
