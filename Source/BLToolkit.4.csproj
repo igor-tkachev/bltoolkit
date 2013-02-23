@@ -347,6 +347,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MemberMapper.tt</DependentUpon>
     </Compile>
+    <Compile Include="Mapping\MemberMappers\BinarySerialisationMapper.cs" />
+    <Compile Include="Mapping\MemberMappers\BinarySerialisationToBase64StringMapper.cs" />
+    <Compile Include="Mapping\MemberMappers\XMLSerialisationMapper.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
     <Compile Include="Properties\BLToolkitConstants.cs" />
