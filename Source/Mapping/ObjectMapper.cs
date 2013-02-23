@@ -26,6 +26,16 @@ namespace BLToolkit.Mapping
 
 			var attr = mapMemberInfo.MemberAccessor.GetAttribute<MemberMapperAttribute>();
 
+		    MemberExtension ext;
+            if (_extension!=null && _extension.Members.TryGetValue(mapMemberInfo.MemberName,out ext))
+            {
+                AttributeExtensionCollection attrExt;
+                if (ext.Attributes.TryGetValue("MemberMapper", out attrExt))
+                {
+                    attr = new MemberMapperAttribute((Type)attrExt[0].Values["MemberMapperType"]);
+                }
+		    }
+
 			if (attr == null)
 			{
 				var attrs = TypeHelper.GetAttributes(mapMemberInfo.Type, typeof(MemberMapperAttribute));
