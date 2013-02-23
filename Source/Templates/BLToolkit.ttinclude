@@ -66,8 +66,8 @@ string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
 string OneToManyAssociationType = "IEnumerable<{0}>";
 
-string OwnerToInclude			= null;
-string[] DatabaseQuote			= null;
+string OwnerToInclude           = null;
+string[] DatabaseQuote          = null;
 
 bool   RenderField              = false;
 bool   RenderBackReferences     = true;
