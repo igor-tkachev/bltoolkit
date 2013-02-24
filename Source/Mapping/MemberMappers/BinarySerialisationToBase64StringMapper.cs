@@ -8,7 +8,7 @@ namespace BLToolkit.Mapping.MemberMappers
     {
         public override void SetValue(object o, object value)
         {
-            if (value != null) this.MemberAccessor.SetValue(o, this.binarydeserialize(Convert.FromBase64String(o.ToString())));                                
+            if (value != null) this.MemberAccessor.SetValue(o, this.binarydeserialize(Convert.FromBase64String(value.ToString())));                                
         }
 
         public override object GetValue(object o)

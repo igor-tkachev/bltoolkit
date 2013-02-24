@@ -7,7 +7,7 @@ namespace BLToolkit.Mapping.MemberMappers
     {
         public override void SetValue(object o, object value)
         {
-            if (value != null) this.MemberAccessor.SetValue(o, this.binarydeserialize((byte[])o));                                
+            if (value != null) this.MemberAccessor.SetValue(o, this.binarydeserialize((byte[])value));                                
         }
 
         public override object GetValue(object o)

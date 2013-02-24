@@ -349,6 +349,7 @@
     </Compile>
     <Compile Include="Mapping\MemberMappers\BinarySerialisationMapper.cs" />
     <Compile Include="Mapping\MemberMappers\BinarySerialisationToBase64StringMapper.cs" />
+    <Compile Include="Mapping\MemberMappers\JSONSerialisationMapper.cs" />
     <Compile Include="Mapping\MemberMappers\XMLSerialisationMapper.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
     <Compile Include="Mapping\RelationAttribute.cs" />
