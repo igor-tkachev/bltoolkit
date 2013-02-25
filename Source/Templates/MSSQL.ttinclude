@@ -9,7 +9,7 @@ private void LoadServerMetadata()
 	using (var conn = GetConnection())
 	using (var cmd  = conn.CreateCommand())
 	{
-		// Load tables & vies.
+		// Load tables & views.
 		//
 		string s = @"
 			SELECT
@@ -47,7 +47,7 @@ private void LoadServerMetadata()
 					) IS NULL
 				)";
 
-		if(string.IsNullOrWhiteSpace(OwnerToInclude))
+		if (string.IsNullOrWhiteSpace(OwnerToInclude))
 			cmd.CommandText = string.Format(s, "");
 		else
 			cmd.CommandText = string.Format(s, " TABLE_SCHEMA = '" + OwnerToInclude + "' AND ");

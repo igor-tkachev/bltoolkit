@@ -208,6 +208,7 @@
     <Compile Include="JointureTests\Factories\MusicFactory.cs" />
     <Compile Include="JointureTests\Title.cs" />
     <Compile Include="Mapping\BltMapTests.cs" />
+    <Compile Include="Mapping\MemberMapperDefaultMappersTest.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
