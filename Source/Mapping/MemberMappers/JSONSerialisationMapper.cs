@@ -16,10 +16,10 @@ namespace BLToolkit.Mapping.MemberMappers
 
         public override object GetValue(object o)
         {
-            return this.xmlserialize(this.MemberAccessor.GetValue(o));
+            return this.serialize(this.MemberAccessor.GetValue(o));
         }
 
-        private string xmlserialize(object obj)
+        private string serialize(object obj)
         {
             if (obj == null) return null;
 
