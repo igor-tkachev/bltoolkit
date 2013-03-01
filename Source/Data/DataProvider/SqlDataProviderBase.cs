@@ -404,6 +404,11 @@ namespace BLToolkit.Data.DataProvider
 			{
 				parameter.Value = (long)(ulong)value;
 			}
+			else if (value is string)
+			{
+				parameter.Value = value;
+				if (parameter.DbType == DbType.String && ((string)value).Length == 0) parameter.Size = 1;
+			}
 			else
 			{
 				base.SetParameterValue(parameter, value);

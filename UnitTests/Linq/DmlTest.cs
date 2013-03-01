@@ -823,10 +823,10 @@ namespace Update
 			ForEachProvider(
 				db =>
 				{
+					db.Parent.Delete(p => p.ParentID > 1000);
+
 					try
 					{
-						db.Parent.Delete(p => p.ParentID > 1000);
-
 						var q =
 							db.Child.     Select(c => new Parent { ParentID = c.ParentID,      Value1 = (int) Math.Floor(c.ChildID / 10.0) }).Union(
 							db.GrandChild.Select(c => new Parent { ParentID = c.ParentID ?? 0, Value1 = (int?)Math.Floor((c.GrandChildID ?? 0) / 100.0) }));

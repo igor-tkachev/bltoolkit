@@ -791,11 +791,13 @@ namespace BLToolkit.Data.Linq.Builder
 					case RequestFor.Table       :
 					case RequestFor.Object      :
 						{
-							var table = FindTable(expression, level, false);
-							return new IsExpressionResult(
+							var table   = FindTable(expression, level, false);
+							var isTable =
 								table       != null &&
 								table.Field == null &&
-								(expression == null || expression.GetLevelExpression(table.Level) == expression));
+								(expression == null || expression.GetLevelExpression(table.Level) == expression);
+
+							return new IsExpressionResult(isTable, isTable ? table.Table : null);
 						}
 
 					case RequestFor.Expression :
