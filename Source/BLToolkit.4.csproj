@@ -350,6 +350,14 @@
     <Compile Include="Mapping\AssociationAttribute.cs" />
     <Compile Include="Mapping\Association.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />
+    <Compile Include="Mapping\Fluent\AssociationMap.cs" />
+    <Compile Include="Mapping\Fluent\Attributes.cs" />
+    <Compile Include="Mapping\Fluent\FluentConfig.cs" />
+    <Compile Include="Mapping\Fluent\FluentMap.cs" />
+    <Compile Include="Mapping\Fluent\FluentMap.Interface.cs" />
+    <Compile Include="Mapping\Fluent\FluentMapHelper.cs" />
+    <Compile Include="Mapping\Fluent\IFluentMap.cs" />
+    <Compile Include="Mapping\Fluent\MapFieldMap.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\InheritanceMappingAttribute.cs" />
     <Compile Include="Mapping\MapRelationBase.cs" />
@@ -360,6 +368,7 @@
     </Compile>
     <Compile Include="Mapping\MemberMappers\BinarySerialisationMapper.cs" />
     <Compile Include="Mapping\MemberMappers\BinarySerialisationToBase64StringMapper.cs" />
+    <Compile Include="Mapping\MemberMappers\TimeSpanBigIntMapper.cs" />
     <Compile Include="Mapping\MemberMappers\JSONSerialisationMapper.cs" />
     <Compile Include="Mapping\MemberMappers\XMLSerialisationMapper.cs" />
     <Compile Include="Mapping\NotNullAttribute.cs" />
