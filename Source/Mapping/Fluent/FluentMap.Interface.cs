@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Data;
 using System.Linq;
 
 using BLToolkit.Reflection;
@@ -202,6 +203,19 @@ namespace BLToolkit.Mapping.Fluent
 			member.Attributes.Add(Attributes.DefaultValue, Convert.ToString(value));
 			this.EachChilds(m => m.DefaulValue(propName, value));
 		}
+
+        /// <summary>
+        /// DB-Type of the value.
+        /// </summary>
+        /// <typeparam name="TR">The type of the R.</typeparam>
+        /// <param name="propName">Name of the prop.</param>
+        /// <param name="dbType">The value.</param>
+        void IFluentMap.DbType<TR>(string propName, DbType dbType)
+        {
+            var member = this.GetMemberExtension(propName);
+            member.Attributes.Add(Attributes.DbType, Convert.ToString(dbType));
+            this.EachChilds(m => m.DefaulValue(propName, dbType));
+        }
 
         /// <summary>
         /// MemberMapper
