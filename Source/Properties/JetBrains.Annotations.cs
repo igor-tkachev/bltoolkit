@@ -275,4 +275,7 @@ namespace JetBrains.Annotations
 		/// </summary>
 		IncludeMembers = 1
 	}
+
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = true)]
+    internal sealed class InstantHandleAttribute : Attribute { }
 }
