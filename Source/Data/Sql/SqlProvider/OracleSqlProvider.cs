@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
@@ -11,6 +13,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override bool IsCountSubQuerySupported    { get { return false; } }
 		public override bool IsIdentityParameterRequired { get { return true;  } }
+		protected override int MaxInListValuesCount      { get { return 1000;  } }
 
 		protected override void BuildSelectClause(StringBuilder sb)
 		{
