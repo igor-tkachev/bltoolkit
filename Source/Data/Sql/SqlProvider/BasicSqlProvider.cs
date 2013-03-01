@@ -67,6 +67,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		public virtual bool IsInsertOrUpdateSupported       { get { return true;  } }
 		public virtual bool CanCombineParameters            { get { return true;  } }
 		public virtual bool IsGroupByExpressionSupported    { get { return true;  } }
+		public virtual int  MaxInListValuesCount            { get { return int.MaxValue; } }
 
 		public virtual bool ConvertCountSubQuery(SqlQuery subQuery)
 		{
@@ -1232,9 +1233,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			var firstValue = true;
 			var len        = sb.Length;
 			var hasNull    = false;
+			var count      = 0;
+			var longList   = false;
 
 			foreach (var value in values)
 			{
+				if (count++ >= MaxInListValuesCount)
+				{
+					count = 1;
+					longList = true;
+
+					// start building next bucked
+					firstValue = true;
+					sb.Remove(sb.Length - 2, 2).Append(')');
+					sb.Append(" OR ");
+				}
+
 				var val = value;
 
 				if (val is IValueContainer)
@@ -1279,6 +1293,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					BuildPredicate(sb, new SqlQuery.Predicate.IsNull(predicate.Expr1, predicate.IsNot));
 					sb.Append(")");
 				}
+			}
+
+			if (longList && !hasNull)
+			{
+				sb.Insert(len, "(");
+				sb.Append(")");
 			}
 		}
 
