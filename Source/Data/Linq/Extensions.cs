@@ -292,7 +292,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int Update<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
-            return new SqlQuery<T>(dataContext).Update(dataContext, maxBatchSize, list);
+			return new SqlQuery<T>(dataContext).Update(dataContext, maxBatchSize, list);
 		}
 
 		public static int Update<T>(this DbManager dataContext, IEnumerable<T> list)
@@ -321,7 +321,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int Delete<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
-            return new SqlQuery<T>(dataContext).Delete(dataContext, maxBatchSize, list);
+			return new SqlQuery<T>(dataContext).Delete(dataContext, maxBatchSize, list);
 		}
 
 		public static int Delete<T>(this DbManager dataContext, IEnumerable<T> list)
