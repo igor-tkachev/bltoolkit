@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq.Expressions;
 
 using BLToolkit.Reflection.Extension;
@@ -102,6 +103,16 @@ namespace BLToolkit.Mapping.Fluent
 		{
 			return this.DefaultValue(this._prop, value);
 		}
+
+        /// <summary>
+        /// DbTypeAttribute
+        /// </summary>
+        /// <param name="dbType"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> DbType(DbType dbType)
+        {
+            return this.DbType(this._prop, dbType);
+        }
 
         /// <summary>
         /// MemberMapperAttribute

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -236,6 +237,20 @@ namespace BLToolkit.Mapping.Fluent
 			((IFluentMap)this).DefaulValue(name, value);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
+
+        /// <summary>
+        /// DbTypeAttribute
+        /// </summary>
+        /// <param name="prop"> </param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> DbType<TR>(Expression<Func<T, TR>> prop, DbType dbType)
+        {
+#warning need test
+            string name = this.GetExprName(prop);
+            ((IFluentMap)this).DbType<TR>(name, dbType);
+            return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
+        }
 
         /// <summary>
         /// MemberMapperAttribute

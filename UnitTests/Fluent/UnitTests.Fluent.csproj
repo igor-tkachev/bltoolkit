@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertExceptionEx.cs" />
+    <Compile Include="FluentMapAttributesTest.cs" />
     <Compile Include="FluentConfigTest.cs" />
     <Compile Include="FluentMapTest.cs" />
     <Compile Include="MockDataBase\AssertCommandData.cs" />

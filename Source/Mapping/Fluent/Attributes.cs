@@ -85,6 +85,8 @@
 
             public const string DefaultValue = "DefaultValue";
 
+            public const string DbType = "DbType";
+
             public static class MemberMapper
             {
                 public const string Name = "MemberMapper";

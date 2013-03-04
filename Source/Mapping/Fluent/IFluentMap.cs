@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 
 using BLToolkit.Reflection.Extension;
 
@@ -115,6 +116,14 @@ namespace BLToolkit.Mapping.Fluent
 		/// <param name="propName">Name of the prop.</param>
 		/// <param name="value">The value.</param>
 		void DefaulValue<TR>(string propName, TR value);
+
+        /// <summary>
+		/// Defauls the value.
+		/// </summary>
+		/// <typeparam name="TR">The type of the R.</typeparam>
+		/// <param name="propName">Name of the prop.</param>
+		/// <param name="value">The value.</param>
+        void DbType<TR>(string propName, DbType value);
 
         /// <summary>
         /// MemberMapper
