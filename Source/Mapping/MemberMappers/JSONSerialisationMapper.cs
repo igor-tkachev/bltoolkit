@@ -12,14 +12,14 @@ namespace BLToolkit.Mapping.MemberMappers
 			if (value != null) this.MemberAccessor.SetValue(o, Deserialize(value.ToString()));
 		}
 
-		public override object GetValue(object o)
-		{
-			return XmlSerialize(this.MemberAccessor.GetValue(o));
-		}
+        public override object GetValue(object o)
+        {
+            return this.serialize(this.MemberAccessor.GetValue(o));
+        }
 
-		string XmlSerialize(object obj)
-		{
-			if (obj == null) return null;
+        private string serialize(object obj)
+        {
+            if (obj == null) return null;
 
 			DataContractJsonSerializer ser = new DataContractJsonSerializer(this.Type);
 			MemoryStream ms = new MemoryStream();
