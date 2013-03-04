@@ -184,29 +184,31 @@
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
     <Compile Include="EditableObjects\NotifyPropertyChangedTest.cs" />
     <Compile Include="JointureTests\Factories\AdExpressFactory.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressOleronFactory.cs" />
     <Compile Include="JointureTests\Factories\AdExpressOleronFactoryTest.cs" />
     <Compile Include="JointureTests\Factories\AdExpressTest.cs" />
-    <Compile Include="JointureTests\Artist.cs" />
-    <Compile Include="JointureTests\Artist2.cs" />
-    <Compile Include="JointureTests\AssociationTests.cs" />
-    <Compile Include="JointureTests\BasicMedia.cs" />
+    <Compile Include="JointureTests\Factories\MediaDiscFactory.cs" />
+    <Compile Include="JointureTests\JointureTests.cs" />
+    <Compile Include="JointureTests\Mappings\Artist.cs" />
+    <Compile Include="JointureTests\Mappings\Artist2.cs" />
+    <Compile Include="JointureTests\DiversTests.cs" />
+    <Compile Include="JointureTests\Mappings\BasicMedia.cs" />
     <Compile Include="JointureTests\Consts.cs" />
-    <Compile Include="JointureTests\ExecTimeInfo.cs" />
+    <Compile Include="JointureTests\PerformanceAndTunningTests.cs" />
+    <Compile Include="JointureTests\Tools\ExecTimeInfo.cs" />
     <Compile Include="JointureTests\Factories\MediaDiscTest.cs" />
-    <Compile Include="JointureTests\FILE_FORM.cs" />
-    <Compile Include="JointureTests\FORM_FOLLOW_UP.cs" />
-    <Compile Include="JointureTests\FORM_SCRIPT.cs" />
-    <Compile Include="JointureTests\Media.cs" />
-    <Compile Include="JointureTests\MusicDB.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="JointureTests\Mappings\FILE_FORM.cs" />
+    <Compile Include="JointureTests\Mappings\FORM_FOLLOW_UP.cs" />
+    <Compile Include="JointureTests\Mappings\FORM_SCRIPT.cs" />
+    <Compile Include="JointureTests\Mappings\Media.cs" />
     <Compile Include="JointureTests\Factories\MusicTest.cs" />
     <Compile Include="JointureTests\Factories\OleronFactory.cs" />
     <Compile Include="JointureTests\Factories\OleronTest.cs" />
     <Compile Include="JointureTests\Factories\OrquaFactory.cs" />
     <Compile Include="JointureTests\Factories\OrquaTest.cs" />
     <Compile Include="JointureTests\Factories\MusicFactory.cs" />
-    <Compile Include="JointureTests\Title.cs" />
+    <Compile Include="JointureTests\Tools\TestsBaseClass.cs" />
+    <Compile Include="JointureTests\Mappings\Title.cs" />
     <Compile Include="Mapping\BltMapTests.cs" />
     <Compile Include="Mapping\MemberMapperDefaultMappersTest.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
@@ -366,5 +368,6 @@
       <Name>BLToolkit.4.JointureAddOn</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,7 +1,7 @@
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Mappings
 {
     [TableName(Name = "FORM_FOLLOW_UP", Owner = "ORQUAFR01")]
     public class FORM_FOLLOW_UP

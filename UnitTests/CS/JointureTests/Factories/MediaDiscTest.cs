@@ -1,14 +1,14 @@
 using BLToolkit.Data;
 using NUnit.Framework;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class MediaDiscTest : AssociationTests
+    public class MediaDiscTest : JointureTests
     {
         #region Overrides of AssociationTests
 
-        public override DbConnectionFactory CreateFactory()
+        protected override DbConnectionFactory CreateFactory()
         {
             return new MediaDiscFactory();
         }

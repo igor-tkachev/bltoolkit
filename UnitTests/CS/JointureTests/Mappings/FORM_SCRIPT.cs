@@ -2,7 +2,7 @@ using System;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Mappings
 {
     [TableName(Name = "SCRIPT", Owner = "ORQUAFR01")]
     public class FORM_SCRIPT

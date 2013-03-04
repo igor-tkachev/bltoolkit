@@ -20,7 +20,9 @@ namespace BLToolkit.DataAccess
         public FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(dbManager.MappingSchema, ignoreLazyLoad, mappingOrder, ignoreMissingColumns);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager, inheritedMappingSchema: dbManager.MappingSchema, ignoreLazyLoad: ignoreLazyLoad,
+                mappingOrder: mappingOrder, ignoreMissingColumns: ignoreMissingColumns);
+
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 

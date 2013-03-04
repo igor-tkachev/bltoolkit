@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +9,8 @@ using BLToolkit.Aspects;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Mapping;
+
+#endregion
 
 namespace BLToolkit.DataAccess
 {
@@ -19,13 +23,17 @@ namespace BLToolkit.DataAccess
         public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(dbManager.MappingSchema, ignoreLazyLoad, mappingOrder, ignoreMissingColumns);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager, inheritedMappingSchema: dbManager.MappingSchema, ignoreLazyLoad: ignoreLazyLoad, 
+                mappingOrder: mappingOrder, ignoreMissingColumns: ignoreMissingColumns);
+
             _ignoreLazyLoad = ignoreLazyLoad;
         }
 
         #endregion
 
         #region Overrides
+
+        private readonly Hashtable _actionSqlQueryInfo = new Hashtable();
 
         [NoInterception]
         protected override SqlQueryInfo CreateSqlText(DbManager db, Type type, string actionName)
@@ -41,13 +49,11 @@ namespace BLToolkit.DataAccess
             }
         }
 
-        private readonly Hashtable _actionSqlQueryInfo = new Hashtable();
-
         [NoInterception]
         public override SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
-        {    
+        {
             var key = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
-            var query = (SqlQueryInfo)_actionSqlQueryInfo[key];
+            var query = (SqlQueryInfo) _actionSqlQueryInfo[key];
 
             if (query == null)
             {
@@ -143,22 +149,22 @@ namespace BLToolkit.DataAccess
             {
                 if (mapField is ValueMapper)
                     sb.AppendFormat("\t{0}.{1} {2},\n"
-                                    , (mapper).PropertyType.Name,                                    
-                                    db.DataProvider.Convert(((ValueMapper)mapField).ColumnName, ConvertType.NameToQueryField),
-                                    ((ValueMapper)mapField).ColumnAlias
+                                    , (mapper).PropertyType.Name,
+                                    db.DataProvider.Convert(((ValueMapper) mapField).ColumnName, ConvertType.NameToQueryField),
+                                    ((ValueMapper) mapField).ColumnAlias
                         );
                 else if (mapField is IPropertiesMapping)
                 {
-                    var propertiesMapping = (IPropertiesMapping)mapField;
+                    var propertiesMapping = (IPropertiesMapping) mapField;
                     var cel = propertiesMapping.ParentMapping;
                     while (cel != null)
                     {
                         // To avoid recursion dont take in account types already loaded.
-                        if (((IMapper)cel).PropertyType == mapField.PropertyType)
+                        if (((IMapper) cel).PropertyType == mapField.PropertyType)
                             continue;
                         cel = cel.ParentMapping;
                     }
-                    var objectMapper = (IObjectMapper)mapField;
+                    var objectMapper = (IObjectMapper) mapField;
                     if (!objectMapper.IsLazy)
                         BuildSelectSql(objectMapper, sb, db);
                 }
@@ -186,7 +192,7 @@ namespace BLToolkit.DataAccess
                     string thisKey = objectMapper.Association.ThisKey;
 
                     // TITLE
-                    string parentDbField = valueMappers.ContainsKey(thisKey) ? valueMappers[thisKey].ColumnName : thisKey;                        
+                    string parentDbField = valueMappers.ContainsKey(thisKey) ? valueMappers[thisKey].ColumnName : thisKey;
 
                     // ARTIST
                     string childDbField = objectMapper.PropertiesMapping.Where(e => e is ValueMapper).Cast<ValueMapper>().First(
@@ -195,7 +201,7 @@ namespace BLToolkit.DataAccess
                     string childDatabase = GetDatabaseName(mapField.PropertyType);
                     string childOwner = base.GetOwnerName(mapField.PropertyType);
                     string childName = base.GetTableName(mapField.PropertyType);
-                    string childAlias =  FullGetTableName(mapField.PropertyType);
+                    string childAlias = FullGetTableName(mapField.PropertyType);
 
                     StringBuilder childFullName = db.DataProvider.CreateSqlProvider().BuildTableName(
                         new StringBuilder(),
@@ -218,7 +224,7 @@ namespace BLToolkit.DataAccess
                                     childDbField
                         );
 
-                    AppendJoinTableName((IPropertiesMapping)mapField, sb, db, mapField.PropertyType);
+                    AppendJoinTableName((IPropertiesMapping) mapField, sb, db, mapField.PropertyType);
                 }
             }
 
@@ -248,14 +254,14 @@ namespace BLToolkit.DataAccess
             {
                 if (mm is ValueMapper && mm.DataReaderIndex == mapper.DataReaderIndex)
                 {
-                    var valueMapper = (ValueMapper)mm;
+                    var valueMapper = (ValueMapper) mm;
 
                     string tableAlias = mapper.PropertyType.Name;
 
                     //mm.Name = ID_TRACK
                     SqlQueryParameterInfo p = query.AddParameter(
                         db.DataProvider.Convert(valueMapper.ColumnName + "_W", ConvertType.NameToQueryParameter).
-                            ToString(),
+                           ToString(),
                         valueMapper.ColumnName);
 
                     sb.AppendFormat("\t{0}.{1} = ", tableAlias,

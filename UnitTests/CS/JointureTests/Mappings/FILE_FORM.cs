@@ -4,7 +4,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using Oracle.DataAccess.Types;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Mappings
 {
     [TableName(Name = "SCRIPT", Owner = "ORQUAFR01")]
     public class SCRIPT_TABLE

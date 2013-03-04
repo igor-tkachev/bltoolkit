@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Tools
 {
     public class ExecTimeInfo:IDisposable
     {

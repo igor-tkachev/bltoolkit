@@ -5,63 +5,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using BLToolkit.Data;
-using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 using Newtonsoft.Json;
+using UnitTests.CS.JointureTests.Factories;
+using UnitTests.CS.JointureTests.Mappings;
+using UnitTests.CS.JointureTests.Tools;
 
 #endregion
 
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
-    public abstract class AssociationTests
+    public abstract class DiversTests : TestsBaseClass
     {
-        private DbConnectionFactory _connectionFactory;
-
-        public abstract DbConnectionFactory CreateFactory();
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            _connectionFactory = CreateFactory();
-
-            DbManager.AddDataProvider(_connectionFactory.Provider);
-            DbManager.AddConnectionString(_connectionFactory.Provider.Name, _connectionFactory.ConnectionString);
-
-            DbManager.TurnTraceSwitchOn();
-        }
-
-        private void SimulateWork(Action<DbManager> action, IDbConnectionFactory connectionFactory, int maxUsers = 5, int execCount = 3)
-        {
-            int count = 0;
-            while (count <= execCount)
-            {
-                var tasks = new List<Task>();
-                for (int i = 0; i < maxUsers; i++)
-                {
-                    var task = Task.Factory.StartNew(o =>
-                        {
-                            using (var dbManager = connectionFactory.CreateDbManager())
-                            {
-                                action(dbManager);
-                            }
-                        }, i, TaskCreationOptions.LongRunning);
-
-                    tasks.Add(task);
-                }
-                Task.WaitAll(tasks.ToArray());
-                Thread.Sleep(1000);
-
-                count++;
-            }
-        }
-
         private void GetMediaSetting(DbManager db)
         {
             var query = from m in db.GetTable<DataMedia>()
@@ -91,11 +51,11 @@ namespace UnitTests.CS.JointureTests
                 }).ToList();
         }
 
-        private static void GetMediaLinq()
+        private void GetMediaLinq()
         {
             var all = new List<long> {21, 24, 25, 27, 38, 221};
 
-            using (var db = new MusicDB())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 using (var a = new ExecTimeInfo())
                 {
@@ -133,9 +93,9 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-        private static void GetMediaReq(string req)
+        private void GetMediaReq(string req)
         {
-            using (var db = new MusicDB())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 using (var a = new ExecTimeInfo())
                 {
@@ -166,23 +126,24 @@ namespace UnitTests.CS.JointureTests
 //                where date_numerisation is null
 //) f
 
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query2 = from m in db.GetTable<ALBUM_FOLLOWED>()
-                             group m by new { m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER } into gn
+                             group m by new {m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER}
+                             into gn
                              select new
-                             {
-                                 gn.Key.ID_DISTRIBUTOR,
-                                 gn.Key.PACKAGE_NUMBER,
-                                 Done = gn.Count(e => e.DATE_NUMERISATION != null),
-                                 //Total = gn.Count(),
-                             };
+                                 {
+                                     gn.Key.ID_DISTRIBUTOR,
+                                     gn.Key.PACKAGE_NUMBER,
+                                     Done = gn.Count(e => e.DATE_NUMERISATION != null),
+                                     //Total = gn.Count(),
+                                 };
 
                 var res = query2.ToList();
                 Console.WriteLine(res);
             }
 
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from m in db.GetTable<ALBUM_FOLLOWED>()
                             where m.DATE_NUMERISATION == null
@@ -195,8 +156,9 @@ namespace UnitTests.CS.JointureTests
                 query = query.Distinct();
 
                 var query2 = from m in query
-                             join n in db.GetTable<ALBUM_FOLLOWED>() on new { m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER } equals new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER}
-                             group n by new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER} into gn
+                             join n in db.GetTable<ALBUM_FOLLOWED>() on new {m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER} equals new {n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER}
+                             group n by new {n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER}
+                             into gn
                              select new
                                  {
                                      gn.Key.ID_DISTRIBUTOR,
@@ -205,15 +167,16 @@ namespace UnitTests.CS.JointureTests
                                  };
 
                 var query3 = from m in query
-                             join n in db.GetTable<ALBUM_FOLLOWED>() on new { m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER } equals new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER }
+                             join n in db.GetTable<ALBUM_FOLLOWED>() on new {m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER} equals new {n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER}
                              where n.DATE_NUMERISATION != null
-                             group n by new { n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER } into gn
+                             group n by new {n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER}
+                             into gn
                              select new
-                             {
-                                 gn.Key.ID_DISTRIBUTOR,
-                                 gn.Key.PACKAGE_NUMBER,
-                                 Done = gn.Count()
-                             };
+                                 {
+                                     gn.Key.ID_DISTRIBUTOR,
+                                     gn.Key.PACKAGE_NUMBER,
+                                     Done = gn.Count()
+                                 };
 
                 var query4 = from m in query2
                              join n in query3 on new {m.ID_DISTRIBUTOR, m.PACKAGE_NUMBER} equals new {n.ID_DISTRIBUTOR, n.PACKAGE_NUMBER} into mn
@@ -229,37 +192,17 @@ namespace UnitTests.CS.JointureTests
                 var res = query4.ToList();
 
                 Console.WriteLine(res.Count);
-
-            }
-        }
-
-        [Test]
-        public void SelectLeftJoin()
-        {
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                var query = from m in db.GetTable<MULTIMEDIA_DB>()
-                            join dv in db.GetTable<DATA_VERSION>() on m.ID_MULTIMEDIA equals dv.ID_MULTIMEDIA into m_dv
-                            from dv in m_dv.DefaultIfEmpty()
-                            where dv != null
-                            select new {m, dv};
-
-                var res = query.ToList();
-
-                Console.WriteLine(res.Count);
-
             }
         }
 
         [Test]
         public void GroupByTest()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from m in db.GetTable<MULTIMEDIA_DB>()
                             join dv in db.GetTable<DATA_VERSION>() on m.ID_MULTIMEDIA equals dv.ID_MULTIMEDIA into m_dv
                             from dv in m_dv.DefaultIfEmpty()
-
                             group m by m.ID_MULTIMEDIA
                             into gm
                             where gm.Count() == 0
@@ -268,14 +211,13 @@ namespace UnitTests.CS.JointureTests
                 var res = query.ToList();
 
                 Console.WriteLine(res.Count);
-
             }
         }
 
         [Test]
         public void InsertArtistWithAutoSequence()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = new SqlQuery(db);
                 var artist = new Label {Name = "TEST", DATE_CREATION = DateTime.Now, DATE_MODIFICATION = DateTime.Now, ACTIVATION = 10, ID_USER_ = 200};
@@ -291,88 +233,9 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void InsertBatchWithGenericDataProvider()
-        {
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                var day = new DateTime(1950, 1, 1);
-
-                var pageViews = new List<ValoNbPagesEvaliant> {new ValoNbPagesEvaliant {DateMedia = day, IdMedia = 10633, NbPages = 200}, new ValoNbPagesEvaliant {DateMedia = day, IdMedia = 10634, NbPages = 300},};
-
-                pageViews.ForEach(e =>
-                    {
-                        e.Activation = 0;
-                        e.DateCreation = DateTime.Now;
-                        e.DateModification = DateTime.Now;
-                        e.IdLanguageDataI = 33;
-
-                        e.IdSessionDetail = 0;
-                    });
-
-                db.UseQueryText = true;
-                db.InsertBatch(pageViews);
-                db.UseQueryText = false;
-            }
-        }
-
-        [Test]
-        public void InsertBatchWithIdentityWithTransaction()
-        {
-            var list = new List<DataImport>();
-            for (int i = 0; i < 1000; i++)
-            {
-                list.Add(new DataImport
-                    {
-                        DeclaredProduct = "zzz" + i,
-                        IdMedia = 2024,
-                        DeclaredId = i,
-                    });
-            }
-
-            using (new ExecTimeInfo())
-            {
-                using (var db = _connectionFactory.CreateDbManager())
-                {
-                    if (_connectionFactory.Provider is GenericDataProvider)
-                        db.UseQueryText = true;
-
-                    db.BeginTransaction();
-                    db.InsertBatchWithIdentity(list.Take(10));
-                    db.RollbackTransaction();
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Fastest method
-        /// </summary>
-        [Test]
-        public void InsertBatchWithIdentityWithoutTransaction()
-        {
-            var list = new List<DataImport>();
-            for (int i = 0; i < 1000; i++)
-            {
-                list.Add(new DataImport
-                    {
-                        DeclaredProduct = "zzz" + i,
-                        IdMedia = 2024,
-                        DeclaredId = i,
-                    });
-            }
-
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                if (_connectionFactory.Provider is GenericDataProvider)
-                    db.UseQueryText = true;
-
-                db.InsertBatchWithIdentity(list.Take(2));
-            }
-        }
-
-        [Test]
         public void InsertBlob()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var sqlQuery = new SqlQuery(db);
 
@@ -391,13 +254,12 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-
         [Test]
         public void InsertDataRadio()
         {
             using (new ExecTimeInfo())
             {
-                using (var db = _connectionFactory.CreateDbManager())
+                using (var db = ConnectionFactory.CreateDbManager())
                 {
                     db.BeginTransaction();
 
@@ -431,7 +293,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertWithIdentity()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var t = db.GetTable<RECO_RADIO>();
                 var now = DateTime.Now.AddDays(30);
@@ -463,7 +325,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertWithIdentityDbManager()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 db.BeginTransaction();
 
@@ -490,7 +352,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertWithIdentityLinq()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 db.BeginTransaction();
 
@@ -520,7 +382,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertWithIdentityQuery()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 db.BeginTransaction();
 
@@ -546,84 +408,9 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void SelectAllArtistsIgnoreLazyLoading()
-        {
-            using (var db = new MusicDB())
-            {
-                var queryI = from a in db.GetTable<Artist>()
-                             where a.Id == 2471
-                             select a;
-
-                var aaa = queryI.First();
-                aaa.Name = "JE NE SUIS PAS UN HÃƒÂ‰ROS";
-
-
-                var data = new byte[] {0x4A, 0x45, 0x20, 0x4E, 0x45, 0x20, 0x53, 0x55, 0x49, 0x53, 0x20, 0x50, 0x41, 0x53, 0x20, 0x55, 0x4E, 0x20, 0x48, 0xC3, 0x83, 0xC2, 0x89, 0x52, 0x4F, 0x53};
-                aaa.Name = Encoding.UTF8.GetString(data);
-
-                var updateQuery = new SqlQuery(db);
-                updateQuery.Update(aaa);
-
-                var ccc = aaa.Id;
-
-                var query2 = new FullSqlQuery(db, true); //loading is automatic
-                var artist2 = (Artist2) query2.SelectByKey(typeof (Artist2), 2643);
-                List<Title> titles2 = artist2.Titles;
-
-                var query = new FullSqlQuery(db);
-                var artist = (Artist2) query.SelectByKey(typeof (Artist2), 2643);
-                List<Title> titles = artist.Titles;
-                Assert.AreEqual(titles2.Count, titles.Count);
-            }
-        }
-
-        [Test]
-        public void SelectAllArtistsLazyLoading()
-        {
-            using (var db = new MusicDB())
-            {
-                DbManager dbCmd = db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
-                dbCmd.MappingSchema = new FullMappingSchema();
-
-                // ExecuteList works only with LazyLoadingTrue
-                List<Artist2> art = dbCmd.ExecuteList<Artist2>();
-
-                foreach (Artist2 artist in art)
-                {
-                    List<Title> titles = artist.Titles;
-                    Console.WriteLine(titles.Count);
-                    break;
-                }
-            }
-        }
-
-        [Test]
-        public void SelectAllTitlesFullQueryAssociation()
-        {
-            using (var db = new MusicDB())
-            {
-                var query = new FullSqlQueryT<Title>(db);
-                List<Title> titles2 = query.SelectAll();
-                Assert.IsTrue(titles2.Count > 0);
-            }
-        }
-
-        [Test]
-        public void SelectArtistWithTitlesLazyLoadingOnQueryAssociation()
-        {
-            using (var db = new MusicDB())
-            {
-                var query2 = new FullSqlQueryT<Artist2>(db);
-                Artist2 artist = query2.SelectByKey(2643);
-                List<Title> titles = artist.Titles;
-                Console.WriteLine(titles.Count);
-            }
-        }
-
-        [Test]
         public void SelectBlob()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from n in db.GetTable<static_nav_session>()
                             where n.ID_STATIC_NAV_SESSION == 102959
@@ -657,7 +444,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectClobField()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from s in db.GetTable<FORM_SCRIPT>()
                             where s.DATE_CREATION > new DateTime(2012, 07, 01)
@@ -675,7 +462,7 @@ namespace UnitTests.CS.JointureTests
             {
                 var beginSpotPeriod = new DateTime(2012, 08, 09);
                 var endSpotPeriod = new DateTime(2012, 08, 09);
-                using (var pitagorDb = _connectionFactory.CreateDbManager())
+                using (var pitagorDb = ConnectionFactory.CreateDbManager())
                 {
                     var dbQuery = from dr in pitagorDb.GetTable<DATA_RADIO>()
                                   join dv in pitagorDb.GetTable<DATA_VERSION>() on dr.ID_DATA_VERSION equals
@@ -703,7 +490,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectGetMediaSettingMultiple()
         {
-            SimulateWork(GetMediaSetting, _connectionFactory, 20, 1);
+            SimulateWork(GetMediaSetting, ConnectionFactory, 20, 1);
         }
 
         [Test]
@@ -711,7 +498,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (new ExecTimeInfo())
             {
-                using (var db = _connectionFactory.CreateDbManager())
+                using (var db = ConnectionFactory.CreateDbManager())
                 {
                     var beginMinute = 0;
                     var beginHour = 0;
@@ -748,34 +535,51 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void SelectLeftJoin()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                var query = from m in db.GetTable<MULTIMEDIA_DB>()
+                            join dv in db.GetTable<DATA_VERSION>() on m.ID_MULTIMEDIA equals dv.ID_MULTIMEDIA into m_dv
+                            from dv in m_dv.DefaultIfEmpty()
+                            where dv != null
+                            select new {m, dv};
+
+                var res = query.ToList();
+
+                Console.WriteLine(res.Count);
+            }
+        }
+
+        [Test]
         public void SelectTest()
         {
             using (new ExecTimeInfo())
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
-                IQueryable<Mapping> resultG = from d in db.GetTable<DataMapping>()
-                                              where d.IdLocker == null && d.IdLanguage == 33
-                                              select new Mapping
-                                                  {
-                                                      IdMapping = d.IdMapping,
-                                                      DeclaredId = d.DeclaredId,
-                                                      DeclaredProduct = d.DeclaredProduct,
-                                                      MappingState = (MappingState) d.Activation,
-                                                      Product = new Product
-                                                          {
-                                                              IdProduct =
-                                                                  d.IdProduct == null
-                                                                      ? 0
-                                                                      : d.IdProduct.Value
-                                                          },
-                                                      ProductPending = new ProductPending
-                                                          {
-                                                              IdProductPending =
-                                                                  d.IdProductPending == null
-                                                                      ? 0
-                                                                      : d.IdProductPending.Value
-                                                          }
-                                                  };
+                IQueryable<Mappings.Mapping> resultG = from d in db.GetTable<DataMapping>()
+                                                       where d.IdLocker == null && d.IdLanguage == 33
+                                                       select new Mappings.Mapping
+                                                           {
+                                                               IdMapping = d.IdMapping,
+                                                               DeclaredId = d.DeclaredId,
+                                                               DeclaredProduct = d.DeclaredProduct,
+                                                               MappingState = (MappingState) d.Activation,
+                                                               Product = new Product
+                                                                   {
+                                                                       IdProduct =
+                                                                           d.IdProduct == null
+                                                                               ? 0
+                                                                               : d.IdProduct.Value
+                                                                   },
+                                                               ProductPending = new ProductPending
+                                                                   {
+                                                                       IdProductPending =
+                                                                           d.IdProductPending == null
+                                                                               ? 0
+                                                                               : d.IdProductPending.Value
+                                                                   }
+                                                           };
 
                 var res = resultG.Distinct().OrderBy(p => p.IdMapping).ToList();
             }
@@ -787,7 +591,7 @@ namespace UnitTests.CS.JointureTests
             string sql = File.ReadAllText(@"c:\requeteOrqua.txt");
 
             var forms = new List<FILE_FORM>();
-            using (var db = new MusicDB())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 //var query = from f in 
 
@@ -805,8 +609,7 @@ namespace UnitTests.CS.JointureTests
                     //}
 
                     DbManager dbCmd = db.SetCommand(sql);
-                    dbCmd.MappingSchema = new FullMappingSchema(inheritedMappingSchema: dbCmd.MappingSchema, mappingOrder: MappingOrder.ByColumnName,
-                                                                ignoreMissingColumns: true, ignoreLazyLoad: false);
+                    dbCmd.MappingSchema = new FullMappingSchema(db, inheritedMappingSchema: dbCmd.MappingSchema, ignoreLazyLoad: false, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: true);
                     var allMedia = dbCmd.ExecuteList<FILE_FORM>();
                     forms = allMedia;
                     foreach (FILE_FORM fileForm in allMedia)
@@ -828,7 +631,7 @@ namespace UnitTests.CS.JointureTests
             Console.WriteLine(Math.Round(0.5));
 
             var creationDate = new DateTime(2012, 1, 1);
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from s in db.GetTable<SCRIPT_TABLE>()
                             where s.DATE_CREATION > creationDate && s.SCRIPT.ContainsExactly("station") > 0
@@ -858,26 +661,11 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void SelectTitleWithArtistQueryAssociation()
-        {
-            using (var db = new MusicDB())
-            {
-                var query = new FullSqlQuery(db);
-                var title = (Title) query.SelectByKey(typeof (Title), 137653);
-                Console.WriteLine(title.Name);
-
-                var query2 = new FullSqlQueryT<Title>(db);
-                var title2 = query2.SelectByKey(137653);
-                Console.WriteLine(title2.Name);
-            }
-        }
-
-        [Test]
         public void SelectTooLong()
         {
             using (new ExecTimeInfo())
             {
-                using (var db = _connectionFactory.CreateDbManager())
+                using (var db = ConnectionFactory.CreateDbManager())
                 {
                     var query = from dt in db.GetTable<DataDeclarativeTrack>()
                                 join dd in db.GetTable<DataDeclarativeData>() on dt.IdDeclarativeTrack equals dd.IdDeclarativeTrack
@@ -899,7 +687,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectTooLong2()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 db.SetCommand(File.ReadAllText(@"c:\requete2.txt"));
                 var res = db.ExecuteList<Monitoring>();
@@ -911,7 +699,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void TestGetDataRadioWithTimeSpan()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from m in db.GetTable<DATA_VERSION>()
                             where m.DATE_CREATION.TimeOfDay > TimeSpan.FromHours(11)
@@ -923,92 +711,9 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void TestLinqAssociation()
-        {
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
-                            where m.ID_MULTIMEDIA == 31265081
-                            select new
-                                {
-                                    //m.MultimediaFiles,
-                                    m.DataVersion.DataRadio,
-                                    m.DataVersion,
-                                    m
-                                };
-
-                var res = query.ToList();
-                Assert.IsNotEmpty(res);
-            }
-        }
-
-        [Test]
-        public void TestLinqAssociation2()
-        {
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                var query = from m in db.GetTable<Artist2>()
-                            where m.Id == 1833
-                            select new
-                                {
-                                    m.Name,
-                                    m.Titles
-                                };
-
-                var res = query.ToList();
-                Assert.IsNotEmpty(res);
-            }
-        }
-
-        [Test]
-        public void TestQueryAssociation()
-        {
-            using (var db = _connectionFactory.CreateDbManager())
-            {
-                db.MappingSchema = new FullMappingSchema(inheritedMappingSchema: db.MappingSchema, mappingOrder: MappingOrder.ByColumnName,
-                                                         ignoreMissingColumns: true);
-                string requete = File.ReadAllText(@"c:\requete3.txt");
-                db.SetCommand(requete);
-                var res = db.ExecuteList<MULTIMEDIA_DATA_VERSION>();
-                Assert.IsNotEmpty(res);
-            }
-        }
-
-        [Test]
-        public void TestSelection()
-        {
-            var beginSpotPeriod = new DateTime(2012, 09, 03);
-
-            using (var pitagorDb = new MusicDB())
-            {
-                pitagorDb.UseQueryText = true;
-
-                var dbQuery = from dr in pitagorDb.GetTable<DATA_RADIO>()
-                              join dv in pitagorDb.GetTable<DATA_VERSION>() on dr.ID_DATA_VERSION equals dv.ID_DATA_VERSION
-                              where dr.DATE_MEDIA == beginSpotPeriod
-                              select
-                                  new DataEntryBroadcast
-                                      {
-                                          Id = dr.ID_DATA_VERSION,
-                                          VersionId = dv.ID_MULTIMEDIA,
-                                          DateMedia = dr.DATE_MEDIA,
-                                          MediaId = dr.ID_MEDIA,
-                                          SpotBegin = dr.DATE_SPOT_BEGINNING,
-                                          SpotEnd = dr.DATE_SPOT_END,
-                                      };
-
-
-                dbQuery = dbQuery.Where(e => e.MediaId == 2015);
-
-                var res = dbQuery.ToList();
-                Assert.IsNotEmpty(res);
-            }
-        }
-
-        [Test]
         public void TestSlowUpdate()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 db.BeginTransaction();
 
@@ -1026,7 +731,7 @@ namespace UnitTests.CS.JointureTests
 
             using (new ExecTimeInfo())
             {
-                using (var db = _connectionFactory.CreateDbManager())
+                using (var db = ConnectionFactory.CreateDbManager())
                 {
                     db.BeginTransaction();
 
@@ -1047,7 +752,7 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void TestUpdate()
         {
-            using (var db = _connectionFactory.CreateDbManager())
+            using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = from d in db.GetTable<DataProductPending>()
                             where d.IdProductPending == 1

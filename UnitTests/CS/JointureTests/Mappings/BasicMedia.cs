@@ -1,6 +1,6 @@
 using BLToolkit.DataAccess;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Mappings
 {
     [TableName(Name = "BASIC_MEDIA", Owner = Consts.Owner)]
     public class BasicMedia

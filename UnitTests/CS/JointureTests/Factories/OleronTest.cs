@@ -1,19 +1,18 @@
 using System;
-using System.Collections.Generic;
 using BLToolkit.Data;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class OleronTest : AssociationTests
+    public class OleronTest : JointureTests
     {
         #region Overrides of AssociationTests
 
-        public override DbConnectionFactory CreateFactory()
+        protected override DbConnectionFactory CreateFactory()
         {
             return new OleronFactory();
         }
@@ -45,7 +44,7 @@ namespace UnitTests.CS.JointureTests
         [PrimaryKey, Identity, SequenceName("PITAFR01.SEQ_DATA_RADIO")]
         public long ID_DATA_RADIO { get; set; }
 
-        [PrimaryKey]
+        //[PrimaryKey]
         [MapField("ID_COBRANDING_ADVERTISER")]
         public long IdCobAdvert { get; set; }
 
@@ -60,11 +59,11 @@ namespace UnitTests.CS.JointureTests
         public long ID_PRODUCT { get; set; }
         //ECRAN (recalcul)
         public string COMMERCIAL_BREAK { get; set; }
-        public int? RANK { get; set; }
+        public Int16? RANK { get; set; }
         public int? NUMBER_SPOT { get; set; }
         public int? DURATION_COMMERCIAL_BREAK { get; set; }
         // Without Auto Promo (ref 180000)
-        public int? RANK_WAP { get; set; }
+        public Int16? RANK_WAP { get; set; }
         public int? NUMBER_SPOT_WAP { get; set; }
         [MapField("DURATION_COMMERCIAL_BREAK_WAP")]
         public int? DurComBreakWap { get; set; }
@@ -182,7 +181,7 @@ namespace UnitTests.CS.JointureTests
         public long? ID_MEDIA_PRICING { get; set; }
     }
 
-    [TableName(Owner = "PITAFR01")]
+    [TableName(Owner = "PITAFR01", Name = "DATA_VERSION")]
     public class DATA_VERSION_DATA_RADIO : DATA_VERSION
     {
         [Association(ThisKey = "ID_DATA_VERSION", OtherKey = "ID_DATA_VERSION")]

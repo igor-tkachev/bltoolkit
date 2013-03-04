@@ -3,7 +3,7 @@ using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Mappings
 {
     [TableName(Name = "ARTIST", Owner = Consts.Owner)]
     public class Artist
@@ -13,6 +13,13 @@ namespace UnitTests.CS.JointureTests
 
         [MapField("ARTIST")]
         public string Name { get; set; }
+    }
+
+    [TableName(Name = "ARTIST", Owner = Consts.Owner)]
+    public class Artist3
+    {
+        public long ID_ARTIST;
+        public string Artist;
     }
 
     [TableName(Name = "RECO_RADIO", Owner = Consts.Owner)]

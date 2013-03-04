@@ -4,15 +4,17 @@ using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
+using UnitTests.CS.JointureTests.Factories;
+using UnitTests.CS.JointureTests.Mappings;
 
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
-    public class MusicTest : AssociationTests
+    public class MusicTest : JointureTests
     {
         #region Overrides of AssociationTests
 
-        public override DbConnectionFactory CreateFactory()
+        protected override DbConnectionFactory CreateFactory()
         {
             return new MusicFactory(false);
         }

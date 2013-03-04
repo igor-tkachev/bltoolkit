@@ -4,14 +4,14 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class AdExpressOleronFactoryTest : AssociationTests
+    public class AdExpressOleronFactoryTest : JointureTests
     {
         #region Overrides of AssociationTests
 
-        public override DbConnectionFactory CreateFactory()
+        protected override DbConnectionFactory CreateFactory()
         {
             return new AdExpressOleronFactory();
         }

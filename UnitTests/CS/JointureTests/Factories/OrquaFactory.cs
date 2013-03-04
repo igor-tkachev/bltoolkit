@@ -2,7 +2,7 @@ using System.Data.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Factories
 {
     public class OrquaFactory : DbConnectionFactory
     {
@@ -14,10 +14,6 @@ namespace UnitTests.CS.JointureTests
             string username = "FSIMON";
             string password = "MAN1AGER";
             string database = "ORQUAF01.PIGE";
-
-            //database = "MUSICFR01.TEST";
-            //username = "scurutchet";
-            //password = "kisscool12";
 
             //database = "pitaoleronfr01.pige";
             //database = "(DESCRIPTION=(ADDRESS_LIST =(ADDRESS = (COMMUNITY = tcp.pige) (PROTOCOL = TCP) (HOST = OLERON) (PORT = 1521))) (CONNECT_DATA = (SID = PITAFR01)))";

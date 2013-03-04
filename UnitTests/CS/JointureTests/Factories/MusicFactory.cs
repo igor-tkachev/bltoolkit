@@ -2,7 +2,7 @@ using System.Data.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Factories
 {
     public class MusicFactory : DbConnectionFactory
     {
@@ -14,6 +14,8 @@ namespace UnitTests.CS.JointureTests
             string database = prod ? "MUSIC01.PIGE" : "MUSICFR01.TEST";
             const string username = "scurutchet";
             const string password = "kisscool12";
+
+            database = "(DESCRIPTION=(ADDRESS_LIST =(ADDRESS = (COMMUNITY = tcp.pige) (PROTOCOL = TCP) (HOST = ARUBA) (PORT = 1521))) (CONNECT_DATA = (SID = HOROSCOPE)))";
 
             //Provider = new OdpDataProvider();
             Provider = new GenericDataProvider(ProviderFullName.Oracle);

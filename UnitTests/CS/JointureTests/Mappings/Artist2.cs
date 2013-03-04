@@ -3,7 +3,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.TypeBuilder;
 
-namespace UnitTests.CS.JointureTests
+namespace UnitTests.CS.JointureTests.Mappings
 {
     [TableName(Name = "ARTIST", Owner = Consts.Owner)]
     public class Artist2
