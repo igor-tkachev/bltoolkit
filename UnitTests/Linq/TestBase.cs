@@ -310,8 +310,8 @@ namespace Data.Linq
 			if (ex != null)
 				throw ex;
 
-			if (!executedForAtLeastOneProvider)
-				throw new ApplicationException("Delegate function has not been executed.");}
+//			if (!executedForAtLeastOneProvider)
+//				throw new ApplicationException("Delegate function has not been executed.");}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
 		{
