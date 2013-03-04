@@ -34,15 +34,15 @@ DROP EXTERNAL FUNCTION ltrim;                 COMMIT;
 
 
 DECLARE EXTERNAL FUNCTION ltrim 
-	CSTRING(255) NULL
-	RETURNS CSTRING(255) FREE_IT
-	ENTRY_POINT 'IB_UDF_ltrim' MODULE_NAME 'ib_udf';
+    CSTRING(255) NULL
+    RETURNS CSTRING(255) FREE_IT
+    ENTRY_POINT 'IB_UDF_ltrim' MODULE_NAME 'ib_udf';
 COMMIT;
 
 DECLARE EXTERNAL FUNCTION rtrim 
-	CSTRING(255) NULL
-	RETURNS CSTRING(255) FREE_IT
-	ENTRY_POINT 'IB_UDF_rtrim' MODULE_NAME 'ib_udf';
+    CSTRING(255) NULL
+    RETURNS CSTRING(255) FREE_IT
+    ENTRY_POINT 'IB_UDF_rtrim' MODULE_NAME 'ib_udf';
 COMMIT;
 
 
@@ -59,11 +59,11 @@ COMMIT;
 
 CREATE TABLE Person
 (
-	PersonID   INTEGER     NOT NULL  PRIMARY KEY,
-	FirstName  VARCHAR(50) CHARACTER SET UNICODE_FSS NOT NULL,
-	LastName   VARCHAR(50) CHARACTER SET UNICODE_FSS NOT NULL,
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)     NOT NULL CHECK (Gender in ('M', 'F', 'U', 'O'))
+    PersonID   INTEGER     NOT NULL  PRIMARY KEY,
+    FirstName  VARCHAR(50) CHARACTER SET UNICODE_FSS NOT NULL,
+    LastName   VARCHAR(50) CHARACTER SET UNICODE_FSS NOT NULL,
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)     NOT NULL CHECK (Gender in ('M', 'F', 'U', 'O'))
 ); 
 COMMIT;
 
@@ -73,12 +73,14 @@ COMMIT;
 CREATE GENERATOR TimestampGen;
 COMMIT;
 
+set term ^ ;
 CREATE TRIGGER CREATE_PersonID FOR Person
 BEFORE INSERT POSITION 0
 AS BEGIN
-	NEW.PersonID = GEN_ID(PersonID, 1);
-END
-COMMIT;
+    NEW.PersonID = GEN_ID(PersonID, 1);
+END^
+COMMIT^
+set term ; ^
 
 INSERT INTO Person (FirstName, LastName, Gender) VALUES ('John',   'Pupkin',    'M');
 COMMIT;
@@ -89,11 +91,11 @@ COMMIT;
 
 CREATE TABLE Doctor
 (
-	PersonID INTEGER     NOT NULL,
-	Taxonomy VARCHAR(50) NOT NULL,
-		FOREIGN KEY (PersonID) REFERENCES Person (PersonID)
-			ON DELETE CASCADE
-)
+    PersonID INTEGER     NOT NULL,
+    Taxonomy VARCHAR(50) NOT NULL,
+        FOREIGN KEY (PersonID) REFERENCES Person (PersonID)
+            ON DELETE CASCADE
+);
 COMMIT;
 
 INSERT INTO Doctor (PersonID, Taxonomy) VALUES (1, 'Psychiatry');
@@ -103,10 +105,10 @@ COMMIT;
 
 CREATE TABLE Patient
 (
-	PersonID  int           NOT NULL,
-	Diagnosis VARCHAR(256)  NOT NULL,
-	FOREIGN KEY (PersonID) REFERENCES Person (PersonID)
-			ON DELETE CASCADE
+    PersonID  int           NOT NULL,
+    Diagnosis VARCHAR(256)  NOT NULL,
+    FOREIGN KEY (PersonID) REFERENCES Person (PersonID)
+            ON DELETE CASCADE
 );
 COMMIT;
 
@@ -115,252 +117,256 @@ COMMIT;
 
 -- Person_SelectByKey
 
+set term ^ ;
 CREATE PROCEDURE Person_SelectByKey(id INTEGER)
 RETURNS (
-	PersonID   INTEGER,
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
+    PersonID   INTEGER,
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)
+    )
 AS
 BEGIN
-	SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
-	WHERE PersonID = :id
-	INTO
-		:PersonID,
-		:FirstName,
-		:LastName,
-		:MiddleName,
-		:Gender;
-	SUSPEND;
-END
-COMMIT;
+    SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
+    WHERE PersonID = :id
+    INTO
+        :PersonID,
+        :FirstName,
+        :LastName,
+        :MiddleName,
+        :Gender;
+    SUSPEND;
+END^
+COMMIT^
 
 -- Person_SelectAll
 
 CREATE PROCEDURE Person_SelectAll
 RETURNS (
-	PersonID   INTEGER,
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
+    PersonID   INTEGER,
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)
+    )
 AS
 BEGIN
-	FOR 
-		SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
-		INTO
-			:PersonID,
-			:FirstName,
-			:LastName,
-			:MiddleName,
-			:Gender
-	DO SUSPEND;
-END
-COMMIT;
+    FOR 
+        SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
+        INTO
+            :PersonID,
+            :FirstName,
+            :LastName,
+            :MiddleName,
+            :Gender
+    DO SUSPEND;
+END^
+COMMIT^
 
 -- Person_SelectByName
 
 CREATE PROCEDURE Person_SelectByName (
-	in_FirstName VARCHAR(50),
-	in_LastName  VARCHAR(50)
-	)
+    in_FirstName VARCHAR(50),
+    in_LastName  VARCHAR(50)
+    )
 RETURNS (
-	PersonID   int,
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
+    PersonID   int,
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)
+    )
 AS
 BEGIN
 
-	FOR SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
-		WHERE FirstName LIKE :in_FirstName and LastName LIKE :in_LastName
-	INTO
-		:PersonID,   
-		:FirstName,  
-		:LastName,   
-		:MiddleName, 
-		:Gender 
-	DO SUSPEND;
-END
-COMMIT;
+    FOR SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
+        WHERE FirstName LIKE :in_FirstName and LastName LIKE :in_LastName
+    INTO
+        :PersonID,   
+        :FirstName,  
+        :LastName,   
+        :MiddleName, 
+        :Gender 
+    DO SUSPEND;
+END^
+COMMIT^
 
 -- Person_Insert
 
 CREATE PROCEDURE Person_Insert(
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)
+    )
 RETURNS (PersonID INTEGER)
 AS
 BEGIN
-	INSERT INTO Person
-		( LastName,  FirstName,  MiddleName,  Gender)
-	VALUES
-		(:LastName, :FirstName, :MiddleName, :Gender);
+    INSERT INTO Person
+        ( LastName,  FirstName,  MiddleName,  Gender)
+    VALUES
+        (:LastName, :FirstName, :MiddleName, :Gender);
 
-	SELECT MAX(PersonID) FROM person
-		INTO :PersonID;
-	SUSPEND;
-END
-COMMIT;
+    SELECT MAX(PersonID) FROM person
+        INTO :PersonID;
+    SUSPEND;
+END^
+COMMIT^
 
 -- Person_Insert_OutputParameter
 
 CREATE PROCEDURE Person_Insert_OutputParameter(
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)
+    )
 RETURNS (PersonID INTEGER)
 AS
 BEGIN
-	INSERT INTO Person
-		( LastName,  FirstName,  MiddleName,  Gender)
-	VALUES
-		(:LastName, :FirstName, :MiddleName, :Gender);
+    INSERT INTO Person
+        ( LastName,  FirstName,  MiddleName,  Gender)
+    VALUES
+        (:LastName, :FirstName, :MiddleName, :Gender);
 
-	SELECT max(PersonID) FROM person
-	INTO :PersonID;
-	SUSPEND;
-END
-COMMIT;
+    SELECT max(PersonID) FROM person
+    INTO :PersonID;
+    SUSPEND;
+END^
+COMMIT^
 
 -- Person_Update
 
 CREATE PROCEDURE Person_Update(
-	PersonID   INTEGER,
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1)
-	)
+    PersonID   INTEGER,
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1)
+    )
 AS
 BEGIN
-	UPDATE
-		Person
-	SET
-		LastName   = :LastName,
-		FirstName  = :FirstName,
-		MiddleName = :MiddleName,
-		Gender     = :Gender
-	WHERE
-		PersonID = :PersonID;
-END
-COMMIT;
+    UPDATE
+        Person
+    SET
+        LastName   = :LastName,
+        FirstName  = :FirstName,
+        MiddleName = :MiddleName,
+        Gender     = :Gender
+    WHERE
+        PersonID = :PersonID;
+END^
+COMMIT^
 
 -- Person_Delete
 
 CREATE PROCEDURE Person_Delete(
-	PersonID INTEGER
-	)
+    PersonID INTEGER
+    )
 AS
 BEGIN
-	DELETE FROM Person WHERE PersonID = :PersonID;
-END
-COMMIT;
+    DELETE FROM Person WHERE PersonID = :PersonID;
+END^
+COMMIT^
 
 -- Patient_SelectAll
 
 CREATE PROCEDURE Patient_SelectAll
 RETURNS (
-	PersonID   int,
-	FirstName  VARCHAR(50),
-	LastName   VARCHAR(50),
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1),
-	Diagnosis  VARCHAR(256)
-	)
+    PersonID   int,
+    FirstName  VARCHAR(50),
+    LastName   VARCHAR(50),
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1),
+    Diagnosis  VARCHAR(256)
+    )
 AS
 BEGIN
-	FOR 
-		SELECT
-			Person.PersonID, 
-			FirstName,
-			LastName,
-			MiddleName,
-			Gender,
-			Patient.Diagnosis
-		FROM
-			Patient, Person
-		WHERE
-			Patient.PersonID = Person.PersonID
-		INTO
-			:PersonID,   
-			:FirstName,  
-			:LastName,   
-			:MiddleName, 
-			:Gender,
-			:Diagnosis
-	DO SUSPEND;
-END
-COMMIT;
+    FOR 
+        SELECT
+            Person.PersonID, 
+            FirstName,
+            LastName,
+            MiddleName,
+            Gender,
+            Patient.Diagnosis
+        FROM
+            Patient, Person
+        WHERE
+            Patient.PersonID = Person.PersonID
+        INTO
+            :PersonID,   
+            :FirstName,  
+            :LastName,   
+            :MiddleName, 
+            :Gender,
+            :Diagnosis
+    DO SUSPEND;
+END^
+COMMIT^
 
 -- Patient_SelectByName
 
 CREATE PROCEDURE Patient_SelectByName(
-	FirstName VARCHAR(50),
-	LastName  VARCHAR(50)
-	)
+    FirstName VARCHAR(50),
+    LastName  VARCHAR(50)
+    )
 RETURNS (
-	PersonID   int,
-	MiddleName VARCHAR(50),
-	Gender     CHAR(1),
-	Diagnosis  VARCHAR(256)
-	)
+    PersonID   int,
+    MiddleName VARCHAR(50),
+    Gender     CHAR(1),
+    Diagnosis  VARCHAR(256)
+    )
 AS
 BEGIN
-	FOR 
-		SELECT
-			Person.PersonID, 
-			MiddleName,
-			Gender,
-			Patient.Diagnosis
-		FROM
-			Patient, Person
-		WHERE
-			Patient.PersonID = Person.PersonID
-			and FirstName = :FirstName and LastName = :LastName
-		INTO
-			:PersonID,   
-			:MiddleName, 
-			:Gender,
-			:Diagnosis
-	DO SUSPEND;
-END
-COMMIT;
+    FOR 
+        SELECT
+            Person.PersonID, 
+            MiddleName,
+            Gender,
+            Patient.Diagnosis
+        FROM
+            Patient, Person
+        WHERE
+            Patient.PersonID = Person.PersonID
+            and FirstName = :FirstName and LastName = :LastName
+        INTO
+            :PersonID,   
+            :MiddleName, 
+            :Gender,
+            :Diagnosis
+    DO SUSPEND;
+END^
+COMMIT^
+
+set term ; ^
 
 -- BinaryData Table
 
 CREATE TABLE BinaryData
 (
-	BinaryDataID INTEGER       NOT NULL PRIMARY KEY,
-	Stamp        INTEGER       NOT NULL,
-	Data         BLOB          NOT NULL
+    BinaryDataID INTEGER       NOT NULL PRIMARY KEY,
+    Stamp        INTEGER       NOT NULL,
+    Data         BLOB          NOT NULL
 );
 COMMIT;
 
+set term ^ ;
 CREATE TRIGGER CREATE_BinaryDataID FOR BinaryData
 BEFORE INSERT POSITION 0
 AS BEGIN
-	NEW.BinaryDataID = GEN_ID(PersonID, 1); 
-	NEW.Stamp = GEN_ID(TimestampGen, 1);
-END
-COMMIT;
+    NEW.BinaryDataID = GEN_ID(PersonID, 1); 
+    NEW.Stamp = GEN_ID(TimestampGen, 1);
+END^
+COMMIT^
 
 CREATE TRIGGER CHANGE_BinaryData FOR BinaryData
 beFORe update 
 AS BEGIN
-	NEW.Stamp = GEN_ID(TimestampGen, 1);
-END
-COMMIT;
+    NEW.Stamp = GEN_ID(TimestampGen, 1);
+END^
+COMMIT^
 
 -- OutRefTest
 
@@ -373,72 +379,72 @@ ex:
 in_inputOutputID is input mirror FOR inout parameter inputOutputID
 */
 CREATE PROCEDURE OutRefTest(
-	ID					INTEGER,
-	in_inputOutputID	INTEGER,
-	str					VARCHAR(50),
-	in_inputOutputStr	VARCHAR(50)
-	)
+    ID                    INTEGER,
+    in_inputOutputID    INTEGER,
+    str                    VARCHAR(50),
+    in_inputOutputStr    VARCHAR(50)
+    )
 RETURNS(
-	inputOutputID  INTEGER,
-	inputOutputStr VARCHAR(50),
-	outputID       INTEGER,
-	outputStr      VARCHAR(50)
-	)
+    inputOutputID  INTEGER,
+    inputOutputStr VARCHAR(50),
+    outputID       INTEGER,
+    outputStr      VARCHAR(50)
+    )
 AS
 BEGIN
-	outputID       = ID;
-	inputOutputID  = ID + in_inputOutputID;
-	outputStr      = str;
-	inputOutputStr = str || in_inputOutputStr;
-	SUSPEND;
-END
-COMMIT;
+    outputID       = ID;
+    inputOutputID  = ID + in_inputOutputID;
+    outputStr      = str;
+    inputOutputStr = str || in_inputOutputStr;
+    SUSPEND;
+END^
+COMMIT^
 
 -- OutRefEnumTest
 
 CREATE PROCEDURE OutRefEnumTest(
-		str					VARCHAR(50),
-		in_inputOutputStr	VARCHAR(50)
-		)
+        str                    VARCHAR(50),
+        in_inputOutputStr    VARCHAR(50)
+        )
 RETURNS (
-	inputOutputStr VARCHAR(50),
-	outputStr      VARCHAR(50)
-	)
+    inputOutputStr VARCHAR(50),
+    outputStr      VARCHAR(50)
+    )
 AS
 BEGIN
-	outputStr      = str;
-	inputOutputStr = str || in_inputOutputStr;
-	SUSPEND;
-END
-COMMIT;
+    outputStr      = str;
+    inputOutputStr = str || in_inputOutputStr;
+    SUSPEND;
+END^
+COMMIT^
 
 -- ExecuteScalarTest
 
 CREATE PROCEDURE Scalar_DataReader
 RETURNS(
-	intField	INTEGER,
-	stringField	VARCHAR(50)
-	)
+    intField    INTEGER,
+    stringField    VARCHAR(50)
+    )
 AS
 BEGIN
-	intField = 12345;
-	stringField = '54321';
-	SUSPEND;
-END
-COMMIT;
+    intField = 12345;
+    stringField = '54321';
+    SUSPEND;
+END^
+COMMIT^
 
 CREATE PROCEDURE Scalar_OutputParameter
 RETURNS (
-	outputInt      INTEGER,
-	outputString   VARCHAR(50)
-	)
+    outputInt      INTEGER,
+    outputString   VARCHAR(50)
+    )
 AS
 BEGIN
-	outputInt = 12345;
-	outputString = '54321';
-	SUSPEND;
-END
-COMMIT;
+    outputInt = 12345;
+    outputString = '54321';
+    SUSPEND;
+END^
+COMMIT^
 
 /*
 "Return_Value" is the name for ReturnValue "emulating"
@@ -448,11 +454,11 @@ CREATE PROCEDURE Scalar_ReturnParameter
 RETURNS (Return_Value INTEGER)
 AS
 BEGIN
-	Return_Value = 12345;
-	SUSPEND;
-END
-COMMIT;
-
+    Return_Value = 12345;
+    SUSPEND;
+END^
+COMMIT^
+set term ; ^
 -- Data Types test
 
 /*
@@ -464,127 +470,131 @@ BUT! BLOB is ised for BINARY data! not CHAR
 
 CREATE TABLE DataTypeTest
 (
-	DataTypeID      INTEGER NOT NULL PRIMARY KEY,
-	Binary_         BLOB,
-	Boolean_        CHAR(1),
-	Byte_           SMALLINT,
-	Bytes_          BLOB,
-	CHAR_           CHAR(1),
-	DateTime_       TIMESTAMP,
-	Decimal_        DECIMAL(10, 2),
-	Double_         DOUBLE PRECISION,
-	Guid_           CHAR(38),
-	Int16_          SMALLINT,
-	Int32_          INTEGER,
-	Int64_          NUMERIC(11),
-	Money_          DECIMAL(18, 4),
-	SByte_          SMALLINT,
-	Single_         FLOAT,
-	Stream_         BLOB,
-	String_         VARCHAR(50) CHARACTER SET UNICODE_FSS,
-	UInt16_         SMALLINT,
-	UInt32_         INTEGER,
-	UInt64_         NUMERIC(11),
-	Xml_            CHAR(1000)
-)
+    DataTypeID      INTEGER NOT NULL PRIMARY KEY,
+    Binary_         BLOB,
+    Boolean_        CHAR(1),
+    Byte_           SMALLINT,
+    Bytes_          BLOB,
+    CHAR_           CHAR(1),
+    DateTime_       TIMESTAMP,
+    Decimal_        DECIMAL(10, 2),
+    Double_         DOUBLE PRECISION,
+    Guid_           CHAR(38),
+    Int16_          SMALLINT,
+    Int32_          INTEGER,
+    Int64_          NUMERIC(11),
+    Money_          DECIMAL(18, 4),
+    SByte_          SMALLINT,
+    Single_         FLOAT,
+    Stream_         BLOB,
+    String_         VARCHAR(50) CHARACTER SET UNICODE_FSS,
+    UInt16_         SMALLINT,
+    UInt32_         INTEGER,
+    UInt64_         NUMERIC(11),
+    Xml_            CHAR(1000)
+);
 COMMIT;
 
 CREATE GENERATOR DataTypeID;
 COMMIT;
 
+set term ^ ;
 CREATE TRIGGER CREATE_DataTypeTest FOR DataTypeTest
 BEFORE INSERT POSITION 0
 AS BEGIN
-	NEW.DataTypeID = GEN_ID(DataTypeID, 1); 
-END
+    NEW.DataTypeID = GEN_ID(DataTypeID, 1); 
+END^
+COMMIT^
+set term ; ^
+
+INSERT INTO DataTypeTest
+    (Binary_, Boolean_,   Byte_,  Bytes_,  CHAR_,  DateTime_, Decimal_,
+     Double_,    Guid_,  Int16_,  Int32_,  Int64_,    Money_,   SByte_,
+     Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
+VALUES
+    (   NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+        NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+        NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL);
 COMMIT;
 
 INSERT INTO DataTypeTest
-	(Binary_, Boolean_,   Byte_,  Bytes_,  CHAR_,  DateTime_, Decimal_,
-	 Double_,    Guid_,  Int16_,  Int32_,  Int64_,    Money_,   SByte_,
-	 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
+    (Binary_,    Boolean_,    Byte_,   Bytes_,  CHAR_,    DateTime_, Decimal_,
+     Double_,    Guid_,        Int16_,  Int32_,  Int64_,    Money_,   SByte_,
+     Single_,    Stream_,    String_, UInt16_, UInt32_,   UInt64_,
+     Xml_)
 VALUES
-	(   NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL);
-COMMIT;
-
-INSERT INTO DataTypeTest
-	(Binary_,	Boolean_,	Byte_,   Bytes_,  CHAR_,	DateTime_, Decimal_,
-	 Double_,	Guid_,		Int16_,  Int32_,  Int64_,    Money_,   SByte_,
-	 Single_,	Stream_,	String_, UInt16_, UInt32_,   UInt64_,
-	 Xml_)
-VALUES
-	('dddddddddddddddd', 1,  255,'dddddddddddddddd', 'B', 'NOW', 12345.67,
-	1234.567, 'dddddddddddddddddddddddddddddddd', 32767, 32768, 1000000, 12.3456, 127,
-	1234.123, 'dddddddddddddddd', 'string', 32767, 32768, 200000000,
-	'<root><element strattr="strvalue" intattr="12345"/></root>');
+    ('dddddddddddddddd', 1,  255,'dddddddddddddddd', 'B', 'NOW', 12345.67,
+    1234.567, 'dddddddddddddddddddddddddddddddd', 32767, 32768, 1000000, 12.3456, 127,
+    1234.123, 'dddddddddddddddd', 'string', 32767, 32768, 200000000,
+    '<root><element strattr="strvalue" intattr="12345"/></root>');
 COMMIT;
 
 
 
-DROP TABLE Parent     COMMIT;
-DROP TABLE Child      COMMIT;
-DROP TABLE GrandChild COMMIT;
+DROP TABLE Parent;     COMMIT;
+DROP TABLE Child;      COMMIT;
+DROP TABLE GrandChild; COMMIT;
 
-CREATE TABLE Parent      (ParentID int, Value1 int)                    COMMIT;
-CREATE TABLE Child       (ParentID int, ChildID int)                   COMMIT;
-CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int) COMMIT;
+CREATE TABLE Parent      (ParentID int, Value1 int);                    COMMIT;
+CREATE TABLE Child       (ParentID int, ChildID int);                   COMMIT;
+CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int); COMMIT;
 
 
-DROP TABLE LinqDataTypes COMMIT;
+DROP TABLE LinqDataTypes; COMMIT;
 
 CREATE TABLE LinqDataTypes
 (
-	ID             int,
-	MoneyValue     decimal(10,4),
-	DateTimeValue  timestamp,
-	DateTimeValue2 timestamp,
-	BoolValue      char(1),
-	GuidValue      char(38),
-	BinaryValue    blob,
-	SmallIntValue  smallint,
-	IntValue       int,
-	BigIntValue    bigint
-)
+    ID             int,
+    MoneyValue     decimal(10,4),
+    DateTimeValue  timestamp,
+    DateTimeValue2 timestamp,
+    BoolValue      char(1),
+    GuidValue      char(38),
+    BinaryValue    blob,
+    SmallIntValue  smallint,
+    IntValue       int,
+    BigIntValue    bigint
+);
 COMMIT;
 
-DROP GENERATOR SequenceTestSeq
+DROP GENERATOR SequenceTestSeq;
 COMMIT;
 
-CREATE GENERATOR SequenceTestSeq
+CREATE GENERATOR SequenceTestSeq;
 COMMIT;
 
-DROP TABLE SequenceTest COMMIT;
+DROP TABLE SequenceTest; COMMIT;
 
 CREATE TABLE SequenceTest
 (
-	ID     int         NOT NULL PRIMARY KEY,
-	Value_ VARCHAR(50) NOT NULL
-)
+    ID     int         NOT NULL PRIMARY KEY,
+    Value_ VARCHAR(50) NOT NULL
+);
 COMMIT;
 
 
-DROP TRIGGER CREATE_ID
+DROP TRIGGER CREATE_ID;
 COMMIT;
 
-DROP GENERATOR TestIdentityID
+DROP GENERATOR TestIdentityID;
 COMMIT;
 
-DROP TABLE TestIdentity
+DROP TABLE TestIdentity;
 COMMIT;
 
 CREATE TABLE TestIdentity (
-	ID INTEGER NOT NULL PRIMARY KEY
-)
+    ID INTEGER NOT NULL PRIMARY KEY
+);
 COMMIT;
 
 CREATE GENERATOR TestIdentityID;
 COMMIT;
 
+set term ^ ;
 CREATE TRIGGER CREATE_ID FOR TestIdentity
 BEFORE INSERT POSITION 0
 AS BEGIN
-	NEW.ID = GEN_ID(TestIdentityID, 1);
-END
-COMMIT;
+    NEW.ID = GEN_ID(TestIdentityID, 1);
+END^
+COMMIT^
+set term ; ^
