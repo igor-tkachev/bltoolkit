@@ -15,13 +15,13 @@ namespace Data.Linq
     [TestFixture]
     public partial class IdlTest : TestBase
     {
-        private readonly TestCaseData[] m_idlProviders = new[]
+        class IdlProvidersAttribute : IncludeDataContextsAttribute
+        {
+            public IdlProvidersAttribute()
+                : base(ProviderName.SQLite, ProviderName.MySql, "Sql2005", "Sql2008")
             {
-                new TestCaseData(ProviderName.SQLite).SetName("SQLite"),
-                new TestCaseData(ProviderName.MySql).SetName("MySql"),
-                new TestCaseData("Sql2005").SetName("Sql2005"),
-                new TestCaseData("Sql2008").SetName("Sql2008")
-            };
+            }
+        }
 
         private void ForProvider(string providerName, Action<ITestDataContext> func)
         {
@@ -172,8 +172,8 @@ namespace Data.Linq
 
         #endregion
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestComplexExpression(string providerName)
+        [Test]
+        public void TestComplexExpression([IdlProviders] string providerName)
         {
             // failed with BLToolkit.Data.Linq.LinqException : 'new StationObjectId() {Value = ConvertNullable(child.ChildID)}' 
             //   cannot be converted to SQL.
@@ -195,8 +195,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestJoin(string providerName)
+        [Test]
+        public void TestJoin([IdlProviders] string providerName)
         {
             // failed with System.ArgumentOutOfRangeException : Index was out of range. Must be non-negative and less than 
             //   the size of the collection.
@@ -217,8 +217,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestNullableExpression(string providerName)
+        [Test]
+        public void TestNullableExpression([IdlProviders] string providerName)
         {
             // failed with System.NullReferenceException : Object reference not set to an instance of an object.
             ForProvider(
@@ -237,8 +237,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestLookupWithInterfaceProperty(string providerName)
+        [Test]
+        public void TestLookupWithInterfaceProperty([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -263,8 +263,8 @@ namespace Data.Linq
 
         #endregion
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestForObjectExt(string providerName)
+        [Test]
+        public void TestForObjectExt([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -292,9 +292,8 @@ namespace Data.Linq
             }
         }
 
-
-        [TestCaseSource("m_idlProviders")]
-        public void TestForGroupBy(string providerName)
+        [Test]
+        public void TestForGroupBy([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -317,8 +316,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestLinqMax(string providerName)
+        [Test]
+        public void TestLinqMax([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -333,8 +332,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestConvertFunction(string providerName)
+        [Test]
+        public void TestConvertFunction([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -353,8 +352,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestJoinOrder(string providerName)
+        [Test]
+        public void TestJoinOrder([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -392,8 +391,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestDistinctWithGroupBy(string providerName)
+        [Test]
+        public void TestDistinctWithGroupBy([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -439,8 +438,8 @@ namespace Data.Linq
             return db.GetTable<T>().Where(obj => obj.ID == id);
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void ImplicitCastTest(string providerName)
+        [Test]
+        public void ImplicitCastTest([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -461,8 +460,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void ListvsArrayTest(string providerName)
+        [Test]
+        public void ListvsArrayTest([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -484,8 +483,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void ConcatJoinOrderByTest(string providerName)
+        [Test]
+        public void ConcatJoinOrderByTest([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -508,8 +507,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestIsContainedInArrayOfEnumValues(string providerName)
+        [Test]
+        public void TestIsContainedInArrayOfEnumValues([IdlProviders] string providerName)
         {
             var types2 = new[] { TypeValue.Value2, TypeValue.Value3, TypeValue.Value4 };
 
@@ -524,8 +523,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestQueryWithInterface(string providerName)
+        [Test]
+        public void TestQueryWithInterface([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -553,8 +552,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestBugCountWithOrderBy(string providerName)
+        [Test]
+        public void TestBugCountWithOrderBy([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -571,14 +570,14 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestUpdateWithTargetByAssociationProperty(string providerName)
+        [Test]
+        public void TestUpdateWithTargetByAssociationProperty([IdlProviders] string providerName)
         {
             TestUpdateByAssociationProperty(providerName, true);
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestSetUpdateWithoutTargetByAssociationProperty(string providerName)
+        [Test]
+        public void TestSetUpdateWithoutTargetByAssociationProperty([IdlProviders] string providerName)
         {
             TestUpdateByAssociationProperty(providerName, false);
         }
@@ -639,8 +638,8 @@ namespace Data.Linq
             return from x in source where x.Id == id select x;
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestComparePropertyOfEnumTypeToVaribleInSubquery(string providerName)
+        [Test]
+        public void TestComparePropertyOfEnumTypeToVaribleInSubquery([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -656,8 +655,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void ConcatOrderByTest(string providerName)
+        [Test]
+        public void ConcatOrderByTest([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -682,8 +681,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestContainsForNullableDateTimeWithOnlyNullValue1(string providerName)
+        [Test]
+        public void TestContainsForNullableDateTimeWithOnlyNullValue1([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -702,8 +701,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestContainsForNullableDateTimeWithOnlyNullValue2(string providerName)
+        [Test]
+        public void TestContainsForNullableDateTimeWithOnlyNullValue2([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -720,8 +719,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestContainsForNullableDateTimeWithNullAndNotNullValues1(string providerName)
+        [Test]
+        public void TestContainsForNullableDateTimeWithNullAndNotNullValues1([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
@@ -741,8 +740,8 @@ namespace Data.Linq
                     });
         }
 
-        [TestCaseSource("m_idlProviders")]
-        public void TestContainsForNullableDateTimeWithNullAndNotNullValues2(string providerName)
+        [Test]
+        public void TestContainsForNullableDateTimeWithNullAndNotNullValues2([IdlProviders] string providerName)
         {
             ForProvider(
                 providerName,
