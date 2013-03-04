@@ -175,7 +175,9 @@ namespace Data.Linq
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			foreach (var info in Providers)
+			var list = UserProviders.Concat(UserProviders.Select(p => p + ".LinqService"));
+
+			foreach (var info in Providers.Where(p => list.Contains(p.Name)))
 			{
 				if (exceptList.Contains(info.Name))
 					continue;
@@ -308,8 +310,8 @@ namespace Data.Linq
 			if (ex != null)
 				throw ex;
 
-            if (!executedForAtLeastOneProvider)
-                throw new ApplicationException("Delegate function has not been executed.");}
+			if (!executedForAtLeastOneProvider)
+				throw new ApplicationException("Delegate function has not been executed.");}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
 		{
