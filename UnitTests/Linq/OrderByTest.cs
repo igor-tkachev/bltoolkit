@@ -5,6 +5,8 @@ using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 
+// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+
 namespace Data.Linq
 {
 	[TestFixture]
@@ -131,9 +133,8 @@ namespace Data.Linq
 					from patient in g.DefaultIfEmpty()
 					orderby person.MiddleName // if comment this line then "Diagnosis" is not selected.
 					select new { person.ID, PatientID = patient != null ? (int?)patient.PersonID : null };
-				// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+
 				q.ToList();
-				// ReSharper restore ReturnValueOfPureMethodIsNotUsed
 
 				Assert.IsFalse(db.LastQuery.Contains("Diagnosis"), "Why do we select Patient.Diagnosis??");
 
@@ -183,7 +184,7 @@ namespace Data.Linq
 			});
 		}
 
-        [Test]
+		[Test]
 		public void OrderBySelectMany1()
 		{
 			var expected =
@@ -225,7 +226,7 @@ namespace Data.Linq
 			});
 		}
 
-        [Test]
+		[Test]
 		public void OrderBySelectMany3()
 		{
 			var expected =

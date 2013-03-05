@@ -2219,7 +2219,9 @@ namespace BLToolkit.Data.Linq.Builder
 										return !CanBeCompiled(pi);
 
 									if (ctx.IsExpression(pi, 0, RequestFor.Object).Result)
-										return !CanBeCompiled(pi);
+										if (!ctx.IsExpression(pi, 0, RequestFor.Table).Result)
+											if (!ctx.IsExpression(pi, 0, RequestFor.Association).Result)
+												return !CanBeCompiled(pi);
 
 									ignoredMembers = ma.Expression.GetMembers();
 								}
@@ -2233,17 +2235,8 @@ namespace BLToolkit.Data.Linq.Builder
 							var ctx = GetContext(context, pi);
 
 							if (ctx == null)
-							{
 								if (canBeCompiled)
 									return !CanBeCompiled(pi);
-							}
-							else
-							{
-								if (pi.NodeType == ExpressionType.Parameter)
-								{
-									
-								}
-							}
 
 							break;
 						}
