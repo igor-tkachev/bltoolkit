@@ -322,6 +322,7 @@ namespace BLToolkit.Mapping
 					mi.DefaultValue               = GetDefaultValue(ma);
 					mi.Nullable                   = GetNullable    (ma);
 					mi.NullValue                  = GetNullValue   (ma, mi.Nullable);
+				    mi.KeyGenerator               = GetKeyGenerator(ma);
 
 					Add(CreateMemberMapper(mi));
 				}
@@ -510,6 +511,25 @@ namespace BLToolkit.Mapping
 			bool isSet;
 			return MetadataProvider.GetFieldName(Extension, memberAccessor, out isSet);
 		}
+
+        protected virtual KeyGenerator GetKeyGenerator(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            var nonUpdatableAttribute = MetadataProvider.GetNonUpdatableAttribute(memberAccessor.Type, Extension, memberAccessor, out isSet);
+            if (isSet && nonUpdatableAttribute is IdentityAttribute)
+            {
+                bool isSeqSet;
+                string sequenceName = MetadataProvider.GetSequenceName(Extension, memberAccessor, out isSeqSet);
+                if (!isSeqSet)
+                    throw new NotImplementedException("Identity without sequence");
+
+                if (string.IsNullOrWhiteSpace(sequenceName))
+                    throw new Exception("SequenceName is empty");
+
+                return new SequenceKeyGenerator(sequenceName);                                   
+            }
+            return null;
+        }
 
 		protected virtual string GetFieldStorage(MemberAccessor memberAccessor)
 		{

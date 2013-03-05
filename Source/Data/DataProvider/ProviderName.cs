@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BLToolkit.Data.DataProvider
+﻿namespace BLToolkit.Data.DataProvider
 {
 	public static class ProviderName
 	{
@@ -20,4 +18,16 @@ namespace BLToolkit.Data.DataProvider
 		public const string SQLite        = "SQLite";
 		public const string Sybase        = "Sybase";
 	}
+
+    /// <summary>
+    /// TODO Should be completed
+    /// </summary>
+    public static class ProviderFullName
+    {
+		public const string Odbc       = "System.Data.Odbc";
+		public const string OleDb      = "System.Data.OleDb";
+        public const string OracleNet  = "System.Data.OracleClient";
+        public const string Oracle     = "Oracle.DataAccess.Client";
+        public const string SQLite     = "System.Data.SQLite";
+    }
 }

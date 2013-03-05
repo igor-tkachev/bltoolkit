@@ -158,6 +158,11 @@ namespace BLToolkit.Data
 			set { _canRaiseEvents = value; }
 		}
 
+        /// <summary>
+        /// Use plain text query instead of using command parameters
+        /// </summary>
+        public bool UseQueryText { get; set; }
+
 		#endregion
 
 		#region Connection
@@ -620,7 +625,11 @@ namespace BLToolkit.Data
 			return ExecuteOperation(
 				OperationType.ExecuteReader,
 				() =>
-					_dataProvider.GetDataReader(_mappingSchema, SelectCommand.ExecuteReader(commandBehavior)));
+				    {
+				        var dataReader = _dataProvider.GetDataReader(SelectCommand, commandBehavior);
+				        LastQuery = SelectCommand.CommandText;
+				        return _dataProvider.GetDataReader(_mappingSchema, dataReader);
+				    });
 		}
 
 		private int ExecuteNonQueryInternal()
@@ -2612,8 +2621,8 @@ namespace BLToolkit.Data
 
 						IDbDataParameter p;
 
-						if ((value == null || value == DBNull.Value) && (dbType == DbType.Binary || type == typeof(byte[])) ||
-							type == typeof(System.Data.Linq.Binary))
+						if ((value == null || value == DBNull.Value) && (dbType == DbType.Binary || type == typeof(byte[])) || 
+                            type == typeof(System.Data.Linq.Binary))
 						{
 							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
 						}
@@ -2622,8 +2631,10 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
-						}
+                            p = value != null
+                                ? Parameter(baseParameters[i].ParameterName + nRows, value)
+                                : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
+                        }
 
 						parameters.Add(p);
 						hasValue.Add(value != null);
@@ -4412,8 +4423,9 @@ namespace BLToolkit.Data
 			}
 			catch (Exception ex)
 			{
-				if (res is IDisposable)
-					((IDisposable)res).Dispose();
+			    var disposable = res as IDisposable;
+			    if (disposable != null)
+			        (disposable).Dispose();
 
 				HandleOperationException(operationType, ex);
 				throw;

@@ -19,6 +19,8 @@ namespace BLToolkit.DataAccess
 			ObjectMapper = objectMapper;
 		}
 
+        public string OwnerName { get; set; }
+        public string ActionName { get; set; }
 		public string       QueryText    { get; set; }
 		public ObjectMapper ObjectMapper { get; private set; }
 
@@ -78,16 +80,23 @@ namespace BLToolkit.DataAccess
 					val = DBNull.Value;
 				}
 
-				if (mmi.IsDbTypeSet)
-				{
-					parameters[i] = mmi.IsDbSizeSet
-						? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize) 
-						: db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
-				}
-				else
-				{
-					parameters[i] = db.Parameter(info.ParameterName, val);
-				}
+                if (mmi.IsDbTypeSet)
+                {
+                    parameters[i] = mmi.IsDbSizeSet
+                        ? db.Parameter(info.ParameterName, val, info.MemberMapper.DbType, mmi.DbSize)
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.DbType);
+                }
+                else
+                {
+                    parameters[i] = val != DBNull.Value
+                        ? db.Parameter(info.ParameterName, val)
+                        : db.Parameter(info.ParameterName, val, info.MemberMapper.GetDbType());
+                }
+
+                if (mmi.KeyGenerator is SequenceKeyGenerator && ActionName == "InsertWithIdentity")
+                {
+                    parameters[i] = db.OutputParameter(info.ParameterName, val);
+                }
 			}
 
 			return parameters;
@@ -95,12 +104,12 @@ namespace BLToolkit.DataAccess
 
 		public MemberMapper[] GetMemberMappers()
 		{
-			var members = new MemberMapper[Parameters.Count];
+            var members = new MemberMapper[Parameters.Count];
 
-			for (var i = 0; i < Parameters.Count; i++)
-				members[i] = Parameters[i].MemberMapper;
+            for (var i = 0; i < Parameters.Count; i++)
+                members[i] = Parameters[i].MemberMapper;
 
-			return members;
+            return members;
 		}
 	}
 }
