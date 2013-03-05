@@ -220,6 +220,7 @@
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />
     <Compile Include="TableFunctionTest.cs" />
+    <Compile Include="UserTests\ExpressionTest.0.cs" />
     <Compile Include="VisualBasicTest.cs" />
     <Compile Include="DmlTest.cs" />
     <Compile Include="ExpressionsTest.cs" />
@@ -360,9 +361,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UserTests\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

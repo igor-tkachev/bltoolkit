@@ -467,6 +467,7 @@ namespace Data.Linq
 				if (_parent == null)
 					using (var db = new TestDbManager("Sql2008"))
 					{
+						db.Parent.Delete(c => c.ParentID >= 1000);
 						_parent = db.Parent.ToList();
 						db.Close();
 
@@ -581,6 +582,7 @@ namespace Data.Linq
 				if (_child == null)
 					using (var db = new TestDbManager("Sql2008"))
 					{
+						db.Child.Delete(c => c.ParentID >= 1000);
 						_child = db.Child.ToList();
 						db.Clone();
 
