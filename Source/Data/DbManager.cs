@@ -2612,7 +2612,9 @@ namespace BLToolkit.Data
 
 						IDbDataParameter p;
 
-						if ((value == null || value == DBNull.Value) && dbType==DbType.Byte || type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+						//if ((value == null || value == DBNull.Value) && dbType == DbType.Byte || type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+						// I do not get this change.                      ^^^^^^^^^^^^^^^^^^^^^
+						if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
 						{
 							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
 						}
@@ -2621,7 +2623,7 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
 						}
 
 						parameters.Add(p);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
@@ -37,7 +38,7 @@ namespace Data.Linq.UserTests
 	}
 
 	[TestFixture]
-	public class UserTest : TestBase
+	public class SelectManyDeleteTest : TestBase
 	{
 		[Test]
 		public void Test([DataContexts(
