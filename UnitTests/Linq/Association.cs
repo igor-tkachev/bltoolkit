@@ -308,25 +308,23 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TestTernary1()
+		public void TestTernary1([DataContexts(ProviderName.SQLite, ProviderName.Access)] string context)
 		{
 			var ids = new[] { 1, 5 };
 
-			ForEachProvider(
-				new[] { ProviderName.SQLite, ProviderName.Access },
-				db =>
-				{
-					var q =
-						from t in db.GetTable<Top>()
-						where ids.Contains(t.ParentID)
-						orderby t.ParentID
-						select t.Middle == null ? null : t.Middle.Bottom;
+			using (var db = GetDataContext(context))
+			{
+				var q =
+					from t in db.GetTable<Top>()
+					where ids.Contains(t.ParentID)
+					orderby t.ParentID
+					select t.Middle == null ? null : t.Middle.Bottom;
 
-					var list = q.ToList();
+				var list = q.ToList();
 
-					Assert.NotNull(list[0]);
-					Assert.Null   (list[1]);
-				});
+				Assert.NotNull(list[0]);
+				Assert.Null   (list[1]);
+			}
 		}
 
 		[Test]

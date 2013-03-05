@@ -2219,9 +2219,7 @@ namespace BLToolkit.Data.Linq.Builder
 										return !CanBeCompiled(pi);
 
 									if (ctx.IsExpression(pi, 0, RequestFor.Object).Result)
-										if (!ctx.IsExpression(pi, 0, RequestFor.Table).Result)
-											if (!ctx.IsExpression(pi, 0, RequestFor.Association).Result)
-												return !CanBeCompiled(pi);
+										return !CanBeCompiled(pi);
 
 									ignoredMembers = ma.Expression.GetMembers();
 								}
@@ -2243,7 +2241,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					case ExpressionType.Call         :
 						{
-							var e = pi as MethodCallExpression;
+							var e = (MethodCallExpression)pi;
 
 							if (e.Method.DeclaringType != typeof(Enumerable))
 							{
@@ -2259,6 +2257,35 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.TypeIs       : return canBeCompiled;
 					case ExpressionType.TypeAs       :
 					case ExpressionType.New          : return true;
+
+					case ExpressionType.NotEqual     :
+					case ExpressionType.Equal        :
+						{
+							var e = (BinaryExpression)pi;
+
+							Expression obj = null;
+
+							if (e.Left.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Left).Value == null)
+								obj = e.Right;
+							else if (e.Right.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Right).Value == null)
+								obj = e.Left;
+
+							if (obj != null)
+							{
+								var ctx = GetContext(context, obj);
+
+								if (ctx != null)
+								{
+									if (ctx.IsExpression(obj, 0, RequestFor.Table).      Result ||
+									    ctx.IsExpression(obj, 0, RequestFor.Association).Result)
+									{
+										ignoredMembers = obj.GetMembers();
+									}
+								}
+							}
+
+							break;
+						}
 				}
 
 				return false;
