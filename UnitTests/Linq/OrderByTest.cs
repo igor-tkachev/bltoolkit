@@ -118,6 +118,29 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void OrderBy6([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var dataContext = GetDataContext(context))
+			{
+				if (!(dataContext is TestDbManager)) return;
+				var db = (TestDbManager)dataContext;
+
+				var q =
+					from person in db.Person
+					join patient in db.Patient on person.ID equals patient.PersonID into g
+					from patient in g.DefaultIfEmpty()
+					orderby person.MiddleName // if comment this line then "Diagnosis" is not selected.
+					select new { person.ID, PatientID = patient != null ? (int?)patient.PersonID : null };
+				// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+				q.ToList();
+				// ReSharper restore ReturnValueOfPureMethodIsNotUsed
+
+				Assert.IsFalse(db.LastQuery.Contains("Diagnosis"), "Why do we select Patient.Diagnosis??");
+
+			};
+		}
+
+		[Test]
 		public void ConditionOrderBy()
 		{
 			var expected =
@@ -303,5 +326,6 @@ namespace Data.Linq
 				Assert.AreEqual(3, q.AsEnumerable().Count());
 			});
 		}
+
 	}
 }
