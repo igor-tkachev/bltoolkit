@@ -18,4 +18,16 @@ namespace UnitTests.CS.JointureTests.Mappings
         [Association(ThisKey = "Id", OtherKey = "ArtistID")]
         public virtual List<Title> Titles { get; set; }
     }
+
+    [TableName(Name = "ARTIST", Owner = Consts.Owner)]
+    public class Artist4
+    {
+        [PrimaryKey, NonUpdatable]
+        public long ID_ARTIST { get; set; }
+        public string ARTIST { get; set; }
+
+        [LazyInstance(true)]
+        [Association(ThisKey = "ID_ARTIST", OtherKey = "ID_ARTIST")]
+        public virtual List<Title2> Titles { get; set; }
+    }
 }

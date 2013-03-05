@@ -15,6 +15,15 @@ namespace UnitTests.CS.JointureTests.Mappings
         public string Name { get; set; }
     }
 
+
+    [TableName(Name = "ARTIST", Owner = Consts.Owner)]
+    public class SimpleArtist
+    {
+        [PrimaryKey, Identity, SequenceName("SEQ_ARTIST")]
+        public long ID_ARTIST { get; set; }
+        public string ARTIST { get; set; }
+    }
+
     [TableName(Name = "ARTIST", Owner = Consts.Owner)]
     public class Artist3
     {

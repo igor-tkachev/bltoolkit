@@ -1038,6 +1038,10 @@ namespace BLToolkit.Data.Linq
 		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
 		{
 			var query = GetQuery();
+
+            // TODO => Add the possibility to switch to the FullMappingSchema
+		    //mapper = (context, dataContext, arg3, arg4, arg5) => MappingSchema.MapDataReaderToObject<T>(arg3);
+
 			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
 		}
 

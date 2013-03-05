@@ -137,7 +137,8 @@ namespace UnitTests.CS.JointureTests
             {
                 var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
                             where m.DataVersion.DataRadio != null
-                            select new
+                            select
+                            new 
                                 {
                                     //m.MultimediaFiles,
                                     m.DataVersion.DataRadio,
@@ -146,6 +147,22 @@ namespace UnitTests.CS.JointureTests
                                 };
 
                 var res = query.Take(100).ToList();
+                Console.WriteLine(res.Count);
+            }
+        }
+
+        [Test]
+        public void TestLinqAssociation4()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.MappingSchema = new FullMappingSchema(db, db.MappingSchema, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: false);
+
+                var query = from m in db.GetTable<Artist4>()
+                            select m;
+
+                var res = query.Take(100).ToList();
+                var t = res.First().Titles;
                 Console.WriteLine(res.Count);
             }
         }

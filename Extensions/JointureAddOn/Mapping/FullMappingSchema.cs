@@ -47,8 +47,8 @@ namespace BLToolkit.Mapping
             _ignoreLazyLoad = ignoreLazyLoad;
             _mappingOrder = mappingOrder;
 
-            IgnoreMissingColumns = ignoreMissingColumns;
-            InheritedMappingSchema = inheritedMappingSchema;
+            _ignoreMissingColumns = ignoreMissingColumns;
+            _inheritedMappingSchema = inheritedMappingSchema;
         }
 
         #region Overrides
@@ -133,8 +133,8 @@ namespace BLToolkit.Mapping
 
         #endregion
 
-        public bool IgnoreMissingColumns { get; set; }
-        public MappingSchema InheritedMappingSchema { get; set; }
+        private readonly bool _ignoreMissingColumns;
+        private MappingSchema _inheritedMappingSchema;
 
         private void InitSchema(IDataReader reader)
         {
@@ -266,7 +266,7 @@ namespace BLToolkit.Mapping
                         }
                         else
                         {
-                            if (!IgnoreMissingColumns)
+                            if (!_ignoreMissingColumns)
                             {
                                 throw new Exception(string.Format("Couldnt find db column {0} in the query result", colName));
                             }
@@ -331,7 +331,7 @@ namespace BLToolkit.Mapping
             return result;
         }
 
-        public FullObjectMapper GetObjectMapper(Type mapperType, ref int startIndex)
+        internal FullObjectMapper GetObjectMapper(Type mapperType, ref int startIndex)
         {
             var mapper = new FullObjectMapper {PropertyType = mapperType};
             return (FullObjectMapper) GetObjectMapper(mapper, ref startIndex);

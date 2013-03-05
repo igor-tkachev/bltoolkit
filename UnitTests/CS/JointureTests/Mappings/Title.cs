@@ -18,4 +18,17 @@ namespace UnitTests.CS.JointureTests.Mappings
         [Association(CanBeNull = false, ThisKey = "ArtistID", OtherKey = "Id")]
         public Artist Artist { get; set; }
     }
+
+
+    [TableName(Name = "TRACK", Owner = Consts.Owner)]
+    public class Title2
+    {
+        [PrimaryKey, NonUpdatable]
+        public long ID_TRACK { get; set; }
+        public string TRACK { get; set; }
+        public long? ID_ARTIST { get; set; }
+
+        [Association(CanBeNull = false, ThisKey = "ID_ARTIST", OtherKey = "ID_ARTIST")]
+        public SimpleArtist Artist { get; set; }
+    }
 }

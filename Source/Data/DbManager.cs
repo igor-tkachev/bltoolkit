@@ -2617,18 +2617,20 @@ namespace BLToolkit.Data
 					{
 						var value  = members[i].GetValue(obj);
 						var type   = members[i].MemberAccessor.Type;
-						//var dbType = members[i].GetDbType();
+						var dbType = members[i].GetDbType();
 
 						IDbDataParameter p;
 
-                        if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
-                        {
-                            p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
-                        }
-                        else
-                        {
-                            if (value != null && value.GetType().IsEnum)
-                                value = MappingSchema.MapEnumToValue(value, true);
+						//if ((value == null || value == DBNull.Value) && dbType == DbType.Byte || type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+						// I do not get this change.                      ^^^^^^^^^^^^^^^^^^^^^
+						if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+						{
+							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
+						}
+						else
+						{
+							if (value != null && value.GetType().IsEnum)
+								value = MappingSchema.MapEnumToValue(value, true);
 
                             p = value != null
                                 ? Parameter(baseParameters[i].ParameterName + nRows, value)

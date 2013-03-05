@@ -917,7 +917,8 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
-							var association = (AssociatedTableContext)GetAssociation(expression, level).Table;
+							var tableLevel  = GetAssociation(expression, level);
+							var association = (AssociatedTableContext)tableLevel.Table;
 
 							if (association.IsList)
 							{
@@ -927,6 +928,9 @@ namespace BLToolkit.Data.Linq.Builder
 								var expr   = helper.GetExpression(ma.Expression, association);
 
 								buildInfo.IsAssociationBuilt = true;
+
+								if (tableLevel.IsNew)
+									association.ParentAssociationJoin.IsWeak = true;
 
 								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 							}
@@ -1081,6 +1085,7 @@ namespace BLToolkit.Data.Linq.Builder
 				public TableContext Table;
 				public SqlField     Field;
 				public int          Level;
+				public bool         IsNew;
 			}
 
 			TableLevel FindTable(Expression expression, int level, bool throwException)
@@ -1124,6 +1129,7 @@ namespace BLToolkit.Data.Linq.Builder
 					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
 						var memberExpression = (MemberExpression)levelExpression;
+						var isNew = false;
 
 						AssociatedTableContext tableAssociation;
 
@@ -1136,13 +1142,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 							tableAssociation = q.FirstOrDefault();
 
+							isNew = true;
+
 							_associations.Add(memberExpression.Member, tableAssociation);
 						}
 
 						if (tableAssociation != null)
 						{
 							if (levelExpression == expression)
-								return new TableLevel { Table = tableAssociation, Level = level };
+								return new TableLevel { Table = tableAssociation, Level = level, IsNew = isNew };
 
 							var al = tableAssociation.GetAssociation(expression, level + 1);
 
@@ -1151,7 +1159,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							var field = tableAssociation.GetField(expression, level + 1, false);
 
-							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1 };
+							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1, IsNew = isNew };
 						}
 					}
 				}
