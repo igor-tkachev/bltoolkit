@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 
 namespace BLToolkit.Mapping
 {
@@ -268,7 +270,30 @@ namespace BLToolkit.Mapping
 
 					var dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
 
-					if (dbTypeAttribute != null)
+                    MemberExtension ext;
+                    if (dbTypeAttribute == null && _extension != null && _extension.Members.TryGetValue(ma.Name, out ext))
+				    {
+				        AttributeExtensionCollection attrExt;
+                        if (ext.Attributes.TryGetValue("DbType", out attrExt))
+                        {
+                            var dbTypeExtension=attrExt.FirstOrDefault(x => x.Name == "DbType");
+                            var dbSizeExtension=attrExt.FirstOrDefault(x => x.Name == "Size");
+                            DbType dbType;
+                            if (dbTypeExtension != null && DbType.TryParse(dbTypeExtension.Value.ToString(), out dbType))
+                            {
+                                if (dbSizeExtension != null)
+                                {
+                                    dbTypeAttribute = new DbTypeAttribute(dbType, int.Parse(dbSizeExtension.Value.ToString()));
+                                }
+                                else
+                                {
+                                    dbTypeAttribute = new DbTypeAttribute(dbType);
+                                }
+                            }
+                        }
+				    }
+
+				    if (dbTypeAttribute != null)
 					{
 						mi.DbType      = dbTypeAttribute.DbType;
 						mi.IsDbTypeSet = true;
