@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9FD2722C-1E6C-4061-8AC0-32EE28808FC0}</ProjectGuid>
+    <ProjectGuid>{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BLToolkit</RootNamespace>
-    <AssemblyName>BLToolkit.4.JointureAddOn</AssemblyName>
+    <RootNamespace>BLToolkit.Data.DataProvider.Generic</RootNamespace>
+    <AssemblyName>BLToolkit.Data.DataProvider.Generic.4</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW4;OVERRIDETOSTRING;</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -31,28 +31,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Castle\Castle.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataAccess\FullSqlQuery.cs" />
-    <Compile Include="DataAccess\FullSqlQueryBase.cs" />
-    <Compile Include="DataAccess\FullSqlQueryInfo.cs" />
-    <Compile Include="DataAccess\FullSqlQueryParameterInfo.cs" />
-    <Compile Include="DataAccess\FullSqlQueryT.cs" />
-    <Compile Include="Emit\DynamicCompilationSpike.cs" />
-    <Compile Include="Emit\FunctionFactory.cs" />
-    <Compile Include="Mapping\FullMappingSchema.cs" />
-    <Compile Include="Mapping\FullObjectMapper.cs" />
-    <Compile Include="Mapping\LazyValueLoadInterceptor.cs" />
-    <Compile Include="Mapping\MappingOrder.cs" />
+    <Compile Include="..\..\Source\Data\DataProvider\GenericDataProvider.cs">
+      <Link>GenericDataProvider.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -60,6 +51,9 @@
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.4</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
