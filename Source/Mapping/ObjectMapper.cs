@@ -280,17 +280,36 @@ namespace BLToolkit.Mapping
 						{
 							var dbTypeExtension=attrExt.FirstOrDefault(x => x.Name == "DbType");
 							var dbSizeExtension=attrExt.FirstOrDefault(x => x.Name == "Size");
-							DbType dbType;
 
-							if (dbTypeExtension != null && DbType.TryParse(dbTypeExtension.Value.ToString(), out dbType))
+							if (dbTypeExtension != null)
 							{
-								if (dbSizeExtension != null)
+								DbType dbType;
+#if FW3
+								var parsed = true;
+
+								try
 								{
-									dbTypeAttribute = new DbTypeAttribute(dbType, int.Parse(dbSizeExtension.Value.ToString()));
+									dbType = (DbType)Enum.Parse(typeof(DbType), dbTypeExtension.Value.ToString());
 								}
-								else
+								catch (Exception)
 								{
-									dbTypeAttribute = new DbTypeAttribute(dbType);
+									dbType = DbType.Object;
+									parsed = false;
+								}
+
+								if (parsed)
+#else
+								if (DbType.TryParse(dbTypeExtension.Value.ToString(), out dbType))
+#endif
+								{
+									if (dbSizeExtension != null)
+									{
+										dbTypeAttribute = new DbTypeAttribute(dbType, int.Parse(dbSizeExtension.Value.ToString()));
+									}
+									else
+									{
+										dbTypeAttribute = new DbTypeAttribute(dbType);
+									}
 								}
 							}
 						}
