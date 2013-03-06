@@ -3,6 +3,7 @@ using BLToolkit.Data;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+using BLToolkit.TypeBuilder;
 using NUnit.Framework;
 
 namespace UnitTests.CS.JointureTests.Factories
@@ -219,6 +220,7 @@ namespace UnitTests.CS.JointureTests.Factories
     [TableName(Name = "MULTIMEDIA", Owner = "PITAFR01")]
     public class MULTIMEDIA_DATA_VERSION : MULTIMEDIA_DB
     {
+        [LazyInstance(true)]
         [Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
         public DATA_VERSION_DATA_RADIO DataVersion { get; set; }
 

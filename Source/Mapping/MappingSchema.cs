@@ -2306,7 +2306,6 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-		//NOTE changed to virtual
 		public virtual object MapDataReaderToObject(
 			IDataReader     dataReader,
 			Type            destObjectType,
@@ -2323,6 +2322,7 @@ namespace BLToolkit.Mapping
 			return MapInternal(ctx);
 		}
 
+        //TODO Remove unused method
 		public T MapDataReaderToObject<T>(
 			IDataReader     dataReader,
 			params object[] parameters)

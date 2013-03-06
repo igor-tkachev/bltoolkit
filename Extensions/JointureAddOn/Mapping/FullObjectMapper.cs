@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using BLToolkit.Data;
+using BLToolkit.DataAccess;
 using BLToolkit.Emit;
+using Castle.DynamicProxy;
 
 namespace BLToolkit.Mapping
 {
@@ -106,8 +109,13 @@ namespace BLToolkit.Mapping
 
     public class FullObjectMapper : ObjectMapper, IObjectMapper
     {
-        public FullObjectMapper()
+        private readonly DbManager _db;
+        private readonly ProxyGenerator _proxy;
+
+        public FullObjectMapper(DbManager db = null)
         {
+            _db = db;
+            _proxy = new ProxyGenerator();
             PropertiesMapping = new List<IMapper>();
         }
 
@@ -145,5 +153,34 @@ namespace BLToolkit.Mapping
         public GetHandler PrimaryKeyValueGetter { get; set; }
 
         #endregion
+
+        public override object CreateInstance()
+        {
+            object result = ContainsLazyChild
+                               ? _proxy.CreateClassProxy(PropertyType, new LazyValueLoadInterceptor(this, LoadLazy))
+                               : FunctionFactory.Remote.CreateInstance(PropertyType);
+
+            return result;
+            //return base.CreateInstance();
+        }
+
+        private object LoadLazy(IMapper mapper, object proxy, Type parentType)
+        {
+            var lazyMapper = (ILazyMapper)mapper;
+            object key = lazyMapper.ParentKeyGetter(proxy);
+
+            var fullSqlQuery = new FullSqlQuery(_db, true);
+            object parentLoadFull = fullSqlQuery.SelectByKey(parentType, key);
+            if (parentLoadFull == null)
+            {
+                object value = Activator.CreateInstance(mapper is CollectionFullObjectMapper
+                                                            ? (mapper as CollectionFullObjectMapper).PropertyCollectionType
+                                                            : mapper.PropertyType);
+                return value;
+            }
+
+            var objectMapper = (IObjectMapper)mapper;
+            return objectMapper.Getter(parentLoadFull);
+        }
     }
 }

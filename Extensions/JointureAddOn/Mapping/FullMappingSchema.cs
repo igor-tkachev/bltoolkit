@@ -41,46 +41,81 @@ namespace BLToolkit.Mapping
 
         #endregion
 
-        public FullMappingSchema(DbManager db, MappingSchema inheritedMappingSchema = null, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
+        public FullMappingSchema(DbManager db, MappingSchema inheritedMappingSchema = null, bool ignoreLazyLoad = false, 
+            MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
         {
             _db = db;
             _ignoreLazyLoad = ignoreLazyLoad;
             _mappingOrder = mappingOrder;
 
+            // TODO Remove this option
             _ignoreMissingColumns = ignoreMissingColumns;
             _inheritedMappingSchema = inheritedMappingSchema;
         }
 
         #region Overrides
 
-        public override object MapDataReaderToObject(
-            IDataReader dataReader,
-            Type destObjectType,
-            params object[] parameters)
+        protected override ObjectMapper CreateObjectMapperInstance(Type type)
         {
-            // Get mapping for the type
-            if (destObjectType == null) throw new ArgumentNullException("destObjectType");
-
-            if (dataReader.FieldCount == 0)
-                return null;
-
             int index = 0;
-            FullObjectMapper mapper = GetObjectMapper(destObjectType, ref index);
+            return GetObjectMapper(type, ref index);
+        }
+
+        protected override void MapInternal(Reflection.InitContext initContext, IMapDataSource source, object sourceObject, IMapDataDestination dest, object destObject, params object[] parameters)
+        {
+            FullObjectMapper mapper = (FullObjectMapper)initContext.ObjectMapper;
+            IDataReader dataReader = (IDataReader)sourceObject;
+
+            int[] index = GetIndex(source, dest);
+            IValueMapper[] mappers = GetValueMappers(source, dest, index);
+
+            foreach (var valueMapper in mappers)
+            {
+                
+            }
+
             InitSchema(dataReader);
 
             if (mapper.ColParent)
             {
-                object result = FillObject(mapper, dataReader);
+                FillObject(mapper, dataReader, destObject);
                 while (dataReader.Read())
                 {
-                    result = FillObject(result, mapper, dataReader);
+                    destObject = FillObject(destObject, mapper, dataReader);
                 }
-
-                return result;
             }
-            return FillObject(mapper, dataReader);
+            else
+                 FillObject(mapper, dataReader, destObject);
         }
 
+
+        //public override object MapDataReaderToObject(
+        //    IDataReader dataReader,
+        //    Type destObjectType,
+        //    params object[] parameters)
+        //{
+        //    if (destObjectType == null) throw new ArgumentNullException("destObjectType");
+
+        //    if (dataReader.FieldCount == 0)
+        //        return null;
+
+        //    int index = 0;
+        //    FullObjectMapper mapper = GetObjectMapper(destObjectType, ref index);
+
+        //    InitSchema(dataReader);
+
+        //    if (mapper.ColParent)
+        //    {
+        //        object result = FillObject(mapper, dataReader);
+        //        while (dataReader.Read())
+        //        {
+        //            result = FillObject(result, mapper, dataReader);
+        //        }
+
+        //        return result;
+        //    }
+        //    return FillObject(mapper, dataReader);
+        //}
 
         public override IList<T> MapDataReaderToList<T>(
             IDataReader reader,
@@ -204,11 +239,12 @@ namespace BLToolkit.Mapping
             return result;
         }
 
-        private object FillObject(IObjectMapper mapper, IDataReader datareader)
+        private object FillObject(IObjectMapper mapper, IDataReader datareader, object result = null)
         {
-            object result = mapper.ContainsLazyChild
-                                ? _proxy.CreateClassProxy(mapper.PropertyType, new LazyValueLoadInterceptor(mapper, LoadLazy))
-                                : FunctionFactory.Remote.CreateInstance(mapper.PropertyType);
+            if (result == null)
+                result = mapper.ContainsLazyChild
+                             ? _proxy.CreateClassProxy(mapper.PropertyType, new LazyValueLoadInterceptor(mapper, LoadLazy))
+                             : FunctionFactory.Remote.CreateInstance(mapper.PropertyType);
 
             foreach (IMapper map in mapper.PropertiesMapping)
             {
@@ -333,7 +369,7 @@ namespace BLToolkit.Mapping
 
         internal FullObjectMapper GetObjectMapper(Type mapperType, ref int startIndex)
         {
-            var mapper = new FullObjectMapper {PropertyType = mapperType};
+            var mapper = new FullObjectMapper(_db) {PropertyType = mapperType};
             return (FullObjectMapper) GetObjectMapper(mapper, ref startIndex);
         }
 

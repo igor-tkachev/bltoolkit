@@ -131,10 +131,12 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void TestLinqAssociation()
+        public void TestLinqAssociationOleron()
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
+                db.MappingSchema = new FullMappingSchema(db, db.MappingSchema, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: false);
+
                 var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
                             where m.DataVersion.DataRadio != null
                             select
@@ -147,6 +149,7 @@ namespace UnitTests.CS.JointureTests
                                 };
 
                 var res = query.Take(100).ToList();
+                var t = res.First().m.DataVersion;
                 Console.WriteLine(res.Count);
             }
         }
@@ -209,10 +212,6 @@ namespace UnitTests.CS.JointureTests
                 var query = new FullSqlQuery(db);
                 var title = (Title)query.SelectByKey(typeof(Title), 137653);
                 Console.WriteLine(title.Name);
-
-                var query2 = new FullSqlQueryT<Title>(db);
-                var title2 = query2.SelectByKey(137653);
-                Console.WriteLine(title2.Name);
             }
         }
     }

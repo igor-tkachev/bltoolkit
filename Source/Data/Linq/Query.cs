@@ -1057,7 +1057,11 @@ namespace BLToolkit.Data.Linq
 				queryContext = new QueryContext(dataContextInfo, expr, ps);
 
 			foreach (var dr in data)
-				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+			{
+                //var a = mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+                //Console.WriteLine(a);
+                yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+			}	
 		}
 
 		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)

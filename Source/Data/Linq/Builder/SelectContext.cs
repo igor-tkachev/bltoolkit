@@ -64,6 +64,7 @@ namespace BLToolkit.Data.Linq.Builder
 			var expr   = BuildExpression(null, 0);
 			var mapper = Builder.BuildMapper<T>(expr);
 
+            //TODO CHeck if it could be useful to use a cache for these queries
 			query.SetQuery(mapper.Compile());
 		}
 
