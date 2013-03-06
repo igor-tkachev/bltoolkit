@@ -1409,21 +1409,6 @@ namespace BLToolkit.Mapping
 			return index;
 		}
 
-		[CLSCompliant(false), Obsolete]
-		protected static void MapInternal(
-			IMapDataSource      source, object sourceObject,
-			IMapDataDestination dest,   object destObject,
-			int[]               index)
-		{
-			for (int i = 0; i < index.Length; i++)
-			{
-				int n = index[i];
-
-				if (n >= 0)
-					dest.SetValue(destObject, n, source.GetValue(sourceObject, i));
-			}
-		}
-
 		[CLSCompliant(false)]
 		internal protected static void MapInternal(
 			IMapDataSource      source, object sourceObject,
@@ -2071,15 +2056,7 @@ namespace BLToolkit.Mapping
 			object          destObject,
 			params object[] parameters)
 		{
-			if (destObject == null) throw new ArgumentNullException("destObject");
-
-			MapInternal(
-				null,
-				CreateDataRowMapper(dataRow, DataRowVersion.Default), dataRow,
-				GetObjectMapper(destObject.  GetType()), destObject,
-				parameters);
-
-			return destObject;
+			return MapDataRowToObject(dataRow, DataRowVersion.Default, destObject, parameters);
 		}
 
 		public object MapDataRowToObject(
@@ -2104,15 +2081,7 @@ namespace BLToolkit.Mapping
 			Type            destObjectType,
 			params object[] parameters)
 		{
-			InitContext ctx = new InitContext();
-
-			ctx.MappingSchema = this;
-			ctx.DataSource    = CreateDataRowMapper(dataRow, DataRowVersion.Default);
-			ctx.SourceObject  = dataRow;
-			ctx.ObjectMapper  = GetObjectMapper(destObjectType);
-			ctx.Parameters    = parameters;
-
-			return MapInternal(ctx);
+		    return MapDataRowToObject(dataRow, DataRowVersion.Default, destObjectType, parameters);
 		}
 
 		public object MapDataRowToObject(
@@ -2130,21 +2099,6 @@ namespace BLToolkit.Mapping
 			ctx.Parameters    = parameters;
 
 			return MapInternal(ctx);
-		}
-
-		public T MapDataRowToObject<T>(
-			DataRow         dataRow,
-			params object[] parameters)
-		{
-			return (T)MapDataRowToObject(dataRow, typeof(T), parameters);
-		}
-
-		public T MapDataRowToObject<T>(
-			DataRow         dataRow,
-			DataRowVersion  version,
-			params object[] parameters)
-		{
-			return (T)MapDataRowToObject(dataRow, version, typeof(T), parameters);
 		}
 
 		#endregion
@@ -3050,7 +3004,7 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToList
 
-		public IList MapDataReaderToList(
+        public virtual IList MapDataReaderToList(
 			IDataReader     reader,
 			IList           list,
 			Type            destObjectType,
@@ -3071,24 +3025,15 @@ namespace BLToolkit.Mapping
 		{
 			IList list = new List<object>();
 
-			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    (list, GetObjectMapper(destObjectType)),
-				parameters);
-
-			return list;
+		    return MapDataReaderToList(reader, list, destObjectType, parameters);
 		}
 
-		//NOTE changed to virtual
-		public virtual IList<T> MapDataReaderToList<T>(
+		public IList<T> MapDataReaderToList<T>(
 			IDataReader     reader,
 			IList<T>        list,
 			params object[] parameters)
 		{
-            MapSourceListToDestinationList(
-                CreateDataReaderListMapper(reader),
-                CreateObjectListMapper((IList)list, GetObjectMapper(typeof(T))),
-                parameters);
+		    MapDataReaderToList(reader, (IList) list, typeof (T), parameters);
 
 			return list;
 		}
@@ -3099,12 +3044,9 @@ namespace BLToolkit.Mapping
 		{
 			List<T> list = new List<T>();
 
-			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    (list, GetObjectMapper(typeof(T))),
-				parameters);
+            MapDataReaderToList<T>(reader, list, parameters);
 
-			return list;
+		    return list;
 		}
 
 		#endregion

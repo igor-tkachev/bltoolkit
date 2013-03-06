@@ -17,11 +17,10 @@ namespace BLToolkit.DataAccess
 
         #region Constructors
 
-        public FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
+        protected FullSqlQueryBase(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(dbManager, inheritedMappingSchema: dbManager.MappingSchema, ignoreLazyLoad: ignoreLazyLoad,
-                mappingOrder: mappingOrder, ignoreMissingColumns: ignoreMissingColumns);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager, mappingOrder: mappingOrder, ignoreMissingColumns: ignoreMissingColumns);
 
             _ignoreLazyLoad = ignoreLazyLoad;
         }
@@ -71,15 +70,14 @@ namespace BLToolkit.DataAccess
 
         #endregion
 
-        protected SqlQueryInfo CreateSelectAllFullSqlText(DbManager db, Type type)
+        private SqlQueryInfo CreateSelectAllFullSqlText(DbManager db, Type type)
         {
             var sb = new StringBuilder();
             var query = new FullSqlQueryInfo();
 
             sb.Append("SELECT\n");
 
-            int index = 0;
-            FullObjectMapper mainMapper = ((FullMappingSchema)db.MappingSchema).GetObjectMapper(type, ref index);
+            var mainMapper = (FullObjectMapper)db.MappingSchema.GetObjectMapper(type); ;
             BuildSelectSQL(mainMapper, sb, db);
 
             sb.Remove(sb.Length - 2, 1);
@@ -95,15 +93,15 @@ namespace BLToolkit.DataAccess
             return query;
         }
 
-        protected SqlQueryInfo CreateSelectFullByKeySqlText(DbManager db, Type type)
+        private SqlQueryInfo CreateSelectFullByKeySqlText(DbManager db, Type type)
         {
             var sb = new StringBuilder();
             var query = new FullSqlQueryInfo();
 
             sb.Append("SELECT\n");
 
-            int index = 0;
-            FullObjectMapper mainMapper = ((FullMappingSchema)db.MappingSchema).GetObjectMapper(type, ref index);
+            var mainMapper = (FullObjectMapper)db.MappingSchema.GetObjectMapper(type);
+
             BuildSelectSQL(mainMapper, sb, db);
 
             sb.Remove(sb.Length - 2, 1);

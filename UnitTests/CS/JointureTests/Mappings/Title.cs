@@ -1,5 +1,6 @@
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+using BLToolkit.TypeBuilder;
 
 namespace UnitTests.CS.JointureTests.Mappings
 {
@@ -15,8 +16,9 @@ namespace UnitTests.CS.JointureTests.Mappings
         [MapField("ID_ARTIST")]
         public long? ArtistID { get; set; }
 
+        [LazyInstance(true)]
         [Association(CanBeNull = false, ThisKey = "ArtistID", OtherKey = "Id")]
-        public Artist Artist { get; set; }
+        public virtual Artist Artist { get; set; }
     }
 
 

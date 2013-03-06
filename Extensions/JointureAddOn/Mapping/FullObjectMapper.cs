@@ -30,7 +30,6 @@ namespace BLToolkit.Mapping
     {
         public string ColumnAlias { get; set; }
         public string ColumnName { get; set; }
-        public Type DbType { get; set; }
 
         #region IMapper Members
 
@@ -44,9 +43,42 @@ namespace BLToolkit.Mapping
 
     public class CollectionFullObjectMapper : TableDescription, IObjectMapper
     {
-        public  CollectionFullObjectMapper()
+        private readonly DbManager _db;
+        private readonly ProxyGenerator _proxy;
+
+        public CollectionFullObjectMapper(DbManager db)
         {
+            _db = db;
+            _proxy = new ProxyGenerator();
             PropertiesMapping = new List<IMapper>();
+        }
+
+        public object CreateInstance()
+        {
+            object result = ContainsLazyChild
+                               ? _proxy.CreateClassProxy(PropertyType, new LazyValueLoadInterceptor(this, LoadLazy))
+                               : FunctionFactory.Remote.CreateInstance(PropertyType);
+
+            return result;
+        }
+
+        private object LoadLazy(IMapper mapper, object proxy, Type parentType)
+        {
+            var lazyMapper = (ILazyMapper)mapper;
+            object key = lazyMapper.ParentKeyGetter(proxy);
+
+            var fullSqlQuery = new FullSqlQuery(_db, true);
+            object parentLoadFull = fullSqlQuery.SelectByKey(parentType, key);
+            if (parentLoadFull == null)
+            {
+                object value = Activator.CreateInstance(mapper is CollectionFullObjectMapper
+                                                            ? (mapper as CollectionFullObjectMapper).PropertyCollectionType
+                                                            : mapper.PropertyType);
+                return value;
+            }
+
+            var objectMapper = (IObjectMapper)mapper;
+            return objectMapper.Getter(parentLoadFull);
         }
 
         #region IPropertiesMapping Members
@@ -112,7 +144,7 @@ namespace BLToolkit.Mapping
         private readonly DbManager _db;
         private readonly ProxyGenerator _proxy;
 
-        public FullObjectMapper(DbManager db = null)
+        public FullObjectMapper(DbManager db)
         {
             _db = db;
             _proxy = new ProxyGenerator();
@@ -154,6 +186,12 @@ namespace BLToolkit.Mapping
 
         #endregion
 
+        public override void Init(MappingSchema mappingSchema, Type type)
+        {
+            // TODO implement this method
+            base.Init(mappingSchema, type);
+        }
+
         public override object CreateInstance()
         {
             object result = ContainsLazyChild
@@ -161,7 +199,11 @@ namespace BLToolkit.Mapping
                                : FunctionFactory.Remote.CreateInstance(PropertyType);
 
             return result;
-            //return base.CreateInstance();
+        }
+
+        public override object CreateInstance(Reflection.InitContext context)
+        {
+            return CreateInstance();
         }
 
         private object LoadLazy(IMapper mapper, object proxy, Type parentType)
@@ -169,7 +211,7 @@ namespace BLToolkit.Mapping
             var lazyMapper = (ILazyMapper)mapper;
             object key = lazyMapper.ParentKeyGetter(proxy);
 
-            var fullSqlQuery = new FullSqlQuery(_db, true);
+            var fullSqlQuery = new FullSqlQuery(_db, ignoreLazyLoad: true);
             object parentLoadFull = fullSqlQuery.SelectByKey(parentType, key);
             if (parentLoadFull == null)
             {

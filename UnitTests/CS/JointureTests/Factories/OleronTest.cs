@@ -222,7 +222,7 @@ namespace UnitTests.CS.JointureTests.Factories
     {
         [LazyInstance(true)]
         [Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
-        public DATA_VERSION_DATA_RADIO DataVersion { get; set; }
+        public virtual DATA_VERSION_DATA_RADIO DataVersion { get; set; }
 
         //[Association(ThisKey = "ID_MULTIMEDIA", OtherKey = "ID_MULTIMEDIA")]
         //public List<MULTIMEDIA_FILE> MultimediaFiles { get; set; }

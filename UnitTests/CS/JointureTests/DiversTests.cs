@@ -609,7 +609,7 @@ namespace UnitTests.CS.JointureTests
                     //}
 
                     DbManager dbCmd = db.SetCommand(sql);
-                    dbCmd.MappingSchema = new FullMappingSchema(db, inheritedMappingSchema: dbCmd.MappingSchema, ignoreLazyLoad: false, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: true);
+                    dbCmd.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: true);
                     var allMedia = dbCmd.ExecuteList<FILE_FORM>();
                     forms = allMedia;
                     foreach (FILE_FORM fileForm in allMedia)
