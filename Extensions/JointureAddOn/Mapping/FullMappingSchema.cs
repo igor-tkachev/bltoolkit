@@ -66,13 +66,13 @@ namespace BLToolkit.Mapping
             FullObjectMapper mapper = (FullObjectMapper)initContext.ObjectMapper;
             IDataReader dataReader = (IDataReader)sourceObject;
 
-            int[] index = GetIndex(source, dest);
-            IValueMapper[] mappers = GetValueMappers(source, dest, index);
+            //int[] index = GetIndex(source, dest);
+            //IValueMapper[] mappers = GetValueMappers(source, dest, index);
 
-            foreach (var valueMapper in mappers)
-            {
+            //foreach (var valueMapper in mappers)
+            //{
                 
-            }
+            //}
 
             InitSchema(dataReader);
 

@@ -2621,9 +2621,8 @@ namespace BLToolkit.Data
 
 						IDbDataParameter p;
 
-						//if ((value == null || value == DBNull.Value) && dbType == DbType.Byte || type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
-						// I do not get this change.                      ^^^^^^^^^^^^^^^^^^^^^
-						if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+						if ((value == null || value == DBNull.Value) && (dbType == DbType.Binary || type == typeof(byte[])) ||
+							type == typeof(System.Data.Linq.Binary))
 						{
 							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
 						}
