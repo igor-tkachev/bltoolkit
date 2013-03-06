@@ -87,10 +87,14 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Oracle.DataAccess, Version=2.112.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -179,14 +183,32 @@
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
     <Compile Include="EditableObjects\NotifyPropertyChangedTest.cs" />
-    <Compile Include="JointureTests\Artist.cs" />
-    <Compile Include="JointureTests\Artist2.cs" />
-    <Compile Include="JointureTests\AssociationTests.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressFactory.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressOleronFactory.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressOleronFactoryTest.cs" />
+    <Compile Include="JointureTests\Factories\AdExpressTest.cs" />
+    <Compile Include="JointureTests\Factories\MediaDiscFactory.cs" />
+    <Compile Include="JointureTests\JointureTests.cs" />
+    <Compile Include="JointureTests\Mappings\Artist.cs" />
+    <Compile Include="JointureTests\Mappings\Artist2.cs" />
+    <Compile Include="JointureTests\DiversTests.cs" />
+    <Compile Include="JointureTests\Mappings\BasicMedia.cs" />
     <Compile Include="JointureTests\Consts.cs" />
-    <Compile Include="JointureTests\MusicDB.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="JointureTests\Title.cs" />
+    <Compile Include="JointureTests\PerformanceAndTunningTests.cs" />
+    <Compile Include="JointureTests\Tools\ExecTimeInfo.cs" />
+    <Compile Include="JointureTests\Factories\MediaDiscTest.cs" />
+    <Compile Include="JointureTests\Mappings\FILE_FORM.cs" />
+    <Compile Include="JointureTests\Mappings\FORM_FOLLOW_UP.cs" />
+    <Compile Include="JointureTests\Mappings\FORM_SCRIPT.cs" />
+    <Compile Include="JointureTests\Mappings\Media.cs" />
+    <Compile Include="JointureTests\Factories\MusicTest.cs" />
+    <Compile Include="JointureTests\Factories\OleronFactory.cs" />
+    <Compile Include="JointureTests\Factories\OleronTest.cs" />
+    <Compile Include="JointureTests\Factories\OrquaFactory.cs" />
+    <Compile Include="JointureTests\Factories\OrquaTest.cs" />
+    <Compile Include="JointureTests\Factories\MusicFactory.cs" />
+    <Compile Include="JointureTests\Tools\TestsBaseClass.cs" />
+    <Compile Include="JointureTests\Mappings\Title.cs" />
     <Compile Include="Mapping\BltMapTests.cs" />
     <Compile Include="Mapping\MemberMapperDefaultMappersTest.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
@@ -321,6 +343,10 @@
     <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DataProviders\Generic\BLToolkit.Data.DataProvider.Generic.4.csproj">
+      <Project>{6e7fe7fc-551f-4273-aceb-72dc0d01120e}</Project>
+      <Name>BLToolkit.Data.DataProvider.Generic.4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
@@ -328,6 +354,10 @@
     <ProjectReference Include="..\..\DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.4.csproj">
+      <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
+      <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\BLToolkit.4.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
@@ -338,5 +368,6 @@
       <Name>BLToolkit.4.JointureAddOn</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

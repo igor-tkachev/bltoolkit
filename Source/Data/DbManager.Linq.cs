@@ -84,7 +84,13 @@ namespace BLToolkit.Data
 			var cc = sqlProvider.CommandCount(sql);
 			var sb = new StringBuilder();
 
-			var commands = new string[cc];
+            //if (DataProvider.UseQueryText)
+            if (UseQueryText)
+            {
+                // Use oracleHelper for OdpDataProvider to generate sql
+            }
+
+            var commands = new string[cc];
 
 			for (var i = 0; i < cc; i++)
 			{
@@ -250,9 +256,17 @@ namespace BLToolkit.Data
 		{
 			var pq = (PreparedQuery)query;
 
-			SetCommand(pq.Commands[0], pq.Parameters);
+		    var command = pq.Commands[0];
 
-			var now = default(DateTime);
+            SetCommand(pq.Commands[0], pq.Parameters);
+
+            if (UseQueryText)
+            {
+                Command.CommandText = OracleHelper.Interpret(Command);
+                Command.Parameters.Clear();
+            }
+
+		    var now = default(DateTime);
 
 			if (TraceSwitch.TraceInfo)
 				now = DateTime.Now;

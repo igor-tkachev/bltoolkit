@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-
+using BLToolkit.DataAccess;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
 
@@ -34,6 +34,11 @@ namespace BLToolkit.Mapping
 		public MappingSchema   MappingSchema              { get; set; }
 		public MemberExtension MemberExtension            { get; set; }
 		public DbType          DbType                     { get; set; }
+
+        /// <summary>
+        /// TODO : Create PrimaryKeyMapMemberInfo?
+        /// </summary>
+        public KeyGenerator KeyGenerator { get; set; }
 
 		private MapValue[] _mapValues;
 		public  MapValue[]  MapValues
