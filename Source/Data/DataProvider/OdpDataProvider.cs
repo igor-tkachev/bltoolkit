@@ -635,6 +635,20 @@ namespace BLToolkit.Data.DataProvider
 			get { return 0; }
 		}
 
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (OracleCommand)command;
+			try
+			{
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				cmd.ArrayBindCount = 0;
+			}
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new OracleSqlProvider();
