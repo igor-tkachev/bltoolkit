@@ -78,6 +78,12 @@ namespace BLToolkit.Data.DataProvider
 			base.AttachParameter(command, parameter);
 		}
 
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (OracleCommand)command;
+			return cmd.ExecuteArray(iterations);
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new OracleSqlProvider();

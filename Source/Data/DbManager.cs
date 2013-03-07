@@ -2894,6 +2894,20 @@ namespace BLToolkit.Data
 			return rowsAffected;
 		}
 
+		/// <summary>
+		/// Executes several SQL statements at a time using single roundtrip to the server (if supported by data provider).
+		/// </summary>
+		/// <remarks>
+		/// All parameters of the query must be arrays of type corresponding to the type of the parameter. 
+		/// The value of the <paramref name="iterations"/> parameter must be equal to the number of elements of each array.
+		/// </remarks>
+		/// <param name="iterations">The number of iterations.</param>
+		/// <returns>The number of rows affected by the command.</returns>
+		public int ExecuteArray(int iterations)
+		{
+			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, () => DataProvider.ExecuteArray(SelectCommand, iterations));
+		}
+
 		#endregion
 
 		#region ExecuteScalar

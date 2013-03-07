@@ -688,6 +688,20 @@ namespace BLToolkit.Data.DataProvider
             return new OracleSqlProvider();
         }
 
+        public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (OracleCommand)command;
+			try
+			{
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				cmd.ArrayBindCount = 0;
+			}
+		}
+
         public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
         {
             return dataReader is OracleDataReader ?

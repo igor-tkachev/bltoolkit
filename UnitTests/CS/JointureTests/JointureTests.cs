@@ -7,6 +7,7 @@ using System.Data.Linq;
 using System.IO;
 using System.Linq;
 using BLToolkit.Data;
+using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Mapping.Fluent;
@@ -159,7 +160,7 @@ namespace UnitTests.CS.JointureTests
             using (var db = ConnectionFactory.CreateDbManager())
             {
                 var query = new FullSqlQuery(db);
-                var title = (Title)query.SelectByKey(typeof(Title), 137653);
+                var title = (Title)query.SelectByKey(typeof(Title), 137653);                
 
                 Console.WriteLine(title.Artist);
                 Console.WriteLine(title.Name);
@@ -191,10 +192,18 @@ namespace UnitTests.CS.JointureTests
             {
                 db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: false);
 
-                var query = from m in db.GetTable<Artist4>()
+                //var query = from m in db.GetTable<Artist4>()
+                //            select m;
+
+                //var res = query.Take(100).ToList();
+                //var t = res.First().Titles;
+                //Console.WriteLine(res.Count);
+
+                var query = from m in db.GetTable<Artist2>()
+                            where m.Name.StartsWith("Metall")
                             select m;
 
-                var res = query.Take(100).ToList();
+                var res = query.ToList();
                 var t = res.First().Titles;
                 Console.WriteLine(res.Count);
             }
