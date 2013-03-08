@@ -49,10 +49,21 @@
     <Compile Include="DataAccess\FullSqlQueryT.cs" />
     <Compile Include="Emit\DynamicCompilationSpike.cs" />
     <Compile Include="Emit\FunctionFactory.cs" />
+    <Compile Include="Mapping\CollectionFullObjectMapper.cs" />
+    <Compile Include="Mapping\DataBindingFactory.cs" />
+    <Compile Include="Mapping\DataBindingMappingSchema.cs" />
+    <Compile Include="Mapping\DataBindingObjectMapper.cs" />
     <Compile Include="Mapping\FullMappingSchema.cs" />
     <Compile Include="Mapping\FullObjectMapper.cs" />
+    <Compile Include="Mapping\ILazyMapper.cs" />
+    <Compile Include="Mapping\IMapper.cs" />
+    <Compile Include="Mapping\IObjectMapper.cs" />
+    <Compile Include="Mapping\IPropertiesMapping.cs" />
     <Compile Include="Mapping\LazyValueLoadInterceptor.cs" />
     <Compile Include="Mapping\MappingOrder.cs" />
+    <Compile Include="Mapping\OwnerDescription.cs" />
+    <Compile Include="Mapping\TableDescription.cs" />
+    <Compile Include="Mapping\ValueMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

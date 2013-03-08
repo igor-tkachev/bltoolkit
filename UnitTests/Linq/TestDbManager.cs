@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql;
 
@@ -14,6 +15,11 @@ namespace Data.Linq
 
 	public class TestDbManager : DbManager, ITestDataContext
 	{
+        public TestDbManager(DataProviderBase dataProviderBase, string configString)
+            : base(dataProviderBase, configString)
+        {
+        }
+
 		public TestDbManager(string configString)
 			: base(configString)
 		{

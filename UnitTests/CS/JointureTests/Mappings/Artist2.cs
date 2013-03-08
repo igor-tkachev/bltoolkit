@@ -12,7 +12,7 @@ namespace UnitTests.CS.JointureTests.Mappings
         public long Id { get; set; }
 
         [MapField("ARTIST")]
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         [LazyInstance(true)]
         [Association(ThisKey = "Id", OtherKey = "ArtistID")]

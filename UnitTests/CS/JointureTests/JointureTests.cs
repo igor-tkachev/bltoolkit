@@ -22,7 +22,7 @@ using UnitTests.CS.JointureTests.Tools;
 
 namespace UnitTests.CS.JointureTests
 {
-    [TestFixture]
+    //[TestFixture]
     public abstract class JointureTests : TestsBaseClass
     {
         public class Category
@@ -192,20 +192,13 @@ namespace UnitTests.CS.JointureTests
             {
                 db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: false);
 
-                //var query = from m in db.GetTable<Artist4>()
-                //            select m;
-
-                //var res = query.Take(100).ToList();
-                //var t = res.First().Titles;
-                //Console.WriteLine(res.Count);
-
                 var query = from m in db.GetTable<Artist2>()
                             where m.Name.StartsWith("Metall")
                             select m;
 
                 var res = query.ToList();
                 var t = res.First().Titles;
-                Console.WriteLine(res.Count);
+                Console.WriteLine(t.Count);
             }
         }
 

@@ -1,38 +1,25 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
-using BLToolkit.Reflection;
 using Castle.DynamicProxy;
-
-#endregion
 
 namespace BLToolkit.Mapping
 {
-    public class FullObjectMapper : ObjectMapper, IObjectMapper
+    public class CollectionFullObjectMapper : TableDescription, IObjectMapper
     {
         private readonly DbManager _db;
         private readonly ProxyGenerator _proxy;
 
-        public FullObjectMapper(DbManager db)
+        public CollectionFullObjectMapper(DbManager db)
         {
             _db = db;
             _proxy = new ProxyGenerator();
             PropertiesMapping = new List<IMapper>();
         }
 
-        #region IPropertiesMapping Members
-
-        public List<IMapper> PropertiesMapping { get; private set; }
-        public IPropertiesMapping ParentMapping { get; set; }
-
-        #endregion
-
-        public bool IsNullable { get; set; }
-        public bool ColParent { get; set; }
+        public Type PropertyCollectionType { get; set; }
 
         #region IMapper Members
 
@@ -40,7 +27,6 @@ namespace BLToolkit.Mapping
         public SetHandler Setter { get; set; }
         public Type PropertyType { get; set; }
         public string PropertyName { get; set; }
-        public AssociationAttribute Association { get; set; }
 
         #endregion
 
@@ -49,23 +35,18 @@ namespace BLToolkit.Mapping
         public bool IsLazy { get; set; }
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
+        public GetHandler PrimaryKeyValueGetter { get; set; }
+        public AssociationAttribute Association { get; set; }
 
         #endregion
 
         #region ILazyMapper
 
         public GetHandler ParentKeyGetter { get; set; }
-        public GetHandler PrimaryKeyValueGetter { get; set; }
 
         #endregion
 
-        public override void Init(MappingSchema mappingSchema, Type type)
-        {
-            // TODO implement this method
-            base.Init(mappingSchema, type);
-        }
-
-        public override object CreateInstance()
+        public object CreateInstance()
         {
             object result = ContainsLazyChild
                                 ? _proxy.CreateClassProxy(PropertyType, new LazyValueLoadInterceptor(this, LoadLazy))
@@ -74,17 +55,12 @@ namespace BLToolkit.Mapping
             return result;
         }
 
-        public override object CreateInstance(InitContext context)
-        {
-            return CreateInstance();
-        }
-
         private object LoadLazy(IMapper mapper, object proxy, Type parentType)
         {
             var lazyMapper = (ILazyMapper) mapper;
             object key = lazyMapper.ParentKeyGetter(proxy);
 
-            var fullSqlQuery = new FullSqlQuery(_db, ignoreLazyLoad: true);
+            var fullSqlQuery = new FullSqlQuery(_db, true);
             object parentLoadFull = fullSqlQuery.SelectByKey(parentType, key);
             if (parentLoadFull == null)
             {
@@ -97,5 +73,12 @@ namespace BLToolkit.Mapping
             var objectMapper = (IObjectMapper) mapper;
             return objectMapper.Getter(parentLoadFull);
         }
+
+        #region IPropertiesMapping Members
+
+        public List<IMapper> PropertiesMapping { get; private set; }
+        public IPropertiesMapping ParentMapping { get; set; }
+
+        #endregion
     }
 }

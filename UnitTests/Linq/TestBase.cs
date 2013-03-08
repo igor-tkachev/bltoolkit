@@ -28,7 +28,13 @@ namespace Data.Linq
     // fix for failing tests due to use of "," vs "." in numbers parsing for some cultures
     [SetCulture("")]
 	public class TestBase
-	{
+    {
+        private static TestDbManager GetDbManager()
+        {
+            SQLiteDataProvider dataProvider = new SQLiteDataProvider();
+            return new TestDbManager(dataProvider, DbManager.GetConnectionString("SQLite"));
+        }
+
         static TestBase()
 		{
 			var providerListFile =
@@ -111,6 +117,7 @@ namespace Data.Linq
 					default                       : return null;
 				}
 			};
+
 		}
 
 		const  int StartIP = 12345;
@@ -187,6 +194,8 @@ namespace Data.Linq
 				if (!info.Loaded)
 					continue;
 
+                //SQLiteDataProvider dataProvider = new SQLiteDataProvider();
+                //yield return new TestDbManager(dataProvider, DbManager.GetConnectionString(info.Name));
 				yield return new TestDbManager(info.Name);
 
 				var ip = GetIP(info.Name);
@@ -385,7 +394,7 @@ namespace Data.Linq
 			get
 			{
 				if (_types == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 						_types = db.Types.ToList();
 
 				foreach (var type in _types)
@@ -399,7 +408,7 @@ namespace Data.Linq
 			get
 			{
 				if (_types2 == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 						_types2 = db.Types2.ToList();
 				return _types2;
 			}
@@ -412,7 +421,7 @@ namespace Data.Linq
 			{
 				if (_person == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 						_person = db.Person.ToList();
 
 					foreach (var p in _person)
@@ -431,7 +440,7 @@ namespace Data.Linq
 			{
 				if (_patient == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 						_patient = db.Patient.ToList();
 
 					foreach (var p in _patient)
@@ -449,7 +458,7 @@ namespace Data.Linq
 			{
 				if (_doctor == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 						_doctor = db.Doctor.ToList();
 				}
 
@@ -465,7 +474,7 @@ namespace Data.Linq
 			get
 			{
 				if (_parent == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 					{
 						db.Parent.Delete(c => c.ParentID >= 1000);
 						_parent = db.Parent.ToList();
@@ -580,7 +589,7 @@ namespace Data.Linq
 			get
 			{
 				if (_child == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 					{
 						db.Child.Delete(c => c.ParentID >= 1000);
 						_child = db.Child.ToList();
@@ -606,7 +615,7 @@ namespace Data.Linq
 			get
 			{
 				if (_grandChild == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 					{
 						_grandChild = db.GrandChild.ToList();
 						db.Close();
@@ -626,7 +635,7 @@ namespace Data.Linq
 			get
 			{
 				if (_grandChild1 == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = GetDbManager())
 					{
 						_grandChild1 = db.GrandChild1.ToList();
 
