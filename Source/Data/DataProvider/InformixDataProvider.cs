@@ -78,6 +78,7 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
+		/*
 		public override int ExecuteArray(IDbCommand command, int iterations)
 		{
 			var cmd = (IfxCommand)command;
@@ -91,6 +92,7 @@ namespace BLToolkit.Data.DataProvider
 				cmd.ArrayBindCount = 0;
 			}
 		}
+		*/
 
 		#region GetDataReader
 

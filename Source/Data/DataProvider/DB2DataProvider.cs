@@ -68,6 +68,7 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
+		/*
 		public override int ExecuteArray(IDbCommand command, int iterations)
 		{
 			var cmd = (DB2Command)command;
@@ -81,5 +82,6 @@ namespace BLToolkit.Data.DataProvider
 				cmd.ArrayBindCount = 0;
 			}
 		}
+		*/
 	}
 }
