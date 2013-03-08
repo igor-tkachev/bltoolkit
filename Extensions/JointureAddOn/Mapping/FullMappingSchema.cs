@@ -20,17 +20,6 @@ namespace BLToolkit.Mapping
     {
         #region Fields
 
-        private static readonly object SetterHandlersLock = new object();
-
-        private static readonly Dictionary<Type, Dictionary<string, SetHandler>> SettersHandlers =
-            new Dictionary<Type, Dictionary<string, SetHandler>>();
-
-        private static readonly Dictionary<Type, Dictionary<string, GetHandler>> GettersHandlers =
-            new Dictionary<Type, Dictionary<string, GetHandler>>();
-
-        private readonly Dictionary<string, int> _columnOccurences = new Dictionary<string, int>();
-        private readonly Dictionary<string, List<string>> _columnVariations = new Dictionary<string, List<string>>();
-
         private readonly DbManager _db;
         private readonly bool _ignoreLazyLoad;
         private readonly MappingOrder _mappingOrder;
@@ -40,26 +29,18 @@ namespace BLToolkit.Mapping
         #endregion
 
         public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false,
-            MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
+            MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
         {
             _db = db;
             _ignoreLazyLoad = ignoreLazyLoad;
             _mappingOrder = mappingOrder;
-
-            // TODO Remove this option
-            _ignoreMissingColumns = ignoreMissingColumns;
         }
 
         #region Overrides
 
         protected override ObjectMapper CreateObjectMapperInstance(Type type)
         {
-            int startIndex = 0;
-
-            var mapper = new FullObjectMapper(_db) { PropertyType = type };
-            var res = (ObjectMapper)GetObjectMapper(mapper, ref startIndex);
-
-            return res;
+            return new FullObjectMapper(_db, _ignoreLazyLoad);
         }
 
         protected override void MapInternal(Reflection.InitContext initContext, IMapDataSource source, object sourceObject, IMapDataDestination dest, object destObject, params object[] parameters)
@@ -133,8 +114,6 @@ namespace BLToolkit.Mapping
 
         #endregion
 
-        private readonly bool _ignoreMissingColumns;
-
         private object FillObject(object result, IObjectMapper mapper, IDataReader datareader)
         {
             foreach (IMapper map in mapper.PropertiesMapping)
@@ -192,7 +171,8 @@ namespace BLToolkit.Mapping
 
                 if (_mappingOrder == MappingOrder.ByColumnName && map is ValueMapper)
                 {
-                    if (SetDataReaderIndex(map)) continue;
+                    if (((ValueMapper)map).SetDataReaderIndex(_schemaColumns))
+                        continue;
                 }
 
                 if (datareader.IsDBNull(map.DataReaderIndex))
@@ -241,200 +221,6 @@ namespace BLToolkit.Mapping
             }
         }
 
-        private IMapper GetObjectMapper(IObjectMapper mapper, ref int startIndex)
-        {
-            Type mapperType = mapper.PropertyType;
-            var objectMappers = new List<IObjectMapper>();
-
-            TableDescription tableDescription = GetTableDescription(mapperType);
-
-            lock (SetterHandlersLock)
-            {
-                if (!SettersHandlers.ContainsKey(mapperType))
-                    SettersHandlers.Add(mapperType, new Dictionary<string, SetHandler>());
-
-                if (!GettersHandlers.ContainsKey(mapperType))
-                    GettersHandlers.Add(mapperType, new Dictionary<string, GetHandler>());
-            }
-
-            PropertyInfo[] properties = mapperType.GetProperties();
-
-            PropertyInfo primaryKeyPropInfo = null;
-            foreach (PropertyInfo prop in properties)
-            {
-                //  Setters
-                lock (SetterHandlersLock)
-                {
-                    if (!SettersHandlers[mapper.PropertyType].ContainsKey(prop.Name))
-                    {
-                        SetHandler setHandler = FunctionFactory.Il.CreateSetHandler(mapper.PropertyType, prop);
-                        SettersHandlers[mapper.PropertyType].Add(prop.Name, setHandler /* IL.Setter*/);
-                    }
-                }
-
-                object[] pkFields = prop.GetCustomAttributes(typeof (PrimaryKeyAttribute), true);
-                if (pkFields.Length > 0)
-                {
-                    primaryKeyPropInfo = prop;
-
-                    lock (SetterHandlersLock)
-                    {
-                        if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
-                        {
-                            GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, prop);
-                            GettersHandlers[mapperType].Add(prop.Name, getHandler);
-                        }
-                    }
-                    mapper.PrimaryKeyValueGetter = GettersHandlers[mapperType][prop.Name];
-
-                    if (mapper.Association != null && string.IsNullOrWhiteSpace(mapper.Association.OtherKey))
-                    {
-                        mapper.Association.OtherKey = prop.Name;
-                    }
-                }
-            }
-            if (primaryKeyPropInfo == null)
-                throw new Exception("PrimaryKey attribute not found on type: " + mapperType);
-
-            foreach (PropertyInfo prop in properties)
-            {
-                // Check if the accessor is an association
-                object[] associationAttr = prop.GetCustomAttributes(typeof (AssociationAttribute), true);
-                if (associationAttr.Length > 0)
-                {
-                    var ass = (AssociationAttribute) associationAttr[0];
-
-                    //  Getters for IObjectMapper
-                    lock (SetterHandlersLock)
-                        if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
-                        {
-                            GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, prop);
-                            GettersHandlers[mapperType].Add(prop.Name, getHandler);
-                        }
-
-                    bool isCollection = prop.PropertyType.GetInterfaces().ToList().Contains(typeof (IList));
-                    IObjectMapper propertiesMapping;
-                    if (!isCollection)
-                    {
-                        propertiesMapping = new FullObjectMapper(_db)
-                            {
-                                PropertyType = prop.PropertyType,
-                                IsNullable = ass.CanBeNull,
-                                Getter = GettersHandlers[mapperType][prop.Name],
-                            };
-                    }
-                    else
-                    {
-                        Type listElementType = GetGenericType(prop.PropertyType);
-                        TableDescription colElementTableDescription = GetTableDescription(listElementType);
-
-                        propertiesMapping = new CollectionFullObjectMapper(_db)
-                            {
-                                PropertyType = listElementType,
-                                Getter = GettersHandlers[mapperType][prop.Name],
-                                TableName = colElementTableDescription.TableName,
-                                PropertyCollectionType = prop.PropertyType,
-                            };
-
-                        ((FullObjectMapper) mapper).ColParent = true;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(ass.ThisKey))
-                        ass.ThisKey = primaryKeyPropInfo.Name;
-
-                    bool isLazy = false;
-                    if (!_ignoreLazyLoad)
-                    {
-                        object[] lazy = prop.GetCustomAttributes(typeof (LazyInstanceAttribute), true);
-                        if (lazy.Length > 0)
-                        {
-                            if (((LazyInstanceAttribute) lazy[0]).IsLazy)
-                            {
-                                isLazy = true;
-                                mapper.ContainsLazyChild = true;
-
-                                //  Getters
-                                lock (SetterHandlersLock)
-                                    if (!GettersHandlers[mapperType].ContainsKey(primaryKeyPropInfo.Name))
-                                    {
-                                        GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, primaryKeyPropInfo);
-                                        GettersHandlers[mapperType].Add(primaryKeyPropInfo.Name, getHandler);
-                                    }
-                            }
-                        }
-                    }
-
-                    propertiesMapping.Association = ass;
-                    propertiesMapping.PropertyName = prop.Name;
-                    propertiesMapping.IsLazy = isLazy;
-                    propertiesMapping.Setter = SettersHandlers[mapperType][prop.Name];
-
-                    if (propertiesMapping.IsLazy)
-                    {
-                        propertiesMapping.ParentKeyGetter = GettersHandlers[mapperType][primaryKeyPropInfo.Name];
-                    }
-                    objectMappers.Add(propertiesMapping);
-                }
-                else
-                {
-                    object[] nomapAttr = prop.GetCustomAttributes(typeof (MapIgnoreAttribute), true);
-                    if (nomapAttr.Length > 0)
-                        continue;
-
-                    object[] mapFields = prop.GetCustomAttributes(typeof (MapFieldAttribute), true);
-                    if (mapFields.Length > 1)
-                        throw new Exception("AssociationAttribute is used several times on the property " + prop.Name);
-
-                    string columnName = mapFields.Length > 0 ? ((MapFieldAttribute) mapFields[0]).MapName : prop.Name;
-
-                    var mapColumnName = GetColumnName(columnName);
-
-                    var map = new ValueMapper
-                        {
-                            PropertyName = prop.Name,
-                            PropertyType = prop.PropertyType,
-                            DataReaderIndex = startIndex,
-                            Setter = SettersHandlers[mapperType][prop.Name],
-                            TableName = tableDescription.TableName,
-                            ColumnName = columnName,
-                            ColumnAlias = columnName == mapColumnName ? null : mapColumnName,
-                        };
-
-                    mapper.PropertiesMapping.Add(map);
-
-                    object[] pkFields = prop.GetCustomAttributes(typeof (PrimaryKeyAttribute), true);
-                    if (pkFields.Length > 1)
-                        throw new Exception("PrimaryKeyAttribute is used several times on the property " + prop.Name);
-
-                    if (pkFields.Length == 1)
-                        mapper.DataReaderIndex = startIndex;
-
-                    startIndex++;
-                }
-            }
-
-            foreach (IObjectMapper objMap in objectMappers)
-            {
-                #region Check mapping recursion
-
-                IObjectMapper cel = mapper;
-                while (cel != null)
-                {
-                    if (mapper.PropertyType == objMap.PropertyType)
-                        continue;
-
-                    cel = (IObjectMapper) cel.ParentMapping;
-                }
-
-                #endregion
-
-                objMap.ParentMapping = mapper;
-                mapper.PropertiesMapping.Add(GetObjectMapper(objMap, ref startIndex));
-            }
-
-            return mapper;
-        }
-
         #region Private methods
 
         private void InitSchema(IDataReader reader)
@@ -445,89 +231,8 @@ namespace BLToolkit.Mapping
                 _schema.Rows.Cast<DataRow>().ToList().ForEach(dr => _schemaColumns.Add((string)dr["ColumnName"]));
         }
 
-        private bool SetDataReaderIndex(IMapper map)
-        {
-            string colName = ((ValueMapper)map).ColumnName;
-            int index = -1;
-            if (!_schemaColumns.Contains(colName))
-            {
-                bool found = false;
-                int order = 1;
-                foreach (string key in _columnVariations.Keys)
-                {
-                    List<string> variations = _columnVariations[key];
-                    if (variations.Contains(colName))
-                    {
-                        if (colName.Contains(key + "_"))
-                        {
-                            string orderString = colName.Replace(key + "_", "");
-                            order = int.Parse(orderString) + 1;
-                            colName = key;
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if (found)
-                {
-                    int i = 0, occurenceCnt = 0;
-                    foreach (string column in _schemaColumns)
-                    {
-                        if (column == colName)
-                        {
-                            occurenceCnt++;
-                            if (occurenceCnt == order)
-                            {
-                                index = i;
-                                break;
-                            }
-                        }
-                        i++;
-                    }
-                }
-                else
-                {
-                    if (!_ignoreMissingColumns)
-                    {
-                        throw new Exception(string.Format("Couldnt find db column {0} in the query result", colName));
-                    }
-                    return true;
-                }
-            }
-            else
-                index = _schemaColumns.IndexOf(colName);
+    
 
-            map.DataReaderIndex = index;
-            return false;
-        }
-
-        private string GetColumnName(string columnName)
-        {
-            int occurenceCount;
-            if (_columnOccurences.ContainsKey(columnName))
-            {
-                occurenceCount = _columnOccurences[columnName] + 1;
-                _columnOccurences[columnName] = occurenceCount;
-            }
-            else
-            {
-                _columnOccurences[columnName] = 1;
-                occurenceCount = 1;
-            }
-
-            string res = columnName + (occurenceCount > 1 ? string.Format("_{0}", occurenceCount - 1) : "");
-
-            var variations = new List<string>();
-            if (_columnVariations.ContainsKey(columnName))
-            {
-                variations = _columnVariations[columnName];
-            }
-
-            variations.Add(res);
-            _columnVariations[columnName] = variations;
-
-            return res;
-        }
 
         public static Type GetGenericType(Type t)
         {
@@ -539,22 +244,6 @@ namespace BLToolkit.Mapping
             return null;
         }
 
-        private TableDescription GetTableDescription(Type type)
-        {
-            var tableDescription = new TableDescription();
-            object[] tableAtt = type.GetCustomAttributes(typeof (TableNameAttribute), true);
-
-            if (tableAtt.Length > 0)
-            {
-                var tna = (TableNameAttribute) tableAtt[0];
-
-                tableDescription.Database = tna.Database;
-                tableDescription.Owner = tna.Owner;
-                tableDescription.TableName = tna.Name;
-            }
-
-            return tableDescription;
-        }
 
         #endregion
     }

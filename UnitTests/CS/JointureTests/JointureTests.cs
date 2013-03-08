@@ -190,7 +190,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: false);
+                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
 
                 var query = from m in db.GetTable<Artist2>()
                             where m.Name.StartsWith("Metall")
@@ -207,7 +207,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: false);
+                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
 
                 var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
                             where m.DataVersion.DataRadio != null
@@ -231,12 +231,13 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName, ignoreMissingColumns: true);
+                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
 
                 string requete = File.ReadAllText(@"c:\requete3.txt");
                 db.SetCommand(requete);
                 var res = db.ExecuteList<MULTIMEDIA_DATA_VERSION>();
-                Console.WriteLine(res.Count);
+                var dataVersion = res.First().DataVersion;
+                Console.WriteLine(dataVersion);
             }
         }
     }

@@ -12,7 +12,7 @@ namespace BLToolkit.DataAccess
         #region Constructors
 
         public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
-            : base(dbManager, ignoreLazyLoad, mappingOrder, ignoreMissingColumns)
+            : base(dbManager, ignoreLazyLoad, mappingOrder)
         {
         }
 

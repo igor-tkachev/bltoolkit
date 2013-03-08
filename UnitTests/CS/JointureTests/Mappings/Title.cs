@@ -16,7 +16,7 @@ namespace UnitTests.CS.JointureTests.Mappings
         [MapField("ID_ARTIST")]
         public long? ArtistID { get; set; }
 
-        [LazyInstance(false)]
+        [LazyInstance(true)]
         [Association(CanBeNull = false, ThisKey = "ArtistID", OtherKey = "Id")]
         public virtual Artist Artist { get; set; }
     }
