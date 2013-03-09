@@ -1430,7 +1430,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (!TypeHelper.IsEnumOrNullableEnum(type))
 				return null;
 
-			var dic = new Dictionary<object, object>();
+			var dic = new Dictionary<object,object>();
 
 			var nullValue = MappingSchema.GetNullValue(type);
 

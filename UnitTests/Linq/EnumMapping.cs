@@ -682,9 +682,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void EnumMapContains1()
+		public void EnumMapContains1([DataContexts] string context)
 		{
-			ForEachProvider(db =>
+			using (var db = GetDataContext(context))
 			{
 				using (new Cleaner(db))
 				{
@@ -697,7 +697,7 @@ namespace Data.Linq
 					Assert.True(1 == db.GetTable<TestTable1>()
 						.Where(r => r.Id == RID && new[] { TestEnum1.Value2 }.Contains(r.TestField)).Count());
 				}
-			});
+			}
 		}
 
 		[Test]

@@ -63,6 +63,7 @@ namespace BLToolkit.Reflection
 			// Add implicit iterface implementation properties support
 			// Or maybe we should support all private fields/properties?
 			var interfaceMethods = originalType.GetInterfaces().SelectMany(ti => originalType.GetInterfaceMap(ti).TargetMethods).ToList();
+
 			if (interfaceMethods.Count > 0)
 			{
 				foreach (var pi in originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
@@ -71,9 +72,9 @@ namespace BLToolkit.Reflection
 					{
 						var getMethod = pi.GetGetMethod(true);
 						var setMethod = pi.GetSetMethod(true);
-						if ((getMethod == null || interfaceMethods.Contains(getMethod))
-							&& (setMethod == null || interfaceMethods.Contains(setMethod))
-							)
+
+						if ((getMethod == null || interfaceMethods.Contains(getMethod)) &&
+							(setMethod == null || interfaceMethods.Contains(setMethod)))
 						{
 							_members.Add(pi);
 						}
