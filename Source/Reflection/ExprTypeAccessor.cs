@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -50,14 +51,37 @@ namespace BLToolkit.Reflection
 				}
 			}
 
+			var originalType = typeof(TOriginal);
+
 			// Add fields.
 			//
-			foreach (var fi in typeof(TOriginal).GetFields(BindingFlags.Instance | BindingFlags.Public))
+			foreach (var fi in originalType.GetFields(BindingFlags.Instance | BindingFlags.Public))
 				_members.Add(fi);
 
-			foreach (var pi in typeof(TOriginal).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+			foreach (var pi in originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				if (pi.GetIndexParameters().Length == 0)
 					_members.Add(pi);
+
+			// Add implicit iterface implementation properties support
+			// Or maybe we should support all private fields/properties?
+			var interfaceMethods = originalType.GetInterfaces().SelectMany(ti => originalType.GetInterfaceMap(ti).TargetMethods).ToList();
+			if (interfaceMethods.Count > 0)
+			{
+				foreach (var pi in originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
+				{
+					if (pi.GetIndexParameters().Length == 0)
+					{
+						var getMethod = pi.GetGetMethod(true);
+						var setMethod = pi.GetSetMethod(true);
+						if ((getMethod == null || interfaceMethods.Contains(getMethod))
+							&& (setMethod == null || interfaceMethods.Contains(setMethod))
+							)
+						{
+							_members.Add(pi);
+						}
+					}
+				}
+			}
 
 			// ObjectFactory
 			//
