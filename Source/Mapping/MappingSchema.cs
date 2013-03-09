@@ -1699,15 +1699,16 @@ namespace BLToolkit.Mapping
 
 			InvalidCastException exInvalidCast = null;
 
+			var enumType = TypeHelper.UnwrapNullableType(type);
 			try
 			{
-				value = ConvertChangeType(value, Enum.GetUnderlyingType(type));
+				value = ConvertChangeType(value, Enum.GetUnderlyingType(enumType));
 
-				if (Enum.IsDefined(type, value))
+				if (Enum.IsDefined(enumType, value))
 				{
 					// Regular (known) enum field w/o explicit mapping defined.
 					//
-					return Enum.ToObject(type, value);
+					return Enum.ToObject(enumType, value);
 				}
 			}
 			catch (InvalidCastException ex)
@@ -1731,7 +1732,7 @@ namespace BLToolkit.Mapping
 
 			// At this point we have an undefined enum value.
 			//
-			return Enum.ToObject(type, value);
+			return Enum.ToObject(enumType, value);
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -1769,15 +1770,16 @@ namespace BLToolkit.Mapping
 
 			InvalidCastException exInvalidCast = null;
 
+			var enumType = TypeHelper.UnwrapNullableType(ma.Type);
 			try
 			{
-				value = ConvertChangeType(value, Enum.GetUnderlyingType(ma.Type));
+				value = ConvertChangeType(value, Enum.GetUnderlyingType(enumType));
 
-				if (Enum.IsDefined(ma.Type, value))
+				if (Enum.IsDefined(enumType, value))
 				{
 					// Regular (known) enum field w/o explicit mapping defined.
 					//
-					return Enum.ToObject(ma.Type, value);
+					return Enum.ToObject(enumType, value);
 				}
 			}
 			catch (InvalidCastException ex)
@@ -1801,7 +1803,7 @@ namespace BLToolkit.Mapping
 
 			// At this point we have an undefined enum value.
 			//
-			return Enum.ToObject(ma.Type, value);
+			return Enum.ToObject(enumType, value);
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
