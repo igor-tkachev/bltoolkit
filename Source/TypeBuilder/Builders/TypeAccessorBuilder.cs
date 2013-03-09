@@ -76,7 +76,7 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (!_originalType.Type.IsVisible && !_friendlyAssembly || 
 				(
-					from p in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+					from p in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
 					from a in p.GetCustomAttributes(typeof(MapFieldAttribute), true).Cast<MapFieldAttribute>()
 					where a.Storage != null
 					select a
@@ -224,6 +224,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (pi.GetIndexParameters().Length == 0)
 					AddMemberToDictionary(members, pi);
 
+			var interfaceMethods = _originalType.Type.IsClass && !_originalType.Type.IsArray ? _originalType.Type.GetInterfaces().SelectMany(ti => _originalType.GetInterfaceMap(ti).TargetMethods).ToList() : new List<MethodInfo>();
 			foreach (var pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
 			{
 				if (pi.GetIndexParameters().Length == 0)
@@ -231,7 +232,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					var getter = pi.GetGetMethod(true);
 					var setter = pi.GetSetMethod(true);
 
-					if (getter != null && getter.IsAbstract || setter != null && setter.IsAbstract)
+					if (getter != null && (getter.IsAbstract || interfaceMethods.Contains(getter))
+						|| setter != null && (setter.IsAbstract || interfaceMethods.Contains(setter)))
 						AddMemberToDictionary(members, pi);
 				}
 			}
