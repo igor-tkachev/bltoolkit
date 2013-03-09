@@ -1,10 +1,10 @@
-﻿using BLToolkit.DataAccess;
-using BLToolkit.Mapping;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
+
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
