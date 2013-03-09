@@ -1611,6 +1611,31 @@ namespace BLToolkit.Reflection
 				}
 			}
 
+			if (member2.DeclaringType.IsInterface && member1.Name.EndsWith(member2.Name))
+			{
+				if (member1 is PropertyInfo)
+				{
+					var isSubclass = member2.DeclaringType.IsAssignableFrom(member1.DeclaringType);
+
+					if (isSubclass)
+					{
+						var getter1 = ((PropertyInfo)member1).GetGetMethod();
+						var getter2 = ((PropertyInfo)member2).GetGetMethod();
+
+						var map = member1.DeclaringType.GetInterfaceMap(member2.DeclaringType);
+
+						for (var i = 0; i < map.InterfaceMethods.Length; i++)
+							if ((getter2 == null || (getter2.Name == map.InterfaceMethods[i].Name && getter2.DeclaringType == map.InterfaceMethods[i].DeclaringType))
+								&&
+								(getter1 == null || (getter1.Name == map.InterfaceMethods[i].Name && getter1.DeclaringType == map.InterfaceMethods[i].DeclaringType))
+								)
+							{
+								return true;
+							}
+					}
+				}
+			}
+
 			return false;
 		}
 
