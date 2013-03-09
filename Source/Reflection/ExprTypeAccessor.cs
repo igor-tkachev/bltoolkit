@@ -20,10 +20,8 @@ namespace BLToolkit.Reflection
 
 			if (type.IsValueType)
 			{
-				var body = Expression.Constant(default(T));
-
-				_createInstance = Expression.Lambda<Func<T>>(body).Compile();
-				_createInstanceInit = Expression.Lambda<Func<InitContext, T>>(body, initPar).Compile();
+				_createInstance = () => default(T);
+				_createInstanceInit = ctx => default(T);
 			}
 			else
 			{

@@ -1076,5 +1076,59 @@ namespace Data.Linq
 				}
 			});
 		}
+
+		[TableName("LinqDataTypes")]
+		class TestTable3
+		{
+			[PrimaryKey]
+			public int ID;
+			
+			[MapField("BigIntValue")]
+			public TestEnum1? TargetType;
+
+			[MapField("IntValue")]
+			public int? TargetID;
+		}
+
+		struct ObjectReference
+		{
+			public TestEnum1 TargetType;
+			public int TargetID;
+			public ObjectReference(TestEnum1 targetType, int tagetId)
+			{
+				TargetType = targetType;
+				TargetID = tagetId;
+			}
+		}
+
+		[Test]
+		public void Test_4_1_18_Regression1()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable()
+					{
+						Id = RID,
+						TestField = VAL2,
+						Int32Field = 10
+					});
+
+					var result = db.GetTable<TestTable3>().Where(r => r.ID == RID).Select(_ => new
+					{
+						Target = _.TargetType != null && _.TargetID != null
+						  ? new ObjectReference(_.TargetType.Value, _.TargetID.Value)
+						  : default(ObjectReference?)
+					})
+					.ToArray();
+
+					Assert.AreEqual(1, result.Length);
+					Assert.NotNull(result[0].Target);
+					Assert.AreEqual(10, result[0].Target.Value.TargetID);
+					Assert.AreEqual(TestEnum1.Value2, result[0].Target.Value.TargetType);
+				}
+			});
+		}
 	}
 }
