@@ -147,9 +147,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDeleteClause(StringBuilder sb)
 		{
+			var table = SqlQuery.Delete.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Delete.Table) ?? SqlQuery.Delete.Table) :
+				SqlQuery.From.Tables[0];
+
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 

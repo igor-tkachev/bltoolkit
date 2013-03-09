@@ -101,20 +101,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+
+
 		protected override void BuildDeleteClause(StringBuilder sb)
 		{
+			var table = SqlQuery.Delete.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Delete.Table) ?? SqlQuery.Delete.Table) :
+				SqlQuery.From.Tables[0];
+
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			if (SqlQuery.Update.Table != null && SqlQuery.Update.Table != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Update.Table, null);
+			var table = SqlQuery.Update.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Update.Table) ?? SqlQuery.Update.Table) :
+				SqlQuery.From.Tables[0];
+
+			if (table is SqlTable)
+				BuildPhysicalTable(sb, table, null);
 			else
-				sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
+				sb.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias));
 		}
 
 		protected override void BuildUnicodeString(StringBuilder sb, string value)

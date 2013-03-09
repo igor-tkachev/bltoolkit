@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.Linq;
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
+using System.Linq;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -226,6 +225,74 @@ namespace BLToolkit.Data.DataProvider
 		public virtual bool CanReuseCommand(IDbCommand command, CommandType newCommandType)
 		{
 			return true;
+		}
+
+		public virtual int ExecuteArray(IDbCommand command, int iterations)
+		{
+			// save parameter values
+			var parameters = command.Parameters
+				.OfType<IDbDataParameter>()
+				.Select(param => new
+				{
+					Parameter = param,
+					Value = param.Value as Array
+				})
+				.ToArray();
+
+			var outParameters = parameters
+				.Where(p =>
+					p.Parameter.Direction == ParameterDirection.InputOutput ||
+					p.Parameter.Direction == ParameterDirection.Output)
+				.ToArray();
+
+			// validate parameter values
+			foreach (var p in parameters)
+			{
+				if (p.Value == null)
+				{
+					throw new InvalidOperationException("ExecuteArray requires that all " +
+						"parameter values are arrays. Parameter name: " + p.Parameter.ParameterName);
+				}
+
+				if (p.Value.GetLength(0) != iterations)
+				{
+					throw new InvalidOperationException("ExecuteArray requires that array sizes are " +
+						"equal to the number of iterations. Parameter name: " + p.Parameter.ParameterName);
+				}
+			}
+
+			try
+			{
+				// run iterations
+				int rowsAffected = 0;
+				for (int iteration = 0; iteration < iterations; iteration++)
+				{
+					// copy input parameter values
+					foreach (var param in parameters)
+					{
+						SetParameterValue(param.Parameter, param.Value.GetValue(iteration));
+					}
+
+					rowsAffected += command.ExecuteNonQuery();
+
+					// return output parameter values
+					foreach (var param in outParameters)
+					{
+						var outputValue = param.Parameter.Value;
+						param.Value.SetValue(outputValue, iteration);
+					}
+				}
+
+				return rowsAffected;
+			}
+			finally
+			{
+				// restore parameter values
+				foreach (var param in parameters)
+				{
+					param.Parameter.Value = param.Value;
+				}
+			}
 		}
 
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)

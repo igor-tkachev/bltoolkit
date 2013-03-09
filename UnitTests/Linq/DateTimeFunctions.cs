@@ -232,11 +232,14 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TimeOfDay()
+		public void TimeOfDay([DataContexts] string context)
 		{
-			ForEachProvider(db => AreEqual(
-				from t in    Types select TruncMiliseconds(Sql.AsSql(t.DateTimeValue.TimeOfDay)),
-				from t in db.Types select TruncMiliseconds(Sql.AsSql(t.DateTimeValue.TimeOfDay))));
+			using (var db = GetDataContext(context))
+			{
+				AreEqual(
+					from t in    Types select TruncMiliseconds(Sql.AsSql(t.DateTimeValue.TimeOfDay)),
+					from t in db.Types select TruncMiliseconds(Sql.AsSql(t.DateTimeValue.TimeOfDay)));
+			}
 		}
 
 		#endregion

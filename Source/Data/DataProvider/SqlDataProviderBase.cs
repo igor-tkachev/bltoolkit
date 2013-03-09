@@ -6,8 +6,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 
-using BLToolkit.Data.Sql;
-
 using SqlException = System.Data.SqlClient.SqlException;
 using SqlParameter = System.Data.SqlClient.SqlParameter;
 
@@ -403,6 +401,11 @@ namespace BLToolkit.Data.DataProvider
 			else if (value is ulong)
 			{
 				parameter.Value = (long)(ulong)value;
+			}
+			else if (value is string)
+			{
+				parameter.Value = value;
+				if (parameter.DbType == DbType.String && ((string)value).Length == 0) parameter.Size = 1;
 			}
 			else
 			{
