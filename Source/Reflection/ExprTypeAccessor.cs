@@ -60,7 +60,7 @@ namespace BLToolkit.Reflection
 				if (pi.GetIndexParameters().Length == 0)
 					_members.Add(pi);
 
-			// Add implicit iterface implementation properties support
+			// Add explicit iterface implementation properties support
 			// Or maybe we should support all private fields/properties?
 			var interfaceMethods = originalType.GetInterfaces().SelectMany(ti => originalType.GetInterfaceMap(ti).TargetMethods).ToList();
 			if (interfaceMethods.Count > 0)
