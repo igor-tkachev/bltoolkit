@@ -4,8 +4,6 @@ using System.Data;
 using System.Data.Common;
 using System.Data.Linq;
 using System.Linq;
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -240,8 +238,11 @@ namespace BLToolkit.Data.DataProvider
 					Value = param.Value as Array
 				})
 				.ToArray();
+
 			var outParameters = parameters
-				.Where(p => (p.Parameter.Direction & ParameterDirection.Output) != 0)
+				.Where(p =>
+					p.Parameter.Direction == ParameterDirection.InputOutput ||
+					p.Parameter.Direction == ParameterDirection.Output)
 				.ToArray();
 
 			// validate parameter values

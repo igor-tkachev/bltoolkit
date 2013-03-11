@@ -22,7 +22,7 @@ using UnitTests.CS.JointureTests.Tools;
 
 namespace UnitTests.CS.JointureTests
 {
-    //[TestFixture]
+    [TestFixture(Ignore = true)]
     public abstract class JointureTests : TestsBaseClass
     {
         public class Category

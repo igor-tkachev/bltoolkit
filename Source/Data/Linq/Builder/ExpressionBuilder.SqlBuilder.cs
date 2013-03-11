@@ -2488,5 +2488,5 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		#endregion
-	}
+    }
 }

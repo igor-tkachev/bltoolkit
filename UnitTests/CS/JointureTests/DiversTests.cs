@@ -19,7 +19,7 @@ using UnitTests.CS.JointureTests.Tools;
 
 namespace UnitTests.CS.JointureTests
 {
-    //[TestFixture]
+   [TestFixture(Ignore = true)]
     public abstract class DiversTests : TestsBaseClass
     {
         private void GetMediaSetting(DbManager db)

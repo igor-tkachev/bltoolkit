@@ -682,9 +682,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void EnumMapContains1()
+		public void EnumMapContains1([DataContexts] string context)
 		{
-			ForEachProvider(db =>
+			using (var db = GetDataContext(context))
 			{
 				using (new Cleaner(db))
 				{
@@ -697,7 +697,7 @@ namespace Data.Linq
 					Assert.True(1 == db.GetTable<TestTable1>()
 						.Where(r => r.Id == RID && new[] { TestEnum1.Value2 }.Contains(r.TestField)).Count());
 				}
-			});
+			}
 		}
 
 		[Test]
@@ -1107,6 +1107,114 @@ namespace Data.Linq
 
 					Assert.True(1 == db.GetTable<NullableTestTable2>()
 						.Delete(r => r.Id == RID && r.TestField.Equals(TestEnum2.Value2)));
+				}
+			});
+		}
+
+		[TableName("LinqDataTypes")]
+		class TestTable3
+		{
+			[PrimaryKey]
+			public int ID;
+			
+			[MapField("BigIntValue")]
+			public TestEnum1? TargetType;
+
+			[MapField("IntValue")]
+			public int? TargetID;
+		}
+
+		struct ObjectReference
+		{
+			public TestEnum1 TargetType;
+			public int TargetID;
+			public ObjectReference(TestEnum1 targetType, int tagetId)
+			{
+				TargetType = targetType;
+				TargetID = tagetId;
+			}
+		}
+
+		[Test]
+		public void Test_4_1_18_Regression1()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable()
+					{
+						Id = RID,
+						TestField = VAL2,
+						Int32Field = 10
+					});
+
+					var result = db.GetTable<TestTable3>().Where(r => r.ID == RID).Select(_ => new
+					{
+						Target = _.TargetType != null && _.TargetID != null
+						  ? new ObjectReference(_.TargetType.Value, _.TargetID.Value)
+						  : default(ObjectReference?)
+					})
+					.ToArray();
+
+					Assert.AreEqual(1, result.Length);
+					Assert.NotNull(result[0].Target);
+					Assert.AreEqual(10, result[0].Target.Value.TargetID);
+					Assert.AreEqual(TestEnum1.Value2, result[0].Target.Value.TargetType);
+				}
+			});
+		}
+
+		[TableName("LinqDataTypes")]
+		class TestTable4
+		{
+			[PrimaryKey]
+			public int ID;
+
+			[MapField("BigIntValue")]
+			public TestEnum2? TargetType;
+
+			[MapField("IntValue")]
+			public int? TargetID;
+		}
+
+		struct ObjectReference2
+		{
+			public TestEnum2 TargetType;
+			public int TargetID;
+			public ObjectReference2(TestEnum2 targetType, int tagetId)
+			{
+				TargetType = targetType;
+				TargetID = tagetId;
+			}
+		}
+
+		[Test]
+		public void Test_4_1_18_Regression2()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable()
+					{
+						Id = RID,
+						TestField = (long)TestEnum2.Value2,
+						Int32Field = 10
+					});
+
+					var result = db.GetTable<TestTable4>().Where(r => r.ID == RID).Select(_ => new
+					{
+						Target = _.TargetType != null && _.TargetID != null
+						  ? new ObjectReference2(_.TargetType.Value, _.TargetID.Value)
+						  : default(ObjectReference2?)
+					})
+					.ToArray();
+
+					Assert.AreEqual(1, result.Length);
+					Assert.NotNull(result[0].Target);
+					Assert.AreEqual(10, result[0].Target.Value.TargetID);
+					Assert.AreEqual(TestEnum2.Value2, result[0].Target.Value.TargetType);
 				}
 			});
 		}
