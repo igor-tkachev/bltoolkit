@@ -13,6 +13,11 @@ namespace BLToolkit.Data.DataProvider
 {
 	public class DevartOracleDataProvider : DataProviderBase
 	{
+		/// <summary>
+		/// Data provider name string.
+		/// </summary>
+		public const string NameString = "DevartOracle";
+
 		public override Type ConnectionType
 		{
 			get { return typeof(OracleConnection); }
@@ -20,7 +25,34 @@ namespace BLToolkit.Data.DataProvider
 
 		public override string Name
 		{
-			get { return "DevartOracle"; }
+			get { return NameString; }
+		}
+
+		/// <summary>
+		/// Gets or sets the database activity monitor.
+		/// </summary>
+		private static Devart.Common.DbMonitor DbMonitor { get; set; }
+
+		/// <summary>
+		/// Gets or sets value indicating whether the database activity monitor is enabled.
+		/// </summary>
+		/// <remarks>
+		/// This feature requires Standard or Pro edition of Devart dotConnect for Oracle provider.
+		/// </remarks>
+		public static bool DbMonitorActive
+		{
+			get { return DbMonitor == null ? false : DbMonitor.IsActive; }
+			set
+			{
+				// setting this property has no effect in Express edition
+#if DEVART_PRO
+				if (DbMonitorActive != value)
+				{
+					DbMonitor = DbMonitor ?? new OracleMonitor();
+					DbMonitor.IsActive = value;
+				}
+#endif
+			}
 		}
 
 		public override IDbConnection CreateConnectionObject()
