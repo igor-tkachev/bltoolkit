@@ -263,7 +263,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void BuildMember(MemberInfo mi)
 		{
 			var isValueType = _originalType.IsValueType;
-			var nestedType  = _typeBuilder.DefineNestedType("Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
+			var name        = "Accessor$" + mi.Name.Replace('.', '_').Replace('<', '_').Replace('>', '_');
+			var nestedType  = _typeBuilder.DefineNestedType(name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
 			var ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
 			BuildGetter    (mi, nestedType);
