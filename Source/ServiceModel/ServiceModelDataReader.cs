@@ -198,7 +198,27 @@ namespace BLToolkit.ServiceModel
 			if (type.IsArray && type == typeof(byte[]))
 				return value == null ? null : System.Convert.FromBase64String(value);
 
-			return Convert.ChangeTypeFromString(value, type);
+            if (type == typeof(double) || type == typeof(double?))
+            {
+                return value == null ? null : (object)double.Parse(value, CultureInfo.InvariantCulture);
+            }
+            else if (type == typeof(decimal) || type == typeof(decimal?))
+            {
+                return value == null ? null : (object)decimal.Parse(value, CultureInfo.InvariantCulture);
+            }
+            else if (type == typeof(float) || type == typeof(float?))
+            {
+                return value == null ? null : (object)float.Parse(value, CultureInfo.InvariantCulture);
+            }
+            else if (type == typeof(DateTime) || type == typeof(DateTime?))
+            {
+                return value == null ? null : (object)DateTime.Parse(value, CultureInfo.InvariantCulture);
+            }
+            else if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
+            {
+                return value == null ? null : (object)DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
+            }
+            return Convert.ChangeTypeFromString(value, type);
 		}
 
 		public int GetValues(object[] values)
