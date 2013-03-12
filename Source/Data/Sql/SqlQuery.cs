@@ -4188,7 +4188,7 @@ namespace BLToolkit.Data.Sql
 
 			var alias = desiredAlias;
 
-			if (string.IsNullOrEmpty(desiredAlias))
+			if (string.IsNullOrEmpty(desiredAlias) || desiredAlias.Length > 30)
 			{
 				desiredAlias = defaultAlias;
 				alias        = defaultAlias + "1";
