@@ -195,30 +195,31 @@ namespace BLToolkit.ServiceModel
 				value = value.Substring(2);
 			}
 
-			if (type.IsArray && type == typeof(byte[]))
-				return value == null ? null : System.Convert.FromBase64String(value);
+			if (value == null)
+				return null;
 
-            if (type == typeof(double) || type == typeof(double?))
-            {
-                return value == null ? null : (object)double.Parse(value, CultureInfo.InvariantCulture);
-            }
-            else if (type == typeof(decimal) || type == typeof(decimal?))
-            {
-                return value == null ? null : (object)decimal.Parse(value, CultureInfo.InvariantCulture);
-            }
-            else if (type == typeof(float) || type == typeof(float?))
-            {
-                return value == null ? null : (object)float.Parse(value, CultureInfo.InvariantCulture);
-            }
-            else if (type == typeof(DateTime) || type == typeof(DateTime?))
-            {
-                return value == null ? null : (object)DateTime.Parse(value, CultureInfo.InvariantCulture);
-            }
-            else if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
-            {
-                return value == null ? null : (object)DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
-            }
-            return Convert.ChangeTypeFromString(value, type);
+			if (type.IsArray && type == typeof(byte[]))
+				return System.Convert.FromBase64String(value);
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.String   : return value;
+				case TypeCode.Double   : return double.  Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.Decimal  : return decimal. Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.Single   : return float.   Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.DateTime : return DateTime.Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.Object   :
+					if (type == typeof(double?))   return double.        Parse(value, CultureInfo.InvariantCulture);
+					if (type == typeof(decimal?))  return decimal.       Parse(value, CultureInfo.InvariantCulture);
+					if (type == typeof(float?))    return float.         Parse(value, CultureInfo.InvariantCulture);
+					if (type == typeof(DateTime?)) return DateTime.      Parse(value, CultureInfo.InvariantCulture);
+
+					if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
+						return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
+					break;
+			}
+
+			return Convert.ChangeTypeFromString(value, type);
 		}
 
 		public int GetValues(object[] values)
