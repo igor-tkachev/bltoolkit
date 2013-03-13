@@ -127,7 +127,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb);
 			sb.Append("DELETE FROM ");
-			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
+//			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
+
+			ISqlTableSource table;
+			ISqlTableSource source;
+
+			if (SqlQuery.Delete.Table != null)
+				table = source = SqlQuery.Delete.Table;
+			else
+			{
+				table  = SqlQuery.From.Tables[0];
+				source = SqlQuery.From.Tables[0].Source;
+			}
+
+			var alias = GetTableAlias(table);
+			BuildPhysicalTable(sb, source, alias);
+
 			sb.AppendLine();
 		}
 
@@ -206,6 +221,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
 			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
+		}
+
+		protected override void BuildEmptyInsert(StringBuilder sb)
+		{
+			sb.AppendLine("VALUES ()");
 		}
 	}
 }

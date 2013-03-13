@@ -6,8 +6,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 
-using BLToolkit.Data.Sql;
-
 using SqlException = System.Data.SqlClient.SqlException;
 using SqlParameter = System.Data.SqlClient.SqlParameter;
 
@@ -384,6 +382,35 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			#endregion
+		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is sbyte)
+			{
+				parameter.Value = (byte)(sbyte)value;
+			}
+			else if (value is ushort)
+			{
+				parameter.Value = (short)(ushort)value;
+			}
+			else if (value is uint)
+			{
+				parameter.Value = (int)(uint)value;
+			}
+			else if (value is ulong)
+			{
+				parameter.Value = (long)(ulong)value;
+			}
+			else if (value is string)
+			{
+				parameter.Value = value;
+				if (parameter.DbType == DbType.String && ((string)value).Length == 0) parameter.Size = 1;
+			}
+			else
+			{
+				base.SetParameterValue(parameter, value);
+			}
 		}
 	}
 }

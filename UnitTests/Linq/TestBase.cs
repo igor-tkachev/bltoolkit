@@ -22,11 +22,25 @@ using NUnit.Framework;
 namespace Data.Linq
 {
 	using Model;
+    using System.Globalization;
+    using System.Threading;
 
+    // fix for failing tests due to use of "," vs "." in numbers parsing for some cultures
+    [SetCulture("")]
 	public class TestBase
 	{
-		static TestBase()
+        static TestBase()
 		{
+			var providerListFile =
+				File.Exists(@"..\..\UserDataProviders.txt") ?
+					@"..\..\UserDataProviders.txt" :
+					@"..\..\DefaultDataProviders.txt";
+
+			UserProviders.AddRange(
+				File.ReadAllLines(providerListFile)
+					.Select(s => s.Trim())
+					.Where (s => s.Length > 0 && !s.StartsWith("--")));
+
 			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
 			{
 				string assembly;
@@ -92,8 +106,8 @@ namespace Data.Linq
 			{
 				switch (str)
 				{
-					case "Data.Linq.Model.Gender" : return typeof(Gender);
-					case "Data.Linq.Model.Person" : return typeof(Person);
+					//case "Data.Linq.Model.Gender" : return typeof(Gender);
+					case "Data.Linq.Model.Person": return typeof(Person);
 					default                       : return null;
 				}
 			};
@@ -151,31 +165,19 @@ namespace Data.Linq
 			public readonly string Type;
 			public          bool   Loaded;
 			public          int    IP;
+			public          bool   Skip;
 		}
 
-		[CLSCompliant(false)]
+		public static readonly List<string>       UserProviders = new List<string>();
 		public static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
-			new ProviderInfo("Sql2008",               null,                                     "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
-			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",      "BLToolkit.Data.DataProvider.SqlCeDataProvider"),
-			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",     "BLToolkit.Data.DataProvider.SQLiteDataProvider"),
-			new ProviderInfo(ProviderName.Access,     null,                                     "BLToolkit.Data.DataProvider.AccessDataProvider"),
-
-#if !MOBILE
-			new ProviderInfo("Sql2005",               null,                                     "BLToolkit.Data.DataProvider.SqlDataProvider"),
-			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",        "BLToolkit.Data.DataProvider.DB2DataProvider"),
-			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",   "BLToolkit.Data.DataProvider.InformixDataProvider"),
-			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",   "BLToolkit.Data.DataProvider.FdpDataProvider"),
-			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",     "BLToolkit.Data.DataProvider.OdpDataProvider"),
-			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL", "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
-			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",      "BLToolkit.Data.DataProvider.MySqlDataProvider"),
-			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",     "BLToolkit.Data.DataProvider.SybaseDataProvider"),
-#endif
-		};
+			new ProviderInfo("Sql2008",               null,                                          "BLToolkit.Data.DataProvider.Sql2008DataProvider"),			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",           "BLToolkit.Data.DataProvider.SqlCeDataProvider"),			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",          "BLToolkit.Data.DataProvider.SQLiteDataProvider"),			new ProviderInfo(ProviderName.Access,     null,                                          "BLToolkit.Data.DataProvider.AccessDataProvider"),#if !MOBILE			new ProviderInfo("Sql2005",               null,                                          "BLToolkit.Data.DataProvider.SqlDataProvider"),			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",             "BLToolkit.Data.DataProvider.DB2DataProvider"),			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",        "BLToolkit.Data.DataProvider.InformixDataProvider"),			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",        "BLToolkit.Data.DataProvider.FdpDataProvider"),			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",          "BLToolkit.Data.DataProvider.OdpDataProvider"),			new ProviderInfo("DevartOracle",          "BLToolkit.Data.DataProvider.DevartOracle",    "BLToolkit.Data.DataProvider.DevartOracleDataProvider"),			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL",      "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",           "BLToolkit.Data.DataProvider.MySqlDataProvider"),			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",          "BLToolkit.Data.DataProvider.SybaseDataProvider"),#endif		};
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			foreach (var info in Providers)
+			var list = UserProviders.Concat(UserProviders.Select(p => p + ".LinqService"));
+
+			foreach (var info in Providers.Where(p => list.Contains(p.Name)))
 			{
 				if (exceptList.Contains(info.Name))
 					continue;
@@ -193,6 +195,66 @@ namespace Data.Linq
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
 
 				yield return dx;
+			}
+		}
+
+		[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+		public class DataContextsAttribute : ValuesAttribute
+		{
+			public DataContextsAttribute(params string[] except)
+			{
+				Except = except;
+			}
+
+			const bool IncludeLinqService = true;
+
+			public string[] Except             { get; set; }
+			public string[] Include            { get; set; }
+			public bool     ExcludeLinqService { get; set; }
+
+			public override IEnumerable GetData(ParameterInfo parameter)
+			{
+				if (Include != null)
+				{
+					var list = Include.Intersect(
+						IncludeLinqService ? 
+							UserProviders.Concat(UserProviders.Select(p => p + ".LinqService")) :
+							UserProviders).
+						ToArray();
+
+					return list;
+				}
+
+				var providers = new List<string>();
+
+				foreach (var info in Providers)
+				{
+					if (info.Skip && Include == null)
+						continue;
+
+					if (Except != null && Except.Contains(info.Name))
+						continue;
+
+					if (!UserProviders.Contains(info.Name))
+						continue;
+
+					providers.Add(info.Name);
+
+					if (IncludeLinqService && !ExcludeLinqService)
+					{
+						providers.Add(info.Name + ".LinqService");
+					}
+				}
+
+				return providers.ToArray();
+			}
+		}
+
+		public class IncludeDataContextsAttribute : DataContextsAttribute
+		{
+			public IncludeDataContextsAttribute(params string[] include)
+			{
+				Include = include;
 			}
 		}
 
@@ -247,10 +309,9 @@ namespace Data.Linq
 
 			if (ex != null)
 				throw ex;
-			
-			if(!executedForAtLeastOneProvider)
-				throw new ApplicationException("Delegate function has not been executed.");
-		}
+
+//			if (!executedForAtLeastOneProvider)
+//				throw new ApplicationException("Delegate function has not been executed.");}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
 		{
@@ -381,6 +442,21 @@ namespace Data.Linq
 			}
 		}
 
+		private   List<Doctor> _doctor;
+		protected List<Doctor>  Doctor
+		{
+			get
+			{
+				if (_doctor == null)
+				{
+					using (var db = new TestDbManager("Sql2008"))
+						_doctor = db.Doctor.ToList();
+				}
+
+				return _doctor;
+			}
+		}
+
 		#region Parent/Child Model
 
 		private          List<Parent> _parent;
@@ -391,6 +467,7 @@ namespace Data.Linq
 				if (_parent == null)
 					using (var db = new TestDbManager("Sql2008"))
 					{
+						db.Parent.Delete(c => c.ParentID >= 1000);
 						_parent = db.Parent.ToList();
 						db.Close();
 
@@ -398,7 +475,7 @@ namespace Data.Linq
 						{
 							p.Children      = Child.     Where(c => c.ParentID == p.ParentID).ToList();
 							p.GrandChildren = GrandChild.Where(c => c.ParentID == p.ParentID).ToList();
-							p.Types         = Types.FirstOrDefault(t => t.ID == p.ParentID);
+							p.Types         = Types.First(t => t.ID == p.ParentID);
 						}
 					}
 
@@ -505,6 +582,7 @@ namespace Data.Linq
 				if (_child == null)
 					using (var db = new TestDbManager("Sql2008"))
 					{
+						db.Child.Delete(c => c.ParentID >= 1000);
 						_child = db.Child.ToList();
 						db.Clone();
 

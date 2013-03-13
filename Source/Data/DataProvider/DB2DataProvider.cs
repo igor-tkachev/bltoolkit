@@ -67,5 +67,21 @@ namespace BLToolkit.Data.DataProvider
 				}
 			}
 		}
+
+		/*
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (DB2Command)command;
+			try
+			{
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				cmd.ArrayBindCount = 0;
+			}
+		}
+		*/
 	}
 }

@@ -134,6 +134,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Convert.tt</DependentUpon>
     </Compile>
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\Linq\Builder\AggregationBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
@@ -198,6 +199,7 @@
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
     <Compile Include="Data\Sql\SqlTableType.cs" />
+    <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\MemberMapper.generated.cs">

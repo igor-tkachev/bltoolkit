@@ -1357,7 +1357,7 @@ namespace Data.Linq
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20))));
 		}
 
-		[Test]
+		[Test, Category("MySql")]
 		public void GroupByExtraFieldBugTest()
 		{
 			// https://github.com/igor-tkachev/bltoolkit/issues/42
@@ -1457,6 +1457,17 @@ namespace Data.Linq
 						Sum = g.Sum(t => t.Max)
 					}));
 			
+		}
+
+		[Test]
+		public void InnerQuery([DataContexts(ProviderName.SqlCe)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				AreEqual(
+					   Doctor.GroupBy(s => s.PersonID).Select(s => s.Select(d => d.Taxonomy).First()),
+					db.Doctor.GroupBy(s => s.PersonID).Select(s => s.Select(d => d.Taxonomy).First()));
+			}
 		}
 	}
 }

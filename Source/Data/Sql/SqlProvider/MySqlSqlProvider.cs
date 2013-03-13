@@ -147,9 +147,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDeleteClause(StringBuilder sb)
 		{
+			var table = SqlQuery.Delete.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Delete.Table) ?? SqlQuery.Delete.Table) :
+				SqlQuery.From.Tables[0];
+
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 
@@ -229,6 +233,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 						return str;
 					}
+				case ConvertType.NameToQueryField:
+				case ConvertType.NameToQueryFieldAlias:
+				case ConvertType.NameToQueryTableAlias:
+					{
+						var name = value.ToString();
+						if (name.Length > 0 && name[0] == '`')
+							return value;
+					}
+					return "`" + value + "`";
+				case ConvertType.NameToDatabase:
+				case ConvertType.NameToOwner:
+				case ConvertType.NameToQueryTable:
+					{
+						var name = value.ToString();
+						if (name.Length > 0 && name[0] == '`')
+						return value;
+
+						if (name.IndexOf('.') > 0)
+						value = string.Join("`.`", name.Split('.'));
+					}
+					return "`" + value + "`";
+
 			}
 
 			return value;
@@ -269,6 +295,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			Indent--;
 
 			sb.AppendLine();
+		}
+
+		protected override void BuildEmptyInsert(StringBuilder sb)
+		{
+			sb.AppendLine("() VALUES ()");
 		}
 	}
 }

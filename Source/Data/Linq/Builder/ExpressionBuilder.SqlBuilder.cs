@@ -508,19 +508,13 @@ namespace BLToolkit.Data.Linq.Builder
 						return expr.Arguments
 							.Select((arg,i) =>
 							{
-								var info = ConvertExpressions(context, arg, queryConvertFlag)[0];
-								//var sql = ConvertToSql(context, arg);
-								var mi  = expr.Members[i];
-
+								var mi = expr.Members[i];
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								//return new SqlInfo { Sql = sql, Member = mi };
-
-								info.Member = mi;
-
-								return info;
+								return ConvertExpressions(context, arg, queryConvertFlag).Select(si => si.Clone(mi));
 							})
+							.SelectMany(si => si)
 							.ToArray();
 					}
 
@@ -537,19 +531,13 @@ namespace BLToolkit.Data.Linq.Builder
 							.OrderBy(b => dic[b.Member])
 							.Select (a =>
 							{
-								var info = ConvertExpressions(context, a.Expression, queryConvertFlag)[0];
-								//var sql = ConvertToSql(context, a.Expression);
-								var mi  = a.Member;
-
+								var mi = a.Member;
 								if (mi is MethodInfo)
 									mi = TypeHelper.GetPropertyByMethod((MethodInfo)mi);
 
-								//return new SqlInfo { Sql = sql, Member = mi };
-
-								info.Member = mi;
-
-								return info;
+								return ConvertExpressions(context, a.Expression, queryConvertFlag).Select(si => si.Clone(mi));
 							})
+							.SelectMany(si => si)
 							.ToArray();
 					}
 			}
@@ -870,8 +858,18 @@ namespace BLToolkit.Data.Linq.Builder
 					return ConvertToSql(context, ((ChangeTypeExpression)expression).Expression);
 			}
 
+			if (expression.Type == typeof(bool) && _convertedPredicates.Add(expression))
+			{
+				var predicate = ConvertPredicate(context, expression);
+				_convertedPredicates.Remove(expression);
+				if (predicate != null)
+					return new SqlQuery.SearchCondition(new SqlQuery.Condition(false, predicate));
+			}
+
 			throw new LinqException("'{0}' cannot be converted to SQL.", expression);
 		}
+
+		readonly HashSet<Expression> _convertedPredicates = new HashSet<Expression>();
 
 		#endregion
 
@@ -1053,13 +1051,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object)));
 			var v      = lambda.Compile()();
-
-			if (v != null && v.GetType().IsEnum)
-			{
-				var attrs = v.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
-
-				v = Map.EnumToValue(v, attrs.Length == 0);
-			}
 
 			value = new SqlValue(v);
 
@@ -1287,6 +1278,22 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 			}
 
+			#region special case for char?
+
+			if (left.NodeType == ExpressionType.Convert && left.Type == typeof(int?) && right.NodeType == ExpressionType.Convert)
+			{
+				var convLeft  = left  as UnaryExpression;
+				var convRight = right as UnaryExpression;
+
+				if (convLeft != null && convRight != null && convLeft.Operand.Type == typeof(char?))
+				{
+					left  = convLeft.Operand;
+					right = Expression.Constant(ConvertTo<char?>.From(((ConstantExpression)convRight.Operand).Value));
+				}
+			}
+
+			#endregion
+
 			switch (nodeType)
 			{
 				case ExpressionType.Equal    :
@@ -1384,27 +1391,46 @@ namespace BLToolkit.Data.Linq.Builder
 
 		ISqlPredicate ConvertEnumConversion(IBuildContext context, Expression left, SqlQuery.Predicate.Operator op, Expression right)
 		{
-			UnaryExpression conv;
-			Expression      value;
+			Expression value;
+			Expression operand;
 
-			if (left.NodeType == ExpressionType.Convert)
+			if (left is MemberExpression)
 			{
-				conv  = (UnaryExpression)left;
-				value = right;
+				operand = left;
+				value   = right;
+			}
+			else if (left.NodeType == ExpressionType.Convert && ((UnaryExpression)left).Operand is MemberExpression)
+			{
+				operand = ((UnaryExpression)left).Operand;
+				value   = right;
+			}
+			else if (right is MemberExpression)
+			{
+				operand = right;
+				value   = left;
+			}
+			else if (right.NodeType == ExpressionType.Convert && ((UnaryExpression)right).Operand is MemberExpression)
+			{
+				operand = ((UnaryExpression)right).Operand;
+				value   = left;
+			}
+			else if (left.NodeType == ExpressionType.Convert)
+			{
+				operand = ((UnaryExpression)left).Operand;
+				value   = right;
 			}
 			else
 			{
-				conv  = (UnaryExpression)right;
+				operand = ((UnaryExpression)right).Operand;
 				value = left;
 			}
 
-			var operand = conv.Operand;
-			var type    = operand.Type;
+			var type = operand.Type;
 
-			if (!type.IsEnum)
+			if (!TypeHelper.IsEnumOrNullableEnum(type))
 				return null;
 
-			var dic = new Dictionary<object, object>();
+			var dic = new Dictionary<object,object>();
 
 			var nullValue = MappingSchema.GetNullValue(type);
 
@@ -1431,24 +1457,37 @@ namespace BLToolkit.Data.Linq.Builder
 // ReSharper restore HeuristicUnreachableCode
 // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
-						var    origValue = Enum.Parse(type, name, false);
-						object mapValue;
+						var origValue = Enum.Parse(type, name, false);
+						var mapValue  = origValue;
 
-						if (!dic.TryGetValue(origValue, out mapValue))
-							return null;
+						if (!(operand is MemberExpression))
+						{
+							if (!dic.TryGetValue(origValue, out mapValue))
+								return null;
+						}
 
 						ISqlExpression l, r;
+
+						SqlValue sqlValue;
 
 						if (left.NodeType == ExpressionType.Convert)
 						{
 							l = ConvertToSql(context, operand);
-							r = new SqlValue(mapValue);
+							r = sqlValue = new SqlValue(mapValue);
 						}
 						else
 						{
 							r = ConvertToSql(context, operand);
-							l = new SqlValue(mapValue);
+							l = sqlValue = new SqlValue(mapValue);
 						}
+
+						if (operand is MemberExpression)
+						{
+							var me = (MemberExpression)operand;
+							var memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+							sqlValue.SetEnumConverter(memberAccessor, MappingSchema);
+						}
+
 
 						return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
@@ -1460,8 +1499,41 @@ namespace BLToolkit.Data.Linq.Builder
 						var l = ConvertToSql(context, operand);
 						var r = ConvertToSql(context, value);
 
-						if (l is SqlParameter) ((SqlParameter)l).SetEnumConverter(type, MappingSchema);
-						if (r is SqlParameter) ((SqlParameter)r).SetEnumConverter(type, MappingSchema);
+						MemberAccessor memberAccessor = null;
+
+						if (operand is MemberExpression)
+						{
+							// is it even possible that operand is not MemberExpression?
+							// if no, then we can remove this two last uses of SetEnumConverter(type, map)
+							// and other depending code
+							// At least currently there is no test coverage for this method and I didn't
+							// manage to create such test
+							var me = (MemberExpression)operand;
+							memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+						}
+
+						if (l is SqlValueBase)
+						{
+							if (memberAccessor != null)
+							{
+								((SqlValueBase)l).SetEnumConverter(memberAccessor, MappingSchema);
+							}
+							else
+							{
+								((SqlValueBase)l).SetEnumConverter(type, MappingSchema);
+							}
+						}
+						if (r is SqlValueBase)
+						{
+							if (memberAccessor != null)
+							{
+								((SqlValueBase)r).SetEnumConverter(memberAccessor, MappingSchema);
+							}
+							else
+							{
+								((SqlValueBase)r).SetEnumConverter(type, MappingSchema);
+							}
+						}
 
 						return Convert(context, new SqlQuery.Predicate.ExprExpr(l, op, r));
 					}
@@ -1543,10 +1615,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
-				lcols  =
-					(from m in lmembers
-					select new { sql = ConvertToSql(leftContext, m.Value), member = m.Key } into mm
-					select new SqlInfo { Sql = mm.sql, Member = mm.member }).ToArray();
+				lcols  = lmembers.Select(m => new SqlInfo(m.Key) { Sql = ConvertToSql(leftContext, m.Value) }).ToArray();
 			}
 			else
 			{
@@ -1580,21 +1649,23 @@ namespace BLToolkit.Data.Linq.Builder
 
 			foreach (var lcol in lcols)
 			{
-				if (lcol.Member == null)
+				if (lcol.Members.Count == 0)
 					throw new InvalidOperationException();
 
 				ISqlExpression rcol = null;
 
+				var lmember = lcol.Members[lcol.Members.Count - 1];
+
 				if (sr)
 				{
-					var info = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lcol.Member), 0, ConvertFlags.Field).Single();
+					var info = rightContext.ConvertToSql(Expression.MakeMemberAccess(right, lmember), 0, ConvertFlags.Field).Single();
 					rcol = info.Sql;
 				}
 				else
 				{
 					if (rmembers.Count != 0)
 					{
-						var info = rightContext.ConvertToSql(rmembers[lcol.Member], 0, ConvertFlags.Field)[0];
+						var info = rightContext.ConvertToSql(rmembers[lmember], 0, ConvertFlags.Field)[0];
 						rcol = info.Sql;
 					}
 				}
@@ -1602,7 +1673,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var rex =
 					isNull ?
 						new SqlValue(right.Type, null) :
-						rcol ?? GetParameter(right, lcol.Member);
+						rcol ?? GetParameter(right, lmember);
 
 				var predicate = Convert(leftContext, new SqlQuery.Predicate.ExprExpr(
 					lcol.Sql,
@@ -1715,7 +1786,7 @@ namespace BLToolkit.Data.Linq.Builder
 			});
 
 			if (ret == null)
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 
 			return ret;
 		}
@@ -1746,11 +1817,11 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				var sql = ConvertExpressions(context, arg, ConvertFlags.Key);
 
-				if (sql.Length == 1 && sql[0].Member == null)
+				if (sql.Length == 1 && sql[0].Members.Count == 0)
 					expr = sql[0].Sql;
 				else
 					expr = new SqlExpression(
-						'\x1' + string.Join(",", sql.Select(s => s.Member.Name).ToArray()),
+						'\x1' + string.Join(",", sql.Select(s => s.Members[s.Members.Count - 1].Name).ToArray()),
 						sql.Select(s => s.Sql).ToArray());
 			}
 
@@ -1765,8 +1836,25 @@ namespace BLToolkit.Data.Linq.Builder
 
 						var exprs  = new ISqlExpression[newArr.Expressions.Count];
 
+						MemberAccessor memberAccessor = null;
+
+						if (arg is MemberExpression)
+						{
+							var me = (MemberExpression)arg;
+							if (TypeHelper.IsEnumOrNullableEnum(me.Type))
+							{
+								memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+							}
+						}
+
 						for (var i = 0; i < newArr.Expressions.Count; i++)
+						{
 							exprs[i] = ConvertToSql(context, newArr.Expressions[i]);
+							if (memberAccessor != null && exprs[i] is SqlValue)
+							{
+								((SqlValue)exprs[i]).SetEnumConverter(memberAccessor, MappingSchema);
+							}
+						}
 
 						return new SqlQuery.Predicate.InList(expr, false, exprs);
 					}
@@ -1831,9 +1919,9 @@ namespace BLToolkit.Data.Linq.Builder
 				Expression.Call(
 				Expression.Call(
 					e.Arguments[0],
+						mi, Expression.Constant("~"), Expression.Constant("~~")),
 						mi, Expression.Constant("%"), Expression.Constant("~%")),
-						mi, Expression.Constant("_"), Expression.Constant("~_")),
-						mi, Expression.Constant("~"), Expression.Constant("~~"));
+						mi, Expression.Constant("_"), Expression.Constant("~_"));
 
 			var expr = ConvertToSql(context, ConvertExpression(ex));
 
@@ -2145,24 +2233,15 @@ namespace BLToolkit.Data.Linq.Builder
 							var ctx = GetContext(context, pi);
 
 							if (ctx == null)
-							{
 								if (canBeCompiled)
 									return !CanBeCompiled(pi);
-							}
-							else
-							{
-								if (pi.NodeType == ExpressionType.Parameter)
-								{
-									
-								}
-							}
 
 							break;
 						}
 
 					case ExpressionType.Call         :
 						{
-							var e = pi as MethodCallExpression;
+							var e = (MethodCallExpression)pi;
 
 							if (e.Method.DeclaringType != typeof(Enumerable))
 							{
@@ -2178,6 +2257,35 @@ namespace BLToolkit.Data.Linq.Builder
 					case ExpressionType.TypeIs       : return canBeCompiled;
 					case ExpressionType.TypeAs       :
 					case ExpressionType.New          : return true;
+
+					case ExpressionType.NotEqual     :
+					case ExpressionType.Equal        :
+						{
+							var e = (BinaryExpression)pi;
+
+							Expression obj = null;
+
+							if (e.Left.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Left).Value == null)
+								obj = e.Right;
+							else if (e.Right.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Right).Value == null)
+								obj = e.Left;
+
+							if (obj != null)
+							{
+								var ctx = GetContext(context, obj);
+
+								if (ctx != null)
+								{
+									if (ctx.IsExpression(obj, 0, RequestFor.Table).      Result ||
+									    ctx.IsExpression(obj, 0, RequestFor.Association).Result)
+									{
+										ignoredMembers = obj.GetMembers();
+									}
+								}
+							}
+
+							break;
+						}
 				}
 
 				return false;

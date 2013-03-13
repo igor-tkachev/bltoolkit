@@ -78,6 +78,22 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
+		/*
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (IfxCommand)command;
+			try
+			{
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				cmd.ArrayBindCount = 0;
+			}
+		}
+		*/
+
 		#region GetDataReader
 
 		public override IDataReader GetDataReader(Mapping.MappingSchema schema, IDataReader dataReader)

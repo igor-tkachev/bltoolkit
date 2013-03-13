@@ -439,6 +439,18 @@ namespace Data.Linq
 							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0, i)).ToArray();
 
 				Assert.AreEqual("7.77.True.0", lines[0]);
+
+				q =
+					db.Child
+						.OrderByDescending(m => m.ChildID)
+						.Where(m => m.Parent != null && m.ParentID > 0);
+
+				lines =
+					q.Select(
+						(m, i) =>
+							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0, i)).ToArray();
+
+				Assert.AreEqual("7.77.True.0", lines[0]);
 			});
 		}
 
@@ -517,6 +529,28 @@ namespace Data.Linq
 
 				p.Arr.Single();
 			});
+		}
+
+		[TableName("Parent")]
+		public class TestParent
+		{
+			[MapField("ParentID")] public int  ParentID_;
+			[MapField("Value1")]   public int? Value1_;
+		}
+
+		[Test]
+		public void SelectField()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from p in db.GetTable<TestParent>()
+					select p.Value1_;
+
+				var sql = q.ToString();
+
+				Assert.That(sql.IndexOf("ParentID_"), Is.LessThan(0));
+			}
 		}
 	}
 }

@@ -5,6 +5,8 @@ using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
 
+// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+
 namespace Data.Linq
 {
 	[TestFixture]
@@ -115,6 +117,28 @@ namespace Data.Linq
 
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
 			});
+		}
+
+		[Test]
+		public void OrderBy6([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var dataContext = GetDataContext(context))
+			{
+				if (!(dataContext is TestDbManager)) return;
+				var db = (TestDbManager)dataContext;
+
+				var q =
+					from person in db.Person
+					join patient in db.Patient on person.ID equals patient.PersonID into g
+					from patient in g.DefaultIfEmpty()
+					orderby person.MiddleName // if comment this line then "Diagnosis" is not selected.
+					select new { person.ID, PatientID = patient != null ? (int?)patient.PersonID : null };
+
+				q.ToList();
+
+				Assert.IsFalse(db.LastQuery.Contains("Diagnosis"), "Why do we select Patient.Diagnosis??");
+
+			};
 		}
 
 		[Test]
@@ -303,5 +327,6 @@ namespace Data.Linq
 				Assert.AreEqual(3, q.AsEnumerable().Count());
 			});
 		}
+
 	}
 }

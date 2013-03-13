@@ -15,7 +15,7 @@ namespace TypeBuilder.Builders
 			public abstract int[]    IntArray2 { get; set; }
 			public abstract byte[][] ByteArray { get; set; }
 
-			// There is a bug in the CLR.
+			// There is a b_u_g in the CLR.
 			// In the file "Rotor2\sscli\clr\src\bcl\system\reflection\emit\signaturehelper.cs" we have:
 			//
 			// else if (clsArgument.IsArray)
@@ -42,7 +42,7 @@ namespace TypeBuilder.Builders
 			//
 			// As we can see, there is NO record for bounds. And we can do nothing with it.
 			//
-			// To bite this CLR bug we need to do the sunset by our own hands.
+			// To bite this CLR b_u_g we need to do the sunset by our own hands.
 			//
 			private int[,]          _dimArray = new int[1,1];
 			public  int[,]           DimArray

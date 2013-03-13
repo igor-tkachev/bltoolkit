@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.SQLite</id>
-		<version>4.1.10.1</version>
+		<version>4.1.19</version>
 		<title>BLToolkit SQLite Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -18,7 +18,7 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.SQLite.3.dll" target="lib\net35" />
-		<file src="..\DataProviders\bin\Release\BLToolkit.Data.DataProvider.SQLite.4.dll" target="lib\net40" />
+		<file src="..\DataProviders\SQLite\bin\Release\BLToolkit.Data.DataProvider.SQLite.3.dll" target="lib\net35" />
+		<file src="..\DataProviders\SQLite\bin\Release\BLToolkit.Data.DataProvider.SQLite.4.dll" target="lib\net40" />
 	</files>
 </package>

@@ -13,6 +13,7 @@ using System.Xml.Linq;
 #endif
 
 using LinqBinary = System.Data.Linq.Binary;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -193,7 +194,8 @@ namespace BLToolkit.Data.Linq
 
 		public class MapSchema : Expressor<Mapping.MappingSchema>
 		{
-			public static MethodInfo MapValueToEnum = MethodExpressor(m => m.MapValueToEnum   (null, null));
+			public static MethodInfo MapValueToEnum = MethodExpressor(m => m.MapValueToEnum(null, (Type)null));
+			public static MethodInfo MapValueToEnumWithMemberAccessor = MethodExpressor(m => m.MapValueToEnum(null, (MemberAccessor)null));
 			public static MethodInfo ChangeType     = MethodExpressor(m => m.ConvertChangeType(null, null));
 
 			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>

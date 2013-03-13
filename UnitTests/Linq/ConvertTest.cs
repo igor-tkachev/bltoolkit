@@ -361,11 +361,12 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ToSqlTime()
+		public void ToSqlTime([DataContexts(ProviderName.SQLite)] string context)
 		{
-			ForEachProvider(new[] { ProviderName.SQLite }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01"),
-				from t in db.Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01")));
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from t in    Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01"),
+					from t in db.Types select Sql.Convert(Sql.Time, t.DateTimeValue.Hour + ":01:01"));
 		}
 
 		DateTime ToDateTime(DateTimeOffset dto)
@@ -412,7 +413,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultChar()
 		{
-			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
@@ -428,7 +429,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultVarChar()
 		{
-			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
@@ -444,7 +445,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultNChar()
 		{
-			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}
@@ -460,7 +461,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultNVarChar()
 		{
-			ForEachProvider(new[] { "Oracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.')));
 		}

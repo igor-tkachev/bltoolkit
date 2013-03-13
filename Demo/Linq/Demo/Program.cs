@@ -688,7 +688,7 @@ namespace Linq.Demo
 		[MethodExpression("OrderCountExpression")]
 		static int OrderCount(Customer customer, string region)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		static Expression<Func<Customer,string,int>> OrderCountExpression()

@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 
 namespace BLToolkit.Mapping
 {
@@ -25,6 +27,18 @@ namespace BLToolkit.Mapping
 			MemberMapper mm = null;
 
 			var attr = mapMemberInfo.MemberAccessor.GetAttribute<MemberMapperAttribute>();
+
+			MemberExtension ext;
+
+			if (_extension != null && _extension.Members.TryGetValue(mapMemberInfo.MemberName,out ext))
+			{
+				AttributeExtensionCollection attrExt;
+
+				if (ext.Attributes.TryGetValue("MemberMapper", out attrExt))
+				{
+					attr = new MemberMapperAttribute((Type)attrExt[0].Values["MemberMapperType"]);
+				}
+			}
 
 			if (attr == null)
 			{
@@ -177,7 +191,6 @@ namespace BLToolkit.Mapping
 					}
 
 					return mm;
-					
 				}
 			}
 		}
@@ -256,6 +269,51 @@ namespace BLToolkit.Mapping
 					var mi = new MapMemberInfo();
 
 					var dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
+
+					MemberExtension ext;
+
+					if (dbTypeAttribute == null && _extension != null && _extension.Members.TryGetValue(ma.Name, out ext))
+					{
+						AttributeExtensionCollection attrExt;
+
+						if (ext.Attributes.TryGetValue("DbType", out attrExt))
+						{
+							var dbTypeExtension=attrExt.FirstOrDefault(x => x.Name == "DbType");
+							var dbSizeExtension=attrExt.FirstOrDefault(x => x.Name == "Size");
+
+							if (dbTypeExtension != null)
+							{
+								DbType dbType;
+#if FW3
+								var parsed = true;
+
+								try
+								{
+									dbType = (DbType)Enum.Parse(typeof(DbType), dbTypeExtension.Value.ToString());
+								}
+								catch (Exception)
+								{
+									dbType = DbType.Object;
+									parsed = false;
+								}
+
+								if (parsed)
+#else
+								if (DbType.TryParse(dbTypeExtension.Value.ToString(), out dbType))
+#endif
+								{
+									if (dbSizeExtension != null)
+									{
+										dbTypeAttribute = new DbTypeAttribute(dbType, int.Parse(dbSizeExtension.Value.ToString()));
+									}
+									else
+									{
+										dbTypeAttribute = new DbTypeAttribute(dbType);
+									}
+								}
+							}
+						}
+					}
 
 					if (dbTypeAttribute != null)
 					{

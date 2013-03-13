@@ -81,7 +81,7 @@ namespace Patterns
 			Assert.AreEqual(2, duck.SameMethodName());
 		}
 
-		[Test, ExpectedException(typeof(NotImplementedException))]
+		[Test, ExpectedException(typeof(InvalidOperationException))]
 		public void RuntimeExceptionTest()
 		{
 			var duck = DuckTyping.Implement<IOptionalInterface>(new TestClass());
@@ -93,7 +93,7 @@ namespace Patterns
 			duck.OptionalMethod();
 		}
 
-		[Test, ExpectedException(typeof(NotImplementedException))]
+		[Test, ExpectedException(typeof(InvalidOperationException))]
 		public void RuntimeAggregateExceptionTest()
 		{
 			var duck = DuckTyping.Aggregate<IOptionalInterface>(new TestClass(), new EmptyClass());

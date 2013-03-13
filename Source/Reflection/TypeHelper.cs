@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+
 #if !SILVERLIGHT
 using System.Xml.Linq;
 #endif
@@ -16,6 +17,7 @@ namespace BLToolkit.Reflection
 #if !SILVERLIGHT && !DATA
 	using EditableObjects;
 #endif
+	using DataAccess;
 	using TypeBuilder;
 
 	/// <summary>
@@ -918,6 +920,16 @@ namespace BLToolkit.Reflection
 			return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
 		}
 
+		public static bool IsNullableEnum(Type type)
+		{
+			return IsNullableType(type) && type.GetGenericArguments()[0].IsEnum;
+		}
+
+		public static bool IsEnumOrNullableEnum(Type type)
+		{
+			return type.IsEnum || IsNullableEnum(type);
+		}
+
 		/// <summary>
 		/// Returns the underlying type argument of the specified type.
 		/// </summary>
@@ -940,6 +952,13 @@ namespace BLToolkit.Reflection
 				type = Enum.GetUnderlyingType(type);
 
 			return type;
+		}
+
+		public static Type UnwrapNullableType(Type type)
+		{
+			if (type == null) throw new ArgumentNullException("type");
+
+			return IsNullableType(type) ? type.GetGenericArguments()[0] : type;
 		}
 
 		public static IEnumerable<Type> GetDefiningTypes(Type child, MemberInfo member)
@@ -1337,6 +1356,7 @@ namespace BLToolkit.Reflection
 				|| type == typeof(System.Data.Linq.Binary)
 				|| type == typeof(Stream)
 				|| type == typeof(XmlReader)
+				|| type.GetCustomAttributes(typeof(ScalarAttribute),true).Any() // If the type is a UDT pass it as is
 #if !SILVERLIGHT
 				|| type == typeof(XmlDocument)
 				|| type == typeof(XElement)
@@ -1551,6 +1571,11 @@ namespace BLToolkit.Reflection
 
 		public static bool Equals(MemberInfo member1, MemberInfo member2)
 		{
+			return Equals(member1, member2, null);
+		}
+
+		public static bool Equals(MemberInfo member1, MemberInfo member2, Type declaringType)
+		{
 			if (ReferenceEquals(member1, member2))
 				return true;
 
@@ -1562,20 +1587,52 @@ namespace BLToolkit.Reflection
 				if (member1.DeclaringType == member2.DeclaringType)
 					return true;
 
-				var isSubclass = IsSameOrParent(member1.DeclaringType, member2.DeclaringType);
-
-				if (!isSubclass && IsSameOrParent(member2.DeclaringType, member1.DeclaringType))
+				if (member1 is PropertyInfo)
 				{
-					isSubclass = true;
+					var isSubclass =
+						IsSameOrParent(member1.DeclaringType, member2.DeclaringType) ||
+						IsSameOrParent(member2.DeclaringType, member1.DeclaringType);
 
-					var member = member1;
-					member1 = member2;
-					member2 = member;
+					if (isSubclass)
+						return true;
+
+					if (declaringType != null && member2.DeclaringType.IsInterface)
+					{
+						var getter1 = ((PropertyInfo)member1).GetGetMethod();
+						var getter2 = ((PropertyInfo)member2).GetGetMethod();
+
+						var map = declaringType.GetInterfaceMap(member2.DeclaringType);
+
+						for (var i = 0; i < map.InterfaceMethods.Length; i++)
+							if (getter2.Name == map.InterfaceMethods[i].Name && getter2.DeclaringType == map.InterfaceMethods[i].DeclaringType &&
+								getter1.Name == map.TargetMethods   [i].Name && getter1.DeclaringType == map.TargetMethods   [i].DeclaringType)
+								return true;
+					}
 				}
+			}
 
-				if (isSubclass)
+			if (member2.DeclaringType.IsInterface && member1.Name.EndsWith(member2.Name))
+			{
+				if (member1 is PropertyInfo)
 				{
-					return member1 is PropertyInfo;
+					var isSubclass = member2.DeclaringType.IsAssignableFrom(member1.DeclaringType);
+
+					if (isSubclass)
+					{
+						var getter1 = ((PropertyInfo)member1).GetGetMethod();
+						var getter2 = ((PropertyInfo)member2).GetGetMethod();
+
+						var map = member1.DeclaringType.GetInterfaceMap(member2.DeclaringType);
+
+						for (var i = 0; i < map.InterfaceMethods.Length; i++)
+							if ((getter2 == null || (getter2.Name == map.InterfaceMethods[i].Name && getter2.DeclaringType == map.InterfaceMethods[i].DeclaringType))
+								&&
+								(getter1 == null || (getter1.Name == map.InterfaceMethods[i].Name && getter1.DeclaringType == map.InterfaceMethods[i].DeclaringType))
+								)
+							{
+								return true;
+							}
+					}
 				}
 			}
 

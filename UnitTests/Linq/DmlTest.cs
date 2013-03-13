@@ -23,88 +23,6 @@ namespace Update
 	public class DmlTest : TestBase
 	{
 		[Test]
-		public void Delete1()
-		{
-			ForEachProvider(db =>
-			{
-				var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
-
-				db.Delete(parent);
-				db.Insert(parent);
-
-				Assert.AreEqual(1, db.Parent.Count (p => p.ParentID == parent.ParentID));
-				Assert.AreEqual(1, db.Parent.Delete(p => p.ParentID == parent.ParentID));
-				Assert.AreEqual(0, db.Parent.Count (p => p.ParentID == parent.ParentID));
-			});
-		}
-
-		[Test]
-		public void Delete2()
-		{
-			ForEachProvider(db =>
-			{
-				var parent = new Parent1 { ParentID = 1001, Value1 = 1001 };
-
-				db.Delete(parent);
-				db.Insert(parent);
-
-				Assert.AreEqual(1, db.Parent.Count(p => p.ParentID == parent.ParentID));
-				Assert.AreEqual(1, db.Parent.Where(p => p.ParentID == parent.ParentID).Delete());
-				Assert.AreEqual(0, db.Parent.Count(p => p.ParentID == parent.ParentID));
-			});
-		}
-
-		[Test]
-		public void Delete3()
-		{
-			ForEachProvider(new[] { ProviderName.Informix }, db =>
-			{
-				db.Child.Delete(c => new[] { 1001, 1002 }.Contains(c.ChildID));
-
-				db.Child.Insert(() => new Child { ParentID = 1, ChildID = 1001 });
-				db.Child.Insert(() => new Child { ParentID = 1, ChildID = 1002 });
-
-				Assert.AreEqual(3, db.Child.Count(c => c.ParentID == 1));
-				Assert.AreEqual(2, db.Child.Where(c => c.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(c.ChildID)).Delete());
-				Assert.AreEqual(1, db.Child.Count(c => c.ParentID == 1));
-			});
-		}
-
-		[Test]
-		public void Delete4()
-		{
-			ForEachProvider(new[] { ProviderName.Informix }, db =>
-			{
-				db.GrandChild1.Delete(gc => new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value));
-
-				db.GrandChild.Insert(() => new GrandChild { ParentID = 1, ChildID = 1, GrandChildID = 1001 });
-				db.GrandChild.Insert(() => new GrandChild { ParentID = 1, ChildID = 2, GrandChildID = 1002 });
-
-				Assert.AreEqual(3, db.GrandChild1.Count(gc => gc.ParentID == 1));
-				Assert.AreEqual(2, db.GrandChild1.Where(gc => gc.Parent.ParentID == 1 && new[] { 1001, 1002 }.Contains(gc.GrandChildID.Value)).Delete());
-				Assert.AreEqual(1, db.GrandChild1.Count(gc => gc.ParentID == 1));
-			});
-		}
-
-		[Test]
-		public void Delete5()
-		{
-			ForEachProvider(db =>
-			{
-				var values = new[] { 1001, 1002 };
-
-				db.Parent.Delete(_ => _.ParentID > 1000);
-
-				db.Parent.Insert(() => new Parent { ParentID = values[0], Value1 = 1 });
-				db.Parent.Insert(() => new Parent { ParentID = values[1], Value1 = 1 });
-
-				Assert.AreEqual(2, db.Parent.Count(_ => _.ParentID > 1000));
-				Assert.AreEqual(2, db.Parent.Delete(_ => values.Contains(_.ParentID)));
-				Assert.AreEqual(0, db.Parent.Count(_ => _.ParentID > 1000));
-			});
-		}
-
-		[Test]
 		public void Update1()
 		{
 			ForEachProvider(db =>
@@ -316,7 +234,7 @@ namespace Update
 		[Test]
 		public void Update9()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
 				try
 				{
@@ -345,7 +263,7 @@ namespace Update
 		[Test]
 		public void Update10()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
 				try
 				{
@@ -385,7 +303,131 @@ namespace Update
 		}
 
 		[Test]
-		public void DistinctInsert()
+		public void UpdateAssociation1([DataContexts(ProviderName.Sybase, ProviderName.Informix)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				const int childId  = 10000;
+				const int parentId = 20000;
+
+				try
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+
+					db.Parent.Insert(() => new Parent { ParentID = parentId, Value1 = parentId });
+					db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
+
+					var parents =
+						from child in db.Child
+						where child.ChildID == childId
+						select child.Parent;
+
+					Assert.AreEqual(1, parents.Update(db.Parent, x => new Parent { Value1 = 5 }));
+				}
+				finally
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+				}
+			}
+		}
+
+		[Test]
+		public void UpdateAssociation2([DataContexts(ProviderName.Sybase, ProviderName.Informix)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				const int childId  = 10000;
+				const int parentId = 20000;
+
+				try
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+
+					db.Parent.Insert(() => new Parent { ParentID = parentId, Value1 = parentId });
+					db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
+
+					var parents =
+						from child in db.Child
+						where child.ChildID == childId
+						select child.Parent;
+
+					Assert.AreEqual(1, parents.Update(x => new Parent { Value1 = 5 }));
+				}
+				finally
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+				}
+			}
+		}
+
+		[Test]
+		public void UpdateAssociation3([DataContexts(ProviderName.Sybase, ProviderName.Informix)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				const int childId  = 10000;
+				const int parentId = 20000;
+
+				try
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+
+					db.Parent.Insert(() => new Parent { ParentID = parentId, Value1 = parentId });
+					db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
+
+					var parents =
+						from child in db.Child
+						where child.ChildID == childId
+						select child.Parent;
+
+					Assert.AreEqual(1, parents.Update(x => x.ParentID > 0, x => new Parent { Value1 = 5 }));
+				}
+				finally
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+				}
+			}
+		}
+
+		[Test]
+		public void UpdateAssociation4([DataContexts(ProviderName.Sybase, ProviderName.Informix)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				const int childId  = 10000;
+				const int parentId = 20000;
+
+				try
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+
+					db.Parent.Insert(() => new Parent { ParentID = parentId, Value1 = parentId });
+					db.Child. Insert(() => new Child  { ChildID = childId, ParentID = parentId });
+
+					var parents =
+						from child in db.Child
+						where child.ChildID == childId
+						select child.Parent;
+
+					Assert.AreEqual(1, parents.Set(x => x.Value1, 5).Update());
+				}
+				finally
+				{
+					db.Child. Delete(x => x.ChildID  == childId);
+					db.Parent.Delete(x => x.ParentID == parentId);
+				}
+			}
+		}
+
+		[Test]
+		public void DistinctInsert1()
 		{
 			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
@@ -405,6 +447,33 @@ namespace Update
 								GuidValue = Sql.NewGuid(),
 								BoolValue = true
 							}));
+				}
+				finally
+				{
+					db.Types.Delete(c => c.ID > 1000);
+				}
+			});
+		}
+
+		[Test]
+		public void DistinctInsert2()
+		{
+			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Informix, ProviderName.PostgreSQL, ProviderName.SQLite, ProviderName.Access }, db =>
+			{
+				try
+				{
+					db.Types.Delete(c => c.ID > 1000);
+
+					Assert.AreEqual(
+						Types.Select(_ => _.ID / 3).Distinct().Count(),
+						db.Types
+							.Select(_ => Math.Floor(_.ID / 3.0))
+							.Distinct()
+							.Into(db.Types)
+								.Value(t => t.ID,        t => (int)(t + 1001))
+								.Value(t => t.GuidValue, t => Sql.NewGuid())
+								.Value(t => t.BoolValue, t => true)
+							.Insert());
 				}
 				finally
 				{
@@ -754,10 +823,10 @@ namespace Update
 			ForEachProvider(
 				db =>
 				{
+					db.Parent.Delete(p => p.ParentID > 1000);
+
 					try
 					{
-						db.Parent.Delete(p => p.ParentID > 1000);
-
 						var q =
 							db.Child.     Select(c => new Parent { ParentID = c.ParentID,      Value1 = (int) Math.Floor(c.ChildID / 10.0) }).Union(
 							db.GrandChild.Select(c => new Parent { ParentID = c.ParentID ?? 0, Value1 = (int?)Math.Floor((c.GrandChildID ?? 0) / 100.0) }));
@@ -1334,6 +1403,28 @@ namespace Update
 					finally
 					{
 						db.Person.Delete(p => p.FirstName.StartsWith("Insert14"));
+					}
+				});
+		}
+
+		[Test]
+		public void InsertSingleIdentity()
+		{
+			ForEachProvider(
+				new [] { ProviderName.Informix, ProviderName.SqlCe },
+				db =>
+				{
+					try
+					{
+						db.TestIdentity.Delete();
+
+						var id = db.TestIdentity.InsertWithIdentity(() => new TestIdentity {});
+
+						Assert.NotNull(id);
+					}
+					finally
+					{
+						db.TestIdentity.Delete();
 					}
 				});
 		}

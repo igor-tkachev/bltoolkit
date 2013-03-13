@@ -128,11 +128,11 @@ BEGIN
 	SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
 	WHERE PersonID = :id
 	INTO
-		:PersonID,   
-		:FirstName,  
-		:LastName,   
-		:MiddleName, 
-		:Gender ;     
+		:PersonID,
+		:FirstName,
+		:LastName,
+		:MiddleName,
+		:Gender;
 	SUSPEND;
 END
 COMMIT;
@@ -152,11 +152,11 @@ BEGIN
 	FOR 
 		SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
 		INTO
-			:PersonID,   
-			:FirstName,  
-			:LastName,   
-			:MiddleName, 
-			:Gender     
+			:PersonID,
+			:FirstName,
+			:LastName,
+			:MiddleName,
+			:Gender
 	DO SUSPEND;
 END
 COMMIT;
@@ -564,3 +564,27 @@ CREATE TABLE SequenceTest
 )
 COMMIT;
 
+
+DROP TRIGGER CREATE_ID
+COMMIT;
+
+DROP GENERATOR TestIdentityID
+COMMIT;
+
+DROP TABLE TestIdentity
+COMMIT;
+
+CREATE TABLE TestIdentity (
+	ID INTEGER NOT NULL PRIMARY KEY
+)
+COMMIT;
+
+CREATE GENERATOR TestIdentityID;
+COMMIT;
+
+CREATE TRIGGER CREATE_ID FOR TestIdentity
+BEFORE INSERT POSITION 0
+AS BEGIN
+	NEW.ID = GEN_ID(TestIdentityID, 1);
+END
+COMMIT;

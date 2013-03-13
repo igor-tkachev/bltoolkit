@@ -11,7 +11,7 @@ namespace Data.Linq.ProviderSpecific
 
 	[TestFixture]
 	[Category("MySql")]
-	public class MySqlSprocParameterPrefixTests
+	public class MySqlSprocParameterPrefixTests : TestBase
 	{
 		[Test]
 		public void ParameterPrefixTest()
@@ -21,7 +21,7 @@ namespace Data.Linq.ProviderSpecific
 
 			try
 			{
-				using (var db = new DbManager(ProviderName.MySql))
+				using (var db = new TestDbManager(ProviderName.MySql))
 				{
 					var person = db.SetSpCommand("GetPersonById", db.Parameter("?ID", 1)).ExecuteObject<Person>();
 					Assert.IsNotNull(person);

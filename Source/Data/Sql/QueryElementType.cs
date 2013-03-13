@@ -36,6 +36,7 @@ namespace BLToolkit.Data.Sql
 			InsertClause,
 			UpdateClause,
 				SetExpression,
+			DeleteClause,
 			FromClause,
 			WhereClause,
 			GroupByClause,

@@ -29,7 +29,7 @@ namespace BLToolkit.Data.Linq.Builder
 				sequence = new SubQueryContext(sequence);
 			}
 
-			if (sequence.SqlQuery.OrderBy.Items.Count > 0)
+			if (!sequence.SqlQuery.OrderBy.IsEmpty)
 			{
 				if (sequence.SqlQuery.Select.TakeValue == null && sequence.SqlQuery.Select.SkipValue == null)
 					sequence.SqlQuery.OrderBy.Items.Clear();
@@ -131,7 +131,7 @@ namespace BLToolkit.Data.Linq.Builder
 					case ConvertFlags.Field : return Sequence.ConvertToSql(expression, level + 1, flags);
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
@@ -145,7 +145,7 @@ namespace BLToolkit.Data.Linq.Builder
 						});
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
@@ -161,7 +161,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 	}

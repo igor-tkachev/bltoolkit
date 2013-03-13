@@ -24,6 +24,9 @@ namespace BLToolkit.Data.Linq.Builder
 				if (_skippedExpressions.Contains(pi))
 					return new ExpressionHelper.ConvertInfo(pi, true);
 
+				if (pi.Find(IsNoneSqlMember) != null)
+					return new ExpressionHelper.ConvertInfo(pi);
+
 				switch (pi.NodeType)
 				{
 					case ExpressionType.MemberAccess:
@@ -35,18 +38,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (SqlProvider.ConvertMember(ma.Member) != null)
 								break;
-
-							/*
-							var res = context.IsExpression(pi, 0, RequestFor.Association);
-
-							if (res.Result)
-							{
-								var table = (TableBuilder.AssociatedTableContext)res.Context;
-
-								if (table.IsList)
-									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
-							}
-							*/
 
 							var ctx = GetContext(context, pi);
 
@@ -178,6 +169,50 @@ namespace BLToolkit.Data.Linq.Builder
 			return field;
 		}
 
+		public Expression BuildSql(MemberAccessor ma, int idx, MethodInfo checkNullFunction, Expression context)
+		{
+			var expr = Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx));
+
+			if (checkNullFunction != null)
+				expr = Expression.Call(null, checkNullFunction, expr, context);
+
+			Expression mapper;
+
+			if (TypeHelper.IsEnumOrNullableEnum(ma.Type))
+			{
+				mapper =
+					Expression.Convert(
+						Expression.Call(
+							Expression.Constant(MappingSchema),
+							ReflectionHelper.MapSchema.MapValueToEnumWithMemberAccessor,
+								expr,
+								Expression.Constant(ma)),
+						ma.Type);
+			}
+			else
+			{
+				MethodInfo mi;
+
+				if (!ReflectionHelper.MapSchema.Converters.TryGetValue(ma.Type, out mi))
+				{
+					mapper =
+						Expression.Convert(
+							Expression.Call(
+								Expression.Constant(MappingSchema),
+								ReflectionHelper.MapSchema.ChangeType,
+									expr,
+									Expression.Constant(ma.Type)),
+							ma.Type);
+				}
+				else
+				{
+					mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+				}
+			}
+
+			return mapper;
+		}
+
 		public Expression BuildSql(Type type, int idx, MethodInfo checkNullFunction, Expression context)
 		{
 			var expr = Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx));
@@ -225,6 +260,36 @@ namespace BLToolkit.Data.Linq.Builder
 		public Expression BuildSql(Type type, int idx)
 		{
 			return BuildSql(type, idx, null, null);
+		}
+
+		public Expression BuildSql(MemberAccessor ma, int idx)
+		{
+			return BuildSql(ma, idx, null, null);
+		}
+
+		#endregion
+
+		#region IsNonSqlMember
+
+		bool IsNoneSqlMember(Expression expr)
+		{
+			switch (expr.NodeType)
+			{
+				case ExpressionType.MemberAccess:
+					{
+						var me = (MemberExpression)expr;
+
+						var om = (
+							from c in Contexts.OfType<TableBuilder.TableContext>()
+							where c.ObjectType == me.Member.DeclaringType
+							select c.ObjectMapper
+						).FirstOrDefault();
+
+						return om != null && om.Associations.All(a => !TypeHelper.Equals(a.MemberAccessor.MemberInfo, me.Member)) && om[me.Member.Name, true] == null;
+					}
+			}
+
+			return false;
 		}
 
 		#endregion

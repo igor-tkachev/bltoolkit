@@ -181,7 +181,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test]
 		public void ObjectCompare()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -271,7 +271,7 @@ namespace Data.Linq
 		public void SubSub2()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Access, ProviderName.DB2, "Oracle", ProviderName.MySql, ProviderName.Sybase, ProviderName.Informix },
+				new[] { ProviderName.Access, ProviderName.DB2, "Oracle", "DevartOracle", ProviderName.MySql, ProviderName.Sybase, ProviderName.Informix },
 				db => AreEqual(
 					from p1 in
 						from p2 in Parent
@@ -536,261 +536,81 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LetTest1()
+		public void Count1()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
+				new[] { ProviderName.SqlCe },
 				db => AreEqual(
-					from p in Parent
-					let ch = p.Children
-					where ch.FirstOrDefault() != null
-					select ch.FirstOrDefault().ParentID
-					,
-					from p in db.Parent
-					let ch = p.Children
-					where ch.FirstOrDefault() != null
-					select ch.FirstOrDefault().ParentID));
-		}
-
-		[Test]
-		public void LetTest2()
-		{
-			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
-				db => AreEqual(
-					from p in Parent
-					let ch = p.Children
-					where ch.FirstOrDefault() != null
-					select p
-					,
-					from p in db.Parent
-					let ch = p.Children
-					where ch.FirstOrDefault() != null
+					from p in
+						from p in Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
+					select p,
+					from p in
+						from p in db.Parent
+						select new
+						{
+							p.ParentID,
+							Sum = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
+						}
+					where p.Sum > 1
 					select p));
 		}
 
 		[Test]
-		public void LetTest3()
+		public void Count2()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, ProviderName.Sybase },
+				new[] { ProviderName.SqlCe },
 				db => AreEqual(
-					from p in Parent
-					let ch = Child
-					select ch.FirstOrDefault().ParentID
-					,
-					from p in db.Parent
-					let ch = db.Child
-					select ch.FirstOrDefault().ParentID));
-		}
-
-		[Test]
-		public void LetTest4()
-		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
-
-			ForEachProvider(
-				new[] { ProviderName.Informix, ProviderName.Sybase },
-				db => AreEqual(
-					from p in Parent
-					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					select new
-					{
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch2.FirstOrDefault(c => c.ParentID > 0),
-						First2 = ch2.FirstOrDefault()
-					}
-					,
-					from p in db.Parent
-					let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					select new
-					{
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch2.FirstOrDefault(c => c.ParentID > 0),
-						First2 = ch2.FirstOrDefault()
-					}));
-
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
-		}
-
-		[Test]
-		public void LetTest5()
-		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
-
-			ForEachProvider(
-				new[] { ProviderName.Informix, ProviderName.Sybase },
-				db => AreEqual(
-					from p in Parent
-					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					select new
-					{
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-						First2 = ch2.FirstOrDefault()
-					}
-					,
-					from p in db.Parent
-					let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					select new
-					{
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-						First2 = ch2.FirstOrDefault()
-					}));
-
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
-		}
-
-		[Test]
-		public void LetTest6()
-		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery     = true;
-			//BLToolkit.Common.Configuration.Linq.GenerateExpressionTest = true;
-
-			ForEachProvider(
-				new[] { ProviderName.Informix, ProviderName.Sybase },
-				db => AreEqual(
-					(
+					from p in
 						from p in Parent
-						let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-						let ch2 = ch1.Where(c => c.ChildID > -100)
-						select new
+						select new Parent
 						{
-							p.ParentID,
-							Any    = ch2.Any(),
-							Count  = ch2.Count(),
-							First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-							First2 = ch2.FirstOrDefault()
+							ParentID = p.ParentID,
+							Value1   = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
 						}
-					).Where(t => t.ParentID > 0)
-					,
-					(
+					where p.Value1 > 1
+					select p,
+					from p in
 						from p in db.Parent
-						let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
-						let ch2 = ch1.Where(c => c.ChildID > -100)
-						select new
+						select new Parent
 						{
-							p.ParentID,
-							Any    = ch2.Any(),
-							Count  = ch2.Count(),
-							First1 = ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-							First2 = ch2.FirstOrDefault()
+							ParentID = p.ParentID,
+							Value1   = p.Children.Where(t => t.ParentID > 0).Sum(t => t.ParentID) / 2,
 						}
-					).Where(t => t.ParentID > 0)));
-
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+					where p.Value1 > 1
+					select p));
 		}
 
 		[Test]
-		public void LetTest7()
+		public void Count3()
 		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
-
 			ForEachProvider(
-				new[] { ProviderName.Informix, ProviderName.Sybase },
+				new[] { ProviderName.SqlCe },
 				db => AreEqual(
-					(
+					from p in
 						from p in Parent
-						let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-						let ch2 = ch1.Where(c => c.ChildID > -100)
 						select new
 						{
 							p.ParentID,
-							Any    = ch2.Any(),
-							Count  = ch2.Count(),
-							First1 = ch2.FirstOrDefault(c => c.ParentID > 0) == null ? 0 : ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-							First2 = ch2.FirstOrDefault()
+							Sum = p.Children.Sum(t => t.ParentID) / 2,
 						}
-					).Where(t => t.ParentID > 0).Take(5000)
-					,
-					(
+					where p.Sum > 1
+					select p,
+					from p in
 						from p in db.Parent
-						let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
-						let ch2 = ch1.Where(c => c.ChildID > -100)
 						select new
 						{
 							p.ParentID,
-							Any    = ch2.Any(),
-							Count  = ch2.Count(),
-							First1 = ch2.FirstOrDefault(c => c.ParentID > 0).ParentID,
-							First2 = ch2.FirstOrDefault()
+							Sum = p.Children.Sum(t => t.ParentID) / 2,
 						}
-					).Where(t => t.ParentID > 0).Take(5000)));
-
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
-		}
-
-		[Test]
-		public void LetTest8()
-		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
-
-			ForEachProvider(
-				db => AreEqual(
-					from p in Parent
-					let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					let ch3	= ch2.FirstOrDefault(c => c.ParentID > 0)
-					select new
-					{
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch3 == null ? 0 : ch3.ParentID,
-						First2 = ch2.FirstOrDefault()
-					}
-					,
-					from p in db.Parent
-					let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
-					let ch2 = ch1.Where(c => c.ChildID > -100)
-					let ch3	= ch2.FirstOrDefault(c => c.ParentID > 0)
-					select new
-					{
-						Any    = ch2.Any(),
-						Count  = ch2.Count(),
-						First1 = ch3 == null ? 0 : ch3.ParentID,
-						First2 = ch2.FirstOrDefault()
-					}));
-
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
-		}
-
-		[Test]
-		public void LetTest9()
-		{
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
-
-			ForEachProvider(
-				db => AreEqual(
-					(
-						from p in Parent
-						let ch1 = Child.Where(c => c.ParentID == p.ParentID)
-						let ch2 = ch1.Where(c => c.ChildID > -100)
-						select new
-						{
-							First = ch2.FirstOrDefault()
-						}
-					).Take(10)
-					,
-					(
-						from p in db.Parent
-						let ch1 = db.Child.Where(c => c.ParentID == p.ParentID)
-						let ch2 = ch1.Where(c => c.ChildID > -100)
-						select new
-						{
-							First = ch2.FirstOrDefault()
-						}
-					).Take(10)));
-
-			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
+					where p.Sum > 1
+					select p));
 		}
 	}
 }

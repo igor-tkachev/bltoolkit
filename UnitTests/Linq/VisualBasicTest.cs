@@ -35,7 +35,7 @@ namespace Data.Linq
 				VisualBasicCommon.ParamenterName(db)));
 		}
 
-		[Test]
+        [Test]
 		public void SearchCondition1()
 		{
 			ForEachProvider(

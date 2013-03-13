@@ -60,6 +60,7 @@ namespace BLToolkit.Data.Sql
 		internal void Init(
 			InsertClause       insert,
 			UpdateClause       update,
+			DeleteClause       delete,
 			SelectClause       select,
 			FromClause         from,
 			WhereClause        where,
@@ -73,6 +74,7 @@ namespace BLToolkit.Data.Sql
 		{
 			_insert             = insert;
 			_update             = update;
+			_delete             = delete;
 			_select             = select;
 			_from               = from;
 			_where              = where;
@@ -2468,6 +2470,89 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region DeleteClause
+
+		public class DeleteClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
+		{
+			public SqlTable Table { get; set; }
+
+			#region Overrides
+
+#if OVERRIDETOSTRING
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+#endif
+
+			#endregion
+
+			#region ICloneableElement Members
+
+			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				if (!doClone(this))
+					return this;
+
+				var clone = new DeleteClause();
+
+				if (Table != null)
+					clone.Table = (SqlTable)Table.Clone(objectTree, doClone);
+
+				objectTree.Add(this, clone);
+
+				return clone;
+			}
+
+			#endregion
+
+			#region ISqlExpressionWalkable Members
+
+			[Obsolete]
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
+			{
+				if (Table != null)
+					((ISqlExpressionWalkable)Table).Walk(skipColumns, func);
+
+				return null;
+			}
+
+			#endregion
+
+			#region IQueryElement Members
+
+			public QueryElementType ElementType { get { return QueryElementType.DeleteClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				sb.Append("DELETE FROM ");
+
+				if (Table != null)
+					((IQueryElement)Table).ToString(sb, dic);
+
+				sb.AppendLine();
+
+				return sb;
+			}
+
+			#endregion
+		}
+
+		private DeleteClause _delete;
+		public  DeleteClause  Delete
+		{
+			get { return _delete ?? (_delete = new DeleteClause()); }
+		}
+
+		public void ClearDelete()
+		{
+			_delete = null;
+		}
+
+		#endregion
+
 		#region FromClause
 
 		public class FromClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
@@ -2623,7 +2708,7 @@ namespace BLToolkit.Data.Sql
 				get { return _tables; }
 			}
 
-			IEnumerable<ISqlTableSource> GetJoinTables(TableSource source, QueryElementType elementType)
+			static IEnumerable<ISqlTableSource> GetJoinTables(TableSource source, QueryElementType elementType)
 			{
 				if (source.Source.ElementType == elementType)
 					yield return source.Source;
@@ -2641,6 +2726,33 @@ namespace BLToolkit.Data.Sql
 			internal IEnumerable<ISqlTableSource> GetFromQueries()
 			{
 				return Tables.SelectMany(_ => GetJoinTables(_, QueryElementType.SqlQuery));
+			}
+
+			static TableSource FindTableSource(TableSource source, SqlTable table)
+			{
+				if (source.Source == table)
+					return source;
+
+				foreach (var join in source.Joins)
+				{
+					var ts = FindTableSource(join.Table, table);
+					if (ts != null)
+						return ts;
+				}
+
+				return null;
+			}
+
+			public ISqlTableSource FindTableSource(SqlTable table)
+			{
+				foreach (var source in Tables)
+				{
+					var ts = FindTableSource(source, table);
+					if (ts != null)
+						return ts;
+				}
+
+				return null;
 			}
 
 			#region Overrides
@@ -3420,7 +3532,7 @@ namespace BLToolkit.Data.Sql
 			{
 				var sql = e as SqlQuery;
 
-				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._insert != null || sql._update != null)
+				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._insert != null || sql._update != null || sql._delete != null)
 					return;
 
 				var table = sql.From.Tables[0];
@@ -3665,7 +3777,7 @@ namespace BLToolkit.Data.Sql
 				OrderBy.Items.Clear();
 		}
 
-		void ResolveWeakJoins()
+		internal void ResolveWeakJoins()
 		{
 			List<ISqlTableSource> tables = null;
 
@@ -3724,6 +3836,9 @@ namespace BLToolkit.Data.Sql
 
 							if (_update != null)
 								visitor.VisitAll(Update, tableCollector);
+
+							if (_delete != null)
+								visitor.VisitAll(Delete, tableCollector);
 						}
 
 						if (findTable(join.Table))
@@ -3820,7 +3935,7 @@ namespace BLToolkit.Data.Sql
 			bool        optimizeValues,
 			bool        optimizeColumns)
 		{
-			var query = (SqlQuery)childSource. Source;
+			var query = (SqlQuery)childSource.Source;
 
 			var isQueryOK = query.From.Tables.Count == 1;
 
@@ -4010,9 +4125,10 @@ namespace BLToolkit.Data.Sql
 				{
 					var sql = From.Tables[i].Source as SqlQuery;
 
-					if (sql != null && sql.OrderBy.Items.Count > 0)
-						foreach (var item in sql.OrderBy.Items)
-							OrderBy.Expr(item.Expression, item.IsDescending);
+					if (!Select.Columns.All(c => IsAggregationFunction(c.Expression)))
+						if (sql != null && sql.OrderBy.Items.Count > 0)
+							foreach (var item in sql.OrderBy.Items)
+								OrderBy.Expr(item.Expression, item.IsDescending);
 
 					From.Tables[i] = table;
 				}
@@ -4072,7 +4188,7 @@ namespace BLToolkit.Data.Sql
 
 			var alias = desiredAlias;
 
-			if (string.IsNullOrEmpty(desiredAlias))
+			if (string.IsNullOrEmpty(desiredAlias) || desiredAlias.Length > 30)
 			{
 				desiredAlias = defaultAlias;
 				alias        = defaultAlias + "1";
@@ -4454,6 +4570,7 @@ namespace BLToolkit.Data.Sql
 
 			if (IsInsert) _insert = (InsertClause)clone._insert.Clone(objectTree, doClone);
 			if (IsUpdate) _update = (UpdateClause)clone._update.Clone(objectTree, doClone);
+			if (IsDelete) _delete = (DeleteClause)clone._delete.Clone(objectTree, doClone);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);
 			_from    = new FromClause   (this, clone._from,    objectTree, doClone);
@@ -4589,6 +4706,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (_insert != null) ((ISqlExpressionWalkable)_insert).Walk(skipColumns, func);
 			if (_update != null) ((ISqlExpressionWalkable)_update).Walk(skipColumns, func);
+			if (_delete != null) ((ISqlExpressionWalkable)_delete).Walk(skipColumns, func);
 
 			((ISqlExpressionWalkable)Select) .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)From)   .Walk(skipColumns, func);

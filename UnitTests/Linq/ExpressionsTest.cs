@@ -205,5 +205,84 @@ namespace Data.Linq
 					where ch.ParentID == p.ParentID
 					select ch);
 		}
+
+		[MethodExpression("GetBoolExpression1")]
+		static bool GetBool1<T>(T obj)
+		{
+			throw new InvalidOperationException();
+		}
+
+		static Expression<Func<T,bool>> GetBoolExpression1<T>()
+			where T : class
+		{
+			return obj => obj != null;
+		}
+
+		[Test]
+		public void TestGenerics1()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from ch in db.Child
+					where GetBool1(ch.Parent)
+					select ch;
+
+				q.ToList();
+			}
+		}
+
+		[MethodExpression("GetBoolExpression2_{0}")]
+		static bool GetBool2<T>(T obj)
+		{
+			throw new InvalidOperationException();
+		}
+
+		static Expression<Func<Parent,bool>> GetBoolExpression2_Parent()
+		{
+			return obj => obj != null;
+		}
+
+		[Test]
+		public void TestGenerics2()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from ch in db.Child
+					where GetBool2(ch.Parent)
+					select ch;
+
+				q.ToList();
+			}
+		}
+
+		class TestClass<T>
+		{
+			[MethodExpression("GetBoolExpression3")]
+			public static bool GetBool3(Parent obj)
+			{
+				throw new InvalidOperationException();
+			}
+
+			static Expression<Func<Parent,bool>> GetBoolExpression3()
+			{
+				return obj => obj != null;
+			}
+		}
+
+		[Test]
+		public void TestGenerics3()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from ch in db.Child
+					where TestClass<int>.GetBool3(ch.Parent)
+					select ch;
+
+				q.ToList();
+			}
+		}
 	}
 }

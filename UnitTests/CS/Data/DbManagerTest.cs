@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
@@ -299,49 +300,51 @@ namespace Data
 		[Test]
 		public void CreateParametersTest()
 		{
-			using (DbManager db = new DbManager())
+			using (var db = new DbManager())
 			{
-				DataTypeTest dt = new DataTypeTest();
-				
-				dt.ID        = 12345;
-				dt.Binary_   = new byte[2] {1, 2};
+				var dt = new DataTypeTest
+				{
+					ID        = 12345,
+					Binary_   = new byte[2] {1, 2},
 #if !ORACLE
-				dt.Boolean_  = true;
-				dt.Guid_     = Guid.Empty;
+					Boolean_  = true,
+					Guid_     = Guid.Empty,
 #endif
-				dt.Byte_     = 250;
-				dt.Bytes_    = new byte[2] {2, 1};
-				dt.DateTime_ = DateTime.Now;
-				dt.Decimal_  = 9876543210.0m;
-				dt.Double_   = 12345.67890;
-				dt.Int16_    = 12345;
-				dt.Int32_    = 1234567890;
-				dt.Int64_    = 1234567890123456789;
-				dt.Money_    = 99876543210.0m;
-				dt.Single_   = 1234.0f;
-				dt.String_   = "Crazy Frog";
+					Byte_     = 250,
+					Bytes_    = new byte[] { 2, 1 },
+					DateTime_ = DateTime.Now,
+					Decimal_  = 9876543210.0m,
+					Double_   = 12345.67890,
+					Int16_    = 12345,
+					Int32_    = 1234567890,
+					Int64_    = 1234567890123456789,
+					Money_    = 99876543210.0m,
+					Single_   = 1234.0f,
+					String_   = "Crazy Frog",
 
-				dt.Char_     = 'F';
-				dt.SByte_    = 123;
-				dt.UInt16_   = 65432;
-				dt.UInt32_   = 4000000000;
-				dt.UInt64_   = 12345678901234567890;
+					Char_     = 'F',
+					SByte_    = 123,
+					//UInt16_   = 65432,
+					//UInt32_   = 4000000000,
+					//UInt64_   = 12345678901234567890,
 #if !SQLCE
-				dt.Stream_   = new MemoryStream(5);
-				dt.Xml_      = new XmlTextReader(new StringReader("<xml/>"));
-				dt.XmlDoc_   = new XmlDocument(); dt.XmlDoc_.LoadXml("<xmldoc/>");
+					Stream_   = new MemoryStream(5),
+					Xml_      = new XmlTextReader(new StringReader("<xml/>")),
+					XmlDoc_   = new XmlDocument(),
 #endif
+				};
 
-				IDbDataParameter[] parameters = db.CreateParameters(dt);
+				dt.XmlDoc_.LoadXml("<xmldoc/>");
+
+				var parameters = db.CreateParameters(dt);
 
 				Assert.IsNotNull(parameters);
 				Assert.AreEqual(ObjectMapper<DataTypeTest>.Instance.Count, parameters.Length);
 
 				foreach (MemberMapper mm in ObjectMapper<DataTypeTest>.Instance)
 				{
-					string paramName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
-					IDbDataParameter p = Array.Find(parameters,
-						delegate(IDbDataParameter obj) { return obj.ParameterName == paramName; });
+					var paramName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
+					var p         = parameters.First(obj => obj.ParameterName == paramName);
 
 					Assert.IsNotNull(p);
 					Assert.AreEqual(mm.GetValue(dt), p.Value);

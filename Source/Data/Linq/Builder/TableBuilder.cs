@@ -134,10 +134,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public virtual IBuildContext Parent { get; set; }
 
-			public    Type         OriginalType;
-			public    Type         ObjectType;
-			protected ObjectMapper ObjectMapper;
-			public    SqlTable     SqlTable;
+			public Type         OriginalType;
+			public Type         ObjectType;
+			public ObjectMapper ObjectMapper;
+			public SqlTable     SqlTable;
 
 			#endregion
 
@@ -656,7 +656,16 @@ namespace BLToolkit.Data.Linq.Builder
 				var info = ConvertToIndex(expression, level, ConvertFlags.Field).Single();
 				var idx  = ConvertToParentIndex(info.Index, null);
 
-				return Builder.BuildSql(expression.Type, idx);
+				if (expression is MemberExpression)
+				{
+					var me = (MemberExpression)expression;
+					var memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+					return Builder.BuildSql(memberAccessor, idx);
+				}
+				else
+				{
+					return Builder.BuildSql(expression.Type, idx);
+				}
 			}
 
 			#endregion
@@ -673,7 +682,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (table.Field == null)
 								return table.Table.SqlTable.Fields.Values
-									.Select(_ => new SqlInfo { Sql = _, Member = _.MemberMapper.MemberAccessor.MemberInfo })
+									.Select(_ => new SqlInfo(_.MemberMapper.MemberAccessor.MemberInfo) { Sql = _ })
 									.ToArray();
 
 							break;
@@ -689,7 +698,7 @@ namespace BLToolkit.Data.Linq.Builder
 									from f in table.Table.SqlTable.Fields.Values
 									where f.IsPrimaryKey
 									orderby f.PrimaryKeyOrder
-									select new SqlInfo { Sql = f, Member = f.MemberMapper.MemberAccessor.MemberInfo };
+									select new SqlInfo(f.MemberMapper.MemberAccessor.MemberInfo) { Sql = f };
 
 								var key = q.ToArray();
 
@@ -706,14 +715,14 @@ namespace BLToolkit.Data.Linq.Builder
 							if (table.Field != null)
 								return new[]
 								{
-									new SqlInfo { Sql = table.Field, Member = table.Field.MemberMapper.MemberAccessor.MemberInfo }
+									new SqlInfo(table.Field.MemberMapper.MemberAccessor.MemberInfo) { Sql = table.Field }
 								};
 
 							break;
 						}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			#endregion
@@ -762,7 +771,7 @@ namespace BLToolkit.Data.Linq.Builder
 						return info;
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			#endregion
@@ -782,11 +791,13 @@ namespace BLToolkit.Data.Linq.Builder
 					case RequestFor.Table       :
 					case RequestFor.Object      :
 						{
-							var table = FindTable(expression, level, false);
-							return new IsExpressionResult(
+							var table   = FindTable(expression, level, false);
+							var isTable =
 								table       != null &&
 								table.Field == null &&
-								(expression == null || expression.GetLevelExpression(table.Level) == expression));
+								(expression == null || expression.GetLevelExpression(table.Level) == expression);
+
+							return new IsExpressionResult(isTable, isTable ? table.Table : null);
 						}
 
 					case RequestFor.Expression :
@@ -906,7 +917,8 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
 						{
-							var association = (AssociatedTableContext)GetAssociation(expression, level).Table;
+							var tableLevel  = GetAssociation(expression, level);
+							var association = (AssociatedTableContext)tableLevel.Table;
 
 							if (association.IsList)
 							{
@@ -916,6 +928,9 @@ namespace BLToolkit.Data.Linq.Builder
 								var expr   = helper.GetExpression(ma.Expression, association);
 
 								buildInfo.IsAssociationBuilt = true;
+
+								if (tableLevel.IsNew)
+									association.ParentAssociationJoin.IsWeak = true;
 
 								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
 							}
@@ -1070,6 +1085,7 @@ namespace BLToolkit.Data.Linq.Builder
 				public TableContext Table;
 				public SqlField     Field;
 				public int          Level;
+				public bool         IsNew;
 			}
 
 			TableLevel FindTable(Expression expression, int level, bool throwException)
@@ -1113,6 +1129,7 @@ namespace BLToolkit.Data.Linq.Builder
 					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
 						var memberExpression = (MemberExpression)levelExpression;
+						var isNew = false;
 
 						AssociatedTableContext tableAssociation;
 
@@ -1125,13 +1142,15 @@ namespace BLToolkit.Data.Linq.Builder
 
 							tableAssociation = q.FirstOrDefault();
 
+							isNew = true;
+
 							_associations.Add(memberExpression.Member, tableAssociation);
 						}
 
 						if (tableAssociation != null)
 						{
 							if (levelExpression == expression)
-								return new TableLevel { Table = tableAssociation, Level = level };
+								return new TableLevel { Table = tableAssociation, Level = level, IsNew = isNew };
 
 							var al = tableAssociation.GetAssociation(expression, level + 1);
 
@@ -1140,7 +1159,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 							var field = tableAssociation.GetField(expression, level + 1, false);
 
-							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1 };
+							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1, IsNew = isNew };
 						}
 					}
 				}

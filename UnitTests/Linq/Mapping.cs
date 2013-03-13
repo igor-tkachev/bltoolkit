@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
-using BLToolkit.Common;
+
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
+using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
 
 using NUnit.Framework;
+
 using Convert = System.Convert;
 
 #pragma warning disable 0649
@@ -307,6 +309,72 @@ namespace Data.Linq
 			{
 				db.BeginTransaction();
 				db.Insert(new MyParent { ParentID = new MyInt { MyValue = 1001 }, Value1 = 1001 });
+				db.Parent.Delete(p => p.ParentID >= 1000);
+			}
+		}
+
+		[TableName("Parent")]
+		class MyParent1
+		{
+			public int  ParentID;
+			public int? Value1;
+
+			[MapIgnore]
+			public string Value2 { get { return "1"; } }
+
+			public int GetValue() { return 2;}
+		}
+
+		[Test]
+		public void MapIgnore1()
+		{
+			ForEachProvider(db => AreEqual(
+				              Parent    .Select(p => new { p.ParentID, Value2 = "1" }),
+				db.GetTable<MyParent1>().Select(p => new { p.ParentID, p.Value2 })));
+		}
+
+		[Test]
+		public void MapIgnore2()
+		{
+			ForEachProvider(db => AreEqual(
+				              Parent    .Select(p => new { p.ParentID, Length = 1      }),
+				db.GetTable<MyParent1>().Select(p => new { p.ParentID, p.Value2.Length })));
+		}
+
+		[Test]
+		public void MapIgnore3()
+		{
+			ForEachProvider(db => AreEqual(
+				              Parent    .Select(p => new { p.ParentID, Value = 2            }),
+				db.GetTable<MyParent1>().Select(p => new { p.ParentID, Value = p.GetValue() })));
+		}
+
+		[TableName("Parent")]
+		public abstract class AbsParent : EditableObject
+		{
+			public abstract int  ParentID { get; set; }
+			public abstract int? Value1   { get; set; }
+		}
+
+		[TableName("Child")]
+		public abstract class AbsChild : EditableObject
+		{
+			public abstract int ParentID { get; set; }
+			public abstract int ChildID  { get; set; }
+
+			[Association(ThisKey = "ParentID", OtherKey = "ParentID", CanBeNull = false)]
+			public AbsParent Parent;
+		}
+
+		[Test]
+		public void MapAbstract()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q = from a in db.GetTable<AbsChild>()
+				select new { a.ChildID, a.Parent.Value1 };
+
+				var ql = q.ToList();
 			}
 		}
 	}

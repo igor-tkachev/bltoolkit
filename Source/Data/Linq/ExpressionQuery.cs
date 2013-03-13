@@ -16,7 +16,7 @@ namespace BLToolkit.Data.Linq
 	{
 		#region Init
 
-		protected ExpressionQuery(IDataContextInfo dataContextInfo, Expression expression)
+		protected void Init(IDataContextInfo dataContextInfo, Expression expression)
 		{
 #if SILVERLIGHT
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");

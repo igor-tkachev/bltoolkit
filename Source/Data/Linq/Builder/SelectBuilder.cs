@@ -93,10 +93,9 @@ namespace BLToolkit.Data.Linq.Builder
 						ExpressionBuilder.ParametersParam,
 					});
 
-				var func    = mapper.Compile();
-				var counter = 0;
+				var func = mapper.Compile();
 
-				Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> map = (ctx,db,rd,e,ps) => func(counter++, ctx, db, rd, e, ps);
+				Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> map = (ctx,db,rd,e,ps,n) => func(n, ctx, db, rd, e, ps);
 
 				query.SetQuery(map);
 			}
@@ -142,7 +141,7 @@ namespace BLToolkit.Data.Linq.Builder
 				selector   = (LambdaExpression)methodCall.Arguments[1].Unwrap();
 			}
 
-			if (param != builder.SequenceParameter)
+			if (param != null && param != builder.SequenceParameter)
 			{
 				var list =
 					(
@@ -167,7 +166,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var btype  = typeof(ExpressionHoder<,>).MakeGenericType(types[0], selector.Body.Type);
 						var fields = btype.GetFields();
 						var pold   = selector.Parameters[0];
-						var psel   = Expression.Parameter(types[0], selector.Parameters[0].Name);
+						var psel   = Expression.Parameter(types[0], pold.Name);
 
 						methodCall = Expression.Call(
 							methodCall.Object,
@@ -177,7 +176,7 @@ namespace BLToolkit.Data.Linq.Builder
 								Expression.MemberInit(
 									Expression.New(btype),
 									Expression.Bind(fields[0], psel),
-									Expression.Bind(fields[1], selector.Body)),
+									Expression.Bind(fields[1], selector.Body.Convert(e => e == pold ? psel : e))),
 								psel));
 
 						selector = (LambdaExpression)methodCall.Arguments[1].Unwrap();
@@ -302,7 +301,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (call.IsQueryable())
 							if (TypeHelper.IsSameOrParent(typeof(IEnumerable), call.Type) ||
-							    TypeHelper.IsSameOrParent(typeof(IQueryable),  call.Type))
+							    TypeHelper.IsSameOrParent(typeof(IQueryable),  call.Type) ||
+							    FirstSingleBuilder.MethodNames.Contains(call.Method.Name))
 								yield return new SequenceConvertPath { Path = path, Expr = expression, Level = level };
 
 						break;

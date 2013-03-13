@@ -26,6 +26,159 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			switch (expr.NodeType)
 			{
+				case ExpressionType.Add:
+				case ExpressionType.AddChecked:
+				case ExpressionType.And:
+				case ExpressionType.AndAlso:
+#if FW4 || SILVERLIGHT
+				case ExpressionType.Assign:
+#endif
+				case ExpressionType.Coalesce:
+				case ExpressionType.Divide:
+				case ExpressionType.Equal:
+				case ExpressionType.ExclusiveOr:
+				case ExpressionType.GreaterThan:
+				case ExpressionType.GreaterThanOrEqual:
+				case ExpressionType.LeftShift:
+				case ExpressionType.LessThan:
+				case ExpressionType.LessThanOrEqual:
+				case ExpressionType.Modulo:
+				case ExpressionType.Multiply:
+				case ExpressionType.MultiplyChecked:
+				case ExpressionType.NotEqual:
+				case ExpressionType.Or:
+				case ExpressionType.OrElse:
+				case ExpressionType.Power:
+				case ExpressionType.RightShift:
+				case ExpressionType.Subtract:
+				case ExpressionType.SubtractChecked:
+					{
+						var e = (BinaryExpression)expr;
+
+						_exprBuilder.Append("(");
+
+						e.Left.Visit(new Func<Expression,bool>(BuildExpression));
+
+						switch (expr.NodeType)
+						{
+							case ExpressionType.Add                :
+							case ExpressionType.AddChecked         : _exprBuilder.Append(" + ");  break;
+							case ExpressionType.And                : _exprBuilder.Append(" & ");  break;
+							case ExpressionType.AndAlso            : _exprBuilder.Append(" && "); break;
+#if FW4 || SILVERLIGHT
+							case ExpressionType.Assign             : _exprBuilder.Append(" = ");  break;
+#endif
+							case ExpressionType.Coalesce           : _exprBuilder.Append(" ?? "); break;
+							case ExpressionType.Divide             : _exprBuilder.Append(" / ");  break;
+							case ExpressionType.Equal              : _exprBuilder.Append(" == "); break;
+							case ExpressionType.ExclusiveOr        : _exprBuilder.Append(" ^ ");  break;
+							case ExpressionType.GreaterThan        : _exprBuilder.Append(" > ");  break;
+							case ExpressionType.GreaterThanOrEqual : _exprBuilder.Append(" >= "); break;
+							case ExpressionType.LeftShift          : _exprBuilder.Append(" << "); break;
+							case ExpressionType.LessThan           : _exprBuilder.Append(" < ");  break;
+							case ExpressionType.LessThanOrEqual    : _exprBuilder.Append(" <= "); break;
+							case ExpressionType.Modulo             : _exprBuilder.Append(" % ");  break;
+							case ExpressionType.Multiply           :
+							case ExpressionType.MultiplyChecked    : _exprBuilder.Append(" * ");  break;
+							case ExpressionType.NotEqual           : _exprBuilder.Append(" != "); break;
+							case ExpressionType.Or                 : _exprBuilder.Append(" | ");  break;
+							case ExpressionType.OrElse             : _exprBuilder.Append(" || "); break;
+							case ExpressionType.Power              : _exprBuilder.Append(" ** "); break;
+							case ExpressionType.RightShift         : _exprBuilder.Append(" >> "); break;
+							case ExpressionType.Subtract           :
+							case ExpressionType.SubtractChecked    : _exprBuilder.Append(" - ");  break;
+						}
+
+						e.Right.Visit(new Func<Expression,bool>(BuildExpression));
+
+						_exprBuilder.Append(")");
+
+						return false;
+					}
+
+				case ExpressionType.ArrayLength:
+					{
+						var e = (UnaryExpression)expr;
+
+						e.Operand.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append(".Length");
+
+						return false;
+					}
+
+				case ExpressionType.Convert:
+				case ExpressionType.ConvertChecked:
+					{
+						var e = (UnaryExpression)expr;
+
+						_exprBuilder.AppendFormat("({0})", GetTypeName(e.Type));
+						e.Operand.Visit(new Func<Expression,bool>(BuildExpression));
+
+						return false;
+					}
+
+				case ExpressionType.Negate:
+				case ExpressionType.NegateChecked:
+					{
+						_exprBuilder.Append("-");
+						return true;
+					}
+
+				case ExpressionType.Not:
+					{
+						_exprBuilder.Append("!");
+						return true;
+					}
+
+				case ExpressionType.Quote:
+					return true;
+
+				case ExpressionType.TypeAs:
+					{
+						var e = (UnaryExpression)expr;
+
+						_exprBuilder.Append("(");
+						e.Operand.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.AppendFormat(" as {0})", GetTypeName(e.Type));
+
+						return false;
+					}
+
+				case ExpressionType.UnaryPlus:
+					{
+						_exprBuilder.Append("+");
+						return true;
+					}
+
+				case ExpressionType.ArrayIndex:
+					{
+						var e = (BinaryExpression)expr;
+
+						e.Left.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append("[");
+						e.Right.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append("]");
+
+						return false;
+					}
+
+				case ExpressionType.MemberAccess :
+					{
+						var e = (MemberExpression)expr;
+
+						e.Expression.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.AppendFormat(".{0}", e.Member.Name);
+
+						return false;
+					}
+
+				case ExpressionType.Parameter :
+					{
+						var e = (ParameterExpression)expr;
+						_exprBuilder.Append(e.Name);
+						return false;
+					}
+
 				case ExpressionType.Call :
 					{
 						var ex = (MethodCallExpression)expr;
@@ -40,7 +193,7 @@ namespace BLToolkit.Data.Linq.Builder
 							_exprBuilder.AppendLine().Append(_indent);
 						}
 						else if (ex.Object != null)
-							ex.Visit(new Func<Expression,bool>(BuildExpression));
+							ex.Object.Visit(new Func<Expression,bool>(BuildExpression));
 						else
 							_exprBuilder.Append(GetTypeName(mi.DeclaringType));
 
@@ -107,7 +260,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var le = (LambdaExpression)expr;
 						var ps = le.Parameters
 							.Select(p => (GetTypeName(p.Type) + " " + p.Name).TrimStart())
-							.Aggregate((p1, p2) => p1 + ", " + p2);
+							.Aggregate("", (p1, p2) => p1 + ", " + p2, p => p.TrimStart(',', ' '));
 
 						_exprBuilder.Append("(").Append(ps).Append(") => ");
 
@@ -115,17 +268,214 @@ namespace BLToolkit.Data.Linq.Builder
 						return false;
 					}
 
-				case ExpressionType.New:
+				case ExpressionType.Conditional:
 					{
-						var ne = (NewExpression)expr;
+						var e = (ConditionalExpression)expr;
 
-						
+						_exprBuilder.Append("(");
+						e.Test.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append(" ? ");
+						e.IfTrue.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append(" : ");
+						e.IfFalse.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append(")");
 
 						return false;
 					}
 
-				case ExpressionType.Quote :
-					return true;
+				case ExpressionType.New:
+					{
+						var ne = (NewExpression)expr;
+
+						if (IsAnonymous(ne.Type))
+						{
+							if (ne.Members.Count == 1)
+							{
+								_exprBuilder.AppendFormat("new {{ {0} = ", ne.Members[0].Name);
+								ne.Arguments[0].Visit(new Func<Expression,bool>(BuildExpression));
+								_exprBuilder.Append(" }}");
+							}
+							else
+							{
+								_exprBuilder.AppendLine("new").Append(_indent).Append("{");
+
+								PushIndent();
+
+								for (var i = 0; i < ne.Members.Count; i++)
+								{
+									_exprBuilder.AppendLine().Append(_indent).AppendFormat("{0} = ", ne.Members[i].Name);
+									ne.Arguments[i].Visit(new Func<Expression,bool>(BuildExpression));
+
+									if (i + 1 < ne.Members.Count)
+										_exprBuilder.Append(",");
+								}
+
+								PopIndent();
+								_exprBuilder.AppendLine().Append(_indent).Append("}");
+							}
+						}
+						else
+						{
+							_exprBuilder.AppendFormat("new {0}(", GetTypeName(ne.Type));
+
+							for (var i = 0; i < ne.Arguments.Count; i++)
+							{
+								ne.Arguments[i].Visit(new Func<Expression,bool>(BuildExpression));
+								if (i + 1 < ne.Arguments.Count)
+									_exprBuilder.Append(", ");
+							}
+
+							_exprBuilder.Append(")");
+						}
+
+						return false;
+					}
+
+				case ExpressionType.MemberInit:
+					{
+						Func<MemberBinding,bool> modify = b =>
+						{
+							switch (b.BindingType)
+							{
+								case MemberBindingType.Assignment    :
+									var ma = (MemberAssignment)b;
+									_exprBuilder.AppendFormat("{0} = ", ma.Member.Name);
+									ma.Expression.Visit(new Func<Expression,bool>(BuildExpression));
+									break;
+								default:
+									_exprBuilder.Append(b.ToString());
+									break;
+							}
+
+							return true;
+						};
+
+						var e = (MemberInitExpression)expr;
+
+						e.NewExpression.Visit(new Func<Expression,bool>(BuildExpression));
+
+						if (e.Bindings.Count == 1)
+						{
+							_exprBuilder.Append(" { ");
+							modify(e.Bindings[0]);
+							_exprBuilder.Append(" }");
+						}
+						else
+						{
+							_exprBuilder.AppendLine().Append(_indent).Append("{");
+
+							PushIndent();
+
+							for (var i = 0; i < e.Bindings.Count; i++)
+							{
+								_exprBuilder.AppendLine().Append(_indent);
+								modify(e.Bindings[i]);
+								if (i + 1 < e.Bindings.Count)
+									_exprBuilder.Append(",");
+							}
+
+							PopIndent();
+							_exprBuilder.AppendLine().Append(_indent).Append("}");
+						}
+
+						return false;
+					}
+
+				case ExpressionType.NewArrayInit:
+					{
+						var e = (NewArrayExpression)expr;
+
+						_exprBuilder.AppendFormat("new {0}[]", GetTypeName(e.Type.GetElementType()));
+
+						if (e.Expressions.Count == 1)
+						{
+							_exprBuilder.Append(" { ");
+							e.Expressions[0].Visit(new Func<Expression,bool>(BuildExpression));
+							_exprBuilder.Append(" }");
+						}
+						else
+						{
+							_exprBuilder.AppendLine().Append(_indent).Append("{");
+
+							PushIndent();
+
+							for (var i = 0; i < e.Expressions.Count; i++)
+							{
+								_exprBuilder.AppendLine().Append(_indent);
+								e.Expressions[i].Visit(new Func<Expression,bool>(BuildExpression));
+								if (i + 1 < e.Expressions.Count)
+									_exprBuilder.Append(",");
+							}
+
+							PopIndent();
+							_exprBuilder.AppendLine().Append(_indent).Append("}");
+						}
+
+						return false;
+					}
+
+				case ExpressionType.TypeIs:
+					{
+						var e = (TypeBinaryExpression)expr;
+
+						_exprBuilder.Append("(");
+						e.Expression.Visit(new Func<Expression, bool>(BuildExpression));
+						_exprBuilder.AppendFormat(" is {0})", e.TypeOperand);
+
+						return false;
+					}
+
+				case ExpressionType.ListInit:
+					{
+						var e = (ListInitExpression)expr;
+
+						e.NewExpression.Visit(new Func<Expression,bool>(BuildExpression));
+
+						if (e.Initializers.Count == 1)
+						{
+							_exprBuilder.Append(" { ");
+							e.Initializers[0].Arguments[0].Visit(new Func<Expression, bool>(BuildExpression));
+							_exprBuilder.Append(" }");
+						}
+						else
+						{
+							_exprBuilder.AppendLine().Append(_indent).Append("{");
+
+							PushIndent();
+
+							for (var i = 0; i < e.Initializers.Count; i++)
+							{
+								_exprBuilder.AppendLine().Append(_indent);
+								e.Initializers[i].Arguments[0].Visit(new Func<Expression,bool>(BuildExpression));
+								if (i + 1 < e.Initializers.Count)
+									_exprBuilder.Append(",");
+							}
+
+							PopIndent();
+							_exprBuilder.AppendLine().Append(_indent).Append("}");
+						}
+
+						return false;
+					}
+
+				case ExpressionType.Invoke:
+					{
+						var e = (InvocationExpression)expr;
+
+						_exprBuilder.Append("Expression.Invoke(");
+						e.Expression.Visit(new Func<Expression,bool>(BuildExpression));
+						_exprBuilder.Append(", (");
+
+						for (var i = 0; i < e.Arguments.Count; i++)
+						{
+							e.Arguments[i].Visit(new Func<Expression,bool>(BuildExpression));
+							if (i + 1 < e.Arguments.Count)
+								_exprBuilder.Append(", ");
+						}
+						_exprBuilder.Append("))");
+
+						return false;
+					}
 
 				default:
 					_exprBuilder.AppendLine("// Unknown expression.").Append(_indent).Append(expr);
@@ -146,7 +496,7 @@ namespace BLToolkit.Data.Linq.Builder
 		void BuildType(Type type)
 		{
 			if (type.Namespace != null && type.Namespace.StartsWith("System") ||
-				type.Name.StartsWith("<>f__AnonymousType")                    ||
+				IsAnonymous(type)                                             ||
 				type.Assembly == GetType().Assembly                           ||
 				type.IsGenericType && type.GetGenericTypeDefinition() != type)
 				return;
@@ -271,14 +621,18 @@ namespace {0}
 					attrs.Count > 0 ? attrs.Select(a => "\n\t" + a.ToString()).Aggregate((a1,a2) => a1 + a2) : "",
 					members.Length > 0 ?
 						(ctors.Count != 0 ? "\n" : "") + members.Aggregate((f1,f2) => f1 + "\n" + f2) :
-						""
-					);
+						"");
 			}
 		}
 
 		string GetTypeNames(IEnumerable<Type> types, string separator = ", ")
 		{
-			return types.Select(GetTypeName).Aggregate((t1,t2) => t1 + separator + t2);
+			return types.Select(GetTypeName).Aggregate("", (t1,t2) => t1 + separator + t2, p => p.TrimStart(separator.ToCharArray()));
+		}
+
+		bool IsAnonymous(Type type)
+		{
+			return type.Name.StartsWith("<>f__AnonymousType");
 		}
 
 		string GetTypeName(Type type)
@@ -294,7 +648,7 @@ namespace {0}
 			if (_typeNames.TryGetValue(type, out name))
 				return name;
 
-			if (type.Name.StartsWith("<>f__AnonymousType"))
+			if (IsAnonymous(type))
 			{
 				_typeNames[type] = null;
 				return null;
@@ -316,9 +670,16 @@ namespace {0}
 				if (idx > 0)
 					name = name.Substring(0, idx);
 
-				name = string.Format("{0}<{1}>",
-					name,
-					args.Select(GetTypeName).Aggregate((s,t) => s + "," + t));
+				if (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					name = string.Format("{0}?", GetTypeName(args[0]));
+				}
+				else
+				{
+					name = string.Format("{0}<{1}>",
+						name,
+						args.Select(GetTypeName).Aggregate("", (s,t) => s + "," + t, p => p.TrimStart(',')));
+				}
 
 				_typeNames[type] = name;
 
@@ -348,6 +709,11 @@ namespace {0}
 
 							if (gmd != ex.Method)
 								_usedMembers.Add(gmd);
+
+							var ga = ex.Method.GetGenericArguments();
+
+							foreach (var type in ga)
+								_usedMembers.Add(type);
 						}
 
 						break;
@@ -440,7 +806,7 @@ namespace {0}
 				if (!Directory.Exists(dir))
 					Directory.CreateDirectory(dir);
 
-				var number = DateTime.Now.Ticks;
+				var number = 0;//DateTime.Now.Ticks;
 
 				fileName = Path.Combine(dir, "ExpressionTest." + number  + ".cs");
 

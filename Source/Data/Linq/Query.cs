@@ -131,7 +131,12 @@ namespace BLToolkit.Data.Linq
 					{
 						if (Configuration.Linq.GenerateExpressionTest)
 						{
+#if FW4 || SILVERLIGHT
 							var testFile = new ExpressionTestGenerator().GenerateSource(expr);
+#else
+							var testFile = "";
+#endif
+
 #if !SILVERLIGHT
 							DbManager.WriteTraceLine(
 								"Expression test code generated: '" + testFile + "'.", 
@@ -520,8 +525,10 @@ namespace BLToolkit.Data.Linq
 				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema)
 			};
 
-			if (field.SystemType.IsEnum)
-				param.SqlParameter.SetEnumConverter(field.SystemType, dataContext.MappingSchema);
+			if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))
+			{
+				param.SqlParameter.SetEnumConverter(field.MemberMapper.ComplexMemberAccessor, dataContext.MappingSchema);
+			}
 
 			return param;
 		}
@@ -976,7 +983,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
+		Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> GetQuery()
 		{
 			FinalizeQuery();
 
@@ -1025,6 +1032,12 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
+			return query;
+		}
+
+		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
+		{
+			var query = GetQuery();
 			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
 		}
 
@@ -1041,6 +1054,29 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var dr in data)
 				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+		}
+
+		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)
+		{
+			var query = GetQuery();
+			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
+		}
+
+		static IEnumerable<T> Map(
+			IEnumerable<IDataReader> data,
+			QueryContext             queryContext,
+			IDataContextInfo         dataContextInfo,
+			Expression               expr,
+			object[]                 ps,
+			Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)
+		{
+			if (queryContext == null)
+				queryContext = new QueryContext(dataContextInfo, expr, ps);
+
+			var counter = 0;
+
+			foreach (var dr in data)
+				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps, counter++);
 		}
 
 		#endregion

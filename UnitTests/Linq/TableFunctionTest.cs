@@ -93,7 +93,7 @@ namespace Data.Linq
 			}
 		}
 
-		[Test]
+        [Test, Category("FULLTEXT")]
 		public void FreeText1()
 		{
 			using (var db = new NorthwindDB())
@@ -108,7 +108,7 @@ namespace Data.Linq
 			}
 		}
 
-		[Test]
+        [Test, Category("FULLTEXT")]
 		public void FreeText2()
 		{
 			using (var db = new NorthwindDB())
@@ -123,7 +123,7 @@ namespace Data.Linq
 			}
 		}
 
-		[Test]
+		[Test, Category("FULLTEXT")]
 		public void FreeText3()
 		{
 			using (var db = new NorthwindDB())
