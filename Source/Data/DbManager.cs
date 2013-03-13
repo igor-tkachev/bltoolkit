@@ -2622,7 +2622,9 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+                            p = value != null
+                                ? Parameter(baseParameters[i].ParameterName + nRows, value)
+                                : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
 						}
 
 						parameters.Add(p);
