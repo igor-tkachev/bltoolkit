@@ -1334,7 +1334,8 @@ namespace BLToolkit.Data.Linq.Builder
 				default: throw new InvalidOperationException();
 			}
 
-			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert)
+			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert
+				|| left.NodeType == ExpressionType.MemberAccess || right.NodeType == ExpressionType.MemberAccess)
 			{
 				var p = ConvertEnumConversion(context, left, op, right);
 				if (p != null)
