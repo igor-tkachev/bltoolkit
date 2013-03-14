@@ -107,6 +107,16 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+        public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+        {
+            switch (number)
+            {
+                case 19:
+                    return DataExceptionType.ConstraintViolation;
+            }
+            return DataExceptionType.undefined;
+        }
+
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
 			if (parameter.Direction == ParameterDirection.Input || parameter.Direction == ParameterDirection.InputOutput)
