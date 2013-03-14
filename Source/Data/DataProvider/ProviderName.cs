@@ -9,6 +9,7 @@ namespace BLToolkit.Data.DataProvider
 		public const string Firebird      = "Fdp";
 		public const string Informix      = "Informix";
 		public const string MsSql         = "Sql";
+		public const string MsSql2000     = "MsSql2000";
 		public const string MsSql2008     = "MsSql2008";
 		public const string MySql         = "MySql";
 		public const string Odbc          = "Odbc";

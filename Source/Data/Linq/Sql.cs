@@ -151,6 +151,7 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty(              "DateTime",       ServerSideOnly=true)] public static DateTime       DateTime                          { get { return DateTime.Now; } }
 
+		[SqlProperty("MsSql2000",  "DateTime",       ServerSideOnly=true)]
 		[SqlProperty("MsSql2005",  "DateTime",       ServerSideOnly=true)]
 		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
@@ -165,6 +166,7 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("SqlCe",      "DateTime",       ServerSideOnly=true)]
 		[SqlProperty(              "SmallDateTime",  ServerSideOnly=true)] public static DateTime       SmallDateTime                     { get { return DateTime.Now; } }
 
+		[SqlProperty("MsSql2000",  "Datetime",       ServerSideOnly=true)]
 		[SqlProperty("MsSql2005",  "Datetime",       ServerSideOnly=true)]
 		[SqlProperty("SqlCe",      "Datetime",       ServerSideOnly=true)]
 		[SqlProperty(              "Date",           ServerSideOnly=true)] public static DateTime       Date                              { get { return DateTime.Now; } }
@@ -217,6 +219,7 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction(                            PreferServerSide = true)]
 		[SqlFunction("Access",    "Len",         PreferServerSide = true)]
 		[SqlFunction("Firebird",  "Char_Length", PreferServerSide = true)]
+		[SqlFunction("MsSql2000", "Len",         PreferServerSide = true)]
 		[SqlFunction("MsSql2005", "Len",         PreferServerSide = true)]
 		[SqlFunction("MsSql2008", "Len",         PreferServerSide = true)]
 		[SqlFunction("SqlCe",     "Len",         PreferServerSide = true)]
@@ -439,6 +442,7 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction(                             PreferServerSide = true)]
 		[SqlFunction("Access",    "Len",          PreferServerSide = true)]
 		[SqlFunction("Firebird",  "Octet_Length", PreferServerSide = true)]
+		[SqlFunction("MsSql2000", "DataLength",   PreferServerSide = true)]
 		[SqlFunction("MsSql2005", "DataLength",   PreferServerSide = true)]
 		[SqlFunction("MsSql2008", "DataLength",   PreferServerSide = true)]
 		[SqlFunction("SqlCe",     "DataLength",   PreferServerSide = true)]
@@ -692,6 +696,7 @@ namespace BLToolkit.Data.Linq
 
 		[CLSCompliant(false)]
 		[SqlFunction( "MsSql2008", "Atn2")]
+		[SqlFunction( "MsSql2000", "Atn2")]
 		[SqlFunction( "MsSql2005", "Atn2")]
 		[SqlFunction( "DB2",       "Atan2", 1, 0)]
 		[SqlFunction( "SqlCe",     "Atn2")]
@@ -841,6 +846,7 @@ namespace BLToolkit.Data.Linq
 
 		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
+		[SqlExpression("MsSql2000",  "Round({0}, 0, 1)")]
 		[SqlExpression("DB2",        "Truncate({0}, 0)")]
 		[SqlExpression("Informix",   "Trunc({0}, 0)")]
 		[SqlExpression("Oracle",     "Trunc({0}, 0)")]
@@ -860,6 +866,7 @@ namespace BLToolkit.Data.Linq
 
 		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
+		[SqlExpression("MsSql2000",  "Round({0}, 0, 1)")]
 		[SqlExpression("DB2",        "Truncate({0}, 0)")]
 		[SqlExpression("Informix",   "Trunc({0}, 0)")]
 		[SqlExpression("Oracle",     "Trunc({0}, 0)")]

@@ -247,6 +247,7 @@ namespace BLToolkit.Data
 		{
 			AddDataProvider(new Sql2008DataProvider());
 			AddDataProvider(new SqlDataProvider());
+			AddDataProvider(new Sql2000DataProvider());
 			AddDataProvider(new AccessDataProvider());
 			AddDataProvider(new OleDbDataProvider());
 			AddDataProvider(new OdbcDataProvider());
@@ -340,8 +341,8 @@ namespace BLToolkit.Data
 					// This hack should be redone.
 					//
 					var provider = css.ProviderName == "System.Data.SqlClient" ?
-						configurationString.IndexOf("2008") >= 0 ?
-							"MSSQL2008" :
+						configurationString.IndexOf("2008") >= 0 ? "MSSQL2008" :
+						configurationString.IndexOf("2000") >= 0 ? "MSSQL2000" :
 							css.ProviderName :
 						css.ProviderName;
 

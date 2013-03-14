@@ -451,6 +451,7 @@ VALUES
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
 GO
 
+-- SKIP Sql2000 BEGIN
 -- SKIP Sql2005 BEGIN
 --
 -- Arrays
@@ -479,6 +480,7 @@ BEGIN
 END
 GO
 -- SKIP Sql2005 END
+-- SKIP Sql2000 END
 
 DROP FUNCTION GetParentByID
 GO
@@ -510,6 +512,7 @@ IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('LinqDataTypes'
 BEGIN DROP TABLE LinqDataTypes END
 GO
 
+-- SKIP Sql2000 BEGIN
 -- SKIP Sql2005 BEGIN
 CREATE TABLE LinqDataTypes
 (
@@ -526,6 +529,7 @@ CREATE TABLE LinqDataTypes
 )
 GO
 -- SKIP Sql2005 END
+-- SKIP Sql2000 END
 
 -- SKIP Sql2008 BEGIN
 CREATE TABLE LinqDataTypes
