@@ -7,6 +7,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class MsSql2000SqlProvider : MsSqlSqlProvider
 	{
+		protected override string FirstFormat              { get { return "TOP {0}"; } }
+
+		public    override bool   IsSkipSupported          { get { return false;     } }
+		public    override bool   IsApplyJoinSupported     { get { return false;     } }
+		public    override bool   TakeAcceptsParameter     { get { return false;     } }
+		public    override bool   IsCountSubQuerySupported { get { return false;     } }
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);

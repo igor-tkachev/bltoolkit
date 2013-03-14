@@ -1382,7 +1382,7 @@ namespace Update
 		public void Insert14()
 		{
 			ForEachProvider(
-				new [] { ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.Sybase },
+				new [] { ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.Sybase },
 				db =>
 				{
 					try

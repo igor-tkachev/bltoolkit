@@ -1,19 +1,6 @@
---CREATE DATABASE BLToolkitData ON PRIMARY
---(NAME=N'BLToolkitTest',     FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData.mdf',     SIZE=3072KB, FILEGROWTH=1024KB)
---LOG ON 
---(NAME=N'BLToolkitTest_log', FILENAME=N'C:\Data\MSSQL.1\MSSQL\DATA\BLToolkitData_log.ldf', SIZE=1024KB, FILEGROWTH=10%)
---GO
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Doctor') AND type in (N'U'))
-BEGIN DROP TABLE Doctor END
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Patient') AND type in (N'U'))
-BEGIN DROP TABLE Patient END
-
--- Person Table
-
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('Person') AND type in (N'U'))
-BEGIN DROP TABLE Person END
+DROP TABLE Doctor
+DROP TABLE Patient
+DROP TABLE Person
 
 CREATE TABLE Person
 (
@@ -69,9 +56,7 @@ GO
 
 -- Person_SelectByKey
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectByKey')
-BEGIN DROP Procedure Person_SelectByKey
-END
+DROP Procedure Person_SelectByKey
 GO
 
 CREATE Procedure Person_SelectByKey
@@ -87,8 +72,7 @@ GO
 
 -- Person_SelectAll
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectAll')
-BEGIN DROP Procedure Person_SelectAll END
+DROP Procedure Person_SelectAll
 GO
 
 CREATE Procedure Person_SelectAll
@@ -103,8 +87,7 @@ GO
 
 -- Person_SelectByName
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectByName')
-BEGIN DROP Procedure Person_SelectByName END
+DROP Procedure Person_SelectByName
 GO
 
 CREATE Procedure Person_SelectByName
@@ -126,9 +109,7 @@ GO
 
 -- Person_SelectListByName
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_SelectListByName')
-BEGIN DROP Procedure Person_SelectListByName
-END
+DROP Procedure Person_SelectListByName
 GO
 
 CREATE Procedure Person_SelectListByName
@@ -150,8 +131,7 @@ GO
 
 -- Person_Insert
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Insert')
-BEGIN DROP Procedure Person_Insert END
+DROP Procedure Person_Insert
 GO
 
 CREATE Procedure Person_Insert
@@ -175,8 +155,7 @@ GO
 
 -- Person_Insert_OutputParameter
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Insert_OutputParameter')
-BEGIN DROP Procedure Person_Insert_OutputParameter END
+DROP Procedure Person_Insert_OutputParameter
 GO
 
 CREATE Procedure Person_Insert_OutputParameter
@@ -201,8 +180,7 @@ GO
 
 -- Person_Update
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Update')
-BEGIN DROP Procedure Person_Update END
+DROP Procedure Person_Update
 GO
 
 CREATE Procedure Person_Update
@@ -230,8 +208,7 @@ GO
 
 -- Person_Delete
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Person_Delete')
-BEGIN DROP Procedure Person_Delete END
+DROP Procedure Person_Delete
 GO
 
 CREATE Procedure Person_Delete
@@ -247,8 +224,7 @@ GO
 
 -- Patient_SelectAll
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Patient_SelectAll')
-BEGIN DROP Procedure Patient_SelectAll END
+DROP Procedure Patient_SelectAll
 GO
 
 CREATE Procedure Patient_SelectAll
@@ -268,8 +244,7 @@ GO
 
 -- Patient_SelectByName
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Patient_SelectByName')
-BEGIN DROP Procedure Patient_SelectByName END
+DROP Procedure Patient_SelectByName
 GO
 
 CREATE Procedure Patient_SelectByName
@@ -292,8 +267,7 @@ GO
 
 -- BinaryData Table
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('BinaryData') AND type in (N'U'))
-BEGIN DROP TABLE BinaryData END
+DROP TABLE BinaryData
 
 CREATE TABLE BinaryData
 (
@@ -305,8 +279,7 @@ GO
 
 -- OutRefTest
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'OutRefTest')
-BEGIN DROP Procedure OutRefTest END
+DROP Procedure OutRefTest
 GO
 
 CREATE Procedure OutRefTest
@@ -327,8 +300,7 @@ GO
 
 -- OutRefEnumTest
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'OutRefEnumTest')
-BEGIN DROP Procedure OutRefEnumTest END
+DROP Procedure OutRefEnumTest
 GO
 
 CREATE Procedure OutRefEnumTest
@@ -344,8 +316,7 @@ GO
 
 -- ExecuteScalarTest
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Scalar_DataReader')
-BEGIN DROP Procedure Scalar_DataReader END
+DROP Procedure Scalar_DataReader
 GO
 
 CREATE Procedure Scalar_DataReader
@@ -354,8 +325,7 @@ SELECT Cast(12345 as int) AS intField, Cast('54321' as varchar(50)) AS stringFie
 
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'Scalar_OutputParameter')
-BEGIN DROP Procedure Scalar_OutputParameter END
+DROP Procedure Scalar_OutputParameter
 GO
 
 CREATE Procedure Scalar_OutputParameter
@@ -369,8 +339,7 @@ END
 
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type in (N'FN', N'IF', N'TF', N'FS', N'FT') AND name = 'Scalar_ReturnParameter')
-BEGIN DROP Function Scalar_ReturnParameter END
+DROP Function Scalar_ReturnParameter
 GO
 
 CREATE Function Scalar_ReturnParameter()
@@ -382,8 +351,7 @@ END
 
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE type ='P' AND name = 'Scalar_ReturnParameterWithObject')
-BEGIN DROP Procedure Scalar_ReturnParameterWithObject END
+DROP Procedure Scalar_ReturnParameterWithObject
 GO
 
 CREATE Procedure Scalar_ReturnParameterWithObject
@@ -398,8 +366,7 @@ GO
 
 -- Data Types test
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('DataTypeTest') AND type in (N'U'))
-BEGIN DROP TABLE DataTypeTest END
+DROP TABLE DataTypeTest
 GO
 
 CREATE TABLE DataTypeTest
@@ -425,7 +392,7 @@ CREATE TABLE DataTypeTest
 	UInt16_         smallint         NULL,
 	UInt32_         int              NULL,
 	UInt64_         bigint           NULL,
-	Xml_            xml              NULL
+	Xml_            nvarchar(2000)   NULL
 ) ON [PRIMARY]
 GO
 
@@ -451,34 +418,6 @@ VALUES
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
 GO
 
--- SKIP Sql2005 BEGIN
---
--- Arrays
---
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'ArrayTest')
-BEGIN DROP PROCEDURE ArrayTest END
-GO
-
---IF EXISTS (SELECT * FROM sys.objects WHERE type = 'T' AND name = 'IntArray')
---BEGIN
-	DROP TYPE IntArray
---END
-GO
-
-CREATE TYPE IntArray AS TABLE
-(
-	Num int NULL
-)
-GO
-
-CREATE PROCEDURE ArrayTest
-	@InputIntArray IntArray READONLY
-AS
-BEGIN
-	SELECT Num * 2 FROM @InputIntArray;
-END
-GO
--- SKIP Sql2005 END
 
 DROP FUNCTION GetParentByID
 GO
@@ -506,28 +445,9 @@ RETURN
 )
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('LinqDataTypes') AND type in (N'U'))
-BEGIN DROP TABLE LinqDataTypes END
+DROP TABLE LinqDataTypes
 GO
 
--- SKIP Sql2005 BEGIN
-CREATE TABLE LinqDataTypes
-(
-	ID             int,
-	MoneyValue     decimal(10,4),
-	DateTimeValue  datetime,
-	DateTimeValue2 datetime2,
-	BoolValue      bit,
-	GuidValue      uniqueidentifier,
-	BinaryValue    varbinary(5000),
-	SmallIntValue  smallint,
-	IntValue       int NULL,
-	BigIntValue    bigint NULL
-)
-GO
--- SKIP Sql2005 END
-
--- SKIP Sql2008 BEGIN
 CREATE TABLE LinqDataTypes
 (
 	ID             int,
@@ -542,7 +462,6 @@ CREATE TABLE LinqDataTypes
 	BigIntValue    bigint NULL
 )
 GO
--- SKIP Sql2008 END
 
 DROP TABLE TestIdentity
 GO

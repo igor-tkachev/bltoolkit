@@ -144,7 +144,7 @@ namespace Create
 		[Test] public void Firebird  ([IncludeDataContexts(ProviderName.Firebird  )] string context) { RunScript(context,           "COMMIT;", "Firebird2");  }
 		[Test] public void PostgreSQL([IncludeDataContexts(ProviderName.PostgreSQL)] string context) { RunScript(context,           "\nGO\n",  "PostgreSQL"); }
 		[Test] public void MySql     ([IncludeDataContexts(ProviderName.MySql     )] string context) { RunScript(context,           "\nGO\n",  "MySql");      }
-		[Test] public void Sql2000   ([IncludeDataContexts("Sql2000"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2000   ([IncludeDataContexts("Sql2000"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql2000");  }
 		[Test] public void Sql2005   ([IncludeDataContexts("Sql2005"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
 		[Test] public void Sql2008   ([IncludeDataContexts("Sql2008"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
 		[Test] public void SqlCe     ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context,           "\nGO\n",  "SqlCe");      }

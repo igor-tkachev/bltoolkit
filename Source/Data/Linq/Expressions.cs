@@ -759,6 +759,9 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Sql.Tanh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / (Sql.Exp(v) + Sql.Exp(-v))) },
 
 				{ M(() => DateTime.Parse("")), L<String,DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => Sql.RoundToEven(0m) ), L<M?,M?>(d => d - Sql.Floor(d) == 0.5m && (long)Sql.Floor(d) % 2 == 0? Sql.Floor(d) : Sql.Round(d)) },
+				{ M(() => Sql.RoundToEven(0.0)), L<F?,F?>(d => d - Sql.Floor(d) == 0.5  && (long)Sql.Floor(d) % 2 == 0? Sql.Floor(d) : Sql.Round(d)) },
+
 			}},
 
 			#endregion
