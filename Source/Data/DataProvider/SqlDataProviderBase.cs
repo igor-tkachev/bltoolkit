@@ -142,25 +142,21 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
-	    public virtual DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
-	    {
-	        switch (number)
-	        {
-	            case 1205:
-	                return DataExceptionType.Deadlock;
-	            case -2:
-	                return DataExceptionType.Timeout;
-	            case 547:
-	                return DataExceptionType.ForeignKeyViolation;
-	            case 2601:
-	                return DataExceptionType.UniqueIndexViolation;
-	            case 2627:
-	                return DataExceptionType.ConstraintViolation;
-	        }
-	        return DataExceptionType.undefined;
-	    }
+		public virtual DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			switch (number)
+			{
+				case 1205: return DataExceptionType.Deadlock;
+				case   -2: return DataExceptionType.Timeout;
+				case  547: return DataExceptionType.ForeignKeyViolation;
+				case 2601: return DataExceptionType.UniqueIndexViolation;
+				case 2627: return DataExceptionType.ConstraintViolation;
+			}
 
-	    /// <summary>
+			return DataExceptionType.Undefined;
+		}
+
+		/// <summary>
 		/// Returns connection type.
 		/// </summary>
 		/// <remarks>

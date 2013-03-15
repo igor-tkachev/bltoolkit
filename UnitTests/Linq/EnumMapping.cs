@@ -1111,9 +1111,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void EnumMapCustomPredicate1()
+		public void EnumMapCustomPredicate1([DataContexts] string context)
 		{
-			ForEachProvider(db =>
+			using (var db = GetDataContext(context))
 			{
 				using (new Cleaner(db))
 				{
@@ -1130,12 +1130,13 @@ namespace Data.Linq
 
 					Assert.AreEqual(1, result.Count);
 				}
-			});
+			}
 		}
+
 		[Test]
-		public void EnumMapCustomPredicate2()
+		public void EnumMapCustomPredicate2([DataContexts] string context)
 		{
-			ForEachProvider(db =>
+			using (var db = GetDataContext(context))
 			{
 				using (new Cleaner(db))
 				{
@@ -1152,7 +1153,7 @@ namespace Data.Linq
 
 					Assert.AreEqual(1, result.Count);
 				}
-			});
+			}
 		}
 
 		[TableName("LinqDataTypes")]

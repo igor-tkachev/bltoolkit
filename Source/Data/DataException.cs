@@ -119,15 +119,15 @@ namespace BLToolkit.Data
 			}
 		}
 
-	    public DataExceptionType DataExceptionType
-	    {
-	        get
-	        {
-	            if (_dbManager == null || Number == null) 
-                    return DataExceptionType.undefined;
-	            return _dbManager.DataProvider.ConvertErrorNumberToDataExceptionType(Number.Value);
-	        }
-	    }
+		public DataExceptionType DataExceptionType
+		{
+			get
+			{
+				if (_dbManager == null || Number == null) 
+					return DataExceptionType.Undefined;
+				return _dbManager.DataProvider.ConvertErrorNumberToDataExceptionType(Number.Value);
+			}
+		}
 
 		#endregion
 	}
