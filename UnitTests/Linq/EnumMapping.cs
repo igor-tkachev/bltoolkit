@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
-
+using System.Linq.Expressions;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -1109,6 +1108,52 @@ namespace Data.Linq
 						.Delete(r => r.Id == RID && r.TestField.Equals(TestEnum2.Value2)));
 				}
 			});
+		}
+
+		[Test]
+		public void EnumMapCustomPredicate1([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					var entityParameter = Expression.Parameter(typeof(TestTable1), "entity"); // parameter name required for BLToolkit
+					var filterExpression = Expression.Equal(Expression.Field(entityParameter, "TestField"), Expression.Constant(TestEnum1.Value2));
+					var filterPredicate = Expression.Lambda<Func<TestTable1, bool>>(filterExpression, entityParameter);
+					var result = db.GetTable<TestTable1>().Where(filterPredicate).ToList();
+
+					Assert.AreEqual(1, result.Count);
+				}
+			}
+		}
+
+		[Test]
+		public void EnumMapCustomPredicate2([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					var entityParameter = Expression.Parameter(typeof(TestTable2), "entity"); // parameter name required for BLToolkit
+					var filterExpression = Expression.Equal(Expression.Field(entityParameter, "TestField"), Expression.Constant(TestEnum2.Value2));
+					var filterPredicate = Expression.Lambda<Func<TestTable2, bool>>(filterExpression, entityParameter);
+					var result = db.GetTable<TestTable2>().Where(filterPredicate).ToList();
+
+					Assert.AreEqual(1, result.Count);
+				}
+			}
 		}
 
 		[TableName("LinqDataTypes")]

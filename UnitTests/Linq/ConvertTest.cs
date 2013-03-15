@@ -209,11 +209,12 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConvertToByte()
+		public void ConvertToByte([DataContexts] string context)
 		{
-			ForEachProvider(db => AreEqual(
-				from p in from t in    Types select Convert.ToByte(t.MoneyValue) where p > 0 select p,
-				from p in from t in db.Types select Convert.ToByte(t.MoneyValue) where p > 0 select p));
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from p in from t in    Types select Convert.ToByte(t.MoneyValue) where p > 0 select p,
+					from p in from t in db.Types select Convert.ToByte(t.MoneyValue) where p > 0 select p);
 		}
 
 		#endregion

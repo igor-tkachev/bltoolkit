@@ -14,7 +14,6 @@ using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 using BLToolkit.ServiceModel;
 
 using NUnit.Framework;
@@ -22,11 +21,9 @@ using NUnit.Framework;
 namespace Data.Linq
 {
 	using Model;
-    using System.Globalization;
-    using System.Threading;
 
-    // fix for failing tests due to use of "," vs "." in numbers parsing for some cultures
-    [SetCulture("")]
+	// fix for failing tests due to use of "," vs "." in numbers parsing for some cultures
+	[SetCulture("")]
 	public class TestBase
     {
         private static TestDbManager GetDbManager()
@@ -178,7 +175,7 @@ namespace Data.Linq
 		public static readonly List<string>       UserProviders = new List<string>();
 		public static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
-			new ProviderInfo("Sql2008",               null,                                          "BLToolkit.Data.DataProvider.Sql2008DataProvider"),			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",           "BLToolkit.Data.DataProvider.SqlCeDataProvider"),			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",          "BLToolkit.Data.DataProvider.SQLiteDataProvider"),			new ProviderInfo(ProviderName.Access,     null,                                          "BLToolkit.Data.DataProvider.AccessDataProvider"),#if !MOBILE			new ProviderInfo("Sql2005",               null,                                          "BLToolkit.Data.DataProvider.SqlDataProvider"),			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",             "BLToolkit.Data.DataProvider.DB2DataProvider"),			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",        "BLToolkit.Data.DataProvider.InformixDataProvider"),			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",        "BLToolkit.Data.DataProvider.FdpDataProvider"),			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",          "BLToolkit.Data.DataProvider.OdpDataProvider"),			new ProviderInfo("DevartOracle",          "BLToolkit.Data.DataProvider.DevartOracle",    "BLToolkit.Data.DataProvider.DevartOracleDataProvider"),			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL",      "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",           "BLToolkit.Data.DataProvider.MySqlDataProvider"),			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",          "BLToolkit.Data.DataProvider.SybaseDataProvider"),#endif		};
+			new ProviderInfo("Sql2008",               null,                                          "BLToolkit.Data.DataProvider.Sql2008DataProvider"),			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",           "BLToolkit.Data.DataProvider.SqlCeDataProvider"),			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",          "BLToolkit.Data.DataProvider.SQLiteDataProvider"),			new ProviderInfo(ProviderName.Access,     null,                                          "BLToolkit.Data.DataProvider.AccessDataProvider"),			new ProviderInfo("Sql2000",               null,                                          "BLToolkit.Data.DataProvider.Sql2000DataProvider"),			new ProviderInfo("Sql2005",               null,                                          "BLToolkit.Data.DataProvider.SqlDataProvider"),			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",             "BLToolkit.Data.DataProvider.DB2DataProvider"),			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",        "BLToolkit.Data.DataProvider.InformixDataProvider"),			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",        "BLToolkit.Data.DataProvider.FdpDataProvider"),			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",          "BLToolkit.Data.DataProvider.OdpDataProvider"),			new ProviderInfo("DevartOracle",          "BLToolkit.Data.DataProvider.DevartOracle",    "BLToolkit.Data.DataProvider.DevartOracleDataProvider"),			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL",      "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",           "BLToolkit.Data.DataProvider.MySqlDataProvider"),			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",          "BLToolkit.Data.DataProvider.SybaseDataProvider"),		};
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{

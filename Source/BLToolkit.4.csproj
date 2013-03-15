@@ -172,6 +172,9 @@
     <None Include="Data\DataProvider\PostgreSQLDataProvider.cs">
       <DependentUpon>DataProviderBase.cs</DependentUpon>
     </None>
+    <None Include="Data\DataProvider\GenericDataProvider.cs">
+      <DependentUpon>DataProviderBase.cs</DependentUpon>
+    </None>
     <Compile Include="Aspects\Builders\AsyncAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\InterceptorAspectBuilder.cs" />
     <Compile Include="Aspects\Builders\MixinAspectBuilder.cs" />
@@ -203,10 +206,10 @@
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
-    <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
-    <None Include="Data\DataProvider\GenericDataProvider.cs" />
-
     <Compile Include="DataAccess\ScalarAttribute.cs" />
+    <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
+    <Compile Include="Data\DataExceptionType.cs" />
+    <Compile Include="Data\DataProvider\Sql2000DataProvider.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\DataProvider\DataProviderInterpreterBase.cs" />
     <Compile Include="Data\DataProvider\Interpreters\OracleDataProviderInterpreter.cs" />
@@ -253,6 +256,7 @@
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />

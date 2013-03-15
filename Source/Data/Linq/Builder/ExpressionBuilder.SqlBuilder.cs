@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -1334,7 +1334,8 @@ namespace BLToolkit.Data.Linq.Builder
 				default: throw new InvalidOperationException();
 			}
 
-			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert)
+			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert
+                     || left.NodeType == ExpressionType.MemberAccess || right.NodeType == ExpressionType.MemberAccess)
 			{
 				var p = ConvertEnumConversion(context, left, op, right);
 				if (p != null)
@@ -1430,7 +1431,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (!TypeHelper.IsEnumOrNullableEnum(type))
 				return null;
 
-			var dic = new Dictionary<object, object>();
+			var dic = new Dictionary<object,object>();
 
 			var nullValue = MappingSchema.GetNullValue(type);
 
@@ -2488,5 +2489,5 @@ namespace BLToolkit.Data.Linq.Builder
 		}
 
 		#endregion
-    }
+	}
 }

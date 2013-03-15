@@ -187,6 +187,11 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+		public virtual DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			return DataExceptionType.Undefined;
+		}
+
 		public virtual void InitDbManager(DbManager dbManager)
 		{
 			var schema = MappingSchema;

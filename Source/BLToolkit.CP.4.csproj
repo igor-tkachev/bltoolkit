@@ -201,8 +201,10 @@
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
+    <Compile Include="Data\DataExceptionType.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\DataProvider\OracleHelper.cs" />
+    <Compile Include="Data\DataProvider\Sql2000DataProvider.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
@@ -242,6 +244,7 @@
     <Compile Include="Data\Linq\ITable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\QueryableAccessor.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />

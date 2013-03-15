@@ -326,7 +326,7 @@ namespace Data.Linq
 			ForEachProvider(
 				new[]
 				{
-					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.DB2, ProviderName.Informix,
 					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
@@ -350,7 +350,7 @@ namespace Data.Linq
 			ForEachProvider(
 				new[]
 				{
-					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.DB2, ProviderName.Informix,
 					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
@@ -377,7 +377,7 @@ namespace Data.Linq
 			ForEachProvider(
 				new[]
 				{
-					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.DB2, ProviderName.Informix,
 					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
