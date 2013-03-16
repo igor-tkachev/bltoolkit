@@ -16,25 +16,21 @@ namespace BLToolkit.Mapping
             _lazyLoader = lazyLoader;
         }
 
-        public bool Intercepted;
+        private bool _intercepted;
+
         public void Intercept(IInvocation invocation)
         {
             if (invocation.Method.Name.StartsWith("get_"))
             {
                 string propertyName = invocation.Method.Name.Substring(4);
-                var pi = invocation.TargetType.GetProperty(propertyName);
-
-                //// check that we have the attribute defined
-                //if (Attribute.GetCustomAttribute(pi, typeof(LazyInstanceAttribute)) == null)
-                //    return;
 
                 foreach (IMapper map in _mapper.PropertiesMapping)
                 {
                     if (map.PropertyName == propertyName)
                     {
-                        if (!Intercepted)
+                        if (!_intercepted)
                         {
-                            Intercepted = true;
+                            _intercepted = true;
                             map.Setter(invocation.Proxy, _lazyLoader(map, invocation.Proxy, invocation.TargetType));
                         }
                         break;
