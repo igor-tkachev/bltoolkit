@@ -206,7 +206,7 @@ namespace BLToolkit.Data.Linq
 			return Query<T>.InsertOrReplace(dataContextInfo, obj);
 		}
 
-        public static int InsertOrReplace<T>([NotNull] this IDataContextInfo dataContextInfo, T[] objs)
+        public static int InsertOrReplace<T>([NotNull] this IDataContextInfo dataContextInfo, IEnumerable<T> objs)
         {
             if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
             int cnt = 0;
@@ -228,7 +228,7 @@ namespace BLToolkit.Data.Linq
 			return Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
 		}
 
-        public static int InsertOrReplace<T>(this IDataContext dataContext, T[] objs)
+        public static int InsertOrReplace<T>(this IDataContext dataContext, IEnumerable<T> objs)
         {
             int cnt = 0;
             foreach (var obj in objs)
