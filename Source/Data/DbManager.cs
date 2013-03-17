@@ -158,6 +158,11 @@ namespace BLToolkit.Data
 			set { _canRaiseEvents = value; }
 		}
 
+        /// <summary>
+        /// Use plain text query instead of using command parameters
+        /// </summary>
+        public bool UseQueryText { get; set; }
+
 		#endregion
 
 		#region Connection
