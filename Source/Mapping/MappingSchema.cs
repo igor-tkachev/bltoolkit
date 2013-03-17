@@ -3051,7 +3051,7 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToList
 
-		public IList MapDataReaderToList(
+		public virtual IList MapDataReaderToList(
 			IDataReader     reader,
 			IList           list,
 			Type            destObjectType,
