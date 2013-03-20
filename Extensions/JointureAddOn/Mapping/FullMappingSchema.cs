@@ -9,6 +9,7 @@ using System.Reflection;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
+using BLToolkit.Reflection.Extension;
 using BLToolkit.TypeBuilder;
 using Castle.DynamicProxy;
 
@@ -25,18 +26,36 @@ namespace BLToolkit.Mapping
         private readonly MappingOrder _mappingOrder;
         private DataTable _schema;
         private List<string> _schemaColumns;
+        private MappingSchema _parentMappingSchema;
 
+        private ExtensionList _extensions;
         #endregion
 
-        public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false,
-            MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
+        public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, MappingSchema parentMappingSchema = null)
         {
             _db = db;
+            _parentMappingSchema = parentMappingSchema;
             _ignoreLazyLoad = ignoreLazyLoad;
             _mappingOrder = mappingOrder;
         }
 
         #region Overrides
+
+        public override ExtensionList Extensions
+        {
+            get
+            {
+                if (_parentMappingSchema != null) 
+                    return this._parentMappingSchema.Extensions;
+                return _extensions;
+            }
+            set
+            {
+                if (_parentMappingSchema != null) 
+                    this._parentMappingSchema.Extensions = value;
+                _extensions = value;
+            }
+        }
 
         protected override ObjectMapper CreateObjectMapperInstance(Type type)
         {

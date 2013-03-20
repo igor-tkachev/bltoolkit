@@ -187,14 +187,14 @@ namespace BLToolkit.DataAccess
                             continue;
                     }
 
-                    string thisKey = objectMapper.Association.ThisKey;
+                    string thisKey = objectMapper.Association.ThisKey[0];
 
                     // TITLE
                     string parentDbField = valueMappers.ContainsKey(thisKey) ? valueMappers[thisKey].ColumnName : thisKey;
 
                     // ARTIST
                     string childDbField = objectMapper.PropertiesMapping.Where(e => e is ValueMapper).Cast<ValueMapper>().First(
-                        e => e.PropertyName == objectMapper.Association.OtherKey).ColumnName;
+                        e => e.PropertyName == objectMapper.Association.OtherKey[0]).ColumnName;
 
                     string childDatabase = GetDatabaseName(mapField.PropertyType);
                     string childOwner = base.GetOwnerName(mapField.PropertyType);
