@@ -272,6 +272,23 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void MutiplySelect12([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var db = (TestDbManager)GetDataContext(context))
+			{
+				var q =
+					from grandChild in db.GrandChild
+					from child in db.Child
+					where grandChild.ChildID.HasValue
+					select grandChild;
+				q.ToList();
+
+				var selectCount = db.LastQuery.Split(' ', '\t', '\n', '\r').Count(s => s.Equals("select", StringComparison.InvariantCultureIgnoreCase));
+				Assert.AreEqual(1, selectCount, "Why do we need \"select from select\"??");
+			}
+		}
+
+		[Test]
 		public void Coalesce()
 		{
 			ForEachProvider(db =>
