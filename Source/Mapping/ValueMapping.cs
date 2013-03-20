@@ -23,7 +23,13 @@ namespace BLToolkit.Mapping
 				IMapDataSource      source, object sourceObject, int sourceIndex,
 				IMapDataDestination dest,   object destObject,   int destIndex)
 			{
-				dest.SetValue(destObject, destIndex, source.GetValue(sourceObject, sourceIndex));
+                var val = source.GetValue(sourceObject, sourceIndex);
+
+                dest.SetValue(destObject, destIndex, val);
+
+                // some objects (like oracle blobs) are disposable
+                var disp = val as IDisposable;
+                if (disp != null) disp.Dispose();
 
 				//object o = source.GetValue(sourceObject, sourceIndex);
 
