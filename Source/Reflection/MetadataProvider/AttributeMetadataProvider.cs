@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
+using BLToolkit.TypeBuilder;
+
 namespace BLToolkit.Reflection.MetadataProvider
 {
 	using DataAccess;
@@ -172,6 +174,57 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+        #region GetMapField
+
+        public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr = member.GetAttribute<MapFieldAttribute>() ?? (MapFieldAttribute)TypeHelper.GetFirstAttribute(member.Type, typeof(MapFieldAttribute));
+
+            if (attr != null)
+            {
+                isSet = true;
+                return attr;
+            }
+
+            return base.GetMapField(typeExtension, member, out isSet);
+        }
+
+        #endregion
+
+        #region GetDbType
+
+        public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr = member.GetAttribute<DbTypeAttribute>() ?? (DbTypeAttribute)TypeHelper.GetFirstAttribute(member.Type, typeof(DbTypeAttribute));
+
+            if (attr != null)
+            {
+                isSet = true;
+                return attr;
+            }
+
+            return base.GetDbType(typeExtension, member, out isSet);
+        }
+
+        #endregion
+
+        #region GetPrimaryKey
+
+        public override PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr = member.GetAttribute<PrimaryKeyAttribute>() ?? (PrimaryKeyAttribute)TypeHelper.GetFirstAttribute(member.Type, typeof(PrimaryKeyAttribute));
+
+            if (attr != null)
+            {
+                isSet = true;
+                return attr;
+            }
+
+            return base.GetPrimaryKey(typeExtension, member, out isSet);
+        }
+
+        #endregion
 
 		#region GetTrimmable
 
@@ -433,6 +486,31 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+        #region GetLazyInstance
+
+        public override bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var attr1 = member.GetAttribute<LazyInstanceAttribute>();
+
+            if (attr1 != null)
+            {
+                isSet = true;
+                return attr1.IsLazy;
+            }
+
+            attr1 = (LazyInstanceAttribute)TypeHelper.GetFirstAttribute(member.MemberInfo.DeclaringType, typeof(LazyInstanceAttribute));
+
+            if (attr1 != null)
+            {
+                isSet = true;
+                return attr1.IsLazy;
+            }
+
+            return base.GetLazyInstance(mappingSchema, typeExtension, member, out isSet);
+        }
+
+        #endregion
 
 		#region GetNullValue
 

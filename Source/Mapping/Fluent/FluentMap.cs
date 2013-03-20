@@ -292,6 +292,20 @@ namespace BLToolkit.Mapping.Fluent
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
 
+        /// <summary>
+        /// LazyInstanceAttribute
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <param name="isLazy"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> LazyInstance<TR>(Expression<Func<T, TR>> prop, bool isLazy = true)
+        {
+#warning need test
+            string name = this.GetExprName(prop);
+            ((IFluentMap)this).LazyInstance(name, isLazy);
+            return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
+        }
+
 		/// <summary>
 		/// NullValueAttribute
 		/// </summary>
