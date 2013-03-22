@@ -25,8 +25,7 @@ namespace BLToolkit.Mapping.Fluent
 		/// </summary>
 		public FluentMap()
 			: this(new TypeExtension { Name = typeof(T).FullName }, null)
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// ctor
@@ -37,6 +36,11 @@ namespace BLToolkit.Mapping.Fluent
 		{
 			this._typeExtension = typeExtension;
 			this._childs = childs;
+
+            if (FluentConfig.MappingConfigurator.GetTableName != null)
+            {
+                this.TableName(null, null, FluentConfig.MappingConfigurator.GetTableName(typeof(T)));
+            }
 		}
 
 		/// <summary>
@@ -97,6 +101,12 @@ namespace BLToolkit.Mapping.Fluent
 		public MapFieldMap<T, TR> MapField<TR>(Expression<Func<T, TR>> prop, string mapName = null, string storage = null, bool? isInheritanceDiscriminator = null)
 		{
 			string name = this.GetExprName(prop);
+
+            if (mapName == null && FluentConfig.MappingConfigurator.GetColumnName != null)
+            {
+                mapName = FluentConfig.MappingConfigurator.GetColumnName(new MappedProperty() { Name = name, Type = typeof(TR), ParentType = typeof(T) });
+            }
+
 			((IFluentMap)this).MapField(name, mapName, storage, isInheritanceDiscriminator);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
@@ -111,7 +121,7 @@ namespace BLToolkit.Mapping.Fluent
 			}
 			var attributeExtension = new AttributeExtension();
 			attributeExtension.Values.Add(Attributes.MapField.OrigName, origName);
-			attributeExtension.Values.Add(Attributes.MapField.MapName, mapName);
+            attributeExtension.Values.Add(Attributes.MapField.MapName, mapName);
 			attrs.Add(attributeExtension);
 		}
 
