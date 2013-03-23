@@ -116,6 +116,15 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Any61([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+				Assert.AreEqual(
+					            Child.   Any(c => c.ParentID > 3),
+					db.GetTable<Child>().Any(c => c.ParentID > 3));
+		}
+
+		[Test]
 		public void Any7()
 		{
 			ForEachProvider(db => Assert.AreEqual(Child.Any(), db.Child.Any()));
