@@ -1569,6 +1569,14 @@ namespace BLToolkit.Reflection
 				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
 
+		public static bool IsNullableHasValueMember(MemberInfo member)
+		{
+			return
+				member.Name == "HasValue" &&
+				member.DeclaringType.IsGenericType &&
+				member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>);
+		}
+
 		public static bool Equals(MemberInfo member1, MemberInfo member2)
 		{
 			return Equals(member1, member2, null);
