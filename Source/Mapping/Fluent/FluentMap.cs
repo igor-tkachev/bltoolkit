@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
@@ -312,6 +313,8 @@ namespace BLToolkit.Mapping.Fluent
         {
 #warning need test
             string name = this.GetExprName(prop);
+            if (!GetIsVirtual(prop))
+                throw new Exception("Property wich uses LazyInstance needs to be virtual!");
             ((IFluentMap)this).LazyInstance(name, isLazy);
             return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
         }
@@ -635,6 +638,20 @@ namespace BLToolkit.Mapping.Fluent
 			return result;
 		}
 
+        private bool GetIsVirtual<TT, TR>(Expression<Func<TT, TR>> prop)
+        {
+            var memberExpression = prop.Body as MemberExpression;
+            if (memberExpression != null)
+            {
+                var prpInfo = memberExpression.Member as PropertyInfo;
+                if (prpInfo != null && !prpInfo.GetGetMethod().IsVirtual)
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
 		/// <summary>
 		/// Invert for BLToolkit.Reflection.Extension.TypeExtension.ToBoolean()
 		/// </summary>
