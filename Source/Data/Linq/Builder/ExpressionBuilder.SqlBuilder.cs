@@ -71,7 +71,8 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							var ma = (MemberExpression)expr;
 
-							if (TypeHelper.IsNullableValueMember(ma.Member))
+							if (TypeHelper.IsNullableValueMember(ma.Member) ||
+							    TypeHelper.IsNullableHasValueMember(ma.Member))
 								break;
 
 							if (SqlProvider.ConvertMember(ma.Member) == null)
