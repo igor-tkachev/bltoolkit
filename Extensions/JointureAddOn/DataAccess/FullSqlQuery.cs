@@ -213,7 +213,7 @@ namespace BLToolkit.DataAccess
                             ? null
                             : db.DataProvider.Convert(childName, ConvertType.NameToQueryTable).ToString());
 
-                    sb.AppendFormat("\tINNER JOIN {0} {1} ON {2}.{3}={4}.{5}\n",
+                    sb.AppendFormat("\tFULL OUTER JOIN {0} {1} ON {2}.{3}={4}.{5}\n",
                                     childFullName,
                                     childAlias,
                                     parentName,

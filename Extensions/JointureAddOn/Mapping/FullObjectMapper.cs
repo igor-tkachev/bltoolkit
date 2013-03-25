@@ -9,6 +9,7 @@ using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 using BLToolkit.TypeBuilder;
 using Castle.DynamicProxy;
 
@@ -128,6 +129,9 @@ namespace BLToolkit.Mapping
 
         private IMapper GetObjectMapper(IObjectMapper mapper, ref int startIndex, TypeAccessor akTypeAccessor)
         {
+            //Todo: Remove this Call!
+            _extension = TypeExtension.GetTypeExtension(mapper.PropertyType /*_typeAccessor.OriginalType*/, MappingSchema.Extensions);
+
             Type mapperType = mapper.PropertyType;
             var objectMappers = new List<IObjectMapper>();
 
@@ -217,7 +221,8 @@ namespace BLToolkit.Mapping
                             PropertyCollectionType = prop.PropertyType,
                         };
 
-                        ((FullObjectMapper)mapper).ColParent = true;
+                        if (mapper is FullObjectMapper)
+                            ((FullObjectMapper)mapper).ColParent = true;
                     }
 
                     if (association.ThisKey == null || association.ThisKey.Length == 0)

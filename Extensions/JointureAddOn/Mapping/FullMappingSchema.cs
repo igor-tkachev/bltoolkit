@@ -89,13 +89,27 @@ namespace BLToolkit.Mapping
                  FillObject(mapper, dataReader, destObject);
         }
 
+        public override IList<T> MapDataReaderToList<T>(IDataReader reader, IList<T> list, params object[] parameters)
+        {
+            return internalMapDataReaderToList(reader, (IList)list, typeof(T), parameters).Cast<T>().ToList();
+        }
+
         public override IList MapDataReaderToList(
             IDataReader reader,
             IList list,
             Type destObjectType,
             params object[] parameters)
         {
-            FullObjectMapper mapper = (FullObjectMapper) GetObjectMapper(destObjectType);
+            return internalMapDataReaderToList(reader, list, destObjectType, parameters);
+        }
+
+        private IList internalMapDataReaderToList(
+            IDataReader reader,
+            IList list,
+            Type destObjectType,
+            params object[] parameters)
+        {
+            FullObjectMapper mapper = (FullObjectMapper)GetObjectMapper(destObjectType);
 
             InitSchema(reader);
 
@@ -119,7 +133,7 @@ namespace BLToolkit.Mapping
                 {
                     currentItem = result;
                     list.Add(result);
-                    continue;
+                    //continue;
                 }
 
                 if (mapper.ColParent)
@@ -130,7 +144,6 @@ namespace BLToolkit.Mapping
 
             return list;
         }
-
         #endregion
 
         private object FillObject(object result, IObjectMapper mapper, IDataReader datareader)
@@ -158,9 +171,11 @@ namespace BLToolkit.Mapping
 
                     if (list.Count > 0)
                     {
+                        var curMapper = (FullObjectMapper)GetObjectMapper(fillObject.GetType());
+
                         object lastElement = list[list.Count - 1];
-                        object lastPk = mapper.PrimaryKeyValueGetter.Invoke(lastElement);
-                        object currentPk = mapper.PrimaryKeyValueGetter.Invoke(fillObject);
+                        object lastPk = curMapper.PrimaryKeyValueGetter.Invoke(lastElement);
+                        object currentPk = curMapper.PrimaryKeyValueGetter.Invoke(fillObject);
                         if (lastPk.Equals(currentPk))
                             continue;
                     }

@@ -118,7 +118,7 @@ namespace BLToolkit.Mapping
 			get { return _inheritanceMapping; }
 		}
 
-		private TypeExtension _extension;
+		protected TypeExtension _extension;
 		public  TypeExtension  Extension
 		{
 			get { return _extension;  }
