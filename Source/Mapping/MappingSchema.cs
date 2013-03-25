@@ -143,7 +143,7 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		public ExtensionList Extensions { get; set; }
+		public virtual ExtensionList Extensions { get; set; }
 
 		#endregion
 
@@ -3849,6 +3849,6 @@ namespace BLToolkit.Mapping
 			return value;
 		}
 
-		#endregion
+		#endregion        
 	}
 }

@@ -9,6 +9,7 @@ using System.Reflection;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
+using BLToolkit.Reflection.Extension;
 using BLToolkit.TypeBuilder;
 using Castle.DynamicProxy;
 
@@ -25,18 +26,36 @@ namespace BLToolkit.Mapping
         private readonly MappingOrder _mappingOrder;
         private DataTable _schema;
         private List<string> _schemaColumns;
+        private MappingSchema _parentMappingSchema;
 
+        private ExtensionList _extensions;
         #endregion
 
-        public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false,
-            MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
+        public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, MappingSchema parentMappingSchema = null)
         {
             _db = db;
+            _parentMappingSchema = parentMappingSchema;
             _ignoreLazyLoad = ignoreLazyLoad;
             _mappingOrder = mappingOrder;
         }
 
         #region Overrides
+
+        public override ExtensionList Extensions
+        {
+            get
+            {
+                if (_parentMappingSchema != null) 
+                    return this._parentMappingSchema.Extensions;
+                return _extensions;
+            }
+            set
+            {
+                if (_parentMappingSchema != null) 
+                    this._parentMappingSchema.Extensions = value;
+                _extensions = value;
+            }
+        }
 
         protected override ObjectMapper CreateObjectMapperInstance(Type type)
         {
@@ -70,13 +89,27 @@ namespace BLToolkit.Mapping
                  FillObject(mapper, dataReader, destObject);
         }
 
+        public override IList<T> MapDataReaderToList<T>(IDataReader reader, IList<T> list, params object[] parameters)
+        {
+            return internalMapDataReaderToList(reader, (IList)list, typeof(T), parameters).Cast<T>().ToList();
+        }
+
         public override IList MapDataReaderToList(
             IDataReader reader,
             IList list,
             Type destObjectType,
             params object[] parameters)
         {
-            FullObjectMapper mapper = (FullObjectMapper) GetObjectMapper(destObjectType);
+            return internalMapDataReaderToList(reader, list, destObjectType, parameters);
+        }
+
+        private IList internalMapDataReaderToList(
+            IDataReader reader,
+            IList list,
+            Type destObjectType,
+            params object[] parameters)
+        {
+            FullObjectMapper mapper = (FullObjectMapper)GetObjectMapper(destObjectType);
 
             InitSchema(reader);
 
@@ -100,7 +133,7 @@ namespace BLToolkit.Mapping
                 {
                     currentItem = result;
                     list.Add(result);
-                    continue;
+                    //continue;
                 }
 
                 if (mapper.ColParent)
@@ -111,7 +144,6 @@ namespace BLToolkit.Mapping
 
             return list;
         }
-
         #endregion
 
         private object FillObject(object result, IObjectMapper mapper, IDataReader datareader)
@@ -139,9 +171,11 @@ namespace BLToolkit.Mapping
 
                     if (list.Count > 0)
                     {
+                        var curMapper = (FullObjectMapper)GetObjectMapper(fillObject.GetType());
+
                         object lastElement = list[list.Count - 1];
-                        object lastPk = mapper.PrimaryKeyValueGetter.Invoke(lastElement);
-                        object currentPk = mapper.PrimaryKeyValueGetter.Invoke(fillObject);
+                        object lastPk = curMapper.PrimaryKeyValueGetter.Invoke(lastElement);
+                        object currentPk = curMapper.PrimaryKeyValueGetter.Invoke(fillObject);
                         if (lastPk.Equals(currentPk))
                             continue;
                     }

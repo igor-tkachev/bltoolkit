@@ -23,7 +23,7 @@ namespace BLToolkit.DataAccess
         public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(dbManager, ignoreLazyLoad: ignoreLazyLoad, mappingOrder: mappingOrder);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager, ignoreLazyLoad: ignoreLazyLoad, mappingOrder: mappingOrder, parentMappingSchema: dbManager.MappingSchema);
 
             _ignoreLazyLoad = ignoreLazyLoad;
         }
@@ -187,14 +187,14 @@ namespace BLToolkit.DataAccess
                             continue;
                     }
 
-                    string thisKey = objectMapper.Association.ThisKey;
+                    string thisKey = objectMapper.Association.ThisKey[0];
 
                     // TITLE
                     string parentDbField = valueMappers.ContainsKey(thisKey) ? valueMappers[thisKey].ColumnName : thisKey;
 
                     // ARTIST
                     string childDbField = objectMapper.PropertiesMapping.Where(e => e is ValueMapper).Cast<ValueMapper>().First(
-                        e => e.PropertyName == objectMapper.Association.OtherKey).ColumnName;
+                        e => e.PropertyName == objectMapper.Association.OtherKey[0]).ColumnName;
 
                     string childDatabase = GetDatabaseName(mapField.PropertyType);
                     string childOwner = base.GetOwnerName(mapField.PropertyType);
@@ -213,7 +213,7 @@ namespace BLToolkit.DataAccess
                             ? null
                             : db.DataProvider.Convert(childName, ConvertType.NameToQueryTable).ToString());
 
-                    sb.AppendFormat("\tINNER JOIN {0} {1} ON {2}.{3}={4}.{5}\n",
+                    sb.AppendFormat("\tFULL OUTER JOIN {0} {1} ON {2}.{3}={4}.{5}\n",
                                     childFullName,
                                     childAlias,
                                     parentName,

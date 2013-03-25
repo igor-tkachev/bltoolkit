@@ -36,7 +36,7 @@ namespace BLToolkit.Mapping
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
         public GetHandler PrimaryKeyValueGetter { get; set; }
-        public AssociationAttribute Association { get; set; }
+        public Association Association { get; set; }
 
         #endregion
 
