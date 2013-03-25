@@ -129,7 +129,7 @@ namespace BLToolkit.DataAccess
 
             //TODO Override OracleSqlProvider in order to avoid this mess...
             string alias = FullGetTableName(type);
-            sb.Append(" " + alias);
+            sb.Append(" " + "T" /*alias*/);
             sb.AppendLine();
         }
 
@@ -141,13 +141,15 @@ namespace BLToolkit.DataAccess
             return type.Name;
         }
 
-        protected void BuildSelectSql(IObjectMapper mapper, StringBuilder sb, DbManager db)
+        protected void BuildSelectSql(IObjectMapper mapper, StringBuilder sb, DbManager db, string tableName = "T")
         {
+            int tableNr = 0;
+
             foreach (IMapper mapField in mapper.PropertiesMapping)
             {
                 if (mapField is ValueMapper)
                     sb.AppendFormat("\t{0}.{1} {2},\n"
-                                    , (mapper).PropertyType.Name,
+                                    , tableName /* (mapper).PropertyType.Name */,
                                     db.DataProvider.Convert(((ValueMapper) mapField).ColumnName, ConvertType.NameToQueryField),
                                     ((ValueMapper) mapField).ColumnAlias
                         );
@@ -163,18 +165,22 @@ namespace BLToolkit.DataAccess
                         cel = cel.ParentMapping;
                     }
                     var objectMapper = (IObjectMapper) mapField;
-                    if (!objectMapper.IsLazy)
-                        BuildSelectSql(objectMapper, sb, db);
+                    if (!objectMapper.IsLazy) 
+                        BuildSelectSql(objectMapper, sb, db, tableName + tableNr.ToString());
+
+                    tableNr++;
                 }
                 else
                     throw new NotImplementedException(mapField.GetType() + " is not yet implemented.");
             }
         }
 
-        protected void AppendJoinTableName(IPropertiesMapping mapper, StringBuilder sb, DbManager db, Type type)
+        protected void AppendJoinTableName(IPropertiesMapping mapper, StringBuilder sb, DbManager db, Type type, string tableName = "T")
         {
             string parentName = FullGetTableName(type);
             Dictionary<string, ValueMapper> valueMappers = mapper.PropertiesMapping.Where(e => e is ValueMapper).Cast<ValueMapper>().ToDictionary(e => e.PropertyName, e => e);
+
+            int tableNr = 0;
 
             foreach (IMapper mapField in mapper.PropertiesMapping)
             {
@@ -215,14 +221,16 @@ namespace BLToolkit.DataAccess
 
                     sb.AppendFormat("\tFULL OUTER JOIN {0} {1} ON {2}.{3}={4}.{5}\n",
                                     childFullName,
-                                    childAlias,
-                                    parentName,
+                                    tableName + tableNr.ToString() /*childAlias*/,
+                                    tableName /*parentName*/,
                                     parentDbField,
-                                    childAlias,
+                                    tableName + tableNr.ToString() /*childAlias*/,
                                     childDbField
                         );
-
-                    AppendJoinTableName((IPropertiesMapping) mapField, sb, db, mapField.PropertyType);
+                    
+                    AppendJoinTableName((IPropertiesMapping)mapField, sb, db, mapField.PropertyType, tableName + tableNr.ToString());
+                    
+                    tableNr++;
                 }
             }
 
@@ -262,7 +270,7 @@ namespace BLToolkit.DataAccess
                            ToString(),
                         valueMapper.ColumnName);
 
-                    sb.AppendFormat("\t{0}.{1} = ", tableAlias,
+                    sb.AppendFormat("\t{0}.{1} = ", "T" /* tableAlias */,
                                     db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
 
                     if (nParameter < 0)
