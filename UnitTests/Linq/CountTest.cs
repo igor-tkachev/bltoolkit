@@ -67,9 +67,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SubQueryCount()
+		public void SubQueryCount([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				AreEqual(
 					from p in Parent

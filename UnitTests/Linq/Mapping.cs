@@ -283,19 +283,21 @@ namespace Data.Linq
 		static readonly MyMappingSchema _myMappingSchema = new MyMappingSchema();
 
 		[Test]
-		public void MyType1()
+		public void MyType1([DataContexts(ExcludeLinqService = true)]string context)
 		{
-			using (var db = new TestDbManager { MappingSchema = _myMappingSchema })
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
+				db.MappingSchema = _myMappingSchema;
 				var list = db.GetTable<MyParent>().ToList();
 			}
 		}
 
 		[Test]
-		public void MyType2()
+		public void MyType2([DataContexts(ExcludeLinqService = true)]string context)
 		{
-			using (var db = new TestDbManager { MappingSchema = _myMappingSchema })
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
+				db.MappingSchema = _myMappingSchema;
 				var list = db.GetTable<MyParent>()
 					.Select(t => new MyParent { ParentID = t.ParentID, Value1 = t.Value1 })
 					.ToList();
@@ -303,10 +305,11 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MyType3()
+		public void MyType3([DataContexts(ExcludeLinqService = true)]string context)
 		{
-			using (var db = new TestDbManager { MappingSchema = _myMappingSchema })
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
+				db.MappingSchema = _myMappingSchema;
 				db.BeginTransaction();
 				db.Insert(new MyParent { ParentID = new MyInt { MyValue = 1001 }, Value1 = 1001 });
 				db.Parent.Delete(p => p.ParentID >= 1000);
@@ -369,13 +372,13 @@ namespace Data.Linq
 		[Test]
 		public void MapAbstract()
 		{
-			using (var db = new TestDbManager())
-			{
-				var q = from a in db.GetTable<AbsChild>()
-				select new { a.ChildID, a.Parent.Value1 };
+			ForEachProvider(db =>
+				{
+					var q = from a in db.GetTable<AbsChild>()
+					        select new {a.ChildID, a.Parent.Value1};
 
-				var ql = q.ToList();
-			}
+					var ql = q.ToList();
+				});
 		}
 	}
 }

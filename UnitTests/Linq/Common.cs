@@ -216,9 +216,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TableAsMethod()
+		public void TableAsMethod([DataContexts(ExcludeLinqService = true)]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q =
 					from d in db.Patient
@@ -237,9 +237,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TableAsExtensionMethod()
+		public void TableAsExtensionMethod([DataContexts(ExcludeLinqService = true)]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q =
 					from d in db.Patient
@@ -247,7 +247,7 @@ namespace Data.Linq
 					select p;
 
 				q.ToList();
-			}
+			};
 		}
 
 		[Test]

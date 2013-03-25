@@ -310,10 +310,10 @@ namespace Data.Linq
 					Expression.Invoke(pred2, param)
 				), param);
 
-			using (var db = new TestDbManager())
-			{
-				Assert.AreEqual(1, db.Parent.Count(final));
-			}
+			ForEachProvider(db =>
+				{
+					Assert.AreEqual(1, db.Parent.Count(final));
+				});
 		}
 
 		#region IEnumerableTest
@@ -401,9 +401,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void IEnumerableTest1()
+		public void IEnumerableTest1([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var res =
 					from rc in db.GetTable<TestEntity>()
@@ -416,9 +416,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void IEnumerableTest2()
+		public void IEnumerableTest2([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var zones =
 					from z in db.GetTable<TestEntity2>()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 using BLToolkit.Data.Linq;
@@ -94,7 +95,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConcurentTest1()
+		public void ConcurentTest1([Sql2008DataContext]string _)
 		{
 			var query = CompiledQuery.Compile((ITestDataContext db, int n) =>
 				db.GetTable<Parent>().Where(p => p.ParentID == n).First().ParentID);
@@ -130,7 +131,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ConcurentTest2()
+		public void ConcurentTest2([Sql2008DataContext]string _)
 		{
 			var threads = new Thread[100];
 			var results = new int   [100,2];

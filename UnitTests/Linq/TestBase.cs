@@ -261,6 +261,15 @@ namespace Data.Linq
 			}
 		}
 
+		public class Sql2008DataContextAttribute : IncludeDataContextsAttribute
+		{
+			public Sql2008DataContextAttribute()
+				: base("Sql2008")
+			{
+				ExcludeLinqService = true;
+			}
+		}
+
 		static readonly Dictionary<string,int> _ips = new Dictionary<string,int>();
 
 		protected ITestDataContext GetDataContext(string configuration)

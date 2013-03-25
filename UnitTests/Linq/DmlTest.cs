@@ -1252,10 +1252,11 @@ namespace Update
 					.Update());
 
 		[Test]
-		public void CompiledUpdate()
+		public void CompiledUpdate([DataContexts(ExcludeLinqService = true)] string context)
 		{
-			using (var ctx = new TestDbManager())
+			using (var ctx = (TestDbManager)GetDataContext(context))
 			{
+				ctx.BeginTransaction();
 				_updateQuery(ctx, 12345, "54321");
 			}
 		}
@@ -1267,6 +1268,7 @@ namespace Update
 			{
 				if (db is DbManager && ((DbManager)db).ConfigurationString == "Oracle")
 				{
+					((DbManager) db).BeginTransaction();
 					db.Types2.Delete(_ => _.ID > 1000);
 
 					((DbManager)db).InsertBatch(1, new[]
@@ -1281,10 +1283,12 @@ namespace Update
 		}
 
 		[Test]
-		public void InsertBatch2()
+		public void InsertBatch2([IncludeDataContexts(ProviderName.MsSql2008, ExcludeLinqService = true)] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
+				db.BeginTransaction();
+
 				db.Types2.Delete(_ => _.ID > 1000);
 
 				db.InsertBatch(100, new[]
