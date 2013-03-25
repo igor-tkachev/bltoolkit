@@ -217,7 +217,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
 						}
-
+                    case "ContainsExactly":
+                        return func.Parameters.Length == 2 ?
+                            new SqlFunction(func.SystemType, "Contains", func.Parameters[1], func.Parameters[0]) :
+                            new SqlFunction(func.SystemType, "Contains", func.Parameters[1], func.Parameters[0], func.Parameters[2]);				
 					case "CharIndex"      :
 						return func.Parameters.Length == 2?
 							new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0]):
