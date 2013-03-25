@@ -33,6 +33,12 @@ namespace BLToolkit.Mapping.Fluent
 			return this.PrimaryKey(this._prop, order);
 		}
 
+        public MapFieldMap<T, TR> LazyInstance(bool isLazy = true)
+        {
+            return this.LazyInstance(this._prop, isLazy);
+        }
+
+
 		/// <summary>
 		/// NonUpdatableAttribute
 		/// </summary>

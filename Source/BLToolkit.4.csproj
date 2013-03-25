@@ -357,6 +357,7 @@
     <Compile Include="Mapping\Fluent\FluentMapHelper.cs" />
     <Compile Include="Mapping\Fluent\IFluentMap.cs" />
     <Compile Include="Mapping\Fluent\MapFieldMap.cs" />
+    <Compile Include="Mapping\Fluent\MappedProperty.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\InheritanceMappingAttribute.cs" />
     <Compile Include="Mapping\MapRelationBase.cs" />

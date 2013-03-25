@@ -242,6 +242,13 @@ namespace BLToolkit.Mapping.Fluent
 			this.EachChilds(m => m.Nullable(propName, isNullable));
 		}
 
+        void IFluentMap.LazyInstance(string propName, bool isLazy)
+		{
+			var member = this.GetMemberExtension(propName);
+			member.Attributes.Add(Attributes.LazyInstance.IsLazyInstance, this.ToString(isLazy));
+            this.EachChilds(m => m.LazyInstance(propName, isLazy));
+		}
+        
 		/// <summary>
 		/// Nulls the value.
 		/// </summary>

@@ -13,6 +13,6 @@ namespace BLToolkit.Mapping
         GetHandler Getter { get; set; }
 
         GetHandler PrimaryKeyValueGetter { get; set; }
-        AssociationAttribute Association { get; set; }
+        Association Association { get; set; }
     }
 }

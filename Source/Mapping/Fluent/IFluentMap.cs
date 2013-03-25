@@ -140,6 +140,8 @@ namespace BLToolkit.Mapping.Fluent
 		/// <param name="isNullable">if set to <c>true</c> [is nullable].</param>
 		void Nullable(string propName, bool isNullable);
 
+        void LazyInstance(string propName, bool isLazy);
+
 		/// <summary>
 		/// Nulls the value.
 		/// </summary>

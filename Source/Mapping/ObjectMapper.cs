@@ -118,7 +118,7 @@ namespace BLToolkit.Mapping
 			get { return _inheritanceMapping; }
 		}
 
-		private TypeExtension _extension;
+		protected TypeExtension _extension;
 		public  TypeExtension  Extension
 		{
 			get { return _extension;  }
@@ -223,7 +223,7 @@ namespace BLToolkit.Mapping
 			return GetOrdinal(name);
 		}
 
-		private TypeAccessor _typeAccessor;
+		protected TypeAccessor _typeAccessor;
 		public  TypeAccessor  TypeAccessor
 		{
 			get { return _typeAccessor; }
@@ -262,58 +262,13 @@ namespace BLToolkit.Mapping
 				if (GetMapIgnore(ma))
 					continue;
 
-				var mapFieldAttr = ma.GetAttribute<MapFieldAttribute>();
+			    var mapFieldAttr = GetMapField(ma); // ma.GetAttribute<MapFieldAttribute>();
 
 				if (mapFieldAttr == null || (mapFieldAttr.OrigName == null && mapFieldAttr.Format == null))
 				{
 					var mi = new MapMemberInfo();
 
-					var dbTypeAttribute = ma.GetAttribute<DbTypeAttribute>();
-
-					MemberExtension ext;
-
-					if (dbTypeAttribute == null && _extension != null && _extension.Members.TryGetValue(ma.Name, out ext))
-					{
-						AttributeExtensionCollection attrExt;
-
-						if (ext.Attributes.TryGetValue("DbType", out attrExt))
-						{
-							var dbTypeExtension=attrExt.FirstOrDefault(x => x.Name == "DbType");
-							var dbSizeExtension=attrExt.FirstOrDefault(x => x.Name == "Size");
-
-							if (dbTypeExtension != null)
-							{
-								DbType dbType;
-#if FW3
-								var parsed = true;
-
-								try
-								{
-									dbType = (DbType)Enum.Parse(typeof(DbType), dbTypeExtension.Value.ToString());
-								}
-								catch (Exception)
-								{
-									dbType = DbType.Object;
-									parsed = false;
-								}
-
-								if (parsed)
-#else
-								if (DbType.TryParse(dbTypeExtension.Value.ToString(), out dbType))
-#endif
-								{
-									if (dbSizeExtension != null)
-									{
-										dbTypeAttribute = new DbTypeAttribute(dbType, int.Parse(dbSizeExtension.Value.ToString()));
-									}
-									else
-									{
-										dbTypeAttribute = new DbTypeAttribute(dbType);
-									}
-								}
-							}
-						}
-					}
+				    var dbTypeAttribute = GetDbType(ma); // ma.GetAttribute<DbTypeAttribute>();
 
 					if (dbTypeAttribute != null)
 					{
@@ -512,13 +467,37 @@ namespace BLToolkit.Mapping
 			return MetadataProvider.GetNullable(MappingSchema, Extension, memberAccessor, out isSet);
 		}
 
+        protected virtual bool GetLazyInstance(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            return MetadataProvider.GetLazyInstance(MappingSchema, Extension, memberAccessor, out isSet);
+        }
+
 		protected virtual bool GetMapIgnore(MemberAccessor memberAccessor)
 		{
 			bool isSet;
 			return MetadataProvider.GetMapIgnore(Extension, memberAccessor, out isSet);
 		}
 
-		protected virtual bool GetSqlIgnore(MemberAccessor memberAccessor)
+        protected virtual MapFieldAttribute GetMapField(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            return MetadataProvider.GetMapField(Extension, memberAccessor, out isSet);
+        }
+
+        protected virtual DbTypeAttribute GetDbType(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            return MetadataProvider.GetDbType(Extension, memberAccessor, out isSet);
+        }
+
+        protected virtual PrimaryKeyAttribute GetPrimaryKey(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            return MetadataProvider.GetPrimaryKey(Extension, memberAccessor, out isSet);
+        }
+
+        protected virtual bool GetSqlIgnore(MemberAccessor memberAccessor)
 		{
 			bool isSet;
 			return MetadataProvider.GetSqlIgnore(Extension, memberAccessor, out isSet);
