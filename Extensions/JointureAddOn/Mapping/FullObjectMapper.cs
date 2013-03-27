@@ -42,6 +42,9 @@ namespace BLToolkit.Mapping
 
             _proxy = new ProxyGenerator();
             PropertiesMapping = new List<IMapper>();
+
+            PrimaryKeyValueGetters = new List<GetHandler>();
+            PrimaryKeyNames = new List<string>();
         }
 
         #region IPropertiesMapping Members
@@ -70,12 +73,14 @@ namespace BLToolkit.Mapping
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
 
+        public List<string> PrimaryKeyNames { get; set; }
+
         #endregion
 
         #region ILazyMapper
 
         public GetHandler ParentKeyGetter { get; set; }
-        public GetHandler PrimaryKeyValueGetter { get; set; }
+        public List<GetHandler> PrimaryKeyValueGetters { get; set; }
 
         #endregion
 
@@ -171,7 +176,8 @@ namespace BLToolkit.Mapping
                             GettersHandlers[mapperType].Add(ma.Name, ma.GetValue);
                         }
                     }
-                    mapper.PrimaryKeyValueGetter = GettersHandlers[mapperType][ma.Name];
+                    mapper.PrimaryKeyValueGetters.Add(GettersHandlers[mapperType][ma.Name]);
+                    mapper.PrimaryKeyNames.Add(ma.Name);
 
                     if (mapper.Association != null && (mapper.Association.OtherKey == null || mapper.Association.OtherKey.Length == 0))
                     {
