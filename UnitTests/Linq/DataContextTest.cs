@@ -13,7 +13,7 @@ namespace Data.Linq
 	public class DataContextTest
 	{
 		[Test]
-		public void TestContext()
+		public void TestContext([TestBase.IncludeDataContextsAttribute("Sql2008", ExcludeLinqService = true)]string _)
 		{
 			var ctx = new DataContext("Sql2008");
 

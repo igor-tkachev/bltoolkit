@@ -13,15 +13,19 @@ namespace Data.Linq.ProviderSpecific
 	[Category("MySql")]
 	public class MySqlSprocParameterPrefixTests : TestBase
 	{
+		class MySqlDataContextAttribute : IncludeDataContextsAttribute
+		{
+			public MySqlDataContextAttribute():base(ProviderName.MySql) { ExcludeLinqService = true; }
+		}
 		[Test]
-		public void ParameterPrefixTest()
+		public void ParameterPrefixTest([MySqlDataContext]string context)
 		{
 			var oldPrefix = MySqlDataProvider.SprocParameterPrefix;
 			MySqlDataProvider.SprocParameterPrefix = "_";
 
 			try
 			{
-				using (var db = new TestDbManager(ProviderName.MySql))
+				using (var db = new TestDbManager(context))
 				{
 					var person = db.SetSpCommand("GetPersonById", db.Parameter("?ID", 1)).ExecuteObject<Person>();
 					Assert.IsNotNull(person);
@@ -39,14 +43,14 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SetCommandWorksCorrectlyWithSprocParameterPrefixSet()
+		public void SetCommandWorksCorrectlyWithSprocParameterPrefixSet([MySqlDataContext]string context)
 		{
 			var oldPrefix = MySqlDataProvider.SprocParameterPrefix;
 			MySqlDataProvider.SprocParameterPrefix = "_";
 
 			try
 			{
-				using (var db = new DbManager(ProviderName.MySql))
+				using (var db = new DbManager(context))
 				{
 					var person = db.SetCommand(
 							"SELECT * FROM Person WHERE PersonID = ?PersonID",
@@ -72,9 +76,9 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SprocParameterPrefixShouldBeSpecifiedManuallyWhenItIsNotSet()
+		public void SprocParameterPrefixShouldBeSpecifiedManuallyWhenItIsNotSet([MySqlDataContext]string context)
 		{
-			using (var db = new DbManager(ProviderName.MySql))
+			using (var db = new DbManager(context))
 			{
 				var person = db.SetSpCommand("GetPersonById", db.Parameter("?_ID", 1)).ExecuteObject<Person>();
 				Assert.IsNotNull(person);
@@ -89,13 +93,13 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void ParameterSymbolMayBeOmitedForSpCommand()
+		public void ParameterSymbolMayBeOmitedForSpCommand([MySqlDataContext]string context)
 		{
 			// I am not sure this is a good thing though
 			// Maybe we need to be more strict on syntax and on the library users
 			// and do not allow different syntax (omiting parameter symbol)?
 
-			using (var db = new DbManager(ProviderName.MySql))
+			using (var db = new DbManager(context))
 			{
 				var person = db.SetSpCommand("GetPersonById", db.Parameter("_ID", 1)).ExecuteObject<Person>();
 				Assert.IsNotNull(person);
@@ -124,14 +128,14 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SpecifyingParameterPrefixManuallyIsAlsoOk()
+		public void SpecifyingParameterPrefixManuallyIsAlsoOk([MySqlDataContext]string context)
 		{
 			var oldPrefix = MySqlDataProvider.SprocParameterPrefix;
 			MySqlDataProvider.SprocParameterPrefix = "_";
 
 			try
 			{
-				using (var db = new DbManager(ProviderName.MySql))
+				using (var db = new DbManager(context))
 				{
 					// we specify parameter name with a prefix, though SprocParameterPrefix is specified
 					// in this case additional parameter prefix will not be added, so everything will be ok
@@ -146,14 +150,14 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void PrefixIsAddedWhenRetrievingParameterFromDbManager()
+		public void PrefixIsAddedWhenRetrievingParameterFromDbManager([MySqlDataContext]string context)
 		{
 			var oldPrefix = MySqlDataProvider.SprocParameterPrefix;
 			MySqlDataProvider.SprocParameterPrefix = "_";
 
 			try
 			{
-				using (var db = new DbManager(ProviderName.MySql))
+				using (var db = new DbManager(context))
 				{
 					db.SetSpCommand("GetPersonById", db.Parameter("?ID", 1)).Prepare();
 

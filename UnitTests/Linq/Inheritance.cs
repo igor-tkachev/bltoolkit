@@ -212,8 +212,8 @@ namespace Data.Linq
 		[Test]
 		public void SimplTest()
 		{
-			using (var db = new TestDbManager())
-				Assert.AreEqual(1, db.GetTable<PersonEx>().Where(_ => _.FirstName == "John").Select(_ => _.ID).Single());
+			ForEachProvider(db =>
+				Assert.AreEqual(1, db.GetTable<PersonEx>().Where(_ => _.FirstName == "John").Select(_ => _.ID).Single()));
 		}
 
 		[InheritanceMapping(Code = 1, Type = typeof(Parent222))]
@@ -437,10 +437,10 @@ namespace Data.Linq
 		[Test]
 		public void GuidTest()
 		{
-			using (var db = new TestDbManager())
-			{
-				var list = db.GetTable<InheritanceA>().Where(a => a.Bs.Any()).ToList();
-			}
+			ForEachProvider(db =>
+				{
+					var list = db.GetTable<InheritanceA>().Where(a => a.Bs.Any()).ToList();
+				});
 		}
 
 		[Test]

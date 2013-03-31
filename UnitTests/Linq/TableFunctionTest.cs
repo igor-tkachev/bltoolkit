@@ -14,9 +14,9 @@ namespace Data.Linq
 	public class TableFunctionTest : TestBase
 	{
 		[Test]
-		public void Func1()
+		public void Func1([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q =
 					from p in new Model.Functions(db).GetParentByID(1)
@@ -27,9 +27,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Func2()
+		public void Func2([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q =
 					from c in db.Child
@@ -41,9 +41,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Func3()
+		public void Func3([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q =
 					from c in db.Child
@@ -58,9 +58,9 @@ namespace Data.Linq
 			(DbManager db, int id) => from p in new Model.Functions(db).GetParentByID(id) select p);
 
 		[Test]
-		public void CompiledFunc1()
+		public void CompiledFunc1([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q = _f1(db, 1);
 				q.ToList();
@@ -71,19 +71,19 @@ namespace Data.Linq
 			(TestDbManager db, int id) => from c in db.Child from p in db.GetParentByID(id) select p);
 
 		[Test]
-		public void CompiledFunc2()
+		public void CompiledFunc2([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q = _f2(db, 1);
 				q.ToList();
-			}
+			};
 		}
 
 		[Test]
-		public void WithTabLock()
+		public void WithTabLock([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
 				var q =
 					from p in new Model.Functions(db).WithTabLock<Parent>()

@@ -76,16 +76,16 @@ namespace Data.Linq
 		{
 			var str = "o";
 
-			using (var db = new TestDbManager())
-			{
-				var q =
-					from d in db.Doctor
-					join p in db.Person.Where(p => p.FirstName.Contains(str))
-					on d.PersonID equals p.ID
-					select p;
+			ForEachProvider(db =>
+				{
+					var q =
+						from d in db.Doctor
+						join p in db.Person.Where(p => p.FirstName.Contains(str))
+							on d.PersonID equals p.ID
+						select p;
 
-				Assert.AreEqual(1, q.ToList().First().ID);
-			}
+					Assert.AreEqual(1, q.ToList().First().ID);
+				});
 		}
 
 		[Test]

@@ -169,41 +169,45 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MethodExpression9()
+		public void MethodExpression9([DataContexts]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = GetDataContext(context))
+			{
 				AreEqual(
 					from ch in Child
-					from p  in
+					from p in
 						from p in Parent
-						where p.ParentID == ch.ChildID / 10
+						where p.ParentID == ch.ChildID/10
 						select p
 					where ch.ParentID == p.ParentID
 					select ch
 					,
 					from ch in db.Child
-					from p  in TestDbManager.GetParent9(db, ch)
+					from p in TestDbManager.GetParent9(db, ch)
 					where ch.ParentID == p.ParentID
 					select ch);
+			}
 		}
 
 		[Test]
-		public void MethodExpression10()
+		public void MethodExpression10([DataContexts(ExcludeLinqService = true)]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = (TestDbManager)GetDataContext(context))
+			{
 				AreEqual(
 					from ch in Child
-					from p  in
+					from p in
 						from p in Parent
-						where p.ParentID == ch.ChildID / 10
+						where p.ParentID == ch.ChildID/10
 						select p
 					where ch.ParentID == p.ParentID
 					select ch
 					,
 					from ch in db.Child
-					from p  in db.GetParent10(ch)
+					from p in db.GetParent10(ch)
 					where ch.ParentID == p.ParentID
 					select ch);
+			};
 		}
 
 		[MethodExpression("GetBoolExpression1")]
@@ -219,9 +223,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TestGenerics1()
+		public void TestGenerics1([DataContexts]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = GetDataContext(context))
 			{
 				var q =
 					from ch in db.Child
@@ -244,9 +248,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TestGenerics2()
+		public void TestGenerics2([DataContexts]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = GetDataContext(context))
 			{
 				var q =
 					from ch in db.Child
@@ -272,9 +276,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TestGenerics3()
+		public void TestGenerics3([DataContexts]string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = GetDataContext(context))
 			{
 				var q =
 					from ch in db.Child

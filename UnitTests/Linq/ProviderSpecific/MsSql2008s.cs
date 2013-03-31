@@ -9,9 +9,9 @@ namespace Data.Linq.ProviderSpecific
 	public class MsSql2008 : TestBase
 	{
 		[Test]
-		public void SqlTest()
+		public void SqlTest([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = (TestDbManager)GetDataContext(context))
 			using (var rd = db.SetCommand(@"
 				SELECT
 					DateAdd(Hour, 1, [t].[DateTimeValue]) - [t].[DateTimeValue]
@@ -27,10 +27,12 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SqlTypeTest()
+		public void SqlTypeTest([Sql2008DataContext]string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = (TestDbManager)GetDataContext(context))
 			{
+				db.BeginTransaction();
+
 				var q =
 					from p in db.Parent
 					join c in db.Child on p.ParentID equals c.ParentID into g

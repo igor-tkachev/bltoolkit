@@ -22,11 +22,11 @@ namespace Data.Linq
 			var bBody     = b.Body.Convert(e => e == b.Parameters[0] ? a.Parameters[0] : e);
 			var predicate = Expression.Lambda<Func<Person,bool>>(Expression.AndAlso(a.Body, bBody), a.Parameters[0]);
 
-			using (var db = new TestDbManager())
-			{
-				var q = db.Person.Where(predicate);
-				var p = q.First();
-			}
+			ForEachProvider(db =>
+				{
+					var q = db.Person.Where(predicate);
+					var p = q.First();
+				});
 		}
 	}
 }

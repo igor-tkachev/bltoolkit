@@ -164,13 +164,13 @@ namespace Data.Linq
 			public          int    IP;
 			public          bool   Skip;
 		}
-
+		
 		public static readonly List<string>       UserProviders = new List<string>();
 		public static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                          "BLToolkit.Data.DataProvider.Sql2008DataProvider"),			new ProviderInfo(ProviderName.SqlCe,      "BLToolkit.Data.DataProvider.SqlCe",           "BLToolkit.Data.DataProvider.SqlCeDataProvider"),			new ProviderInfo(ProviderName.SQLite,     "BLToolkit.Data.DataProvider.SQLite",          "BLToolkit.Data.DataProvider.SQLiteDataProvider"),			new ProviderInfo(ProviderName.Access,     null,                                          "BLToolkit.Data.DataProvider.AccessDataProvider"),			new ProviderInfo("Sql2000",               null,                                          "BLToolkit.Data.DataProvider.Sql2000DataProvider"),			new ProviderInfo("Sql2005",               null,                                          "BLToolkit.Data.DataProvider.SqlDataProvider"),			new ProviderInfo(ProviderName.DB2,        "BLToolkit.Data.DataProvider.DB2",             "BLToolkit.Data.DataProvider.DB2DataProvider"),			new ProviderInfo(ProviderName.Informix,   "BLToolkit.Data.DataProvider.Informix",        "BLToolkit.Data.DataProvider.InformixDataProvider"),			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",        "BLToolkit.Data.DataProvider.FdpDataProvider"),			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",          "BLToolkit.Data.DataProvider.OdpDataProvider"),			new ProviderInfo("DevartOracle",          "BLToolkit.Data.DataProvider.DevartOracle",    "BLToolkit.Data.DataProvider.DevartOracleDataProvider"),			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL",      "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",           "BLToolkit.Data.DataProvider.MySqlDataProvider"),			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",          "BLToolkit.Data.DataProvider.SybaseDataProvider"),		};
 
-		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
+		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList, bool excludeLinqService)
 		{
 			var list = UserProviders.Concat(UserProviders.Select(p => p + ".LinqService"));
 
@@ -186,6 +186,8 @@ namespace Data.Linq
 
 				yield return new TestDbManager(info.Name);
 
+				if (excludeLinqService)
+					continue;
 				var ip = GetIP(info.Name);
 				var dx = new TestServiceModelDataContext(ip);
 
@@ -193,6 +195,10 @@ namespace Data.Linq
 
 				yield return dx;
 			}
+		}
+		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
+		{
+			return GetProviders(exceptList, false);
 		}
 
 		[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
@@ -255,6 +261,15 @@ namespace Data.Linq
 			}
 		}
 
+		public class Sql2008DataContextAttribute : IncludeDataContextsAttribute
+		{
+			public Sql2008DataContextAttribute()
+				: base("Sql2008")
+			{
+				ExcludeLinqService = true;
+			}
+		}
+
 		static readonly Dictionary<string,int> _ips = new Dictionary<string,int>();
 
 		protected ITestDataContext GetDataContext(string configuration)
@@ -275,13 +290,13 @@ namespace Data.Linq
 			return new TestDbManager(configuration);
 		}
 
-		protected void ForEachProvider(Type expectedException, string[] exceptList, Action<ITestDataContext> func)
+		protected void ForEachProvider(Type expectedException, string[] exceptList, bool excludeLinqService, Action<ITestDataContext> func)
 		{
 			Exception ex = null;
 
 			var executedForAtLeastOneProvider = false;
 
-			foreach (var db in GetProviders(exceptList))
+			foreach (var db in GetProviders(exceptList, excludeLinqService))
 			{
 				try
 				{
@@ -309,6 +324,20 @@ namespace Data.Linq
 
 //			if (!executedForAtLeastOneProvider)
 //				throw new ApplicationException("Delegate function has not been executed.");}
+		protected void ForEachProvider(Type expectedException, string[] exceptList, Action<ITestDataContext> func)
+		{
+			ForEachProvider(expectedException, exceptList, false, func);
+		}
+
+		protected void ForEachProvider(string[] exceptList, bool excludeLinqService, Action<ITestDataContext> func)
+		{
+			ForEachProvider(null, exceptList, excludeLinqService, func);
+		}
+
+		protected void ForEachProvider(bool excludeLinqService, Action<ITestDataContext> func)
+		{
+			ForEachProvider(null, Array<string>.Empty, excludeLinqService, func);
+		}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
 		{
@@ -382,8 +411,23 @@ namespace Data.Linq
 			get
 			{
 				if (_types == null)
-					using (var db = new TestDbManager("Sql2008"))
-						_types = db.Types.ToList();
+				{
+					_types = new List<LinqDataTypes>()
+						{
+							new LinqDataTypes() {ID = 1, MoneyValue = 1.11m, DateTimeValue = new DateTime(2001, 01, 11, 01, 11, 21, 100), BoolValue = true, GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue = 1},
+							new LinqDataTypes() {ID = 2, MoneyValue = 2.49m, DateTimeValue = new DateTime(2005, 05, 15, 05, 15, 25, 500), BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b"), SmallIntValue = 2},
+							new LinqDataTypes() {ID = 3, MoneyValue = 3.99m, DateTimeValue = new DateTime(2009, 09, 19, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("d2f970c0-35ac-4987-9cd5-5badb1757436"), SmallIntValue = 3},
+							new LinqDataTypes() {ID = 4, MoneyValue = 4.5m, DateTimeValue = new DateTime(2009, 09, 20, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b"), SmallIntValue = 4},
+							new LinqDataTypes() {ID = 5, MoneyValue = 5.5m, DateTimeValue = new DateTime(2009, 09, 21, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("febe3eca-cb5f-40b2-ad39-2979d312afca"), SmallIntValue = 5},
+							new LinqDataTypes() {ID = 6, MoneyValue = 6.55m, DateTimeValue = new DateTime(2009, 09, 22, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("8d3c5d1d-47db-4730-9fe7-968f6228a4c0"), SmallIntValue = 6},
+							new LinqDataTypes() {ID = 7, MoneyValue = 7,     DateTimeValue = new DateTime(2009, 09, 23, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("48094115-83af-46dd-a906-bff26ee21ee2"), SmallIntValue = 7},
+							new LinqDataTypes() {ID = 8, MoneyValue = 8.99m, DateTimeValue = new DateTime(2009, 09, 24, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("c1139f1f-1335-4cd4-937e-92602f732dd3"), SmallIntValue = 8},
+							new LinqDataTypes() {ID = 9, MoneyValue = 9.63m, DateTimeValue = new DateTime(2009, 09, 25, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("46c5c512-3d4b-4cf7-b4e7-1de080789e5d"), SmallIntValue = 9},
+							new LinqDataTypes() {ID = 10, MoneyValue = 10.77m, DateTimeValue = new DateTime(2009, 09, 26, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("61b2bc55-147f-4b40-93ed-a4aa83602fee"), SmallIntValue = 10},
+							new LinqDataTypes() {ID = 11, MoneyValue = 11.45m, DateTimeValue = new DateTime(2009, 09, 27, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("d3021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 11},
+							new LinqDataTypes() {ID = 12, MoneyValue = 11.45m, DateTimeValue = new DateTime(2012, 11, 07, 19, 19, 29, 90), BoolValue = true, GuidValue = new Guid("03021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 12},
+						};
+				}
 
 				foreach (var type in _types)
 					yield return type;
@@ -396,8 +440,23 @@ namespace Data.Linq
 			get
 			{
 				if (_types2 == null)
-					using (var db = new TestDbManager("Sql2008"))
-						_types2 = db.Types2.ToList();
+				{
+					_types2 = new List<LinqDataTypes2>()
+						{
+							new LinqDataTypes2() {ID = 1, MoneyValue = 1.11m, DateTimeValue = new DateTime(2001, 01, 11, 01, 11, 21, 100), BoolValue = true, GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue = 1},
+							new LinqDataTypes2() {ID = 2, MoneyValue = 2.49m, DateTimeValue = new DateTime(2005, 05, 15, 05, 15, 25, 500), BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b"), SmallIntValue = 2},
+							new LinqDataTypes2() {ID = 3, MoneyValue = 3.99m, DateTimeValue = new DateTime(2009, 09, 19, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("d2f970c0-35ac-4987-9cd5-5badb1757436"), SmallIntValue = 3},
+							new LinqDataTypes2() {ID = 4, MoneyValue = 4.5m, DateTimeValue = new DateTime(2009, 09, 20, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b"), SmallIntValue = 4},
+							new LinqDataTypes2() {ID = 5, MoneyValue = 5.5m, DateTimeValue = new DateTime(2009, 09, 21, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("febe3eca-cb5f-40b2-ad39-2979d312afca"), SmallIntValue = 5},
+							new LinqDataTypes2() {ID = 6, MoneyValue = 6.55m, DateTimeValue = new DateTime(2009, 09, 22, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("8d3c5d1d-47db-4730-9fe7-968f6228a4c0"), SmallIntValue = 6},
+							new LinqDataTypes2() {ID = 7, MoneyValue = 7,     DateTimeValue = new DateTime(2009, 09, 23, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("48094115-83af-46dd-a906-bff26ee21ee2"), SmallIntValue = 7},
+							new LinqDataTypes2() {ID = 8, MoneyValue = 8.99m, DateTimeValue = new DateTime(2009, 09, 24, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("c1139f1f-1335-4cd4-937e-92602f732dd3"), SmallIntValue = 8},
+							new LinqDataTypes2() {ID = 9, MoneyValue = 9.63m, DateTimeValue = new DateTime(2009, 09, 25, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("46c5c512-3d4b-4cf7-b4e7-1de080789e5d"), SmallIntValue = 9},
+							new LinqDataTypes2() {ID = 10, MoneyValue = 10.77m, DateTimeValue = new DateTime(2009, 09, 26, 09, 19, 29, 90), BoolValue = false, GuidValue = new Guid("61b2bc55-147f-4b40-93ed-a4aa83602fee"), SmallIntValue = 10},
+							new LinqDataTypes2() {ID = 11, MoneyValue = 11.45m, DateTimeValue = new DateTime(2009, 09, 27, 09, 19, 29, 90), BoolValue = true, GuidValue = new Guid("d3021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 11},
+							new LinqDataTypes2() {ID = 12, MoneyValue = 11.45m, DateTimeValue = new DateTime(2012, 11, 07, 19, 19, 29, 90), BoolValue = true, GuidValue = new Guid("03021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 11},
+						};	
+				}
 				return _types2;
 			}
 		}
@@ -409,8 +468,11 @@ namespace Data.Linq
 			{
 				if (_person == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
-						_person = db.Person.ToList();
+					_person = new List<Person>()
+						{
+							new Person() {ID = 1, FirstName = "John", LastName = "Pupkin", Gender = Gender.Male, MiddleName = ""},
+							new Person() {ID = 2, FirstName = "Tester", LastName = "Testerson", Gender = Gender.Male, MiddleName = ""},
+						};
 
 					foreach (var p in _person)
 						p.Patient = Patient.SingleOrDefault(ps => p.ID == ps.PersonID);
@@ -428,8 +490,10 @@ namespace Data.Linq
 			{
 				if (_patient == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
-						_patient = db.Patient.ToList();
+					_patient = new List<Patient>()
+						{
+							new Patient() {PersonID = 2, Diagnosis = "Hallucination with Paranoid Bugs' Delirium of Persecution"}
+						};
 
 					foreach (var p in _patient)
 						p.Person = Person.Single(ps => ps.ID == p.PersonID);
@@ -446,8 +510,10 @@ namespace Data.Linq
 			{
 				if (_doctor == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
-						_doctor = db.Doctor.ToList();
+					_doctor = new List<Doctor>()
+						{
+							new Doctor() {PersonID = 1, Taxonomy = "Psychiatry"}
+						};
 				}
 
 				return _doctor;
@@ -462,19 +528,25 @@ namespace Data.Linq
 			get
 			{
 				if (_parent == null)
-					using (var db = new TestDbManager("Sql2008"))
-					{
-						db.Parent.Delete(c => c.ParentID >= 1000);
-						_parent = db.Parent.ToList();
-						db.Close();
-
-						foreach (var p in _parent)
+				{
+					_parent = new List<Parent>()
 						{
-							p.Children      = Child.     Where(c => c.ParentID == p.ParentID).ToList();
-							p.GrandChildren = GrandChild.Where(c => c.ParentID == p.ParentID).ToList();
-							p.Types         = Types.First(t => t.ID == p.ParentID);
-						}
+							new Parent() { ParentID = 1, Value1 = 1},
+							new Parent() { ParentID = 2},
+							new Parent() { ParentID = 3, Value1 = 3},
+							new Parent() { ParentID = 4},            
+							new Parent() { ParentID = 5, Value1 = 5},
+							new Parent() { ParentID = 6, Value1 = 6},
+							new Parent() { ParentID = 7, Value1 = 1},
+						};
+
+					foreach (var p in _parent)
+					{
+						p.Children      = Child.     Where(c => c.ParentID == p.ParentID).ToList();
+						p.GrandChildren = GrandChild.Where(c => c.ParentID == p.ParentID).ToList();
+						p.Types         = Types.First(t => t.ID == p.ParentID);
 					}
+				}
 
 				foreach (var parent in _parent)
 					yield return parent;
@@ -577,20 +649,37 @@ namespace Data.Linq
 			get
 			{
 				if (_child == null)
-					using (var db = new TestDbManager("Sql2008"))
-					{
-						db.Child.Delete(c => c.ParentID >= 1000);
-						_child = db.Child.ToList();
-						db.Clone();
-
-						foreach (var ch in _child)
+				{
+					_child = new List<Child>()
 						{
-							ch.Parent        = Parent. Single(p => p.ParentID == ch.ParentID);
-							ch.Parent1       = Parent1.Single(p => p.ParentID == ch.ParentID);
-							ch.ParentID2     = new Parent3 { ParentID2 = ch.Parent.ParentID, Value1 = ch.Parent.Value1 };
-							ch.GrandChildren = GrandChild.Where(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID).ToList();
-						}
+							new Child() {ParentID = 1, ChildID = 11},
+							new Child() {ParentID = 2, ChildID = 21},
+							new Child() {ParentID = 2, ChildID = 22},
+							new Child() {ParentID = 3, ChildID = 31},
+							new Child() {ParentID = 3, ChildID = 32},
+							new Child() {ParentID = 3, ChildID = 33},
+							new Child() {ParentID = 4, ChildID = 41},
+							new Child() {ParentID = 4, ChildID = 42},
+							new Child() {ParentID = 4, ChildID = 43},
+							new Child() {ParentID = 4, ChildID = 44},
+							new Child() {ParentID = 6, ChildID = 61},
+							new Child() {ParentID = 6, ChildID = 62},
+							new Child() {ParentID = 6, ChildID = 63},
+							new Child() {ParentID = 6, ChildID = 64},
+							new Child() {ParentID = 6, ChildID = 65},
+							new Child() {ParentID = 6, ChildID = 66},
+							new Child() {ParentID = 7, ChildID = 77},
+						};
+					
+
+					foreach (var ch in _child)
+					{
+						ch.Parent        = Parent. Single(p => p.ParentID == ch.ParentID);
+						ch.Parent1       = Parent1.Single(p => p.ParentID == ch.ParentID);
+						ch.ParentID2     = new Parent3 { ParentID2 = ch.Parent.ParentID, Value1 = ch.Parent.Value1 };
+						ch.GrandChildren = GrandChild.Where(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID).ToList();
 					}
+				}
 
 				foreach (var child in _child)
 					yield return child;
@@ -603,14 +692,36 @@ namespace Data.Linq
 			get
 			{
 				if (_grandChild == null)
-					using (var db = new TestDbManager("Sql2008"))
-					{
-						_grandChild = db.GrandChild.ToList();
-						db.Close();
+				{
+					_grandChild = new List<GrandChild>()
+						{
+							new GrandChild() {ParentID = 1, ChildID = 11, GrandChildID = 111},
+							new GrandChild() {ParentID = 2, ChildID = 21, GrandChildID = 211},
+							new GrandChild() {ParentID = 2, ChildID = 21, GrandChildID = 212},
+							new GrandChild() {ParentID = 2, ChildID = 22, GrandChildID = 221},
+							new GrandChild() {ParentID = 2, ChildID = 22, GrandChildID = 222},
+							new GrandChild() {ParentID = 3, ChildID = 31, GrandChildID = 311},
+							new GrandChild() {ParentID = 3, ChildID = 31, GrandChildID = 312},
+							new GrandChild() {ParentID = 3, ChildID = 31, GrandChildID = 313},
+							new GrandChild() {ParentID = 3, ChildID = 32, GrandChildID = 321},
+							new GrandChild() {ParentID = 3, ChildID = 32, GrandChildID = 322},
+							new GrandChild() {ParentID = 3, ChildID = 32, GrandChildID = 323},
+							new GrandChild() {ParentID = 3, ChildID = 33, GrandChildID = 331},
+							new GrandChild() {ParentID = 3, ChildID = 33, GrandChildID = 332},
+							new GrandChild() {ParentID = 3, ChildID = 33, GrandChildID = 333},
+							new GrandChild() {ParentID = 4, ChildID = 41, GrandChildID = 411},
+							new GrandChild() {ParentID = 4, ChildID = 41, GrandChildID = 412},
+							new GrandChild() {ParentID = 4, ChildID = 41, GrandChildID = 413},
+							new GrandChild() {ParentID = 4, ChildID = 41, GrandChildID = 414},
+							new GrandChild() {ParentID = 4, ChildID = 42, GrandChildID = 421},
+							new GrandChild() {ParentID = 4, ChildID = 42, GrandChildID = 422},
+							new GrandChild() {ParentID = 4, ChildID = 42, GrandChildID = 423},
+							new GrandChild() {ParentID = 4, ChildID = 42, GrandChildID = 424},
+						};
 
-						foreach (var ch in _grandChild)
-							ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
-					}
+					foreach (var ch in _grandChild)
+						ch.Child = Child.Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
+				}
 
 				foreach (var grandChild in _grandChild)
 					yield return grandChild;
@@ -623,16 +734,17 @@ namespace Data.Linq
 			get
 			{
 				if (_grandChild1 == null)
-					using (var db = new TestDbManager("Sql2008"))
-					{
-						_grandChild1 = db.GrandChild1.ToList();
+				{
+					_grandChild1 =
+						GrandChild.Select(
+							g => new GrandChild1() {ParentID = g.ParentID.Value, ChildID = g.ChildID, GrandChildID = g.GrandChildID}).ToList();
 
-						foreach (var ch in _grandChild1)
-						{
-							ch.Parent = Parent1.Single(p => p.ParentID == ch.ParentID);
-							ch.Child  = Child.  Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
-						}
+					foreach (var ch in _grandChild1)
+					{
+						ch.Parent = Parent1.Single(p => p.ParentID == ch.ParentID);
+						ch.Child  = Child.  Single(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID);
 					}
+				}
 
 				foreach (var grandChild in _grandChild1)
 					yield return grandChild;
