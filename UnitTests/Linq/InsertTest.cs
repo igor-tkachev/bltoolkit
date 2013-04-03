@@ -20,7 +20,7 @@ using Data.Linq.Model;
 namespace Update
 {
 	[TestFixture]
-	public class DmlTest : TestBase
+	public class InsertTest : TestBase
 	{
 		[Test]
 		public void DistinctInsert1()
