@@ -188,6 +188,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UpdateTest.cs" />
     <Compile Include="DeleteTest.cs" />
     <Compile Include="EnumMapping.cs" />
     <Compile Include="Exceptions\DataExceptionTest.cs" />
@@ -223,7 +224,7 @@
     <Compile Include="UserTests\SelectManyUpdateTest.cs" />
     <Compile Include="UserTests\SelectManyDeleteTest.cs" />
     <Compile Include="VisualBasicTest.cs" />
-    <Compile Include="DmlTest.cs" />
+    <Compile Include="InsertTest.cs" />
     <Compile Include="ExpressionsTest.cs" />
     <Compile Include="MathFunctions.cs" />
     <Compile Include="Exceptions\Inheritance.cs" />

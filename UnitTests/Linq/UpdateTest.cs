@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using BLToolkit.Data;
@@ -439,6 +440,50 @@ namespace Update
 			using (var ctx = new TestDbManager())
 			{
 				_updateQuery(ctx, 12345, "54321");
+			}
+		}
+
+		[TableName("LinqDataTypes")]
+		class Table1
+		{
+			public int  ID;
+			public bool BoolValue;
+
+			[Association(ThisKey = "ID", OtherKey = "ParentID", CanBeNull = false)]
+			public List<Table2> Tables2;
+		}
+
+		[TableName("Parent")]
+		class Table2
+		{
+			public int  ParentID;
+			public bool Value1;
+
+			[Association(ThisKey = "ParentID", OtherKey = "ID", CanBeNull = false)]
+			public Table1 Table1;
+		}
+
+		[Test]
+		public void UpdateAssociation5([DataContexts(ExcludeLinqService=true)] string context)
+		{
+			using (var db = new DbManager(context))
+			{
+				var ids = new[] { 10000, 20000 };
+
+				db.GetTable<Table2>()
+					.Where(x => ids.Contains(x.ParentID))
+					.Select(x => x.Table1)
+					.Distinct()
+					.Set(y => y.BoolValue, y => y.Tables2.All(x => x.Value1))
+					.Update();
+
+				var idx = db.LastQuery.IndexOf("INNER JOIN");
+
+				Assert.That(idx, Is.Not.EqualTo(-1));
+
+				idx = db.LastQuery.IndexOf("INNER JOIN", idx + 1);
+
+				Assert.That(idx, Is.EqualTo(-1));
 			}
 		}
 	}
