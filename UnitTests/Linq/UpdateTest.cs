@@ -464,14 +464,16 @@ namespace Update
 		}
 
 		[Test]
-		public void UpdateAssociation5([DataContexts(ExcludeLinqService=true)] string context)
+		public void UpdateAssociation5([DataContexts(
+			ProviderName.Access, ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite,
+			ExcludeLinqService=true)] string context)
 		{
 			using (var db = new DbManager(context))
 			{
 				var ids = new[] { 10000, 20000 };
 
 				db.GetTable<Table2>()
-					.Where(x => ids.Contains(x.ParentID))
+					.Where (x => ids.Contains(x.ParentID))
 					.Select(x => x.Table1)
 					.Distinct()
 					.Set(y => y.BoolValue, y => y.Tables2.All(x => x.Value1))

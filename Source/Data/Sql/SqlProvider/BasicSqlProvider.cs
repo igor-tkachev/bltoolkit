@@ -338,7 +338,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				var addAlias = false;
 
 				BuildColumnExpression(sb, expr.Expression, null, ref addAlias);
-				//BuildExpression(sb, expr.Expression);
 			}
 
 			Indent--;
