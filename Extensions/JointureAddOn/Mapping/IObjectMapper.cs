@@ -1,4 +1,6 @@
-﻿using BLToolkit.Emit;
+﻿using System.Collections.Generic;
+
+using BLToolkit.Emit;
 
 namespace BLToolkit.Mapping
 {
@@ -7,12 +9,14 @@ namespace BLToolkit.Mapping
         bool IsLazy { get; set; }
         bool ContainsLazyChild { get; set; }
 
+        List<string> PrimaryKeyNames { get; set; }
+
         /// <summary>
         ///     Is set only for CollectionFullObjectMapper. TODO : Should refactor this?
         /// </summary>
         GetHandler Getter { get; set; }
 
-        GetHandler PrimaryKeyValueGetter { get; set; }
+        List<GetHandler> PrimaryKeyValueGetters { get; set; }
         Association Association { get; set; }
     }
 }
