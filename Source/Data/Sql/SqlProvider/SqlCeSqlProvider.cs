@@ -189,7 +189,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			var wrap = false;
 
-			if (expr == typeof(bool))
+			if (expr.SystemType == typeof(bool))
 			{
 				if (expr is SqlQuery.SearchCondition)
 					wrap = true;
