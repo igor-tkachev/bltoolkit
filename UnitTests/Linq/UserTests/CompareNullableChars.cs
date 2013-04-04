@@ -10,26 +10,26 @@ using NUnit.Framework;
 
 namespace Data.Linq.UserTests
 {
-	[TableName(Name = "EngineeringCircuitEnd")]
-	public class EngineeringCircuitEndRecord
+	[TestFixture]
+	public class CompareNullableChars : TestBase
 	{
-		[PrimaryKey(1)]
-		[Identity] public Int64 EngineeringCircuitID { get; set; }
-		[Nullable] public Char? Gender               { get; set; }
-	}
-
-	public class SqlServerDataRepository : DbManager
-	{
-		public SqlServerDataRepository(string configurationString) : base(configurationString)
+		[TableName(Name = "EngineeringCircuitEnd")]
+		public class EngineeringCircuitEndRecord
 		{
+			[PrimaryKey(1)]
+			[Identity] public Int64 EngineeringCircuitID { get; set; }
+			[Nullable] public Char? Gender               { get; set; }
 		}
 
-		public Table<EngineeringCircuitEndRecord> EngineeringCircuitEnds { get { return this.GetTable<EngineeringCircuitEndRecord>(); } }
-	}
+		public class SqlServerDataRepository : DbManager
+		{
+			public SqlServerDataRepository(string configurationString) : base(configurationString)
+			{
+			}
 
-	[TestFixture]
-	public class UserTest : TestBase
-	{
+			public Table<EngineeringCircuitEndRecord> EngineeringCircuitEnds { get { return this.GetTable<EngineeringCircuitEndRecord>(); } }
+		}
+
 		[Test]
 		public void Test([DataContexts(ExcludeLinqService=true)] string context)
 		{
