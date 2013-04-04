@@ -8,8 +8,6 @@ using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
-	using DataAccess;
-
 	public static class Extensions
 	{
 		#region Table Helpers
@@ -357,13 +355,13 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-        #region String Extensions
+		#region String Extensions
 
-        public static int ContainsExactly(this string s, string value)
-        {
-            return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value), RegexOptions.IgnoreCase).Count;
-        }
+		public static int ContainsExactly(this string s, string value)
+		{
+			return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value), RegexOptions.IgnoreCase).Count;
+		}
 
-        #endregion
+		#endregion
 	}
 }

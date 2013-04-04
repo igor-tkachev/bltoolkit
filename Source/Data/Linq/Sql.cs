@@ -274,14 +274,14 @@ namespace BLToolkit.Data.Linq
 			return str.IndexOf(value) + 1;
 		}
 
-        [SqlFunction]
-        public static int? ContainsExactly(string value, string str)
-        {
-            if (str == null || value == null)
-                return null;
+		[SqlFunction]
+		public static int? ContainsExactly(string value, string str)
+		{
+			if (str == null || value == null)
+				return null;
 
-            return str.ContainsExactly(value);
-        }
+			return str.ContainsExactly(value);
+		}
 
 		[SqlFunction]
 		[SqlFunction("DB2",   "Locate")]
