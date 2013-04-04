@@ -221,6 +221,9 @@
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />
     <Compile Include="TableFunctionTest.cs" />
+    <Compile Include="UserTests\CompareNullableChars.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="UserTests\SelectManyUpdateTest.cs" />
     <Compile Include="UserTests\SelectManyDeleteTest.cs" />
     <Compile Include="VisualBasicTest.cs" />
