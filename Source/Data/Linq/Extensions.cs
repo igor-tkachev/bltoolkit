@@ -8,6 +8,8 @@ using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
 {
+	using DataAccess;
+
 	public static class Extensions
 	{
 		#region Table Helpers
