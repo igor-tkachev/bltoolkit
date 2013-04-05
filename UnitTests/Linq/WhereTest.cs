@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NUnit.Framework;
-
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Mapping;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -940,6 +941,44 @@ namespace Data.Linq
 				from t in db.Types
 				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
 				select t));
+		}
+
+		public new class Parent1
+		{
+			public int Id               { get; set; }
+			public string Name          { get; set; }
+			public bool IsDeleted       { get; set; }
+
+			[Association(ThisKey="Id", OtherKey="ParentId")]
+			public List<Child1> Childs  { get; set; }
+		}
+
+		public class ParentView : Parent1
+		{
+			public string ExtInfo { get; set; }
+		}
+
+		public class Child1
+		{
+			public int Id               { get; set; }
+			public int? ParentId        { get; set; }
+			public string Name          { get; set; }
+
+			[Association(ThisKey = "ParentId", OtherKey = "Id")]
+			public Parent1 Parent       { get; set; }
+		}
+
+		//[Test]
+		public void SelectWhereTest()
+		{
+			using (var db = new TestDbManager())
+			{
+				var filteredParentView = db.GetTable<Parent1>()
+					.Where (p => p.IsDeleted == false)
+					.Select(p => new ParentView { Id = p.Id, Name = p.Name });
+
+				var sql = filteredParentView.Where(pv => pv.Childs.Any(c => c.Name == "")).ToString();
+			}
 		}
 	}
 }

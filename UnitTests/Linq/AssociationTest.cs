@@ -13,7 +13,7 @@ namespace Data.Linq
 	using Model;
 
 	[TestFixture]
-	public class Association : TestBase
+	public class AssociationTest : TestBase
 	{
 		[Test]
 		public void Test1()

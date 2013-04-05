@@ -199,7 +199,7 @@
     <Compile Include="ConvertTest.cs" />
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
-    <Compile Include="Association.cs" />
+    <Compile Include="AssociationTest.cs" />
     <Compile Include="ConvertExpression.cs" />
     <Compile Include="ConcatUnionTest.cs" />
     <Compile Include="IdlTest.mono.cs" />
