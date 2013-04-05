@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -14,6 +15,14 @@ namespace BLToolkit.Data.DataProvider
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2000SqlProvider();
+		}
+
+		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
+		{
+			if (parameter.DbType == DbType.DateTime2)
+				parameter.DbType = DbType.DateTime;
+
+			base.AttachParameter(command, parameter);
 		}
 	}
 }
