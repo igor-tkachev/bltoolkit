@@ -279,8 +279,6 @@ namespace Data.Linq
 		{
 			Exception ex = null;
 
-			var executedForAtLeastOneProvider = false;
-
 			foreach (var db in GetProviders(exceptList))
 			{
 				try
@@ -289,7 +287,6 @@ namespace Data.Linq
 						((DbManager)db).BeginTransaction();
 
 					func(db);
-					executedForAtLeastOneProvider = true;
 				}
 				catch (Exception e)
 				{
@@ -306,9 +303,7 @@ namespace Data.Linq
 
 			if (ex != null)
 				throw ex;
-
-//			if (!executedForAtLeastOneProvider)
-//				throw new ApplicationException("Delegate function has not been executed.");}
+		}
 
 		protected void ForEachProvider(string[] exceptList, Action<ITestDataContext> func)
 		{
