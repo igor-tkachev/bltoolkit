@@ -121,37 +121,41 @@ namespace BLToolkit.Reflection.MetadataProvider
 
         #endregion
 
-        #region GetDbType
+		#region GetDbType
 
-        public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            var extList = typeExtension[member.Name]["DbType"];
+		public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			var extList = typeExtension[member.Name]["DbType"];
 
-            if (extList != AttributeExtensionCollection.Null)
-            {
-                isSet = true;
-                var attr = new DbTypeAttribute(DbType.String);
+			if (extList != AttributeExtensionCollection.Null)
+			{
+				isSet = true;
+				var attr = new DbTypeAttribute(DbType.String);
 
-                var extDbType = extList.FirstOrDefault(x => x.Name == "DbType");
-                var extSize = extList.FirstOrDefault(x => x.Name == "Size");
+				var extDbType = extList.FirstOrDefault(x => x.Name == "DbType");
+				var extSize = extList.FirstOrDefault(x => x.Name == "Size");
 
-                DbType dbType;
-                if (extDbType != null)
-                {
-                    DbType.TryParse(extDbType.Value.ToString(), out dbType);
-                    attr.DbType = dbType;
-                }
-                if (extSize != null)
-                {
-                    attr.Size = int.Parse(extSize.Value.ToString());
-                }
-                return attr;
-            }
+				DbType dbType;
+				if (extDbType != null)
+				{
+#if SILVERLIGHT || FW4
+					DbType.TryParse(extDbType.Value.ToString(), out dbType);
+#else
+					dbType = (DbType)Enum.Parse(typeof(DbType), extDbType.Value.ToString());
+#endif
+					attr.DbType = dbType;
+				}
+				if (extSize != null)
+				{
+					attr.Size = int.Parse(extSize.Value.ToString());
+				}
+				return attr;
+			}
 
-            return base.GetDbType(typeExtension, member, out isSet);
-        }
+			return base.GetDbType(typeExtension, member, out isSet);
+		}
 
-        #endregion
+		#endregion
 
         #region GetPrimaryKey
 
