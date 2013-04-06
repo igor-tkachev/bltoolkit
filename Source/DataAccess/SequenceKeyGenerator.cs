@@ -1,3 +1,5 @@
+using System;
+
 namespace BLToolkit.DataAccess
 {
 	public class SequenceKeyGenerator : KeyGenerator

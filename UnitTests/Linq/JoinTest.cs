@@ -752,9 +752,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void StackOverflow()
+		public void StackOverflow([IncludeDataContexts("Sql2008")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from c in db.Child

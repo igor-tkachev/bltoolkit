@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 
-using NUnit.Framework;
-
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -15,7 +16,7 @@ namespace Data.Linq
 		[Test]
 		public void TestContext()
 		{
-			var ctx = new DataContext("Sql2008");
+			var ctx = new DataContext(ProviderName.Access);
 
 			ctx.GetTable<Person>().ToList();
 
@@ -42,7 +43,7 @@ namespace Data.Linq
 		[Test]
 		public void TestContextToString()
 		{
-			using (var ctx = new DataContext("Sql2008"))
+			using (var ctx = new DataContext(ProviderName.Access))
 			{
 				Console.WriteLine(ctx.GetTable<Person>().ToString());
 

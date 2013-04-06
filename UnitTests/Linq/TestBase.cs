@@ -377,7 +377,7 @@ namespace Data.Linq
 			get
 			{
 				if (_types == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 						_types = db.Types.ToList();
 
 				foreach (var type in _types)
@@ -391,7 +391,7 @@ namespace Data.Linq
 			get
 			{
 				if (_types2 == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 						_types2 = db.Types2.ToList();
 				return _types2;
 			}
@@ -404,7 +404,7 @@ namespace Data.Linq
 			{
 				if (_person == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 						_person = db.Person.ToList();
 
 					foreach (var p in _person)
@@ -423,7 +423,7 @@ namespace Data.Linq
 			{
 				if (_patient == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 						_patient = db.Patient.ToList();
 
 					foreach (var p in _patient)
@@ -441,7 +441,7 @@ namespace Data.Linq
 			{
 				if (_doctor == null)
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 						_doctor = db.Doctor.ToList();
 				}
 
@@ -457,7 +457,7 @@ namespace Data.Linq
 			get
 			{
 				if (_parent == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						db.Parent.Delete(c => c.ParentID >= 1000);
 						_parent = db.Parent.ToList();
@@ -572,7 +572,7 @@ namespace Data.Linq
 			get
 			{
 				if (_child == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						db.Child.Delete(c => c.ParentID >= 1000);
 						_child = db.Child.ToList();
@@ -598,7 +598,7 @@ namespace Data.Linq
 			get
 			{
 				if (_grandChild == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						_grandChild = db.GrandChild.ToList();
 						db.Close();
@@ -618,7 +618,7 @@ namespace Data.Linq
 			get
 			{
 				if (_grandChild1 == null)
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						_grandChild1 = db.GrandChild1.ToList();
 

@@ -48,7 +48,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SearchCondition2()
+		public void SearchCondition2([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{

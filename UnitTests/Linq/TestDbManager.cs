@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql;
 
@@ -20,7 +21,7 @@ namespace Data.Linq
 		}
 
 		public TestDbManager()
-			: base("Sql2008")
+			: base(ProviderName.Access)
 		{
 		}
 

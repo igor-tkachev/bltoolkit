@@ -861,9 +861,9 @@ namespace Update
 		}
 
 		[Test]
-		public void InsertBatch2()
+		public void InsertBatch2([IncludeDataContexts("Sql2008")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 			{
 				db.Types2.Delete(_ => _.ID > 1000);
 

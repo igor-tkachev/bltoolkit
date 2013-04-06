@@ -190,11 +190,11 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect11()
+		public void MultipleSelect11([IncludeDataContexts("Sql2008")] string context)
 		{
 			var dt = DateTime.Now;
 
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from p in db.Parent
