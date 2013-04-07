@@ -876,8 +876,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
 				}
 
 				return base.ConvertToGuid(value);
@@ -899,8 +899,8 @@ namespace BLToolkit.Data.DataProvider
 #endif
 				if (value is OracleClob)
 				{
-					var oraClob = (OracleClob)value;
-					return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
+					using (var oraClob = (OracleClob)value)
+						return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
 				}
 
 				return base.ConvertToString(value);
@@ -945,8 +945,8 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? null: oraBlob.Value;
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? null: oraBlob.Value;
 				}
 
 				if (value is OracleBinary)
@@ -974,8 +974,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleClob)
 				{
-					var oraClob = (OracleClob)value;
-					return oraClob.IsNull? null: oraClob.Value.ToCharArray();
+					using (var oraClob = (OracleClob)value)
+						return oraClob.IsNull? null: oraClob.Value.ToCharArray();
 				}
 
 				return base.ConvertToCharArray(value);
@@ -1142,8 +1142,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
 				}
 
 				return base.ConvertToNullableGuid(value);
