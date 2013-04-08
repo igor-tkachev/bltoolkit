@@ -405,6 +405,7 @@
     <Compile Include="Data\Sql\SqlValue.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />
     <Compile Include="Mapping\Association.cs" />
+    <Compile Include="Mapping\ExpressionMapIgnoreAttribute.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\InheritanceMappingAttribute.cs" />

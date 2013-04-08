@@ -348,6 +348,7 @@
     <Compile Include="Data\Sql\SqlValue.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />
     <Compile Include="Mapping\Association.cs" />
+    <Compile Include="Mapping\ExpressionMapIgnoreAttribute.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />
     <Compile Include="Mapping\Fluent\AssociationMap.cs" />
     <Compile Include="Mapping\Fluent\Attributes.cs" />

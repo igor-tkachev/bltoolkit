@@ -609,6 +609,11 @@ namespace BLToolkit.Mapping
 				if (!dma.HasSetter)
 					continue;
 
+				var attr = dma.GetAttribute<ExpressionMapIgnoreAttribute>();
+
+				if (attr != null && attr.Ignore)
+					continue;
+
 				var smm = src[dmm.Name];
 
 				if (smm == null || smm is MemberMapper.ComplexMapper)
@@ -617,6 +622,11 @@ namespace BLToolkit.Mapping
 				var sma = smm.MemberAccessor;
 
 				if (!sma.HasGetter)
+					continue;
+
+				attr = sma.GetAttribute<ExpressionMapIgnoreAttribute>();
+
+				if (attr != null && attr.Ignore)
 					continue;
 
 				_getCurrent = dma.GetValue;
