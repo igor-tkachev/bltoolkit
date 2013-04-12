@@ -201,6 +201,9 @@
     <Compile Include="JointureTests\DiversTests.cs" />
     <Compile Include="JointureTests\Mappings\BasicMedia.cs" />
     <Compile Include="JointureTests\Consts.cs" />
+    <Compile Include="JointureTests\Mappings\Multimedia.cs" />
+    <Compile Include="JointureTests\Mappings\MultimediaCobranding.cs" />
+    <Compile Include="JointureTests\Mappings\MultimediaFile.cs" />
     <Compile Include="JointureTests\PerformanceAndTunningTests.cs" />
     <Compile Include="JointureTests\Tools\ExecTimeInfo.cs" />
     <Compile Include="JointureTests\Factories\MediaDiscTest.cs" />

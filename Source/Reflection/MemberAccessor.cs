@@ -1,13 +1,16 @@
 using System;
-using System.Data.SqlTypes;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.ComponentModel;
+using BLToolkit.Data.Linq;
+
+#if DATA
+using System.Data.SqlTypes;
+#endif
 
 #if !SILVERLIGHT && !DATA
 using BLToolkit.ComponentModel;
-using BLToolkit.Data.Linq;
-
+using System.ComponentModel;
+using System.Data.SqlTypes;
 #endif
 
 namespace BLToolkit.Reflection

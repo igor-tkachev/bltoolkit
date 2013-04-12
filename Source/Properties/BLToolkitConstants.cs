@@ -42,6 +42,6 @@ namespace BLToolkit
         // <summary>
         // Revision component of version.
         // <summary>
-        public const string AutoRevision = "3";
+        public const string AutoRevision = "1";
     }
 }
