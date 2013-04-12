@@ -503,7 +503,7 @@ namespace BLToolkit.Data.Linq
 				getter = i == 0 ? pof : Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
 			}
 
-			if (!mm.Type.IsClass && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
+			if (!mm.Type.IsClass && !mm.Type.IsInterface && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
 			{
 				var method = ReflectionHelper.Expressor<int>.MethodExpressor(_ => ConvertNullable(0, 0))
 					.GetGenericMethodDefinition()

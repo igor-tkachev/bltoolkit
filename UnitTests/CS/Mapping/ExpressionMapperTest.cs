@@ -384,5 +384,32 @@ namespace Mapping
 			Assert.IsNotNull (dest.Class2);
 			Assert.AreNotSame(dest.Class1, dest.Class2);
 		}
+
+		class Object1
+		{
+			public int Field1;
+			[ExpressionMapIgnore]
+			public int Field2;
+		}
+
+		class Object2
+		{
+			public int Field1;
+			public int Field2;
+		}
+
+		[Test]
+		public void ExpressionMapIgnoreTest()
+		{
+			var mapper1  = Map.GetObjectMapper<Object1,Object2>();
+			var object2 = mapper1(new Object1 { Field1 = 1, Field2 = 2 });
+
+			Assert.That(object2.Field2, Is.Not.EqualTo(2));
+
+			var mapper2 = Map.GetObjectMapper<Object2,Object1>();
+			var object1 = mapper2(new Object2 { Field1 = 1, Field2 = 2 });
+
+			Assert.That(object1.Field2, Is.Not.EqualTo(2));
+		}
 	}
 }

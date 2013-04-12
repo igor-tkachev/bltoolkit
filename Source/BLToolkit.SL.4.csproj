@@ -257,6 +257,7 @@
     <Compile Include="Mapping\DictionaryListMapperT.cs" />
     <Compile Include="Mapping\DictionaryMapper.cs" />
     <Compile Include="Mapping\EnumeratorMapper.cs" />
+    <Compile Include="Mapping\ExpressionMapIgnoreAttribute.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />
     <Compile Include="Mapping\IMapDataDestination.cs" />
     <Compile Include="Mapping\IMapDataDestinationList.cs" />
