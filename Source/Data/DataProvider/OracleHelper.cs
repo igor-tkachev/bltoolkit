@@ -167,6 +167,11 @@ namespace BLToolkit.Data.DataProvider
 
         #endregion
 
+        /// <summary>
+        /// TODO Remove Oracle helper class since it is useless. Generate sql text query dynamically
+        /// </summary>
+        /// <param name="poCommand"></param>
+        /// <returns></returns>
         public static string Interpret(IDbCommand poCommand)
         {
             if (poCommand.Parameters.Count == 0)
@@ -180,12 +185,15 @@ namespace BLToolkit.Data.DataProvider
 
             for (int i = 0; i < oMatchCollection.Count; i++)
             {
-                if (oMatchCollection[i].Groups["string"].Success)
+                int index = oMatchCollection.Count - i - 1;
+                int matchCountIndex = oMatchCollection.Count - matchCount- 1;
+
+                if (oMatchCollection[index].Groups["string"].Success)
                     continue;
 
-                string strParameter = oMatchCollection[i].Groups["Parameters"].Captures[0].Value;
+                string strParameter = oMatchCollection[index].Groups["Parameters"].Captures[0].Value;
 
-                var param = (IDbDataParameter)poCommand.Parameters[matchCount];
+                var param = (IDbDataParameter)poCommand.Parameters[matchCountIndex];
                 if (param.Value is DateTime)
                 {
                     var dt = (DateTime)param.Value;

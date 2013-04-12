@@ -536,61 +536,67 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void ComplexSelect4()
+        public void SelectWithManyParameters()
         {
             var productIds = new[]
                 {
-                    22130,
-                    203032,
-                    229145,
-                    331494,
-                    57292,
-                    89931
-                };
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                }.ToList();
             var duration = TimeSpan.FromSeconds(3);
 
-            using (var pitagorDb = ConnectionFactory.CreateDbManager())
+            using (var manager = ConnectionFactory.CreateDbManager())
             {
-                pitagorDb.UseQueryText = true;
+                //manager.UseQueryText = true;
 
-                Query(pitagorDb, productIds.ToList(), duration);
+                var queryMultimedia = from multimedia in manager.GetTable<Multimedia>()
+                                      join multimediaFile in manager.GetTable<MultimediaFile>() on multimedia.Id equals multimediaFile.MultimediaId
+                                          into joinedMultimediaFile
+                                      from subMultimediaFile in joinedMultimediaFile.DefaultIfEmpty()
+                                      join multimediaCobranding1 in manager.GetTable<MultimediaCobranding>() on new {MultimediaId = multimedia.Id, multimedia.CategoryMultimediaId} equals new {multimediaCobranding1.MultimediaId, multimediaCobranding1.CategoryMultimediaId}
+                                      where multimedia.CategoryMultimediaId == 65 &&
+                                            multimediaCobranding1.ProductId == productIds[0] &&
+                                            multimediaCobranding1.CategoryMultimediaId == 65
+                                      select new
+                                          {
+                                              Multimedia = multimedia,
+                                              MultimediaFile = subMultimediaFile
+                                          };
+
+                for (int i = 1; i < productIds.Count; i++)
+                {
+                    var productId = productIds[i];
+                    queryMultimedia = from productMultimedia in queryMultimedia
+                                      join multimediaCobranding1 in
+                                          manager.GetTable<MultimediaCobranding>()
+                                                 .Where(mc => mc.CategoryMultimediaId == 65) on productMultimedia.Multimedia.Id equals
+                                          multimediaCobranding1.MultimediaId
+                                      where multimediaCobranding1.ProductId == productId &&
+                                            multimediaCobranding1.CategoryMultimediaId == 65
+                                      select productMultimedia;
+                }
+
+                queryMultimedia = queryMultimedia.Where(p => p.Multimedia.DurationInSeconds == (long) duration.TotalSeconds);
+
+                var tempMultimediae = queryMultimedia.Distinct().ToList();
+                Console.WriteLine(tempMultimediae);
             }
-        }
-
-        private void Query(DbManager manager, List<int> productIds, TimeSpan? duration = null)
-        {
-            var queryMultimedia = from multimedia in manager.GetTable<Multimedia>()
-                                  join multimediaFile in manager.GetTable<MultimediaFile>() on multimedia.Id equals multimediaFile.MultimediaId
-                                      into joinedMultimediaFile
-                                  from subMultimediaFile in joinedMultimediaFile.DefaultIfEmpty()
-                                  join multimediaCobranding1 in manager.GetTable<MultimediaCobranding>() on new {MultimediaId = multimedia.Id, multimedia.CategoryMultimediaId} equals new {multimediaCobranding1.MultimediaId, multimediaCobranding1.CategoryMultimediaId}
-                                  where multimedia.CategoryMultimediaId == 65 &&
-                                        multimediaCobranding1.ProductId == productIds[0] &&
-                                        multimediaCobranding1.CategoryMultimediaId == 65
-                                  select new
-                                      {
-                                          Multimedia = multimedia,
-                                          MultimediaFile = subMultimediaFile
-                                      };
-
-            for (int i = 1; i < productIds.Count; i++)
-            {
-                var productId = productIds[i];
-                queryMultimedia = from productMultimedia in queryMultimedia
-                                  join multimediaCobranding1 in
-                                      manager.GetTable<MultimediaCobranding>()
-                                             .Where(mc => mc.CategoryMultimediaId == 65) on productMultimedia.Multimedia.Id equals
-                                      multimediaCobranding1.MultimediaId
-                                  where multimediaCobranding1.ProductId == productId &&
-                                        multimediaCobranding1.CategoryMultimediaId == 65
-                                  select productMultimedia;
-            }
-
-            if (duration.HasValue)
-                queryMultimedia = queryMultimedia.Where(p => p.Multimedia.DurationInSeconds == (long) duration.Value.TotalSeconds);
-
-            var tempMultimediae = queryMultimedia.Distinct().ToList();
-            Console.WriteLine(tempMultimediae);
         }
 
         [Test]
