@@ -9,6 +9,7 @@ using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
 using BLToolkit.Reflection;
+using BLToolkit.Reflection.Extension;
 using BLToolkit.TypeBuilder;
 using Castle.DynamicProxy;
 
@@ -40,7 +41,10 @@ namespace BLToolkit.Mapping
             _ignoreLazyLoad = ignoreLazyLoading;
 
             _proxy = new ProxyGenerator();
+
             PropertiesMapping = new List<IMapper>();
+            PrimaryKeyValueGetters = new List<GetHandler>();
+            PrimaryKeyNames = new List<string>();
         }
 
         #region IPropertiesMapping Members
@@ -59,7 +63,7 @@ namespace BLToolkit.Mapping
         public SetHandler Setter { get; set; }
         public Type PropertyType { get; set; }
         public string PropertyName { get; set; }
-        public AssociationAttribute Association { get; set; }
+        public Association Association { get; set; }
 
         #endregion
 
@@ -69,12 +73,14 @@ namespace BLToolkit.Mapping
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
 
+        public List<string> PrimaryKeyNames { get; set; }
+
         #endregion
 
         #region ILazyMapper
 
         public GetHandler ParentKeyGetter { get; set; }
-        public GetHandler PrimaryKeyValueGetter { get; set; }
+        public List<GetHandler> PrimaryKeyValueGetters { get; set; }
 
         #endregion
 
@@ -88,7 +94,7 @@ namespace BLToolkit.Mapping
             base.Init(mappingSchema, type);
 
             int startIndex = 0;
-            GetObjectMapper(this, ref startIndex);
+            GetObjectMapper(this, ref startIndex, _typeAccessor);
         }
 
         public override object CreateInstance()
@@ -126,8 +132,11 @@ namespace BLToolkit.Mapping
             return tableDescription;
         }
 
-        private IMapper GetObjectMapper(IObjectMapper mapper, ref int startIndex)
+        private IMapper GetObjectMapper(IObjectMapper mapper, ref int startIndex, TypeAccessor akTypeAccessor)
         {
+            //Todo: Remove this Call!
+            _extension = TypeExtension.GetTypeExtension(mapper.PropertyType /*_typeAccessor.OriginalType*/, MappingSchema.Extensions);
+
             Type mapperType = mapper.PropertyType;
             var objectMappers = new List<IObjectMapper>();
 
@@ -144,57 +153,55 @@ namespace BLToolkit.Mapping
 
             PropertyInfo[] properties = mapperType.GetProperties();
 
-            PropertyInfo primaryKeyPropInfo = null;
-            foreach (PropertyInfo prop in properties)
+            MemberAccessor primaryKeyMemberAccessor = null;
+            foreach (MemberAccessor ma in akTypeAccessor)
             {
                 //  Setters
                 lock (SetterHandlersLock)
                 {
-                    if (!SettersHandlers[mapper.PropertyType].ContainsKey(prop.Name))
+
+                    if (!SettersHandlers[mapper.PropertyType].ContainsKey(ma.Name))
                     {
-                        SetHandler setHandler = FunctionFactory.Il.CreateSetHandler(mapper.PropertyType, prop);
-                        SettersHandlers[mapper.PropertyType].Add(prop.Name, setHandler /* IL.Setter*/);
+                        SettersHandlers[mapper.PropertyType].Add(ma.Name, ma.SetValue);
                     }
                 }
 
-                object[] pkFields = prop.GetCustomAttributes(typeof(PrimaryKeyAttribute), true);
-                if (pkFields.Length > 0)
+                if (GetPrimaryKey(ma) != null)
                 {
-                    primaryKeyPropInfo = prop;
+                    primaryKeyMemberAccessor = ma;
 
                     lock (SetterHandlersLock)
                     {
-                        if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
+                        if (!GettersHandlers[mapperType].ContainsKey(ma.Name))
                         {
-                            GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, prop);
-                            GettersHandlers[mapperType].Add(prop.Name, getHandler);
+                            GettersHandlers[mapperType].Add(ma.Name, ma.GetValue);
                         }
                     }
-                    mapper.PrimaryKeyValueGetter = GettersHandlers[mapperType][prop.Name];
+                    mapper.PrimaryKeyValueGetters.Add(GettersHandlers[mapperType][ma.Name]);
+                    mapper.PrimaryKeyNames.Add(ma.Name);
 
-                    if (mapper.Association != null && string.IsNullOrWhiteSpace(mapper.Association.OtherKey))
+                    if (mapper.Association != null && (mapper.Association.OtherKey == null || mapper.Association.OtherKey.Length == 0))
                     {
-                        mapper.Association.OtherKey = prop.Name;
+                        mapper.Association.OtherKey = new string[] { ma.Name };
                     }
                 }
             }
-            if (primaryKeyPropInfo == null)
+            if (primaryKeyMemberAccessor == null)
                 throw new Exception("PrimaryKey attribute not found on type: " + mapperType);
 
             foreach (PropertyInfo prop in properties)
             {
-                // Check if the accessor is an association
-                object[] associationAttr = prop.GetCustomAttributes(typeof(AssociationAttribute), true);
-                if (associationAttr.Length > 0)
-                {
-                    var ass = (AssociationAttribute)associationAttr[0];
+                var ma = akTypeAccessor.First(x => x.Name == prop.Name);
 
+                // Check if the accessor is an association
+                var association = GetAssociation(ma);
+                if (association != null)
+                {
                     //  Getters for IObjectMapper
                     lock (SetterHandlersLock)
                         if (!GettersHandlers[mapperType].ContainsKey(prop.Name))
                         {
-                            GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, prop);
-                            GettersHandlers[mapperType].Add(prop.Name, getHandler);
+                            GettersHandlers[mapperType].Add(prop.Name, ma.GetValue);
                         }
 
                     bool isCollection = prop.PropertyType.GetInterfaces().ToList().Contains(typeof(IList));
@@ -204,7 +211,7 @@ namespace BLToolkit.Mapping
                         propertiesMapping = new FullObjectMapper(_db, _ignoreLazyLoad)
                         {
                             PropertyType = prop.PropertyType,
-                            IsNullable = ass.CanBeNull,
+                            IsNullable = association.CanBeNull,
                             Getter = GettersHandlers[mapperType][prop.Name],
                         };
                     }
@@ -221,56 +228,51 @@ namespace BLToolkit.Mapping
                             PropertyCollectionType = prop.PropertyType,
                         };
 
-                        ((FullObjectMapper)mapper).ColParent = true;
+                        if (mapper is FullObjectMapper)
+                            ((FullObjectMapper)mapper).ColParent = true;
                     }
 
-                    if (string.IsNullOrWhiteSpace(ass.ThisKey))
-                        ass.ThisKey = primaryKeyPropInfo.Name;
+                    if (association.ThisKey == null || association.ThisKey.Length == 0)
+                        association.ThisKey =new string[]{ primaryKeyMemberAccessor.Name};
 
                     bool isLazy = false;
                     if (!_ignoreLazyLoad)
                     {
-                        object[] lazy = prop.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
-                        if (lazy.Length > 0)
+                        var lazy = GetLazyInstance(ma); // prop.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
+                        if (lazy)
                         {
-                            if (((LazyInstanceAttribute)lazy[0]).IsLazy)
-                            {
-                                isLazy = true;
-                                mapper.ContainsLazyChild = true;
+                            isLazy = true;
+                            mapper.ContainsLazyChild = true;
 
-                                //  Getters
-                                lock (SetterHandlersLock)
-                                    if (!GettersHandlers[mapperType].ContainsKey(primaryKeyPropInfo.Name))
-                                    {
-                                        GetHandler getHandler = FunctionFactory.Il.CreateGetHandler(mapperType, primaryKeyPropInfo);
-                                        GettersHandlers[mapperType].Add(primaryKeyPropInfo.Name, getHandler);
-                                    }
-                            }
+                            //  Getters
+                            lock (SetterHandlersLock)
+                                if (!GettersHandlers[mapperType].ContainsKey(primaryKeyMemberAccessor.Name))
+                                {
+                                    GettersHandlers[mapperType].Add(primaryKeyMemberAccessor.Name, primaryKeyMemberAccessor.GetValue);
+                                }
                         }
                     }
 
-                    propertiesMapping.Association = ass;
+                    propertiesMapping.Association = association;
                     propertiesMapping.PropertyName = prop.Name;
                     propertiesMapping.IsLazy = isLazy;
                     propertiesMapping.Setter = SettersHandlers[mapperType][prop.Name];
 
                     if (propertiesMapping.IsLazy)
                     {
-                        propertiesMapping.ParentKeyGetter = GettersHandlers[mapperType][primaryKeyPropInfo.Name];
+                        propertiesMapping.ParentKeyGetter = GettersHandlers[mapperType][primaryKeyMemberAccessor.Name];
                     }
                     objectMappers.Add(propertiesMapping);
                 }
                 else
                 {
-                    object[] nomapAttr = prop.GetCustomAttributes(typeof(MapIgnoreAttribute), true);
-                    if (nomapAttr.Length > 0)
+
+                    var mapIgnore = GetMapIgnore(ma);
+                    if (mapIgnore)
                         continue;
 
-                    object[] mapFields = prop.GetCustomAttributes(typeof(MapFieldAttribute), true);
-                    if (mapFields.Length > 1)
-                        throw new Exception("AssociationAttribute is used several times on the property " + prop.Name);
-
-                    string columnName = mapFields.Length > 0 ? ((MapFieldAttribute)mapFields[0]).MapName : prop.Name;
+                    var mapField = this.GetMapField(ma);
+                    string columnName = mapField != null ? mapField.MapName : prop.Name;
 
                     var map = new ValueMapper
                     {
@@ -287,11 +289,8 @@ namespace BLToolkit.Mapping
 
                     mapper.PropertiesMapping.Add(map);
 
-                    object[] pkFields = prop.GetCustomAttributes(typeof(PrimaryKeyAttribute), true);
-                    if (pkFields.Length > 1)
-                        throw new Exception("PrimaryKeyAttribute is used several times on the property " + prop.Name);
-
-                    if (pkFields.Length == 1)
+                    var pkField = GetPrimaryKey(ma);
+                    if (pkField != null) 
                         mapper.DataReaderIndex = startIndex;
 
                     startIndex++;
@@ -314,7 +313,7 @@ namespace BLToolkit.Mapping
                 #endregion
 
                 objMap.ParentMapping = mapper;
-                mapper.PropertiesMapping.Add(GetObjectMapper(objMap, ref startIndex));
+                mapper.PropertiesMapping.Add(GetObjectMapper(objMap, ref startIndex, MappingSchema.GetObjectMapper(objMap.PropertyType).TypeAccessor));
             }
 
             return mapper;

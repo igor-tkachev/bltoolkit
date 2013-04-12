@@ -9,9 +9,9 @@ namespace Data.Linq.ProviderSpecific
 	public class MsSql2008 : TestBase
 	{
 		[Test]
-		public void SqlTest()
+		public void SqlTest([IncludeDataContexts("Sql2008")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 			using (var rd = db.SetCommand(@"
 				SELECT
 					DateAdd(Hour, 1, [t].[DateTimeValue]) - [t].[DateTimeValue]
@@ -27,9 +27,9 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SqlTypeTest()
+		public void SqlTypeTest([IncludeDataContexts("Sql2008")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from p in db.Parent

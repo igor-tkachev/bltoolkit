@@ -13,7 +13,7 @@ namespace Data.Linq
 	using Model;
 
 	[TestFixture]
-	public class Association : TestBase
+	public class AssociationTest : TestBase
 	{
 		[Test]
 		public void Test1()
@@ -188,7 +188,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void EqualsNull1()
+		public void EqualsNull1([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -197,7 +197,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void EqualsNull2()
+		public void EqualsNull2([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -206,7 +206,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void EqualsNull3()
+		public void EqualsNull3([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -215,7 +215,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void StackOverflow1()
+		public void StackOverflow1([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				Assert.AreEqual(

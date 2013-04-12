@@ -1,24 +1,20 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using BLToolkit.Data;
 using NUnit.Framework;
 
-#endregion
-
-namespace UnitTests.CS.JointureTests.Tools
+namespace UnitTests.CS.JointureTests
 {
-    public abstract class TestsBaseClass
+    public abstract partial class AllTests
     {
-        protected DbConnectionFactory ConnectionFactory;
+        private DbConnectionFactory ConnectionFactory;
 
         protected abstract DbConnectionFactory CreateFactory();
 
         [TestFixtureSetUp]
-        public virtual void Setup()
+        public void Setup()
         {
             ConnectionFactory = CreateFactory();
 

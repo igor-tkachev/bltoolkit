@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class MediaDiscTest : JointureTests
+    public class MediaDiscTest : AllTests
     {
         #region Overrides of AssociationTests
 

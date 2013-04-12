@@ -1,5 +1,9 @@
-﻿using System;
+﻿#region
+
+using System;
 using BLToolkit.Reflection;
+
+#endregion
 
 namespace BLToolkit.Mapping
 {
@@ -20,11 +24,6 @@ namespace BLToolkit.Mapping
         public override object CreateInstance(InitContext context)
         {
             return CreateInstance();
-        }
-
-        public override void Init(MappingSchema mappingSchema, Type type)
-        {
-            base.Init(mappingSchema, type);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -71,12 +72,18 @@ namespace BLToolkit.Mapping.Fluent
             /// <returns></returns>
             public void MapingFromType<T>() where T : IFluentMap
             {
-                var res = new ExtensionList();
-                var map = (IFluentMap)Activator.CreateInstance(typeof(T));
-                map.MapTo(res);
-                FluentMapHelper.MergeExtensions(res, ref this._extensions);
+                MapingFromType(typeof(T));                
             }
 
+            public void MapingFromType(Type T)
+            {
+                var res = new ExtensionList();
+                var map = (IFluentMap)Activator.CreateInstance(T);
+
+                map.MapTo(res);
+
+                FluentMapHelper.MergeExtensions(res, ref this._extensions);
+            }
 			/// <summary>
 			/// Mapping from assembly contains type
 			/// </summary>
@@ -101,18 +108,26 @@ namespace BLToolkit.Mapping.Fluent
 					_hash.Add(assembly, res);
 
 					string fluentType = typeof(IFluentMap).FullName;
-					var maps = from type in assembly.GetTypes()
+					var mapTypes = from type in assembly.GetTypes()
 							   where type.IsClass && !type.IsAbstract && !type.IsGenericType
 									 && (null != type.GetInterface(fluentType)) // Is IFluentMap
 									 && (null != type.GetConstructor(new Type[0])) // Is defaut ctor
-							   select (IFluentMap)Activator.CreateInstance(type);
-					foreach (var fluentMap in maps)
+							   select type;
+                    foreach (var fluentMapType in mapTypes)
 					{
-						fluentMap.MapTo(res);
+                        MapingFromType(fluentMapType);
 					}
 				}
-				FluentMapHelper.MergeExtensions(res, ref this._extensions);
-			}
-		}
+				//FluentMapHelper.MergeExtensions(res, ref this._extensions);
+            }
+
+            #region Conventions
+
+            public static Func<Type, string> GetTableName;
+            public static Func<MappedProperty, string> GetColumnName;                          
+            //public static Func<MappedProperty, MappedProperty, string> GetManyToManyTableName;
+            
+            #endregion
+		}        
 	}
 }

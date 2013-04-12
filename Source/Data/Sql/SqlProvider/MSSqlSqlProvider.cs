@@ -101,8 +101,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
-
-
 		protected override void BuildDeleteClause(StringBuilder sb)
 		{
 			var table = SqlQuery.Delete.Table != null ?
@@ -135,23 +133,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.Append('\'');
 		}
 
-		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = false;
 
-			if (col.SystemType == typeof(bool))
+			if (expr.SystemType == typeof(bool))
 			{
-				if (col.Expression is SqlQuery.SearchCondition)
+				if (expr is SqlQuery.SearchCondition)
 					wrap = true;
 				else
 				{
-					var ex = col.Expression as SqlExpression;
+					var ex = expr as SqlExpression;
 					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
 				}
 			}
 
 			if (wrap) sb.Append("CASE WHEN ");
-			base.BuildColumn(sb, col, ref addAlias);
+			base.BuildColumnExpression(sb, expr, alias, ref addAlias);
 			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 

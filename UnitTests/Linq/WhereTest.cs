@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NUnit.Framework;
-
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Mapping;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -838,7 +839,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SelectNestedCalculatedTest()
+		public void SelectNestedCalculatedTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(

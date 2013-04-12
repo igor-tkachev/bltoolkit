@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
@@ -25,8 +26,7 @@ namespace BLToolkit.Mapping.Fluent
 		/// </summary>
 		public FluentMap()
 			: this(new TypeExtension { Name = typeof(T).FullName }, null)
-		{
-		}
+		{ }
 
 		/// <summary>
 		/// ctor
@@ -37,6 +37,11 @@ namespace BLToolkit.Mapping.Fluent
 		{
 			this._typeExtension = typeExtension;
 			this._childs = childs;
+
+            if (FluentConfig.MappingConfigurator.GetTableName != null)
+            {
+                this.TableName(null, null, FluentConfig.MappingConfigurator.GetTableName(typeof(T)));
+            }
 		}
 
 		/// <summary>
@@ -97,6 +102,12 @@ namespace BLToolkit.Mapping.Fluent
 		public MapFieldMap<T, TR> MapField<TR>(Expression<Func<T, TR>> prop, string mapName = null, string storage = null, bool? isInheritanceDiscriminator = null)
 		{
 			string name = this.GetExprName(prop);
+
+            if (mapName == null && FluentConfig.MappingConfigurator.GetColumnName != null)
+            {
+                mapName = FluentConfig.MappingConfigurator.GetColumnName(new MappedProperty() { Name = name, Type = typeof(TR), ParentType = typeof(T) });
+            }
+
 			((IFluentMap)this).MapField(name, mapName, storage, isInheritanceDiscriminator);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
@@ -111,7 +122,7 @@ namespace BLToolkit.Mapping.Fluent
 			}
 			var attributeExtension = new AttributeExtension();
 			attributeExtension.Values.Add(Attributes.MapField.OrigName, origName);
-			attributeExtension.Values.Add(Attributes.MapField.MapName, mapName);
+            attributeExtension.Values.Add(Attributes.MapField.MapName, mapName);
 			attrs.Add(attributeExtension);
 		}
 
@@ -291,6 +302,22 @@ namespace BLToolkit.Mapping.Fluent
 			((IFluentMap)this).Nullable(name, isNullable);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
+
+        /// <summary>
+        /// LazyInstanceAttribute
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <param name="isLazy"></param>
+        /// <returns></returns>
+        public MapFieldMap<T, TR> LazyInstance<TR>(Expression<Func<T, TR>> prop, bool isLazy = true)
+        {
+#warning need test
+            string name = this.GetExprName(prop);
+            if (!GetIsVirtual(prop))
+                throw new Exception("Property wich uses LazyInstance needs to be virtual!");
+            ((IFluentMap)this).LazyInstance(name, isLazy);
+            return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
+        }
 
 		/// <summary>
 		/// NullValueAttribute
@@ -611,6 +638,20 @@ namespace BLToolkit.Mapping.Fluent
 			return result;
 		}
 
+        private bool GetIsVirtual<TT, TR>(Expression<Func<TT, TR>> prop)
+        {
+            var memberExpression = prop.Body as MemberExpression;
+            if (memberExpression != null)
+            {
+                var prpInfo = memberExpression.Member as PropertyInfo;
+                if (prpInfo != null && !prpInfo.GetGetMethod().IsVirtual)
+                {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
 		/// <summary>
 		/// Invert for BLToolkit.Reflection.Extension.TypeExtension.ToBoolean()
 		/// </summary>

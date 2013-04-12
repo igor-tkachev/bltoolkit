@@ -26,7 +26,7 @@ namespace Data.Linq
 		}
 
 		public TestDbManager()
-			: base("Sql2008")
+			: base(ProviderName.Access)
 		{
 		}
 

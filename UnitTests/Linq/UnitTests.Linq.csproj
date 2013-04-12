@@ -188,6 +188,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UpdateTest.cs" />
     <Compile Include="DeleteTest.cs" />
     <Compile Include="EnumMapping.cs" />
     <Compile Include="Exceptions\DataExceptionTest.cs" />
@@ -198,7 +199,7 @@
     <Compile Include="ConvertTest.cs" />
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
-    <Compile Include="Association.cs" />
+    <Compile Include="AssociationTest.cs" />
     <Compile Include="ConvertExpression.cs" />
     <Compile Include="ConcatUnionTest.cs" />
     <Compile Include="IdlTest.mono.cs" />
@@ -220,10 +221,13 @@
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />
     <Compile Include="TableFunctionTest.cs" />
+    <Compile Include="UserTests\CompareNullableChars.cs" />
+    <Compile Include="UserTests\GroupBySubqueryTest.cs" />
     <Compile Include="UserTests\SelectManyUpdateTest.cs" />
     <Compile Include="UserTests\SelectManyDeleteTest.cs" />
+    <Compile Include="UserTests\UnnecessaryInnerJoinTest.cs" />
     <Compile Include="VisualBasicTest.cs" />
-    <Compile Include="DmlTest.cs" />
+    <Compile Include="InsertTest.cs" />
     <Compile Include="ExpressionsTest.cs" />
     <Compile Include="MathFunctions.cs" />
     <Compile Include="Exceptions\Inheritance.cs" />

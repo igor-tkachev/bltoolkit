@@ -22,8 +22,8 @@ using UnitTests.CS.JointureTests.Tools;
 
 namespace UnitTests.CS.JointureTests
 {
-    [TestFixture(Ignore = true)]
-    public abstract class JointureTests : TestsBaseClass
+    [TestFixture]
+    public abstract partial class AllTests
     {
         public class Category
         {

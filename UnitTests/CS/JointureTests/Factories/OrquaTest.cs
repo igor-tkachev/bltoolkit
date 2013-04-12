@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class OrquaTest : JointureTests
+    public class OrquaTest : AllTests
     {
         #region Overrides of AssociationTests
 

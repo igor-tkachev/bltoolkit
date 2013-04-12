@@ -490,7 +490,7 @@ namespace BLToolkit.Data.DataProvider
             int                             maxBatchSize,
             DbManager.ParameterProvider<T>  getParameters)
         {
-            throw new NotImplementedException("Insert batch with identity is not implemented! If you use the GenericDataProvider and Oracle make sur to set UseQueryText to true");
+            throw new NotImplementedException("Insert batch with identity is not implemented! If you use the GenericDataProvider and Oracle make sure to set UseQueryText to true");
         }
 
 		public virtual int InsertBatch<T>(
@@ -505,7 +505,9 @@ namespace BLToolkit.Data.DataProvider
 			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
 		}
 
-	    protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
+		#endregion
+
+        protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
         {
             var cnt = 0;
             foreach (string sql in sqlList)
@@ -515,7 +517,5 @@ namespace BLToolkit.Data.DataProvider
 
             return cnt;
         }
-
-		#endregion
 	}
 }

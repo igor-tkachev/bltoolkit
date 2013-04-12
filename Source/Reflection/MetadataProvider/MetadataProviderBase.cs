@@ -89,6 +89,36 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+        #region GetMapField
+
+        public virtual MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            isSet = false;
+            return null;            
+        }
+
+        #endregion
+
+        #region GetDbType
+
+        public virtual DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            isSet = false;
+            return null;                
+        }
+
+        #endregion
+
+        #region GetPrimaryKey
+
+        public virtual PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            isSet = false;
+            return null;
+        }
+
+        #endregion
+
 		#region GetTrimmable
 
 		public virtual bool GetTrimmable(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
@@ -145,6 +175,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+        #region GetLazyInstance
+
+        public virtual bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            isSet = false;
+            return false;                
+        }
+
+        #endregion
 
 		#region GetNullValue
 

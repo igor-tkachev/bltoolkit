@@ -16,7 +16,10 @@ namespace BLToolkit.Mapping
         {
             _db = db;
             _proxy = new ProxyGenerator();
+
             PropertiesMapping = new List<IMapper>();
+            PrimaryKeyValueGetters = new List<GetHandler>();
+            PrimaryKeyNames = new List<string>();
         }
 
         public Type PropertyCollectionType { get; set; }
@@ -35,8 +38,11 @@ namespace BLToolkit.Mapping
         public bool IsLazy { get; set; }
         public bool ContainsLazyChild { get; set; }
         public GetHandler Getter { get; set; }
-        public GetHandler PrimaryKeyValueGetter { get; set; }
-        public AssociationAttribute Association { get; set; }
+
+        public List<GetHandler> PrimaryKeyValueGetters { get; set; }
+        public Association Association { get; set; }
+
+        public List<string> PrimaryKeyNames { get; set; }
 
         #endregion
 

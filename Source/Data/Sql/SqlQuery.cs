@@ -1821,6 +1821,7 @@ namespace BLToolkit.Data.Sql
 				: base(sqlQuery)
 			{
 				_columns.AddRange(clone._columns.ConvertAll(c => (Column)c.Clone(objectTree, doClone)));
+
 				IsDistinct = clone.IsDistinct;
 				TakeValue  = clone.TakeValue == null ? null : (ISqlExpression)clone.TakeValue.Clone(objectTree, doClone);
 				SkipValue  = clone.SkipValue == null ? null : (ISqlExpression)clone.SkipValue.Clone(objectTree, doClone);
@@ -1832,6 +1833,7 @@ namespace BLToolkit.Data.Sql
 				IsDistinct = isDistinct;
 				TakeValue  = takeValue;
 				SkipValue  = skipValue;
+
 				_columns.AddRange(columns);
 			}
 

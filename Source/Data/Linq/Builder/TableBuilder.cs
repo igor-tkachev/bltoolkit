@@ -929,7 +929,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 								buildInfo.IsAssociationBuilt = true;
 
-								if (tableLevel.IsNew)
+								if (tableLevel.IsNew || buildInfo.CopyTable)
 									association.ParentAssociationJoin.IsWeak = true;
 
 								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
@@ -938,7 +938,10 @@ namespace BLToolkit.Data.Linq.Builder
 						else
 						{
 							var association = GetAssociation(levelExpression, level);
-							((AssociatedTableContext)association.Table).ParentAssociationJoin.IsWeak = false;
+							var paj         = ((AssociatedTableContext)association.Table).ParentAssociationJoin;
+
+							paj.IsWeak = paj.IsWeak && buildInfo.CopyTable;
+
 							return association.Table.GetContext(expression, level + 1, buildInfo);
 						}
 					}

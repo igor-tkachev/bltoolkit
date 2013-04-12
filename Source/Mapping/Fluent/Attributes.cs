@@ -57,6 +57,11 @@
                 public const string IsNullable = "Nullable";
             }
 
+            public static class LazyInstance
+            {
+                public const string IsLazyInstance = "LazyInstance";
+            }
+
             public static class InheritanceMapping
             {
                 public const string Name = "InheritanceMapping";

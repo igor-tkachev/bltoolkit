@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +71,8 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							var ma = (MemberExpression)expr;
 
-							if (TypeHelper.IsNullableValueMember(ma.Member))
+							if (TypeHelper.IsNullableValueMember(ma.Member) ||
+							    TypeHelper.IsNullableHasValueMember(ma.Member))
 								break;
 
 							if (SqlProvider.ConvertMember(ma.Member) == null)
@@ -1280,17 +1281,17 @@ namespace BLToolkit.Data.Linq.Builder
 
 			#region special case for char?
 
-			if (left.NodeType == ExpressionType.Convert && left.Type == typeof(int?) && right.NodeType == ExpressionType.Convert)
-			{
-				var convLeft  = left  as UnaryExpression;
-				var convRight = right as UnaryExpression;
-
-				if (convLeft != null && convRight != null && convLeft.Operand.Type == typeof(char?))
-				{
-					left  = convLeft.Operand;
-					right = Expression.Constant(ConvertTo<char?>.From(((ConstantExpression)convRight.Operand).Value));
-				}
-			}
+//			if (left.NodeType == ExpressionType.Convert && left.Type == typeof(int?) && right.NodeType == ExpressionType.Convert)
+//			{
+//				var convLeft  = left  as UnaryExpression;
+//				var convRight = right as UnaryExpression;
+//
+//				if (convLeft != null && convRight != null && convLeft.Operand.Type == typeof(char?))
+//				{
+//					left  = convLeft.Operand;
+//					right = Expression.Constant(ConvertTo<char?>.From(((ConstantExpression)convRight.Operand).Value));
+//				}
+//			}
 
 			#endregion
 
@@ -1334,8 +1335,8 @@ namespace BLToolkit.Data.Linq.Builder
 				default: throw new InvalidOperationException();
 			}
 
-			if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert
-                     || left.NodeType == ExpressionType.MemberAccess || right.NodeType == ExpressionType.MemberAccess)
+            if (left.NodeType == ExpressionType.Convert || right.NodeType == ExpressionType.Convert
+                            || left.NodeType == ExpressionType.MemberAccess || right.NodeType == ExpressionType.MemberAccess)
 			{
 				var p = ConvertEnumConversion(context, left, op, right);
 				if (p != null)

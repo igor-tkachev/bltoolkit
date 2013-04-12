@@ -1,5 +1,4 @@
 using System;
-using BLToolkit.Aspects;
 using Castle.DynamicProxy;
 using IInterceptor = Castle.DynamicProxy.IInterceptor;
 
@@ -40,19 +39,6 @@ namespace BLToolkit.Mapping
 
             // let the original call go through first, so we can notify *after*
             invocation.Proceed();
-        }
-    }
-
-    public class PropInterceptor : Interceptor
-    {
-        protected override void BeforeCall(InterceptCallInfo info)
-        {
-            info.Items["ReturnValue"] = info.ReturnValue;
-        }
-
-        protected override void AfterCall(InterceptCallInfo info)
-        {
-            info.ReturnValue = (int)info.ReturnValue + (int)info.Items["ReturnValue"];
         }
     }
 }

@@ -34,11 +34,7 @@ namespace BLToolkit.Mapping
 		public MappingSchema   MappingSchema              { get; set; }
 		public MemberExtension MemberExtension            { get; set; }
 		public DbType          DbType                     { get; set; }
-
-        /// <summary>
-        /// TODO : Create PrimaryKeyMapMemberInfo?
-        /// </summary>
-        public KeyGenerator KeyGenerator { get; set; }
+		public KeyGenerator    KeyGenerator               { get; set; }
 
 		private MapValue[] _mapValues;
 		public  MapValue[]  MapValues

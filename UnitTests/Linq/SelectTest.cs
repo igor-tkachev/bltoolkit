@@ -190,11 +190,11 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect11()
+		public void MultipleSelect11([IncludeDataContexts("Sql2008")] string context)
 		{
 			var dt = DateTime.Now;
 
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from p in db.Parent
@@ -269,6 +269,23 @@ namespace Data.Linq
 			}
 
 			Assert.IsTrue((DateTime.Now - dt).TotalSeconds < 30);
+		}
+
+		[Test]
+		public void MutiplySelect12([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var db = (TestDbManager)GetDataContext(context))
+			{
+				var q =
+					from grandChild in db.GrandChild
+					from child in db.Child
+					where grandChild.ChildID.HasValue
+					select grandChild;
+				q.ToList();
+
+				var selectCount = db.LastQuery.Split(' ', '\t', '\n', '\r').Count(s => s.Equals("select", StringComparison.InvariantCultureIgnoreCase));
+				Assert.AreEqual(1, selectCount, "Why do we need \"select from select\"??");
+			}
 		}
 
 		[Test]

@@ -116,6 +116,15 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void Any61([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+				Assert.AreEqual(
+					            Child.   Any(c => c.ParentID > 3),
+					db.GetTable<Child>().Any(c => c.ParentID > 3));
+		}
+
+		[Test]
 		public void Any7()
 		{
 			ForEachProvider(db => Assert.AreEqual(Child.Any(), db.Child.Any()));
@@ -254,7 +263,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void AllNestedTest()
+		public void AllNestedTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -267,7 +276,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ComplexAllTest()
+		public void ComplexAllTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -442,7 +451,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains10()
+		public void Contains10([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -468,7 +477,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains11()
+		public void Contains11([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -487,7 +496,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains12()
+		public void Contains12([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -506,7 +515,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Contains13()
+		public void Contains13([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{

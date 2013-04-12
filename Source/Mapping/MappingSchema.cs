@@ -143,7 +143,7 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		public ExtensionList Extensions { get; set; }
+		public virtual ExtensionList Extensions { get; set; }
 
 		#endregion
 
@@ -3006,7 +3006,7 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToList
 
-        public virtual IList MapDataReaderToList(
+		public virtual IList MapDataReaderToList(
 			IDataReader     reader,
 			IList           list,
 			Type            destObjectType,
@@ -3792,6 +3792,6 @@ namespace BLToolkit.Mapping
 			return value;
 		}
 
-		#endregion
+		#endregion        
 	}
 }

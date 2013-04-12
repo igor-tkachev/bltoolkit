@@ -200,12 +200,12 @@
     <Compile Include="Configuration\TypeFactoryElement.cs" />
     <Compile Include="DataAccess\ActualTypeAttribute.cs" />
     <Compile Include="DataAccess\ISqlQueryT.cs" />
-    <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
     <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\DataAccessorBase.cs" />
     <Compile Include="DataAccess\DbTypeAttribute.cs" />
     <Compile Include="DataAccess\ParamTypeNameAttribute.cs" />
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
+    <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
     <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataExceptionType.cs" />
@@ -362,6 +362,7 @@
     <Compile Include="Mapping\Fluent\FluentMapHelper.cs" />
     <Compile Include="Mapping\Fluent\IFluentMap.cs" />
     <Compile Include="Mapping\Fluent\MapFieldMap.cs" />
+    <Compile Include="Mapping\Fluent\MappedProperty.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\InheritanceMappingAttribute.cs" />
     <Compile Include="Mapping\MapRelationBase.cs" />

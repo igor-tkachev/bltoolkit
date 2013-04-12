@@ -110,7 +110,7 @@ namespace Data.Linq
 
 				threads[i] = new Thread(() =>
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						var id = (n % 6) + 1;
 						results[n,0] = id;

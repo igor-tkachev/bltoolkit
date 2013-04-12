@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class AdExpressTest : JointureTests
+    public class AdExpressTest : AllTests
     {
         #region Overrides of AssociationTests
 

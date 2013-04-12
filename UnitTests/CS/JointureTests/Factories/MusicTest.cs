@@ -10,7 +10,7 @@ using UnitTests.CS.JointureTests.Mappings;
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
-    public class MusicTest : JointureTests
+    public class MusicTest : AllTests
     {
         #region Overrides of AssociationTests
 

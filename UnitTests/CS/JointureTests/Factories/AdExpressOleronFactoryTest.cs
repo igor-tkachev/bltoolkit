@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class AdExpressOleronFactoryTest : JointureTests
+    public class AdExpressOleronFactoryTest : AllTests
     {
         #region Overrides of AssociationTests
 

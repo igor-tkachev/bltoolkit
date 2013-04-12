@@ -19,8 +19,8 @@ using UnitTests.CS.JointureTests.Tools;
 
 namespace UnitTests.CS.JointureTests
 {
-   [TestFixture(Ignore = true)]
-    public abstract class DiversTests : TestsBaseClass
+    [TestFixture]
+    public abstract partial class AllTests
     {
         private void GetMediaSetting(DbManager db)
         {

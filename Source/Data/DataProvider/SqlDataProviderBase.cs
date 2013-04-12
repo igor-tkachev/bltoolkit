@@ -142,7 +142,7 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
-		public virtual DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
 		{
 			switch (number)
 			{

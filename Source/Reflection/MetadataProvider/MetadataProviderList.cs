@@ -121,6 +121,58 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+        #region GetMapField
+
+	    public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+	    {
+	        foreach (var p in _list)
+	        {
+	            var attr = p.GetMapField(typeExtension, member, out isSet);
+
+	            if (attr != null) 
+                    return attr;
+	        }
+
+	        return base.GetMapField(typeExtension, member, out isSet);
+	    }
+
+	    #endregion
+
+        #region GetDbType
+
+        public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            foreach (var p in _list)
+            {
+                var attr = p.GetDbType(typeExtension, member, out isSet);
+
+                if (attr != null)
+                    return attr;
+            }
+
+            return base.GetDbType(typeExtension, member, out isSet);
+        }
+
+        #endregion
+
+        #region GetPrimaryKey
+
+        public override PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            foreach (var p in _list)
+            {
+                var attr = p.GetPrimaryKey(typeExtension, member, out isSet);
+
+                if (attr != null)
+                    return attr;
+            }
+
+            return base.GetPrimaryKey(typeExtension, member, out isSet);
+        }
+
+        #endregion
+
+
 		#region GetTrimmable
 
 		public override bool GetTrimmable(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
@@ -217,6 +269,23 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+        #region GetLazyInstance
+
+        public override bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            foreach (var p in _list)
+            {
+                var value = p.GetLazyInstance(mappingSchema, typeExtension, member, out isSet);
+
+                if (isSet)
+                    return value;
+            }
+
+            return base.GetLazyInstance(mappingSchema, typeExtension, member, out isSet);
+        }
+
+        #endregion
 
 		#region GetNullValue
 

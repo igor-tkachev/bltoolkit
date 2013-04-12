@@ -19,3 +19,4 @@ namespace BLToolkit.DataAccess
     {
     }
 }
+

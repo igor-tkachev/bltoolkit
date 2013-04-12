@@ -206,6 +206,17 @@ namespace BLToolkit.Data.Linq
 			return Query<T>.InsertOrReplace(dataContextInfo, obj);
 		}
 
+		public static int InsertOrReplace<T>([NotNull] this IDataContextInfo dataContextInfo, IEnumerable<T> objs)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			int cnt = 0;
+			foreach (var obj in objs)
+			{
+				cnt += Query<T>.InsertOrReplace(dataContextInfo, obj);
+			}
+			return cnt;
+		}
+
 		[Obsolete("Use 'InsertOrReplace' instead.")]
 		public static int InsertOrUpdate<T>(this IDataContext dataContext, T obj)
 		{
@@ -215,6 +226,16 @@ namespace BLToolkit.Data.Linq
 		public static int InsertOrReplace<T>(this IDataContext dataContext, T obj)
 		{
 			return Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
+		}
+
+		public static int InsertOrReplace<T>(this IDataContext dataContext, IEnumerable<T> objs)
+		{
+			int cnt = 0;
+			foreach (var obj in objs)
+			{
+				cnt += Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
+			}
+			return cnt;
 		}
 
 		#endregion
@@ -340,13 +361,13 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
-        #region String Extensions
+		#region String Extensions
 
-        public static int ContainsExactly(this string s, string value)
-        {
-            return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value), RegexOptions.IgnoreCase).Count; 
-        }
+		public static int ContainsExactly(this string s, string value)
+		{
+			return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value), RegexOptions.IgnoreCase).Count;
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

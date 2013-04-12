@@ -11,7 +11,7 @@ using UnitTests.CS.JointureTests.Tools;
 namespace UnitTests.CS.JointureTests
 {
     [TestFixture]
-    public abstract class PerformanceAndTunningTests : TestsBaseClass
+    public abstract partial class AllTests
     {
         [Test]
         public void InsertBatchWithGenericDataProvider()

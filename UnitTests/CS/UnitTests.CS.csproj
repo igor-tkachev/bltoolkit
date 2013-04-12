@@ -97,7 +97,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Oracle.DataAccess, Version=2.112.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
+    <Reference Include="Oracle.DataAccess, Version=4.112.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\app\Valeriu.Lacatusu\product\11.2.0\client_2\odp.net\bin\2.x\Oracle.DataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -186,6 +189,7 @@
     <Compile Include="EditableObjects\NestedObjectTest.cs" />
     <Compile Include="EditableObjects\NotifyCollectionChangeTest.cs" />
     <Compile Include="EditableObjects\NotifyPropertyChangedTest.cs" />
+    <Compile Include="JointureTests\AllTests.cs" />
     <Compile Include="JointureTests\Factories\AdExpressFactory.cs" />
     <Compile Include="JointureTests\Factories\AdExpressOleronFactory.cs" />
     <Compile Include="JointureTests\Factories\AdExpressOleronFactoryTest.cs" />
@@ -210,7 +214,6 @@
     <Compile Include="JointureTests\Factories\OrquaFactory.cs" />
     <Compile Include="JointureTests\Factories\OrquaTest.cs" />
     <Compile Include="JointureTests\Factories\MusicFactory.cs" />
-    <Compile Include="JointureTests\Tools\TestsBaseClass.cs" />
     <Compile Include="JointureTests\Mappings\Title.cs" />
     <Compile Include="Mapping\BltMapTests.cs" />
     <Compile Include="Mapping\MemberMapperDefaultMappersTest.cs" />
