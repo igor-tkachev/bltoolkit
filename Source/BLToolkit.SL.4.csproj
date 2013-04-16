@@ -229,6 +229,7 @@
     <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2012SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MSSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
