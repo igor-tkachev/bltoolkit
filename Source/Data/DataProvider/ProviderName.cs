@@ -9,6 +9,7 @@
 		public const string MsSql         = "Sql";
         public const string MsSql2000     = "MsSql2000";
 		public const string MsSql2008     = "MsSql2008";
+        public const string MsSql2012     = "MsSql2012";
 		public const string MySql         = "MySql";
 		public const string Odbc          = "Odbc";
 		public const string OleDb         = "OleDb";

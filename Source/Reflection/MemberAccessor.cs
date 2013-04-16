@@ -3,11 +3,10 @@ using System.Data.SqlTypes;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.ComponentModel;
+using BLToolkit.Data.Linq;
 
 #if !SILVERLIGHT && !DATA
 using BLToolkit.ComponentModel;
-using BLToolkit.Data.Linq;
-
 #endif
 
 namespace BLToolkit.Reflection
