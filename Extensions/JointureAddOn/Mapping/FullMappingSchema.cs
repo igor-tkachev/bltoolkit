@@ -18,21 +18,22 @@ namespace BLToolkit.Mapping
 
         private readonly DbManager _db;
         private readonly bool _ignoreLazyLoad;
-        private readonly MappingOrder _mappingOrder;
         private DataTable _schema;
         private List<string> _schemaColumns;
         private readonly MappingSchema _parentMappingSchema;
+        private readonly FactoryType _factoryType;
 
         private ExtensionList _extensions;
 
         #endregion
 
-        public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, MappingSchema parentMappingSchema = null)
+        public FullMappingSchema(DbManager db, bool ignoreLazyLoad = false, MappingSchema parentMappingSchema = null, 
+            FactoryType factoryType = FactoryType.LazyLoading)
         {
             _db = db;
             _parentMappingSchema = parentMappingSchema;
+            _factoryType = factoryType;
             _ignoreLazyLoad = ignoreLazyLoad;
-            _mappingOrder = mappingOrder;
         }
 
         #region Overrides
@@ -55,7 +56,7 @@ namespace BLToolkit.Mapping
 
         protected override ObjectMapper CreateObjectMapperInstance(Type type)
         {
-            return new FullObjectMapper(_db, _ignoreLazyLoad);
+            return new FullObjectMapper(_db, _ignoreLazyLoad,_factoryType);
         }
 
         protected override void MapInternal(Reflection.InitContext initContext, IMapDataSource source, object sourceObject, IMapDataDestination dest, object destObject, params object[] parameters)
@@ -174,10 +175,7 @@ namespace BLToolkit.Mapping
             {
                 if (map is IObjectMapper && (map as IObjectMapper).IsLazy)
                     continue;
-
-                if (_mappingOrder == MappingOrder.ByColumnIndex && (datareader.IsDBNull(map.DataReaderIndex)))
-                    continue;
-
+                
                 if (map is CollectionFullObjectMapper)
                 {
                     var collectionFullObjectMapper = (CollectionFullObjectMapper) map;
@@ -197,7 +195,6 @@ namespace BLToolkit.Mapping
 
                         object lastElement = list[list.Count - 1];
 
-                        //bool pkIsNull = false;
                         bool allPksEqual = true;
 
                         //This is needed, because DBValue can be Null, but the Field can be Guid, wich then is filled with Guid.Empty and this is also a valid value!
@@ -218,14 +215,12 @@ namespace BLToolkit.Mapping
 
                             if (!lastPk.Equals(currentPk))
                             {
-                                allPksEqual = true;
+                                allPksEqual = false;
                                 break;
                             }
                         }
 
-                        //object lastPk = curMapper.PrimaryKeyValueGetter.Invoke(lastElement);
-                        //object currentPk = curMapper.PrimaryKeyValueGetter.Invoke(fillObject);
-                        if (allPksEqual) //lastPk.Equals(currentPk))
+                        if (allPksEqual)
                             continue;
                     }
 
@@ -243,16 +238,7 @@ namespace BLToolkit.Mapping
                 if (map is IObjectMapper && (map as IObjectMapper).IsLazy)
                     continue;
 
-                if (_mappingOrder == MappingOrder.ByColumnIndex)
-                {
-                    if (!(map.DataReaderIndex < datareader.FieldCount))
-                        continue;
-                }
-
-                if ((_mappingOrder == MappingOrder.ByColumnIndex) && datareader.IsDBNull(map.DataReaderIndex))
-                    continue;
-
-                if (_mappingOrder == MappingOrder.ByColumnName && map is ValueMapper)
+                if  (map is ValueMapper)
                 {
                     if (((ValueMapper)map).SetDataReaderIndex(_schemaColumns))
                         continue;

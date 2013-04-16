@@ -689,7 +689,7 @@ namespace UnitTests.CS.JointureTests
                     //}
 
                     DbManager dbCmd = db.SetCommand(sql);
-                    dbCmd.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
+                    dbCmd.MappingSchema = new FullMappingSchema(db);
                     var allMedia = dbCmd.ExecuteList<FILE_FORM>();
                     forms = allMedia;
                     foreach (FILE_FORM fileForm in allMedia)

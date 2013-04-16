@@ -18,7 +18,7 @@ namespace BLToolkit.Mapping
 
         public override object CreateInstance()
         {
-            return DataBindingFactory.Create(_type);
+            return TypeFactory.DataBindingFactory.Create(_type);
         }
 
         public override object CreateInstance(InitContext context)

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BLToolkit.Data;
-using BLToolkit.Mapping;
 
 namespace BLToolkit.DataAccess
 {
@@ -11,8 +10,8 @@ namespace BLToolkit.DataAccess
     {
         #region Constructors
 
-        public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex, bool ignoreMissingColumns = false)
-            : base(dbManager, ignoreLazyLoad, mappingOrder)
+        public FullSqlQueryT(DbManager dbManager, bool ignoreLazyLoad = false)
+            : base(dbManager, ignoreLazyLoad)
         {
         }
 

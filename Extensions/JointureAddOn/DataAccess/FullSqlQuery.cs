@@ -20,10 +20,10 @@ namespace BLToolkit.DataAccess
 
         #region Constructors
 
-        public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad = false, MappingOrder mappingOrder = MappingOrder.ByColumnIndex)
+        public FullSqlQuery(DbManager dbManager, bool ignoreLazyLoad = false, FactoryType factoryType = FactoryType.LazyLoading)
             : base(dbManager)
         {
-            dbManager.MappingSchema = new FullMappingSchema(dbManager, ignoreLazyLoad: ignoreLazyLoad, mappingOrder: mappingOrder, parentMappingSchema: dbManager.MappingSchema);
+            dbManager.MappingSchema = new FullMappingSchema(dbManager, ignoreLazyLoad, dbManager.MappingSchema, factoryType);
 
             _ignoreLazyLoad = ignoreLazyLoad;
         }
@@ -65,7 +65,7 @@ namespace BLToolkit.DataAccess
 
         #endregion
 
-        #region Protected
+        #region Private methods
 
         private SqlQueryInfo CreateSelectAllFullSqlText(DbManager db, Type type)
         {
@@ -116,7 +116,7 @@ namespace BLToolkit.DataAccess
             return query;
         }
 
-        protected void FullAppendTableName(StringBuilder sb, DbManager db, Type type)
+        private void FullAppendTableName(StringBuilder sb, DbManager db, Type type)
         {
             var database = GetDatabaseName(type);
             var owner = GetOwnerName(type);
@@ -133,7 +133,7 @@ namespace BLToolkit.DataAccess
             sb.AppendLine();
         }
 
-        protected string FullGetTableName(Type type)
+        private string FullGetTableName(Type type)
         {
             //bool isSet;
             //return MappingSchema.MetadataProvider.GetTableName(type, Extensions, out isSet);
@@ -141,7 +141,7 @@ namespace BLToolkit.DataAccess
             return type.Name;
         }
 
-        protected void BuildSelectSql(IObjectMapper mapper, StringBuilder sb, DbManager db, string tableName = "T")
+        private void BuildSelectSql(IObjectMapper mapper, StringBuilder sb, DbManager db, string tableName = "T")
         {
             int tableNr = 0;
 
@@ -176,7 +176,7 @@ namespace BLToolkit.DataAccess
             }
         }
 
-        protected void AppendJoinTableName(IPropertiesMapping mapper, StringBuilder sb, DbManager db, Type type, string tableName = "T")
+        private void AppendJoinTableName(IPropertiesMapping mapper, StringBuilder sb, DbManager db, Type type, string tableName = "T")
         {
             string parentName = FullGetTableName(type);
             Dictionary<string, ValueMapper> valueMappers = mapper.PropertiesMapping.Where(e => e is ValueMapper).Cast<ValueMapper>().ToDictionary(e => e.PropertyName, e => e);
@@ -253,7 +253,7 @@ namespace BLToolkit.DataAccess
             //    ARTIST2.ID_ARTIST = 2566
         }
 
-        protected void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb, int nParameter, FullObjectMapper mapper)
+        private void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb, int nParameter, FullObjectMapper mapper)
         {
             sb.Append("WHERE\n");
 

@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using BLToolkit.Data;
 using BLToolkit.DataAccess;
 using BLToolkit.Emit;
-using Castle.DynamicProxy;
 
 namespace BLToolkit.Mapping
 {
     public class CollectionFullObjectMapper : TableDescription, IObjectMapper
     {
         private readonly DbManager _db;
-        private readonly ProxyGenerator _proxy;
+        private readonly FactoryType _factoryType;
 
-        public CollectionFullObjectMapper(DbManager db)
+        public CollectionFullObjectMapper(DbManager db, FactoryType factoryType)
         {
             _db = db;
-            _proxy = new ProxyGenerator();
+            _factoryType = factoryType;
 
             PropertiesMapping = new List<IMapper>();
             PrimaryKeyValueGetters = new List<GetHandler>();
@@ -55,8 +54,10 @@ namespace BLToolkit.Mapping
         public object CreateInstance()
         {
             object result = ContainsLazyChild
-                                ? _proxy.CreateClassProxy(PropertyType, new LazyValueLoadInterceptor(this, LoadLazy))
-                                : FunctionFactory.Remote.CreateInstance(PropertyType);
+                    ? (_factoryType == FactoryType.LazyLoading
+                           ? TypeFactory.LazyLoading.Create(PropertyType, this, LoadLazy)
+                           : TypeFactory.LazyLoadingWithDataBinding.Create(PropertyType, this, LoadLazy))
+                    : FunctionFactory.Remote.CreateInstance(PropertyType);
 
             return result;
         }

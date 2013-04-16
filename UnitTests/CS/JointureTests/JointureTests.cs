@@ -190,14 +190,24 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
+                db.MappingSchema = new FullMappingSchema(db, factoryType:FactoryType.LazyLoadingWithDataBinding);
 
                 var query = from m in db.GetTable<Artist2>()
                             where m.Name.StartsWith("Metall")
                             select m;
 
                 var res = query.ToList();
-                var t = res.Skip(2).First().Titles;
+                var firstArtist = res.First();
+                var t = firstArtist.Titles;
+                if (firstArtist is INotifyPropertyChanged)
+                {
+                    var element = (INotifyPropertyChanged) firstArtist;
+                    element.PropertyChanged += (sender, args) =>
+                        {
+                            Console.WriteLine("");
+                        };
+                    firstArtist.Name = "test";
+                }
                 Console.WriteLine(t.Count);
             }
         }
@@ -207,7 +217,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
+                db.MappingSchema = new FullMappingSchema(db);
 
                 var query = from m in db.GetTable<MULTIMEDIA_DATA_VERSION>()
                             where m.DataVersion.DataRadio != null
@@ -222,6 +232,7 @@ namespace UnitTests.CS.JointureTests
 
                 var res = query.Take(100).ToList();
                 var t = res.First().m.DataVersion;
+
                 Console.WriteLine(res.Count);
             }
         }
@@ -231,7 +242,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, mappingOrder: MappingOrder.ByColumnName);
+                db.MappingSchema = new FullMappingSchema(db);
 
                 string requete = File.ReadAllText(@"c:\requete3.txt");
                 db.SetCommand(requete);

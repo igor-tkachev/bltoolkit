@@ -6,16 +6,19 @@ namespace BLToolkit.Mapping
 {
     public class LazyValueLoadInterceptor : IInterceptor
     {
+        #region Fields
+
         private readonly IObjectMapper _mapper;
         private readonly Func<IMapper, object, Type, object> _lazyLoader;
+        private bool _intercepted;
+
+        #endregion
 
         public LazyValueLoadInterceptor(IObjectMapper mapper, Func<IMapper, object, Type, object> lazyLoader)
         {
             _mapper = mapper;
             _lazyLoader = lazyLoader;
         }
-
-        private bool _intercepted;
 
         public void Intercept(IInvocation invocation)
         {
