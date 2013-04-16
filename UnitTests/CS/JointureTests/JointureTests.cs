@@ -197,7 +197,7 @@ namespace UnitTests.CS.JointureTests
                             select m;
 
                 var res = query.ToList();
-                var t = res.First().Titles;
+                var t = res.Skip(2).First().Titles;
                 Console.WriteLine(t.Count);
             }
         }

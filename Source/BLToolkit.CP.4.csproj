@@ -209,6 +209,7 @@
     <Compile Include="Data\DataProvider\OracleHelper.cs" />
     <Compile Include="Data\DataProvider\Sql2000DataProvider.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
+    <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
@@ -248,6 +249,7 @@
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2012SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Data\Linq\ExpressionQuery.cs" />

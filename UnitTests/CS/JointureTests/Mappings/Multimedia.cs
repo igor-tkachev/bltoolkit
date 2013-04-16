@@ -6,6 +6,26 @@ using UnitTests.CS.JointureTests;
 namespace PitagorDataAccess.Mappings.DataEntry
 {
 
+    [TableName(Name = "PRODUCT", Owner = Consts.Owner)]
+    public class CProduct 
+    {
+        private long _activation;
+
+        [MapField("ID_PRODUCT")]
+        public  long Id { get; set; }
+        [MapField("PRODUCT")]
+        public  string Label { get; set; }
+        [MapField("ID_LANGUAGE_DATA")]
+        public long LanguageId { get; set; }
+        [MapField("ACTIVATION")]
+        public long Activation { get; set; }
+        [MapField("ID_ADVERTISER")]
+        public long AdvertiserId { get; set; }
+
+        [MapField("ID_SEGMENT")]
+        public long SegmentId { get; set; }
+    }
+
     [TableName(Name = "MULTIMEDIA", Owner = Consts.Owner)]
     public class Multimedia
     {

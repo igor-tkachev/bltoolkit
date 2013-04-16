@@ -538,6 +538,21 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void SelectWithManyParameters()
         {
+            using (var manager = ConnectionFactory.CreateDbManager())
+            {
+                int prodId = 203032;
+                manager.UseQueryText = true;
+                var query = from p in manager.GetTable<CProduct>()
+                            where p.Id == prodId &&
+                                  p.Label.EndsWith("P#") &&
+                                  p.LanguageId == 33 &&
+                                  p.Activation < 50
+                            select p;
+
+                var product = query.FirstOrDefault();
+                Console.WriteLine(product);
+            }
+
             var productIds = new[]
                 {
                     1,
@@ -563,7 +578,7 @@ namespace UnitTests.CS.JointureTests
 
             using (var manager = ConnectionFactory.CreateDbManager())
             {
-                //manager.UseQueryText = true;
+                manager.UseQueryText = true;
 
                 var queryMultimedia = from multimedia in manager.GetTable<Multimedia>()
                                       join multimediaFile in manager.GetTable<MultimediaFile>() on multimedia.Id equals multimediaFile.MultimediaId

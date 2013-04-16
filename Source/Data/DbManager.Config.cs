@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 
@@ -245,6 +246,7 @@ namespace BLToolkit.Data
 
 		static DbManager()
 		{
+            AddDataProvider(new Sql2012DataProvider());
 			AddDataProvider(new Sql2008DataProvider());
 			AddDataProvider(new SqlDataProvider());
 			AddDataProvider(new Sql2000DataProvider());
@@ -334,17 +336,64 @@ namespace BLToolkit.Data
 
 			if (dp == null)
 			{
-				var css = ConfigurationManager.ConnectionStrings[configurationString];
+			    
 
-				if (css != null && !string.IsNullOrEmpty(css.ProviderName))
-				{
-					// This hack should be redone.
-					//
-					var provider = css.ProviderName == "System.Data.SqlClient" ?
-						configurationString.IndexOf("2008") >= 0 ? "MSSQL2008" :
-						configurationString.IndexOf("2000") >= 0 ? "MSSQL2000" :
-							css.ProviderName :
-						css.ProviderName;
+				var css = ConfigurationManager.ConnectionStrings[configurationString];
+                
+                if (css != null && !string.IsNullOrEmpty(css.ProviderName))
+                {
+                    string provider = null;
+
+                    if (css.ProviderName == "System.Data.SqlClient")
+                    {
+                        try
+                        {
+                            using (SqlConnection sqlConnection = new SqlConnection(css.ConnectionString))
+                            {
+                                sqlConnection.Open();
+
+                                string serverVersion = sqlConnection.ServerVersion;
+                                string[] serverVersionDetails = serverVersion.Split(new string[] {"."},
+                                                                                    StringSplitOptions.None);
+
+                                int versionNumber = int.Parse(serverVersionDetails[0]);
+
+                                switch (versionNumber)
+                                {
+                                    case 8:
+                                        provider = "MSSQL2000";
+                                        break;
+                                    case 9:
+                                        provider = "MSSQL2008"; //MSSQL 2005 -> Can the same as 2008
+                                        break;
+                                    case 10:
+                                        provider = "MSSQL2008";
+                                        break;
+                                    case 11:
+                                        provider = "MSSQL2012";
+                                        break;
+                                    default:
+                                        provider = "MSSQL2008";
+                                        break;
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        { }                        
+                    }
+
+                    if (provider == null)
+                    {
+                        // This hack should be redone.
+					    //
+                    
+                        provider = css.ProviderName == "System.Data.SqlClient" ?
+                            configurationString.IndexOf("2012") >= 0 ? "MSSQL2012" :
+                            configurationString.IndexOf("2008") >= 0 ? "MSSQL2008" :
+                            configurationString.IndexOf("2000") >= 0 ? "MSSQL2000" :
+                                css.ProviderName :
+                                css.ProviderName;
+                    }
 
 					dp = _dataProviderNameList[provider];
 				}
