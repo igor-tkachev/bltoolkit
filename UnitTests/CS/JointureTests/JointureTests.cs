@@ -190,7 +190,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                db.MappingSchema = new FullMappingSchema(db, factoryType:FactoryType.LazyLoadingWithDataBinding);
+                db.MappingSchema = new FullDataBindingMappingSchema(db);
 
                 var query = from m in db.GetTable<Artist2>()
                             where m.Name.StartsWith("Metall")

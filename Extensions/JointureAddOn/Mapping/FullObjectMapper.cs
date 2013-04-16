@@ -206,6 +206,7 @@ namespace BLToolkit.Mapping
                     IObjectMapper propertiesMapping;
                     if (!isCollection)
                     {
+                        // TODO Generate this instance using the CreateObjectMapperInstance method of fullMappingSchema
                         propertiesMapping = new FullObjectMapper(_db, _ignoreLazyLoad, _factoryType)
                             {
                                 PropertyType = prop.PropertyType,
@@ -215,9 +216,10 @@ namespace BLToolkit.Mapping
                     }
                     else
                     {
-                        Type listElementType = FullMappingSchema.GetGenericType(prop.PropertyType);
+                        Type listElementType = GetGenericType(prop.PropertyType);
                         TableDescription colElementTableDescription = GetTableDescription(listElementType);
 
+                        // TODO Generate this instance using the CreateObjectMapperInstance method of fullMappingSchema
                         propertiesMapping = new CollectionFullObjectMapper(_db, _factoryType)
                             {
                                 PropertyType = listElementType,
@@ -316,7 +318,7 @@ namespace BLToolkit.Mapping
             return mapper;
         }
 
-        private object LoadLazy(IMapper mapper, object proxy, Type parentType)
+        protected object LoadLazy(IMapper mapper, object proxy, Type parentType)
         {
             var lazyMapper = (ILazyMapper) mapper;
             object key = lazyMapper.ParentKeyGetter(proxy);
@@ -333,6 +335,16 @@ namespace BLToolkit.Mapping
 
             var objectMapper = (IObjectMapper) mapper;
             return objectMapper.Getter(parentLoadFull);
+        }
+
+        private static Type GetGenericType(Type t)
+        {
+            if (t.IsGenericType)
+            {
+                Type[] at = t.GetGenericArguments();
+                return at.FirstOrDefault();
+            }
+            return null;
         }
 
         #endregion

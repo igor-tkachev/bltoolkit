@@ -95,79 +95,9 @@ namespace BLToolkit.Mapping
             return internalMapDataReaderToList(reader, list, destObjectType, parameters);
         }
 
-        private IList internalMapDataReaderToList(
-            IDataReader reader,
-            IList list,
-            Type destObjectType,
-            params object[] parameters)
-        {
-            FullObjectMapper mapper = (FullObjectMapper)GetObjectMapper(destObjectType);
-
-            InitSchema(reader);
-
-            object currentItem = null;
-
-            List<int> pkIndexes = new List<int>();
-            foreach (var nm in mapper.PrimaryKeyNames)
-            {
-                pkIndexes.Add(mapper.PropertiesMapping.First(x => x.PropertyName == nm).DataReaderIndex);
-            }
-            
-            while (reader.Read())
-            {
-                var result = mapper.CreateInstance();
-
-                FillObject(mapper, reader, result);
-                if (currentItem == null)
-                {
-                    currentItem = result;
-                    list.Add(result);
-                    continue;
-                }
-
-                bool pkIsNull = false;
-                bool allPksEqual = true;
-
-                //This is needed, because DBValue can be Null, but the Field can be Guid, wich then is filled with Guid.Empty and this is also a valid value!
-                foreach (var pkIndex in pkIndexes)
-                {
-                    var dbValue = reader.GetValue(pkIndex);
-                    if (dbValue == DBNull.Value)
-                    {
-                        pkIsNull = true;
-                        break;
-                    }
-                }
-
-                if (!pkIsNull)
-                    foreach (var pkGetter in mapper.PrimaryKeyValueGetters)
-                    {
-                        object resultPk = pkGetter.Invoke(result);
-                        object currentItemPk = pkGetter.Invoke(currentItem);
-
-                        if (!resultPk.Equals(currentItemPk))
-                        {
-                            allPksEqual = false;
-                            break;
-                        }
-                    }
-
-                if (!pkIsNull && !allPksEqual)
-                {
-                    currentItem = result;
-                    list.Add(result);
-                    //continue;
-                }
-
-                if (mapper.ColParent)
-                {
-                    FillObject(currentItem, mapper, reader);
-                }
-            }
-
-            return list;
-        }
         #endregion
+
+        #region Private methods
 
         private object FillObject(object result, IObjectMapper mapper, IDataReader datareader)
         {
@@ -290,8 +220,6 @@ namespace BLToolkit.Mapping
             }
         }
 
-        #region Private methods
-
         private void InitSchema(IDataReader reader)
         {
             _schemaColumns = new List<string>();
@@ -299,15 +227,78 @@ namespace BLToolkit.Mapping
             if (_schema != null)
                 _schema.Rows.Cast<DataRow>().ToList().ForEach(dr => _schemaColumns.Add((string)dr["ColumnName"]));
         }
-    
-        public static Type GetGenericType(Type t)
+
+        private IList internalMapDataReaderToList(
+            IDataReader reader,
+            IList list,
+            Type destObjectType,
+            params object[] parameters)
         {
-            if (t.IsGenericType)
+            FullObjectMapper mapper = (FullObjectMapper)GetObjectMapper(destObjectType);
+
+            InitSchema(reader);
+
+            object currentItem = null;
+
+            List<int> pkIndexes = new List<int>();
+            foreach (var nm in mapper.PrimaryKeyNames)
             {
-                Type[] at = t.GetGenericArguments();
-                return at.FirstOrDefault();
+                pkIndexes.Add(mapper.PropertiesMapping.First(x => x.PropertyName == nm).DataReaderIndex);
             }
-            return null;
+
+            while (reader.Read())
+            {
+                var result = mapper.CreateInstance();
+
+                FillObject(mapper, reader, result);
+                if (currentItem == null)
+                {
+                    currentItem = result;
+                    list.Add(result);
+                    continue;
+                }
+
+                bool pkIsNull = false;
+                bool allPksEqual = true;
+
+                //This is needed, because DBValue can be Null, but the Field can be Guid, wich then is filled with Guid.Empty and this is also a valid value!
+                foreach (var pkIndex in pkIndexes)
+                {
+                    var dbValue = reader.GetValue(pkIndex);
+                    if (dbValue == DBNull.Value)
+                    {
+                        pkIsNull = true;
+                        break;
+                    }
+                }
+
+                if (!pkIsNull)
+                    foreach (var pkGetter in mapper.PrimaryKeyValueGetters)
+                    {
+                        object resultPk = pkGetter.Invoke(result);
+                        object currentItemPk = pkGetter.Invoke(currentItem);
+
+                        if (!resultPk.Equals(currentItemPk))
+                        {
+                            allPksEqual = false;
+                            break;
+                        }
+                    }
+
+                if (!pkIsNull && !allPksEqual)
+                {
+                    currentItem = result;
+                    list.Add(result);
+                    //continue;
+                }
+
+                if (mapper.ColParent)
+                {
+                    FillObject(currentItem, mapper, reader);
+                }
+            }
+
+            return list;
         }
 
         #endregion
