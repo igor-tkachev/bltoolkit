@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BLToolkit.Data.DataProvider
@@ -170,80 +172,82 @@ namespace BLToolkit.Data.DataProvider
         /// <summary>
         /// TODO Remove Oracle helper class since it is useless. Generate sql text query dynamically
         /// </summary>
-        /// <param name="poCommand"></param>
+        /// <param name="cmd"></param>
         /// <returns></returns>
-        public static string Interpret(IDbCommand poCommand)
+        public static string Interpret(IDbCommand cmd)
         {
-            if (poCommand.Parameters.Count == 0)
-                return poCommand.CommandText;
+            if (cmd.Parameters.Count == 0)
+                return cmd.CommandText;
 
-            var oRegex = new Regex(@"(?<string>'[^']+')|(?<Parameters>:[a-zA-Z0-9_]+)");
-            MatchCollection oMatchCollection = oRegex.Matches(poCommand.CommandText);
+            var regex = new Regex(@"(?<string>'[^']+')|(?<Parameters>:[a-zA-Z0-9_]+)");
+            MatchCollection matchCollection = regex.Matches(cmd.CommandText);
 
-            string strQuery = poCommand.CommandText + " ";
+            string strQuery = cmd.CommandText + " ";
             int matchCount = 0;
+            List<string> p = new List<string>();
 
-            for (int i = 0; i < oMatchCollection.Count; i++)
+            for (int i = 0; i < matchCollection.Count; i++)
             {
-                int index = oMatchCollection.Count - i - 1;
-                int matchCountIndex = oMatchCollection.Count - matchCount- 1;
-
-                if (oMatchCollection[index].Groups["string"].Success)
+                if (matchCollection[i].Groups["string"].Success)
                     continue;
 
-                string strParameter = oMatchCollection[index].Groups["Parameters"].Captures[0].Value;
+                if (matchCollection[i].Groups["Parameters"].Success)
+                {
+                    p.Add(matchCollection[i].Groups["Parameters"].Captures[0].Value);
+                }
+            }
 
-                var param = (IDbDataParameter)poCommand.Parameters[matchCountIndex];
+            for (int i = p.Count - 1; i >= 0; i--)
+            {
+                string parameters = p[i];
+
+                var param = (IDbDataParameter)cmd.Parameters[i];
                 if (param.Value is DateTime)
                 {
                     var dt = (DateTime)param.Value;
 
-                    strQuery = strQuery.Replace(strParameter + " ",
+                    strQuery = strQuery.Replace(parameters + " ",
                                                 dt.Date == dt
                                                     ? SqlConvertDate(dt) + " "
                                                     : SqlConvertDateTime(dt) + " ");
                 }
                 else if (param.Value is string)
-                    strQuery = strQuery.Replace(strParameter, SqlConvertString(param.Value.ToString()) + " ");
+                    strQuery = strQuery.Replace(parameters, SqlConvertString(param.Value.ToString()) + " ");
                 else if (param.Value is Int16)
-                    strQuery = strQuery.Replace(strParameter, ((Int16)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameters, ((Int16)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int32)
-                    strQuery = strQuery.Replace(strParameter, ((Int32)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameters, ((Int32)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int64)
-                    strQuery = strQuery.Replace(strParameter, ((Int64)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameters, ((Int64)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is decimal)
-                    strQuery = strQuery.Replace(strParameter, ((decimal)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameters, ((decimal)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is float)
-                    strQuery = strQuery.Replace(strParameter, ((float)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameters, ((float)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is double)
-                    strQuery = strQuery.Replace(strParameter, ((double)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameters, ((double)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is TimeSpan)
-                    strQuery = strQuery.Replace(strParameter, "'" + ((TimeSpan)param.Value).ToString() + "' ");
+                    strQuery = strQuery.Replace(parameters, "'" + ((TimeSpan)param.Value).ToString() + "' ");
                 else
                     throw new NotImplementedException(param.Value.GetType() + " is not implemented yet.");
 
                 matchCount++;
             }
 
-            if (matchCount != poCommand.Parameters.Count)
+            if (matchCount != cmd.Parameters.Count)
             {
-                // ReSharper disable InvocationIsSkipped
-                Debug.WriteLine(
-                    "Number of parameters in query is not equals to number of parameters set in the command object " +
-                    poCommand.CommandText);
                 // ReSharper restore InvocationIsSkipped
                 var msg =
-                    "Number of parameters in query is not equals to number of parameters set in the command object : " + poCommand.CommandText + "\r\n" +
+                    "Number of parameters in query is not equals to number of parameters set in the command object : " + cmd.CommandText + "\r\n" +
                     "Query params :\r\n";
 
-                foreach (Match match in oMatchCollection)
+                foreach (Match match in matchCollection)
                 {
                     msg += "\t" + match.Value + "\r\n";
                 }
 
                 msg += "\nCommand params :\r\n";
 
-                foreach (IDataParameter param in poCommand.Parameters)
+                foreach (IDataParameter param in cmd.Parameters)
                 {
                     msg += "\t" + param.ParameterName + " = " + Convert.ToString(param) + "\r\n";
                 }

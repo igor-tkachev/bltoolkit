@@ -541,7 +541,7 @@ namespace UnitTests.CS.JointureTests
             using (var manager = ConnectionFactory.CreateDbManager())
             {
                 int prodId = 203032;
-                manager.UseQueryText = true;
+                manager.UseQueryText = false;
                 var query = from p in manager.GetTable<CProduct>()
                             where p.Id == prodId &&
                                   p.Label.EndsWith("P#") &&
