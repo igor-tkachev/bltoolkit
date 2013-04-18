@@ -87,8 +87,8 @@ namespace BLToolkit.DataAccess
 				else
 				{
 					parameters[i] = val != DBNull.Value
-                       ? db.Parameter(info.ParameterName, val)
-                       : db.Parameter(info.ParameterName, val, info.MemberMapper.GetDbType());
+						? db.Parameter(info.ParameterName, val)
+						: db.Parameter(info.ParameterName, val, info.MemberMapper.GetDbType());
 				}
 			}
 

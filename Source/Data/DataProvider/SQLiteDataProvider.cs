@@ -122,7 +122,7 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (parameter.Value is XmlDocument)
 				{
-					parameter.Value = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
+					parameter.Value  = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
 					parameter.DbType = DbType.Binary;
 				}
 			}

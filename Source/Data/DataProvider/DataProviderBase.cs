@@ -504,5 +504,10 @@ namespace BLToolkit.Data.DataProvider
 
 			return cnt;
 		}
+
+		public virtual DbType GetParameterDbType(DbType dbType)
+		{
+			return dbType;
+		}
 	}
 }

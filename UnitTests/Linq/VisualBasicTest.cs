@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
+
 using BLToolkit.Data.DataProvider;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class VisualBasicTest : TestBase
 	{

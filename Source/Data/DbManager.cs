@@ -1601,7 +1601,7 @@ namespace BLToolkit.Data
 
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
-			parameter.DbType        = dbType;
+			parameter.DbType        = _dataProvider.GetParameterDbType(dbType);
 
 			_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 
