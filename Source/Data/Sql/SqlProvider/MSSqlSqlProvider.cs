@@ -11,6 +11,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override bool IsApplyJoinSupported { get { return true; } }
 
+		protected virtual  bool BuildAlternativeSql  { get { return true; } }
+
 		protected override string FirstFormat
 		{
 			get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" : null; }
@@ -18,7 +20,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSql(StringBuilder sb)
 		{
-			AlternativeBuildSql(sb, true, base.BuildSql);
+			if (BuildAlternativeSql)
+				AlternativeBuildSql(sb, true, base.BuildSql);
+			else
+				base.BuildSql(sb);
 		}
 
 		protected override void BuildGetIdentity(StringBuilder sb)
@@ -30,13 +35,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildOrderByClause(StringBuilder sb)
 		{
-			if (!NeedSkip)
+			if (!BuildAlternativeSql || !NeedSkip)
 				base.BuildOrderByClause(sb);
 		}
 
 		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
-			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
+			if (BuildAlternativeSql && NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
 			return base.GetSelectedColumns();
 		}
@@ -213,10 +218,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public override void BuildValue(StringBuilder sb, object value)
 		{
-			if (value is sbyte) sb.Append((byte)(sbyte)value);
+			if      (value is sbyte)  sb.Append((byte)(sbyte)value);
 			else if (value is ushort) sb.Append((short)(ushort)value);
-			else if (value is uint) sb.Append((int)(uint)value);
-			else if (value is ulong) sb.Append((long)(ulong)value);
+			else if (value is uint)   sb.Append((int)(uint)value);
+			else if (value is ulong)  sb.Append((long)(ulong)value);
 			else base.BuildValue(sb, value);
 		}
 	}

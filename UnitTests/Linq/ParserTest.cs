@@ -866,7 +866,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Join6([IncludeDataContexts("Sql2008")] string context)
+		public void Join6([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{

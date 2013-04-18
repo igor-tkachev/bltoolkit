@@ -861,7 +861,7 @@ namespace Update
 		}
 
 		[Test]
-		public void InsertBatch2([IncludeDataContexts("Sql2008")] string context)
+		public void InsertBatch2([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{

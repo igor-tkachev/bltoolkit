@@ -19,7 +19,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TableName([IncludeDataContexts("Sql2008")] string context)
+		public void TableName([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 				db.GetTable<ParenTable>().TableName("Parent").ToList();
@@ -33,7 +33,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void OwnerName([IncludeDataContexts("Sql2008")] string context)
+		public void OwnerName([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 				db.GetTable<Parent>().OwnerName("dbo").ToList();

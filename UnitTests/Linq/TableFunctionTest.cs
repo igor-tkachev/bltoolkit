@@ -14,7 +14,7 @@ namespace Data.Linq
 	public class TableFunctionTest : TestBase
 	{
 		[Test]
-		public void Func1([IncludeDataContexts("Sql2008")] string context)
+		public void Func1([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -27,7 +27,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Func2([IncludeDataContexts("Sql2008")] string context)
+		public void Func2([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -41,7 +41,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Func3([IncludeDataContexts("Sql2008")] string context)
+		public void Func3([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -58,7 +58,7 @@ namespace Data.Linq
 			(DbManager db, int id) => from p in new Model.Functions(db).GetParentByID(id) select p);
 
 		[Test]
-		public void CompiledFunc1([IncludeDataContexts("Sql2008")] string context)
+		public void CompiledFunc1([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -71,7 +71,7 @@ namespace Data.Linq
 			(TestDbManager db, int id) => from c in db.Child from p in db.GetParentByID(id) select p);
 
 		[Test]
-		public void CompiledFunc2([IncludeDataContexts("Sql2008")] string context)
+		public void CompiledFunc2([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -81,7 +81,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void WithTabLock([IncludeDataContexts("Sql2008")] string context)
+		public void WithTabLock([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{

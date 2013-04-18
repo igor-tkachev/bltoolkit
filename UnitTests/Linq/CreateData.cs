@@ -147,6 +147,7 @@ namespace Create
 		[Test] public void Sql2000   ([IncludeDataContexts("Sql2000"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql2000");  }
 		[Test] public void Sql2005   ([IncludeDataContexts("Sql2005"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
 		[Test] public void Sql2008   ([IncludeDataContexts("Sql2008"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2012   ([IncludeDataContexts("Sql2012"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
 		[Test] public void SqlCe     ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context,           "\nGO\n",  "SqlCe");      }
 		[Test] public void SqlCeData ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context + ".Data", "\nGO\n",  "SqlCe");      }
 		[Test] public void SQLite    ([IncludeDataContexts(ProviderName.SQLite    )] string context) { RunScript(context,           "\nGO\n",  "SQLite");     }

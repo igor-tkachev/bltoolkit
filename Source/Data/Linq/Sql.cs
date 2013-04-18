@@ -176,6 +176,7 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("PostgreSQL", "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty("Firebird",   "TimeStamp",      ServerSideOnly=true)]
 		[SqlProperty("MsSql2008",  "DateTimeOffset", ServerSideOnly=true)]
+		[SqlProperty("MsSql2012",  "DateTimeOffset", ServerSideOnly=true)]
 		[SqlProperty(              "DateTime",       ServerSideOnly=true)] public static DateTimeOffset DateTimeOffset                    { get { return DateTimeOffset.Now; } }
 
 		[SqlFunction("SqlCe",      "NChar",          ServerSideOnly=true)]
@@ -222,6 +223,7 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction("MsSql2000", "Len",         PreferServerSide = true)]
 		[SqlFunction("MsSql2005", "Len",         PreferServerSide = true)]
 		[SqlFunction("MsSql2008", "Len",         PreferServerSide = true)]
+		[SqlFunction("MsSql2012", "Len",         PreferServerSide = true)]
 		[SqlFunction("SqlCe",     "Len",         PreferServerSide = true)]
 		[SqlFunction("Sybase",    "Len",         PreferServerSide = true)]
 		public static int? Length(string str)
@@ -454,6 +456,7 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction("MsSql2000", "DataLength",   PreferServerSide = true)]
 		[SqlFunction("MsSql2005", "DataLength",   PreferServerSide = true)]
 		[SqlFunction("MsSql2008", "DataLength",   PreferServerSide = true)]
+		[SqlFunction("MsSql2012", "DataLength",   PreferServerSide = true)]
 		[SqlFunction("SqlCe",     "DataLength",   PreferServerSide = true)]
 		[SqlFunction("Sybase",    "DataLength",   PreferServerSide = true)]
 		public static int? Length(Binary value)
@@ -704,6 +707,7 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction] public static Double?  Atan   (Double?  value) { return value == null ? null : (Double?) Math.Atan   (value.Value); }
 
 		[CLSCompliant(false)]
+		[SqlFunction( "MsSql2012", "Atn2")]
 		[SqlFunction( "MsSql2008", "Atn2")]
 		[SqlFunction( "MsSql2000", "Atn2")]
 		[SqlFunction( "MsSql2005", "Atn2")]
@@ -853,6 +857,7 @@ namespace BLToolkit.Data.Linq
 		[SqlFunction] public static Double?  Tan     (Double?  value) { return value == null ? null : (Double?)Math.Tan (value.Value); }
 		[SqlFunction] public static Double?  Tanh    (Double?  value) { return value == null ? null : (Double?)Math.Tanh(value.Value); }
 
+		[SqlExpression("MsSql2012",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2000",  "Round({0}, 0, 1)")]
@@ -873,6 +878,7 @@ namespace BLToolkit.Data.Linq
 #endif
 		}
 
+		[SqlExpression("MsSql2012",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2008",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2005",  "Round({0}, 0, 1)")]
 		[SqlExpression("MsSql2000",  "Round({0}, 0, 1)")]

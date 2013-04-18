@@ -67,7 +67,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SubQueryCount([IncludeDataContexts("Sql2008")] string context)
+		public void SubQueryCount([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{

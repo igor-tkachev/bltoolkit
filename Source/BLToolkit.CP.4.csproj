@@ -208,6 +208,7 @@
     <Compile Include="Data\DataProvider\Interpreters\SqliteDataProviderInterpreter.cs" />
     <Compile Include="Data\DataProvider\OracleHelper.cs" />
     <Compile Include="Data\DataProvider\Sql2000DataProvider.cs" />
+    <Compile Include="Data\DataProvider\Sql2005DataProvider.cs" />
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
