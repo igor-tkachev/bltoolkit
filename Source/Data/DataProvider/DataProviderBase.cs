@@ -507,15 +507,16 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
-        protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
-        {
-            var cnt = 0;
-            foreach (string sql in sqlList)
-            {
-                cnt += db.SetCommand(sql).ExecuteNonQuery();
-            }
+		protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
+		{
+			var cnt = 0;
 
-            return cnt;
-        }
+			foreach (string sql in sqlList)
+			{
+				cnt += db.SetCommand(sql).ExecuteNonQuery();
+			}
+
+			return cnt;
+		}
 	}
 }

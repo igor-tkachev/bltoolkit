@@ -9,9 +9,9 @@ namespace BLToolkit.Data.DataProvider
 
 	public sealed class Sql2012DataProvider : SqlDataProviderBase
 	{
-		static readonly List<Func<Type,string>> _udtTypeNameResolvers = new List<Func<Type, string>>();
+		static readonly List<Func<Type,string>> _udtTypeNameResolvers = new List<Func<Type,string>>();
 
-        static Sql2012DataProvider()
+		static Sql2012DataProvider()
 		{
 			AddUdtTypeNameResolver(ResolveStandartUdt);
 		}

@@ -9,7 +9,7 @@ namespace Data.Linq.ProviderSpecific
 	public class MsSql2008 : TestBase
 	{
 		[Test]
-		public void SqlTest([IncludeDataContexts("Sql2008")] string context)
+		public void SqlTest([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			using (var rd = db.SetCommand(@"
@@ -27,7 +27,7 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SqlTypeTest([IncludeDataContexts("Sql2008")] string context)
+		public void SqlTypeTest([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{

@@ -190,7 +190,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect11([IncludeDataContexts("Sql2008")] string context)
+		public void MultipleSelect11([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			var dt = DateTime.Now;
 

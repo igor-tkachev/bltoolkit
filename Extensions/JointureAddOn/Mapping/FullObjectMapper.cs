@@ -207,6 +207,8 @@ namespace BLToolkit.Mapping
                     if (!isCollection)
                     {
                         // TODO Generate this instance using the CreateObjectMapperInstance method of fullMappingSchema
+                        // _db.MappingSchema.CreateObjectMapperInstance(prop.PropertyType)
+
                         propertiesMapping = new FullObjectMapper(_db, _ignoreLazyLoad, _factoryType)
                             {
                                 PropertyType = prop.PropertyType,

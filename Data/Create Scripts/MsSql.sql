@@ -528,6 +528,7 @@ GO
 -- SKIP Sql2005 END
 
 -- SKIP Sql2008 BEGIN
+-- SKIP Sql2012 BEGIN
 CREATE TABLE LinqDataTypes
 (
 	ID             int,
@@ -542,6 +543,7 @@ CREATE TABLE LinqDataTypes
 	BigIntValue    bigint NULL
 )
 GO
+-- SKIP Sql2012 END
 -- SKIP Sql2008 END
 
 DROP TABLE TestIdentity

@@ -74,7 +74,7 @@ namespace Data.Exceptions
 		}
 
 		[Test, ExpectedException(typeof(DataException), ExpectedMessage = "Invalid object name 'Parent1'.")]
-		public void ReplaceTableTest([IncludeDataContexts("Sql2008")] string context)
+		public void ReplaceTableTest([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new MyDbManager())
 			{

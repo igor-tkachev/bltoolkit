@@ -752,7 +752,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void StackOverflow([IncludeDataContexts("Sql2008")] string context)
+		public void StackOverflow([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			using (var db = new TestDbManager(context))
 			{
