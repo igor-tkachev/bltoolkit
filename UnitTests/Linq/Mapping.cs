@@ -387,7 +387,7 @@ namespace Data.Linq
 		{
 			using (var db = new TestDbManager())
 			{
-				var query = db.GetTable<Document>();
+				IQueryable<IDocument> query = db.GetTable<Document>();
 				var idsQuery = query.Select(s => s.Id);
 				var str = idsQuery.ToString(); // Exception
 				Assert.IsNotNull(str);

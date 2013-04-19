@@ -1035,7 +1035,7 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							foreach (var field in SqlTable.Fields.Values)
 							{
-								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member))
+								if (TypeHelper.Equals(field.MemberMapper.MapMemberInfo.MemberAccessor.MemberInfo, memberExpression.Member, SqlTable.ObjectType))
 								{
 									if (field.MemberMapper is MemberMapper.ComplexMapper &&
 										field.MemberMapper.MemberName.IndexOf('.') > 0)
