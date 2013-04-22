@@ -112,12 +112,9 @@ namespace BLToolkit.Data.DataProvider
 			return new SqlCeSqlProvider();
 		}
 
-		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
+		public override DbType GetParameterDbType(DbType dbType)
 		{
-			if (parameter.DbType == DbType.DateTime2)
-				parameter.DbType = DbType.DateTime;
-
-			base.AttachParameter(command, parameter);
+			return dbType == DbType.DateTime2 ? DbType.DateTime : dbType;
 		}
 	}
 }
