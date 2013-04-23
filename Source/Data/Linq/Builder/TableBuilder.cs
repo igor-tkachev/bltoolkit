@@ -186,7 +186,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				SqlQuery.From.Table(SqlTable);
 
-				var args = mc.Arguments.Select(a => builder.ConvertToSql(this, a));
+				var args = mc.Arguments.Select(a => builder.ConvertToSql(this, a, false));
 
 				attr.SetTable(SqlTable, mc.Method, mc.Arguments, args);
 

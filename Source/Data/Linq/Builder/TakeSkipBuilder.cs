@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (arg.NodeType == ExpressionType.Lambda)
 				arg = ((LambdaExpression)arg).Body.Unwrap();
 
-			var expr = builder.ConvertToSql(sequence, arg);
+			var expr = builder.ConvertToSql(sequence, arg, false);
 
 			if (methodCall.Method.Name == "Take")
 			{

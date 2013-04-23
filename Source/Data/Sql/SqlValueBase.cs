@@ -25,11 +25,11 @@ namespace BLToolkit.Data.Sql
 		#region Value Converter
 
 		internal List<Type> EnumTypes;
-		internal List<int> TakeValues;
-		internal string LikeStart, LikeEnd;
+		internal List<int>  TakeValues;
+		internal string     LikeStart, LikeEnd;
 
-		private Converter<object, object> _valueConverter;
-		public Converter<object, object> ValueConverter
+		private Converter<object,object> _valueConverter;
+		public  Converter<object,object>  ValueConverter
 		{
 			get
 			{
@@ -173,6 +173,7 @@ namespace BLToolkit.Data.Sql
 				return sb.ToString();
 			};
 		}
+
 		#endregion
 	}
 }
