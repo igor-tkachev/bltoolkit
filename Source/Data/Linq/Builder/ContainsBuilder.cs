@@ -123,7 +123,7 @@ namespace BLToolkit.Data.Linq.Builder
 						 ctx.IsExpression(expr, 0, RequestFor.Expression).Result))
 					{
 						Sequence.ConvertToIndex(null, 0, ConvertFlags.All);
-						var ex = Builder.ConvertToSql(ctx, _methodCall.Arguments[1]);
+						var ex = Builder.ConvertToSql(ctx, _methodCall.Arguments[1], false);
 						cond = new SqlQuery.Condition(false, new SqlQuery.Predicate.InSubQuery(ex, false, SqlQuery));
 					}
 					else

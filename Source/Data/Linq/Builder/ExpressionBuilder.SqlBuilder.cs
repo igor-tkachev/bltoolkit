@@ -548,30 +548,30 @@ namespace BLToolkit.Data.Linq.Builder
 			if (ctx != null && ctx.IsExpression(expression, 0, RequestFor.Object).Result)
 				return ctx.ConvertToSql(expression, 0, queryConvertFlag);
 
-			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression) } };
+			return new[] { new SqlInfo { Sql = ConvertToSql(context, expression, false) } };
 		}
 
-		public ISqlExpression ConvertToSqlExpression(IBuildContext context, Expression expression)
+		public ISqlExpression ConvertToSqlExpression(IBuildContext context, Expression expression, bool convertEnum)
 		{
 			var expr = ConvertExpression(expression);
-			return ConvertToSql(context, expr);
+			return ConvertToSql(context, expr, false, convertEnum);
 		}
 
 #if FW3
-		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression)
+		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression, bool unwrap)
 		{
-			return ConvertToSql(context, expression, false);
+			return ConvertToSql(context, expression, unwrap, true);
 		}
 #endif
 
-		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression, bool unwrap
+		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression, bool unwrap, bool convertEnum
 #if !FW3
-			= false
+			= true
 #endif
 			)
 		{
 			if (CanBeConstant(expression))
-				return BuildConstant(expression);
+				return BuildConstant(expression, convertEnum);
 
 			if (CanBeCompiled(expression))
 				return BuildParameter(expression).SqlParameter;
@@ -617,8 +617,8 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Coalesce           :
 					{
 						var e = (BinaryExpression)expression;
-						var l = ConvertToSql(context, e.Left);
-						var r = ConvertToSql(context, e.Right);
+						var l = ConvertToSql(context, e.Left,  false);
+						var r = ConvertToSql(context, e.Right, false);
 						var t = e.Type;
 
 						switch (expression.NodeType)
@@ -664,7 +664,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.NegateChecked  :
 					{
 						var e = (UnaryExpression)expression;
-						var o = ConvertToSql(context, e.Operand);
+						var o = ConvertToSql(context, e.Operand, false);
 						var t = e.Type;
 
 						switch (expression.NodeType)
@@ -682,7 +682,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.ConvertChecked :
 					{
 						var e = (UnaryExpression)expression;
-						var o = ConvertToSql(context, e.Operand);
+						var o = ConvertToSql(context, e.Operand, false);
 
 						if (e.Method == null && e.IsLifted)
 							return o;
@@ -707,9 +707,9 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Conditional    :
 					{
 						var e = (ConditionalExpression)expression;
-						var s = ConvertToSql(context, e.Test);
-						var t = ConvertToSql(context, e.IfTrue);
-						var f = ConvertToSql(context, e.IfFalse);
+						var s = ConvertToSql(context, e.Test,    false);
+						var t = ConvertToSql(context, e.IfTrue,  false);
+						var f = ConvertToSql(context, e.IfFalse, false);
 
 						if (f is SqlFunction)
 						{
@@ -810,9 +810,9 @@ namespace BLToolkit.Data.Linq.Builder
 							var parms = new List<ISqlExpression>();
 
 							if (e.Object != null)
-								parms.Add(ConvertToSql(context, e.Object));
+								parms.Add(ConvertToSql(context, e.Object, false));
 
-							parms.AddRange(e.Arguments.Select(t => ConvertToSql(context, t)));
+							parms.AddRange(e.Arguments.Select(t => ConvertToSql(context, t, false)));
 
 							return Convert(context, attr.GetExpression(e.Method, parms.ToArray()));
 						}
@@ -842,7 +842,7 @@ namespace BLToolkit.Data.Linq.Builder
 								return dic.TryGetValue(wpi, out ppi) ? ppi : wpi;
 							});
 
-							return ConvertToSql(context, pie);
+							return ConvertToSql(context, pie, false);
 						}
 
 						break;
@@ -856,7 +856,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 
 				case (ExpressionType)ChangeTypeExpression.ChangeTypeType :
-					return ConvertToSql(context, ((ChangeTypeExpression)expression).Expression);
+					return ConvertToSql(context, ((ChangeTypeExpression)expression).Expression, false);
 			}
 
 			if (expression.Type == typeof(bool) && _convertedPredicates.Add(expression))
@@ -1043,7 +1043,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		readonly Dictionary<Expression,SqlValue> _constants = new Dictionary<Expression,SqlValue>();
 
-		SqlValue BuildConstant(Expression expr)
+		SqlValue BuildConstant(Expression expr, bool convertEnum)
 		{
 			SqlValue value;
 
@@ -1052,6 +1052,13 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object)));
 			var v      = lambda.Compile()();
+
+			if (v != null && convertEnum && v.GetType().IsEnum)
+			{
+				var attrs = v.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
+
+				v = Map.EnumToValue(v, attrs.Length == 0);
+			}
 
 			value = new SqlValue(v);
 
@@ -1214,7 +1221,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Conditional  :
 					return Convert(context,
 						new SqlQuery.Predicate.ExprExpr(
-							ConvertToSql(context, expression),
+							ConvertToSql(context, expression, false),
 							SqlQuery.Predicate.Operator.Equal,
 							new SqlValue(true)));
 
@@ -1226,7 +1233,7 @@ namespace BLToolkit.Data.Linq.Builder
 							e.Member.DeclaringType.IsGenericType && 
 							e.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))
 						{
-							var expr = ConvertToSql(context, e.Expression);
+							var expr = ConvertToSql(context, e.Expression, false);
 							return Convert(context, new SqlQuery.Predicate.IsNull(expr, true));
 						}
 
@@ -1245,7 +1252,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 			}
 
-			var ex = ConvertToSql(context, expression);
+			var ex = ConvertToSql(context, expression, false);
 
 			if (SqlExpression.NeedsEqual(ex))
 				return Convert(context, new SqlQuery.Predicate.ExprExpr(ex, SqlQuery.Predicate.Operator.Equal, new SqlValue(true)));
@@ -1343,7 +1350,7 @@ namespace BLToolkit.Data.Linq.Builder
 					return p;
 			}
 
-			var l = ConvertToSql(context, left);
+			var l = ConvertToSql(context, left,  false);
 			var r = ConvertToSql(context, right, true);
 
 			switch (nodeType)
@@ -1474,12 +1481,12 @@ namespace BLToolkit.Data.Linq.Builder
 
 						if (left.NodeType == ExpressionType.Convert)
 						{
-							l = ConvertToSql(context, operand);
+							l = ConvertToSql(context, operand, false);
 							r = sqlValue = new SqlValue(mapValue);
 						}
 						else
 						{
-							r = ConvertToSql(context, operand);
+							r = ConvertToSql(context, operand, false);
 							l = sqlValue = new SqlValue(mapValue);
 						}
 
@@ -1498,8 +1505,8 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						value = ((UnaryExpression)value).Operand;
 
-						var l = ConvertToSql(context, operand);
-						var r = ConvertToSql(context, value);
+						var l = ConvertToSql(context, operand, false, false);
+						var r = ConvertToSql(context, value,   false, false);
 
 						MemberAccessor memberAccessor = null;
 
@@ -1525,6 +1532,7 @@ namespace BLToolkit.Data.Linq.Builder
 								((SqlValueBase)l).SetEnumConverter(type, MappingSchema);
 							}
 						}
+
 						if (r is SqlValueBase)
 						{
 							if (memberAccessor != null)
@@ -1617,7 +1625,7 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				isNull = right is ConstantExpression && ((ConstantExpression)right).Value == null;
-				lcols  = lmembers.Select(m => new SqlInfo(m.Key) { Sql = ConvertToSql(leftContext, m.Value) }).ToArray();
+				lcols  = lmembers.Select(m => new SqlInfo(m.Key) { Sql = ConvertToSql(leftContext, m.Value, false) }).ToArray();
 			}
 			else
 			{
@@ -1718,10 +1726,10 @@ namespace BLToolkit.Data.Linq.Builder
 
 			for (var i = 0; i < newExpr.Arguments.Count; i++)
 			{
-				var lex = ConvertToSql(context, newExpr.Arguments[i]);
+				var lex = ConvertToSql(context, newExpr.Arguments[i], false);
 				var rex =
 					newRight != null ?
-						ConvertToSql(context, newRight.Arguments[i]) :
+						ConvertToSql(context, newRight.Arguments[i], false) :
 						GetParameter(right, newExpr.Members[i]);
 
 				var predicate = Convert(context,
@@ -1851,7 +1859,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 						for (var i = 0; i < newArr.Expressions.Count; i++)
 						{
-							exprs[i] = ConvertToSql(context, newArr.Expressions[i]);
+							exprs[i] = ConvertToSql(context, newArr.Expressions[i], false, false);
+
 							if (memberAccessor != null && exprs[i] is SqlValue)
 							{
 								((SqlValue)exprs[i]).SetEnumConverter(memberAccessor, MappingSchema);
@@ -1883,8 +1892,8 @@ namespace BLToolkit.Data.Linq.Builder
 		ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression, string start, string end)
 		{
 			var e = expression;
-			var o = ConvertToSql(context, e.Object);
-			var a = ConvertToSql(context, e.Arguments[0]);
+			var o = ConvertToSql(context, e.Object,       false);
+			var a = ConvertToSql(context, e.Arguments[0], false);
 
 			if (a is SqlValue)
 			{
@@ -1925,7 +1934,7 @@ namespace BLToolkit.Data.Linq.Builder
 						mi, Expression.Constant("%"), Expression.Constant("~%")),
 						mi, Expression.Constant("_"), Expression.Constant("~_"));
 
-			var expr = ConvertToSql(context, ConvertExpression(ex));
+			var expr = ConvertToSql(context, ConvertExpression(ex), false);
 
 			if (!string.IsNullOrEmpty(start))
 				expr = new SqlBinaryExpression(typeof(string), new SqlValue("%"), "+", expr);
@@ -1939,13 +1948,13 @@ namespace BLToolkit.Data.Linq.Builder
 		ISqlPredicate ConvertLikePredicate(IBuildContext context, MethodCallExpression expression)
 		{
 			var e  = expression;
-			var a1 = ConvertToSql(context, e.Arguments[0]);
-			var a2 = ConvertToSql(context, e.Arguments[1]);
+			var a1 = ConvertToSql(context, e.Arguments[0], false);
+			var a2 = ConvertToSql(context, e.Arguments[1], false);
 
 			ISqlExpression a3 = null;
 
 			if (e.Arguments.Count == 3)
-				a3 = ConvertToSql(context, e.Arguments[2]);
+				a3 = ConvertToSql(context, e.Arguments[2], false);
 
 			return new SqlQuery.Predicate.Like(a1, false, a2, a3);
 		}
@@ -2396,8 +2405,8 @@ namespace BLToolkit.Data.Linq.Builder
 							typeof(int),
 							"DateDiff",
 							new SqlValue(datePart),
-							ConvertToSql(context, e.Right),
-							ConvertToSql(context, e.Left));
+							ConvertToSql(context, e.Right, false),
+							ConvertToSql(context, e.Left,  false));
 				}
 			}
 

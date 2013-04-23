@@ -159,7 +159,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression BuildSql(IBuildContext context, Expression expression)
 		{
-			var sqlex = ConvertToSqlExpression(context, expression);
+			var sqlex = ConvertToSqlExpression(context, expression, true);
 			var idx   = context.SqlQuery.Select.Add(sqlex);
 
 			idx = context.ConvertToParentIndex(idx, context);

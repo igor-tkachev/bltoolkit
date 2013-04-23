@@ -16,26 +16,21 @@ namespace Data.Linq.UserTests
 			Text = 1,
 		}
 
-		class ColumnInfo
-		{
-			public ColumnDataType DataType { get; set; }
-		}
-
 		class CustomTableColumn
 		{
 			public int? DataTypeID { get; set; }
 		}
 
 		[Test]
-		public void Test([DataContexts] string context)
+		public void Test()
 		{
-			using (var db = GetDataContext(context))
+			using (var db = new TestDbManager())
 			{
 				var q = db.GetTable<CustomTableColumn>()
 					.Select(
-						x => new ColumnInfo
+						x => new
 						{
-							DataType = x.DataTypeID == null ? ColumnDataType.Unknown : (ColumnDataType)x.DataTypeID,
+							DataType = Sql.AsSql(ColumnDataType.Unknown),
 						});
 
 				var sql = q.ToString();

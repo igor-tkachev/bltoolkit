@@ -259,7 +259,7 @@ namespace BLToolkit.Data.Linq.Builder
 								expression,
 								level,
 								(ctx, ex, l) => ctx.ConvertToSql(ex, l, flags),
-								() => new[] { new SqlInfo { Sql = Builder.ConvertToSql(this, expression) } });
+								() => new[] { new SqlInfo { Sql = Builder.ConvertToSql(this, expression, false) } });
 						}
 				}
 			}

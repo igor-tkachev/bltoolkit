@@ -712,7 +712,7 @@ namespace Data.Linq
 						TestField = VAL2
 					});
 
-					Assert.True(1 == db.GetTable<TestTable2>().Where(r => r.Id == RID && new[] { TestEnum2.Value2 }.Contains(r.TestField)).Count());
+					Assert.That(db.GetTable<TestTable2>().Where(r => r.Id == RID && new[] { TestEnum2.Value2 }.Contains(r.TestField)).Count(), Is.EqualTo(1));
 				}
 			});
 		}
