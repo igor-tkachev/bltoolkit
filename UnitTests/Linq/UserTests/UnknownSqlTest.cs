@@ -13,7 +13,7 @@ namespace Data.Linq.UserTests
 		enum ColumnDataType
 		{
 			Unknown = 0,
-			Text = 1,
+			Text    = 1,
 		}
 
 		class CustomTableColumn
