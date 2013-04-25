@@ -1358,13 +1358,13 @@ namespace Data.Linq
 		}
 
 		[Test, Category("MySql")]
-		public void GroupByExtraFieldBugTest()
+		public void GroupByExtraFieldBugTest([IncludeDataContexts(ProviderName.MySql)] string context)
 		{
 			// https://github.com/igor-tkachev/bltoolkit/issues/42
 			// extra field is generated in the GROUP BY clause, for example:
 			// GROUP BY p.LastName, p.LastName <--- the second one is redundant
 
-			using (var db = new TestDbManager("MySql"))
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from d in db.Doctor
