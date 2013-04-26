@@ -3252,7 +3252,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal(isApplySupported, optimizeColumns, true);
+			FinalizeAndValidateInternal(isApplySupported, optimizeColumns, true, new List<ISqlTableSource>());
 			ResolveFields();
 			SetAliases();
 
@@ -3593,7 +3593,7 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns, bool optimizeSearchCondition)
+		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns, bool optimizeSearchCondition, List<ISqlTableSource> tables)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
@@ -3614,14 +3614,14 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns, false);
+					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns, false, tables);
 
 					if (sql.IsParameterDependent)
 						IsParameterDependent = true;
 				}
 			});
 
-			ResolveWeakJoins();
+			ResolveWeakJoins(tables);
 			OptimizeColumns();
 			OptimizeApplies   (isApplySupported, optimizeColumns);
 			OptimizeSubQueries(isApplySupported, optimizeColumns);
@@ -3779,10 +3779,8 @@ namespace BLToolkit.Data.Sql
 				OrderBy.Items.Clear();
 		}
 
-		internal void ResolveWeakJoins()
+		internal void ResolveWeakJoins(List<ISqlTableSource> tables)
 		{
-			List<ISqlTableSource> tables = null;
-
 			Func<TableSource,bool> findTable = null; findTable = table =>
 			{
 				if (tables.Contains(table.Source))
@@ -3805,6 +3803,8 @@ namespace BLToolkit.Data.Sql
 				return false;
 			};
 
+			var areTablesCollected = false;
+
 			ForEachTable(table =>
 			{
 				for (var i = 0; i < table.Joins.Count; i++)
@@ -3813,9 +3813,9 @@ namespace BLToolkit.Data.Sql
 
 					if (join.IsWeak)
 					{
-						if (tables == null)
+						if (!areTablesCollected)
 						{
-							tables = new List<ISqlTableSource>();
+							areTablesCollected = true;
 
 							Action<IQueryElement> tableCollector = expr =>
 							{
@@ -3851,7 +3851,6 @@ namespace BLToolkit.Data.Sql
 						{
 							table.Joins.RemoveAt(i);
 							i--;
-							continue;
 						}
 					}
 				}

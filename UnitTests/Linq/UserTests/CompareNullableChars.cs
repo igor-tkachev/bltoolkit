@@ -13,33 +13,32 @@ namespace Data.Linq.UserTests
 	[TestFixture]
 	public class CompareNullableChars : TestBase
 	{
-		[TableName(Name = "EngineeringCircuitEnd")]
-		public class EngineeringCircuitEndRecord
+		class Table1
 		{
 			[PrimaryKey(1)]
-			[Identity] public Int64 EngineeringCircuitID { get; set; }
-			[Nullable] public Char? Gender               { get; set; }
+			[Identity] public Int64 Field1 { get; set; }
+			[Nullable] public Char? Foeld2 { get; set; }
 		}
 
-		public class SqlServerDataRepository : DbManager
+		class Repository : DbManager
 		{
-			public SqlServerDataRepository(string configurationString) : base(configurationString)
+			public Repository(string configurationString) : base(configurationString)
 			{
 			}
 
-			public Table<EngineeringCircuitEndRecord> EngineeringCircuitEnds { get { return this.GetTable<EngineeringCircuitEndRecord>(); } }
+			public Table<Table1> Table1 { get { return this.GetTable<Table1>(); } }
 		}
 
 		[Test]
 		public void Test([DataContexts(ExcludeLinqService=true)] string context)
 		{
-			using (var db = new SqlServerDataRepository(context))
+			using (var db = new Repository(context))
 			{
 				var q =
-					from current  in db.EngineeringCircuitEnds
-					from previous in db.EngineeringCircuitEnds
-					where current.Gender == previous.Gender
-					select new { CurrentId = current.EngineeringCircuitID, PreviousId = previous.EngineeringCircuitID };
+					from current  in db.Table1
+					from previous in db.Table1
+					where current.Foeld2 == previous.Foeld2
+					select new { current.Field1, Field2 = previous.Field1 };
 
 				var sql = q.ToString();
 			}
