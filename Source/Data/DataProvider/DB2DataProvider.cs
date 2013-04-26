@@ -16,7 +16,6 @@ namespace BLToolkit.Data.DataProvider
 
 		public override Type   ConnectionType { get { return typeof(DB2Connection);         } }
 		public override string Name           { get { return DataProvider.ProviderName.DB2; } }
-		public override string EndOfSql       { get { return ";"; } }
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
