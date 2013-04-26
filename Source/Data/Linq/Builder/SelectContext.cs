@@ -137,8 +137,6 @@ namespace BLToolkit.Data.Linq.Builder
 										case ExpressionType.New        :
 										case ExpressionType.MemberInit :
 											{
-												var sequence = GetSequence(memberExpression, 0);
-
 												return memberExpression.Convert(e =>
 												{
 													if (e != memberExpression)
@@ -146,7 +144,10 @@ namespace BLToolkit.Data.Linq.Builder
 														switch (e.NodeType)
 														{
 															case ExpressionType.MemberAccess :
-																if (!sequence.IsExpression(e, 0, RequestFor.Object).Result &&
+																var sequence = GetSequence(e, 0) ?? Sequence[0];
+
+																if (sequence != null &&
+																	!sequence.IsExpression(e, 0, RequestFor.Object).Result &&
 																	!sequence.IsExpression(e, 0, RequestFor.Field). Result)
 																{
 																	var info = ConvertToIndex(e, 0, ConvertFlags.Field).Single();
@@ -826,7 +827,10 @@ namespace BLToolkit.Data.Linq.Builder
 				var levelExpression = expression.GetLevelExpression(level);
 
 				if (levelExpression != expression)
-					return action(GetSequence(expression, level), expression, level + 1);
+				{
+					var ctx = GetSequence(expression, level);
+					return ctx == null ? defaultAction() : action(ctx, expression, Sequence.Contains(ctx) ? level + 1 : 0);
+				}
 
 				if (expression.NodeType == ExpressionType.Parameter)
 				{
@@ -865,13 +869,23 @@ namespace BLToolkit.Data.Linq.Builder
 			var memberExpression = Members[levelExpression.Member];
 			var newExpression    = GetExpression(expression, levelExpression, memberExpression);
 			var sequence         = GetSequence  (expression, level);
+			var nextLevel        = 1;
 
 			if (sequence != null)
 			{
-				var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+				var idx = Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence);
 
-				if (memberExpression == parameter && levelExpression == expression)
-					return action(1, sequence, null, 0, memberExpression);
+				if (idx >= 0)
+				{
+					var parameter = Lambda.Parameters[idx];
+
+					if (memberExpression == parameter && levelExpression == expression)
+						return action(1, sequence, null, 0, memberExpression);
+				}
+				else
+				{
+					nextLevel = 0;
+				}
 			}
 
 			switch (memberExpression.NodeType)
@@ -879,7 +893,7 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.MemberAccess :
 				case ExpressionType.Parameter    :
 					if (sequence != null)
-						return action(2, sequence, newExpression, 1, memberExpression);
+						return action(2, sequence, newExpression, nextLevel, memberExpression);
 					throw new InvalidOperationException();
 
 				case ExpressionType.New          :
@@ -903,7 +917,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		IBuildContext GetSequence(Expression expression, int level)
 		{
-			if (Sequence.Length == 1)
+			if (Sequence.Length == 1 && Sequence[0].Parent == null)
 				return Sequence[0];
 
 			Expression root = null;
@@ -927,9 +941,9 @@ namespace BLToolkit.Data.Linq.Builder
 							if (root.NodeType != ExpressionType.Parameter)
 								return null;
 
-							for (var i = 0; i < Lambda.Parameters.Count; i++)
-								if (root == Lambda.Parameters[i])
-									return Sequence[i];
+//							for (var i = 0; i < Lambda.Parameters.Count; i++)
+//								if (root == Lambda.Parameters[i])
+//									return Sequence[i];
 
 							break;
 						}
@@ -947,7 +961,20 @@ namespace BLToolkit.Data.Linq.Builder
 					if (root == Lambda.Parameters[i])
 						return Sequence[i];
 
-			throw new InvalidOperationException();
+			foreach (var context in Sequence)
+			{
+				if (context.Parent != null)
+				{
+					var ctx = Builder.GetContext(context, root);
+					if (ctx != null)
+						return ctx;
+				}
+			}
+
+//			if (Sequence.Length == 1)
+//				return Sequence[0];
+
+			return null;
 		}
 
 		static Expression GetExpression(Expression expression, Expression levelExpression, Expression memberExpression)

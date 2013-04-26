@@ -55,22 +55,6 @@ namespace Data.Linq.UserTests
 			public string Field8;
 		}
 
-		[MethodExpression("GetSubQueryExpression")]
-		static IEnumerable<Table2> GetSubQuery(Table2 t2)
-		{
-			throw new NotImplementedException();
-		}
-
-		private static Expression<Func<Table2,IEnumerable<Table2>>> GetSubQueryExpression()
-		{
-			return t1 =>
-				from t2 in t1.Ref3.Ref4.Ref1.Ref2
-				let  t3 = t1.Ref3
-				where t3.Ref5.Field8 == t2.Ref5.Field8
-				from t4 in t2.Ref9
-				select t4;
-		}
-
 		[Test]
 		public void LetTest1()
 		{
@@ -78,27 +62,16 @@ namespace Data.Linq.UserTests
 			{
 				var q =
 					from t1 in repository.GetTable<Table2>()
-					from t2 in GetSubQuery(t1)
+					from t2 in 
+						from t5 in t1.Ref3.Ref4.Ref1.Ref2
+						let  t3 = t1.Ref3
+						where t3.Ref5.Field8 == t5.Ref5.Field8
+						from t4 in t5.Ref9
+						select t4
 					select t1;
 
 				var linqResult = q.ToString();
 			}
-		}
-
-		[MethodExpression("GetSubQueryExpression1")]
-		static IEnumerable<Table2> GetSubQuery1(Table2 t2)
-		{
-			throw new NotImplementedException();
-		}
-
-		private static Expression<Func<Table2,IEnumerable<Table2>>> GetSubQueryExpression1()
-		{
-			return t1 =>
-				from t2 in t1.Ref3.Ref4.Ref1.Ref2
-				let  t3 = t1.Ref3
-				where t3.Ref5 == t2.Ref5
-				from t4 in t2.Ref9
-				select t4;
 		}
 
 		[Test]
@@ -108,7 +81,12 @@ namespace Data.Linq.UserTests
 			{
 				var q =
 					from t1 in repository.GetTable<Table2>()
-					from t2 in GetSubQuery1(t1)
+					from t2 in 
+						from t5 in t1.Ref3.Ref4.Ref1.Ref2
+						let  t3 = t1.Ref3
+						where t3.Ref5 == t5.Ref5
+						from t4 in t5.Ref9
+						select t4
 					select t1;
 
 				var linqResult = q.ToString();
