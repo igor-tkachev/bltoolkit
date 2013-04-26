@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.DB2</id>
-		<version>4.1.20</version>
+		<version>4.1.21</version>
 		<title>BLToolkit DB2 Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
