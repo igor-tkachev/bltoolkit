@@ -180,6 +180,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (TypeHelper.IsEnumOrNullableEnum(ma.Type))
 			{
+				var type = TypeHelper.ToNullable(ma.Type);
 				mapper =
 					Expression.Convert(
 						Expression.Call(
@@ -187,7 +188,7 @@ namespace BLToolkit.Data.Linq.Builder
 							ReflectionHelper.MapSchema.MapValueToEnumWithMemberAccessor,
 								expr,
 								Expression.Constant(ma)),
-						ma.Type);
+						type);
 			}
 			else
 			{
