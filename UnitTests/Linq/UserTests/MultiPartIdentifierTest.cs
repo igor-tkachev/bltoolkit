@@ -17,100 +17,44 @@ namespace Data.Linq.UserTests
 	{
 		class Table1
 		{
-			public long   Field1;
-			public bool   ConfirmedEndView           { get; set; }
-			public bool   ConfirmedSchematic         { get; set; }
-			public char?  Gender                     { get; set; }
-			public string WireSegmentLabel           { get; set; }
-			public int    EngineeringCavityLabelsID  { get; set; }
-			public int?   EngineeringFunctionID      { get; set; }
-			public int?   CircuitColor               { get; set; }
-			public int?   TraceColor                 { get; set; }
-			public int?   TraceTwoColor              { get; set; }
-			public int?   CircuitMaterialID          { get; set; }
-			public long   EngineeringConnectorID     { get; set; }
-			public int?   QualifierID                { get; set; }
-			public int?   EngineeringCircuitNumberID { get; set; }
-			public int?   GaugeID                    { get; set; }
-			public int?   TerminalPartNumberID       { get; set; }
-			public int?   ServiceCircuitID           { get; set; }
+			public long Field1;
+			public long Field2;
+			public int? Field3;
 
-			[Association(ThisKey = "EngineeringConnectorID", OtherKey = "EngineeringConnectorID", CanBeNull = false)]
+			[Association(ThisKey = "Field2", OtherKey = "Field2", CanBeNull = false)]
 			public Table2 Table2Ref { get; set; }
 
-			[Association(ThisKey = "ServiceCircuitID", OtherKey = "ServiceCircuitID", CanBeNull = true)]
+			[Association(ThisKey = "Field3", OtherKey = "Field3", CanBeNull = true)]
 			public Table4 Table4Ref { get; set; }
 		}
 
 		class Table2
 		{
-			[Identity, PrimaryKey(1)] public long   EngineeringConnectorID            { get; set; }
-			                          public int    CavityCount                       { get; set; }
-			                          public string ConnectorNumber                   { get; set; }
-			[Nullable               ] public char?  ConnectorGender                   { get; set; }
-			[Nullable               ] public string EndviewFileName                   { get; set; }
-			[Nullable               ] public string UnEditedConnectorNumber           { get; set; }
-			                          public bool   ConfirmedEndView                  { get; set; }
-			                          public bool   ConfirmedSchematic                { get; set; }
-			                          public bool   IsNonDEFData                      { get; set; }
-			                          public bool   IsInLine                          { get; set; }
-			[Nullable               ] public long?  PreviousConnectorID               { get; set; }
-			                          public int    SupplierID                        { get; set; }
-			[Nullable               ] public int?   ColorID                           { get; set; }
-			                          public int    HarnessID                         { get; set; }
-			[Nullable               ] public int?   DeviceID                          { get; set; }
-			[Nullable               ] public int?   ProblematicalField                { get; set; }
-			[Nullable               ] public int?   EngineeringConnectorPartNumberID  { get; set; }
-			[Nullable               ] public int?   EngineeringConnectorDescriptionID { get; set; }
+			public long Field2 { get; set; }
+			public int  Field4 { get; set; }
 
-			[Association(ThisKey = "EngineeringConnectorID", OtherKey = "EngineeringConnectorID", CanBeNull = false)]
+			[Association(ThisKey = "Field2", OtherKey = "Field2", CanBeNull = false)]
 			public List<Table1> Table1s { get; set; }
 
-			[Association(ThisKey="HarnessID", OtherKey="HarnessID", CanBeNull=false)]
+			[Association(ThisKey="Field4", OtherKey="Field4", CanBeNull=false)]
 			public Table3 Table3Ref { get; set; }
 		}
 
 		class Table3
 		{
-			[Identity, PrimaryKey(1)] public int    HarnessID         { get; set; }
-			                          public string HarnessPartNumber { get; set; }
-			[Nullable               ] public string RevisionNumber    { get; set; }
-			                          public bool   HarnessFlag       { get; set; }
-			                          public bool   VirtualHarness    { get; set; }
-			[Nullable               ] public int?   PreviousHarnessID { get; set; }
-			                          public int    FamilyID          { get; set; }
-			                          public int    RevisionID        { get; set; }
-			[Nullable               ] public int?   ServiceFamilyID   { get; set; }
+			public int Field4;
 
-			[Association(ThisKey="HarnessID", OtherKey="HarnessID", CanBeNull=true)]
+			[Association(ThisKey="Field4", OtherKey="Field4", CanBeNull=true)]
 			public List<Table2> Table2s { get; set; }
 		}
 
 		class Table4
 		{
-			[Association(ThisKey = "ServiceCircuitID", OtherKey = "ServiceCircuitID", CanBeNull = true)]
-			public List<Table1> EngineeringCircuits { get; set; }
+			public int Field3 { get; set; }
+			public int ProblematicalField { get; set; }
 
-			public int    ServiceCircuitID            { get; set; }
-			public char?  Gender                      { get; set; }
-			public string BestView                    { get; set; }
-			public string TerminalPartLocation        { get; set; }
-			public string CoreCrimpType               { get; set; }
-			public string InsulatorCrimpType          { get; set; }
-			public int?   ServiceFunctionID           { get; set; }
-			public int?   ServiceCavityLabelsID       { get; set; }
-			public int    ProblematicalField          { get; set; }
-			public int?   QualifierID                 { get; set; }
-			public int?   CircuitEndGroupID           { get; set; }
-			public int?   ServiceCircuitNumberID      { get; set; }
-			public int?   GaugeID                     { get; set; }
-			public int?   ReleaseToolPartNumberID     { get; set; }
-			public int?   TestProbePartNumberID       { get; set; }
-			public int?   CircuitColor                { get; set; }
-			public int?   TraceColor                  { get; set; }
-			public int?   TraceTwoColor               { get; set; }
-			public int?   TestProbeColorID            { get; set; }
-			public int?   ServiceTerminalPartNumberID { get; set; }
+			[Association(ThisKey = "Field3", OtherKey = "Field3", CanBeNull = true)]
+			public List<Table1> Table1s { get; set; }
 
 			[Association(ThisKey="ProblematicalField", OtherKey="ProblematicalField", CanBeNull=false)]
 			public Table5 Table5Ref { get; set; }
@@ -118,11 +62,10 @@ namespace Data.Linq.UserTests
 
 		class Table5
 		{
-			public int? ParentProblematicalField;
+			public int? Field5;
 			public int  ProblematicalField;
-			public int  RevisionID;
 
-			[Association(ThisKey = "ParentProblematicalField", OtherKey = "ProblematicalField", CanBeNull = true)]
+			[Association(ThisKey = "Field5", OtherKey = "ProblematicalField", CanBeNull = true)]
 			public Table5 Table5Ref { get; set; }
 
 			[Association(ThisKey = "ProblematicalField", OtherKey = "ProblematicalField", CanBeNull = true)]
@@ -137,14 +80,14 @@ namespace Data.Linq.UserTests
 				var q =
 					from t1 in db.GetTable<Table5>()
 					from t2 in
-						(from t3 in t1.Table4s.SelectMany(x => x.EngineeringCircuits)
+						(from t3 in t1.Table4s.SelectMany(x => x.Table1s)
 						 from t4 in
 							from t5 in t3.Table4Ref.Table5Ref.Table5Ref.Table4s
-							from t6 in t5.EngineeringCircuits
+							from t6 in t5.Table1s
 							select t6
 						 select t4.Field1)
 					from t7 in
-						(from t8 in t1.Table5Ref.Table4s.SelectMany(x => x.EngineeringCircuits)
+						(from t8 in t1.Table5Ref.Table4s.SelectMany(x => x.Table1s)
 						 from t9 in
 							from t10 in t8.Table2Ref.Table3Ref.Table2s
 							from t11 in t10.Table1s
@@ -154,6 +97,9 @@ namespace Data.Linq.UserTests
 					select t7;
 
 				var sql = q.ToString();
+				var idx = sql.IndexOf("APPLY");
+
+				Assert.That(idx, Is.GreaterThanOrEqualTo(0));
 			}
 		}
 	}
