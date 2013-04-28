@@ -1636,19 +1636,19 @@ namespace BLToolkit.Linq
 			return modified ? list : source;
 		}
 
-		static IEnumerable<Expression> ConvertConstructorArguments(IEnumerable<Expression> source, ConstructorInfo constructor
-			, IList<MemberInfo> members = null)
+		static IEnumerable<Expression> ConvertMethodArguments(IEnumerable<Expression> source, MethodBase method
+			, IList<MemberInfo> initMembers = null)
 		{
 			var list = new List<Expression>();
 
 			var targetTypes = new List<Type>();
-			foreach (var param in constructor.GetParameters())
+			foreach (var param in method.GetParameters())
 			{
 				targetTypes.Add(param.ParameterType);
 			}
-			if (members != null)
+			if (initMembers != null)
 			{
-				foreach (var mi in members)
+				foreach (var mi in initMembers)
 				{
 					if (mi is PropertyInfo)
 					{
@@ -1762,8 +1762,8 @@ namespace BLToolkit.Linq
 						var o = Convert2(e.Object,    func);
 						var a = Convert2(e.Arguments, func);
 
-						return o != e.Object || a != e.Arguments ? 
-							Expression.Call(o, e.Method, a) : 
+						return o != e.Object || a != e.Arguments ?
+							Expression.Call(o, e.Method, ConvertMethodArguments(a, e.Method)) : 
 							expr;
 					}
 
@@ -1917,8 +1917,8 @@ namespace BLToolkit.Linq
 
 						return a != e.Arguments ?
 							e.Members == null ?
-								Expression.New(e.Constructor, ConvertConstructorArguments(a, e.Constructor)) :
-								Expression.New(e.Constructor, ConvertConstructorArguments(a, e.Constructor, e.Members), e.Members) :
+								Expression.New(e.Constructor, ConvertMethodArguments(a, e.Constructor)) :
+								Expression.New(e.Constructor, ConvertMethodArguments(a, e.Constructor, e.Members), e.Members) :
 							expr;
 					}
 
