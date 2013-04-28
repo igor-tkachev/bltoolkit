@@ -1263,5 +1263,60 @@ namespace Data.Linq
 				}
 			});
 		}
+
+		class NullableResult
+		{
+			public TestEnum1? Value;
+		}
+		[Test]
+		public void EnumMapSelectNull([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID
+					});
+
+					var result = db.GetTable<TestTable1>()
+						.Where(r => r.Id == RID)
+						.Select(r => new NullableResult {Value = r.TestField })
+						.FirstOrDefault();
+
+					Assert.NotNull(result);
+					Assert.Null(result.Value);
+				}
+			}
+		}
+
+		private TestEnum1 Convert(TestEnum1 val)
+		{
+			return val;
+		}
+		[Test]
+		public void EnumMapSelectNull_Regression([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					var result = db.GetTable<TestTable1>()
+						.Where(r => r.Id == RID)
+						.Select(r => new NullableResult { Value = Convert(r.TestField) })
+						.FirstOrDefault();
+
+					Assert.NotNull(result);
+					Assert.That(result.Value, Is.EqualTo(TestEnum1.Value2));
+				}
+			}
+		}
 	}
 }
