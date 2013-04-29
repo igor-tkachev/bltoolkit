@@ -381,6 +381,29 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void InsertWithIdentityQuery2()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.BeginTransaction();
+
+                var dbKeyword = new Keyword
+                {
+                    NAME = "Valeriu",
+                    DATE_CREATION = DateTime.UtcNow,
+                };
+
+                var query = new SqlQuery(db);
+                var res = query.InsertWithIdentity(dbKeyword);
+
+                db.RollbackTransaction();
+
+                Console.WriteLine(res);
+                Console.WriteLine(db.LastQuery);
+            }
+        }
+
+        [Test]
         public void InsertWithIdentityQuery()
         {
             using (var db = ConnectionFactory.CreateDbManager())
