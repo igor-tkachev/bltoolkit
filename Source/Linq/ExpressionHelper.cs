@@ -1636,6 +1636,49 @@ namespace BLToolkit.Linq
 			return modified ? list : source;
 		}
 
+		static IEnumerable<Expression> ConvertMethodArguments(IEnumerable<Expression> source, MethodBase method
+			, IList<MemberInfo> initMembers = null)
+		{
+			var list = new List<Expression>();
+
+			var targetTypes = new List<Type>();
+			foreach (var param in method.GetParameters())
+			{
+				targetTypes.Add(param.ParameterType);
+			}
+			if (initMembers != null)
+			{
+				foreach (var mi in initMembers)
+				{
+					if (mi is PropertyInfo)
+					{
+						targetTypes.Add(((PropertyInfo)mi).PropertyType);
+					}
+					else if (mi is FieldInfo)
+					{
+						targetTypes.Add(((FieldInfo)mi).FieldType);
+					}
+				}
+			}
+
+			var idx = 0;
+			foreach (var item in source)
+			{
+				var targetType = targetTypes[idx];
+				if (item.Type != targetType)
+				{
+					list.Add(Expression.Convert(item, targetType));
+				}
+				else
+				{
+					list.Add(item);
+				}
+				idx++;
+			}
+
+			return list;
+		}
+
 		public static Expression Convert2(this Expression expr, Func<Expression,ConvertInfo> func)
 		{
 			if (expr == null)
@@ -1719,8 +1762,8 @@ namespace BLToolkit.Linq
 						var o = Convert2(e.Object,    func);
 						var a = Convert2(e.Arguments, func);
 
-						return o != e.Object || a != e.Arguments ? 
-							Expression.Call(o, e.Method, a) : 
+						return o != e.Object || a != e.Arguments ?
+							Expression.Call(o, e.Method, ConvertMethodArguments(a, e.Method)) : 
 							expr;
 					}
 
@@ -1813,7 +1856,13 @@ namespace BLToolkit.Linq
 										var ex = Convert2(ma.Expression, func);
 
 										if (ex != ma.Expression)
+										{
+											if (ex.Type != ma.Expression.Type)
+											{
+												ex = Expression.Convert(ex, ma.Expression.Type);
+											}
 											ma = Expression.Bind(ma.Member, ex);
+										}
 
 										return ma;
 									}
@@ -1868,8 +1917,8 @@ namespace BLToolkit.Linq
 
 						return a != e.Arguments ?
 							e.Members == null ?
-								Expression.New(e.Constructor, a) :
-								Expression.New(e.Constructor, a, e.Members) :
+								Expression.New(e.Constructor, ConvertMethodArguments(a, e.Constructor)) :
+								Expression.New(e.Constructor, ConvertMethodArguments(a, e.Constructor, e.Members), e.Members) :
 							expr;
 					}
 

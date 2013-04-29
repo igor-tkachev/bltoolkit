@@ -930,6 +930,20 @@ namespace BLToolkit.Reflection
 			return type.IsEnum || IsNullableEnum(type);
 		}
 
+		public static Type ToNullable(Type type)
+		{
+			if (!IsNullable(type) && type.IsValueType)
+			{
+				var nullable = typeof(Nullable<>);
+				var typeArguments = nullable.GetGenericArguments();
+				if (typeArguments != null && typeArguments.Length == 1)
+				{
+					type = nullable.MakeGenericType(type);
+				}
+			}
+			return type;
+		}
+
 		/// <summary>
 		/// Returns the underlying type argument of the specified type.
 		/// </summary>

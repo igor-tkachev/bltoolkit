@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 
-using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 using NUnit.Framework;
