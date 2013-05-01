@@ -426,6 +426,15 @@ namespace BLToolkit.Data.Sql
 					((SqlQuery)Source).ForEachTable(action, visitedQueries);
 			}
 
+			public IEnumerable<ISqlTableSource> GetTables()
+			{
+				yield return Source;
+
+				foreach (var join in Joins)
+					foreach (var table in join.Table.GetTables())
+						yield return table;
+			}
+
 			public int GetJoinNumber()
 			{
 				var n = Joins.Count;
@@ -581,10 +590,11 @@ namespace BLToolkit.Data.Sql
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak, SearchCondition searchCondition)
 			{
-				JoinType  = joinType;
-				Table     = table;
-				IsWeak    = isWeak;
-				Condition = searchCondition;
+				JoinType        = joinType;
+				Table           = table;
+				IsWeak          = isWeak;
+				Condition       = searchCondition;
+				CanConvertApply = true;
 			}
 
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak)
@@ -597,10 +607,11 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			public JoinType        JoinType  { get; set; }
-			public TableSource     Table     { get; set; }
-			public SearchCondition Condition { get; private set; }
-			public bool            IsWeak    { get; set; }
+			public JoinType        JoinType        { get; set; }
+			public TableSource     Table           { get; set; }
+			public SearchCondition Condition       { get; private set; }
+			public bool            IsWeak          { get; set; }
+			public bool            CanConvertApply { get; set; }
 
 			public ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
@@ -3841,6 +3852,19 @@ namespace BLToolkit.Data.Sql
 
 							if (_delete != null)
 								visitor.VisitAll(Delete, tableCollector);
+
+							visitor.VisitAll(From, expr =>
+							{
+								var tbl = expr as SqlTable;
+
+								if (tbl != null && tbl.TableArguments != null)
+								{
+									var v = new QueryVisitor();
+
+									foreach (var arg in tbl.TableArguments)
+										v.VisitAll(arg, tableCollector);
+								}
+							});
 						}
 
 						if (findTable(join.Table))
@@ -4027,6 +4051,9 @@ namespace BLToolkit.Data.Sql
 				if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
 					OptimizeApply(joinSource, join, isApplySupported, optimizeColumns);
 
+			if (isApplySupported && !joinTable.CanConvertApply)
+				return;
+
 			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
 			{
 				var sql   = (SqlQuery)joinSource.Source;
@@ -4072,6 +4099,9 @@ namespace BLToolkit.Data.Sql
 			}
 			else
 			{
+				if (isApplySupported && joinTable.Condition.Conditions.Count == 0)
+					return;
+
 				if (!ContainsTable(tableSource.Source, joinSource.Source))
 					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
 			}

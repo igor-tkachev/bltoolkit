@@ -51,12 +51,12 @@ namespace Data.Linq.UserTests
 		class Table4
 		{
 			public int Field3 { get; set; }
-			public int ProblematicalField { get; set; }
+			public int Field4 { get; set; }
 
 			[Association(ThisKey = "Field3", OtherKey = "Field3", CanBeNull = true)]
 			public List<Table1> Table1s { get; set; }
 
-			[Association(ThisKey="ProblematicalField", OtherKey="ProblematicalField", CanBeNull=false)]
+			[Association(ThisKey="Field4", OtherKey="ProblematicalField", CanBeNull=false)]
 			public Table5 Table5Ref { get; set; }
 		}
 
@@ -68,7 +68,7 @@ namespace Data.Linq.UserTests
 			[Association(ThisKey = "Field5", OtherKey = "ProblematicalField", CanBeNull = true)]
 			public Table5 Table5Ref { get; set; }
 
-			[Association(ThisKey = "ProblematicalField", OtherKey = "ProblematicalField", CanBeNull = true)]
+			[Association(ThisKey = "ProblematicalField", OtherKey = "Field4", CanBeNull = true)]
 			public List<Table4> Table4s { get; set; }
 		}
 
@@ -97,9 +97,9 @@ namespace Data.Linq.UserTests
 					select t7;
 
 				var sql = q.ToString();
-				var idx = sql.IndexOf("APPLY");
+				var idx = sql.IndexOf(",");
 
-				Assert.That(idx, Is.GreaterThanOrEqualTo(0));
+				Assert.That(idx, Is.EqualTo(-1));
 			}
 		}
 	}
