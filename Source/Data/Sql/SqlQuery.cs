@@ -4099,9 +4099,6 @@ namespace BLToolkit.Data.Sql
 			}
 			else
 			{
-				if (isApplySupported && joinTable.Condition.Conditions.Count == 0)
-					return;
-
 				if (!ContainsTable(tableSource.Source, joinSource.Source))
 					joinTable.JoinType = joinTable.JoinType == JoinType.CrossApply ? JoinType.Inner : JoinType.Left;
 			}
