@@ -1268,6 +1268,7 @@ namespace Data.Linq
 		{
 			public TestEnum1? Value;
 		}
+
 		[Test]
 		public void EnumMapSelectNull([DataContexts] string context)
 		{
@@ -1295,6 +1296,7 @@ namespace Data.Linq
 		{
 			return val;
 		}
+
 		[Test]
 		public void EnumMapSelectNull_Regression([DataContexts] string context)
 		{
