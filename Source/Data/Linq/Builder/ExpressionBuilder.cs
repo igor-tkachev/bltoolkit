@@ -97,7 +97,7 @@ namespace BLToolkit.Data.Linq.Builder
 			OriginalExpression = expression;
 
 			_visitedExpressions = new HashSet<Expression>();
-			Expression         = ConvertExpressionTree(expression);
+			Expression          = ConvertExpressionTree(expression);
 			_visitedExpressions = null;
 		}
 

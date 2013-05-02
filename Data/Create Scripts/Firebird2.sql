@@ -22,6 +22,8 @@ DROP GENERATOR DataTypeID;                    COMMIT;
 DROP GENERATOR PersonID;                      COMMIT;
 DROP GENERATOR TimestampGen;                  COMMIT;
 
+DROP VIEW PersonView;                         COMMIT;
+
 DROP TABLE Dual;                              COMMIT;
 DROP TABLE DataTypeTest;                      COMMIT;
 DROP TABLE BinaryData;                        COMMIT;
@@ -527,9 +529,9 @@ DROP TABLE Parent     COMMIT;
 DROP TABLE Child      COMMIT;
 DROP TABLE GrandChild COMMIT;
 
-CREATE TABLE Parent      (ParentID int, Value1 int)                    COMMIT;
-CREATE TABLE Child       (ParentID int, ChildID int)                   COMMIT;
-CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int) COMMIT;
+CREATE TABLE Parent     (ParentID int, Value1  int)                   COMMIT;
+CREATE TABLE Child      (ParentID int, ChildID int)                   COMMIT;
+CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int) COMMIT;
 
 
 DROP TABLE LinqDataTypes COMMIT;
@@ -587,4 +589,10 @@ BEFORE INSERT POSITION 0
 AS BEGIN
 	NEW.ID = GEN_ID(TestIdentityID, 1);
 END
+COMMIT;
+
+
+CREATE VIEW PersonView
+AS
+    SELECT * FROM Person
 COMMIT;
