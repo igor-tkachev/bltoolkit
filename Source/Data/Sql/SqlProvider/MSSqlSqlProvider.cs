@@ -46,6 +46,30 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return base.GetSelectedColumns();
 		}
 
+		protected override void BuildPredicate(StringBuilder sb, ISqlPredicate predicate)
+		{
+			switch (predicate.ElementType)
+			{
+				case QueryElementType.ExprExprPredicate:
+					{
+						var expr = (SqlQuery.Predicate.ExprExpr)predicate;
+
+						if (expr.Operator == Sql.SqlQuery.Predicate.Operator.NotEqual
+							&& expr.Expr2 is SqlValue
+							&& ((SqlValue)expr.Expr2).Value is bool
+							&& (bool)((SqlValue)expr.Expr2).Value)
+						{
+							sb.Append("~");
+							BuildExpression(sb, GetPrecedence(expr), expr.Expr1);
+							return;
+						}
+					}
+					break;
+			}
+
+			base.BuildPredicate(sb, predicate);
+		}
+
 		public override ISqlExpression ConvertExpression(ISqlExpression expr)
 		{
 			expr = base.ConvertExpression(expr);
