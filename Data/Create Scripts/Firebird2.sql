@@ -282,7 +282,7 @@ AS
 BEGIN
 	FOR 
 		SELECT
-			Person.PersonID, 
+			Person.PersonID,
 			FirstName,
 			LastName,
 			MiddleName,
@@ -293,10 +293,10 @@ BEGIN
 		WHERE
 			Patient.PersonID = Person.PersonID
 		INTO
-			:PersonID,   
-			:FirstName,  
-			:LastName,   
-			:MiddleName, 
+			:PersonID,
+			:FirstName,
+			:LastName,
+			:MiddleName,
 			:Gender,
 			:Diagnosis
 	DO SUSPEND;

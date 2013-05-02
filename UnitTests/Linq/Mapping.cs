@@ -5,7 +5,7 @@ using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
-
+using BLToolkit.Reflection;
 using NUnit.Framework;
 
 using Convert = System.Convert;
@@ -391,6 +391,55 @@ namespace Data.Linq
 				var idsQuery = query.Select(s => s.Id);
 				var str = idsQuery.ToString(); // Exception
 				Assert.IsNotNull(str);
+			}
+		}
+
+		[TableName("Parent")]
+		public abstract class ParentX
+		{
+			[MapField("ParentID")]
+			public abstract int  ParentID { get; set; }
+			[MapField("Value1")]
+			public abstract int? Value1 { get; set; }
+		}
+
+		[TableName("Child")]
+		[MapField("ParentID", "Parent.ParentID")]
+		public abstract class ChildX
+		{
+			[MapField("ChildID")]
+			public abstract int     ChildID { get; set; }
+			public abstract ParentX Parent  { get; set; }
+		}
+
+		[Test]
+		public void Test4([DataContexts] string contexts)
+		{
+			using (var db = GetDataContext(contexts))
+			{
+				db.Child. Delete(p => p.ParentID == 1001);
+				db.Parent.Delete(p => p.ParentID == 1001);
+
+				try
+				{
+					var child  = TypeAccessor.CreateInstance<ChildX>();
+					var parent = TypeAccessor.CreateInstance<ParentX>();
+
+					parent.ParentID = 1001;
+					parent.Value1   = 1;
+
+					db.Insert(parent);
+
+					child.ChildID = 1001;
+					child.Parent  = parent;
+
+					db.Insert(child);
+				}
+				finally
+				{
+					db.Child. Delete(p => p.ParentID == 1001);
+					db.Parent.Delete(p => p.ParentID == 1001);
+				}
 			}
 		}
 	}
