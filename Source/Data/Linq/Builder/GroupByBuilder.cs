@@ -111,6 +111,11 @@ namespace BLToolkit.Data.Linq.Builder
 				: base(parent, lambda, sequences)
 			{
 			}
+
+			public override Expression ExpandExpression(Expression expression)
+			{
+				return expression;
+			}
 		}
 
 		#endregion

@@ -204,6 +204,11 @@ namespace BLToolkit.Data.Linq.Builder
 				: base(parent, lambda, outerContext, innerContext)
 			{
 			}
+
+			public override Expression ExpandExpression(Expression expression)
+			{
+				return expression;
+			}
 		}
 
 		internal class GroupJoinContext : JoinContext
@@ -332,6 +337,11 @@ namespace BLToolkit.Data.Linq.Builder
 				}
 
 				return base.BuildExpression(expression, level);
+			}
+
+			public override Expression ExpandExpression(Expression expression)
+			{
+				return expression;
 			}
 		}
 
