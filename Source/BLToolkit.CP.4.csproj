@@ -213,7 +213,9 @@
     <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\DbConnectionFactory.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
+    <Compile Include="Data\IDbConnectionFactory.cs" />
     <Compile Include="Data\Linq\Builder\ConcatUnionBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
