@@ -372,7 +372,20 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-		#region GetNonUpdatableFlag
+        public override string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            foreach (var p in _list)
+            {
+                var value = p.GetSequenceName(typeExtension, member, out isSet);
+
+                if (isSet)
+                    return value;
+            }
+
+            return base.GetSequenceName(typeExtension, member, out isSet);
+        }
+
+	    #region GetNonUpdatableFlag
 
 		public override NonUpdatableAttribute GetNonUpdatableAttribute(Type type, TypeExtension typeExt, MemberAccessor member, out bool isSet)
 		{
