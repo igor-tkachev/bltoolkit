@@ -10,8 +10,6 @@ using BLToolkit.DataAccess;
 using BLToolkit.Emit;
 using BLToolkit.Reflection;
 using BLToolkit.Reflection.Extension;
-using BLToolkit.TypeBuilder;
-using Castle.DynamicProxy;
 
 #endregion
 
@@ -30,19 +28,18 @@ namespace BLToolkit.Mapping
             new Dictionary<Type, Dictionary<string, GetHandler>>();
 
         private readonly DbManager _db;
+        private readonly FactoryType _factoryType;
         private readonly bool _ignoreLazyLoad;
-        private readonly ProxyGenerator _proxy;
 
         #endregion
 
-        public FullObjectMapper(DbManager db, bool ignoreLazyLoading)
+        public FullObjectMapper(DbManager db, bool ignoreLazyLoading, FactoryType factoryType)
         {
             _db = db;
             _ignoreLazyLoad = ignoreLazyLoading;
+            _factoryType = factoryType;
 
-            _proxy = new ProxyGenerator();
             PropertiesMapping = new List<IMapper>();
-
             PrimaryKeyValueGetters = new List<GetHandler>();
             PrimaryKeyNames = new List<string>();
         }
@@ -100,7 +97,9 @@ namespace BLToolkit.Mapping
         public override object CreateInstance()
         {
             object result = ContainsLazyChild
-                                ? _proxy.CreateClassProxy(PropertyType, new LazyValueLoadInterceptor(this, LoadLazy))
+                                ? (_factoryType == FactoryType.LazyLoading
+                                       ? TypeFactory.LazyLoading.Create(PropertyType, this, LoadLazy)
+                                       : TypeFactory.LazyLoadingWithDataBinding.Create(PropertyType, this, LoadLazy))
                                 : FunctionFactory.Remote.CreateInstance(PropertyType);
 
             return result;
@@ -118,11 +117,11 @@ namespace BLToolkit.Mapping
         private TableDescription GetTableDescription(Type type)
         {
             var tableDescription = new TableDescription();
-            object[] tableAtt = type.GetCustomAttributes(typeof(TableNameAttribute), true);
+            object[] tableAtt = type.GetCustomAttributes(typeof (TableNameAttribute), true);
 
             if (tableAtt.Length > 0)
             {
-                var tna = (TableNameAttribute)tableAtt[0];
+                var tna = (TableNameAttribute) tableAtt[0];
 
                 tableDescription.Database = tna.Database;
                 tableDescription.Owner = tna.Owner;
@@ -181,7 +180,7 @@ namespace BLToolkit.Mapping
 
                     if (mapper.Association != null && (mapper.Association.OtherKey == null || mapper.Association.OtherKey.Length == 0))
                     {
-                        mapper.Association.OtherKey = new string[] { ma.Name };
+                        mapper.Association.OtherKey = new[] {ma.Name};
                     }
                 }
             }
@@ -193,7 +192,7 @@ namespace BLToolkit.Mapping
                 var ma = akTypeAccessor.First(x => x.Name == prop.Name);
 
                 // Check if the accessor is an association
-                var association = this.GetAssociation(ma);
+                var association = GetAssociation(ma);
                 if (association != null)
                 {
                     //  Getters for IObjectMapper
@@ -203,42 +202,45 @@ namespace BLToolkit.Mapping
                             GettersHandlers[mapperType].Add(prop.Name, ma.GetValue);
                         }
 
-                    bool isCollection = prop.PropertyType.GetInterfaces().ToList().Contains(typeof(IList));
+                    bool isCollection = prop.PropertyType.GetInterfaces().ToList().Contains(typeof (IList));
                     IObjectMapper propertiesMapping;
                     if (!isCollection)
                     {
-                        propertiesMapping = new FullObjectMapper(_db, _ignoreLazyLoad)
-                        {
-                            PropertyType = prop.PropertyType,
-                            IsNullable = association.CanBeNull,
-                            Getter = GettersHandlers[mapperType][prop.Name],
-                        };
+                        // TODO Generate this instance using the CreateObjectMapperInstance method of fullMappingSchema
+                        // _db.MappingSchema.CreateObjectMapperInstance(prop.PropertyType)
+
+                        propertiesMapping = new FullObjectMapper(_db, _ignoreLazyLoad, _factoryType)
+                            {
+                                PropertyType = prop.PropertyType,
+                                IsNullable = association.CanBeNull,
+                                Getter = GettersHandlers[mapperType][prop.Name],
+                            };
                     }
                     else
                     {
-                        Type listElementType = FullMappingSchema.GetGenericType(prop.PropertyType);
+                        Type listElementType = GetGenericType(prop.PropertyType);
                         TableDescription colElementTableDescription = GetTableDescription(listElementType);
 
-                        propertiesMapping = new CollectionFullObjectMapper(_db)
-                        {
-                            PropertyType = listElementType,
-                            Getter = GettersHandlers[mapperType][prop.Name],
-                            TableName = colElementTableDescription.TableName,
-                            PropertyCollectionType = prop.PropertyType,
-                        };
+                        // TODO Generate this instance using the CreateObjectMapperInstance method of fullMappingSchema
+                        propertiesMapping = new CollectionFullObjectMapper(_db, _factoryType)
+                            {
+                                PropertyType = listElementType,
+                                Getter = GettersHandlers[mapperType][prop.Name],
+                                TableName = colElementTableDescription.TableName,
+                                PropertyCollectionType = prop.PropertyType,
+                            };
 
                         if (mapper is FullObjectMapper)
-                            ((FullObjectMapper)mapper).ColParent = true;
+                            ((FullObjectMapper) mapper).ColParent = true;
                     }
 
                     if (association.ThisKey == null || association.ThisKey.Length == 0)
-                        association.ThisKey =new string[]{ primaryKeyMemberAccessor.Name};
+                        association.ThisKey = new[] {primaryKeyMemberAccessor.Name};
 
                     bool isLazy = false;
                     if (!_ignoreLazyLoad)
                     {
-
-                        var lazy = this.GetLazyInstance(ma); // prop.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
+                        var lazy = GetLazyInstance(ma); // prop.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
                         if (lazy)
                         {
                             isLazy = true;
@@ -266,23 +268,22 @@ namespace BLToolkit.Mapping
                 }
                 else
                 {
-
                     var mapIgnore = GetMapIgnore(ma);
                     if (mapIgnore)
                         continue;
 
-                    var mapField = this.GetMapField(ma);
+                    var mapField = GetMapField(ma);
                     string columnName = mapField != null ? mapField.MapName : prop.Name;
 
                     var map = new ValueMapper
-                    {
-                        PropertyName = prop.Name,
-                        PropertyType = prop.PropertyType,
-                        DataReaderIndex = startIndex,
-                        Setter = SettersHandlers[mapperType][prop.Name],
-                        TableName = tableDescription.TableName,
-                        ColumnName = columnName,
-                    };
+                        {
+                            PropertyName = prop.Name,
+                            PropertyType = prop.PropertyType,
+                            DataReaderIndex = startIndex,
+                            Setter = SettersHandlers[mapperType][prop.Name],
+                            TableName = tableDescription.TableName,
+                            ColumnName = columnName,
+                        };
 
                     var mapColumnName = map.GetColumnName(columnName);
                     map.ColumnAlias = columnName == mapColumnName ? null : mapColumnName;
@@ -290,7 +291,7 @@ namespace BLToolkit.Mapping
                     mapper.PropertiesMapping.Add(map);
 
                     var pkField = GetPrimaryKey(ma);
-                    if (pkField != null) 
+                    if (pkField != null)
                         mapper.DataReaderIndex = startIndex;
 
                     startIndex++;
@@ -307,20 +308,19 @@ namespace BLToolkit.Mapping
                     if (mapper.PropertyType == objMap.PropertyType)
                         continue;
 
-                    cel = (IObjectMapper)cel.ParentMapping;
+                    cel = (IObjectMapper) cel.ParentMapping;
                 }
 
                 #endregion
 
                 objMap.ParentMapping = mapper;
-                
                 mapper.PropertiesMapping.Add(GetObjectMapper(objMap, ref startIndex, MappingSchema.GetObjectMapper(objMap.PropertyType).TypeAccessor));
             }
 
             return mapper;
         }
 
-        private object LoadLazy(IMapper mapper, object proxy, Type parentType)
+        protected object LoadLazy(IMapper mapper, object proxy, Type parentType)
         {
             var lazyMapper = (ILazyMapper) mapper;
             object key = lazyMapper.ParentKeyGetter(proxy);
@@ -337,6 +337,16 @@ namespace BLToolkit.Mapping
 
             var objectMapper = (IObjectMapper) mapper;
             return objectMapper.Getter(parentLoadFull);
+        }
+
+        private static Type GetGenericType(Type t)
+        {
+            if (t.IsGenericType)
+            {
+                Type[] at = t.GetGenericArguments();
+                return at.FirstOrDefault();
+            }
+            return null;
         }
 
         #endregion
