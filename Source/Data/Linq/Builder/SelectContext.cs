@@ -808,6 +808,95 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
+		readonly Dictionary<Expression,Expression> _expandExpressions = new Dictionary<Expression,Expression>();
+		         Dictionary<Expression,Expression> _memberExpressions = null;
+
+		public virtual Expression ExpandExpression(Expression expression)
+		{
+			// .Select(t3 => new
+			// {
+			//     t3,
+			//     t1 = t3.Table2s.SelectMany(x => x.Table1s) })
+			// .Select(t => new
+			// {
+			//     c2 = t.t1.Count(),
+			//     c1 = t.t3.Table2s.SelectMany(x => x.Table1s).Count(),
+			// });
+
+			Expression expr;
+
+			if (_expandExpressions.TryGetValue(expression, out expr))
+				return expr;
+
+			var root = expression.GetRootObject();
+
+			if (root.NodeType == ExpressionType.Parameter)
+			{
+				for (var i = 0; i < Lambda.Parameters.Count; i++)
+				{
+					if (root == Lambda.Parameters[i])
+					{
+						expr = Sequence[i].ExpandExpression(expression);
+						break;
+					}
+				}
+
+				if (expr == null && !IsScalar)
+				{
+					if (root.Type == Body.Type && root != expression)
+					{
+						var member = expression.GetLevelExpression(1);
+
+						if (member.NodeType == ExpressionType.MemberAccess)
+						{
+							Expression ex;
+
+							if (Members.TryGetValue(((MemberExpression)member).Member, out ex))
+							{
+								var ctx = Builder.GetContext(this, ex);
+
+								if (ctx != null)
+									ex = ctx.ExpandExpression(ex);
+
+								if (_memberExpressions == null)
+								{
+									_memberExpressions = new Dictionary<Expression,Expression>();
+
+									foreach (var m in Members)
+										if (m.Value.NodeType == ExpressionType.Parameter && !_memberExpressions.ContainsKey(m.Value))
+											_memberExpressions.Add(m.Value, Expression.MakeMemberAccess(root, m.Key));
+								}
+
+								if (_memberExpressions.Count > 0)
+								{
+									var ex1 = ex.Convert(e =>
+									{
+										Expression me;
+										return _memberExpressions.TryGetValue(e, out me) ? me : e;
+									});
+
+									if (ex != ex1)
+									{
+										expr = expression.Convert(e => e == member ? ex1 : e);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (expr == null)
+				expr = expression;
+
+			_expandExpressions.Add(expression, expr);
+
+			if (expression != expr)
+				_expandExpressions.Add(expr, expr);
+
+			return expr;
+		}
+
 		#endregion
 
 		#region Helpers
@@ -880,8 +969,14 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					var parameter = Lambda.Parameters[idx];
 
-					if (memberExpression == parameter && levelExpression == expression)
-						return action(1, sequence, null, 0, memberExpression);
+					if (levelExpression == expression)
+					{
+						if (memberExpression == parameter)
+							return action(1, sequence, null, 0, memberExpression);
+
+//						if (!(sequence is GroupByBuilder.GroupByContext) && memberExpression.GetRootObject() == parameter)
+//							return action(3, this, newExpression, 0, memberExpression);
+					}
 				}
 				else
 				{

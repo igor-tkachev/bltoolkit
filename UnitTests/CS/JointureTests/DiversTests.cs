@@ -533,16 +533,12 @@ namespace UnitTests.CS.JointureTests
                     IQueryable<TitleQuery> queryTitle = from data in db.GetTable<DataMusic>()
                                                         join title in db.GetTable<Title>() on data.TitleId equals title.Id
                                                         join artist in db.GetTable<Artist>() on title.ArtistID equals artist.Id
-                                                        where data.MediaId == 2002
-                                                              &&
-                                                              data.DateMedia >= DateTime.Today
-                                                              &&
-                                                              data.DateMedia <= DateTime.Today
-                                                              &&
-                                                              data.DateSpot.TimeOfDay >= new TimeSpan(beginHour, beginMinute, 0)
-                                                              &&
-                                                              data.DateSpot.TimeOfDay <= new TimeSpan(endHour, endMinute, 0)
-                                                              && data.DateMedia >= Sql.Date
+                                                        where data.MediaId == 2002 &&
+                                                              data.DateMedia >= DateTime.Today &&
+                                                              data.DateMedia <= DateTime.Today &&
+                                                              data.DateSpot.TimeOfDay >= new TimeSpan(beginHour, beginMinute, 0) &&
+                                                              data.DateSpot.TimeOfDay <= new TimeSpan(endHour, endMinute, 0) && 
+                                                              data.DateMedia >= Sql.Date
                                                         select new TitleQuery
                                                             {
                                                                 Title = title,
@@ -555,7 +551,7 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void SelectWithManyParameters()
+        public void SelectWithManyParametersPSharpCharacter()
         {
             using (var manager = ConnectionFactory.CreateDbManager())
             {
@@ -571,7 +567,11 @@ namespace UnitTests.CS.JointureTests
                 var product = query.FirstOrDefault();
                 Console.WriteLine(product);
             }
+        }
 
+        [Test]
+        public void SelectWithManyParameters()
+        {
             var productIds = new[]
                 {
                     1,

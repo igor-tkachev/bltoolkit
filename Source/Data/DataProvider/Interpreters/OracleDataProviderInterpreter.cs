@@ -32,12 +32,29 @@ namespace BLToolkit.Data.DataProvider.Interpreters
             return GetInsertBatchSqlListUnionAll(insertText, collection, members, maxBatchSize, withIdentity);
         }
 
+        public override string GetSequenceQuery(string sequenceName)
+        {
+            return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
+        }
+
+        public override string NextSequenceQuery(string sequenceName)
+        {
+            return string.Format("{0}.NEXTVAL", sequenceName);
+        }
+
+        public override string GetReturningInto(string columnName)
+        {
+            return string.Format("returning {0} into :IDENTITY_PARAMETER", columnName);
+        }
+
+        #region Private methods
+
         private List<string> GetInsertBatchSqlListUnionAll<T>(
-            string              insertText,
-            IEnumerable<T>      collection,
-            MemberMapper[]      members,
-            int                 maxBatchSize,
-            bool                withIdentity)
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize,
+            bool withIdentity)
         {
             var sp = new OracleSqlProvider();
             var n = 0;
@@ -112,10 +129,10 @@ namespace BLToolkit.Data.DataProvider.Interpreters
         }
 
         private List<string> GetInsertBatchSqlListWithInsertAll<T>(
-            string          insertText,
-            IEnumerable<T>  collection,
-            MemberMapper[]  members,
-            int             maxBatchSize)
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize)
         {
             var sb = new StringBuilder();
             var sp = new OracleSqlProvider();
@@ -185,19 +202,6 @@ namespace BLToolkit.Data.DataProvider.Interpreters
             return sqlList;
         }
 
-        public override string GetSequenceQuery(string sequenceName)
-        {
-            return string.Format("SELECT {0}.NEXTVAL FROM DUAL", sequenceName);
-        }
-
-        public override string NextSequenceQuery(string sequenceName)
-        {
-            return string.Format("{0}.NEXTVAL", sequenceName);
-        }
-
-        public override string GetReturningInto(string columnName)
-        {
-            return string.Format("returning {0} into :IDENTITY_PARAMETER", columnName);
-        }
+        #endregion
     }
 }
