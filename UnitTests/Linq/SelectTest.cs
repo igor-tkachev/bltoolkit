@@ -569,5 +569,23 @@ namespace Data.Linq
 				Assert.That(sql.IndexOf("ParentID_"), Is.LessThan(0));
 			}
 		}
+
+		[Test]
+		public void SelectTernary_Boolean()
+		{
+			ForEachProvider(context =>
+			{
+				var q =
+					from p in context.Types
+					join lp in context.Types on p.ID equals lp.ID into leftJoin
+					from lp in leftJoin.DefaultIfEmpty()
+					select lp != null ? !lp.BoolValue : !p.BoolValue;
+
+				var sql = q.ToString();
+				var result = q.ToList();
+
+				Assert.NotNull(result);
+			});
+		}
 	}
 }
