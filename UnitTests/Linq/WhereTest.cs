@@ -909,12 +909,15 @@ namespace Data.Linq
 		public void CheckField6()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in    Parent
-				select new { p, Value = p.Value1 * 100 } into p
-				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p },
-				from p in db.Parent
-				select new { p, Value = p.Value1 * 100 } into p
-				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p }));
+				from p1 in    Parent
+				select new { p1, Value = p1.Value1 * 100 } into p
+				where p.p1.ParentID == 1 && p.Value > 0
+				select new { p, p.p1.Value1, p.Value, p.p1 },
+
+				from p1 in db.Parent
+				select new { p1, Value = p1.Value1 * 100 } into p
+				where p.p1.ParentID == 1 && p.Value > 0
+				select new { p, p.p1.Value1, p.Value, p.p1 }));
 		}
 
 		[Test]

@@ -807,93 +807,86 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
-		readonly Dictionary<Expression,Expression> _expandExpressions = new Dictionary<Expression,Expression>();
-		         Dictionary<Expression,Expression> _memberExpressions = null;
+		readonly Dictionary<Expression,Expression> _expandedExpressions = new Dictionary<Expression,Expression>();
 
 		public virtual Expression ExpandExpression(Expression expression)
 		{
-			// .Select(t3 => new
-			// {
-			//     t3,
-			//     t1 = t3.Table2s.SelectMany(x => x.Table1s) })
-			// .Select(t => new
-			// {
-			//     c2 = t.t1.Count(),
-			//     c1 = t.t3.Table2s.SelectMany(x => x.Table1s).Count(),
-			// });
+			if (IsScalar)
+				return expression;
 
 			Expression expr;
 
-			if (_expandExpressions.TryGetValue(expression, out expr))
+			if (_expandedExpressions.TryGetValue(expression, out expr))
 				return expr;
+			
+			expr = ExpandExpressionInternal(expression) ?? expression;
 
+			_expandedExpressions.Add(expression, expr);
+
+			if (expression != expr)
+				_expandedExpressions.Add(expr, expr);
+
+			return expr;
+		}
+
+		Dictionary<Expression,MemberInfo> _memberExpressions;
+
+		Expression ExpandExpressionInternal(Expression expression)
+		{
 			var root = expression.GetRootObject();
 
-			if (root.NodeType == ExpressionType.Parameter)
+			if (root.NodeType != ExpressionType.Parameter)
+				return null;
+
+			for (var i = 0; i < Lambda.Parameters.Count; i++)
+				if (root == Lambda.Parameters[i])
+					return Sequence[i].ExpandExpression(expression);
+
+			if (root.Type == Body.Type && root != expression)
 			{
-				for (var i = 0; i < Lambda.Parameters.Count; i++)
+				var member = expression.GetLevelExpression(1);
+
+				if (member.NodeType == ExpressionType.MemberAccess)
 				{
-					if (root == Lambda.Parameters[i])
+					if (_memberExpressions == null)
 					{
-						expr = Sequence[i].ExpandExpression(expression);
-						break;
+						_memberExpressions = new Dictionary<Expression,MemberInfo>();
+
+						foreach (var m in Members)
+							if (m.Value.NodeType == ExpressionType.Parameter && !_memberExpressions.ContainsKey(m.Value))
+								_memberExpressions.Add(m.Value, m.Key);
 					}
-				}
 
-				if (expr == null && !IsScalar)
-				{
-					if (root.Type == Body.Type && root != expression)
+					if (_memberExpressions.Count > 0)
 					{
-						var member = expression.GetLevelExpression(1);
+						Expression ex;
 
-						if (member.NodeType == ExpressionType.MemberAccess)
+						if (Members.TryGetValue(((MemberExpression)member).Member, out ex))
 						{
-							Expression ex;
+							if (ex.NodeType == ExpressionType.Parameter)
+								return null;
 
-							if (Members.TryGetValue(((MemberExpression)member).Member, out ex))
+							var ctx = Builder.GetContext(this, ex);
+
+							if (ctx != null)
+								ex = ctx.ExpandExpression(ex);
+
+							var ex1 = ex.Convert(e =>
 							{
-								var ctx = Builder.GetContext(this, ex);
+								MemberInfo mi;
+								return _memberExpressions.TryGetValue(e, out mi) ? Expression.MakeMemberAccess(root, mi) : e;
+							});
 
-								if (ctx != null)
-									ex = ctx.ExpandExpression(ex);
-
-								if (_memberExpressions == null)
-								{
-									_memberExpressions = new Dictionary<Expression,Expression>();
-
-									foreach (var m in Members)
-										if (m.Value.NodeType == ExpressionType.Parameter && !_memberExpressions.ContainsKey(m.Value))
-											_memberExpressions.Add(m.Value, Expression.MakeMemberAccess(root, m.Key));
-								}
-
-								if (_memberExpressions.Count > 0)
-								{
-									var ex1 = ex.Convert(e =>
-									{
-										Expression me;
-										return _memberExpressions.TryGetValue(e, out me) ? me : e;
-									});
-
-									if (ex != ex1)
-									{
-										expr = expression.Convert(e => e == member ? ex1 : e);
-									}
-								}
+							if (ex != ex1)
+							{
+								return expression.Convert(e => e == member ? ex1 : e);
 							}
 						}
 					}
 				}
 			}
 
-			if (expr == null)
-				expr = expression;
-
-			_expandExpressions.Add(expression, expr);
-
-			if (expression != expr)
-				_expandExpressions.Add(expr, expr);
-
-			return expr;
+			return null;
 		}
 
 		#endregion

@@ -40,6 +40,11 @@ namespace BLToolkit.Data.Linq.Builder
 		public override SqlQuery      SqlQuery { get; set; }
 		public override IBuildContext Parent   { get; set; }
 
+		public override Expression ExpandExpression(Expression expression)
+		{
+			return expression;
+		}
+
 		public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 		{
 			if (Expression.NodeType == ExpressionType.Lambda)

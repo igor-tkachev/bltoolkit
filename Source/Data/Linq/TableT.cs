@@ -51,5 +51,10 @@ namespace BLToolkit.Data.Linq
 #endif
 
 		#endregion
+
+		public object Select(object p)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
