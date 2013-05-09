@@ -32,6 +32,5 @@ namespace BLToolkit.Data.Linq.Builder
 		int                ConvertToParentIndex(int index, IBuildContext context);
 		void               SetAlias            (string alias);
 		ISqlExpression     GetSubQuery         (IBuildContext context);
-		Expression         ExpandExpression    (Expression expression);
 	}
 }

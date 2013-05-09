@@ -69,10 +69,5 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			return Context.GetSubQuery(context);
 		}
-
-		public virtual Expression ExpandExpression(Expression expression)
-		{
-			return Context.ExpandExpression(expression);
-		}
 	}
 }

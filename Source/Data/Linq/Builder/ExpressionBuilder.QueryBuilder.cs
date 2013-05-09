@@ -21,8 +21,6 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			var newExpr = expression.Convert2(expr =>
 			{
-				//expr = ExpandExpression(context, expr);
-
 				if (_skippedExpressions.Contains(expr))
 					return new ExpressionHelper.ConvertInfo(expr, true);
 

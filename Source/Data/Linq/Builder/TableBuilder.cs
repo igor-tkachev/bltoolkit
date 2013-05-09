@@ -981,11 +981,6 @@ namespace BLToolkit.Data.Linq.Builder
 				return null;
 			}
 
-			public Expression ExpandExpression(Expression expression)
-			{
-				return expression;
-			}
-
 			#endregion
 
 			#region Helpers

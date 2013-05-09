@@ -60,7 +60,7 @@ namespace Data.Linq.UserTests
 						c1 = t3.Table2s.SelectMany(x => x.Table1s).Count(),
 					};
 
-				var sql = query.Take(1).ToString();
+				query.FirstOrDefault();
 			}
 		}
 	}

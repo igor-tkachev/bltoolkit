@@ -62,11 +62,6 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
-		public Expression ExpandExpression(Expression expression)
-		{
-			return expression;
-		}
-
 		protected bool IsSubQuery()
 		{
 			for (var p = Parent; p != null; p = p.Parent)
