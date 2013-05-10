@@ -161,7 +161,7 @@ namespace BLToolkit.Data.Linq
 
 		class Updatable<T> : IUpdatable<T>
 		{
-			public IQueryable<T> Query { get; set; }
+			public IQueryable<T> Query;
 		}
 
 		public static IUpdatable<T> AsUpdatable<T>([NotNull] this IQueryable<T> source)
