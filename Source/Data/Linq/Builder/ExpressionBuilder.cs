@@ -52,6 +52,7 @@ namespace BLToolkit.Data.Linq.Builder
 			new IntersectBuilder     (),
 			new CastBuilder          (),
 			new OfTypeBuilder        (),
+			new AsUpdatableBuilder   (),
 		};
 
 		public static void AddBuilder(ISequenceBuilder builder)
