@@ -1,5 +1,10 @@
-﻿using System;
+﻿#region
+
+using System;
+using BLToolkit.Data;
 using BLToolkit.Reflection;
+
+#endregion
 
 namespace BLToolkit.Mapping
 {
@@ -14,17 +19,28 @@ namespace BLToolkit.Mapping
 
         public override object CreateInstance()
         {
-            return DataBindingFactory.Create(_type);
+            return TypeFactory.DataBindingFactory.Create(_type);
         }
 
         public override object CreateInstance(InitContext context)
         {
             return CreateInstance();
         }
+    }
 
-        public override void Init(MappingSchema mappingSchema, Type type)
+    public class FullDataBindingObjectMapper : FullObjectMapper
+    {
+        public FullDataBindingObjectMapper(DbManager db, bool ignoreLazyLoading) : base(db, ignoreLazyLoading, FactoryType.LazyLoadingWithDataBinding)
         {
-            base.Init(mappingSchema, type);
+        }
+
+        public override object CreateInstance()
+        {
+            object result = ContainsLazyChild
+                                ? TypeFactory.LazyLoadingWithDataBinding.Create(PropertyType, this, LoadLazy)
+                                : base.CreateInstance();
+
+            return result;
         }
     }
 }
