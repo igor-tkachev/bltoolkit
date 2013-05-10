@@ -367,8 +367,8 @@ namespace BLToolkit.Data
 								}
 							}
 						}
-						catch (Exception ex)
-						{ }
+						catch (Exception)
+						{}
 					}
 
 					if (provider == null)

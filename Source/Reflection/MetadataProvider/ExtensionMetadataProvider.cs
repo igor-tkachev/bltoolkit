@@ -86,43 +86,44 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-        #region GetMapField
+		#region GetMapField
 
-        public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            var extList = typeExtension[member.Name]["MapField"];
+		public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			var extList = typeExtension[member.Name]["MapField"];
 
-            if (extList != AttributeExtensionCollection.Null)
-            {
-                isSet = true;
-                var attr = new MapFieldAttribute();
+			if (extList != AttributeExtensionCollection.Null)
+			{
+				isSet = true;
+				var attr = new MapFieldAttribute();
 
-                var extFormat = extList.FirstOrDefault(x => x.Name == "Format");
-                var extMapName = extList.FirstOrDefault(x => x.Name == "MapName");
-                var extIsInheritanceDiscriminator = extList.FirstOrDefault(x => x.Name == "IsInheritanceDiscriminator");
-                var extOrigName = extList.FirstOrDefault(x => x.Name == "OrigName");
-                var extStorage = extList.FirstOrDefault(x => x.Name == "Storage");
+				var extFormat = extList.FirstOrDefault(x => x.Name == "Format");
+				var extMapName = extList.FirstOrDefault(x => x.Name == "MapName");
+				var extIsInheritanceDiscriminator = extList.FirstOrDefault(x => x.Name == "IsInheritanceDiscriminator");
+				var extOrigName = extList.FirstOrDefault(x => x.Name == "OrigName");
+				var extStorage = extList.FirstOrDefault(x => x.Name == "Storage");
 
-                if (extFormat != null) 
-                    attr.Format = (string)extFormat.Value;
-                if (extMapName != null) 
-                    attr.MapName = (string)extMapName.Value;
-                if (extFormat != null) 
-                    attr.IsInheritanceDiscriminator = Convert.ToBoolean(extIsInheritanceDiscriminator.Value);
-                if (extFormat != null) 
-                    attr.OrigName = (string)extOrigName.Value;
-                if (extFormat != null) 
-                    attr.Storage = (string)extStorage.Value;
-                return attr;
-            }
+				if (extFormat != null) 
+					attr.Format = (string)extFormat.Value;
+				if (extMapName != null) 
+					attr.MapName = (string)extMapName.Value;
+				if (extFormat != null) 
+					attr.IsInheritanceDiscriminator = Convert.ToBoolean(extIsInheritanceDiscriminator.Value);
+				if (extFormat != null) 
+					attr.OrigName = (string)extOrigName.Value;
+				if (extFormat != null) 
+					attr.Storage = (string)extStorage.Value;
+				return attr;
+			}
 
-            return base.GetMapField(typeExtension, member, out isSet);
-        }
+			return base.GetMapField(typeExtension, member, out isSet);
+		}
 
-        #endregion
+		#endregion
 
 		#region GetDbType
 
+		[CLSCompliant(false)]
 		public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
 		{
 			var extList = typeExtension[member.Name]["DbType"];
