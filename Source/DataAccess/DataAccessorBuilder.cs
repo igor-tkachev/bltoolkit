@@ -175,8 +175,8 @@ namespace BLToolkit.DataAccess
 			GetSqlQueryAttribute();
 			ProcessParameters();
 
-			Type returnType = MethodReturnType;
-			ReturnType rt = GetReturnType(returnType);
+			var returnType = MethodReturnType;
+			var rt         = GetReturnType(returnType);
 
 			CreateDbManager(rt != ReturnType.Enumerable);
 			SetObjectType();
@@ -291,7 +291,7 @@ namespace BLToolkit.DataAccess
 
 				default:
 
-					if (_objectType == null)
+					if (_objectType == null || !TypeHelper.IsSameOrParent(returnType, _objectType))
 						_objectType = returnType;
 
 					if (!_explicitObjectType && ActualTypes.ContainsKey(_objectType))
@@ -430,8 +430,6 @@ namespace BLToolkit.DataAccess
 			if (attrs.Length != 0)
 				_objectType = ((ObjectTypeAttribute)attrs[0]).ObjectType;
 
-
-			// why not _objectType =  mi.ReturnType ? 
 			if (_objectType == null)
 			{
 				var types = TypeHelper.GetGenericArguments(mi.DeclaringType, typeof(DataAccessor));
