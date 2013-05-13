@@ -212,7 +212,10 @@
     <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\DbConnectionFactory.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
+    <Compile Include="Data\IDbConnectionFactory.cs" />
+    <Compile Include="Data\Linq\Builder\AsUpdatableBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ConcatUnionBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ContainsBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
@@ -246,6 +249,7 @@
     <Compile Include="Data\Linq\ExpressionQueryImpl.cs" />
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\ITable.cs" />
+    <Compile Include="Data\Linq\IUpdatable.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
@@ -287,7 +291,6 @@
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\Extensions.cs" />
-    <Compile Include="Data\Linq\IUpdateable.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />

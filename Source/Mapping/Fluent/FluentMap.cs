@@ -85,7 +85,7 @@ namespace BLToolkit.Mapping.Fluent
 		/// <param name="prop"></param>
 		/// <param name="isInheritanceDiscriminator"></param>
 		/// <returns></returns>
-		public MapFieldMap<T, TR> MapField<TR>(Expression<Func<T, TR>> prop, bool isInheritanceDiscriminator)
+		public MapFieldMap<T,TR> MapField<TR>(Expression<Func<T, TR>> prop, bool isInheritanceDiscriminator)
 		{
 			return this.MapField(prop, null, null, isInheritanceDiscriminator);
 		}
@@ -103,10 +103,10 @@ namespace BLToolkit.Mapping.Fluent
 		{
 			string name = this.GetExprName(prop);
 
-            if (mapName == null && FluentConfig.MappingConfigurator.GetColumnName != null)
-            {
-                mapName = FluentConfig.MappingConfigurator.GetColumnName(new MappedProperty() { Name = name, Type = typeof(TR), ParentType = typeof(T) });
-            }
+			if (mapName == null && FluentConfig.MappingConfigurator.GetColumnName != null)
+			{
+				mapName = FluentConfig.MappingConfigurator.GetColumnName(new MappedProperty { Name = name, Type = typeof(TR), ParentType = typeof(T) });
+			}
 
 			((IFluentMap)this).MapField(name, mapName, storage, isInheritanceDiscriminator);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
@@ -175,7 +175,6 @@ namespace BLToolkit.Mapping.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Identity<TR>(Expression<Func<T, TR>> prop)
 		{
-#warning need test
 			string name = this.GetExprName(prop);
 			((IFluentMap)this).Identity(name);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
@@ -243,51 +242,48 @@ namespace BLToolkit.Mapping.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> DefaultValue<TR>(Expression<Func<T, TR>> prop, TR value)
 		{
-#warning need test
 			string name = this.GetExprName(prop);
 			((IFluentMap)this).DefaulValue(name, value);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
 
-        /// <summary>
-        /// DbTypeAttribute
-        /// </summary>
-        /// <param name="prop"> </param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public MapFieldMap<T, TR> DbType<TR>(Expression<Func<T, TR>> prop, DbType dbType)
-        {
-#warning need test
-            string name = this.GetExprName(prop);
-            ((IFluentMap)this).DbType<TR>(name, dbType);
-            return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
-        }
-
-        /// <summary>
-        /// MemberMapperAttribute
+		/// <summary>
+		/// DbTypeAttribute
 		/// </summary>
 		/// <param name="prop"> </param>
-		/// <param name="value"></param>
+		/// <param name="dbType"></param>
 		/// <returns></returns>
-        public MapFieldMap<T, TR> MemberMapper<TR>(Expression<Func<T, TR>> prop, Type memberMapperType)
+		public MapFieldMap<T,TR> DbType<TR>(Expression<Func<T, TR>> prop, DbType dbType)
 		{
-#warning need test
-			return this.MemberMapper<TR>(prop, null, memberMapperType);
+			string name = this.GetExprName(prop);
+			((IFluentMap)this).DbType<TR>(name, dbType);
+			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
 
-        /// <summary>
-        /// MemberMapperAttribute
-        /// </summary>
-        /// <param name="prop"> </param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public MapFieldMap<T, TR> MemberMapper<TR>(Expression<Func<T, TR>> prop, Type memberType, Type memberMapperType)
-        {
-#warning need test
-            string name = this.GetExprName(prop);
-            ((IFluentMap)this).MemberMapper<TR>(name, memberType, memberMapperType);
-            return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
-        }
+		/// <summary>
+		/// MemberMapperAttribute
+		/// </summary>
+		/// <param name="prop"> </param>
+		/// <param name="memberMapperType"></param>
+		/// <returns></returns>
+		public MapFieldMap<T,TR> MemberMapper<TR>(Expression<Func<T,TR>> prop, Type memberMapperType)
+		{
+			return this.MemberMapper(prop, null, memberMapperType);
+		}
+
+		/// <summary>
+		/// MemberMapperAttribute
+		/// </summary>
+		/// <param name="prop"> </param>
+		/// <param name="memberType"></param>
+		/// <param name="memberMapperType"></param>
+		/// <returns></returns>
+		public MapFieldMap<T, TR> MemberMapper<TR>(Expression<Func<T, TR>> prop, Type memberType, Type memberMapperType)
+		{
+			string name = this.GetExprName(prop);
+			((IFluentMap)this).MemberMapper<TR>(name, memberType, memberMapperType);
+			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
+		}
 
 		/// <summary>
 		/// NullableAttribute
@@ -297,27 +293,25 @@ namespace BLToolkit.Mapping.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> Nullable<TR>(Expression<Func<T, TR>> prop, bool isNullable = true)
 		{
-#warning need test
 			string name = this.GetExprName(prop);
 			((IFluentMap)this).Nullable(name, isNullable);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
 
-        /// <summary>
-        /// LazyInstanceAttribute
-        /// </summary>
-        /// <param name="prop"></param>
-        /// <param name="isLazy"></param>
-        /// <returns></returns>
-        public MapFieldMap<T, TR> LazyInstance<TR>(Expression<Func<T, TR>> prop, bool isLazy = true)
-        {
-#warning need test
-            string name = this.GetExprName(prop);
-            if (!GetIsVirtual(prop))
-                throw new Exception("Property wich uses LazyInstance needs to be virtual!");
-            ((IFluentMap)this).LazyInstance(name, isLazy);
-            return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
-        }
+		/// <summary>
+		/// LazyInstanceAttribute
+		/// </summary>
+		/// <param name="prop"></param>
+		/// <param name="isLazy"></param>
+		/// <returns></returns>
+		public MapFieldMap<T, TR> LazyInstance<TR>(Expression<Func<T, TR>> prop, bool isLazy = true)
+		{
+			string name = this.GetExprName(prop);
+			if (!GetIsVirtual(prop))
+				throw new Exception("Property wich uses LazyInstance needs to be virtual!");
+			((IFluentMap)this).LazyInstance(name, isLazy);
+			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
+		}
 
 		/// <summary>
 		/// NullValueAttribute
@@ -327,7 +321,6 @@ namespace BLToolkit.Mapping.Fluent
 		/// <returns></returns>
 		public MapFieldMap<T, TR> NullValue<TR>(Expression<Func<T, TR>> prop, TR value)
 		{
-#warning need test
 			string name = this.GetExprName(prop);
 			((IFluentMap)this).NullValue(name, value);
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
@@ -418,7 +411,7 @@ namespace BLToolkit.Mapping.Fluent
 			return new MapFieldMap<T, TR>(this._typeExtension, this.Childs, prop);
 		}
 
-		private void FillRelationIndex(string[] index, AttributeExtension attributeExtension, string indexName)
+		static void FillRelationIndex(string[] index, AttributeExtension attributeExtension, string indexName)
 		{
 			if (index.Any())
 			{
@@ -530,21 +523,21 @@ namespace BLToolkit.Mapping.Fluent
 			}
 		}
 
-        protected void FillMemberMapperExtension(AttributeNameCollection attributeCollection, Type memberType, Type memberMapperType)
-	    {
-            AttributeExtensionCollection attrs;
-            if (!attributeCollection.TryGetValue(Attributes.MemberMapper.Name, out attrs))
-            {
-                attrs = new AttributeExtensionCollection();
-                attributeCollection.Add(Attributes.MemberMapper.Name, attrs);
-            }
-            var attributeExtension = new AttributeExtension();
-            attributeExtension.Values.Add(Attributes.MemberMapper.MemberType, memberType);
-            attributeExtension.Values.Add(Attributes.MemberMapper.MemberMapperType, memberMapperType);
-            attrs.Add(attributeExtension);	       
-	    }
+		protected void FillMemberMapperExtension(AttributeNameCollection attributeCollection, Type memberType, Type memberMapperType)
+		{
+			AttributeExtensionCollection attrs;
+			if (!attributeCollection.TryGetValue(Attributes.MemberMapper.Name, out attrs))
+			{
+				attrs = new AttributeExtensionCollection();
+				attributeCollection.Add(Attributes.MemberMapper.Name, attrs);
+			}
+			var attributeExtension = new AttributeExtension();
+			attributeExtension.Values.Add(Attributes.MemberMapper.MemberType, memberType);
+			attributeExtension.Values.Add(Attributes.MemberMapper.MemberMapperType, memberMapperType);
+			attrs.Add(attributeExtension);	       
+		}
 
-	    /// <summary>
+		/// <summary>
 		/// Fluent settings result
 		/// </summary>
 		/// <returns></returns>
@@ -638,20 +631,21 @@ namespace BLToolkit.Mapping.Fluent
 			return result;
 		}
 
-        private bool GetIsVirtual<TT, TR>(Expression<Func<TT, TR>> prop)
-        {
-            var memberExpression = prop.Body as MemberExpression;
-            if (memberExpression != null)
-            {
-                var prpInfo = memberExpression.Member as PropertyInfo;
-                if (prpInfo != null && !prpInfo.GetGetMethod().IsVirtual)
-                {
-                    return false;
-                }
-            }
-            
-            return true;
-        }
+		static bool GetIsVirtual<TT, TR>(Expression<Func<TT, TR>> prop)
+		{
+			var memberExpression = prop.Body as MemberExpression;
+			if (memberExpression != null)
+			{
+				var prpInfo = memberExpression.Member as PropertyInfo;
+				if (prpInfo != null && !prpInfo.GetGetMethod().IsVirtual)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		/// <summary>
 		/// Invert for BLToolkit.Reflection.Extension.TypeExtension.ToBoolean()
 		/// </summary>

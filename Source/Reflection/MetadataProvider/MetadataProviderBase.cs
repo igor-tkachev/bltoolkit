@@ -89,35 +89,36 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-        #region GetMapField
+		#region GetMapField
 
-        public virtual MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            isSet = false;
-            return null;            
-        }
+		public virtual MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
 
-        #endregion
+		#endregion
 
-        #region GetDbType
+		#region GetDbType
 
-        public virtual DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            isSet = false;
-            return null;                
-        }
+		[CLSCompliant(false)]
+		public virtual DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
 
-        #endregion
+		#endregion
 
-        #region GetPrimaryKey
+		#region GetPrimaryKey
 
-        public virtual PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            isSet = false;
-            return null;
-        }
+		public virtual PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
 
-        #endregion
+		#endregion
 
 		#region GetTrimmable
 
@@ -176,15 +177,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-        #region GetLazyInstance
+		#region GetLazyInstance
 
-        public virtual bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            isSet = false;
-            return false;                
-        }
+		public virtual bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return false;
+		}
 
-        #endregion
+		#endregion
 
 		#region GetNullValue
 

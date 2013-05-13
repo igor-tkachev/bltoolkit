@@ -312,8 +312,8 @@ namespace BLToolkit.Mapping.Fluent
 			attributeExtension.Values.Add(TypeExtension.AttrName.DestinationType, destinationType.AssemblyQualifiedName);
 			attrs.Add(attributeExtension);
 
-			this.FillRelationIndex(slaveIndex, attributeExtension, TypeExtension.NodeName.SlaveIndex);
-			this.FillRelationIndex(masterIndex, attributeExtension, TypeExtension.NodeName.MasterIndex);
+			FillRelationIndex(slaveIndex, attributeExtension, TypeExtension.NodeName.SlaveIndex);
+			FillRelationIndex(masterIndex, attributeExtension, TypeExtension.NodeName.MasterIndex);
 			this.EachChilds(m => m.Relation(propName, destinationType, slaveIndex, masterIndex));
 		}
 

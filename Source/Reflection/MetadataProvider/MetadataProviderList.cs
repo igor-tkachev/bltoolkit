@@ -121,57 +121,57 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-        #region GetMapField
+		#region GetMapField
 
-	    public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-	    {
-	        foreach (var p in _list)
-	        {
-	            var attr = p.GetMapField(typeExtension, member, out isSet);
+		public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			foreach (var p in _list)
+			{
+				var attr = p.GetMapField(typeExtension, member, out isSet);
 
-	            if (attr != null) 
-                    return attr;
-	        }
+				if (attr != null) 
+					return attr;
+			}
 
-	        return base.GetMapField(typeExtension, member, out isSet);
-	    }
+			return base.GetMapField(typeExtension, member, out isSet);
+		}
 
-	    #endregion
+		#endregion
 
-        #region GetDbType
+		#region GetDbType
 
-        public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            foreach (var p in _list)
-            {
-                var attr = p.GetDbType(typeExtension, member, out isSet);
+		[CLSCompliant(false)]
+		public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			foreach (var p in _list)
+			{
+				var attr = p.GetDbType(typeExtension, member, out isSet);
 
-                if (attr != null)
-                    return attr;
-            }
+				if (attr != null)
+					return attr;
+			}
 
-            return base.GetDbType(typeExtension, member, out isSet);
-        }
+			return base.GetDbType(typeExtension, member, out isSet);
+		}
 
-        #endregion
+		#endregion
 
-        #region GetPrimaryKey
+		#region GetPrimaryKey
 
-        public override PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-        {
-            foreach (var p in _list)
-            {
-                var attr = p.GetPrimaryKey(typeExtension, member, out isSet);
+		public override PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			foreach (var p in _list)
+			{
+				var attr = p.GetPrimaryKey(typeExtension, member, out isSet);
 
-                if (attr != null)
-                    return attr;
-            }
+				if (attr != null)
+					return attr;
+			}
 
-            return base.GetPrimaryKey(typeExtension, member, out isSet);
-        }
+			return base.GetPrimaryKey(typeExtension, member, out isSet);
+		}
 
-        #endregion
-
+		#endregion
 
 		#region GetTrimmable
 

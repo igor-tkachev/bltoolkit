@@ -2318,23 +2318,6 @@ namespace BLToolkit.Data.Linq.Builder
 			return null;
 		}
 
-		Expression ExpandExpression(IBuildContext current, Expression expression)
-		{
-			switch (expression.NodeType)
-			{
-				default                          : return expression;
-				case ExpressionType.Call         :
-				case ExpressionType.MemberAccess : break;
-			}
-
-			var ctx = GetContext(current, expression);
-
-			if (ctx != null)
-				return ctx.ExpandExpression(expression);
-
-			return expression;
-		}
-
 		SqlFunctionAttribute GetFunctionAttribute(ICustomAttributeProvider member)
 		{
 			var attrs = member.GetCustomAttributes(typeof(SqlFunctionAttribute), true);

@@ -43,4 +43,5 @@ BLToolkit.2010.sln.docstates
 *.csproj.user
 UnitTests/BLToolkit.Linq.VisualState.xml
 UnitTests/Linq/UserDataProviders.txt
+!*.dll
 *.ncrunchsolution

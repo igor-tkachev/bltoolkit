@@ -118,6 +118,7 @@ namespace BLToolkit.Mapping
 			get { return _inheritanceMapping; }
 		}
 
+		[CLSCompliant(false)]
 		protected TypeExtension _extension;
 		public  TypeExtension  Extension
 		{
@@ -223,6 +224,7 @@ namespace BLToolkit.Mapping
 			return GetOrdinal(name);
 		}
 
+		[CLSCompliant(false)]
 		protected TypeAccessor _typeAccessor;
 		public  TypeAccessor  TypeAccessor
 		{
@@ -468,11 +470,11 @@ namespace BLToolkit.Mapping
 			return MetadataProvider.GetNullable(MappingSchema, Extension, memberAccessor, out isSet);
 		}
 
-        protected virtual bool GetLazyInstance(MemberAccessor memberAccessor)
-        {
-            bool isSet;
-            return MetadataProvider.GetLazyInstance(MappingSchema, Extension, memberAccessor, out isSet);
-        }
+		protected virtual bool GetLazyInstance(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetLazyInstance(MappingSchema, Extension, memberAccessor, out isSet);
+		}
 
 		protected virtual bool GetMapIgnore(MemberAccessor memberAccessor)
 		{
@@ -480,25 +482,26 @@ namespace BLToolkit.Mapping
 			return MetadataProvider.GetMapIgnore(Extension, memberAccessor, out isSet);
 		}
 
-        protected virtual MapFieldAttribute GetMapField(MemberAccessor memberAccessor)
-        {
-            bool isSet;
-            return MetadataProvider.GetMapField(Extension, memberAccessor, out isSet);
-        }
+		protected virtual MapFieldAttribute GetMapField(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetMapField(Extension, memberAccessor, out isSet);
+		}
 
-        protected virtual DbTypeAttribute GetDbType(MemberAccessor memberAccessor)
-        {
-            bool isSet;
-            return MetadataProvider.GetDbType(Extension, memberAccessor, out isSet);
-        }
+		[CLSCompliant(false)]
+		protected virtual DbTypeAttribute GetDbType(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetDbType(Extension, memberAccessor, out isSet);
+		}
 
-        protected virtual PrimaryKeyAttribute GetPrimaryKey(MemberAccessor memberAccessor)
-        {
-            bool isSet;
-            return MetadataProvider.GetPrimaryKey(Extension, memberAccessor, out isSet);
-        }
+		protected virtual PrimaryKeyAttribute GetPrimaryKey(MemberAccessor memberAccessor)
+		{
+			bool isSet;
+			return MetadataProvider.GetPrimaryKey(Extension, memberAccessor, out isSet);
+		}
 
-        protected virtual bool GetSqlIgnore(MemberAccessor memberAccessor)
+		protected virtual bool GetSqlIgnore(MemberAccessor memberAccessor)
 		{
 			bool isSet;
 			return MetadataProvider.GetSqlIgnore(Extension, memberAccessor, out isSet);

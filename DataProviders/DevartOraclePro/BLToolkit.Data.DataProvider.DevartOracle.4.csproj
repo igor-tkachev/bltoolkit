@@ -30,13 +30,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Devart.Data, Version=5.0.651.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data, Version=5.0.685.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.7.6.192\lib\Devart.Data.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.7.7.226\lib\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.Oracle, Version=7.6.192.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data.Oracle, Version=7.7.226.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.7.6.192\lib\Devart.Data.Oracle.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.7.7.226\lib\Devart.Data.Oracle.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
