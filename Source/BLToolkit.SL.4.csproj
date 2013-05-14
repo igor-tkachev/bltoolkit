@@ -120,6 +120,7 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\Builder\AggregationBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\AsUpdatableBuilder.cs" />
     <Compile Include="Data\Linq\Builder\BuildInfo.cs" />
     <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ChangeTypeExpression.cs" />
@@ -179,7 +180,7 @@
     <Compile Include="Data\Linq\IQueryContext.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\ITable.cs" />
-    <Compile Include="Data\Linq\IUpdateable.cs" />
+    <Compile Include="Data\Linq\IUpdatable.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
