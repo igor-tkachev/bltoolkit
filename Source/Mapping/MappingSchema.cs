@@ -858,7 +858,9 @@ namespace BLToolkit.Mapping
 				}
 			}
 			else if (conversionType.IsEnum)
-				return Enum.ToObject(conversionType, ConvertChangeType(value, Enum.GetUnderlyingType(conversionType), false));
+			{
+				return MapValueToEnum(value, conversionType);
+			}
 
 			if (isNullable)
 			{

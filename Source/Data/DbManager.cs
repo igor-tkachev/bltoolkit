@@ -3067,7 +3067,8 @@ namespace BLToolkit.Data
 		/// <seealso cref="ExecuteScalar{T}(ScalarSourceType, NameOrIndexParameter)"/>
 		public T ExecuteScalar<T>()
 		{
-			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(), typeof(T));
+			var value = _mappingSchema.ConvertChangeType(ExecuteScalar(), typeof(T));
+			return value == null && typeof(T).IsEnum ? default(T) : (T)value;
 		}
 
 		/// <summary>
