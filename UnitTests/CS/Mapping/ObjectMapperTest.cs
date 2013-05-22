@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-
+using BLToolkit.EditableObjects;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -79,6 +79,35 @@ namespace Mapping
 			var s2 = new Test();
 
 			Map.ObjectToObject(s1, s2, null);
+		}
+
+		public abstract class BizEntityTest : EditableObject<BizEntityTest>
+		{
+			public abstract int                ID                 { get; set; }
+			public abstract string             Name               { get; set; }
+			public abstract BizEntityTestInner BizEntityTestInner { get; set; }
+		}
+
+		public abstract class BizEntityTestInner : EditableObject<BizEntityTestInner>
+		{
+			public abstract int    ID   { get; set; }
+			public abstract string Name { get; set; }
+		}
+
+		[Test]
+		public void DestabilizeTest()
+		{
+			var bet = BizEntityTest.CreateInstance();
+
+			bet.ID                      = 1;
+			bet.Name                    = "BizEntityTest";
+			bet.BizEntityTestInner      = BizEntityTestInner.CreateInstance();
+			bet.BizEntityTestInner.ID   = 111;
+			bet.BizEntityTestInner.Name = "BizEntityTestInner";
+
+			var mapper = Map.GetObjectMapper<BizEntityTest, BizEntityTest>(true);
+
+			var bet2 = mapper(bet);
 		}
 	}
 }

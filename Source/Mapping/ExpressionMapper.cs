@@ -697,10 +697,35 @@ namespace BLToolkit.Mapping
 			return expr;
 		}
 
+		interface IAbstractHelper
+		{
+			Func<TSource,TDest> GetMapper(MappingParameters ps);
+		}
+
+		class AbstractHelper<TS,TD> : IAbstractHelper
+		{
+			public Func<TSource,TDest> GetMapper(MappingParameters ps)
+			{
+				var em     = new ExpressionMapper<TS,TD>(ps);
+				var mapper = em.GetMapper();
+
+				return source => (TDest)(object)mapper((TS)(object)source);
+			}
+		}
+
 		public Func<TSource,TDest> GetMapper()
 		{
 			if (typeof(TSource) == typeof(TDest) && !DeepCopy)
 				return s => (TDest)(object)s;
+
+			if (typeof(TSource).IsAbstract || typeof(TDest).IsAbstract)
+			{
+				var sta = TypeAccessor<TSource>.Instance;
+				var dta = TypeAccessor<TDest>.  Instance;
+
+				var type = typeof(AbstractHelper<,>).MakeGenericType(typeof(TSource), typeof(TDest), sta.Type, dta.Type);
+				return ((IAbstractHelper)Activator.CreateInstance(type)).GetMapper(_parameters);
+			}
 
 			var parm = Expression.Parameter(typeof(TSource), "src");
 			var expr = GetValueMapper(
