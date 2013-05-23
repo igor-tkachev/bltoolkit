@@ -3834,12 +3834,28 @@ namespace BLToolkit.Mapping
 
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>()
 		{
-			return new ExpressionMapper<TSource,TDest>(this).GetMapper();
+			return new ExpressionMapper<TSource,TDest>(this)
+			{
+				IncludeComplexMapping = Common.Configuration.ExpressionMapper.IncludeComplexMapping
+			}.GetMapper();
 		}
 
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy)
 		{
-			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy }.GetMapper();
+			return new ExpressionMapper<TSource,TDest>(this)
+			{
+				DeepCopy              = deepCopy,
+				IncludeComplexMapping = Common.Configuration.ExpressionMapper.IncludeComplexMapping
+			}.GetMapper();
+		}
+
+		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy, bool includeComplexMapping)
+		{
+			return new ExpressionMapper<TSource,TDest>(this)
+			{
+				DeepCopy              = deepCopy,
+				IncludeComplexMapping = includeComplexMapping
+			}.GetMapper();
 		}
 
 		#endregion

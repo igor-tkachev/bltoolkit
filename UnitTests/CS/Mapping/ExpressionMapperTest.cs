@@ -411,5 +411,34 @@ namespace Mapping
 
 			Assert.That(object1.Field2, Is.Not.EqualTo(2));
 		}
+
+		[MapField("SomethingColumnInDB", "MyInnerClass.Something")]
+		class MyClass
+		{
+			public int          ID;
+			public string       Name;
+			public MyInnerClass MyInnerClass;
+		}
+
+		class MyInnerClass
+		{
+			public string Something;
+		}
+
+		[Test]
+		public void MapFieldTest()
+		{
+			var entity = new MyClass 
+			{ 
+				ID           = 1,
+				Name         = "Test",
+				MyInnerClass = new MyInnerClass { Something = "Something" } 
+			};
+
+			var mapper = Map.GetObjectMapper<MyClass,MyClass>(true, true);
+			var clone = mapper(entity);
+
+			Assert.That(clone.MyInnerClass, Is.Not.Null);
+		}
 	}
 }
