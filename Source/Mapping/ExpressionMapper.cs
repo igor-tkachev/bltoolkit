@@ -718,12 +718,12 @@ namespace BLToolkit.Mapping
 			if (typeof(TSource) == typeof(TDest) && !DeepCopy)
 				return s => (TDest)(object)s;
 
-			if (typeof(TSource).IsAbstract || typeof(TDest).IsAbstract)
+			if (TypeHelper.IsAbstractClass(typeof(TSource)) || TypeHelper.IsAbstractClass(typeof(TDest)))
 			{
-				var sta = TypeAccessor<TSource>.Instance;
-				var dta = TypeAccessor<TDest>.  Instance;
+				var st = TypeHelper.IsAbstractClass(typeof(TSource)) ? TypeAccessor<TSource>.Instance.Type : typeof(TSource);
+				var dt = TypeHelper.IsAbstractClass(typeof(TDest))   ? TypeAccessor<TDest>.  Instance.Type : typeof(TDest);
 
-				var type = typeof(AbstractHelper<,>).MakeGenericType(typeof(TSource), typeof(TDest), sta.Type, dta.Type);
+				var type = typeof(AbstractHelper<,>).MakeGenericType(typeof(TSource), typeof(TDest), st, dt);
 				return ((IAbstractHelper)Activator.CreateInstance(type)).GetMapper(_parameters);
 			}
 

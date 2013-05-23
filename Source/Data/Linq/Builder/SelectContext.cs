@@ -339,6 +339,11 @@ namespace BLToolkit.Data.Linq.Builder
 										return GetSequence(expression, level).ConvertToSql(null, 0, flags);
 
 									break;
+
+								default:
+									if (level == 0)
+										return Builder.ConvertExpressions(this, expression, flags);
+									break;
 							}
 
 							break;
