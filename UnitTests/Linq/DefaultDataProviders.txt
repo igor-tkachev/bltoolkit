@@ -5,12 +5,13 @@
 Access
 SqlCe
 SQLite
-
 --DB2
 --Fdp
 --Informix
+--Sql2000
 --Sql2005
 --Sql2008
+--Sql2012
 --MySql
 --Oracle
 --PostgreSQL
