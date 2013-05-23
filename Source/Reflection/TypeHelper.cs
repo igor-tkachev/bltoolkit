@@ -999,6 +999,11 @@ namespace BLToolkit.Reflection
 			yield return member.DeclaringType;
 		}
 
+		public static bool IsAbstractClass(Type type)
+		{
+			return type.IsClass && type.IsAbstract;
+		}
+
 		/// <summary>
 		/// Determines whether the specified types are considered equal.
 		/// </summary>
