@@ -18,6 +18,10 @@ namespace BLToolkit.EditableObjects
 	{
 		#region Constructors
 
+		public EditableArrayList() : this(typeof(object), new ArrayList(), true)
+		{
+		}
+
 		public EditableArrayList([JetBrains.Annotations.NotNull] Type itemType, [JetBrains.Annotations.NotNull] ArrayList list, bool trackChanges)
 		{
 			if (itemType == null) throw new ArgumentNullException("itemType");
