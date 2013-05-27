@@ -2649,11 +2649,16 @@ namespace BLToolkit.Data
 							isPrepared = false;
 
 							var type   = members[i].MemberAccessor.Type;
+						    var dbType = members[i].GetDbType();
 
 							if (value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							var p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+						    IDbDataParameter p;
+						    if (dbType != DbType.Object)
+						        p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
+                            else
+                                p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
 
 							parameters[n + i] = p;
 							hasValue  [n + i] = true;
