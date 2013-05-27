@@ -13,7 +13,10 @@ namespace BLToolkit.Mapping.MemberMappers
 
         public override object GetValue(object o)
         {
-            return ((TimeSpan)this.MemberAccessor.GetValue(o)).Ticks;                        
+            var val = this.MemberAccessor.GetValue(o);
+            if (val != null)
+                return ((TimeSpan) val).Ticks;
+            return null;                        
         }                
     }
 }
