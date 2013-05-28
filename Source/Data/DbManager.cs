@@ -2627,9 +2627,9 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-                            p = value != null
-                                ? Parameter(baseParameters[i].ParameterName + nRows, value)
-                                : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
+							p = value != null
+								? Parameter(baseParameters[i].ParameterName + nRows, value)
+								: Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
 						}
 
 						parameters.Add(p);
@@ -2649,16 +2649,16 @@ namespace BLToolkit.Data
 							isPrepared = false;
 
 							var type   = members[i].MemberAccessor.Type;
-						    var dbType = members[i].GetDbType();
+							var dbType = members[i].GetDbType();
 
 							if (value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-						    IDbDataParameter p;
-						    if (dbType != DbType.Object)
-						        p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
-                            else
-                                p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+							IDbDataParameter p;
+							if (dbType != DbType.Object)
+								p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
+							else
+								p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
 
 							parameters[n + i] = p;
 							hasValue  [n + i] = true;
