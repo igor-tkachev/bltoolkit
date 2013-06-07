@@ -1669,16 +1669,16 @@ namespace BLToolkit.Mapping
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		public virtual object MapValueToEnum(object value, Type type)
 		{
-			if (value == null)
+			if (value == null || value == DBNull.Value)
 				return GetNullValue(type);
 
 			MapValue[] mapValues = GetMapValues(type);
 
-            var mapValueType = GetMapValueType(mapValues);
-            if (mapValueType != null && value.GetType() != mapValueType)
-            {
-                value = ConvertChangeType(value, mapValueType);
-            }
+			var mapValueType = GetMapValueType(mapValues);
+			if (mapValueType != null && value.GetType() != mapValueType)
+			{
+				value = ConvertChangeType(value, mapValueType);
+			}
 
 			if (mapValues != null)
 			{
@@ -1689,9 +1689,9 @@ namespace BLToolkit.Mapping
 				{
 					try
 					{
-                        if (comp.CompareTo(mapValue) == 0)
-                                return mv.OrigValue;
-                        }
+						if (comp.CompareTo(mapValue) == 0)
+							return mv.OrigValue;
+					}
 					catch (ArgumentException ex)
 					{
 						Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
