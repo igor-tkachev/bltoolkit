@@ -31,6 +31,7 @@ namespace BLToolkit.Mapping
 		public   MappingSchema             MappingSchema;
 		public   bool                      DeepCopy              = true;
 		public   bool                      HandleCrossReferences = true;
+		public   bool                      IncludeComplexMapping;
 
 		public   Dictionary<object,object> MapperList     = new Dictionary<object,object>();
 
@@ -54,8 +55,9 @@ namespace BLToolkit.Mapping
 		private  Func<object,object>   _getCurrent;
 		private  Action<object,object> _setCurrent;
 
-		public bool DeepCopy             { get { return _parameters.DeepCopy;              } set { _parameters.DeepCopy              = value; } }
-		public bool HandleBackReferences { get { return _parameters.HandleCrossReferences; } set { _parameters.HandleCrossReferences = value; } }
+		public bool DeepCopy              { get { return _parameters.DeepCopy;              } set { _parameters.DeepCopy              = value; } }
+		public bool HandleBackReferences  { get { return _parameters.HandleCrossReferences; } set { _parameters.HandleCrossReferences = value; } }
+		public bool IncludeComplexMapping { get { return _parameters.IncludeComplexMapping; } set { _parameters.IncludeComplexMapping = value; } }
 
 		public ExpressionMapper()
 			: this(Map.DefaultSchema)
@@ -601,7 +603,7 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberMapper dmm in dest)
 			{
-				if (dmm is MemberMapper.ComplexMapper)
+				if (!IncludeComplexMapping && dmm is MemberMapper.ComplexMapper)
 					continue;
 
 				var dma = dmm.MemberAccessor;
@@ -616,7 +618,10 @@ namespace BLToolkit.Mapping
 
 				var smm = src[dmm.Name];
 
-				if (smm == null || smm is MemberMapper.ComplexMapper)
+				if (smm == null)
+					continue;
+
+				if (!IncludeComplexMapping && smm is MemberMapper.ComplexMapper)
 					continue;
 
 				var sma = smm.MemberAccessor;

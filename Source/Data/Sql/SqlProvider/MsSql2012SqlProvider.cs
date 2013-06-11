@@ -31,5 +31,59 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			base.BuildSql(sb);
 		}
+
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+
+			switch (func.Name)
+			{
+				case "CASE"     : func = ConvertCase(func.SystemType, func.Parameters, 0); break;
+				case "Coalesce" :
+
+					if (func.Parameters.Length > 2)
+					{
+						var parms = new ISqlExpression[func.Parameters.Length - 1];
+
+						Array.Copy(func.Parameters, 1, parms, 0, parms.Length);
+						BuildFunction(sb, new SqlFunction(func.SystemType, func.Name, func.Parameters[0],
+						                  new SqlFunction(func.SystemType, func.Name, parms)));
+						return;
+					}
+
+					var sc = new SqlQuery.SearchCondition();
+
+					sc.Conditions.Add(new SqlQuery.Condition(false, new SqlQuery.Predicate.IsNull(func.Parameters[0], false)));
+
+					func = new SqlFunction(func.SystemType, "IIF", sc, func.Parameters[1], func.Parameters[0]);
+
+					break;
+			}
+
+			base.BuildFunction(sb, func);
+		}
+
+		static SqlFunction ConvertCase(Type systemType, ISqlExpression[] parameters, int start)
+		{
+			var len  = parameters.Length - start;
+			var name = start == 0 ? "IIF" : "CASE";
+			var cond = parameters[start];
+
+			if (start == 0 && SqlExpression.NeedsEqual(cond))
+			{
+				cond = new SqlQuery.SearchCondition(
+					new SqlQuery.Condition(
+						false,
+						new SqlQuery.Predicate.ExprExpr(cond, SqlQuery.Predicate.Operator.Equal, new SqlValue(1))));
+			}
+
+			if (len == 3)
+				return new SqlFunction(systemType, name, cond, parameters[start + 1], parameters[start + 2]);
+
+			return new SqlFunction(systemType, name,
+				cond,
+				parameters[start + 1],
+				ConvertCase(systemType, parameters, start + 2));
+		}
 	}
 }

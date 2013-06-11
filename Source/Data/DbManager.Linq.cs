@@ -172,7 +172,9 @@ namespace BLToolkit.Data
 			}
 			else
 			{
-				var dataType = DataProvider.GetDbType(parm.SystemType);
+                var dataType = DataProvider.GetDbType(parm.SystemType);
+			    if (parm.DbType != DbType.Object)
+			        dataType = parm.DbType;
 				parms.Add(dataType == DbType.Object ? Parameter(name, value) : Parameter(name, null, dataType));
 			}
 		}

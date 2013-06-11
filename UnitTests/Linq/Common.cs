@@ -108,6 +108,25 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CoalesceLike([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from p in    Person
+					where
+						(p.FirstName == null ? (bool?)null : (bool?)p.FirstName.StartsWith("Jo")) == null ?
+							false :
+							(p.FirstName == null ? (bool?)null : p.FirstName.StartsWith("Jo")).Value
+					select p,
+					from p in db.Person
+					where
+						(p.FirstName == null ? (bool?)null : (bool?)p.FirstName.StartsWith("Jo")) == null ?
+							false :
+							(p.FirstName == null ? (bool?)null : p.FirstName.StartsWith("Jo")).Value
+					select p);
+		}
+
+		[Test]
 		public void PreferServerFunc1()
 		{
 			ForEachProvider(db => AreEqual(
