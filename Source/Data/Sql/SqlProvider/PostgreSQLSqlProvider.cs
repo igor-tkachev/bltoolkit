@@ -2,11 +2,10 @@
 using System.Data;
 using System.Text;
 
-using BLToolkit.Reflection;
-
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{

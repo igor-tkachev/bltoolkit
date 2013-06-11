@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 
 #region ReSharper disable
 // ReSharper disable SuggestUseVarKeywordEverywhere
@@ -12,6 +10,8 @@ using BLToolkit.Reflection;
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Mapping;
+	using Reflection;
 
 	using Linq;
 
@@ -144,6 +144,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
 		}
 
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)

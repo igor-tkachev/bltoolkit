@@ -181,6 +181,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		static void SetQueryParameter(IQueryElement element)
 		{
 			if (element.ElementType == QueryElementType.SqlParameter)

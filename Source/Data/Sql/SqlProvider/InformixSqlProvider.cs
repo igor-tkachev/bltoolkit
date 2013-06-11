@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class InformixSqlProvider : BasicSqlProvider
 	{
@@ -171,6 +171,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return expr;
+		}
+
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
 		}
 
 		public virtual object ConvertBooleanValue(bool value)

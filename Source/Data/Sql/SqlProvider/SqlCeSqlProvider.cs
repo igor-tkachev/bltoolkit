@@ -113,6 +113,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		public override SqlQuery Finalize(SqlQuery sqlQuery)
 		{
 			sqlQuery = base.Finalize(sqlQuery);
