@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -1318,6 +1321,36 @@ namespace Data.Linq
 					Assert.NotNull(result);
 					Assert.That(result.Value, Is.EqualTo(TestEnum1.Value2));
 				}
+			}
+		}
+
+		[Flags]
+		enum TestFlag
+		{
+			Value1 = 0x1,
+			Value2 = 0x2
+		}
+
+		[TableName("LinqDataTypes")]
+		class TestTable5
+		{
+			public int      ID;
+			public TestFlag IntValue;
+		}
+
+		[Test]
+		public void TestFlagEnum([DataContexts(ProviderName.Access)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var result =
+					from t in db.GetTable<TestTable5>()
+					where (t.IntValue & TestFlag.Value1) != 0
+					select t;
+
+				var sql = result.ToString();
+
+				Assert.That(sql, Is.Not.Contains("Convert"));
 			}
 		}
 	}
