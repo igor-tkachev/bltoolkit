@@ -1866,6 +1866,25 @@ namespace BLToolkit.Mapping
 
 			if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
 
+			if (value is IEnumerable)
+			{
+				var result = new ArrayList();
+				foreach (var item in (IEnumerable)value)
+				{
+					result.Add(MapEnumToValue(item, memberAccessor, convertToUnderlyingType));
+				}
+				var type = typeof(object);
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						type = var.GetType();
+						break;
+					}
+				}
+				return result.ToArray(type);
+			}
+
 			object nullValue = GetNullValue(memberAccessor.Type);
 
 			if (nullValue != null)
