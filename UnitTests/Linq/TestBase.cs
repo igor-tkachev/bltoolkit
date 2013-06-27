@@ -836,7 +836,7 @@ namespace Data.Linq
 
 			if (exceptResult != 0 || exceptExpected != 0)
 				for (var i = 0; i < resultList.Count; i++)
-					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
+					Debug.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
 
 			Assert.AreEqual(0, exceptExpected);
 			Assert.AreEqual(0, exceptResult);

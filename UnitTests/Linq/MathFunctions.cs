@@ -198,8 +198,8 @@ namespace Data.Linq
 		public void Round3()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in from p in    Types select Math.Round(p.MoneyValue, 1) where t != 0 select t,
-				from t in from p in db.Types select Math.Round(p.MoneyValue, 1) where t != 0 select t));
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1) where t != 0 && t != 7 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1) where t != 0 && t != 7 select t));
 		}
 
 		[Test]
@@ -254,8 +254,8 @@ namespace Data.Linq
 		public void Round10()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in from p in    Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select t,
-				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select t));
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 && t != 7 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 && t != 7 select t));
 		}
 
 		[Test]
@@ -272,8 +272,8 @@ namespace Data.Linq
 			var mp = MidpointRounding.AwayFromZero;
 
 			ForEachProvider(new[] { ProviderName.SQLite }, db => AreEqual(
-				from t in from p in    Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 select t,
-				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 select t));
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 && t != 7 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 && t != 7 select t));
 		}
 
 		[Test]
