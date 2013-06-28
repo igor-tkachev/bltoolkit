@@ -1446,5 +1446,89 @@ namespace Data.Linq
 				}
 			});
 		}
+
+		[Test]
+		public void EnumMapIntermediateObject1()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					Assert.That(
+						db.GetTable<TestTable1>()
+						.Select(r => new {r.Id, r.TestField})
+						.Where(r => r.Id == RID && r.TestField == TestEnum1.Value2).Count(), Is.EqualTo(1));
+				}
+			});
+		}
+
+		[Test]
+		public void EnumMapIntermediateObject2()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					Assert.That(
+						db.GetTable<TestTable2>()
+						.Select(r => new { r.Id, r.TestField })
+						.Where(r => r.Id == RID && r.TestField == TestEnum2.Value2).Count(), Is.EqualTo(1));
+				}
+			});
+		}
+
+		[Test]
+		public void EnumMapIntermediateObject3()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					Assert.That(
+						db.GetTable<NullableTestTable1>()
+						.Select(r => new { r.Id, r.TestField })
+						.Where(r => r.Id == RID && r.TestField == TestEnum1.Value2).Count(), Is.EqualTo(1));
+				}
+			});
+		}
+
+		[Test]
+		public void EnumMapIntermediateObject4()
+		{
+			ForEachProvider(db =>
+			{
+				using (new Cleaner(db))
+				{
+					db.GetTable<RawTable>().Insert(() => new RawTable
+					{
+						Id = RID,
+						TestField = VAL2
+					});
+
+					Assert.That(
+						db.GetTable<NullableTestTable2>()
+						.Select(r => new { r.Id, r.TestField })
+						.Where(r => r.Id == RID && r.TestField == TestEnum2.Value2).Count(), Is.EqualTo(1));
+				}
+			});
+		}
 	}
 }
