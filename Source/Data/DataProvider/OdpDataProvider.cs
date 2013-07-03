@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -649,13 +650,26 @@ namespace BLToolkit.Data.DataProvider
 		public override int ExecuteArray(IDbCommand command, int iterations)
 		{
 			var cmd = (OracleCommand)command;
+			var oracleParameters = cmd.Parameters.OfType<OracleParameter>().ToArray();
+			var oldCollectionTypes = oracleParameters.Select(p => p.CollectionType).ToArray();
+
 			try
 			{
+				foreach (var p in oracleParameters)
+				{
+					p.CollectionType = OracleCollectionType.None;
+				}
+
 				cmd.ArrayBindCount = iterations;
 				return cmd.ExecuteNonQuery();
 			}
 			finally
 			{
+				foreach (var p in oracleParameters.Zip(oldCollectionTypes, (p, t) => new { Param = p, CollectionType = t }))
+				{
+					p.Param.CollectionType = p.CollectionType;
+				}
+
 				cmd.ArrayBindCount = 0;
 			}
 		}
