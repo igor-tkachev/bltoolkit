@@ -179,6 +179,17 @@ namespace BLToolkit.Data.DataProvider
 			return base.CreateCommandObject(connection);
 		}
 
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			base.SetParameterValue(parameter, value);
+
+			// strings larger than 4000 bytes may be handled improperly
+			if (parameter is OracleParameterWrap && value is string && Encoding.UTF8.GetBytes((string)value).Length > 4000)
+			{
+				((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+			}
+		}
+
 		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
 		{
 			var oraParameter = (parameter is OracleParameterWrap)?
