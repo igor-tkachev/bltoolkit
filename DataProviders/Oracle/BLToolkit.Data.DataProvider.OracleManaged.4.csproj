@@ -86,7 +86,7 @@
   <ItemGroup>
     <Reference Include="Oracle.ManagedDataAccess">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Oracle\Oracle.ManagedDataAccess.dll</HintPath>
+      <HintPath>..\..\packages\odp.net.managed.112.3.60\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
