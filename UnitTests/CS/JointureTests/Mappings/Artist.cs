@@ -15,6 +15,51 @@ namespace UnitTests.CS.JointureTests.Mappings
         public string Name { get; set; }
     }
 
+    [TableName(Name = "track", Owner = "SPRE01")]
+    public class track
+    {
+        [PrimaryKey, Identity, SequenceName("SPRE01.SEQ_TRACK")]
+        public long ID_TRACK { get; set; }
+
+        public string TRACK { get; set; }
+        public short DURATION { get; set; }
+        public string ID_COUNTRY_CODE { get; set; }
+        public long ID_ARTIST { get; set; }
+        public long ID_USER_ { get; set; }
+        public short VALIDITY_STATUS { get; set; }
+        public string PAPERCLIP_FILENAME { get; set; }
+        public string TRACK_LIKE { get; set; }
+        //public DateTime? DATE_CONFIRMED { get; set; }
+        public DateTime DATE_CREATION { get; set; }
+        public DateTime DATE_MODIFICATION { get; set; }
+        public string COMMENTARY { get; set; }
+        public short ACTIVATION { get; set; }
+        //public DateTime? DATE_NPF { get; set; }
+        //public short? NEW_PROD_STATUS { get; set; }
+        public long? ID_LABEL { get; set; }
+        [Nullable]
+        public DateTime? DATE_RELEASE { get; set; }
+        public long? ID_GENRE { get; set; }
+        public long? ID_TRACK_VERSION { get; set; }
+        public string ISRC { get; set; }
+    }
+
+    [TableName(Name = "artist", Owner = "SPRE01")]
+    public class artist
+    {
+        [PrimaryKey, Identity, SequenceName("SPRE01.SEQ_ARTIST")]
+        public long ID_ARTIST { get; set; }
+
+        public string ARTIST { get; set; }
+        public long ID_USER_ { get; set; }
+        public string ARTIST_LIKE { get; set; }
+        public DateTime DATE_CONFIRMED { get; set; }
+        public long EXT_ARTIST_ID { get; set; }
+        public DateTime DATE_CREATION { get; set; }
+        public DateTime DATE_MODIFICATION { get; set; }
+        public string COMMENTARY { get; set; }
+        public short ACTIVATION { get; set; }
+    }
 
     [TableName(Name = "ARTIST", Owner = Consts.Owner)]
     public class SimpleArtist

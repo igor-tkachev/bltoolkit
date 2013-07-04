@@ -203,36 +203,6 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
-        #region InsertWithIdentity
-
-        public virtual object InsertWithIdentity(DbManager db, object obj)
-        {
-            var query = GetSqlQueryInfo(db, obj.GetType(), "InsertWithIdentity");
-
-            var parameters = query.GetParameters(db, obj);
-
-            db.SetCommand(query.QueryText, parameters).ExecuteNonQuery();
-
-            var outputParameter = parameters.ToList().First(e => e.Direction == ParameterDirection.Output);
-            return outputParameter.Value;
-        }
-
-        public virtual object InsertWithIdentity(object obj)
-        {
-            var db = GetDbManager();
-
-            try
-            {
-                return InsertWithIdentity(db, obj);
-            }
-            finally
-            {
-                Dispose(db);
-            }
-        }
-
-        #endregion
-
         #region Insert
 
         public virtual int Insert(DbManager db, object obj)

@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +13,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 using Newtonsoft.Json;
+using Oracle.DataAccess.Client;
 using PitagorDataAccess.Mappings.DataEntry;
 using UnitTests.CS.JointureTests.Factories;
 using UnitTests.CS.JointureTests.Mappings;
@@ -292,10 +295,109 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void InsertNewArtist()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.UseQueryText = true;
+                db.BeginTransaction();
+
+                //var query = new SqlQuery<artist>(db);
+                //var newId = (long)query.InsertWithIdentity(new artist
+                //    {
+                //        ARTIST = "Artist",
+                //        ARTIST_LIKE = "test",
+                //        DATE_CREATION = DateTime.Now,
+                //        DATE_MODIFICATION = DateTime.Now,
+                //        DATE_CONFIRMED = new DateTime(2070, 1, 1),
+                //        ID_USER_ = 52,
+                //        EXT_ARTIST_ID = 0,
+                //        ACTIVATION = 0,
+                //    });
+
+                //db.RollbackTransaction();
+
+                //Console.WriteLine(newId);
+
+                var idArtist = (long) db.GetTable<artist>().InsertWithIdentity(() =>
+                                                                               new artist
+                                                                                   {
+                                                                                       ARTIST = "Artist",
+                                                                                       ARTIST_LIKE = "test",
+                                                                                       DATE_CREATION = DateTime.Now,
+                                                                                       DATE_MODIFICATION = DateTime.Now,
+                                                                                       DATE_CONFIRMED = new DateTime(2070, 1, 1),
+                                                                                       ID_USER_ = 52,
+                                                                                       EXT_ARTIST_ID = 0,
+                                                                                       ACTIVATION = 0,
+                                                                                   });
+
+                db.RollbackTransaction();
+
+                Console.WriteLine(idArtist);
+            }
+        }
+
+        [Test]
+        public void InsertNewTrack()
+        {
+            //foreach (var d in Enum.GetValues(typeof (DbType)))
+            //{
+            //    var p = new OracleParameter();
+            //    try
+            //    {
+            //        // Since the OracleDbType is inferred when the DbType is set
+            //        // setting DbType for an OracleParameter then displaying
+            //        // the resulting OracleDbType will show the mapping for valid values.
+            //        Console.Write("{0} => ", d);
+            //        p.DbType = (DbType) d;
+            //        Console.WriteLine("{0}", p.OracleDbType.ToString());
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex.Message);
+            //    }
+            //}
+
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                //db.UseQueryText = true;
+                db.BeginTransaction();
+
+                var query = new SqlQuery(db);
+                //var id = (long) query.InsertWithIdentity(
+                var id = (object) db.GetTable<track>().InsertWithIdentity(() =>
+                    new track
+                        {
+                            TRACK = "title",
+                            TRACK_LIKE = "titleLike",
+                            ACTIVATION = 0,
+                            DATE_CREATION = DateTime.Now,
+                            DATE_MODIFICATION = DateTime.Now,
+                            DATE_RELEASE = null,
+                            ID_GENRE = 1,
+                            ID_LABEL = 1,
+                            ID_COUNTRY_CODE = "ww",
+                            ID_USER_ = 52,
+                            ID_ARTIST = 104973,
+                            VALIDITY_STATUS = 64,
+                            DURATION = 210
+                        });
+                // TODO Why ID is decimal? Is it because of the sequence return type?
+
+                db.RollbackTransaction();
+
+                Console.WriteLine(id);
+            }
+        }
+
+        [Test]
         public void InsertWithIdentity()
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
+                db.BeginTransaction();
+
                 var t = db.GetTable<RECO_RADIO>();
                 var now = DateTime.Now.AddDays(30);
                 var id = t.InsertWithIdentity(
@@ -320,6 +422,8 @@ namespace UnitTests.CS.JointureTests
                             TIME_MEDIA = now
                         });
                 Console.WriteLine(id + " : " + id.GetType() + " ->" + db.LastQuery);
+
+                db.RollbackTransaction();
             }
         }
 
@@ -381,29 +485,6 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void InsertWithIdentityQuery2()
-        {
-            using (var db = ConnectionFactory.CreateDbManager())
-            {
-                db.BeginTransaction();
-
-                var dbKeyword = new Keyword
-                {
-                    NAME = "Valeriu",
-                    DATE_CREATION = DateTime.UtcNow,
-                };
-
-                var query = new SqlQuery(db);
-                var res = query.InsertWithIdentity(dbKeyword);
-
-                db.RollbackTransaction();
-
-                Console.WriteLine(res);
-                Console.WriteLine(db.LastQuery);
-            }
-        }
-
-        [Test]
         public void InsertWithIdentityQuery()
         {
             using (var db = ConnectionFactory.CreateDbManager())
@@ -423,6 +504,29 @@ namespace UnitTests.CS.JointureTests
 
                 var query = new SqlQuery(db);
                 var res = query.InsertWithIdentity(dataProduct);
+
+                db.RollbackTransaction();
+
+                Console.WriteLine(res);
+                Console.WriteLine(db.LastQuery);
+            }
+        }
+
+        [Test]
+        public void InsertWithIdentityQuery2()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.BeginTransaction();
+
+                var dbKeyword = new Keyword
+                    {
+                        NAME = "Valeriu",
+                        DATE_CREATION = DateTime.UtcNow,
+                    };
+
+                var query = new SqlQuery(db);
+                var res = query.InsertWithIdentity(dbKeyword);
 
                 db.RollbackTransaction();
 
@@ -537,7 +641,7 @@ namespace UnitTests.CS.JointureTests
                                                               data.DateMedia >= DateTime.Today &&
                                                               data.DateMedia <= DateTime.Today &&
                                                               data.DateSpot.TimeOfDay >= new TimeSpan(beginHour, beginMinute, 0) &&
-                                                              data.DateSpot.TimeOfDay <= new TimeSpan(endHour, endMinute, 0) && 
+                                                              data.DateSpot.TimeOfDay <= new TimeSpan(endHour, endMinute, 0) &&
                                                               data.DateMedia >= Sql.Date
                                                         select new TitleQuery
                                                             {
@@ -547,89 +651,6 @@ namespace UnitTests.CS.JointureTests
                     var res = queryTitle.ToList();
                     Console.WriteLine(res);
                 }
-            }
-        }
-
-        [Test]
-        public void SelectWithManyParametersPSharpCharacter()
-        {
-            using (var manager = ConnectionFactory.CreateDbManager())
-            {
-                int prodId = 203032;
-                manager.UseQueryText = false;
-                var query = from p in manager.GetTable<CProduct>()
-                            where p.Id == prodId &&
-                                  p.Label.EndsWith("P#") &&
-                                  p.LanguageId == 33 &&
-                                  p.Activation < 50
-                            select p;
-
-                var product = query.FirstOrDefault();
-                Console.WriteLine(product);
-            }
-        }
-
-        [Test]
-        public void SelectWithManyParameters()
-        {
-            var productIds = new[]
-                {
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    10,
-                    11,
-                    12,
-                    13,
-                    14,
-                    15,
-                    16,
-                    17,
-                    18,
-                }.ToList();
-            var duration = TimeSpan.FromSeconds(3);
-
-            using (var manager = ConnectionFactory.CreateDbManager())
-            {
-                manager.UseQueryText = true;
-
-                var queryMultimedia = from multimedia in manager.GetTable<Multimedia>()
-                                      join multimediaFile in manager.GetTable<MultimediaFile>() on multimedia.Id equals multimediaFile.MultimediaId
-                                          into joinedMultimediaFile
-                                      from subMultimediaFile in joinedMultimediaFile.DefaultIfEmpty()
-                                      join multimediaCobranding1 in manager.GetTable<MultimediaCobranding>() on new {MultimediaId = multimedia.Id, multimedia.CategoryMultimediaId} equals new {multimediaCobranding1.MultimediaId, multimediaCobranding1.CategoryMultimediaId}
-                                      where multimedia.CategoryMultimediaId == 65 &&
-                                            multimediaCobranding1.ProductId == productIds[0] &&
-                                            multimediaCobranding1.CategoryMultimediaId == 65
-                                      select new
-                                          {
-                                              Multimedia = multimedia,
-                                              MultimediaFile = subMultimediaFile
-                                          };
-
-                for (int i = 1; i < productIds.Count; i++)
-                {
-                    var productId = productIds[i];
-                    queryMultimedia = from productMultimedia in queryMultimedia
-                                      join multimediaCobranding1 in
-                                          manager.GetTable<MultimediaCobranding>()
-                                                 .Where(mc => mc.CategoryMultimediaId == 65) on productMultimedia.Multimedia.Id equals
-                                          multimediaCobranding1.MultimediaId
-                                      where multimediaCobranding1.ProductId == productId &&
-                                            multimediaCobranding1.CategoryMultimediaId == 65
-                                      select productMultimedia;
-                }
-
-                queryMultimedia = queryMultimedia.Where(p => p.Multimedia.DurationInSeconds == (long) duration.TotalSeconds);
-
-                var tempMultimediae = queryMultimedia.Distinct().ToList();
-                Console.WriteLine(tempMultimediae);
             }
         }
 
@@ -792,6 +813,89 @@ namespace UnitTests.CS.JointureTests
                 var res = db.ExecuteList<Monitoring>();
 
                 Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
+        public void SelectWithManyParameters()
+        {
+            var productIds = new[]
+                {
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                }.ToList();
+            var duration = TimeSpan.FromSeconds(3);
+
+            using (var manager = ConnectionFactory.CreateDbManager())
+            {
+                manager.UseQueryText = true;
+
+                var queryMultimedia = from multimedia in manager.GetTable<Multimedia>()
+                                      join multimediaFile in manager.GetTable<MultimediaFile>() on multimedia.Id equals multimediaFile.MultimediaId
+                                          into joinedMultimediaFile
+                                      from subMultimediaFile in joinedMultimediaFile.DefaultIfEmpty()
+                                      join multimediaCobranding1 in manager.GetTable<MultimediaCobranding>() on new {MultimediaId = multimedia.Id, multimedia.CategoryMultimediaId} equals new {multimediaCobranding1.MultimediaId, multimediaCobranding1.CategoryMultimediaId}
+                                      where multimedia.CategoryMultimediaId == 65 &&
+                                            multimediaCobranding1.ProductId == productIds[0] &&
+                                            multimediaCobranding1.CategoryMultimediaId == 65
+                                      select new
+                                          {
+                                              Multimedia = multimedia,
+                                              MultimediaFile = subMultimediaFile
+                                          };
+
+                for (int i = 1; i < productIds.Count; i++)
+                {
+                    var productId = productIds[i];
+                    queryMultimedia = from productMultimedia in queryMultimedia
+                                      join multimediaCobranding1 in
+                                          manager.GetTable<MultimediaCobranding>()
+                                                 .Where(mc => mc.CategoryMultimediaId == 65) on productMultimedia.Multimedia.Id equals
+                                          multimediaCobranding1.MultimediaId
+                                      where multimediaCobranding1.ProductId == productId &&
+                                            multimediaCobranding1.CategoryMultimediaId == 65
+                                      select productMultimedia;
+                }
+
+                queryMultimedia = queryMultimedia.Where(p => p.Multimedia.DurationInSeconds == (long) duration.TotalSeconds);
+
+                var tempMultimediae = queryMultimedia.Distinct().ToList();
+                Console.WriteLine(tempMultimediae);
+            }
+        }
+
+        [Test]
+        public void SelectWithManyParametersPSharpCharacter()
+        {
+            using (var manager = ConnectionFactory.CreateDbManager())
+            {
+                int prodId = 203032;
+                manager.UseQueryText = false;
+                var query = from p in manager.GetTable<CProduct>()
+                            where p.Id == prodId &&
+                                  p.Label.EndsWith("P#") &&
+                                  p.LanguageId == 33 &&
+                                  p.Activation < 50
+                            select p;
+
+                var product = query.FirstOrDefault();
+                Console.WriteLine(product);
             }
         }
 

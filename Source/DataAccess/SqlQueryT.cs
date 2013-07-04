@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-
+using System.Data;
+using System.Linq;
 using BLToolkit.Data;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection.Extension;
@@ -148,6 +149,16 @@ namespace BLToolkit.DataAccess
 				.SetCommand(query.QueryText, query.GetParameters(db, obj))
 				.ExecuteNonQuery();
 		}
+
+        public virtual object InsertWithIdentity(DbManager db, T obj)
+        {
+            return base.InsertWithIdentity(db, obj);
+        }
+
+        public virtual object InsertWithIdentity(T obj)
+        {
+            return base.InsertWithIdentity(obj);
+        }
 
 		public virtual int Insert(T obj)
 		{

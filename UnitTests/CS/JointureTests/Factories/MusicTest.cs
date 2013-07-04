@@ -16,7 +16,7 @@ namespace UnitTests.CS.JointureTests
 
         protected override DbConnectionFactory CreateFactory()
         {
-            return new MusicFactory(true);
+            return new MusicFactory(false);
         }
 
         #endregion
