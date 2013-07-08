@@ -184,10 +184,18 @@ namespace BLToolkit.Data.DataProvider
 		{
 			base.SetParameterValue(parameter, value);
 
-			// strings larger than 4000 bytes may be handled improperly
-			if (parameter is OracleParameterWrap && value is string && Encoding.UTF8.GetBytes((string)value).Length > 4000)
+			// strings and byte arrays larger than 4000 bytes may be handled improperly
+			if (parameter is OracleParameterWrap)
 			{
-				((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+				const int ThresholdSize = 4000;
+				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+				}
+				else if (value is byte[] && ((byte[])value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Blob;
+				}
 			}
 		}
 
