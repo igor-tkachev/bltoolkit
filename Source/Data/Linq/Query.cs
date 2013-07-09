@@ -871,6 +871,9 @@ namespace BLToolkit.Data.Linq
 							ei.Queries[0].Parameters.Add(param);
 
 							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+
+							if (field.Nullable)
+								sqlQuery.IsParameterDependent = true;
 						}
 
 						ei.SetNonQueryQuery();
@@ -924,6 +927,9 @@ namespace BLToolkit.Data.Linq
 							ei.Queries[0].Parameters.Add(param);
 
 							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+
+							if (field.Nullable)
+								sqlQuery.IsParameterDependent = true;
 						}
 
 						ei.SetNonQueryQuery();
