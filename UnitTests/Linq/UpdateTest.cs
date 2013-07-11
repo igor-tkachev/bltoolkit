@@ -516,5 +516,30 @@ namespace Update
 				}
 			}
 		}
+
+		[TableName("GrandChild")]
+		class Table3
+		{
+			[PrimaryKey(1)] public int? ParentID;
+			[PrimaryKey(2)] public int? ChildID;
+			                public int? GrandChildID;
+		}
+
+		[Test]
+		public void UpdateNullablePrimaryKey([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				db.Update(new Table3 { ParentID = 10000, ChildID = null, GrandChildID = 1000 });
+
+				if (db is DbManager)
+					Assert.IsTrue(((DbManager)db).LastQuery.Contains("IS NULL"));
+
+				db.Update(new Table3 { ParentID = 10000, ChildID = 111, GrandChildID = 1000 });
+
+				if (db is DbManager)
+					Assert.IsFalse(((DbManager)db).LastQuery.Contains("IS NULL"));
+			}
+		}
 	}
 }

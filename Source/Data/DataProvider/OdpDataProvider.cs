@@ -188,10 +188,29 @@ namespace BLToolkit.Data.DataProvider
             return base.CreateCommandObject(connection);
         }
 
-        public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
-        {
-            var oraParameter = (parameter is OracleParameterWrap) ?
-                (parameter as OracleParameterWrap).OracleParameter : parameter as OracleParameter;
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+            _interpreterBase.SetParameterValue(parameter, value);
+
+			// strings and byte arrays larger than 4000 bytes may be handled improperly
+			if (parameter is OracleParameterWrap)
+			{
+				const int ThresholdSize = 4000;
+				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+				}
+				else if (value is byte[] && ((byte[])value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Blob;
+				}
+			}
+		}
+
+		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
+		{
+			var oraParameter = (parameter is OracleParameterWrap)?
+				(parameter as OracleParameterWrap).OracleParameter: parameter as OracleParameter;
 
             if (null != oraParameter)
             {
@@ -582,11 +601,6 @@ namespace BLToolkit.Data.DataProvider
             base.AttachParameter(command, parameter);
         }
 
-        public override void SetParameterValue(IDbDataParameter parameter, object value)
-        {
-            _interpreterBase.SetParameterValue(parameter, value);
-        }
-
         public override DbType GetParameterDbType(DbType dbType)
         {
             /*See how the DbType values map to OracleDbType
@@ -759,13 +773,26 @@ BinaryFloat => Single
         public override int ExecuteArray(IDbCommand command, int iterations)
 		{
 			var cmd = (OracleCommand)command;
+			var oracleParameters = cmd.Parameters.OfType<OracleParameter>().ToArray();
+			var oldCollectionTypes = oracleParameters.Select(p => p.CollectionType).ToArray();
+
 			try
 			{
+				foreach (var p in oracleParameters)
+				{
+					p.CollectionType = OracleCollectionType.None;
+				}
+
 				cmd.ArrayBindCount = iterations;
 				return cmd.ExecuteNonQuery();
 			}
 			finally
 			{
+				foreach (var p in oracleParameters.Zip(oldCollectionTypes, (p, t) => new { Param = p, CollectionType = t }))
+				{
+					p.Param.CollectionType = p.CollectionType;
+				}
+
 				cmd.ArrayBindCount = 0;
 			}
 		}
