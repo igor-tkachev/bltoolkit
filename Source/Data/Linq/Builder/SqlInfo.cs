@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -47,7 +48,14 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public bool CompareMembers(SqlInfo info)
 		{
-			return Members.Count == info.Members.Count && !Members.Where((t, i) => t != info.Members[i]).Any();
+			return Members.Count == info.Members.Count && !Members.Where((t, i) => !TypeHelper.Equals(t, info.Members[i])).Any();
+		}
+
+		public bool CompareLastMember(SqlInfo info)
+		{
+			return
+				Members.Count > 0 && info.Members.Count > 0 &&
+				TypeHelper.Equals(Members[Members.Count - 1], info.Members[info.Members.Count - 1]);
 		}
 	}
 }

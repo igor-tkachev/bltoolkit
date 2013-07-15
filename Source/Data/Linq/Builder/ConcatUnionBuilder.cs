@@ -113,7 +113,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var em = members.FirstOrDefault(m =>
 						m.Member.SequenceInfo != null &&
-						m.Member.SequenceInfo.CompareMembers(info));
+						m.Member.SequenceInfo.CompareLastMember(info));
 
 					if (em == null)
 					{
@@ -287,7 +287,7 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var levelExpression = expression.GetLevelExpression(1);
 
-						if (expression == levelExpression)
+						if (expression == levelExpression && !IsExpression(expression, 1, RequestFor.Object).Result)
 						{
 							var idx = ConvertToIndex(expression, level, ConvertFlags.Field);
 							var n   = idx[0].Index;
