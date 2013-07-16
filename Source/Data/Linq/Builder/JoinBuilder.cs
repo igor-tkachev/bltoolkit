@@ -190,8 +190,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 						return new SqlInfo(idx.Members)
 						{
-							Sql    = SqlQuery.Select.Columns[n],
-							Index  = n
+							Sql   = SqlQuery.Select.Columns[n],
+							Index = n
 						};
 					})
 					.ToArray();
