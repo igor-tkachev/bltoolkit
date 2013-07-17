@@ -401,9 +401,11 @@ namespace BLToolkit.Data.Linq
 
 						foreach (var v in (IEnumerable)value)
 						{
-							values.Add(v != null && v.GetType().IsEnum ?
-								MappingSchema.MapEnumToValue(v, true) :
-								v);
+							values.Add(v);
+							// Enum mapping done by parameter itself
+							//values.Add(v != null && v.GetType().IsEnum ?
+							//	MappingSchema.MapEnumToValue(v, true) :
+							//	v);
 						}
 
 						value = values;
