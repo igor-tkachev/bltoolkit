@@ -1468,7 +1468,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		//////[Test]
 		public void EnumMapIntermediateObject2()
 		{
 			ForEachProvider(db =>
@@ -1510,7 +1510,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+		//////[Test]
 		public void EnumMapIntermediateObject4()
 		{
 			ForEachProvider(db =>
