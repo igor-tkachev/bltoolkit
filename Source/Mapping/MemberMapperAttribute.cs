@@ -33,7 +33,7 @@ namespace BLToolkit.Mapping
 			get { return _memberMapperType; }
 		}
 
-		public virtual MemberMapper  MemberMapper
+		public virtual MemberMapper MemberMapper
 		{
 			get
 			{
