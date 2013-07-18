@@ -1868,12 +1868,16 @@ namespace BLToolkit.Mapping
 
 			if (value is IEnumerable)
 			{
-				var result = new ArrayList();
+#if SILVERLIGHT
+				var result = new List<object>();
+
 				foreach (var item in (IEnumerable)value)
 				{
 					result.Add(MapEnumToValue(item, memberAccessor, convertToUnderlyingType));
 				}
+
 				var type = typeof(object);
+
 				foreach (var var in result)
 				{
 					if (var != null)
@@ -1882,7 +1886,33 @@ namespace BLToolkit.Mapping
 						break;
 					}
 				}
+
+				var arr = Array.CreateInstance(type, result.Count);
+
+				Array.Copy(result.ToArray(), arr, arr.Length);
+
+				return arr;
+#else
+				var result = new ArrayList();
+
+				foreach (var item in (IEnumerable)value)
+				{
+					result.Add(MapEnumToValue(item, memberAccessor, convertToUnderlyingType));
+				}
+
+				var type = typeof(object);
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						type = var.GetType();
+						break;
+					}
+				}
+
 				return result.ToArray(type);
+#endif
 			}
 
 			object nullValue = GetNullValue(memberAccessor.Type);
