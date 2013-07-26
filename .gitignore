@@ -45,3 +45,5 @@ UnitTests/BLToolkit.Linq.VisualState.xml
 UnitTests/Linq/UserDataProviders.txt
 !*.dll
 *.ncrunchsolution
+!*.exe
+!*.pdb

@@ -401,9 +401,11 @@ namespace BLToolkit.Data.Linq
 
 						foreach (var v in (IEnumerable)value)
 						{
-							values.Add(v != null && v.GetType().IsEnum ?
-								MappingSchema.MapEnumToValue(v, true) :
-								v);
+							values.Add(v);
+							// Enum mapping done by parameter itself
+							//values.Add(v != null && v.GetType().IsEnum ?
+							//	MappingSchema.MapEnumToValue(v, true) :
+							//	v);
 						}
 
 						value = values;
@@ -500,7 +502,25 @@ namespace BLToolkit.Data.Linq
 				var member = members[i];
 				var pof    = Expression.PropertyOrField(getter, member) as Expression;
 
-				getter = i == 0 ? pof : Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
+				if (i == 0)
+				{
+					if (members.Length == 1 && mm.IsExplicit)
+					{
+						if (getter.Type != typeof(object))
+							getter = Expression.Convert(getter, typeof(object));
+
+						pof = Expression.Call(
+							Expression.Constant(mm),
+							ReflectionHelper.Expressor<MemberMapper>.MethodExpressor(m => m.GetValue(null)),
+							getter);
+					}
+
+					getter = pof;
+				}
+				else
+				{
+					getter = Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
+				}
 			}
 
 			if (!mm.Type.IsClass && !mm.Type.IsInterface && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
@@ -512,7 +532,10 @@ namespace BLToolkit.Data.Linq
 				getter = Expression.Call(null, method, getter, Expression.Constant(mm.MapMemberInfo.NullValue));
 			}
 			else
-				getter = Expression.Convert(getter, typeof(object));
+			{
+				if (getter.Type != typeof(object))
+					getter = Expression.Convert(getter, typeof(object));
+			}
 
 			var mapper    = Expression.Lambda<Func<Expression,object[],object>>(
 				getter,

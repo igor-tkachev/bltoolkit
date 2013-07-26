@@ -1837,6 +1837,17 @@ namespace BLToolkit.Data.Linq.Builder
 						sql.Select(s => s.Sql).ToArray());
 			}
 
+			MemberAccessor memberAccessor = null;
+
+			if (arg is MemberExpression)
+			{
+				var me = (MemberExpression)arg;
+				if (TypeHelper.IsEnumOrNullableEnum(me.Type))
+				{
+					memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
+				}
+			}
+			
 			switch (arr.NodeType)
 			{
 				case ExpressionType.NewArrayInit :
@@ -1847,17 +1858,6 @@ namespace BLToolkit.Data.Linq.Builder
 							return new SqlQuery.Predicate.Expr(new SqlValue(false));
 
 						var exprs  = new ISqlExpression[newArr.Expressions.Count];
-
-						MemberAccessor memberAccessor = null;
-
-						if (arg is MemberExpression)
-						{
-							var me = (MemberExpression)arg;
-							if (TypeHelper.IsEnumOrNullableEnum(me.Type))
-							{
-								memberAccessor = TypeAccessor.GetAccessor(me.Member.DeclaringType)[me.Member.Name];
-							}
-						}
 
 						for (var i = 0; i < newArr.Expressions.Count; i++)
 						{
@@ -1878,6 +1878,10 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var p = BuildParameter(arr).SqlParameter;
 						p.IsQueryParameter = false;
+						if (memberAccessor != null)
+						{
+							p.SetEnumConverter(memberAccessor, MappingSchema);
+						}
 						return new SqlQuery.Predicate.InList(expr, false, p);
 					}
 
