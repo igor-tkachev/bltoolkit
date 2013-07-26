@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +11,6 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 using Newtonsoft.Json;
-using Oracle.DataAccess.Client;
 using PitagorDataAccess.Mappings.DataEntry;
 using UnitTests.CS.JointureTests.Factories;
 using UnitTests.CS.JointureTests.Mappings;
@@ -366,23 +363,23 @@ namespace UnitTests.CS.JointureTests
 
                 var query = new SqlQuery(db);
                 //var id = (long) query.InsertWithIdentity(
-                var id = (object) db.GetTable<track>().InsertWithIdentity(() =>
-                    new track
-                        {
-                            TRACK = "title",
-                            TRACK_LIKE = "titleLike",
-                            ACTIVATION = 0,
-                            DATE_CREATION = DateTime.Now,
-                            DATE_MODIFICATION = DateTime.Now,
-                            DATE_RELEASE = null,
-                            ID_GENRE = 1,
-                            ID_LABEL = 1,
-                            ID_COUNTRY_CODE = "ww",
-                            ID_USER_ = 52,
-                            ID_ARTIST = 104973,
-                            VALIDITY_STATUS = 64,
-                            DURATION = 210
-                        });
+                var id = db.GetTable<track>().InsertWithIdentity(() =>
+                                                                 new track
+                                                                     {
+                                                                         TRACK = "title",
+                                                                         TRACK_LIKE = "titleLike",
+                                                                         ACTIVATION = 0,
+                                                                         DATE_CREATION = DateTime.Now,
+                                                                         DATE_MODIFICATION = DateTime.Now,
+                                                                         DATE_RELEASE = null,
+                                                                         ID_GENRE = 1,
+                                                                         ID_LABEL = 1,
+                                                                         ID_COUNTRY_CODE = "ww",
+                                                                         ID_USER_ = 52,
+                                                                         ID_ARTIST = 104973,
+                                                                         VALIDITY_STATUS = 64,
+                                                                         DURATION = 210
+                                                                     });
                 // TODO Why ID is decimal? Is it because of the sequence return type?
 
                 db.RollbackTransaction();
@@ -968,6 +965,49 @@ namespace UnitTests.CS.JointureTests
                 queryUpdate.Update(productPending);
 
                 Console.WriteLine(db.LastQuery);
+            }
+        }
+
+        [Test]
+        public void TestUpdateQueryWithJoin()
+        {
+            var Nat = new List<long> {68, 31, 35, 37, 39};
+            var Tnt = new List<long> {44, 261, 301, 78};
+
+            var W9D17France4 = new List<long> {3128, 14791, 3129};
+            var LiveStations = new List<long> {3140, 3120, 3130, 3132, 3190, 3161, 3110, 3157, 3139, 3123, 3133, 3124, 3617, 14791, 3125, 3129, 3102, 3168, 3613, 3188, 3126, 3127, 3194, 3612, 3128, 19609, 18729};
+            var LiveStationsNat = new List<long> {3140, 3120, 3130, 3132, 3190, 3161, 3110, 3157, 3139, 3123, 3133, 3124};
+            List<long> LiveStationsTnt = LiveStations.Except(LiveStationsNat).ToList();
+
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.BeginTransaction();
+
+                DateTime mardiDate = DateTime.Today.AddDays(-2);
+
+                try
+                {
+                    var query = from p in db.GetTable<data_media>()
+                                join m in db.GetTable<all_media>() on p.ID_MEDIA equals m.ID_MEDIA
+                                where p.DATA_PRESENCE < 2 && p.DATE_MEDIA == mardiDate && LiveStationsTnt.Contains(p.ID_MEDIA)
+                                      && Tnt.Contains(m.ID_CATEGORY)
+                                select p;
+
+                    var resQuery = query.ToList();
+
+                    var modifiedLignes = query.Set(d => d.DATA_PRESENCE, () => 2)
+                                              .Set(d => d.DATE_MODIFICATION, () => DateTime.Now)
+                                              .Update();
+
+                    Assert.IsTrue(resQuery.Count == modifiedLignes);
+
+                    db.RollbackTransaction();
+                }
+                catch (Exception e)
+                {
+                    db.RollbackTransaction();
+                    Console.WriteLine(e);
+                }
             }
         }
     }
