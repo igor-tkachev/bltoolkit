@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace UnitTests.CS.JointureTests.Factories
 {
     [TestFixture]
-    public class RadioTest : AllTests
+    public class RadioProdTest : AllTests
     {
         #region Overrides of AssociationTests
 

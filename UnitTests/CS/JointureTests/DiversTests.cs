@@ -112,6 +112,76 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void ComplexJoin()
+        {
+            // BLToolkit BUG
+            using (var pitagorDb = ConnectionFactory.CreateDbManager())
+            {
+                var groupsToExclude = new List<long> {549};
+                var query = from m in pitagorDb.GetTable<MULTIMEDIA_TABLE>()
+                            join p in pitagorDb.GetTable<PRODUCT>() on m.ID_PRODUCT equals p.Id
+                            join s in pitagorDb.GetTable<SEGMENT>() on p.SegmentId equals s.Id
+                            where m.DATE_CREATION >= new DateTime(2013, 07, 01) && m.DATE_CREATION < new DateTime(2013, 08, 01)
+                                    && m.ID_CATEGORY_MULTIMEDIA == 95
+                                    && m.ID_VEHICLE_I == 2
+                                    && m.ACTIVATION == 0
+                                    && !groupsToExclude.Contains(s.GroupId)
+                            group m by new
+                                {
+                                    QualiStatus = m.STATUS_QUALI,
+                                    Date = m.DATE_CREATION.Date
+                                }
+                            into b
+                            select new {QualiStatusByDate = b.Key, Count = b.Count()};
+
+                var res = query.ToList();
+
+                Console.WriteLine(res);
+            }
+        }
+
+        [Test]
+        public void ComplexJoin2()
+        {
+            // BLToolkit BUG
+            using (var pitagorDb = ConnectionFactory.CreateDbManager())
+            {
+                var groupsToExclude = new List<long> { 549 };
+                var query = from m in pitagorDb.GetTable<MULTIMEDIA_TABLE>()
+                            join p in pitagorDb.GetTable<PRODUCT>() on m.ID_PRODUCT equals p.Id
+                            where p.ID_LANGUAGE_DATA == 33
+                            join s in pitagorDb.GetTable<SEGMENT>() on p.SegmentId equals s.Id
+                            where s.ID_LANGUAGE_DATA == 33
+                            where m.DATE_CREATION >= new DateTime(2013, 07, 01) && m.DATE_CREATION < new DateTime(2013, 08, 01)
+                                  && m.ID_CATEGORY_MULTIMEDIA == 95
+                                  && m.ID_VEHICLE_I == 2
+                                  && m.ACTIVATION == 0
+                                  && groupsToExclude.Contains(s.GroupId)
+                            select m.ID_MULTIMEDIA;
+
+                var query2 = from m in pitagorDb.GetTable<MULTIMEDIA_TABLE>()
+                             join em in query on m.ID_MULTIMEDIA equals em into m_em
+                             from em in m_em.DefaultIfEmpty()
+                             where m.DATE_CREATION >= new DateTime(2013, 07, 01) && m.DATE_CREATION < new DateTime(2013, 08, 01)
+                                   && m.ID_CATEGORY_MULTIMEDIA == 95
+                                   && m.ID_VEHICLE_I == 2
+                                   && m.ACTIVATION == 0
+                                   && em == null
+                             group m by new
+                                {
+                                    QualiStatus = m.STATUS_QUALI,
+                                    Date = m.DATE_CREATION.Date
+                                }
+                            into b
+                            select new {QualiStatusByDate = b.Key, Count = b.Count()};
+
+                var res = query2.ToList();
+
+                Console.WriteLine(res);
+            }
+        }
+
+        [Test]
         public void ComplexSelect()
         {
 //select id_distributor, package_number,
@@ -208,6 +278,26 @@ namespace UnitTests.CS.JointureTests
                             into gm
                             where gm.Count() == 0
                             select new {Id = gm.Key, Count = gm.Count()};
+
+                var res = query.ToList();
+
+                Console.WriteLine(res.Count);
+            }
+        }
+
+
+        [Test]
+        public void GroupByTest2()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                var query = from m in db.GetTable<MULTIMEDIA_DB>()
+                            join dv in db.GetTable<DATA_VERSION>() on m.ID_MULTIMEDIA equals dv.ID_MULTIMEDIA into m_dv
+                            from dv in m_dv.DefaultIfEmpty()
+                            where dv == null
+                            group m by m.ID_MULTIMEDIA
+                                into gm
+                                select new { Id = gm.Key, Count = gm.Count() };
 
                 var res = query.ToList();
 
@@ -652,7 +742,7 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void SelectLeftJoin()
+        public void LeftJoin()
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
@@ -703,16 +793,12 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void SelectTest1()
+        public void SelectSqlTextOracleClobWithFullMappingTest1()
         {
             string sql = File.ReadAllText(@"c:\requeteOrqua.txt");
 
-            var forms = new List<FILE_FORM>();
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                //var query = from f in 
-
-
                 using (var a = new ExecTimeInfo())
                 {
                     //db.SetCommand(sql);
@@ -728,7 +814,7 @@ namespace UnitTests.CS.JointureTests
                     DbManager dbCmd = db.SetCommand(sql);
                     dbCmd.MappingSchema = new FullMappingSchema(db);
                     var allMedia = dbCmd.ExecuteList<FILE_FORM>();
-                    forms = allMedia;
+
                     foreach (FILE_FORM fileForm in allMedia)
                     {
                         if (fileForm.SCRIPT_FIELD != null && !fileForm.SCRIPT_FIELD.IsNull)
@@ -741,7 +827,7 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
-        public void SelectTest3()
+        public void ContainsExactlyExtension()
         {
             Console.WriteLine("Hello1 Hello2".ContainsExactly("Hello2"));
 

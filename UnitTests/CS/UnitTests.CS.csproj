@@ -197,7 +197,7 @@
     <Compile Include="JointureTests\Factories\MediaDiscFactory.cs" />
     <Compile Include="JointureTests\Factories\MusicProd.cs" />
     <Compile Include="JointureTests\Factories\RadioPigeFactory.cs" />
-    <Compile Include="JointureTests\Factories\RadioTest.cs" />
+    <Compile Include="JointureTests\Factories\RadioProdTest.cs" />
     <Compile Include="JointureTests\Factories\TvPigeFactory.cs" />
     <Compile Include="JointureTests\Factories\TvTest.cs" />
     <Compile Include="JointureTests\JointureTests.cs" />
@@ -212,6 +212,7 @@
     <Compile Include="JointureTests\Mappings\Multimedia.cs" />
     <Compile Include="JointureTests\Mappings\MultimediaCobranding.cs" />
     <Compile Include="JointureTests\Mappings\MultimediaFile.cs" />
+    <Compile Include="JointureTests\Mappings\RadioMappings.cs" />
     <Compile Include="JointureTests\PerformanceAndTunningTests.cs" />
     <Compile Include="JointureTests\Tools\ExecTimeInfo.cs" />
     <Compile Include="JointureTests\Factories\MediaDiscTest.cs" />
