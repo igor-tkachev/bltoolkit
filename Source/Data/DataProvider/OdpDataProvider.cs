@@ -29,6 +29,7 @@ using Oracle.DataAccess.Types;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
+    using BLToolkit.Data.Sql;
 
 	/// <summary>
 	/// Implements access to the Data Provider for Oracle.
@@ -746,6 +747,18 @@ namespace BLToolkit.Data.DataProvider
 				NameOrIndexParameter nip)
 			{
 				return new OracleScalarDataReaderMapper(this, dataReader, nip);
+			}
+
+			public override Reflection.Extension.ExtensionList Extensions
+			{
+				get
+				{
+					return Map.DefaultSchema.Extensions;
+				}
+				set
+				{
+					Map.DefaultSchema.Extensions = value;
+				}
 			}
 
 			#region Convert
@@ -1627,6 +1640,9 @@ namespace BLToolkit.Data.DataProvider
 				foreach (var member in members)
 				{
 					var value = member.GetValue(item);
+
+					if (value != null && value.GetType().IsEnum)
+						value = MappingSchema.MapEnumToValue(value, true);
 
 					if (value is Nullable<DateTime>)
 						value = ((DateTime?)value).Value;
