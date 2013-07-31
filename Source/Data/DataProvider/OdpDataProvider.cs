@@ -1641,6 +1641,9 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
+					if (value != null && value.GetType().IsEnum)
+						value = MappingSchema.MapEnumToValue(value, true);
+
 					if (value is Nullable<DateTime>)
 						value = ((DateTime?)value).Value;
 
