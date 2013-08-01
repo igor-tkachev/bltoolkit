@@ -29,7 +29,7 @@ using Oracle.DataAccess.Types;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
-    using BLToolkit.Data.Sql;
+	using BLToolkit.Data.Sql;
 
 	/// <summary>
 	/// Implements access to the Data Provider for Oracle.
@@ -751,14 +751,8 @@ namespace BLToolkit.Data.DataProvider
 
 			public override Reflection.Extension.ExtensionList Extensions
 			{
-				get
-				{
-					return Map.DefaultSchema.Extensions;
-				}
-				set
-				{
-					Map.DefaultSchema.Extensions = value;
-				}
+				get { return Map.DefaultSchema.Extensions;  }
+				set { Map.DefaultSchema.Extensions = value; }
 			}
 
 			#region Convert
