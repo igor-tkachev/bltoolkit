@@ -12,8 +12,8 @@ namespace UnitTests.CS.JointureTests.Factories
             var bb = aa.Rows.Count;
 
             string username = "mediadisc01_proc_1";
-            string password = "proki36";
-            string database = "mediadiscfr01.prod";
+            string password = "proki35";
+            string database = "mediadiscfr01.test";
 
             Provider = new OdpDataProvider();
 

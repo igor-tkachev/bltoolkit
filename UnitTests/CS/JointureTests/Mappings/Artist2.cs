@@ -14,7 +14,7 @@ namespace UnitTests.CS.JointureTests.Mappings
         [MapField("ARTIST")]
         public virtual string Name { get; set; }
 
-        [LazyInstance(true)]
+        [LazyInstance(false)]
         [Association(ThisKey = "Id", OtherKey = "ArtistID")]
         public virtual List<Title> Titles { get; set; }
     }
@@ -30,4 +30,6 @@ namespace UnitTests.CS.JointureTests.Mappings
         [Association(ThisKey = "ID_ARTIST", OtherKey = "ID_ARTIST")]
         public virtual List<Title2> Titles { get; set; }
     }
+
+
 }

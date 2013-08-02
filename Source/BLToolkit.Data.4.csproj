@@ -262,6 +262,7 @@
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataExceptionType.cs" />
+    <Compile Include="Data\DataProvider\EnumerableExtensions.cs" />
     <Compile Include="Data\DataProvider\Sql2005DataProvider.cs" />
     <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\DataProviderInterpreterBase.cs" />

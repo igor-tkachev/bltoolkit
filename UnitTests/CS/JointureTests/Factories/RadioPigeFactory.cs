@@ -10,7 +10,8 @@ namespace UnitTests.CS.JointureTests.Factories
             Provider = new OdpDataProvider();
 
             string database = "PITARADIOFR01.PIGE";
-            const string username = "pitafr01_proc_11";
+            string username = "pitafr01_proc_11";
+            //username = "pitafr01_proc_8";
             const string password = "smsmms8";
 
             ConnectionString = string.Format(

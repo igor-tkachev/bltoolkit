@@ -5,14 +5,20 @@ using BLToolkit.Mapping;
 
 namespace UnitTests.CS.JointureTests.Mappings
 {
-    [TableName(Name = "ARTIST", Owner = Consts.Owner)]
+    [TableName(Name = "ARTIST", Owner = Consts.MusicOwner)]
     public class Artist
     {
-        [MapField("ID_ARTIST"), PrimaryKey, Identity, SequenceName("SEQ_ARTIST")]
+        [MapField("ID_ARTIST"), PrimaryKey, Identity, SequenceName(Consts.MusicOwner + ".SEQ_ARTIST")]
         public long Id { get; set; }
 
         [MapField("ARTIST")]
         public string Name { get; set; }
+    }
+
+    [TableName(Name = "ARTIST", Owner = Consts.MusicOwner)]
+    public class ExtArtist : Artist
+    {
+        public decimal EXT_ID_ARTIST { get; set; }
     }
 
     [TableName(Name = "track", Owner = "SPRE01")]
@@ -115,10 +121,10 @@ namespace UnitTests.CS.JointureTests.Mappings
 
 
 
-    [TableName(Name = "LABEL", Owner = Consts.Owner)]
+    [TableName(Name = "LABEL", Owner = Consts.MusicOwner)]
     public class Label
     {
-        [MapField("ID_LABEL"), PrimaryKey, SequenceName("SEQ_LABEL"), Identity]
+        [MapField("ID_LABEL"), PrimaryKey, SequenceName(Consts.MusicOwner + ".SEQ_LABEL"), Identity]
         public long Id { get; set; }
 
         [MapField("LABEL")]

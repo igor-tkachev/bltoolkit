@@ -207,6 +207,9 @@
     <Compile Include="JointureTests\DiversTests.cs" />
     <Compile Include="JointureTests\Mappings\BasicMedia.cs" />
     <Compile Include="JointureTests\Consts.cs" />
+    <Compile Include="JointureTests\Mappings\DataGenre.cs" />
+    <Compile Include="JointureTests\Mappings\DataGenreMapping.cs" />
+    <Compile Include="JointureTests\Mappings\DataProduct.cs" />
     <Compile Include="JointureTests\Mappings\data_media.cs" />
     <Compile Include="JointureTests\Mappings\Keyword.cs" />
     <Compile Include="JointureTests\Mappings\Multimedia.cs" />

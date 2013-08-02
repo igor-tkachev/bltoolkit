@@ -285,7 +285,6 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
-
         [Test]
         public void GroupByTest2()
         {

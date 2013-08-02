@@ -436,6 +436,7 @@ namespace BLToolkit.Mapping
 				// So we cache failed requests.
 				// If this optimization is a memory leak for you, just comment out next line.
 				//
+                // TODO : Should we add an option property?
 				if (_nameToComplexMapper.ContainsKey(name))
 					_nameToComplexMapper[name] = null;
 				else

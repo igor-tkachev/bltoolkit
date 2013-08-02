@@ -12,6 +12,7 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Mapping.Fluent;
 using BLToolkit.Mapping.MemberMappers;
+using BeeMusic.WebServices.DataAccess.DbModel;
 using Castle.DynamicProxy;
 using NUnit.Framework;
 using UnitTests.CS.JointureTests.Factories;
@@ -56,6 +57,23 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void SelectJointureWithJoinExecuteList()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                string sql = "select ( select count(distinct id_track) from PITAFR01.TRACK t where t.id_artist = a.id_artist ) as EXT_ID_ARTIST, a.* " +
+                             " from PITAFR01.ARTIST a " +
+                             " where a.id_artist = 1433 ";
+
+                DbManager dbCmd = db.SetCommand(sql);
+                dbCmd.MappingSchema = new FullMappingSchema(dbCmd);
+
+                var res = dbCmd.ExecuteList<ExtArtist>();
+                Console.WriteLine(res);
+            }
+        }
+
+        [Test]
         public void SelectAllArtistsIgnoreLazyLoading()
         {
             using (var db = ConnectionFactory.CreateDbManager())
@@ -92,7 +110,7 @@ namespace UnitTests.CS.JointureTests
         {
             using (var db = ConnectionFactory.CreateDbManager())
             {
-                DbManager dbCmd = db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
+                DbManager dbCmd = db.SetCommand("SELECT a.*, t.* FROM PITAFR01.Artist a inner join pitafr01.track t on a.id_artist = t.id_artist where a.date_creation > sysdate - 10");
                 dbCmd.MappingSchema = new FullMappingSchema(db);
 
                 // ExecuteList works only with LazyLoadingTrue
@@ -167,6 +185,20 @@ namespace UnitTests.CS.JointureTests
             }
         }
 
+        [Test]
+        public void BeeMusicGenreMappingAssociations()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                 db.MappingSchema = new FullMappingSchema(db);
+                var query = from gm in db.GetTable<DataGenreMapping>()
+                            select gm;
+
+                var res = query.ToList();
+                Console.WriteLine(res.First());
+            }
+        }
+
         [Test(Description = "BUG : Need to be fixed")]
         public void TestLinqAssociation2()
         {
@@ -181,6 +213,23 @@ namespace UnitTests.CS.JointureTests
                                 };
 
                 var res = query.ToList();
+                Assert.IsNotEmpty(res);
+            }
+        }
+
+        [Test]
+        public void CsaMusicTitleArtistAssociations()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.MappingSchema = new FullDataBindingMappingSchema(db);
+
+                var query = from m in db.GetTable<Title>()
+                            where m.Name.StartsWith("A")
+                            select m;
+
+                var res = query.ToList();
+                Console.WriteLine(res.First().Artist);
                 Assert.IsNotEmpty(res);
             }
         }

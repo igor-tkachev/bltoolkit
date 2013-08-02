@@ -490,7 +490,7 @@ namespace BLToolkit.Data.DataProvider
             int                             maxBatchSize,
             DbManager.ParameterProvider<T>  getParameters)
         {
-            throw new NotImplementedException("Insert batch with identity is not implemented! If you use the GenericDataProvider and Oracle make sure to set UseQueryText to true");
+            throw new NotImplementedException("Insert batch with identity is not implemented!");
         }
 
 		public virtual int InsertBatch<T>(

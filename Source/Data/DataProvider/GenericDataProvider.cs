@@ -148,10 +148,11 @@ namespace BLToolkit.Data.DataProvider
         {
             if (db.UseQueryText && Name == ProviderFullName.Oracle)
             {
-                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, true);
+                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, true, db);
                 return ExecuteSqlList(db, sqlList);
             }
-            return base.InsertBatchWithIdentity(db, insertText, collection, members, maxBatchSize, getParameters);
+
+            throw new NotImplementedException("Insert batch with identity is not implemented! If you use the GenericDataProvider and Oracle make sure to set UseQueryText to true");
         }
 
         public override int InsertBatch<T>(
@@ -166,7 +167,7 @@ namespace BLToolkit.Data.DataProvider
             {
                 if (db.UseQueryText)
                 {
-                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false);
+                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false, db);
                     return ExecuteSqlList(db, sqlList);
                 }
                 throw new NotSupportedException("Set UseQueryText = true on the current generic data provider!");                

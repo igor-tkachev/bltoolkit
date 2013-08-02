@@ -1719,12 +1719,12 @@ BinaryFloat => Single
         {
             if (db.UseQueryText)
             {
-                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false);
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false, db);
                 return ExecuteSqlList(db, sqlList);
             }
 
 #if !MANAGED
-            return OracleInsertBulk(db, insertText, collection, members, 1000, getParameters);
+            return OracleInsertBulk(db, insertText, collection, members, 1000);
 #else
             throw new NotImplementedException("OracleInsertBulk not supported on OdpManagedDataProvider!");
 #endif
@@ -1740,39 +1740,15 @@ BinaryFloat => Single
         {
             if (db.UseQueryText || db.Transaction != null)
             {
-                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100, true);
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100, true, db);
                 return ExecuteSqlList(db, sqlList);
             }
 
 #if !MANAGED            
-            // Call if UseQuery false or out of a transaction scope
+            // Called if UseQuery false or out of a transaction scope
+            _interpreterBase.SetCollectionIds(db, members, collection);
 
-            MemberMapper primaryKeyMapper = null;
-            SequenceKeyGenerator keyGenerator = null;
-            foreach (var mapper in members)
-            {
-                keyGenerator = mapper.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
-                if (keyGenerator != null)
-                {
-                    primaryKeyMapper = mapper;
-                    break;
-                }
-            }
-
-            if (primaryKeyMapper == null)
-                throw new Exception("The class mapping should contain a pk column!");
-
-            var rowCount = collection.Count();
-            var sequenceIds = ReserveSequenceValues(db, rowCount, _interpreterBase.NextSequenceQuery(keyGenerator.Sequence));
-
-            int i = 0;
-            foreach (var element in collection)
-            {
-                primaryKeyMapper.SetInt64(element, sequenceIds[i]);
-                i++;
-            }
-
-            return OracleInsertBulk(db, insertText, collection, members, 1000, getParameters);
+            return OracleInsertBulk(db, insertText, collection, members, 1000);
 #else
             throw new NotImplementedException("OracleInsertBulk not supported on OdpManagedDataProvider!");
 #endif
@@ -1785,8 +1761,7 @@ BinaryFloat => Single
             string insertText,
             IEnumerable<T> collection,
             MemberMapper[] members,
-            int maxBatchSize,
-            DbManager.ParameterProvider<T> getParameters)
+            int maxBatchSize)
         {
             var idx = insertText.IndexOf('\n');
             var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
@@ -1805,27 +1780,6 @@ BinaryFloat => Single
             return rd.Count;
         }
 #endif
-
-        private List<Int64> ReserveSequenceValues(DbManager db, int count, string sequenceName)
-        {
-            var results = new List<long>();
-
-            foreach (var page in Enumerable.Range(1, count).ToPages(1000))
-            {
-                var sql = new StringBuilder("SELECT " + sequenceName + " FROM (");
-                for (int i = 1; i < page.Count(); i++)
-                    sql.Append("SELECT 0 FROM DUAL UNION ALL ");
-
-                sql.Append("SELECT 0 FROM DUAL)");
-
-                db.SetCommand(sql.ToString());
-
-                var result = db.ExecuteScalarList<long>();
-                results.AddRange(result);
-            }
-
-            return results;
-        }
 
         #endregion
 
@@ -1965,23 +1919,4 @@ BinaryFloat => Single
         }
     }
 
-    public static class EnumerableExtensions
-    {
-        public static IEnumerable<IEnumerable<T>> ToPages<T>(this IEnumerable<T> source, int pageSize)
-        {
-            var page = new List<T>(pageSize);
-            foreach (var x in source)
-            {
-                page.Add(x);
-                if (page.Count < pageSize) continue;
-
-                yield return page;
-                page = new List<T>(pageSize);
-            }
-
-            // Last page
-            if (page.Any())
-                yield return page;
-        }
-    }
 }

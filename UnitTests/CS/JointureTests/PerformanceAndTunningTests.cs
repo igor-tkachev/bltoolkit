@@ -41,15 +41,17 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertBatchWithIdentityWithTransaction()
         {
-            var list = new List<DataImport>();
+            var list = new List<Label>();
             for (int i = 0; i < 1000; i++)
             {
-                list.Add(new DataImport
-                    {
-                        DeclaredProduct = "zzz" + i,
-                        IdMedia = 2024,
-                        DeclaredId = i,
-                    });
+                list.Add(new Label
+                {
+                    ACTIVATION = 0,
+                    DATE_CREATION = DateTime.Now,
+                    DATE_MODIFICATION = DateTime.Now,
+                    ID_USER_ = 52,
+                    Name = "test" + i,
+                });
             }
 
             using (new ExecTimeInfo())
@@ -72,14 +74,16 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void InsertBatchWithIdentityWithoutTransaction()
         {
-            var list = new List<DataImport>();
+            var list = new List<Label>();
             for (int i = 0; i < 1000; i++)
             {
-                list.Add(new DataImport
+                list.Add(new Label
                     {
-                        DeclaredProduct = "zzz" + i,
-                        IdMedia = 2024,
-                        DeclaredId = i,
+                        ACTIVATION = 0,
+                        DATE_CREATION = DateTime.Now,
+                        DATE_MODIFICATION = DateTime.Now,
+                        ID_USER_ = 52,
+                        Name = "test" + i,
                     });
             }
 

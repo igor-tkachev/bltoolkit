@@ -208,6 +208,7 @@
     <Compile Include="DataAccess\ScalarAttribute.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataExceptionType.cs" />
+    <Compile Include="Data\DataProvider\EnumerableExtensions.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
     <Compile Include="Data\DataProvider\DataProviderInterpreterBase.cs" />
     <Compile Include="Data\DataProvider\Interpreters\OracleDataProviderInterpreter.cs" />
