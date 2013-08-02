@@ -370,10 +370,28 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is DateTime)
 			{
 				sb.AppendFormat("TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
-			}
-			else
-				base.BuildValue(sb, value);
-		}
+            }
+            else if (value is byte[])
+            {
+                sb.Append("'"+ ByteToHexBitFiddle(value as byte[]) +"'");
+            }
+            else
+                base.BuildValue(sb, value);
+        }
+ 
+        static string ByteToHexBitFiddle(byte[] bytes)
+        {
+            char[] c = new char[bytes.Length * 2];
+            int b;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                b = bytes[i] >> 4;
+                c[i * 2] = (char)(55 + b + (((b - 10) >> 31) & -7));
+                b = bytes[i] & 0xF;
+                c[i * 2 + 1] = (char)(55 + b + (((b - 10) >> 31) & -7));
+            }
+            return new string(c);
+        }
 
 		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
