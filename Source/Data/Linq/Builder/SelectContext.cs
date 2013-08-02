@@ -673,7 +673,9 @@ namespace BLToolkit.Data.Linq.Builder
 								case ExpressionType.Parameter    :
 									{
 										var sequence  = GetSequence(expression, level);
-										var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+										//var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
+										var index     = Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence);
+										var parameter = Lambda.Parameters[index == -1 ? 0 :    index];
 
 										if (levelExpression == expression)
 										{
