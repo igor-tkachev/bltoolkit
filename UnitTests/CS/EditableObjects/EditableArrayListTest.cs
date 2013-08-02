@@ -11,6 +11,16 @@ using BLToolkit.Reflection;
 
 namespace EditableObjects
 {
+	[Serializable]
+	public abstract class SerializableObject : EditableObject
+	{
+		public abstract int    ID   { get; set; }
+		public abstract Guid   UUID { get; set; }
+		public abstract string Name { get; set; }
+
+		public abstract EditableList<string> Array { get; set; }
+	}
+
 	[TestFixture]
 	public class EditableArrayListTest
 	{
@@ -385,16 +395,6 @@ namespace EditableObjects
 			Console.WriteLine("--- Print List ---");
 			foreach (EditableTestObject o in _testList)
 				Console.WriteLine(o);
-		}
-
-		[Serializable]
-		public abstract class SerializableObject : EditableObject
-		{
-			public abstract int    ID   { get; set; }
-			public abstract Guid   UUID { get; set; }
-			public abstract string Name { get; set; }
-
-			public abstract EditableList<string> Array { get; set; }
 		}
 
 		[Test]

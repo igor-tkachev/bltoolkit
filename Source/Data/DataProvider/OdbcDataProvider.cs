@@ -2,10 +2,11 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.Odbc;
-using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// Implements access to the Data Provider for ODBC.
 	/// </summary>

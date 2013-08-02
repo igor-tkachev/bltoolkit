@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.Validation;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -786,5 +787,31 @@ namespace Data.Linq
 				q.ToList();
 			}
 		}
+
+		[Test]
+		public void Issue257([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var q =
+					from m in db.Types
+						join p in db.Parent on m.ID equals p.ParentID
+					where m.DateTimeValue >= new DateTime(2013, 07, 01) && m.DateTimeValue < new DateTime(2013, 08, 01)
+					group m by new
+					{
+						QualiStatus = m.MoneyValue,
+						Date        = m.DateTimeValue.Date
+					}
+					into b
+					select new
+					{
+						QualiStatusByDate = b.Key,
+						Count             = b.Count()
+					};
+
+				q.ToList();
+			}
+		}
+
 	}
 }

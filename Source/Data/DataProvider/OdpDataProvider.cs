@@ -881,6 +881,12 @@ BinaryFloat => Single
                 return new OracleScalarDataReaderMapper(this, dataReader, nip);
             }
 
+            public override Reflection.Extension.ExtensionList Extensions
+            {
+                get { return Map.DefaultSchema.Extensions; }
+                set { Map.DefaultSchema.Extensions = value; }
+            }
+
             #region Convert
 
             #region Primitive Types

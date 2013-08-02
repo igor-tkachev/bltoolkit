@@ -83,14 +83,12 @@ namespace BLToolkit.Data.DataProvider.Interpreters
             if (primaryKeyMapper == null)
                 throw new Exception("The class mapping should contain a pk column!");
 
-            int j = 0;
-            foreach (var element in collection)
-            {
-                primaryKeyMapper.SetInt64(element, j);
-                j++;
-            }
-
-            return;
+            //int j = 0;
+            //foreach (var element in collection)
+            //{
+            //    primaryKeyMapper.SetInt64(element, j);
+            //    j++;
+            //}
 
             var rowCount = collection.Count();
             var sequenceIds = ReserveSequenceValues(db, rowCount, NextSequenceQuery(keyGenerator.Sequence));
@@ -180,13 +178,7 @@ namespace BLToolkit.Data.DataProvider.Interpreters
                     if (value is DateTime?)
                         value = ((DateTime?) value).Value;
 
-                    if (value is DateTime)
-                    {
-                        var dt = (DateTime) value;
-                        sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
-                    }
-                    else
-                        sp.BuildValue(sbItem, value);
+                    sp.BuildValue(sbItem, value);
 
                     values.Add(sbItem + " " + member.Name);
                 }
