@@ -966,10 +966,6 @@ namespace BLToolkit.Data.Linq.Builder
 							if (root.NodeType != ExpressionType.Parameter)
 								return null;
 
-//							for (var i = 0; i < Lambda.Parameters.Count; i++)
-//								if (root == Lambda.Parameters[i])
-//									return Sequence[i];
-
 							break;
 						}
 
@@ -995,9 +991,6 @@ namespace BLToolkit.Data.Linq.Builder
 						return ctx;
 				}
 			}
-
-//			if (Sequence.Length == 1)
-//				return Sequence[0];
 
 			return null;
 		}
