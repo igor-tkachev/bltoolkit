@@ -810,6 +810,5 @@ namespace Data.Linq
 				q.ToList();
 			}
 		}
-
 	}
 }
