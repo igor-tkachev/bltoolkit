@@ -145,6 +145,20 @@ namespace BLToolkit.Data.Linq.Builder
 														switch (e.NodeType)
 														{
 															case ExpressionType.MemberAccess :
+																var ma = (MemberExpression)e;
+																var l  = Builder.SqlProvider.ConvertMember(ma.Member);
+
+																if (l != null)
+																{
+																	var body = l.Body.Unwrap();
+																	var expr = body.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
+
+																	if (expr.Type != e.Type)
+																		expr = new ChangeTypeExpression(expr, e.Type);
+
+																	e = expr;
+																}
+
 																var sequence = GetSequence(e, 0) ?? Sequence[0];
 
 																if (sequence != null &&
@@ -364,7 +378,7 @@ namespace BLToolkit.Data.Linq.Builder
 		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Builder.ConvertExpressions(this, expression, flags)
-				.Select<SqlInfo,SqlInfo>(CheckExpression)
+				.Select(CheckExpression)
 				.ToArray();
 		}
 
@@ -674,8 +688,9 @@ namespace BLToolkit.Data.Linq.Builder
 								case ExpressionType.Parameter    :
 									{
 										var sequence  = GetSequence(expression, level);
-										var index     = Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence);
-										var parameter = Lambda.Parameters[index == -1 ? 0 :    index];
+                                        var index     = Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence);
+                                        var parameter = Lambda.Parameters[index == -1 ? 0 :    index];
+										//var parameter = Lambda.Parameters[Sequence.Length == 0 ? 0 : Array.IndexOf(Sequence, sequence)];
 
 										if (levelExpression == expression)
 										{
@@ -954,10 +969,6 @@ namespace BLToolkit.Data.Linq.Builder
 							if (root.NodeType != ExpressionType.Parameter)
 								return null;
 
-//							for (var i = 0; i < Lambda.Parameters.Count; i++)
-//								if (root == Lambda.Parameters[i])
-//									return Sequence[i];
-
 							break;
 						}
 
@@ -983,9 +994,6 @@ namespace BLToolkit.Data.Linq.Builder
 						return ctx;
 				}
 			}
-
-//			if (Sequence.Length == 1)
-//				return Sequence[0];
 
 			return null;
 		}

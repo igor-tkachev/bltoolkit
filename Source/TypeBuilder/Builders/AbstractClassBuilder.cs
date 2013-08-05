@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -254,53 +253,12 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			_context.TypeBuilder = _context.AssemblyBuilder.DefineType(
 				typeName,
-				TypeAttributes.Public
-				| TypeAttributes.BeforeFieldInit
-				| (TypeFactory.SealTypes? TypeAttributes.Sealed: 0),
+				TypeAttributes.Public | TypeAttributes.BeforeFieldInit | (TypeFactory.SealTypes? TypeAttributes.Sealed: 0),
 				_context.Type.IsInterface? typeof(object): (Type)_context.Type,
 				interfaces.ToArray());
 
 			if (_context.Type.IsSerializable)
 				_context.TypeBuilder.SetCustomAttribute(typeof(SerializableAttribute));
-
-/*
-			var dataContracts = _context.Type.GetCustomAttributes(typeof(DataContractAttribute));
-
-			if (dataContracts.Length > 0)
-			{
-				foreach (DataContractAttribute a in dataContracts)
-				{
-					var builder = 
-						new GeneratedAttributeBuilder(
-							typeof(DataContractAttribute),
-							null,
-							new[] { "Name", "Namespace", "IsReference" },
-							new object[] { a.Name, a.Namespace, a.IsReference });
-
-					builder.Build(_context);
-				}
-
-				var emit = _context.TypeBuilder.DefineMethod("WcfKnownTypes", MethodAttributes.Static | MethodAttributes.Public, typeof(Type[])).Emitter;
-				var loc = emit.DeclareLocal(typeof (Type[]));
-
-				emit
-					.ldc_i4_2
-					.newarr(typeof(Type))
-					.stloc(loc)
-					.ldloc(loc)
-					.ldc_i4_0
-					.LoadType(_context.Type)
-					.stelem_ref 
-					.ldloc(loc)
-					.ldc_i4_1
-					.LoadType(_context.TypeBuilder.TypeBuilder)
-					.stelem_ref 
-					.ldloc(loc)
-					.ret();
-
-				new GeneratedAttributeBuilder(typeof(KnownTypeAttribute), new object[] { "WcfKnownTypes" }, null, null).Build(_context);
-			}
-*/
 		}
 
 		class BuilderComparer : IComparer<IAbstractTypeBuilder>

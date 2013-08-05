@@ -796,11 +796,9 @@ namespace Data.Linq
 				var q =
 					from m in db.Types
 						join p in db.Parent on m.ID equals p.ParentID
-					where m.DateTimeValue >= new DateTime(2013, 07, 01) && m.DateTimeValue < new DateTime(2013, 08, 01)
 					group m by new
 					{
-						QualiStatus = m.MoneyValue,
-						Date        = m.DateTimeValue.Date
+						m.DateTimeValue.Date
 					}
 					into b
 					select new
@@ -809,9 +807,8 @@ namespace Data.Linq
 						Count             = b.Count()
 					};
 
-				q.ToList();
+                q.ToList();
 			}
 		}
-
 	}
 }

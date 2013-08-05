@@ -114,7 +114,6 @@ namespace UnitTests.CS.JointureTests
         [Test]
         public void ComplexJoin()
         {
-            // BLToolkit BUG
             using (var pitagorDb = ConnectionFactory.CreateDbManager())
             {
                 var groupsToExclude = new List<long> {549};

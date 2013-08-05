@@ -22,7 +22,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var body = ((LambdaExpression)methodCall.Arguments[1].Unwrap()).Body.Unwrap();
 
-			if (body.NodeType == ExpressionType	.MemberInit)
+			if (body.NodeType == ExpressionType.MemberInit)
 			{
 				var mi = (MemberInitExpression)body;
 				bool throwExpr;
