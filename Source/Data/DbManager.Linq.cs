@@ -80,15 +80,10 @@ namespace BLToolkit.Data
 			}
 
 			var sqlProvider = DataProvider.CreateSqlProvider();
+            sqlProvider.UseQueryText = UseQueryText;
 
 			var cc = sqlProvider.CommandCount(sql);
 			var sb = new StringBuilder();
-
-            //if (DataProvider.UseQueryText)
-            if (UseQueryText)
-            {
-                // Use oracleHelper for OdpDataProvider to generate sql
-            }
 
             var commands = new string[cc];
 
@@ -119,6 +114,9 @@ namespace BLToolkit.Data
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
 		{
+            if (UseQueryText)
+                return;
+
 			var parameters = query.GetParameters();
 
 			if (parameters.Length == 0 && pq.SqlParameters.Count == 0)
@@ -188,12 +186,6 @@ namespace BLToolkit.Data
 			var pq = (PreparedQuery)query;
 
 			SetCommand(pq.Commands[0], pq.Parameters);
-
-            if (UseQueryText)
-            {
-                Command.CommandText = OracleHelper.Interpret(Command);
-                Command.Parameters.Clear();
-            }
 
 			var now = default(DateTime);
 
@@ -265,12 +257,6 @@ namespace BLToolkit.Data
 			var pq = (PreparedQuery)query;
 
             SetCommand(pq.Commands[0], pq.Parameters);
-
-            if (UseQueryText)
-            {
-                Command.CommandText = OracleHelper.Interpret(Command);
-                Command.Parameters.Clear();
-            }
 
 		    var now = default(DateTime);
 

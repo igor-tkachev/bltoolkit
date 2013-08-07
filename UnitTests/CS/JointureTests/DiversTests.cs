@@ -149,15 +149,6 @@ namespace UnitTests.CS.JointureTests
                 var updateCount = query.Set(d => d.MediaId, mediaId)
                     .Update();
 
-                //var updateCount = db.GetTable<MultimediaContext>().
-                //    Where(d =>
-                //        d.DateParution >= 100 &&
-                //        d.DateParution < 200 &&
-                //        d.MediaId == mediaId
-                //        )
-                //    .Set(d => d.MediaId, mediaId)
-                //    .Update();
-
                 db.RollbackTransaction();
                 Console.WriteLine(updateCount);
             }

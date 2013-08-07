@@ -22,6 +22,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		string           Name                        { get; }
 		SqlQuery         SqlQuery                    { get; set; }
+        bool             UseQueryText                { get; set; }
 
 		bool             SkipAcceptsParameter        { get; }
 		bool             TakeAcceptsParameter        { get; }

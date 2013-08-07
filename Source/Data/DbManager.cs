@@ -627,18 +627,13 @@ namespace BLToolkit.Data
 				() =>
 				    {
 				        var dataReader = _dataProvider.GetDataReader(SelectCommand, commandBehavior);
-				        LastQuery = SelectCommand.CommandText;
 				        return _dataProvider.GetDataReader(_mappingSchema, dataReader);
 				    });
 		}
 
 		private int ExecuteNonQueryInternal()
 		{
-		    return ExecuteOperation<int>(OperationType.ExecuteNonQuery, () =>
-		    {
-		        LastQuery = SelectCommand.CommandText;
-		        return SelectCommand.ExecuteNonQuery();
-		    });
+		    return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
 		}
 
 		#endregion

@@ -37,7 +37,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Support Flags
 
-		public virtual bool SkipAcceptsParameter            { get { return true;  } }
+	    public bool UseQueryText                            { get; set; }
+	    public virtual bool SkipAcceptsParameter            { get { return true;  } }
 		public virtual bool TakeAcceptsParameter            { get { return true;  } }
 		public virtual bool IsTakeSupported                 { get { return true;  } }
 		public virtual bool IsSkipSupported                 { get { return true;  } }
@@ -1482,8 +1483,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case QueryElementType.SqlParameter:
 					{
 						var parm = (SqlParameter)expr;
-
-						if (parm.IsQueryParameter)
+                        
+						if (!UseQueryText && parm.IsQueryParameter)
 						{
 							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
 							sb.Append(name);
