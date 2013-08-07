@@ -634,7 +634,11 @@ namespace BLToolkit.Data
 
 		private int ExecuteNonQueryInternal()
 		{
-			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
+		    return ExecuteOperation<int>(OperationType.ExecuteNonQuery, () =>
+		    {
+		        LastQuery = SelectCommand.CommandText;
+		        return SelectCommand.ExecuteNonQuery();
+		    });
 		}
 
 		#endregion

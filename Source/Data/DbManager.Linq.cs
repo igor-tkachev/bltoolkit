@@ -189,6 +189,12 @@ namespace BLToolkit.Data
 
 			SetCommand(pq.Commands[0], pq.Parameters);
 
+            if (UseQueryText)
+            {
+                Command.CommandText = OracleHelper.Interpret(Command);
+                Command.Parameters.Clear();
+            }
+
 			var now = default(DateTime);
 
 			if (TraceSwitch.TraceInfo)
@@ -257,8 +263,6 @@ namespace BLToolkit.Data
 		IDataReader IDataContext.ExecuteReader(object query)
 		{
 			var pq = (PreparedQuery)query;
-
-		    var command = pq.Commands[0];
 
             SetCommand(pq.Commands[0], pq.Parameters);
 

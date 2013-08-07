@@ -22,7 +22,16 @@ namespace UnitTests.CS.JointureTests
         #endregion
     }
 
-[TableName(Name = "DATA_MEDIA", Owner = "PITAFR01")]
+    [TableName(Name = "MULTIMEDIA_CONTEXT", Owner = "PITAFR01")]
+    public class MultimediaContext
+    {
+        [MapField("ID_MEDIA")]
+        public long MediaId { get; set; }
+        [MapField("DATE_PARUTION")]
+        public long DateParution { get; set; }
+    }
+
+    [TableName(Name = "DATA_MEDIA", Owner = "PITAFR01")]
     public class DataMedia
     {
         [MapField("ID_MEDIA")]

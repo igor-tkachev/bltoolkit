@@ -182,7 +182,7 @@ namespace BLToolkit.Data.DataProvider
             var regex = new Regex(@"(?<string>'[^']+')|(?<Parameters>:[a-zA-Z0-9_]+)");
             MatchCollection matchCollection = regex.Matches(cmd.CommandText);
 
-            string strQuery = cmd.CommandText + " ";
+            string query = cmd.CommandText + " ";
             int matchCount = 0;
             List<string> p = new List<string>();
 
@@ -205,65 +205,45 @@ namespace BLToolkit.Data.DataProvider
                 if (param.Value is DateTime)
                 {
                     var dt = (DateTime) param.Value;
+                    var endingChars = new List<string>()
+                    {
+                        "", " ", Environment.NewLine, Environment.NewLine + " "
+                    };
 
-                    if (strQuery.Contains(parameter + " "))
+                    bool found = false;
+                    foreach (var endingChar in endingChars)
                     {
-                        strQuery = strQuery.Replace(parameter + " ",
-                            dt.Date == dt
-                                ? SqlConvertDate(dt) + " "
-                                : SqlConvertDateTime(dt) + " ");
-                    }
-                    else
-                    {
-                        if (strQuery.EndsWith(parameter))
+                        if (query.Contains(parameter + endingChar))
                         {
-                            strQuery = strQuery.Replace(parameter,
+                            query = query.Replace(parameter + endingChar,
                                 dt.Date == dt
-                                    ? SqlConvertDate(dt)
-                                    : SqlConvertDateTime(dt));
-                        }
-                        else
-                        {
-                            if (strQuery.EndsWith(parameter + Environment.NewLine + " "))
-                            {
-                                strQuery = strQuery.Replace(parameter + Environment.NewLine + " ",
-                                    dt.Date == dt
-                                        ? SqlConvertDate(dt) + Environment.NewLine + " "
-                                        : SqlConvertDateTime(dt)) + Environment.NewLine + " ";
-                            }
-                            else
-                            {
-                                if (strQuery.EndsWith(parameter + Environment.NewLine))
-                                {
-                                    strQuery = strQuery.Replace(parameter + Environment.NewLine,
-                                        dt.Date == dt
-                                            ? SqlConvertDate(dt) + Environment.NewLine
-                                            : SqlConvertDateTime(dt)) + Environment.NewLine;
-                                }
-                                else
-                                {
-                                    throw new Exception("Couldnt find parameter " + parameter + " in sql : " + strQuery);
-                                }
-                            }
+                                    ? SqlConvertDate(dt) + endingChar
+                                    : SqlConvertDateTime(dt) + endingChar);
+
+                            found = true; 
+                            break;
                         }
                     }
+
+                    if (!found)
+                        throw new Exception("Couldnt find parameter " + parameter + " in sql : " + query);
                 }
                 else if (param.Value is string)
-                    strQuery = strQuery.Replace(parameter, SqlConvertString(param.Value.ToString()) + " ");
+                    query = query.Replace(parameter, SqlConvertString(param.Value.ToString()) + " ");
                 else if (param.Value is Int16)
-                    strQuery = strQuery.Replace(parameter, ((Int16) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    query = query.Replace(parameter, ((Int16) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int32)
-                    strQuery = strQuery.Replace(parameter, ((Int32) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    query = query.Replace(parameter, ((Int32) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int64)
-                    strQuery = strQuery.Replace(parameter, ((Int64) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    query = query.Replace(parameter, ((Int64) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is decimal)
-                    strQuery = strQuery.Replace(parameter, ((decimal) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    query = query.Replace(parameter, ((decimal) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is float)
-                    strQuery = strQuery.Replace(parameter, ((float) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    query = query.Replace(parameter, ((float) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is double)
-                    strQuery = strQuery.Replace(parameter, ((double) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    query = query.Replace(parameter, ((double) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is TimeSpan)
-                    strQuery = strQuery.Replace(parameter, "'" + ((TimeSpan) param.Value).ToString() + "' ");
+                    query = query.Replace(parameter, "'" + ((TimeSpan) param.Value).ToString() + "' ");
                 else
                     throw new NotImplementedException(param.Value.GetType() + " is not implemented yet.");
 
@@ -292,7 +272,7 @@ namespace BLToolkit.Data.DataProvider
                 throw new Exception(msg);
             }
 
-            return strQuery;
+            return query;
         }
 
     }

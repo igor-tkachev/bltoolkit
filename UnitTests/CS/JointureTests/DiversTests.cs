@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
@@ -125,6 +126,40 @@ namespace UnitTests.CS.JointureTests
 
                 var res = queryDataMediaFrance5.ToList();
                 Console.WriteLine(res);
+            }
+        }
+
+        [Test]
+        public void GenericUserQueryTrueUpdateError()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.UseQueryText = true;
+
+                db.BeginTransaction();
+
+                int mediaId = 10;
+
+                var query = from d in db.GetTable<MultimediaContext>()
+                    where d.DateParution >= 100 &&
+                          d.DateParution < 200 &&
+                          d.MediaId == mediaId
+                    select d;
+
+                var updateCount = query.Set(d => d.MediaId, mediaId)
+                    .Update();
+
+                //var updateCount = db.GetTable<MultimediaContext>().
+                //    Where(d =>
+                //        d.DateParution >= 100 &&
+                //        d.DateParution < 200 &&
+                //        d.MediaId == mediaId
+                //        )
+                //    .Set(d => d.MediaId, mediaId)
+                //    .Update();
+
+                db.RollbackTransaction();
+                Console.WriteLine(updateCount);
             }
         }
 
