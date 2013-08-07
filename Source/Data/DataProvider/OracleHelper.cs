@@ -199,34 +199,71 @@ namespace BLToolkit.Data.DataProvider
 
             for (int i = p.Count - 1; i >= 0; i--)
             {
-                string parameters = p[i];
+                string parameter = p[i];
 
                 var param = (IDbDataParameter)cmd.Parameters[i];
                 if (param.Value is DateTime)
                 {
-                    var dt = (DateTime)param.Value;
+                    var dt = (DateTime) param.Value;
 
-                    strQuery = strQuery.Replace(parameters + " ",
-                                                dt.Date == dt
-                                                    ? SqlConvertDate(dt) + " "
-                                                    : SqlConvertDateTime(dt) + " ");
+                    if (strQuery.Contains(parameter + " "))
+                    {
+                        strQuery = strQuery.Replace(parameter + " ",
+                            dt.Date == dt
+                                ? SqlConvertDate(dt) + " "
+                                : SqlConvertDateTime(dt) + " ");
+                    }
+                    else
+                    {
+                        if (strQuery.EndsWith(parameter))
+                        {
+                            strQuery = strQuery.Replace(parameter,
+                                dt.Date == dt
+                                    ? SqlConvertDate(dt)
+                                    : SqlConvertDateTime(dt));
+                        }
+                        else
+                        {
+                            if (strQuery.EndsWith(parameter + Environment.NewLine + " "))
+                            {
+                                strQuery = strQuery.Replace(parameter + Environment.NewLine + " ",
+                                    dt.Date == dt
+                                        ? SqlConvertDate(dt) + Environment.NewLine + " "
+                                        : SqlConvertDateTime(dt)) + Environment.NewLine + " ";
+                            }
+                            else
+                            {
+                                if (strQuery.EndsWith(parameter + Environment.NewLine))
+                                {
+                                    strQuery = strQuery.Replace(parameter + Environment.NewLine,
+                                        dt.Date == dt
+                                            ? SqlConvertDate(dt) + Environment.NewLine
+                                            : SqlConvertDateTime(dt)) + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    throw new Exception("Couldnt find parameter " + parameter + " in sql : " + strQuery);
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (param.Value is string)
-                    strQuery = strQuery.Replace(parameters, SqlConvertString(param.Value.ToString()) + " ");
+                    strQuery = strQuery.Replace(parameter, SqlConvertString(param.Value.ToString()) + " ");
                 else if (param.Value is Int16)
-                    strQuery = strQuery.Replace(parameters, ((Int16)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameter, ((Int16) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int32)
-                    strQuery = strQuery.Replace(parameters, ((Int32)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameter, ((Int32) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is Int64)
-                    strQuery = strQuery.Replace(parameters, ((Int64)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameter, ((Int64) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is decimal)
-                    strQuery = strQuery.Replace(parameters, ((decimal)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameter, ((decimal) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is float)
-                    strQuery = strQuery.Replace(parameters, ((float)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameter, ((float) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is double)
-                    strQuery = strQuery.Replace(parameters, ((double)param.Value).ToString(CultureInfo.InvariantCulture) + " ");
+                    strQuery = strQuery.Replace(parameter, ((double) param.Value).ToString(CultureInfo.InvariantCulture) + " ");
                 else if (param.Value is TimeSpan)
-                    strQuery = strQuery.Replace(parameters, "'" + ((TimeSpan)param.Value).ToString() + "' ");
+                    strQuery = strQuery.Replace(parameter, "'" + ((TimeSpan) param.Value).ToString() + "' ");
                 else
                     throw new NotImplementedException(param.Value.GetType() + " is not implemented yet.");
 

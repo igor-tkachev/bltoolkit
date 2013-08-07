@@ -21,6 +21,19 @@ namespace UnitTests.CS.JointureTests.Factories
         #endregion
     }
 
+    [TestFixture]
+    public class FeroeTest : AllTests
+    {
+        #region Overrides of AssociationTests
+
+        protected override DbConnectionFactory CreateFactory()
+        {
+            return new FeroeFactory();
+        }
+
+        #endregion
+    }
+
     [TableName(Owner = "MEDIADISC01")]
     public class ALBUM_FOLLOWED
     {

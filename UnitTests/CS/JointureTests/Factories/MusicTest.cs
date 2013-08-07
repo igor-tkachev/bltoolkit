@@ -22,22 +22,32 @@ namespace UnitTests.CS.JointureTests
         #endregion
     }
 
-
-    [TableName(Name = "PITAFR01.MEDIA")]
+[TableName(Name = "DATA_MEDIA", Owner = "PITAFR01")]
     public class DataMedia
     {
-        [MapField("ID_MEDIA"), PrimaryKey]
-        public Int64 IdMedia { get; set; }
-
-        [MapField("MEDIA")]
-        public String Media { get; set; }
-
-        [MapField("ID_LANGUAGE_DATA")]
-        public Int64 IdLanguageData { get; set; }
-
-        [MapField("ACTIVATION")]
-        public Int16 Activation { get; set; }
+        [MapField("ID_MEDIA")]
+        public long MediaId { get; set; }
+        [MapField("DATE_MEDIA")]
+        public DateTime Date { get; set; }
+        [MapField("ID_DATA_MEDIA")]
+        public long Id { get; set; }
     }
+
+[TableName(Name = "PITAFR01.MEDIA")]
+public class DataMedia2
+{
+    [MapField("ID_MEDIA"), PrimaryKey]
+    public Int64 IdMedia { get; set; }
+
+    [MapField("MEDIA")]
+    public String Media { get; set; }
+
+    [MapField("ID_LANGUAGE_DATA")]
+    public Int64 IdLanguageData { get; set; }
+
+    [MapField("ACTIVATION")]
+    public Int16 Activation { get; set; }
+}
 
     [TableName(Name = "PITAFR01.MEDIA_SETTING")]
     public class DataMediaSetting

@@ -25,7 +25,7 @@ namespace UnitTests.CS.JointureTests
     {
         private void GetMediaSetting(DbManager db)
         {
-            var query = from m in db.GetTable<DataMedia>()
+            var query = from m in db.GetTable<DataMedia2>()
                         join s in db.GetTable<DataMediaSetting>() on m.IdMedia equals s.IdMedia
                         where m.IdLanguageData == 33 && s.IdLanguageDataI == 33
                         orderby m.Media
@@ -108,6 +108,23 @@ namespace UnitTests.CS.JointureTests
                     db.SetCommand(req);
                     var allMedia = db.ExecuteList<Media>();
                 }
+            }
+        }
+
+        [Test]
+        public void GenericUserQueryTrueSelectError()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                int mediaId = 10;
+
+                db.UseQueryText = true;
+                var queryDataMediaFrance5 = db.GetTable<DataMedia>()
+                    .Where(d => d.Date <= DateTime.Now && d.Date >= DateTime.Now && d.MediaId == mediaId)
+                    .Select(d => d);
+
+                var res = queryDataMediaFrance5.ToList();
+                Console.WriteLine(res);
             }
         }
 
@@ -335,7 +352,7 @@ namespace UnitTests.CS.JointureTests
                         STATUS = 3,
                         PDF_NAME = "COCO",
                         ID_PDF_RESULT_TYPE = 29,
-                        STATIC_NAV_SESSION = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new DataMedia {Activation = 2, IdLanguageData = 123, IdMedia = 2002, Media = "COCO"}))
+                        STATIC_NAV_SESSION = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new DataMedia2 {Activation = 2, IdLanguageData = 123, IdMedia = 2002, Media = "COCO"}))
                     };
 
                 var sessionId = sqlQuery.InsertWithIdentity(session);
