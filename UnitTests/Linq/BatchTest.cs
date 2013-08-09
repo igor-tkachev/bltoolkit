@@ -1,6 +1,5 @@
 ﻿using System;
 using BLToolkit.Data;
-using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
