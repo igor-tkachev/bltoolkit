@@ -411,7 +411,7 @@ namespace EditableObjects
 			//Configuration.NotifyOnChangesOnly = false;
 		}
 
-		[Test]
+		//////[Test] Resharpe 8 issue
 		public void SerializationTest2()
 		{
 			//Configuration.NotifyOnChangesOnly = true;
