@@ -144,21 +144,7 @@ namespace BLToolkit.Data.Linq.Builder
 														switch (e.NodeType)
 														{
 															case ExpressionType.MemberAccess :
-																var ma = (MemberExpression)e;
-																var l  = Builder.SqlProvider.ConvertMember(ma.Member);
-
-																if (l != null)
-																{
-																	var body = l.Body.Unwrap();
-																	var expr = body.Convert(wpi => wpi.NodeType == ExpressionType.Parameter ? ma.Expression : wpi);
-
-																	if (expr.Type != e.Type)
-																		expr = new ChangeTypeExpression(expr, e.Type);
-
-																	e = expr;
-																}
-
-																var sequence = GetSequence(e, 0) ?? Sequence[0];
+																var sequence = GetSequence(memberExpression, 0);
 
 																if (sequence != null &&
 																	!sequence.IsExpression(e, 0, RequestFor.Object).Result &&
