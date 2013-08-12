@@ -1636,27 +1636,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildString(StringBuilder sb, string value)
 		{
-			for (var i = 0; i < value.Length; i++)
-			{
-				if (value[i] > 127)
-				{
-					BuildUnicodeString(sb, value);
-					return;
-				}
-			}
-
 			sb
 				.Append('\'')
 				.Append(value.Replace("'", "''"))
 				.Append('\'');
 		}
 
-		protected virtual void BuildUnicodeString(StringBuilder sb, string value)
+		protected virtual void BuildChar(StringBuilder sb, char value)
 		{
-			sb
-				.Append('\'')
-				.Append(value.Replace("'", "''"))
-				.Append("\'");
+			sb.Append('\'');
+
+			if (value == '\'') sb.Append("''");
+			else               sb.Append(value);
+
+			sb.Append('\'');
 		}
 
 		protected virtual void BuildDateTime(StringBuilder sb, object value)
