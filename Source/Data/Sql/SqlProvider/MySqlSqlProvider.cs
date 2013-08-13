@@ -331,5 +331,18 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return new string(c);
 		}
+
+		protected override void BuildString(StringBuilder sb, string value)
+		{
+			sb
+				.Append('\'')
+				.Append(value.Replace("'", "''").Replace("\\", "\\\\"))
+				.Append('\'');
+		}
+
+		protected override void BuildChar(StringBuilder sb, char value)
+		{
+			BuildString(sb, new string(new[] { value }));
+		}
 	}
 }
