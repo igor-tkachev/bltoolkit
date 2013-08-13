@@ -1586,15 +1586,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual void BuildValue(StringBuilder sb, object value)
 		{
-			if      (value == null)                   sb.Append("NULL");
-			else if (value is string)                 BuildString(sb, value.ToString());
-			else if (value is char || value is char?) sb.Append('\'').Append(value.ToString().Replace("'", "''")).Append('\'');
-			else if (value is bool || value is bool?) sb.Append((bool)value ? "1" : "0");
-			else if (value is DateTime)               BuildDateTime(sb, value);
-			else if (value is Guid)                   sb.Append('\'').Append(value).Append('\'');
-			else if (value is decimal)                sb.Append(((decimal)value).ToString(NumberFormatInfo));
-			else if (value is double)                 sb.Append(((double) value).ToString(NumberFormatInfo));
-			else if (value is float)                  sb.Append(((float)  value).ToString(NumberFormatInfo));
+			if      (value == null)     sb.Append("NULL");
+			else if (value is string)   BuildString(sb, value.ToString());
+			else if (value is char)     BuildChar  (sb, (char)value);
+			else if (value is bool)     sb.Append((bool)value ? "1" : "0");
+			else if (value is DateTime) BuildDateTime(sb, value);
+			else if (value is Guid)     sb.Append('\'').Append(value).Append('\'');
+			else if (value is decimal)  sb.Append(((decimal)value).ToString(NumberFormatInfo));
+			else if (value is double)   sb.Append(((double) value).ToString(NumberFormatInfo));
+			else if (value is float)    sb.Append(((float)  value).ToString(NumberFormatInfo));
 			else
 			{
 				var type = value.GetType();

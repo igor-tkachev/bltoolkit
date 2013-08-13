@@ -334,15 +334,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildString(StringBuilder sb, string value)
 		{
-			sb
-				.Append('\'')
-				.Append(value.Replace("'", "''").Replace("\\", "\\\\"))
-				.Append('\'');
+			base.BuildString(sb, value.Replace("\\", "\\\\"));
 		}
 
 		protected override void BuildChar(StringBuilder sb, char value)
 		{
-			BuildString(sb, new string(new[] { value }));
+			if (value == '\\')
+				sb.Append("\\\\");
+			else
+				base.BuildChar(sb, value);
 		}
 	}
 }
