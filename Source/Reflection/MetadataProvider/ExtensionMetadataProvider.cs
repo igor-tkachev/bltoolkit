@@ -21,11 +21,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private static object GetValue(TypeExtension typeExtension, MemberAccessor member, string elemName, out bool isSet)
 		{
-			var value = typeExtension[member.Name][elemName].Value;
-
-			isSet = value != null;
-
-			return value;
+			AttributeExtensionCollection ext;
+			isSet = typeExtension[member.Name].Attributes.TryGetValue(elemName, out ext);
+			return isSet ? ext.Value : null;
 		}
 
 		#endregion
