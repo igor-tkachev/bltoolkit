@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.Validation;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -782,6 +783,29 @@ namespace Data.Linq
 					from ch in db.Child
 					from p in new Model.Functions(db).GetParentByID(ch.Parent.ParentID)
 					select p;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Issue257([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var q =
+					from m in db.Types
+						join p in db.Parent on m.ID equals p.ParentID
+					group m by new
+					{
+						m.DateTimeValue.Date
+					}
+					into b
+					select new
+					{
+						QualiStatusByDate = b.Key,
+						Count             = b.Count()
+					};
 
 				q.ToList();
 			}
