@@ -85,6 +85,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Web", "Demo\Asp.Net\Web\", 
 		SccAuxPath = ""
 		SccLocalPath = ""
 		SccProvider = ""
+		Frontpage = "false"
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		ProjectReferences = "{0C325F5D-E50E-4340-8724-D29896CCC583}|BLToolkit.4.dll;{01C318D0-1CB1-4CB4-A5ED-D311665C76EE}|PetShop.BusinessLogic.dll;{BF0811CA-4663-4778-8331-9BEEBCAAC8C8}|PetShop.ObjectModel.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/Web"
@@ -177,6 +178,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests.Fluent", "UnitTests\Fluent\UnitTests.Fluent.csproj", "{527300F8-9F04-434C-8239-4FE5E174FF6B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Generic.4", "DataProviders\Generic\BLToolkit.Data.DataProvider.Generic.4.csproj", "{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.CSharpSQLite.4", "DataProviders\BLToolkit.Data.DataProvider.CSharpSQLite.4\BLToolkit.Data.DataProvider.CSharpSQLite.4.csproj", "{426758BC-CD0A-423D-BCFD-9A57921CA048}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2061,6 +2064,48 @@ Global
 		{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}.Template|Win32.ActiveCfg = Release|Any CPU
 		{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}.Template|x64.ActiveCfg = Release|Any CPU
 		{6E7FE7FC-551F-4273-ACEB-72DC0D01120E}.Template|x86.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|Any CPU.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|Any CPU.Build.0 = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|Mixed Platforms.Build.0 = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|Win32.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|x64.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug FW 3.5|x86.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|Any CPU.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|Any CPU.Build.0 = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|Mixed Platforms.Build.0 = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|Win32.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|x64.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.DebugMono|x86.ActiveCfg = Debug|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|Any CPU.Build.0 = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|Win32.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|x64.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Release|x86.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|Any CPU.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|Any CPU.Build.0 = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|Mixed Platforms.Build.0 = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|Win32.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|x64.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.ReleaseMono|x86.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|Any CPU.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|Any CPU.Build.0 = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|Mixed Platforms.Build.0 = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|Win32.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|x64.ActiveCfg = Release|Any CPU
+		{426758BC-CD0A-423D-BCFD-9A57921CA048}.Template|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2088,6 +2133,7 @@ Global
 		{785CE174-0A91-465F-9E41-65E6E05A0EC9} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
 		{CB303F0B-0AA3-4589-850A-95E985A09492} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
 		{6E7FE7FC-551F-4273-ACEB-72DC0D01120E} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
+		{426758BC-CD0A-423D-BCFD-9A57921CA048} = {E6CE0ECB-3373-4DC0-98CB-F4E9DC2293C4}
 		{83C0070F-E639-4D65-B392-34F621165A1C} = {B75C60BF-F5B7-472E-A0A8-8A12DDDDAA7D}
 		{0F3F166F-9927-4BC0-855F-ADB0D20218F1} = {B75C60BF-F5B7-472E-A0A8-8A12DDDDAA7D}
 		{35E61C2A-2B8C-4AF4-AD21-353936581EF5} = {B75C60BF-F5B7-472E-A0A8-8A12DDDDAA7D}

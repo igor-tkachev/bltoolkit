@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Community.CsharpSqlite.SQLiteClient</id>
+    <version>3.7.7.2</version>
+    <title>Community.CsharpSqlite.SQLiteClient</title>
+    <authors>Noah B. Hart</authors>
+    <owners>Noah B. Hart</owners>
+    <licenseUrl>http://opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://code.google.com/p/csharp-sqlite</projectUrl>
+    <iconUrl>https://code.google.com/p/csharp-sqlite/logo?cct=1355956730</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>C#-SQLite is an independent reimplementation of the SQLite software library.  It has been ported into managed code, written in C#.</description>
+    <releaseNotes />
+    <copyright />
+    <language />
+    <tags>sqlite csharpsqlite</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Data" targetFramework="" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

@@ -1,0 +1,144 @@
+using System;
+using System.Data;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Text;
+using System.Xml;
+
+using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.Mapping;
+
+using Community.CsharpSqlite.SQLiteClient;
+
+namespace BLToolkit.Data.DataProvider
+{
+	/// <summary>
+	/// Implements access to the Data Provider for SQLite.
+	/// </summary>
+	/// <remarks>
+	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+	/// </remarks>
+	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+    public sealed class CSharpSQLiteDataProvider : DataProviderBase
+	{
+		/// <summary>
+		/// Returns connection type.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+		/// <value>An instance of the <see cref="Type"/> class.</value>
+		public override Type ConnectionType
+		{
+            get { return typeof(SqliteConnection); }
+		}
+
+		/// <summary>
+		/// Returns the data provider name.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataProvider Method</seealso>
+		/// <value>Data provider name.</value>
+		public override string Name
+		{
+			get { return DataProvider.ProviderName.SQLite; }
+		}
+
+		/// <summary>
+		/// Creates the database connection object.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+		/// <returns>The database connection object.</returns>
+		public override IDbConnection CreateConnectionObject()
+		{
+            return new SqliteConnection();
+		}
+
+		/// <summary>
+		/// Creates the data adapter object.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+		/// <returns>A data adapter object.</returns>
+		public override DbDataAdapter CreateDataAdapterObject()
+		{
+            return new SqliteDataAdapter();
+		}
+
+		/// <summary>
+		/// Populates the specified IDbCommand object's Parameters collection with 
+		/// parameter information for the stored procedure specified in the IDbCommand.
+		/// </summary>
+		/// <remarks>
+		/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
+		/// </remarks>
+		/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+		/// <param name="command">The IDbCommand referencing the stored procedure for which the parameter information is to be derived. The derived parameters will be populated into the Parameters of this command.</param>
+		public override bool DeriveParameters(IDbCommand command)
+		{
+			// SQLiteCommandBuilder does not implement DeriveParameters.
+			// This is not surprising, since SQLite has no support for stored procs.
+			//
+			return false;
+		}
+
+		public override object Convert(object value, ConvertType convertType)
+		{
+			switch (convertType)
+			{
+				case ConvertType.ExceptionToErrorNumber:
+					{
+                        if (value is SqliteException)
+							return ((SqliteException) value).ErrorCode;
+						break;
+					}
+			}
+
+			return SqlProvider.Convert(value, convertType);
+		}
+
+		public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			switch (number)
+			{
+				case 19: return DataExceptionType.ConstraintViolation;
+			}
+			return DataExceptionType.Undefined;
+		}
+
+		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
+		{
+			if (parameter.Direction == ParameterDirection.Input || parameter.Direction == ParameterDirection.InputOutput)
+			{
+				if (parameter.Value is XmlDocument)
+				{
+					parameter.Value  = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
+					parameter.DbType = DbType.Binary;
+				}
+			}
+
+			base.AttachParameter(command, parameter);
+		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (parameter.DbType == DbType.DateTime2)
+				parameter.DbType = DbType.DateTime;
+
+			base.SetParameterValue(parameter, value);
+		}
+
+		public override ISqlProvider CreateSqlProvider()
+		{
+			return new SQLiteSqlProvider();
+		}		
+	}
+}
