@@ -258,7 +258,7 @@ namespace BLToolkit.Mapping.Fluent
 		void IFluentMap.NullValue<TR>(string propName, TR value)
 		{
 			var member = this.GetMemberExtension(propName);
-			member.Attributes.Add(Attributes.NullValue, Convert.ToString(value));
+			member.Attributes.Add(Attributes.NullValue, Equals(value, null) ? null : Convert.ToString(value));
 			this.EachChilds(m => m.NullValue(propName, value));
 		}
 
