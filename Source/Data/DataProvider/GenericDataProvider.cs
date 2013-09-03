@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Transactions;
 using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.Emit;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -93,9 +94,44 @@ namespace BLToolkit.Data.DataProvider
             }
         }
 
+        private object _nVarchar2EnumValue;
+#if !DATA
+        private SetHandler _oracleDbTypeSetHandler;
+#endif
+
         public override void SetParameterValue(IDbDataParameter parameter, object value)
         {
+            if (Name == ProviderFullName.Oracle)
+            {
+                if (value is string)
+                {
+                    // We need NVarChar2 in order to insert UTF8 string values. The default Odp VarChar2 dbtype doesnt work
+                    // with UTF8 values. Note : Microsoft oracle client uses NVarChar value by default.
+
+                    if (_nVarchar2EnumValue == null)
+                    {
+                        const string typeName = "Oracle.DataAccess.Client.OracleDbType";
+
+                        var nvarCharType = parameter.GetType().Assembly.GetType(typeName);
+                        var enumValue = Enum.Parse(nvarCharType, "NVarchar2");
+                        _nVarchar2EnumValue = enumValue;
+
+#if !DATA
+                        _oracleDbTypeSetHandler = FunctionFactory.Il.CreateSetHandler(parameter.GetType(), "OracleDbType");
+#endif
+                    }
+#if !DATA
+                    _oracleDbTypeSetHandler(parameter, _nVarchar2EnumValue);
+#endif
+                }
+            }
+
             _dataProviderInterpreter.SetParameterValue(parameter, value);
+        }
+
+        public override DbType GetParameterDbType(DbType dbType)
+        {
+            return _dataProviderInterpreter.GetParameterDbType(dbType);
         }
 
         public override string GetSequenceQuery(string sequenceName)

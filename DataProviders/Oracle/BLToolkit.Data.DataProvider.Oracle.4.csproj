@@ -85,8 +85,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Oracle.DataAccess, Version=2.112.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
-      <Private>True</Private>
       <HintPath>C:/app/Valeriu.Lacatusu/product/11.2.0/client_2/odp.net/bin/2.x/Oracle.DataAccess.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

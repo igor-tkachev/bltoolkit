@@ -38,6 +38,11 @@ namespace BLToolkit.Data.DataProvider
             return null;
         }
 
+        public virtual DbType GetParameterDbType(DbType dbType)
+        {
+            return dbType;
+        }
+
         public virtual string NextSequenceQuery(string sequenceName)
         {
             return null;

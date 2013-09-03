@@ -128,11 +128,21 @@ namespace UnitTests.CS.JointureTests
                 var res = prod.FirstOrDefault();
                 Console.WriteLine(res);
 
+                res.RefProvider = "valeriu" + DateTime.Now.ToString();
                 res.Grid = "Germania";
+                res.Title = "西格玛";
 
-                db.Update(res);
+                res.IdProduct = Convert.ToInt32(db.InsertWithIdentity(res));
 
-                db.RollbackTransaction();
+                res = (from p in db.GetTable<DataProduct2>()
+                    where p.IdProduct == res.IdProduct
+                    select p).FirstOrDefault();
+
+                //db.Update(res);
+
+                Console.WriteLine(res);
+
+                db.CommitTransaction();
 
                 var updateCount = prod.Set(e => e.Grid, () => "Germania")
                     .Update();

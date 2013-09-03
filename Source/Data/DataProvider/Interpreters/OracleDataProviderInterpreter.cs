@@ -15,6 +15,91 @@ namespace BLToolkit.Data.DataProvider.Interpreters
 {
     public class OracleDataProviderInterpreter : DataProviderInterpreterBase
     {
+        public override DbType GetParameterDbType(DbType dbType)
+        {
+            /*
+             * In the OracleParameter class, DbType, OracleDbType, and Value properties are linked. Specifying the value of any of these properties infers the value of one or more of the other properties.
+             * */
+
+            /*See how the DbType values map to OracleDbType
+             * In the OracleParameter class, specifying the value of DbType infers the value of OracleDbType
+AnsiString => Varchar2
+Binary => Raw
+Byte => Byte
+Boolean => Value does not fall within the expected range.
+Currency => Value does not fall within the expected range.
+Date => Date
+DateTime => TimeStamp
+Decimal => Decimal
+Double => Double
+Guid => Value does not fall within the expected range.
+Int16 => Int16
+Int32 => Int32
+Int64 => Int64
+Object => Object
+SByte => Value does not fall within the expected range.
+Single => Single
+String => Varchar2
+Time => TimeStamp
+UInt16 => Value does not fall within the expected range.
+UInt32 => Value does not fall within the expected range.
+UInt64 => Value does not fall within the expected range.
+VarNumeric => Value does not fall within the expected range.
+AnsiStringFixedLength => Char
+StringFixedLength => Char
+Xml => Specified argument was out of the range of valid values.
+DateTime2 => Specified argument was out of the range of valid values.
+DateTimeOffset => Specified argument was out of the range of valid values.
+             * */
+
+            /*See how the OracleDbType values map to DbType
+             * In the OracleParameter class, specifying the value of OracleDbType infers the value of DbType 
+BFile => Object
+Blob => Object
+Byte => Byte
+Char => StringFixedLength
+Clob => Object
+Date => Date
+Decimal => Decimal
+Double => Double
+Long => String
+LongRaw => Binary
+Int16 => Int16
+Int32 => Int32
+Int64 => Int64
+IntervalDS => Object
+IntervalYM => Int64
+NClob => Object
+NChar => StringFixedLength
+NVarchar2 => String
+Raw => Binary
+RefCursor => Object
+Single => Single
+TimeStamp => DateTime
+TimeStampLTZ => DateTime
+TimeStampTZ => DateTime
+Varchar2 => String
+XmlType => String
+Array => Object
+Object => Object
+Ref => Object
+BinaryDouble => Double
+BinaryFloat => Single
+             */
+            switch (dbType)
+            {
+                case DbType.UInt16:
+                    return DbType.Int16;
+                case DbType.DateTime2:
+                    return DbType.DateTime;
+                
+                // TODO Add the other cases ...
+
+                default:
+                    return base.GetParameterDbType(dbType);
+            }
+        }
+
         public override void SetParameterValue(IDbDataParameter parameter, object value)
         {
             if (null != value)
@@ -23,15 +108,15 @@ namespace BLToolkit.Data.DataProvider.Interpreters
                 {
                     // Fix Oracle.Net bug #6: guid type is not handled
                     //
-                    value = ((Guid)value).ToByteArray();
+                    value = ((Guid) value).ToByteArray();
                 }
-                //else if (value is Array && !(value is byte[] || value is char[]))
-                //{
-                //    _oracleParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
-                //}
+                    //else if (value is Array && !(value is byte[] || value is char[]))
+                    //{
+                    //    _oracleParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
+                    //}
                 else if (value is IConvertible)
                 {
-                    var convertible = (IConvertible)value;
+                    var convertible = (IConvertible) value;
                     var typeCode = convertible.GetTypeCode();
 
                     switch (typeCode)
@@ -51,11 +136,11 @@ namespace BLToolkit.Data.DataProvider.Interpreters
                             value = convertible.ToDecimal(null);
                             break;
 
-                        // Fix Oracle.Net bug #10: zero-length string can not be converted to
-                        // ORAXML type, but null value can be.
-                        //
+                            // Fix Oracle.Net bug #10: zero-length string can not be converted to
+                            // ORAXML type, but null value can be.
+                            //
                         case TypeCode.String:
-                            if (((string)value).Length == 0)
+                            if (((string) value).Length == 0)
                                 value = null;
                             break;
 

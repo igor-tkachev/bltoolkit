@@ -1,9 +1,11 @@
 ﻿#region
 
 using System;
+using System.Data;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
+using Oracle.DataAccess.Client;
 
 #endregion
 
@@ -35,7 +37,7 @@ namespace BeeMusic.WebServices.DataAccess.DbModel
         [MapField("CATALOG_NUMBER")]
         public string CatalogNumber { get; set; }
 
-        [MapField("TITLE")]
+        [MapField("TITLE"), DbType(System.Data.DbType.String)]
         public string Title { get; set; }
 
         [MapField("ALBUM_SHORT")]
@@ -44,13 +46,13 @@ namespace BeeMusic.WebServices.DataAccess.DbModel
         [MapField("ALBUM_RECEIPT")]
         public string ReceipTitle { get; set; }
 
-        [MapField("SUBTITLE")]
+        [MapField("SUBTITLE"), DbType(System.Data.DbType.String)]
         public string SubTitle { get; set; }
 
-        [MapField("VERSION")]
+        [MapField("VERSION"), DbType(System.Data.DbType.String)]
         public string Version { get; set; }
 
-        [MapField("DISPLAY_ARTIST")]
+        [MapField("DISPLAY_ARTIST"), DbType(System.Data.DbType.String)]
         public string ArtistDisplay { get; set; }
 
         [MapField("ID_DISPLAY_ARTIST")]
@@ -62,7 +64,7 @@ namespace BeeMusic.WebServices.DataAccess.DbModel
         [MapField("CONTAINER_TYPE")]
         public string ContainerType { get; set; }
 
-        [MapField("ARGUMENT")]
+        [MapField("ARGUMENT"), DbType(System.Data.DbType.String)]
         public string Argument { get; set; }
 
         [MapField("DATE_SELL")]
@@ -97,10 +99,10 @@ namespace BeeMusic.WebServices.DataAccess.DbModel
         [MapField("YEAR")]
         public int? Year { get; set; }
 
-        [MapField("P_LINE")]
+        [MapField("P_LINE"), DbType(System.Data.DbType.String)]
         public string Pline { get; set; }
 
-        [MapField("C_LINE")]
+        [MapField("C_LINE"), DbType(System.Data.DbType.String)]
         public string Cline { get; set; }
 
         [MapField("ID_GENRE_MAPPING")]
@@ -124,15 +126,10 @@ namespace BeeMusic.WebServices.DataAccess.DbModel
         [MapField("PRICE")]
         public decimal? PriceValue { get; set; }
 
-        [MapField("IMPORT")]
+        [MapField("IMPORT"), DbType(System.Data.DbType.Int16)]
         [MapValue(true, 1)]
-        [MapValue(false, 0)]
+        [MapValue(false, 0)]        
         public bool? IsImport { get; set; }
-
-        //[MapField("IMPORT"), DbType(System.Data.DbType.Int16)]
-        //[MapValue(true, 1)]
-        //[MapValue(false, 0)]
-        //public bool? IsImport { get; set; }
 
         [MapField("LIMITED_EDITION"), DbType(System.Data.DbType.Int16)]
         [MapValue(true, 1)]
@@ -144,12 +141,12 @@ namespace BeeMusic.WebServices.DataAccess.DbModel
         [MapValue(false, 0)]
         public bool? IsCompilation { get; set; }
 
-        [MapField("EXCLUSIVE_"), DbType(System.Data.DbType.Int16)]
+        [MapField("EXCLUSIVE_")]//, DbType((DbType)OracleDbType.NVarchar2)]
         [MapValue(true, 1)]
         [MapValue(false, 0)]
         public bool IsExclusive { get; set; }
 
-        [MapField("CRC")]
+        [MapField("CRC")]//, DbType(System.Data.DbType.UInt32)]
         public uint? CRC { get; set; }
 
         [MapField("CRC_PRICE")]

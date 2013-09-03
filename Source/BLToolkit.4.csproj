@@ -548,6 +548,8 @@
     <Compile Include="Patterns\MustImplementAttribute.cs" />
     <Compile Include="Properties\JetBrains.Annotations.cs" />
     <Compile Include="Properties\Revision.generated.cs" />
+    <Compile Include="Reflection\Emit\DynamicCompilationSpike.cs" />
+    <Compile Include="Reflection\Emit\FunctionFactory.cs" />
     <Compile Include="Reflection\ExprMemberAccessor.cs" />
     <Compile Include="Reflection\ExprTypeAccessor.cs" />
     <Compile Include="Reflection\GenericBinder.cs" />

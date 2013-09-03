@@ -15,7 +15,6 @@ using System.Xml;
 
 using BLToolkit.Aspects;
 using BLToolkit.Common;
-using BLToolkit.DataAccess;
 using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
@@ -190,6 +189,12 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void SetParameterValue(IDbDataParameter parameter, object value)
 		{
+            // We need NVarChar2 in order to insert UTF8 string values. The default Odp VarChar2 dbtype doesnt work
+            // with UTF8 values. Note : Microsoft oracle client uses NVarChar value by default.
+
+            if (parameter is OracleParameterWrap && value is string)
+                ((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.NVarchar2;
+
             _interpreterBase.SetParameterValue(parameter, value);
 
 			// strings and byte arrays larger than 4000 bytes may be handled improperly
@@ -603,70 +608,7 @@ namespace BLToolkit.Data.DataProvider
 
         public override DbType GetParameterDbType(DbType dbType)
         {
-            /*See how the DbType values map to OracleDbType
-AnsiString => Varchar2
-Binary => Raw
-Byte => Byte
-Boolean => Value does not fall within the expected range.
-Currency => Value does not fall within the expected range.
-Date => Date
-DateTime => TimeStamp
-Decimal => Decimal
-Double => Double
-Guid => Value does not fall within the expected range.
-Int16 => Int16
-Int32 => Int32
-Int64 => Int64
-Object => Object
-SByte => Value does not fall within the expected range.
-Single => Single
-String => Varchar2
-Time => TimeStamp
-UInt16 => Value does not fall within the expected range.
-UInt32 => Value does not fall within the expected range.
-UInt64 => Value does not fall within the expected range.
-VarNumeric => Value does not fall within the expected range.
-AnsiStringFixedLength => Char
-StringFixedLength => Char
-Xml => Specified argument was out of the range of valid values.
-DateTime2 => Specified argument was out of the range of valid values.
-DateTimeOffset => Specified argument was out of the range of valid values.
-             * */
-
-            /*See how the OracleDbType values map to DbType
-BFile => Object
-Blob => Object
-Byte => Byte
-Char => StringFixedLength
-Clob => Object
-Date => Date
-Decimal => Decimal
-Double => Double
-Long => String
-LongRaw => Binary
-Int16 => Int16
-Int32 => Int32
-Int64 => Int64
-IntervalDS => Object
-IntervalYM => Int64
-NClob => Object
-NChar => StringFixedLength
-NVarchar2 => String
-Raw => Binary
-RefCursor => Object
-Single => Single
-TimeStamp => DateTime
-TimeStampLTZ => DateTime
-TimeStampTZ => DateTime
-Varchar2 => String
-XmlType => String
-Array => Object
-Object => Object
-Ref => Object
-BinaryDouble => Double
-BinaryFloat => Single
-             */
-            return dbType == DbType.DateTime2 ? DbType.DateTime : base.GetParameterDbType(dbType);
+            return _interpreterBase.GetParameterDbType(dbType);
         }
 
         private static Stream CopyStream(Stream stream, OracleCommand cmd)
