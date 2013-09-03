@@ -46,6 +46,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsConstant3([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var arr = new[] { "oh", "oh'", "oh\\" };
+
+				var q = from p in db.Person where  arr.Contains(p.FirstName) select p;
+				Assert.AreEqual(0, q.Count());
+			}
+		}
+
+		[Test]
 		public void ContainsParameter1()
 		{
 			var str = "oh";

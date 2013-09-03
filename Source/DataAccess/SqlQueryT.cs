@@ -1,13 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using BLToolkit.Data;
-using BLToolkit.Mapping;
-using BLToolkit.Reflection.Extension;
 
 namespace BLToolkit.DataAccess
 {
+	using Data;
+	using Mapping;
+	using Reflection.Extension;
+
 	public class SqlQuery<T> : SqlQueryBase, ISqlQueryT<T>
 	{
 		#region Constructors

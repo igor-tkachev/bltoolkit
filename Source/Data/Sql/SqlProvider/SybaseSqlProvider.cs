@@ -161,12 +161,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 		}
 
-		protected override void BuildUnicodeString(StringBuilder sb, string value)
+		protected override void BuildString(StringBuilder sb, string value)
 		{
-			sb
-				.Append("N\'")
-				.Append(value.Replace("'", "''"))
-				.Append('\'');
+			foreach (var ch in value)
+			{
+				if (ch > 127)
+				{
+					sb.Append("N");
+					break;
+				}
+			}
+
+			base.BuildString(sb, value);
+		}
+
+		protected override void BuildChar(StringBuilder sb, char value)
+		{
+			if (value > 127)
+				sb.Append("N");
+
+			base.BuildChar(sb, value);
 		}
 
 		public override object Convert(object value, ConvertType convertType)
