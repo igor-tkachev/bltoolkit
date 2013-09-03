@@ -107,7 +107,7 @@ namespace BLToolkit.Data
 			};
 		}
 
-		protected virtual SqlQuery ProcessQuery(SqlQuery sqlQuery)
+		public virtual SqlQuery ProcessQuery(SqlQuery sqlQuery)
 		{
 			return sqlQuery;
 		}

@@ -2,13 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using BeeMusic.WebServices.DataAccess.DbModel;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
-using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using NUnit.Framework;
 using Newtonsoft.Json;
@@ -16,6 +17,7 @@ using PitagorDataAccess.Mappings.DataEntry;
 using UnitTests.CS.JointureTests.Factories;
 using UnitTests.CS.JointureTests.Mappings;
 using UnitTests.CS.JointureTests.Tools;
+using SqlQuery = BLToolkit.DataAccess.SqlQuery;
 
 #endregion
 
@@ -109,6 +111,35 @@ namespace UnitTests.CS.JointureTests
                     db.SetCommand(req);
                     var allMedia = db.ExecuteList<Media>();
                 }
+            }
+        }
+
+        [Test]
+        public void BeeMusicInsertError()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.BeginTransaction();
+
+                var prod = from p in db.GetTable<DataProduct2>()
+                    where p.IdProduct == 4341296
+                    select p;
+
+                var res = prod.FirstOrDefault();
+                Console.WriteLine(res);
+
+                res.Grid = "Germania";
+
+                db.Update(res);
+
+                db.RollbackTransaction();
+
+                var updateCount = prod.Set(e => e.Grid, () => "Germania")
+                    .Update();
+
+                db.RollbackTransaction();
+
+                Console.WriteLine(updateCount);
             }
         }
 

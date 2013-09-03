@@ -194,7 +194,11 @@
     <Compile Include="JointureTests\Factories\AdExpressOleronFactory.cs" />
     <Compile Include="JointureTests\Factories\AdExpressOleronFactoryTest.cs" />
     <Compile Include="JointureTests\Factories\AdExpressTest.cs" />
+    <Compile Include="JointureTests\Factories\BeeMusicFactory.cs" />
+    <Compile Include="JointureTests\Factories\FeroeFactory.cs" />
+    <Compile Include="JointureTests\Factories\FeroeTest.cs" />
     <Compile Include="JointureTests\Factories\MediaDiscFactory.cs" />
+    <Compile Include="JointureTests\Factories\MediaDiscProd.cs" />
     <Compile Include="JointureTests\Factories\MusicProd.cs" />
     <Compile Include="JointureTests\Factories\RadioPigeFactory.cs" />
     <Compile Include="JointureTests\Factories\RadioProdTest.cs" />

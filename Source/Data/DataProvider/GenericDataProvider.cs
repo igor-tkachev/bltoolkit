@@ -24,7 +24,9 @@ namespace BLToolkit.Data.DataProvider
             {
                 _factory = DbProviderFactories.GetFactory(providerName);
             }
-            
+
+            // When Provider is Oracle, we should call the OdpDataProvider typeTable mapping initialization
+
             switch (Name)
             {
                 case ProviderFullName.Oracle:

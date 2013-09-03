@@ -1652,57 +1652,9 @@ BinaryFloat => Single
                 {
                     if (null != value)
                     {
-                        if (value is Guid)
-                        {
-                            // Fix Oracle.Net bug #6: guid type is not handled
-                            //
-                            value = ((Guid)value).ToByteArray();
-                        }
-                        else if (value is Array && !(value is byte[] || value is char[]))
+                        if (value is Array && !(value is byte[] || value is char[]))
                         {
                             _oracleParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
-                        }
-                        else if (value is IConvertible)
-                        {
-                            var convertible = (IConvertible)value;
-                            var typeCode = convertible.GetTypeCode();
-
-                            switch (typeCode)
-                            {
-                                case TypeCode.Boolean:
-                                    // Fix Oracle.Net bug #7: bool type is handled wrong
-                                    //
-                                    value = convertible.ToByte(null);
-                                    break;
-
-                                case TypeCode.SByte:
-                                case TypeCode.UInt16:
-                                case TypeCode.UInt32:
-                                case TypeCode.UInt64:
-                                    // Fix Oracle.Net bug #8: some integer types are handled wrong
-                                    //
-                                    value = convertible.ToDecimal(null);
-                                    break;
-
-                                // Fix Oracle.Net bug #10: zero-length string can not be converted to
-                                // ORAXML type, but null value can be.
-                                //
-                                case TypeCode.String:
-                                    if (((string)value).Length == 0)
-                                        value = null;
-                                    break;
-
-                                default:
-                                    // Fix Oracle.Net bug #5: Enum type is not handled
-                                    //
-                                    if (value is Enum)
-                                    {
-                                        // Convert a Enum value to it's underlying type.
-                                        //
-                                        value = System.Convert.ChangeType(value, typeCode);
-                                    }
-                                    break;
-                            }
                         }
                     }
 

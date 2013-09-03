@@ -20,7 +20,7 @@ namespace Data.Exceptions
 		{
 			public MyDbManager() : base("Sql2008") {}
 
-			protected override SqlQuery ProcessQuery(SqlQuery sqlQuery)
+            public override SqlQuery ProcessQuery(SqlQuery sqlQuery)
 			{
 				if (sqlQuery.IsInsert && sqlQuery.Insert.Into.Name == "Parent")
 				{

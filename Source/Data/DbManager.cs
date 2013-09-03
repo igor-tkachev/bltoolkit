@@ -1576,6 +1576,9 @@ namespace BLToolkit.Data
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
 
+            if (parameterName.Contains("IsImport"))
+                Console.WriteLine();
+
 			_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 
 			return parameter;
