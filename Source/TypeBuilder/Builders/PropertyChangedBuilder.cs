@@ -94,10 +94,10 @@ namespace BLToolkit.TypeBuilder.Builders
 					{
 						// Handled nullable types
 
-						var currentValue = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
-						var newValue = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
-						var notEqualLabel = emit.DefineLabel();
-						var comparedLabel = emit.DefineLabel();
+						var currentValue      = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
+						var newValue          = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
+						var notEqualLabel     = emit.DefineLabel();
+						var comparedLabel     = emit.DefineLabel();
 						var hasValueGetMethod = Context.CurrentProperty.PropertyType.GetProperty("HasValue").GetGetMethod();
 
 						emit
@@ -122,13 +122,15 @@ namespace BLToolkit.TypeBuilder.Builders
 
 						if (op_InequalityMethod != null)
 						{
-							emit.call(op_InequalityMethod)
+							emit
+								.call(op_InequalityMethod)
 							    .brtrue_s(notEqualLabel);
 						}
 						else
 							emit.bne_un_s(notEqualLabel);
 
-						emit.ldloca(currentValue)
+						emit
+							.ldloca(currentValue)
 						    .call(hasValueGetMethod)
 						    .ldloca(newValue)
 						    .call(hasValueGetMethod)
@@ -143,8 +145,7 @@ namespace BLToolkit.TypeBuilder.Builders
 					}
 					else if (!Context.CurrentProperty.PropertyType.IsPrimitive)
 					{
-						// Handled structs without op_Inequality.
-
+						// Handle structs without op_Inequality.
 						var currentValue = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
 
 						emit
