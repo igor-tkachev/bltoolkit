@@ -204,6 +204,7 @@
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
     <Compile Include="Mapping\ObjectMapperTest.cs" />
     <Compile Include="Mapping\ResultSetTest.cs" />
+    <Compile Include="Mapping\TestFluentNullable.cs" />
     <Compile Include="Mapping\TrimmableAttributeTest.cs" />
     <Compile Include="Mapping\XmlMap.cs" />
     <Compile Include="Patterns\MustImplementAttributeTest.cs" />

@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using BLToolkit.Reflection;
 using BLToolkit.Reflection.Emit;
 
 namespace BLToolkit.TypeBuilder.Builders
@@ -87,32 +88,117 @@ namespace BLToolkit.TypeBuilder.Builders
 
 			if (op_InequalityMethod == null)
 			{
-				if (Context.CurrentProperty.PropertyType.IsValueType || !_useReferenceEquals)
+				if (Context.CurrentProperty.PropertyType.IsValueType)
 				{
+					if (TypeHelper.IsNullableType(Context.CurrentProperty.PropertyType))
+					{
+						// Handled nullable types
+
+						var currentValue      = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
+						var newValue          = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
+						var notEqualLabel     = emit.DefineLabel();
+						var comparedLabel     = emit.DefineLabel();
+						var hasValueGetMethod = Context.CurrentProperty.PropertyType.GetProperty("HasValue").GetGetMethod();
+
+						emit
+							.ldarg_0
+							.callvirt(Context.CurrentProperty.GetGetMethod(true))
+							.stloc(currentValue)
+							.ldarg_1
+							.stloc(newValue)
+							.ldloca(currentValue)
+							.call(Context.CurrentProperty.PropertyType, "GetValueOrDefault")
+							.ldloca(newValue)
+							.call(Context.CurrentProperty.PropertyType, "GetValueOrDefault");
+
+						var nullableUnderlyingType = TypeHelper.GetUnderlyingType(Context.CurrentProperty.PropertyType);
+
+						op_InequalityMethod = nullableUnderlyingType.GetMethod("op_Inequality",
+						                                                       new Type[]
+							                                                       {
+								                                                       nullableUnderlyingType,
+								                                                       nullableUnderlyingType
+							                                                       });
+
+						if (op_InequalityMethod != null)
+						{
+							emit
+								.call(op_InequalityMethod)
+							    .brtrue_s(notEqualLabel);
+						}
+						else
+							emit.bne_un_s(notEqualLabel);
+
+						emit
+							.ldloca(currentValue)
+						    .call(hasValueGetMethod)
+						    .ldloca(newValue)
+						    .call(hasValueGetMethod)
+						    .ceq
+						    .ldc_bool(true)
+						    .ceq
+						    .br(comparedLabel)
+						    .MarkLabel(notEqualLabel)
+						    .ldc_bool(false)
+						    .MarkLabel(comparedLabel)
+						    .end();
+					}
+					else if (!Context.CurrentProperty.PropertyType.IsPrimitive)
+					{
+						// Handle structs without op_Inequality.
+						var currentValue = emit.DeclareLocal(Context.CurrentProperty.PropertyType);
+
+						emit
+							.ldarg_0
+							.callvirt(Context.CurrentProperty.GetGetMethod(true))
+							.stloc(currentValue)
+							.ldloca(currentValue)
+							.ldarg_1
+							.box(Context.CurrentProperty.PropertyType)
+							.constrained(Context.CurrentProperty.PropertyType)
+							.callvirt(typeof(object), "Equals", new [] {typeof(object)})
+							.end();
+					}
+					else
+					{
+						// Primitive value type comparison
+						emit
+							.ldarg_0
+							.callvirt(Context.CurrentProperty.GetGetMethod(true))
+							.ldarg_1
+							.ceq
+							.end();
+					}
+				}
+				else if (!_useReferenceEquals)
+				{
+					// Do not use ReferenceEquals comparison for objects
 					emit
 						.ldarg_0
-						.callvirt  (Context.CurrentProperty.GetGetMethod(true))
+						.callvirt(Context.CurrentProperty.GetGetMethod(true))
 						.ldarg_1
 						.ceq
 						.end();
 				}
 				else
 				{
+					// ReferenceEquals comparison for objects
 					emit
 						.ldarg_0
-						.callvirt  (Context.CurrentProperty.GetGetMethod(true))
+						.callvirt(Context.CurrentProperty.GetGetMethod(true))
 						.ldarg_1
-						.call      (typeof(object), "ReferenceEquals", typeof(object), typeof(object))
+						.call(typeof(object), "ReferenceEquals", typeof(object), typeof(object))
 						.end();
 				}
 			}
 			else
 			{
+				// Items compared have op_Inequality operator (!=)
 				emit
 					.ldarg_0
-					.callvirt (Context.CurrentProperty.GetGetMethod(true))
+					.callvirt(Context.CurrentProperty.GetGetMethod(true))
 					.ldarg_1
-					.call     (op_InequalityMethod)
+					.call(op_InequalityMethod)
 					.ldc_i4_0
 					.ceq
 					.end();
