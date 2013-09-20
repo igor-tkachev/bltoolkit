@@ -377,14 +377,21 @@ namespace BLToolkit.Data.Linq
 		{
 			lock (this)
 			{
-				SetParameters(expr, parameters, idx);
+			    bool useQueryText = false;
+#if !SILVERLIGHT
+                useQueryText = dataContext is DbManager && ((DbManager) dataContext).UseQueryText;
+#endif
+                SetParameters(expr, parameters, idx, useQueryText);
+
 				return dataContext.SetQuery(Queries[idx]);
 			}
 		}
 
-		void SetParameters(Expression expr, object[] parameters, int idx)
+		void SetParameters(Expression expr, object[] parameters, int idx, bool useQueryText)
 		{
-			foreach (var p in Queries[idx].Parameters)
+		    QueryInfo query = Queries[idx];
+
+			foreach (var p in query.Parameters)
 			{
 				var value = p.Accessor(expr, parameters);
 
@@ -407,10 +414,15 @@ namespace BLToolkit.Data.Linq
 							//	MappingSchema.MapEnumToValue(v, true) :
 							//	v);
 						}
-
+                        
 						value = values;
 					}
 				}
+
+                // Reset the query context sql when the parameters values change. When UseQueryText = true
+                // the query context sql includes the parameters values
+			    if (useQueryText && query.Context != null && !Equals(p.SqlParameter.Value, value))
+			        query.Context = null;
 
 				p.SqlParameter.Value = value;
 			}

@@ -19,7 +19,7 @@ namespace BLToolkit.Data.DataProvider.Interpreters
         {
             /*
              * In the OracleParameter class, DbType, OracleDbType, and Value properties are linked. Specifying the value of any of these properties infers the value of one or more of the other properties.
-             * */
+             */
 
             /*See how the DbType values map to OracleDbType
              * In the OracleParameter class, specifying the value of DbType infers the value of OracleDbType

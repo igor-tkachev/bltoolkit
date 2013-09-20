@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using BLToolkit.Data.Sql.SqlProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -80,6 +81,140 @@ namespace UnitTests.CS.JointureTests.Mappings
     {
         public long ID_ARTIST;
         public string Artist;
+    }
+
+    public static class PitagorConstants
+    {
+        public static long Date2DayOfWeek(DateTime date)
+        {
+            if (date.DayOfWeek == DayOfWeek.Monday)
+                return 1;
+            if (date.DayOfWeek == DayOfWeek.Tuesday)
+                return 2;
+            if (date.DayOfWeek == DayOfWeek.Wednesday)
+                return 3;
+            if (date.DayOfWeek == DayOfWeek.Thursday)
+                return 4;
+            if (date.DayOfWeek == DayOfWeek.Friday)
+                return 5;
+            if (date.DayOfWeek == DayOfWeek.Saturday)
+                return 6;
+            if (date.DayOfWeek == DayOfWeek.Sunday)
+                return 7;
+
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Return a integer value which represents the time with the offset
+        /// </summary>
+        /// <param name="dateSpotStart">Original time</param>
+        /// <param name="offset">Offset in seconds</param>
+        /// <returns>decimal value with yyyyMMddHHmmss format</returns>
+        public static long GetDateTimeOffset(DateTime dateSpotStart, TimeSpan offset)
+        {
+            long dateTimeOffset = 0;
+
+            if (dateSpotStart.TimeOfDay.TotalSeconds < offset.TotalSeconds)
+            {
+                dateTimeOffset = long.Parse(dateSpotStart.AddDays(-1).ToString("yyyyMMdd")) * 1000000;
+                dateTimeOffset += 240000 + dateSpotStart.TimeOfDay.Hours * 10000;
+                dateTimeOffset += dateSpotStart.TimeOfDay.Minutes * 100;
+                dateTimeOffset += dateSpotStart.TimeOfDay.Seconds;
+            }
+            else
+            {
+                dateTimeOffset = long.Parse(dateSpotStart.ToString("yyyyMMddHHmmss"));
+            }
+
+            return dateTimeOffset;
+        }
+    }
+
+    [TableName(Name = "DATA_SPONSORSHIP", Owner = Consts.Owner)]
+    public class DataSponsorship
+    {
+        [MapField("ID_MEDIA")]
+        public long MediaId { get; set; }
+
+        [MapField("ID_DATA_SPONSORSHIP"), Identity, SequenceName(Consts.Owner + ".SEQ_DATA_SPONSORSHIP")]
+        public long Id { get; set; }
+
+        [MapField("ID_DATA_VERSION")]
+        public long DataVersionId { get; set; }
+
+        [MapField("ID_COBRANDING_ADVERTISER")]
+        public long CobrandingAdvertiserId { get; set; }
+
+        [MapField("ID_LANGUAGE_DATA_I")]
+        public long LanguageId { get { return 33; } set { } }
+
+        [MapField("ID_PRICING_TV")]
+        public long? PricingTvId { get; set; }
+
+        [MapField("ID_PRODUCT")]
+        public long ProductId { get; set; }
+
+        [MapField("ID_TYPE_SPONSORSHIP")]
+        public long TypeId { get; set; }
+
+        [MapField("ID_FORM_SPONSORSHIP")]
+        public long PlacementId { get; set; }
+
+        [MapField("ID_CIRCULATION_DAY")]
+        public long DayOfWeek { get { return PitagorConstants.Date2DayOfWeek(DateMedia); } set { } }
+
+        [MapField("ID_REGION_DATA")]
+        public long RegionDataId { get { return 33; } set { } }
+
+        [MapField("ID_USER_")]
+        public long UserId { get; set; }
+
+        [MapField("EXPENDITURE")]
+        public decimal Expenditure { get { return ExpenditureEuro; } set { } }
+
+        [MapField("EXPENDITURE_EURO")]
+        public decimal ExpenditureEuro { get; set; }
+
+        [MapField("NET_EXPENDITURE")]
+        public decimal ExpenditureNet { get; set; }
+
+        [MapField("DURATION")]
+        public long DurationInSeconds { get; set; }
+
+        [MapField("COMMERCIAL_BREAK")]
+        public long? CommercialBreak { get; set; }
+
+        [MapField("DATE_MEDIA")]
+        [DbType(DbType.Date)]
+        public DateTime DateMedia { get; set; }
+
+        [MapField("DATE_SPOT_BEGINNING")]
+        public DateTime StartAt { get; set; }
+
+        [MapField("DATE_SPOT_END")]
+        public DateTime EndAt { get; set; }
+
+        [MapField("DATE_CREATION")]
+        [DbType(DbType.Date)]
+        public DateTime CreatedAt { get; set; }
+
+        [MapField("DATE_MODIFICATION")]
+        [DbType(DbType.Date)]
+        public DateTime ModifiedAt { get; set; }
+
+        [MapField("ACTIVATION")]
+        public long Activation { get; set; }
+
+        [MapField("RANK")]
+        public short? Rank { get; set; }
+
+        [MapField("ID_MEDIA_PRICING_TV")]
+        public long? ReferencedMediaForRevalorization { get; set; }
+
+        [MapField("ID_SESSION_DETAIL")]
+        public long SessionDetailId { get; set; }
+
     }
 
     [TableName(Name = "RECO_RADIO", Owner = Consts.Owner)]

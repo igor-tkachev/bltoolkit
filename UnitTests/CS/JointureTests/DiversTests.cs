@@ -115,6 +115,70 @@ namespace UnitTests.CS.JointureTests
         }
 
         [Test]
+        public void MultipleInsertWithIdentityUsingQueryText()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.UseQueryText = true;
+
+                var query = from ds in db.GetTable<DataSponsorship>()
+                            where ds.DataVersionId == 283010002677
+                    select ds;
+
+                var elements = query.ToList();
+                
+                db.BeginTransaction();
+
+                query.Delete();
+
+                foreach (DataSponsorship element in elements)
+                {
+                    var value = db.InsertWithIdentity(element);
+
+                    Console.WriteLine(value);
+                }
+
+                db.RollbackTransaction();
+            }
+        }
+
+        [Test]
+        public void InsertRecoRadioDateUsingOracleDataProvider()
+        {
+            using (var db = ConnectionFactory.CreateDbManager())
+            {
+                db.UseQueryText = true;
+
+                db.BeginTransaction();
+
+                var recoRadio = new RECO_RADIO
+                {
+                    ID_MULTIMEDIA_FILE = 311391,
+                    ID_MEDIA = 2002,
+                    ACTIVATION = 0,
+                    COMMENTARY = "",
+                    DATE_CREATION = DateTime.Now, 
+                    DATE_LAST_IMPORT = DateTime.Now,
+                    DATE_MODIFICATION = DateTime.Now,
+                    INPUT_STATUS = 0,
+                    ID_LANGUAGE_DATA_I = 33,
+                    DATE_MEDIA = DateTime.Now,
+                    TAG_MATCH_BEGINNING = 1f,
+                    TAG_MATCH_DURATION = 2f,
+                    IdMultVal = 0,
+                    TAG_DURATION = 3f,
+                    TIME_MEDIA = DateTime.Now,
+                    RATE = 2,
+                };
+
+                var value = db.InsertWithIdentity(recoRadio);
+                db.RollbackTransaction();
+
+                Console.WriteLine(value);
+            }
+        }
+
+        [Test]
         public void BeeMusicInsertError()
         {
             using (var db = ConnectionFactory.CreateDbManager())
