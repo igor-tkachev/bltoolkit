@@ -391,7 +391,13 @@ namespace BLToolkit.Data.Linq
 		{
 		    QueryInfo query = Queries[idx];
 
-			foreach (var p in query.Parameters)
+		    if (query.UseQueryText != useQueryText)
+		    {
+		        query.Context = null;
+                query.UseQueryText = useQueryText;
+		    }
+
+		    foreach (var p in query.Parameters)
 			{
 				var value = p.Accessor(expr, parameters);
 
@@ -460,6 +466,7 @@ namespace BLToolkit.Data.Linq
 
 			public SqlQuery SqlQuery { get; set; }
 			public object   Context  { get; set; }
+            public bool     UseQueryText { get; set; }
 
 			public SqlParameter[] GetParameters()
 			{
