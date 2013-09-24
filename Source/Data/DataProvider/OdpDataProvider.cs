@@ -1624,6 +1624,8 @@ namespace BLToolkit.Data.DataProvider
 				//.Replace("  ", " ")
 				+ ") VALUES (";
 
+		    List<IDbDataParameter> parameters = new List<IDbDataParameter>();
+            
 			foreach (var item in collection)
 			{
 				if (sb.Length == 0)
@@ -1635,7 +1637,7 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
-					if (value != null && value.GetType().IsEnum)
+				    if (value != null && value.GetType().IsEnum)
 						value = MappingSchema.MapEnumToValue(value, true);
 
 					if (value is Nullable<DateTime>)
@@ -1646,6 +1648,12 @@ namespace BLToolkit.Data.DataProvider
 						var dt = (DateTime)value;
 						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
 					}
+                    else if (value is string && ((string) value).Length >= 2000)
+                    {
+                        var par = db.Parameter("Par" + cnt, value);
+                        parameters.Add(par);
+                        sb.Append(":" + par.ParameterName);
+                    }
 					else
 						sp.BuildValue(sb, value);
 
@@ -1665,8 +1673,9 @@ namespace BLToolkit.Data.DataProvider
 
 					if (DbManager.TraceSwitch.TraceInfo)
 						DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
-
-					cnt += db.SetCommand(sql).ExecuteNonQuery();
+                    
+					cnt += db.SetCommand(sql, parameters.ToArray()).ExecuteNonQuery();
+                    parameters = new List<IDbDataParameter>();
 
 					n = 0;
 					sb.Length = 0;
@@ -1682,7 +1691,7 @@ namespace BLToolkit.Data.DataProvider
 				if (DbManager.TraceSwitch.TraceInfo)
 					DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
+                cnt += db.SetCommand(sql, parameters.ToArray()).ExecuteNonQuery();                
 			}
 
 			return cnt;
