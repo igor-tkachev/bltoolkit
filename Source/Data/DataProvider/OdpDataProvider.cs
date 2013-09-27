@@ -1612,6 +1612,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			var sb  = new StringBuilder();
 			var sp  = new OracleSqlProvider();
+			var pn  = 0;
 			var n   = 0;
 			var cnt = 0;
 			var str = "\t" + insertText
@@ -1623,6 +1624,8 @@ namespace BLToolkit.Data.DataProvider
 				.Replace("( ", "(")
 				//.Replace("  ", " ")
 				+ ") VALUES (";
+
+			var parameters = new List<IDbDataParameter>();
 
 			foreach (var item in collection)
 			{
@@ -1646,6 +1649,12 @@ namespace BLToolkit.Data.DataProvider
 						var dt = (DateTime)value;
 						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
 					}
+					else if (value is string && ((string)value).Length >= 2000)
+					{
+						var par = db.Parameter("p" + ++pn, value);
+						parameters.Add(par);
+						sb.Append(":" + par.ParameterName);
+					}
 					else
 						sp.BuildValue(sb, value);
 
@@ -1666,9 +1675,13 @@ namespace BLToolkit.Data.DataProvider
 					if (DbManager.TraceSwitch.TraceInfo)
 						DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-					cnt += db.SetCommand(sql).ExecuteNonQuery();
+					cnt += db
+						.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+						.ExecuteNonQuery();
 
-					n = 0;
+					parameters.Clear();
+					pn = 0;
+					n  = 0;
 					sb.Length = 0;
 				}
 			}
@@ -1682,7 +1695,9 @@ namespace BLToolkit.Data.DataProvider
 				if (DbManager.TraceSwitch.TraceInfo)
 					DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
+				cnt += db
+					.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+					.ExecuteNonQuery();
 			}
 
 			return cnt;
