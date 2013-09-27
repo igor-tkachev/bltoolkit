@@ -1619,8 +1619,9 @@ namespace BLToolkit.Data.DataProvider
         {
             if (db.UseQueryText)
             {
-                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false, db);
-                return ExecuteSqlList(db, sqlList);
+                var parameters = new List<IDbDataParameter>();
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false, db, parameters);
+                return ExecuteSqlList(db, sqlList, parameters);
             }
 
 #if !MANAGED
@@ -1631,17 +1632,18 @@ namespace BLToolkit.Data.DataProvider
         }
 
         public override int InsertBatchWithIdentity<T>(
-            DbManager db,
-            string insertText,
-            IEnumerable<T> collection,
-            MemberMapper[] members,
-            int maxBatchSize,
-            DbManager.ParameterProvider<T> getParameters)
+            DbManager                       db,
+            string                          insertText,
+            IEnumerable<T>                  collection,
+            MemberMapper[]                  members,
+            int                             maxBatchSize,
+            DbManager.ParameterProvider<T>  getParameters)
         {
             if (db.UseQueryText || db.Transaction != null)
             {
-                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100, true, db);
-                return ExecuteSqlList(db, sqlList);
+                var parameters = new List<IDbDataParameter>();
+                List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, 100, true, db, parameters);
+                return ExecuteSqlList(db, sqlList, parameters);
             }
 
 #if !MANAGED            

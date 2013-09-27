@@ -161,12 +161,15 @@ namespace BLToolkit.Data
 
 			if (value != null)
 			{
-				if (parm.DbType == DbType.Object)
-					parms.Add(Parameter(name, value));
-				else if (parm.DbSize == 0)
-					parms.Add(Parameter(name, value, parm.DbType));
-				else
-					parms.Add(Parameter(name, value, parm.DbType, parm.DbSize));
+			    if (parm.DbType == DbType.Object)
+			    {
+			        parm.DbType = DataProvider.GetDbType(parm.SystemType);
+			        parms.Add(Parameter(name, value));
+			    }
+			    else if (parm.DbSize == 0)
+			        parms.Add(Parameter(name, value, parm.DbType));
+			    else
+			        parms.Add(Parameter(name, value, parm.DbType, parm.DbSize));
 			}
 			else
 			{

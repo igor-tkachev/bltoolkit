@@ -28,7 +28,14 @@ namespace BLToolkit.Data.DataProvider
                 parameter.Value = value;
         }
 
-        public virtual List<string> GetInsertBatchSqlList<T>(string insertText, IEnumerable<T> collection, MemberMapper[] members, int maxBatchSize, bool withIdentity, DbManager db)
+        public virtual List<string> GetInsertBatchSqlList<T>(
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize,
+            bool withIdentity,
+            DbManager db,
+            List<IDbDataParameter> parameters)
         {
             return new List<string>();
         }
