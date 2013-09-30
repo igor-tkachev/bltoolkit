@@ -1452,7 +1452,22 @@ namespace BLToolkit.Data.DataProvider
 				return _oracleParameter.ToString();
 			}
 
-			///<summary>
+            protected DbType DbType
+		    {
+                [MixinOverride]
+                set
+                {
+                    if (value == DbType.Guid)
+                    {
+                        value = DbType.Binary;
+                    }
+
+                    _oracleParameter.DbType = value;
+                }
+		    }
+
+
+		    ///<summary>
 			///Gets or sets the value of the parameter.
 			///</summary>
 			///<returns>
