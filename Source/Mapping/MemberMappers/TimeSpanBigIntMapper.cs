@@ -8,7 +8,7 @@ namespace BLToolkit.Mapping.MemberMappers
     {
         public override void SetValue(object o, object value)
         {
-            if (value != null) this.MemberAccessor.SetValue(o, new TimeSpan((long)value));                                
+            if (value != null) this.MemberAccessor.SetValue(o, new TimeSpan(Convert.ToInt64(value)));                                
         }
 
         public override object GetValue(object o)
