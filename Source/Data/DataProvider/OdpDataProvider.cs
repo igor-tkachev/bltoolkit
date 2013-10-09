@@ -1629,6 +1629,7 @@ namespace BLToolkit.Data.DataProvider
 			var sp  = new OracleSqlProvider();
 			var n   = 0;
 			var cnt = 0;
+		    var parCnt = 0;
 			var str = "\t" + insertText
 				.Substring(0, insertText.IndexOf(") VALUES ("))
 				.Substring(7)
@@ -1665,7 +1666,7 @@ namespace BLToolkit.Data.DataProvider
 					}
                     else if (value is string && ((string) value).Length >= 2000)
                     {
-                        var par = db.Parameter("Par" + cnt, value);
+                        var par = db.Parameter("Par" + parCnt++, value);
                         parameters.Add(par);
                         sb.Append(":" + par.ParameterName);
                     }
@@ -1691,6 +1692,7 @@ namespace BLToolkit.Data.DataProvider
                     
 					cnt += db.SetCommand(sql, parameters.ToArray()).ExecuteNonQuery();
                     parameters = new List<IDbDataParameter>();
+				    parCnt = 0;
 
 					n = 0;
 					sb.Length = 0;
