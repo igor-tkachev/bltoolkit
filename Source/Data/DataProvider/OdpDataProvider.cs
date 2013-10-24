@@ -1670,6 +1670,12 @@ namespace BLToolkit.Data.DataProvider
                         parameters.Add(par);
                         sb.Append(":" + par.ParameterName);
                     }
+                    else if (value is byte[])
+                    {
+                        var par = db.Parameter("Par" + parCnt++, value);
+                        parameters.Add(par);
+                        sb.Append(":" + par.ParameterName);
+                    }
 					else
 						sp.BuildValue(sb, value);
 
