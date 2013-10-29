@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Insert", "InsertWithIdentity");
+			return methodCall.IsQueryable("Insert", "InsertWithIdentity","InsertWithOutput");
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
