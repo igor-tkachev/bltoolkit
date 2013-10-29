@@ -98,8 +98,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			sequence.SqlQuery.QueryType           = QueryType.Insert;
 			sequence.SqlQuery.Insert.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
+			sequence.SqlQuery.Insert.WithOutput   = methodCall.Method.Name == "InsertWithOutput";
 
-			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity);
+			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity || sequence.SqlQuery.Insert.WithOutput);
 		}
 
 		protected override SequenceConvertInfo Convert(
