@@ -450,6 +450,24 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
 					new[] { query.Expression }));
 		}
+		
+		public static object InsertWithOutput<T>(
+	            [NotNull]                this Table<T> target,
+	            [NotNull, InstantHandle] Expression<Func<T>> setter )
+	        {
+	            if ( target == null )
+	                throw new ArgumentNullException( "target" );
+	            if ( setter == null )
+	                throw new ArgumentNullException( "setter" );
+	
+	            IQueryable<T> query = target;
+	
+	            return query.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( T ) } ),
+	                    new[] { query.Expression, Expression.Quote( setter ) } ) );
+	        }
 
 		#endregion
 
