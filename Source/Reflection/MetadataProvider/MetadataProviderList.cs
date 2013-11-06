@@ -336,7 +336,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return base.GetOwnerName(type, extensions, out isSet);
 		}
 
-		#endregion
+	    public override void SetOwnerName(Type type, string ownerName)
+	    {
+	        foreach (var providerBase in _list)
+	        {
+	            providerBase.SetOwnerName(type, ownerName);
+	        }
+	        base.SetOwnerName(type, ownerName);
+	    }
+
+	    #endregion
 
 		#region GetTableName
 

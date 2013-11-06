@@ -594,7 +594,13 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		public override string GetOwnerName(Type type, ExtensionList extensions, out bool isSet)
 		{
-			var attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
+		    if (_typesOwners.ContainsKey(type))
+		    {
+		        isSet = true;
+		        return _typesOwners[type];
+		    }
+
+		    var attrs = type.GetCustomAttributes(typeof(TableNameAttribute), true);
 
 			if (attrs.Length > 0)
 			{
@@ -606,7 +612,15 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return base.GetOwnerName(type, extensions, out isSet);
 		}
 
-		#endregion
+        private readonly Dictionary<Type, string> _typesOwners = new Dictionary<Type, string>(); 
+
+	    public override void SetOwnerName(Type type, string ownerName)
+	    {
+	        _typesOwners[type] = ownerName;
+	        base.SetOwnerName(type, ownerName);
+	    }
+
+	    #endregion
 
 		#region GetTableName
 

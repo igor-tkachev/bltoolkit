@@ -239,6 +239,18 @@ namespace BLToolkit.Mapping
 
 		#region Init Mapper
 
+	    public void SetMappingTypeSequence(string sequenceName)
+	    {
+	        foreach (var memberMapper in _members)
+	        {
+	            if (memberMapper.MapMemberInfo.KeyGenerator != null)
+	            {
+                    memberMapper.MapMemberInfo.KeyGenerator = new SequenceKeyGenerator(sequenceName);
+	                break;
+	            }
+	        }
+	    }
+
 		public virtual void Init(MappingSchema mappingSchema, Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");

@@ -430,6 +430,11 @@ namespace BLToolkit.DataAccess
 
 		private static readonly Hashtable _actionSqlQueryInfo = new Hashtable();
 
+	    public static void ClearCache()
+	    {
+	        _actionSqlQueryInfo.Clear();
+	    }
+
 		[NoInterception]
 		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{

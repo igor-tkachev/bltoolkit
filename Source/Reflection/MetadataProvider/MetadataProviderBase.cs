@@ -229,6 +229,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return null;
 		}
 
+	    public virtual void SetOwnerName(Type type, string ownerName)
+	    {
+	        
+	    }
+
 		#endregion
 
 		#region GetTableName

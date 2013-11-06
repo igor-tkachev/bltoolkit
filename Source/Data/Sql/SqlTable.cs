@@ -96,7 +96,11 @@ namespace BLToolkit.Data.Sql
 				var om = mappingSchema.GetObjectMapper(ObjectType);
 				var mm = om[identityField.Name, true];
 
-				_sequenceAttributes = mm.MapMemberInfo.MemberAccessor.GetAttributes<SequenceNameAttribute>();
+			    var generator = mm.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+
+			    _sequenceAttributes = generator != null 
+                    ? new[] {new SequenceNameAttribute(generator.Sequence)} 
+                    : mm.MapMemberInfo.MemberAccessor.GetAttributes<SequenceNameAttribute>();
 			}
 		}
 

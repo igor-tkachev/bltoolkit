@@ -175,7 +175,7 @@ BinaryFloat => Single
             DbManager               db,
             List<IDbDataParameter>  parameters)
         {
-            const InsertBatchMethod method = InsertBatchMethod.UnionAll;
+            const InsertBatchMethod method = InsertBatchMethod.InsertAllWithPks;
             switch (method)
             {
                 case InsertBatchMethod.InsertAllWithPks:

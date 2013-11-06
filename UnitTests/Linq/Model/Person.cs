@@ -37,6 +37,9 @@ namespace Data.Linq.Model
 		[Association(ThisKey = "ID", OtherKey = "PersonID", CanBeNull = true)]
 		public Patient Patient;
 
+        //[Association(ThisKey = "ID", OtherKey = "PersonID", CanBeNull = true)]
+        //public Doctor Doctor;
+
 		public override bool Equals(object obj)
 		{
 			return Equals(obj as Person);

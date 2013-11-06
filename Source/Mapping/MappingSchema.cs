@@ -50,6 +50,22 @@ namespace BLToolkit.Mapping
 		private readonly Dictionary<Type,ObjectMapper> _mappers        = new Dictionary<Type,ObjectMapper>();
 		private readonly Dictionary<Type,ObjectMapper> _pendingMappers = new Dictionary<Type,ObjectMapper>();
 
+	    private readonly Dictionary<Type, string> _mappersSequences = new Dictionary<Type, string>();
+
+	    public void SetMappingTypeSequence(Type type, string sequenceName)
+	    {
+	        lock (_mappers)
+	        {
+	            _mappersSequences[type] = sequenceName;
+
+                ObjectMapper om;
+	            if (_mappers.TryGetValue(type, out om))
+	            {
+                    om.SetMappingTypeSequence(sequenceName);
+	            }
+	        }
+	    }
+
 		public ObjectMapper GetObjectMapper(Type type)
 		{
 			ObjectMapper om;
@@ -76,6 +92,10 @@ namespace BLToolkit.Mapping
 				try
 				{
 					om.Init(this, type);
+				    if (_mappersSequences.ContainsKey(type))
+				    {
+				        om.SetMappingTypeSequence(_mappersSequences[type]);
+				    }
 				}
 				finally
 				{

@@ -117,6 +117,30 @@ namespace BLToolkit.Data.Linq
 
 		const int CacheSize = 100;
 
+	    public static void ClearCache()
+	    {
+	        lock (_sync)
+	        {
+	            var temp = _first;
+
+	            while (temp != null)
+	            {
+	                var temp2 = temp;
+	                temp = temp.Next;
+
+                    temp2.Queries.Clear();
+	            }
+
+	            _first = null;
+
+                ObjectOperation<T>.InsertWithIdentity.Clear();
+                ObjectOperation<T>.InsertOrUpdate.Clear();
+                ObjectOperation<T>.Insert.Clear();
+                ObjectOperation<T>.Update.Clear();
+                ObjectOperation<T>.Delete.Clear();
+	        }
+	    }
+
 		public static Query<T> GetQuery(IDataContextInfo dataContextInfo, Expression expr)
 		{
 			var query = FindQuery(dataContextInfo, expr);

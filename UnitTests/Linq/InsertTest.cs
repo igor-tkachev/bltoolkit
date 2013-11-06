@@ -243,6 +243,25 @@ namespace Update
 			});
 		}
 
+        [Test]
+        public void Insert65()
+        {
+            ForEachProvider(db =>
+            {
+                try
+                {
+                    db.Person.Where(p => p.Gender == Gender.Male)
+                        .Into(db.Doctor)
+                        .Value(d => d.PersonID, p => p.ID + 10)
+                        .Value(d => d.Taxonomy, "VALERIU")
+                        .Insert();
+                }
+                finally
+                {
+                }
+            });
+        }
+
 		[Test]
 		public void Insert6()
 		{
