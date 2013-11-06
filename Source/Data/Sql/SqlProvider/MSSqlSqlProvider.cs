@@ -32,6 +32,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.AppendLine()
 				.AppendLine("SELECT SCOPE_IDENTITY()");
 		}
+		
+		protected override void BuildSetOutput( StringBuilder sb )
+	        {
+	        	// TODO: set the right data type
+	            sb
+	                .AppendLine()
+	                .Append( "declare @tabTempInsert table(TempID " ).Append( "uniqueidentifier" ).AppendLine( ")" );
+	        }
+	
+	        protected override void BuildGetOutput( StringBuilder sb )
+	        {
+	            sb
+	                .AppendLine()
+	                .AppendLine( "select top 1 TempID from @tabTempInsert" );
+	        }
 
 		protected override void BuildOrderByClause(StringBuilder sb)
 		{

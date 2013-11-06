@@ -300,6 +300,21 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+		
+		#region InsertWithOutput
+
+	        public static object InsertWithOutput<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+	        {
+	            if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+	            return Query<T>.InsertWithOutput(dataContextInfo, obj);
+	        }
+	
+	        public static object InsertWithOutput<T>( this IDataContext dataContext, T obj )
+	        {
+	            return Query<T>.InsertWithOutput(DataContextInfo.Create( dataContext ), obj);
+	        }
+	
+	        #endregion
 
 		#region Update
 
