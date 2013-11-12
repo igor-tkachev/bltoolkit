@@ -254,7 +254,7 @@ namespace BLToolkit.Data.DataProvider
 			var idx = insertText.IndexOf('\n');
 			var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
 			var rd  = new BulkCopyReader(members, collection);
-			var bc  = new SqlBulkCopy((SqlConnection)db.Connection)
+            var bc = new SqlBulkCopy((SqlConnection)db.Connection, SqlBulkCopyOptions.Default, (SqlTransaction)db.Transaction)
 			{
 				BatchSize            = maxBatchSize,
 				DestinationTableName = tbl,
