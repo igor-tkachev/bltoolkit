@@ -46,3 +46,4 @@ UnitTests/Linq/UserDataProviders.txt
 !*.dll
 !*.exe
 !*.pdb
+BLToolkit.2012.opensdf
