@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>dotConnect.Express.for.Oracle</id>
-    <version>7.8.301</version>
+    <version>8.1.36</version>
     <title>dotConnect Express for Oracle</title>
     <authors>Devart Software</authors>
     <owners>Devart Software</owners>
