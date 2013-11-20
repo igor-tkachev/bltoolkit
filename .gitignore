@@ -47,3 +47,4 @@ UnitTests/Linq/UserDataProviders.txt
 *.ncrunchsolution
 !*.exe
 !*.pdb
+BLToolkit.2012.opensdf

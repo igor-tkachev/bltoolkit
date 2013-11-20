@@ -192,22 +192,23 @@ namespace BLToolkit.Data.DataProvider
             // We need NVarChar2 in order to insert UTF8 string values. The default Odp VarChar2 dbtype doesnt work
             // with UTF8 values. Note : Microsoft oracle client uses NVarChar value by default.
 
-            if (parameter is OracleParameterWrap && value is string)
-                ((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.NVarchar2;
+            var wrap = parameter as OracleParameterWrap;
+            if (wrap != null && value is string)
+                wrap.OracleParameter.OracleDbType = OracleDbType.NVarchar2;
 
             _interpreterBase.SetParameterValue(parameter, value);
 
 			// strings and byte arrays larger than 4000 bytes may be handled improperly
-			if (parameter is OracleParameterWrap)
+		    if (wrap != null)
 			{
-				const int ThresholdSize = 4000;
-				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
+				const int thresholdSize = 4000;
+				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > thresholdSize)
 				{
-					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+					wrap.OracleParameter.OracleDbType = OracleDbType.Clob;
 				}
-				else if (value is byte[] && ((byte[])value).Length > ThresholdSize)
+				else if (value is byte[] && ((byte[])value).Length > thresholdSize)
 				{
-					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Blob;
+					wrap.OracleParameter.OracleDbType = OracleDbType.Blob;
 				}
 			}
 		}
