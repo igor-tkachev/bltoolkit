@@ -218,6 +218,7 @@ BinaryFloat => Single
         {
             MemberMapper primaryKeyMapper = null;
             SequenceKeyGenerator keyGenerator = null;
+
             foreach (var mapper in members)
             {
                 keyGenerator = mapper.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
@@ -230,13 +231,6 @@ BinaryFloat => Single
 
             if (primaryKeyMapper == null)
                 throw new Exception("The class mapping should contain a pk column!");
-
-            //int j = 0;
-            //foreach (var element in collection)
-            //{
-            //    primaryKeyMapper.SetInt64(element, j);
-            //    j++;
-            //}
 
             var rowCount = collection.Count();
             var sequenceIds = ReserveSequenceValues(db, rowCount, NextSequenceQuery(keyGenerator.Sequence));
