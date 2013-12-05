@@ -325,6 +325,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	            base.BuildValue(sb, value);
 	    }
 
+	    protected override void BuildDate(StringBuilder sb, object value)
+        {
+            sb.AppendFormat("TO_DATE('{0:yyyy-MM-dd}', 'YYYY-MM-DD')", value);
+	    }
+
 	    protected override void BuildDateTime(StringBuilder sb, object value)
 	    {
             //sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));

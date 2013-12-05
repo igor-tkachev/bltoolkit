@@ -1537,7 +1537,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sb;
 		}
 
-		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
+	    private void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = Wrap(GetPrecedence(expr), parentPrecedence);
 
@@ -1618,7 +1618,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is string)   BuildString(sb, value.ToString());
 			else if (value is char)     BuildChar  (sb, (char)value);
 			else if (value is bool)     sb.Append((bool)value ? "1" : "0");
-			else if (value is DateTime) BuildDateTime(sb, value);
+			else if (value is DateTime)
+			{
+			    var dateTime = (DateTime) value;
+			    if (dateTime.TimeOfDay.TotalSeconds == 0)
+			    {
+			        BuildDate(sb, value);
+			    }
+                else
+                    BuildDateTime(sb, dateTime);
+			}
 			else if (value is Guid)     sb.Append('\'').Append(value).Append('\'');
 			else if (value is decimal)  sb.Append(((decimal)value).ToString(NumberFormatInfo));
 			else if (value is double)   sb.Append(((double) value).ToString(NumberFormatInfo));
@@ -1679,6 +1688,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			sb.Append('\'');
 		}
+
+	    protected virtual void BuildDate(StringBuilder sb, object value)
+	    {
+            sb.Append(string.Format("'{0:yyyy-MM-dd}'", value));
+	    }
 
 		protected virtual void BuildDateTime(StringBuilder sb, object value)
 		{
