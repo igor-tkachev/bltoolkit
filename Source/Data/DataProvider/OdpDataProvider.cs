@@ -1620,6 +1620,9 @@ namespace BLToolkit.Data.DataProvider
         {
             if (db.UseQueryText)
             {
+                // Called if UseQuery false or out of a transaction scope
+                _interpreterBase.SetCollectionIds(db, members, collection);
+
                 var parameters = new List<IDbDataParameter>();
                 List<string> sqlList = _interpreterBase.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false, db, parameters);
                 return ExecuteSqlList(db, sqlList, parameters);
@@ -1666,6 +1669,7 @@ namespace BLToolkit.Data.DataProvider
             MemberMapper[] members,
             int maxBatchSize)
         {
+
             var idx = insertText.IndexOf('\n');
             var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
             var rd = new BulkCopyReader(members, collection);
