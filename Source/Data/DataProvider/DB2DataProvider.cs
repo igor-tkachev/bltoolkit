@@ -8,7 +8,7 @@ namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
 
-	class DB2DataProvider :  DataProviderBase
+	public class DB2DataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject () { return new DB2Connection (); }
 		public override DbDataAdapter CreateDataAdapterObject() { return new DB2DataAdapter(); }
