@@ -1510,14 +1510,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case QueryElementType.SqlParameter:
 					{
 						var parm = (SqlParameter)expr;
-                        
-						if (!UseQueryText && parm.IsQueryParameter)
-						{
-							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
-							sb.Append(name);
-						}
-						else
-							BuildValue(sb, parm.Value);
+
+					    if (!UseQueryText && parm.IsQueryParameter)
+					    {
+					        var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
+					        sb.Append(name);
+					    }
+                        else
+                            BuildValue(sb, parm.Value, parm);
 					}
 
 					break;
@@ -1612,7 +1612,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			PositiveSign             = NumberFormatInfo.InvariantInfo.PositiveSign,
 		};
 
-		public virtual void BuildValue(StringBuilder sb, object value)
+		public virtual void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 		{
 			if      (value == null)     sb.Append("NULL");
 			else if (value is string)   BuildString(sb, value.ToString());
@@ -1620,13 +1620,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is bool)     sb.Append((bool)value ? "1" : "0");
 			else if (value is DateTime)
 			{
-			    var dateTime = (DateTime) value;
-			    if (dateTime.TimeOfDay.TotalSeconds == 0)
+			    var dt = (DateTime) value;
+			    if (sqlParameter != null && sqlParameter.DbType == DbType.Date)
 			    {
-			        BuildDate(sb, value);
+                    dt = new DateTime(dt.Year, dt.Month, dt.Day);
+			    }
+                if (dt.TimeOfDay.TotalSeconds == 0)
+			    {
+                    BuildDate(sb, dt);
 			    }
                 else
-                    BuildDateTime(sb, dateTime);
+                    BuildDateTime(sb, dt);
 			}
 			else if (value is Guid)     sb.Append('\'').Append(value).Append('\'');
 			else if (value is decimal)  sb.Append(((decimal)value).ToString(NumberFormatInfo));

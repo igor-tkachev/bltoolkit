@@ -302,7 +302,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildFromClause(sb);
 		}
 
-	    public override void BuildValue(StringBuilder sb, object value)
+	    public override void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 	    {
 	        if (value is Guid)
 	        {
@@ -322,7 +322,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	                .Append("' as raw(16))");
 	        }
 	        else
-	            base.BuildValue(sb, value);
+	            base.BuildValue(sb, value, sqlParameter);
 	    }
 
 	    protected override void BuildDate(StringBuilder sb, object value)

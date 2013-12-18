@@ -110,6 +110,11 @@ BinaryFloat => Single
                     //
                     value = ((Guid) value).ToByteArray();
                 }
+                else if (parameter.DbType == DbType.Date && value is DateTime)
+                {
+                    var dt = (DateTime)value;
+                    value = new DateTime(dt.Year, dt.Month, dt.Day);
+                }
                     //else if (value is Array && !(value is byte[] || value is char[]))
                     //{
                     //    _oracleParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
@@ -247,6 +252,12 @@ BinaryFloat => Single
 
         private List<Int64> ReserveSequenceValues(DbManager db, int count, string sequenceName)
         {
+            //var sql2 = new StringBuilder("SELECT level," + sequenceName + " Id from DUAL connect by level <= " + count);
+
+            //db.SetCommand(sql2.ToString());
+
+            //return db.ExecuteScalarList<long>();
+
             var results = new List<long>();
 
             foreach (var page in Enumerable.Range(1, count).ToPages(1000))

@@ -97,7 +97,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
-		public override void BuildValue(StringBuilder sb, object value)
+		public override void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 		{
 			if (value is bool)
 				sb.Append(value);

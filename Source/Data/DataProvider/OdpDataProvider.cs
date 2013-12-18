@@ -1,4 +1,4 @@
-// Odp.Net Data Provider.
+﻿// Odp.Net Data Provider.
 // http://www.oracle.com/technology/tech/windows/odpnet/index.html
 //
 using System;
@@ -192,6 +192,7 @@ namespace BLToolkit.Data.DataProvider
             // We need NVarChar2 in order to insert UTF8 string values. The default Odp VarChar2 dbtype doesnt work
             // with UTF8 values. Note : Microsoft oracle client uses NVarChar value by default.
 
+// ReSharper disable once SuspiciousTypeConversion.Global
             var wrap = parameter as OracleParameterWrap;
             if (wrap != null && value is string)
                 wrap.OracleParameter.OracleDbType = OracleDbType.NVarchar2;
@@ -1643,6 +1644,13 @@ namespace BLToolkit.Data.DataProvider
             int                             maxBatchSize,
             DbManager.ParameterProvider<T>  getParameters)
         {
+            /*
+             * ﻿OracleBulkCopy doesn't support transaction for all the records, it only support transaction for batches if UseInternalTransaction is specified.
+             * ﻿If BatchSize > 0 and the UseInternalTransaction bulk copy option is specified, each batch of the bulk copy operation occurs within a transaction.
+             * If the connection used to perform the bulk copy operation is already part of a transaction, an InvalidOperationException exception is raised.
+             * If BatchSize > 0 and the UseInternalTransaction option is not specified, rows are sent to the database in batches of size BatchSize, but no transaction-related action is taken.
+             */
+
             if (db.UseQueryText || db.Transaction != null)
             {
                 var parameters = new List<IDbDataParameter>();

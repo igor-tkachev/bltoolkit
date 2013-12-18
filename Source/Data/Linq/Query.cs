@@ -1189,8 +1189,6 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var dr in data)
 			{
-                //var a = mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
-                //Console.WriteLine(a);
                 yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
 			}	
 		}
