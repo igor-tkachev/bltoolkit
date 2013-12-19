@@ -1623,7 +1623,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			    var dt = (DateTime) value;
 			    if (sqlParameter != null && sqlParameter.DbType == DbType.Date)
 			    {
-                    dt = new DateTime(dt.Year, dt.Month, dt.Day);
+                    dt = new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, dt.Kind);
 			    }
                 if (dt.TimeOfDay.TotalSeconds == 0)
 			    {

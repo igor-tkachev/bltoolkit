@@ -115,6 +115,7 @@ BinaryFloat => Single
                     var dt = (DateTime)value;
                     value = new DateTime(dt.Year, dt.Month, dt.Day);
                 }
+                    //// This case is treated in OracleParameterWrap set method of Value property
                     //else if (value is Array && !(value is byte[] || value is char[]))
                     //{
                     //    _oracleParameter.CollectionType = OracleCollectionType.PLSQLAssociativeArray;
@@ -193,11 +194,8 @@ BinaryFloat => Single
                     return GetInsertBatchSqlListWithInsertAll(insertText, collection, members, maxBatchSize, db.MappingSchema);
                     break;
                 case InsertBatchMethod.UnionAll:
-                    return GetInsertBatchSqlListUnionAll(insertText, collection, members, maxBatchSize, withIdentity, db.MappingSchema);
-                    break;
                 default:
                     return GetInsertBatchSqlListUnionAll(insertText, collection, members, maxBatchSize, withIdentity, db.MappingSchema);
-                    break;
             }
         }
 

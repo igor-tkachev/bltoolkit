@@ -332,8 +332,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	    protected override void BuildDateTime(StringBuilder sb, object value)
 	    {
-            //sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
-            sb.AppendFormat("TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
+	        var dt = (DateTime) value;
+	        sb.AppendFormat(dt.Millisecond == 0 
+                ? "TO_DATE('{0:yyyy-MM-dd HH:mm:ss}', 'YYYY-MM-DD HH24:MI:SS')" 
+                : "TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
 	    }
 
 	    protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
