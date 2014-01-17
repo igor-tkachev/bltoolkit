@@ -691,7 +691,14 @@ namespace BLToolkit.Data.DataProvider
 
         public override DbType GetParameterDbType(DbType dbType)
 		{
-			return dbType == DbType.DateTime2 ? DbType.DateTime : dbType;
+            switch (dbType)
+            {
+                case DbType.DateTime2:
+                    return DbType.DateTime;
+                case DbType.Boolean:
+                    return DbType.Byte;
+            }
+			return dbType;
 		}
 
 		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)
