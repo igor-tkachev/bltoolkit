@@ -189,11 +189,12 @@ namespace BLToolkit.Data.DataProvider
 			if (parameter is OracleParameterWrap)
 			{
 				const int ThresholdSize = 4000;
-				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
-				{
-					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
-				}
-				else if (value is byte[] && ((byte[])value).Length > ThresholdSize)
+                //if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
+                //{
+                //    ((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;				    
+                //}
+                //else 
+                if (value is byte[] && ((byte[])value).Length > ThresholdSize)
 				{
 					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Blob;
 				}
@@ -686,6 +687,11 @@ namespace BLToolkit.Data.DataProvider
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new OracleSqlProvider();
+		}
+
+        public override DbType GetParameterDbType(DbType dbType)
+		{
+			return dbType == DbType.DateTime2 ? DbType.DateTime : dbType;
 		}
 
 		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)

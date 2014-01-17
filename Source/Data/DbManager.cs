@@ -2628,8 +2628,8 @@ namespace BLToolkit.Data
 								value = MappingSchema.MapEnumToValue(value, true);
 
 							p = value != null
-								? Parameter(baseParameters[i].ParameterName + nRows, value)
-								: Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
+                                ? Parameter(baseParameters[i].ParameterName + nRows, value, dbType)
+                                : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, dbType);
 						}
 
 						parameters.Add(p);
