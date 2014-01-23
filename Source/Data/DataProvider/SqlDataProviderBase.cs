@@ -402,7 +402,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void SetParameterValue(IDbDataParameter parameter, object value)
 		{
-			if (value is sbyte)
+            if (value is sbyte)
 			{
 				parameter.Value = (byte)(sbyte)value;
 			}
@@ -423,6 +423,12 @@ namespace BLToolkit.Data.DataProvider
 				parameter.Value = value;
 				if (parameter.DbType == DbType.String && ((string)value).Length == 0) parameter.Size = 1;
 			}
+            else if (value is DateTime || value is DateTime?)
+            {
+                parameter.Value = value;
+                if ((parameter.DbType == DbType.DateTime || parameter.DbType == DbType.DateTime2)) 
+                    parameter.Size = 1;
+            }
 			else
 			{
 				base.SetParameterValue(parameter, value);
