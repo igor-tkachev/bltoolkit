@@ -29,7 +29,7 @@ namespace Data.Linq
 		public void DatabaseName([IncludeDataContexts("Sql2008")] string context)
 		{
 			using (var db = new TestDbManager(context))
-				db.GetTable<Parent>().DatabaseName("BLToolkitData").ToList();
+				db.GetTable<Parent>().DatabaseName("TestData").ToList();
 		}
 
 		[Test]
@@ -44,7 +44,7 @@ namespace Data.Linq
 		{
 			using (var db = new TestDbManager(context))
 				db.GetTable<ParenTable>()
-					.DatabaseName("BLToolkitData")
+					.DatabaseName("TestData")
 					.OwnerName("dbo")
 					.TableName("Parent")
 					.ToList();

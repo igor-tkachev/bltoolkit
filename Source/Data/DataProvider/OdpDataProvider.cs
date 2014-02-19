@@ -1480,7 +1480,7 @@ namespace BLToolkit.Data.DataProvider
 		    }
 
 
-		    ///<summary>
+			///<summary>
 			///Gets or sets the value of the parameter.
 			///</summary>
 			///<returns>
@@ -1640,6 +1640,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			var sb  = new StringBuilder();
 			var sp  = new OracleSqlProvider();
+			var pn  = 0;
 			var n   = 0;
 			var cnt = 0;
 		    var parCnt = 0;
@@ -1653,8 +1654,8 @@ namespace BLToolkit.Data.DataProvider
 				//.Replace("  ", " ")
 				+ ") VALUES (";
 
-		    List<IDbDataParameter> parameters = new List<IDbDataParameter>();
-            
+			var parameters = new List<IDbDataParameter>();
+
 			foreach (var item in collection)
 			{
 				if (sb.Length == 0)
@@ -1666,7 +1667,7 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
-				    if (value != null && value.GetType().IsEnum)
+					if (value != null && value.GetType().IsEnum)
 						value = MappingSchema.MapEnumToValue(value, true);
 
 					if (value is Nullable<DateTime>)
@@ -1677,18 +1678,12 @@ namespace BLToolkit.Data.DataProvider
 						var dt = (DateTime)value;
 						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
 					}
-                    else if (value is string && ((string) value).Length >= 2000)
-                    {
-                        var par = db.Parameter("Par" + parCnt++, value);
-                        parameters.Add(par);
-                        sb.Append(":" + par.ParameterName);
-                    }
-                    else if (value is byte[])
-                    {
-                        var par = db.Parameter("Par" + parCnt++, value);
-                        parameters.Add(par);
-                        sb.Append(":" + par.ParameterName);
-                    }
+					else if (value is byte[] || (value is string && ((string)value).Length >= 2000))
+					{
+						var par = db.Parameter("p" + ++pn, value);
+						parameters.Add(par);
+						sb.Append(":" + par.ParameterName);
+					}
 					else
 						sp.BuildValue(sb, value);
 
@@ -1708,11 +1703,13 @@ namespace BLToolkit.Data.DataProvider
 
 					if (DbManager.TraceSwitch.TraceInfo)
 						DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
-                    
-					cnt += db.SetCommand(sql, parameters.ToArray()).ExecuteNonQuery();
-                    parameters = new List<IDbDataParameter>();
-				    parCnt = 0;
 
+					cnt += db
+						.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+						.ExecuteNonQuery();
+
+					parameters.Clear();
+					pn = 0;
 					n = 0;
 					sb.Length = 0;
 				}
@@ -1727,7 +1724,9 @@ namespace BLToolkit.Data.DataProvider
 				if (DbManager.TraceSwitch.TraceInfo)
 					DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-                cnt += db.SetCommand(sql, parameters.ToArray()).ExecuteNonQuery();                
+				cnt += db
+					.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+					.ExecuteNonQuery();
 			}
 
 			return cnt;

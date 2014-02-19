@@ -46,3 +46,5 @@ UnitTests/Linq/UserDataProviders.txt
 !*.dll
 !*.exe
 !*.pdb
+BLToolkit.2012.opensdf
+ipch/examples.cpp-54293a33/examples.ipch
