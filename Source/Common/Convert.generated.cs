@@ -9010,6 +9010,14 @@ namespace BLToolkit.Common
 
 		#endregion
 
+		#region XElement
+
+#if !SILVERLIGHT
+
+#endif
+
+		#endregion
+
 		#region XmlDocument
 
 #if !SILVERLIGHT

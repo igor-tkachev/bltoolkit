@@ -10,6 +10,7 @@ using System;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Xml;
+using System.Xml.Linq;
 
 using Convert = BLToolkit.Common.Convert;
 
@@ -29,7 +30,7 @@ namespace BLToolkit.Mapping
 
 #if !SILVERLIGHT
 <#
-		CreateMapper(SimpleMapper,  "XmlReader", "XmlDocument");
+		CreateMapper(SimpleMapper,  "XmlReader", "XmlDocument", "XElement");
 		CreateMapper(SqlTypeMapper, "Byte", "Int16", "Int32", "Int64", "Single", "Boolean", "Double", "DateTime", "Decimal", "Money", "Guid", "String");
 #>
 
@@ -54,6 +55,7 @@ void SimpleMapper(string type)
 		case "Stream"      :
 		case "XmlReader"   :
 		case "XmlDocument" :
+		case "XElement"	   :
 			getset = "Value";
 			cast   = "";
 			break;
@@ -70,6 +72,7 @@ void SimpleMapper(string type)
 					case "Stream"      :
 					case "XmlReader"   :
 					case "XmlDocument" :
+					case "XElement"    :
 						break;
 					default            :
 #>
@@ -107,6 +110,7 @@ void SimpleMapper(string type)
 					case "Stream"      :
 					case "XmlReader"   :
 					case "XmlDocument" :
+					case "XElement"    :
 #>
 
 				if (mapMemberInfo.NullValue != null)
@@ -135,6 +139,7 @@ void SimpleMapper(string type)
 					case "Stream"      :
 					case "XmlReader"   :
 					case "XmlDocument" :
+					case "XElement"    :
 						break;
 					default:
 #>
