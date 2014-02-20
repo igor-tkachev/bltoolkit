@@ -113,7 +113,12 @@ BinaryFloat => Single
                 else if (parameter.DbType == DbType.Date && value is DateTime)
                 {
                     var dt = (DateTime)value;
-                    value = new DateTime(dt.Year, dt.Month, dt.Day);
+                    value = new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, 0, dt.Kind);
+                }
+                else if (parameter.DbType == DbType.DateTime && value is DateTime)
+                {
+                    var dt = (DateTime)value;
+                    value = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, 0, dt.Kind);
                 }
                     //// This case is treated in OracleParameterWrap set method of Value property
                     //else if (value is Array && !(value is byte[] || value is char[]))

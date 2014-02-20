@@ -2141,7 +2141,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				(sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0) && 
 				sqlQuery.From.Tables[0].Source is SqlTable)
 			{
-				var sql = new SqlQuery { QueryType = QueryType.Delete };
+				var sql = new SqlQuery { QueryType = QueryType.Delete, IsParameterDependent = sqlQuery.IsParameterDependent };
 
 				sqlQuery.ParentSql = sql;
 				sqlQuery.QueryType = QueryType.Select;
@@ -2191,7 +2191,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				if (sqlQuery.From.Tables.Count > 1 || sqlQuery.From.Tables[0].Joins.Count > 0)
 				{
-					var sql = new SqlQuery { QueryType = QueryType.Update };
+					var sql = new SqlQuery { QueryType = QueryType.Update, IsParameterDependent = sqlQuery.IsParameterDependent };
 
 					sqlQuery.ParentSql = sql;
 					sqlQuery.QueryType = QueryType.Select;
