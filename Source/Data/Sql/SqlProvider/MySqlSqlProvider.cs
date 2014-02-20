@@ -304,7 +304,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public static bool GenerateOldGuid = false;
 
-		public override void BuildValue(StringBuilder sb, object value)
+		public override void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 		{
 			if (GenerateOldGuid && value is Guid)
 			{

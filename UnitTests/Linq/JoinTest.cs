@@ -807,7 +807,7 @@ namespace Data.Linq
 						Count             = b.Count()
 					};
 
-				q.ToList();
+                q.ToList();
 			}
 		}
 	}

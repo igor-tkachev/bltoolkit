@@ -1,19 +1,24 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using System.Data;
+using System.Data.Linq;
 using BLToolkit.Mapping;
+
+#endregion
 
 namespace BLToolkit.Data.DataProvider
 {
     /// <summary>
-    /// BasicSqlProvider equivalent for the non-linq DAL
+    ///     BasicSqlProvider equivalent for the non-linq DAL
     /// </summary>
     public abstract class DataProviderInterpreterBase
     {
         public virtual void SetParameterValue(IDbDataParameter parameter, object value)
         {
-            if (value is System.Data.Linq.Binary)
+            if (value is Binary)
             {
-                var arr = ((System.Data.Linq.Binary)value).ToArray();
+                var arr = ((Binary) value).ToArray();
 
                 parameter.Value = arr;
                 parameter.DbType = DbType.Binary;
@@ -24,11 +29,13 @@ namespace BLToolkit.Data.DataProvider
         }
 
         public virtual List<string> GetInsertBatchSqlList<T>(
-            string              insertText, 
-            IEnumerable<T>      collection, 
-            MemberMapper[]      members, 
-            int                 maxBatchSize, 
-            bool                withIdentity)
+            string insertText,
+            IEnumerable<T> collection,
+            MemberMapper[] members,
+            int maxBatchSize,
+            bool withIdentity,
+            DbManager db,
+            List<IDbDataParameter> parameters)
         {
             return new List<string>();
         }
@@ -36,6 +43,11 @@ namespace BLToolkit.Data.DataProvider
         public virtual string GetSequenceQuery(string sequenceName)
         {
             return null;
+        }
+
+        public virtual DbType GetParameterDbType(DbType dbType)
+        {
+            return dbType;
         }
 
         public virtual string NextSequenceQuery(string sequenceName)
@@ -47,5 +59,10 @@ namespace BLToolkit.Data.DataProvider
         {
             return null;
         }
+
+        public abstract void SetCollectionIds<T>(
+            DbManager db,
+            IEnumerable<MemberMapper> members,
+            IEnumerable<T> collection);
     }
 }

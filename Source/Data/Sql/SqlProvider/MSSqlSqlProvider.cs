@@ -32,6 +32,21 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.AppendLine()
 				.AppendLine("SELECT SCOPE_IDENTITY()");
 		}
+		
+		protected override void BuildSetOutput( StringBuilder sb )
+	        {
+	        	// TODO: set the right data type
+	            sb
+	                .AppendLine()
+	                .Append( "declare @tabTempInsert table(TempID " ).Append( "uniqueidentifier" ).AppendLine( ")" );
+	        }
+	
+	        protected override void BuildGetOutput( StringBuilder sb )
+	        {
+	            sb
+	                .AppendLine()
+	                .AppendLine( "select top 1 TempID from @tabTempInsert" );
+	        }
 
 		protected override void BuildOrderByClause(StringBuilder sb)
 		{
@@ -230,7 +245,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.Append(string.Format("'{0:yyyy-MM-ddTHH:mm:ss.fff}'", value));
 		}
 
-		public override void BuildValue(StringBuilder sb, object value)
+		public override void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 		{
 			if      (value is sbyte)  sb.Append((byte)(sbyte)value);
 			else if (value is ushort) sb.Append((short)(ushort)value);

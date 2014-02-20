@@ -64,7 +64,7 @@ namespace Mapping
 			Assert.AreEqual(101,  Map.EnumToValue(OtherEnum1.EnumValue2));
 		}
 
-		//[Test]
+		[Test]
 		public void ObjToDicTest()
 		{
 			var obj  = new TestObj { Country = CountryCodeEnum1.DZ, Other = OtherEnum1.EnumValue2 };

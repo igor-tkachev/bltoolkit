@@ -37,7 +37,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		#region Support Flags
 
-		public virtual bool SkipAcceptsParameter            { get { return true;  } }
+	    public bool UseQueryText                            { get; set; }
+	    public virtual bool SkipAcceptsParameter            { get { return true;  } }
 		public virtual bool TakeAcceptsParameter            { get { return true;  } }
 		public virtual bool IsTakeSupported                 { get { return true;  } }
 		public virtual bool IsSkipSupported                 { get { return true;  } }
@@ -92,7 +93,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (union.IsAll) sb.Append(" ALL");
 						sb.AppendLine();
 
-						CreateSqlProvider().BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
+                        var sqlProvider = CreateSqlProvider();
+					    sqlProvider.UseQueryText = UseQueryText;
+                        sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
 					}
 				}
 			}
@@ -120,7 +123,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
-			return CreateSqlProvider().BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
+            var sqlProvider = CreateSqlProvider();
+            sqlProvider.UseQueryText = UseQueryText;
+            return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
 		protected abstract ISqlProvider CreateSqlProvider();
@@ -178,6 +183,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildInsertQuery(StringBuilder sb)
 		{
+			if (SqlQuery.Insert.WithOutput)
+                		BuildSetOutput(sb);
+                
 			BuildStep = Step.InsertClause; BuildInsertClause(sb);
 
 			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.From.Tables.Count != 0)
@@ -193,6 +201,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
+				
+			if (SqlQuery.Insert.WithOutput)
+                		BuildGetOutput(sb);
 		}
 
 		protected virtual void BuildUnknownQuery(StringBuilder sb)
@@ -395,6 +406,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				sb.AppendLine();
 				AppendIndent(sb).AppendLine(")");
+				
+				if ( SqlQuery.Insert.WithOutput )
+		                {
+		                    var pkField = SqlQuery.Insert.Into.Fields.FirstOrDefault(x=>x.Value.IsIdentity && x.Value.IsPrimaryKey);
+		
+		                    AppendIndent( sb ).Append( "output inserted.[" ).Append( pkField.Value.Name ).AppendLine( "] into @tabTempInsert" );
+		                }
 
 				if (SqlQuery.QueryType == QueryType.InsertOrUpdate || SqlQuery.From.Tables.Count == 0)
 				{
@@ -427,6 +445,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			//throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
 		}
+		
+		protected virtual void BuildSetOutput(StringBuilder sb)
+	        {
+	            //throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
+	        }
+	
+	        protected virtual void BuildGetOutput(StringBuilder sb)
+	        {
+	            //throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
+	        }
 
 		#endregion
 
@@ -1483,13 +1511,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var parm = (SqlParameter)expr;
 
-						if (parm.IsQueryParameter)
-						{
-							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
-							sb.Append(name);
-						}
-						else
-							BuildValue(sb, parm.Value);
+					    if (!UseQueryText && parm.IsQueryParameter)
+					    {
+					        var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
+					        sb.Append(name);
+					    }
+                        else
+                            BuildValue(sb, parm.Value, parm);
 					}
 
 					break;
@@ -1509,7 +1537,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return sb;
 		}
 
-		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
+	    private void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = Wrap(GetPrecedence(expr), parentPrecedence);
 
@@ -1584,13 +1612,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			PositiveSign             = NumberFormatInfo.InvariantInfo.PositiveSign,
 		};
 
-		public virtual void BuildValue(StringBuilder sb, object value)
+		public virtual void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 		{
 			if      (value == null)     sb.Append("NULL");
 			else if (value is string)   BuildString(sb, value.ToString());
 			else if (value is char)     BuildChar  (sb, (char)value);
 			else if (value is bool)     sb.Append((bool)value ? "1" : "0");
-			else if (value is DateTime) BuildDateTime(sb, value);
+			else if (value is DateTime)
+			{
+			    var dt = (DateTime) value;
+			    if (sqlParameter != null && sqlParameter.DbType == DbType.Date)
+			    {
+                    dt = new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, dt.Kind);
+			    }
+                if (dt.TimeOfDay.TotalSeconds == 0)
+			    {
+                    BuildDate(sb, dt);
+			    }
+                else
+                    BuildDateTime(sb, dt);
+			}
 			else if (value is Guid)     sb.Append('\'').Append(value).Append('\'');
 			else if (value is decimal)  sb.Append(((decimal)value).ToString(NumberFormatInfo));
 			else if (value is double)   sb.Append(((double) value).ToString(NumberFormatInfo));
@@ -1651,6 +1692,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			sb.Append('\'');
 		}
+
+	    protected virtual void BuildDate(StringBuilder sb, object value)
+	    {
+            sb.Append(string.Format("'{0:yyyy-MM-dd}'", value));
+	    }
 
 		protected virtual void BuildDateTime(StringBuilder sb, object value)
 		{

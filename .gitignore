@@ -44,6 +44,7 @@ BLToolkit.2010.sln.docstates
 UnitTests/BLToolkit.Linq.VisualState.xml
 UnitTests/Linq/UserDataProviders.txt
 !*.dll
+*.ncrunchsolution
 !*.exe
 !*.pdb
 BLToolkit.2012.opensdf

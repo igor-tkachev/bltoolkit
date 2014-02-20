@@ -117,6 +117,30 @@ namespace BLToolkit.Data.Linq
 
 		const int CacheSize = 100;
 
+	    public static void ClearCache()
+	    {
+	        lock (_sync)
+	        {
+	            var temp = _first;
+
+	            while (temp != null)
+	            {
+	                var temp2 = temp;
+	                temp = temp.Next;
+
+                    temp2.Queries.Clear();
+	            }
+
+	            _first = null;
+
+                ObjectOperation<T>.InsertWithIdentity.Clear();
+                ObjectOperation<T>.InsertOrUpdate.Clear();
+                ObjectOperation<T>.Insert.Clear();
+                ObjectOperation<T>.Update.Clear();
+                ObjectOperation<T>.Delete.Clear();
+	        }
+	    }
+
 		public static Query<T> GetQuery(IDataContextInfo dataContextInfo, Expression expr)
 		{
 			var query = FindQuery(dataContextInfo, expr);
@@ -377,14 +401,27 @@ namespace BLToolkit.Data.Linq
 		{
 			lock (this)
 			{
-				SetParameters(expr, parameters, idx);
+			    bool useQueryText = false;
+#if !SILVERLIGHT
+                useQueryText = dataContext is DbManager && ((DbManager) dataContext).UseQueryText;
+#endif
+                SetParameters(expr, parameters, idx, useQueryText);
+
 				return dataContext.SetQuery(Queries[idx]);
 			}
 		}
 
-		void SetParameters(Expression expr, object[] parameters, int idx)
+		void SetParameters(Expression expr, object[] parameters, int idx, bool useQueryText)
 		{
-			foreach (var p in Queries[idx].Parameters)
+		    QueryInfo query = Queries[idx];
+
+		    if (query.UseQueryText != useQueryText)
+		    {
+		        query.Context = null;
+                query.UseQueryText = useQueryText;
+		    }
+
+		    foreach (var p in query.Parameters)
 			{
 				var value = p.Accessor(expr, parameters);
 
@@ -407,10 +444,15 @@ namespace BLToolkit.Data.Linq
 							//	MappingSchema.MapEnumToValue(v, true) :
 							//	v);
 						}
-
+                        
 						value = values;
 					}
 				}
+
+                // Reset the query context sql when the parameters values change. When UseQueryText = true
+                // the query context sql includes the parameters values
+			    if (useQueryText && query.Context != null && !Equals(p.SqlParameter.Value, value))
+			        query.Context = null;
 
 				p.SqlParameter.Value = value;
 			}
@@ -448,6 +490,7 @@ namespace BLToolkit.Data.Linq
 
 			public SqlQuery SqlQuery { get; set; }
 			public object   Context  { get; set; }
+            public bool     UseQueryText { get; set; }
 
 			public SqlParameter[] GetParameters()
 			{
@@ -470,6 +513,7 @@ namespace BLToolkit.Data.Linq
 		{
 			public static readonly Dictionary<object,Query<int>>    Insert             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<object>> InsertWithIdentity = new Dictionary<object,Query<object>>();
+			public static readonly Dictionary<object,Query<object>> InsertWithOutput   = new Dictionary<object, Query<object>>();
 			public static readonly Dictionary<object,Query<int>>    InsertOrUpdate     = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Update             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
@@ -670,6 +714,64 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+		
+		#region InsertWithOutput
+
+	        public static object InsertWithOutput( IDataContextInfo dataContextInfo, T obj )
+	        {
+	            if ( Equals( default( T ), obj ) )
+	                return 0;
+	
+	            Query<object> ei;
+	
+	            var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
+	
+	            if ( !ObjectOperation<T>.InsertWithOutput.TryGetValue( key, out ei ) )
+	                lock ( _sync )
+	                    if ( !ObjectOperation<T>.InsertWithOutput.TryGetValue( key, out ei ) )
+	                    {
+	                        var sqlTable = new SqlTable<T>( dataContextInfo.MappingSchema );
+	                        var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
+	
+	                        sqlQuery.Insert.Into = sqlTable;
+	                        sqlQuery.Insert.WithIdentity = true;
+	
+	                        ei = new Query<object>
+	                        {
+	                            MappingSchema = dataContextInfo.MappingSchema,
+	                            ContextID = dataContextInfo.ContextID,
+	                            CreateSqlProvider = dataContextInfo.CreateSqlProvider,
+	                            Queries = { new Query<object>.QueryInfo { SqlQuery = sqlQuery, } }
+	                        };
+	
+	                        foreach ( var field in sqlTable.Fields )
+	                        {
+	                            if ( field.Value.IsInsertable )
+	                            {
+	                                var param = GetParameter<object>( dataContextInfo.DataContext, field.Value );
+	
+	                                ei.Queries[0].Parameters.Add( param );
+	
+	                                sqlQuery.Insert.Items.Add( new SqlQuery.SetExpression( field.Value, param.SqlParameter ) );
+	                            }
+	                            else if ( field.Value.IsIdentity )
+	                            {
+	                                var expr = ei.SqlProvider.GetIdentityExpression( sqlTable, field.Value, true );
+	
+	                                if ( expr != null )
+	                                    sqlQuery.Insert.Items.Add( new SqlQuery.SetExpression( field.Value, expr ) );
+	                            }
+	                        }
+	
+	                        ei.SetScalarQuery<object>();
+	
+	                        ObjectOperation<T>.InsertWithOutput.Add( key, ei );
+	                    }
+	
+	            return ei.GetElement( null, dataContextInfo, Expression.Constant( obj ), null );
+	        }
+	
+	        #endregion
 
 		#region InsertOrReplace
 
@@ -1067,6 +1169,10 @@ namespace BLToolkit.Data.Linq
 		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
 		{
 			var query = GetQuery();
+
+            // TODO => Add the possibility to switch to the FullMappingSchema
+		    //mapper = (context, dataContext, arg3, arg4, arg5) => MappingSchema.MapDataReaderToObject<T>(arg3);
+
 			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
 		}
 
@@ -1082,7 +1188,9 @@ namespace BLToolkit.Data.Linq
 				queryContext = new QueryContext(dataContextInfo, expr, ps);
 
 			foreach (var dr in data)
-				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+			{
+                yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+			}	
 		}
 
 		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)

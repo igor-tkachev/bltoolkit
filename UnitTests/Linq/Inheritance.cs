@@ -454,37 +454,55 @@ namespace Data.Linq
 		}
 
 		[TableName("Person")]
-		[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
-		[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
+        //[InheritanceMapping(Code = 1, Type = typeof(Test17John))]
+        //[InheritanceMapping(Code = 2, Type = typeof(Test17Tester))]
 		public class Test17Person
 		{
 			[MapField(IsInheritanceDiscriminator = true)]
 			public int PersonID { get; set; }
 		}
 
-		public class Test17John : Test17Person
-		{
-			public string FirstName { get; set; }
-		}
+        public class Test17Male : Test17Person
+        {
+            public string FirstName { get; set; }
+        }
 
-		public class Test17Tester : Test17Person
-		{
-			public string LastName { get; set; }
-		}
+        public class Test17Female : Test17Person
+        {
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+        }
 
-		[Test]
-		public void Test17()
-		{
-			ForEachProvider(context =>
-			{
-				if (context is TestDbManager)
-				{
-					var db = (TestDbManager)context;
-					db.GetTable<Test17Person>().OfType<Test17John>().ToList();
-					Assert.False(db.LastQuery.ToLowerInvariant().Contains("lastname"), "Why select LastName field??");
-				}
-			});
-		}
+        [Test]
+        public void Test17()
+        {
+            ForEachProvider(context =>
+            {
+                if (context is TestDbManager)
+                {
+                    var db = (TestDbManager)context;
+                    db.GetTable<Test17Person>().OfType<Test17Male>().ToList();
+                    Assert.False(db.LastQuery.ToLowerInvariant().Contains("lastname"), "Why select LastName field??");
+                }
+            });
+        }
+
+        [Test]
+        public void Test18ExceptFirebird()
+        {
+            ForEachProvider(Providers.Select(p => p.Name).Except(new[] { ProviderName.Firebird }).ToArray(), context =>
+            {
+                var db = context as TestDbManager;
+                if (db == null) return;
+                var ids = Enumerable.Range(0, 10).ToList();
+                var persons =
+                    (from person1 in db.GetTable<Test17Person>()
+                     where ids.Contains(person1.PersonID)
+                     join person2 in db.GetTable<Test17Person>() on person1.PersonID equals person2.PersonID
+                     select person1).Distinct();
+                persons.OfType<Test17Female>().ToList();
+            });
+        }
 
 		[TableName("Person")]
 		[InheritanceMapping(Code = Gender.Male,   Type = typeof(Test18Male))]

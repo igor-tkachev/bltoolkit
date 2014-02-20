@@ -145,7 +145,7 @@ namespace BLToolkit.Data.Linq
 				{ M(() => "".Length               ), L<S,I>      ( obj           => Sql.Length(obj).Value) },
 				{ M(() => "".Substring  (0)       ), L<S,I,S>    ((obj,p0)       => Sql.Substring(obj, p0 + 1, obj.Length - p0)) },
 				{ M(() => "".Substring  (0,0)     ), L<S,I,I,S>  ((obj,p0,p1)    => Sql.Substring(obj, p0 + 1, p1)) },
-				{ M(() => "".ContainsExactly("")  ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (Sql.ContainsExactly(p0, obj)                .Value) - 1) },
+                { M(() => "".ContainsExactly("")  ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (Sql.ContainsExactly(p0, obj)                .Value) - 1) },
 				{ M(() => "".IndexOf    ("")      ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (Sql.CharIndex(p0, obj)                      .Value) - 1) },
 				{ M(() => "".IndexOf    ("",0)    ), L<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (Sql.CharIndex(p0, obj,               p1 + 1).Value) - 1) },
 				{ M(() => "".IndexOf    ("",0,0)  ), L<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (Sql.CharIndex(p0, Sql.Left(obj, p2), p1)    .Value) - 1) },

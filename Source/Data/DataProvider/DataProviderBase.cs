@@ -397,28 +397,39 @@ namespace BLToolkit.Data.DataProvider
 
 			#region Implementation of IDataRecord
 
-			public string              GetName        (int i)           { return DataReader.GetName        (i); }
-			public string              GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
-			public Type                GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
-            // GetValue method is virtual since it can be overridden by some data provider 
-            // (For instance, OdbDataProvider uses special methodes for clob data fetching)
-			public virtual object      GetValue       (int i)           { return DataReader.GetValue       (i); }
-			public int                 GetValues      (object[] values) { return DataReader.GetValues      (values); }
-			public int                 GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
-			public bool                GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
-			public byte                GetByte        (int i)           { return DataReader.GetByte        (i); }
-			public char                GetChar        (int i)           { return DataReader.GetChar        (i); }
-			public Guid                GetGuid        (int i)           { return DataReader.GetGuid        (i); }
-			public short               GetInt16       (int i)           { return DataReader.GetInt16       (i); }
-			public int                 GetInt32       (int i)           { return DataReader.GetInt32       (i); }
-			public long                GetInt64       (int i)           { return DataReader.GetInt64       (i); }
-			public float               GetFloat       (int i)           { return DataReader.GetFloat       (i); }
-			public double              GetDouble      (int i)           { return DataReader.GetDouble      (i); }
-			public string              GetString      (int i)           { return DataReader.GetString      (i); }
-			public decimal             GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
-			public DateTime            GetDateTime    (int i)           { return DataReader.GetDateTime    (i); }
-			public IDataReader         GetData        (int i)           { return DataReader.GetData        (i); }
-			public bool                IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
+			public string      GetName        (int i)           { return DataReader.GetName        (i); }
+			public string      GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
+			public Type        GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
+
+            /// <summary>
+            /// GetValue method is virtual since it can be overridden by some data provider 
+            /// (For instance, OdbDataProvider uses special methodes for clob data fetching)
+            /// </summary>
+            /// <param name="i"></param>
+            /// <returns></returns>
+			public virtual object      GetValue       (int i)
+			{
+			    return DataReader.GetValue       (i);
+			}
+			public int         GetValues      (object[] values) { return DataReader.GetValues      (values); }
+			public int         GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
+			public bool        GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
+			public byte        GetByte        (int i)           { return DataReader.GetByte        (i); }
+			public char        GetChar        (int i)           { return DataReader.GetChar        (i); }
+			public Guid        GetGuid        (int i)           { return DataReader.GetGuid        (i); }
+			public short       GetInt16       (int i)           { return DataReader.GetInt16       (i); }
+			public int         GetInt32       (int i)           { return DataReader.GetInt32       (i); }
+			public long        GetInt64       (int i)           { return DataReader.GetInt64       (i); }
+			public float       GetFloat       (int i)           { return DataReader.GetFloat       (i); }
+			public double      GetDouble      (int i)           { return DataReader.GetDouble      (i); }
+			public string      GetString      (int i)           { return DataReader.GetString      (i); }
+			public decimal     GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
+			public DateTime    GetDateTime    (int i)
+			{
+			    return DataReader.GetDateTime    (i);
+			}
+			public IDataReader GetData        (int i)           { return DataReader.GetData        (i); }
+			public bool        IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
 
 			public int FieldCount { get { return DataReader.FieldCount; } }
 
@@ -440,7 +451,10 @@ namespace BLToolkit.Data.DataProvider
 			#region Implementation of IDataReader
 
 			public void      Close         () {        DataReader.Close         (); }
-			public DataTable GetSchemaTable() { return DataReader.GetSchemaTable(); }
+			public DataTable GetSchemaTable()
+			{
+			    return DataReader.GetSchemaTable();
+			}
 			public bool      NextResult    () { return DataReader.NextResult    (); }
 			public bool      Read          () { return DataReader.Read          (); }
 			public int       Depth           { get { return DataReader.Depth;           } }
@@ -468,24 +482,24 @@ namespace BLToolkit.Data.DataProvider
 
 		#region InsertBatch
 
-		public virtual int InsertBatchWithIdentity<T>(
-			DbManager db,
-			string insertText,
-			IEnumerable<T> collection,
-			MemberMapper[] members,
-			int maxBatchSize,
-			DbManager.ParameterProvider<T> getParameters)
-		{
-			throw new NotImplementedException("Insert batch with identity is not implemented!");
-		}
+        public virtual int InsertBatchWithIdentity<T>(
+            DbManager                       db,
+            string                          insertText,
+            IEnumerable<T>                  collection,
+            MemberMapper[]                  members,
+            int                             maxBatchSize,
+            DbManager.ParameterProvider<T>  getParameters)
+        {
+            throw new NotImplementedException("Insert batch with identity is not implemented!");
+        }
 
 		public virtual int InsertBatch<T>(
-			DbManager      db,
-			string         insertText,
-			IEnumerable<T> collection,
-			MemberMapper[] members,
-			int            maxBatchSize,
-			DbManager.ParameterProvider<T> getParameters)
+			DbManager                       db,
+			string                          insertText,
+			IEnumerable<T>                  collection,
+			MemberMapper[]                  members,
+			int                             maxBatchSize,
+			DbManager.ParameterProvider<T>  getParameters)
 		{
 			db.SetCommand(insertText);
 			return db.ExecuteForEach(collection, members, maxBatchSize, getParameters);
@@ -493,13 +507,15 @@ namespace BLToolkit.Data.DataProvider
 
 		#endregion
 
-		protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
+		protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList, List<IDbDataParameter> parameters)
 		{
 			var cnt = 0;
 
 			foreach (string sql in sqlList)
 			{
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
+                cnt += db
+                        .SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+                        .ExecuteNonQuery();
 			}
 
 			return cnt;

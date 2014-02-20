@@ -80,11 +80,12 @@ namespace BLToolkit.Data
 			}
 
 			var sqlProvider = DataProvider.CreateSqlProvider();
+            sqlProvider.UseQueryText = UseQueryText;
 
 			var cc = sqlProvider.CommandCount(sql);
 			var sb = new StringBuilder();
 
-			var commands = new string[cc];
+            var commands = new string[cc];
 
 			for (var i = 0; i < cc; i++)
 			{
@@ -106,13 +107,16 @@ namespace BLToolkit.Data
 			};
 		}
 
-		protected virtual SqlQuery ProcessQuery(SqlQuery sqlQuery)
+		public virtual SqlQuery ProcessQuery(SqlQuery sqlQuery)
 		{
 			return sqlQuery;
 		}
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
 		{
+            if (UseQueryText)
+                return;
+
 			var parameters = query.GetParameters();
 
 			if (parameters.Length == 0 && pq.SqlParameters.Count == 0)
@@ -157,12 +161,15 @@ namespace BLToolkit.Data
 
 			if (value != null)
 			{
-				if (parm.DbType == DbType.Object)
-					parms.Add(Parameter(name, value));
-				else if (parm.DbSize == 0)
-					parms.Add(Parameter(name, value, parm.DbType));
-				else
-					parms.Add(Parameter(name, value, parm.DbType, parm.DbSize));
+			    if (parm.DbType == DbType.Object)
+			    {
+			        parm.DbType = DataProvider.GetDbType(parm.SystemType);
+			        parms.Add(Parameter(name, value));
+			    }
+			    else if (parm.DbSize == 0)
+			        parms.Add(Parameter(name, value, parm.DbType));
+			    else
+			        parms.Add(Parameter(name, value, parm.DbType, parm.DbSize));
 			}
 			else
 			{
@@ -252,9 +259,9 @@ namespace BLToolkit.Data
 		{
 			var pq = (PreparedQuery)query;
 
-			SetCommand(pq.Commands[0], pq.Parameters);
+            SetCommand(pq.Commands[0], pq.Parameters);
 
-			var now = default(DateTime);
+		    var now = default(DateTime);
 
 			if (TraceSwitch.TraceInfo)
 				now = DateTime.Now;

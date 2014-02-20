@@ -36,6 +36,6 @@
 		public const string PostgreSQL = "Npgsql";
 		public const string SqlCe      = "System.Data.SqlServerCe";
 		public const string SQLite     = "System.Data.SQLite";
-		public const string Sybase     = "Sybase.Data.AseClient";		
+		public const string Sybase     = "Sybase.Data.AseClient";
     }
 }

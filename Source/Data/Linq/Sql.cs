@@ -276,14 +276,14 @@ namespace BLToolkit.Data.Linq
 			return str.IndexOf(value) + 1;
 		}
 
-		[SqlFunction]
-		public static int? ContainsExactly(string value, string str)
-		{
-			if (str == null || value == null)
-				return null;
+        [SqlFunction]
+        public static int? ContainsExactly(string value, string str)
+        {
+            if (str == null || value == null)
+                return null;
 
-			return str.ContainsExactly(value);
-		}
+            return str.ContainsExactly(value);
+        }
 
 		[SqlFunction]
 		[SqlFunction("DB2",   "Locate")]
@@ -471,6 +471,7 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("CURRENT_TIMESTAMP")]
 		[SqlProperty("Informix", "CURRENT")]
 		[SqlProperty("Access",   "Now")]
+        [SqlProperty("Oracle", "SYSDATE")]
 		public static DateTime GetDate()
 		{
 			return DateTime.Now;
@@ -481,6 +482,7 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("Access",   "Now",     ServerSideOnly = true)]
 		[SqlFunction("SqlCe",    "GetDate", ServerSideOnly = true)]
 		[SqlFunction("Sybase",   "GetDate", ServerSideOnly = true)]
+        [SqlFunction("Oracle", "SYSDATE", ServerSideOnly = true)]
 		public static DateTime CurrentTimestamp
 		{
 			get { throw new LinqException("The 'CurrentTimestamp' is server side only property."); }
@@ -491,6 +493,7 @@ namespace BLToolkit.Data.Linq
 		[SqlProperty("Access",   "Now")]
 		[SqlFunction("SqlCe",    "GetDate")]
 		[SqlFunction("Sybase",   "GetDate")]
+        [SqlFunction("Oracle", "SYSDATE")]
 		public static DateTime CurrentTimestamp2
 		{
 			get { return DateTime.Now; }

@@ -15,6 +15,11 @@ namespace Data.Linq
 
 	public class TestDbManager : DbManager, ITestDataContext
 	{
+        public TestDbManager(DataProviderBase dataProviderBase, string configString)
+            : base(dataProviderBase, configString)
+        {
+        }
+
 		public TestDbManager(string configString)
 			: base(configString)
 		{

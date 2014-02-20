@@ -6,6 +6,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 
 namespace BLToolkit.Data
 {
@@ -619,6 +621,30 @@ namespace BLToolkit.Data
 				_dataProviderTypeList[dataProvider.ConnectionType] = dataProvider;
 			}
 		}
+
+        public static void SetMappingTypeSequence<T>(string sequenceName)
+        {
+            foreach (var providerBase in _dataProviderNameList.Values)
+            {
+                if (providerBase.MappingSchema != null)
+                {
+                    providerBase.MappingSchema.SetMappingTypeSequence(typeof(T), sequenceName);
+                }
+            }
+            Query<T>.ClearCache();
+            SqlQueryBase.ClearCache();
+        }
+
+	    public static void SetMappingTypeOwner<T>(string ownerName)
+	    {
+	        foreach (var providerBase in _dataProviderNameList.Values)
+	        {
+                if (providerBase.MappingSchema != null)
+	                providerBase.MappingSchema.MetadataProvider.SetOwnerName(typeof(T), ownerName);
+	        }
+            Query<T>.ClearCache();
+            SqlQueryBase.ClearCache();
+	    }
 
 		/// <summary>
 		/// Adds a new data provider witch a specified name.

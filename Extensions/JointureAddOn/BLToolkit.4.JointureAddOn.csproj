@@ -46,8 +46,6 @@
     <Compile Include="DataAccess\FullSqlQueryInfo.cs" />
     <Compile Include="DataAccess\FullSqlQueryParameterInfo.cs" />
     <Compile Include="DataAccess\FullSqlQueryT.cs" />
-    <Compile Include="Emit\DynamicCompilationSpike.cs" />
-    <Compile Include="Emit\FunctionFactory.cs" />
     <Compile Include="Mapping\CollectionFullObjectMapper.cs" />
     <Compile Include="Mapping\NotifyPropertyChangedInterceptor.cs" />
     <Compile Include="Mapping\DataBindingMappingSchema.cs" />

@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Text;
 
 using BLToolkit.Aspects;
@@ -31,6 +33,36 @@ namespace BLToolkit.DataAccess
 		}
 
 		#endregion
+
+        #region InsertWithIdentity
+
+        public virtual object InsertWithIdentity(DbManager db, object obj)
+	    {
+	        var query = GetSqlQueryInfo(db, obj.GetType(), "InsertWithIdentity");
+
+	        var parameters = query.GetParameters(db, obj);
+
+	        db.SetCommand(query.QueryText, parameters).ExecuteNonQuery();
+
+	        var outputParameter = parameters.ToList().First(e => e.Direction == ParameterDirection.Output);
+	        return outputParameter.Value;
+	    }
+
+	    public virtual object InsertWithIdentity(object obj)
+	    {
+	        var db = GetDbManager();
+
+	        try
+	        {
+	            return InsertWithIdentity(db, obj);
+	        }
+	        finally
+	        {
+	            Dispose(db);
+	        }
+	    }
+
+	    #endregion
 
 		#region Protected Members
 
@@ -212,7 +244,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter)
+		protected SqlQueryInfo CreateInsertSqlText(DbManager db, Type type, int nParameter, bool insertAutoSequence = false)
 		{
 			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			var om      = db.MappingSchema.GetObjectMapper(type);
@@ -225,6 +257,7 @@ namespace BLToolkit.DataAccess
 			AppendTableName(sb, db, type);
 			sb.Append(" (\n");
 
+            
 			foreach (var mm in GetFieldList(om))
 			{
 				// IT: This works incorrectly for complex mappers.
@@ -233,37 +266,65 @@ namespace BLToolkit.DataAccess
 				// as in CreateUpdateSqlText
 				//
 
-				bool isSet;
-				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
 
-				if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.OnInsert == false)
-				{
-					sb.AppendFormat("\t{0},\n",
-						db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
-					list.Add(mm);
-				}
+                bool isSet;
+				var nonUpdatableAttribute = mp.GetNonUpdatableAttribute(type, typeExt, mm.MapMemberInfo.MemberAccessor, out isSet);
+                if (insertAutoSequence && nonUpdatableAttribute is IdentityAttribute)
+                {                    
+                    sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
+                    list.Add(mm);
+                }
+                else
+                {
+                    if (nonUpdatableAttribute == null || !isSet || nonUpdatableAttribute.IsIdentity || nonUpdatableAttribute.OnInsert == false)
+                    {
+                        sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
+                        list.Add(mm);
+                    }
+                }
 			}
 
 			sb.Remove(sb.Length - 2, 1);
 
 			sb.Append(") VALUES (\n");
 
-			foreach (var mm in list)
-			{
-				var p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name + "_P", ConvertType.NameToQueryParameter).ToString(),
-					mm.Name);
+            MemberMapper identityMember = null;
+            foreach (var mm in list)
+            {
+                var keyGenerator = mm.MapMemberInfo.KeyGenerator as SequenceKeyGenerator;
+                if (keyGenerator != null && insertAutoSequence)
+                {
+                    string seqQuery = db.DataProvider.NextSequenceQuery(keyGenerator.Sequence);
+                    sb.AppendFormat("\t{0},\n", seqQuery);
+                    identityMember = mm;
+                }
+                else
+                {
+                    // Previously : mm.Name
+                    var p = query.AddParameter(
+                        db.DataProvider.Convert(mm.MemberName + "_P", ConvertType.NameToQueryParameter).ToString(),
+                        mm.Name);
 
-				if (nParameter < 0)
-					sb.AppendFormat("\t{0},\n", p.ParameterName);
-					//sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(p.ParameterName, ConvertType.NameToQueryParameter));
-				else
-					sb.AppendFormat("\t{{{0}}},\n", nParameter++);
-			}
+                    if (nParameter < 0)
+                        sb.AppendFormat("\t{0},\n", p.ParameterName);
+                        //sb.AppendFormat("\t{0},\n", db.DataProvider.Convert(p.ParameterName, ConvertType.NameToQueryParameter));
+                    else
+                        sb.AppendFormat("\t{{{0}}},\n", nParameter++);
+                }
+            }
 
-			sb.Remove(sb.Length - 2, 1);
+		    sb.Remove(sb.Length - 2, 1);
 
 			sb.Append(")");
+
+            if (identityMember != null)
+            {
+                sb.AppendFormat("\r\n{0}", db.DataProvider.GetReturningInto(identityMember.Name));
+
+                query.AddParameter(
+                    db.DataProvider.Convert("IDENTITY_PARAMETER", ConvertType.NameToQueryParameter).ToString(),
+                    identityMember.Name);
+            }
 
 			query.QueryText = sb.ToString();
 
@@ -349,11 +410,16 @@ namespace BLToolkit.DataAccess
 			switch (actionName)
 			{
 				case "SelectByKey": return CreateSelectByKeySqlText(db, type);
-				case "SelectAll":   return CreateSelectAllSqlText  (db, type);
-				case "Insert":      return CreateInsertSqlText     (db, type, -1);
-				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
+				case "SelectAll":   return CreateSelectAllSqlText  (db, type);      
+          
+				case "Insert":      return CreateInsertSqlText     (db, type, -1, false);
+                case "InsertWithIdentity": return CreateInsertSqlText(db, type, -1, true);
+                case "InsertBatch": return CreateInsertSqlText(db, type, 0, false);
+                case "InsertBatchWithIdentity": return CreateInsertSqlText(db, type, 0, db.UseQueryText || db.Transaction != null);                
+
 				case "Update":      return CreateUpdateSqlText     (db, type, -1);
 				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);
+
 				case "Delete":      return CreateDeleteSqlText     (db, type, -1);
 				case "DeleteBatch": return CreateDeleteSqlText     (db, type,  0);
 				default:
@@ -364,6 +430,11 @@ namespace BLToolkit.DataAccess
 
 		private static readonly Hashtable _actionSqlQueryInfo = new Hashtable();
 
+	    public static void ClearCache()
+	    {
+	        _actionSqlQueryInfo.Clear();
+	    }
+
 		[NoInterception]
 		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
 		{
@@ -373,7 +444,9 @@ namespace BLToolkit.DataAccess
 			if (query == null)
 			{
 				query = CreateSqlText(db, type, actionName);
-				_actionSqlQueryInfo[key] = query;
+                query.OwnerName = GetOwnerName(type);
+			    query.ActionName = actionName;
+			    _actionSqlQueryInfo[key] = query;
 			}
 
 			return query;

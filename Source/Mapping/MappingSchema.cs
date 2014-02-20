@@ -50,6 +50,22 @@ namespace BLToolkit.Mapping
 		private readonly Dictionary<Type,ObjectMapper> _mappers        = new Dictionary<Type,ObjectMapper>();
 		private readonly Dictionary<Type,ObjectMapper> _pendingMappers = new Dictionary<Type,ObjectMapper>();
 
+	    private readonly Dictionary<Type, string> _mappersSequences = new Dictionary<Type, string>();
+
+	    public void SetMappingTypeSequence(Type type, string sequenceName)
+	    {
+	        lock (_mappers)
+	        {
+	            _mappersSequences[type] = sequenceName;
+
+                ObjectMapper om;
+	            if (_mappers.TryGetValue(type, out om))
+	            {
+                    om.SetMappingTypeSequence(sequenceName);
+	            }
+	        }
+	    }
+
 		public ObjectMapper GetObjectMapper(Type type)
 		{
 			ObjectMapper om;
@@ -76,6 +92,10 @@ namespace BLToolkit.Mapping
 				try
 				{
 					om.Init(this, type);
+				    if (_mappersSequences.ContainsKey(type))
+				    {
+				        om.SetMappingTypeSequence(_mappersSequences[type]);
+				    }
 				}
 				finally
 				{
@@ -1411,21 +1431,6 @@ namespace BLToolkit.Mapping
 			return index;
 		}
 
-		[CLSCompliant(false), Obsolete]
-		protected static void MapInternal(
-			IMapDataSource      source, object sourceObject,
-			IMapDataDestination dest,   object destObject,
-			int[]               index)
-		{
-			for (int i = 0; i < index.Length; i++)
-			{
-				int n = index[i];
-
-				if (n >= 0)
-					dest.SetValue(destObject, n, source.GetValue(sourceObject, i));
-			}
-		}
-
 		[CLSCompliant(false)]
 		internal protected static void MapInternal(
 			IMapDataSource      source, object sourceObject,
@@ -1680,26 +1685,26 @@ namespace BLToolkit.Mapping
 				value = ConvertChangeType(value, mapValueType);
 			}
 
-			if (mapValues != null)
-			{
-				var comp = (IComparable)value;
+		    if (mapValues != null)
+		    {
+		        var comp = (IComparable) value;
 
-				foreach (MapValue mv in mapValues)
-				foreach (object mapValue in mv.MapValues)
-				{
-					try
-					{
-						if (comp.CompareTo(mapValue) == 0)
-							return mv.OrigValue;
-					}
-					catch (ArgumentException ex)
-					{
-						Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
-					}
-				}
-			}
+		        foreach (MapValue mv in mapValues)
+		            foreach (object mapValue in mv.MapValues)
+		            {
+		                try
+		                {
+		                    if (comp.CompareTo(mapValue) == 0)
+		                        return mv.OrigValue;
+		                }
+		                catch (ArgumentException ex)
+		                {
+		                    Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
+		                }
+		            }
+		    }
 
-			InvalidCastException exInvalidCast = null;
+		    InvalidCastException exInvalidCast = null;
 
 			var enumType = TypeHelper.UnwrapNullableType(type);
 			try
@@ -2123,15 +2128,7 @@ namespace BLToolkit.Mapping
 			object          destObject,
 			params object[] parameters)
 		{
-			if (destObject == null) throw new ArgumentNullException("destObject");
-
-			MapInternal(
-				null,
-				CreateDataRowMapper(dataRow, DataRowVersion.Default), dataRow,
-				GetObjectMapper(destObject.  GetType()), destObject,
-				parameters);
-
-			return destObject;
+			return MapDataRowToObject(dataRow, DataRowVersion.Default, destObject, parameters);
 		}
 
 		public object MapDataRowToObject(
@@ -2156,15 +2153,7 @@ namespace BLToolkit.Mapping
 			Type            destObjectType,
 			params object[] parameters)
 		{
-			InitContext ctx = new InitContext();
-
-			ctx.MappingSchema = this;
-			ctx.DataSource    = CreateDataRowMapper(dataRow, DataRowVersion.Default);
-			ctx.SourceObject  = dataRow;
-			ctx.ObjectMapper  = GetObjectMapper(destObjectType);
-			ctx.Parameters    = parameters;
-
-			return MapInternal(ctx);
+		    return MapDataRowToObject(dataRow, DataRowVersion.Default, destObjectType, parameters);
 		}
 
 		public object MapDataRowToObject(
@@ -2182,21 +2171,6 @@ namespace BLToolkit.Mapping
 			ctx.Parameters    = parameters;
 
 			return MapInternal(ctx);
-		}
-
-		public T MapDataRowToObject<T>(
-			DataRow         dataRow,
-			params object[] parameters)
-		{
-			return (T)MapDataRowToObject(dataRow, typeof(T), parameters);
-		}
-
-		public T MapDataRowToObject<T>(
-			DataRow         dataRow,
-			DataRowVersion  version,
-			params object[] parameters)
-		{
-			return (T)MapDataRowToObject(dataRow, version, typeof(T), parameters);
 		}
 
 		#endregion
@@ -2358,12 +2332,11 @@ namespace BLToolkit.Mapping
 			return destObject;
 		}
 
-		//NOTE changed to virtual
 		public virtual object MapDataReaderToObject(
 			IDataReader     dataReader,
 			Type            destObjectType,
 			params object[] parameters)
-		{
+		{            
 			InitContext ctx = new InitContext();
 
 			ctx.MappingSchema = this;
@@ -2375,6 +2348,7 @@ namespace BLToolkit.Mapping
 			return MapInternal(ctx);
 		}
 
+        //TODO Remove unused method
 		public T MapDataReaderToObject<T>(
 			IDataReader     dataReader,
 			params object[] parameters)
@@ -3123,24 +3097,15 @@ namespace BLToolkit.Mapping
 		{
 			IList list = new List<object>();
 
-			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    (list, GetObjectMapper(destObjectType)),
-				parameters);
-
-			return list;
+		    return MapDataReaderToList(reader, list, destObjectType, parameters);
 		}
 
-		//NOTE changed to virtual
-		public virtual IList<T> MapDataReaderToList<T>(
+		public IList<T> MapDataReaderToList<T>(
 			IDataReader     reader,
 			IList<T>        list,
 			params object[] parameters)
 		{
-			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    ((IList)list, GetObjectMapper(typeof(T))),
-				parameters);
+		    MapDataReaderToList(reader, (IList) list, typeof (T), parameters);
 
 			return list;
 		}
@@ -3151,12 +3116,9 @@ namespace BLToolkit.Mapping
 		{
 			List<T> list = new List<T>();
 
-			MapSourceListToDestinationList(
-				CreateDataReaderListMapper(reader),
-				CreateObjectListMapper    (list, GetObjectMapper(typeof(T))),
-				parameters);
+            MapDataReaderToList<T>(reader, list, parameters);
 
-			return list;
+		    return list;
 		}
 
 		#endregion

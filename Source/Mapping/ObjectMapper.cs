@@ -239,6 +239,18 @@ namespace BLToolkit.Mapping
 
 		#region Init Mapper
 
+	    public void SetMappingTypeSequence(string sequenceName)
+	    {
+	        foreach (var memberMapper in _members)
+	        {
+	            if (memberMapper.MapMemberInfo.KeyGenerator != null)
+	            {
+                    memberMapper.MapMemberInfo.KeyGenerator = new SequenceKeyGenerator(sequenceName);
+	                break;
+	            }
+	        }
+	    }
+
 		public virtual void Init(MappingSchema mappingSchema, Type type)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -296,6 +308,7 @@ namespace BLToolkit.Mapping
 					mi.DefaultValue               = GetDefaultValue(ma);
 					mi.Nullable                   = GetNullable    (ma);
 					mi.NullValue                  = GetNullValue   (ma, mi.Nullable);
+				    mi.KeyGenerator               = GetKeyGenerator(ma);
 
 					Add(CreateMemberMapper(mi));
 				}
@@ -433,6 +446,7 @@ namespace BLToolkit.Mapping
 				// So we cache failed requests.
 				// If this optimization is a memory leak for you, just comment out next line.
 				//
+                // TODO : Should we add an option property?
 				if (_nameToComplexMapper.ContainsKey(name))
 					_nameToComplexMapper[name] = null;
 				else
@@ -509,6 +523,25 @@ namespace BLToolkit.Mapping
 			bool isSet;
 			return MetadataProvider.GetFieldName(Extension, memberAccessor, out isSet);
 		}
+
+        protected virtual KeyGenerator GetKeyGenerator(MemberAccessor memberAccessor)
+        {
+            bool isSet;
+            var nonUpdatableAttribute = MetadataProvider.GetNonUpdatableAttribute(memberAccessor.Type, Extension, memberAccessor, out isSet);
+            if (isSet && nonUpdatableAttribute is IdentityAttribute)
+            {
+                bool isSeqSet;
+                string sequenceName = MetadataProvider.GetSequenceName(Extension, memberAccessor, out isSeqSet);
+                if (!isSeqSet)
+                    throw new NotImplementedException("Identity without sequence");
+
+                if (string.IsNullOrWhiteSpace(sequenceName))
+                    throw new Exception("SequenceName is empty");
+
+                return new SequenceKeyGenerator(sequenceName);                                   
+            }
+            return null;
+        }
 
 		protected virtual string GetFieldStorage(MemberAccessor memberAccessor)
 		{

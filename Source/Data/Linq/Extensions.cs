@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
 using JetBrains.Annotations;
 
 namespace BLToolkit.Data.Linq
@@ -255,6 +254,11 @@ namespace BLToolkit.Data.Linq
 			return InsertBatch(dataContext, int.MaxValue, list);
 		}
 
+        public static int InsertBatchWithIdentity<T>(this DbManager dataContext, IEnumerable<T> list)
+        {
+            return new SqlQuery<T>().InsertBatchWithIdentity(dataContext, int.MaxValue, list);
+        }
+
 		public static int InsertBatch<T>(this DbManager dataContext, T[] list)
 		{
 			return InsertBatch(dataContext, int.MaxValue, list);
@@ -296,6 +300,21 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+		
+		#region InsertWithOutput
+
+	        public static object InsertWithOutput<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+	        {
+	            if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+	            return Query<T>.InsertWithOutput(dataContextInfo, obj);
+	        }
+	
+	        public static object InsertWithOutput<T>( this IDataContext dataContext, T obj )
+	        {
+	            return Query<T>.InsertWithOutput(DataContextInfo.Create( dataContext ), obj);
+	        }
+	
+	        #endregion
 
 		#region Update
 

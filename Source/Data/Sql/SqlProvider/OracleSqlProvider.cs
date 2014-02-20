@@ -215,14 +215,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 							return new SqlExpression(func.SystemType, "Cast({0} as {1})", Precedence.Primary, FloorBeforeConvert(func), func.Parameters[0]);
 						}
-					case "ContainsExactly":
-						return func.Parameters.Length == 2 ?
-							new SqlFunction(func.SystemType, "Contains", func.Parameters[1], func.Parameters[0]) :
-							new SqlFunction(func.SystemType, "Contains", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
+                    case "ContainsExactly":
+                        return func.Parameters.Length == 2 ?
+                            new SqlFunction(func.SystemType, "Contains", func.Parameters[1], func.Parameters[0]) :
+                            new SqlFunction(func.SystemType, "Contains", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
 					case "CharIndex"      :
-						return func.Parameters.Length == 2?
-							new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0]):
-							new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
+                        return func.Parameters.Length == 2 ?
+                            new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0]) :
+                            new SqlFunction(func.SystemType, "InStr", func.Parameters[1], func.Parameters[0], func.Parameters[2]);
 					case "AddYear"        : return new SqlFunction(func.SystemType, "Add_Months", func.Parameters[0], Mul(func.Parameters[1], 12));
 					case "AddQuarter"     : return new SqlFunction(func.SystemType, "Add_Months", func.Parameters[0], Mul(func.Parameters[1],  3));
 					case "AddMonth"       : return new SqlFunction(func.SystemType, "Add_Months", func.Parameters[0],     func.Parameters[1]);
@@ -302,34 +302,43 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildFromClause(sb);
 		}
 
-		public override void BuildValue(StringBuilder sb, object value)
-		{
-			if (value is Guid)
-			{
-				var s = ((Guid)value).ToString("N");
+	    public override void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
+	    {
+	        if (value is Guid)
+	        {
+	            var s = ((Guid) value).ToString("N");
 
-				sb
-					.Append("Cast('")
-					.Append(s.Substring( 6,  2))
-					.Append(s.Substring( 4,  2))
-					.Append(s.Substring( 2,  2))
-					.Append(s.Substring( 0,  2))
-					.Append(s.Substring(10,  2))
-					.Append(s.Substring( 8,  2))
-					.Append(s.Substring(14,  2))
-					.Append(s.Substring(12,  2))
-					.Append(s.Substring(16, 16))
-					.Append("' as raw(16))");
-			}
-			else if (value is DateTime)
-			{
-				sb.AppendFormat("TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
-			}
-			else
-				base.BuildValue(sb, value);
-		}
+	            sb
+	                .Append("Cast('")
+	                .Append(s.Substring(6, 2))
+	                .Append(s.Substring(4, 2))
+	                .Append(s.Substring(2, 2))
+	                .Append(s.Substring(0, 2))
+	                .Append(s.Substring(10, 2))
+	                .Append(s.Substring(8, 2))
+	                .Append(s.Substring(14, 2))
+	                .Append(s.Substring(12, 2))
+	                .Append(s.Substring(16, 16))
+	                .Append("' as raw(16))");
+	        }
+	        else
+	            base.BuildValue(sb, value, sqlParameter);
+	    }
 
-		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
+	    protected override void BuildDate(StringBuilder sb, object value)
+        {
+            sb.AppendFormat("TO_DATE('{0:yyyy-MM-dd}', 'YYYY-MM-DD')", value);
+	    }
+
+	    protected override void BuildDateTime(StringBuilder sb, object value)
+	    {
+	        var dt = (DateTime) value;
+	        sb.AppendFormat(dt.Millisecond == 0 
+                ? "TO_DATE('{0:yyyy-MM-dd HH:mm:ss}', 'YYYY-MM-DD HH24:MI:SS')" 
+                : "TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
+	    }
+
+	    protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = false;
 

@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9D063CAA-4C44-4C5E-9C9E-74EFA4049FEC}</ProjectGuid>
+    <ProjectGuid>{FF377109-1931-499F-9346-449D259977F2}</ProjectGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>ExamplesCpp</RootNamespace>

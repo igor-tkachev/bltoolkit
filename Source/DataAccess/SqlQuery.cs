@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-
 using BLToolkit.Data;
 using BLToolkit.Reflection.Extension;
 
@@ -202,9 +201,9 @@ namespace BLToolkit.DataAccess
 
 		#endregion
 
-		#region Insert
+        #region Insert
 
-		public virtual int Insert(DbManager db, object obj)
+        public virtual int Insert(DbManager db, object obj)
 		{
 			var query = GetSqlQueryInfo(db, obj.GetType(), "Insert");
 

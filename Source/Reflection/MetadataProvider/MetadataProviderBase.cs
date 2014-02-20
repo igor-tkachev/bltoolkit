@@ -42,11 +42,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
-		public virtual string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
-		{
-			isSet = false;
-			return null;
-		}
+        public virtual string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            isSet = false;
+            return null;
+        }
 
 		#region GetFieldStorage
 
@@ -228,6 +228,11 @@ namespace BLToolkit.Reflection.MetadataProvider
 			isSet = false;
 			return null;
 		}
+
+	    public virtual void SetOwnerName(Type type, string ownerName)
+	    {
+	        
+	    }
 
 		#endregion
 

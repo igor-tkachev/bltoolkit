@@ -1355,6 +1355,11 @@ namespace BLToolkit.Data.Linq.Builder
 			var l = ConvertToSql(context, left,  false);
 			var r = ConvertToSql(context, right, true);
 
+		    if (l is SqlField && r is SqlParameter)
+		    {
+		        ((SqlParameter) r).DbType = ((SqlField) l).MemberMapper.DbType;
+		    }
+
 			switch (nodeType)
 			{
 				case ExpressionType.Equal   :

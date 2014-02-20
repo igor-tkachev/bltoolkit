@@ -625,12 +625,15 @@ namespace BLToolkit.Data
 			return ExecuteOperation(
 				OperationType.ExecuteReader,
 				() =>
-					_dataProvider.GetDataReader(_mappingSchema, SelectCommand.ExecuteReader(commandBehavior)));
+				    {
+				        var dataReader = _dataProvider.GetDataReader(SelectCommand, commandBehavior);
+				        return _dataProvider.GetDataReader(_mappingSchema, dataReader);
+				    });
 		}
 
 		private int ExecuteNonQueryInternal()
 		{
-			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
+		    return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
 		}
 
 		#endregion
@@ -4439,8 +4442,9 @@ namespace BLToolkit.Data
 			}
 			catch (Exception ex)
 			{
-				if (res is IDisposable)
-					((IDisposable)res).Dispose();
+			    var disposable = res as IDisposable;
+			    if (disposable != null)
+			        (disposable).Dispose();
 
 				HandleOperationException(operationType, ex);
 				throw;

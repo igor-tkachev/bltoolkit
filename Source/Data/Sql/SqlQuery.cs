@@ -2282,6 +2282,7 @@ namespace BLToolkit.Data.Sql
 			public List<SetExpression> Items        { get; private set; }
 			public SqlTable            Into         { get; set; }
 			public bool                WithIdentity { get; set; }
+			public bool                WithOutput   { get; set; }
 
 			#region Overrides
 
@@ -2303,7 +2304,7 @@ namespace BLToolkit.Data.Sql
 				if (!doClone(this))
 					return this;
 
-				var clone = new InsertClause { WithIdentity = WithIdentity };
+				var clone = new InsertClause { WithIdentity = WithIdentity, WithOutput = WithOutput };
 
 				if (Into != null)
 					clone.Into = (SqlTable)Into.Clone(objectTree, doClone);

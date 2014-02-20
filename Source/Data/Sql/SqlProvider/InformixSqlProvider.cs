@@ -184,7 +184,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return value ? 't' : 'f';
 		}
 
-		public override void BuildValue(StringBuilder sb, object value)
+		public override void BuildValue(StringBuilder sb, object value, SqlParameter sqlParameter = null)
 		{
 			if (value is bool || value is bool?)
 				sb.Append("'").Append(ConvertBooleanValue((bool)value)).Append("'");

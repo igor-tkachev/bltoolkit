@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Transactions;
 using BLToolkit.Data.DataProvider.Interpreters;
 using BLToolkit.Data.Sql.SqlProvider;
+using BLToolkit.Emit;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -24,7 +25,9 @@ namespace BLToolkit.Data.DataProvider
             {
                 _factory = DbProviderFactories.GetFactory(providerName);
             }
-            
+
+            // When Provider is Oracle, we should call the OdpDataProvider typeTable mapping initialization
+
             switch (Name)
             {
                 case ProviderFullName.Oracle:
@@ -91,9 +94,44 @@ namespace BLToolkit.Data.DataProvider
             }
         }
 
+        private object _nVarchar2EnumValue;
+#if !DATA
+        private SetHandler _oracleDbTypeSetHandler;
+#endif
+
         public override void SetParameterValue(IDbDataParameter parameter, object value)
         {
+            if (Name == ProviderFullName.Oracle)
+            {
+                if (value is string)
+                {
+                    // We need NVarChar2 in order to insert UTF8 string values. The default Odp VarChar2 dbtype doesnt work
+                    // with UTF8 values. Note : Microsoft oracle client uses NVarChar value by default.
+
+                    if (_nVarchar2EnumValue == null)
+                    {
+                        const string typeName = "Oracle.DataAccess.Client.OracleDbType";
+
+                        var nvarCharType = parameter.GetType().Assembly.GetType(typeName);
+                        var enumValue = Enum.Parse(nvarCharType, "NVarchar2");
+                        _nVarchar2EnumValue = enumValue;
+
+#if !DATA
+                        _oracleDbTypeSetHandler = FunctionFactory.Il.CreateSetHandler(parameter.GetType(), "OracleDbType");
+#endif
+                    }
+#if !DATA
+                    _oracleDbTypeSetHandler(parameter, _nVarchar2EnumValue);
+#endif
+                }
+            }
+
             _dataProviderInterpreter.SetParameterValue(parameter, value);
+        }
+
+        public override DbType GetParameterDbType(DbType dbType)
+        {
+            return _dataProviderInterpreter.GetParameterDbType(dbType);
         }
 
         public override string GetSequenceQuery(string sequenceName)
@@ -148,10 +186,12 @@ namespace BLToolkit.Data.DataProvider
         {
             if (db.UseQueryText && Name == ProviderFullName.Oracle)
             {
-                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, true);
-                return ExecuteSqlList(db, sqlList);
+                var parameters = new List<IDbDataParameter>();
+                List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, true, db, parameters);
+                return ExecuteSqlList(db, sqlList, parameters);
             }
-            return base.InsertBatchWithIdentity(db, insertText, collection, members, maxBatchSize, getParameters);
+
+            throw new NotImplementedException("Insert batch with identity is not implemented! If you use the GenericDataProvider and Oracle make sure to set UseQueryText to true");
         }
 
         public override int InsertBatch<T>(
@@ -166,10 +206,11 @@ namespace BLToolkit.Data.DataProvider
             {
                 if (db.UseQueryText)
                 {
-                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false);
-                    return ExecuteSqlList(db, sqlList);
+                    var parameters = new List<IDbDataParameter>();
+                    List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false, db, parameters);
+                    return ExecuteSqlList(db, sqlList, parameters);
                 }
-                throw new NotSupportedException("Set UseQueryText = true on the current generic data provider!");                
+                throw new NotSupportedException("Set UseQueryText = true on the current generic data provider!");
             }
             return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
         }
