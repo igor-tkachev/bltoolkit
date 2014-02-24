@@ -118,6 +118,16 @@ namespace BLToolkit.Data.DataProvider
 			return new PostgreSQLSqlProvider();
 		}
 
+        public override DbType GetParameterDbType(DbType dbType)
+        {
+            switch (dbType)
+            {
+                case DbType.DateTime2:
+                    return DbType.DateTime;               
+            }
+            return dbType;
+        }
+
 		public override void PrepareCommand(ref CommandType commandType, ref string commandText, ref IDbDataParameter[] commandParameters)
 		{
 			if (QueryCaseConvert == CaseConvert.Lower)
