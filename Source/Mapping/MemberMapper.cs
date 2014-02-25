@@ -43,7 +43,10 @@ namespace BLToolkit.Mapping
 			var type = mi.Type;
 			var mm   = null as MemberMapper;
 
-			if (type.IsPrimitive || type.IsEnum)
+		    if (type.IsEnum && mi.DbType == DbType.String)
+		        mm = new EnumStringMapper(type);
+
+			if (mm == null && (type.IsPrimitive || type.IsEnum))
 				mm = GetPrimitiveMemberMapper(mi);
 
 			if (mm == null)
@@ -657,6 +660,38 @@ namespace BLToolkit.Mapping
 				}
 			}
 		}
+
+        class EnumStringMapper : MemberMapper
+        {
+            private Type _enumType;
+
+            public EnumStringMapper(Type enumType)
+            {
+                this._enumType = enumType;
+            }
+
+            string _nullValue;
+
+            public override void SetValue(object o, object value)
+            {
+                MemberAccessor.SetValue(o, Enum.Parse(_enumType, value.ToString(), true));
+            }
+
+            public override object GetValue(object o)
+            {
+                return this.MemberAccessor.GetValue(o).ToString();
+            }
+
+            public override void Init(MapMemberInfo mapMemberInfo)
+            {
+                if (mapMemberInfo == null) throw new ArgumentNullException("mapMemberInfo");
+
+                if (mapMemberInfo.NullValue != null)
+                    _nullValue = Convert.ToString(mapMemberInfo.NullValue);
+
+                base.Init(mapMemberInfo);
+            }           
+        }
 
 		#endregion
 
