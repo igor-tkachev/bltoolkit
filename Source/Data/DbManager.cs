@@ -2627,7 +2627,13 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-						    if (dbType != DbType.Object)
+                            if (dbType == DbType.Decimal && value == null)
+                            {
+                                p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, dbType);
+                                p.Precision = 1;
+                                p.Scale = 1;
+                            }
+						    else if (dbType != DbType.Object)
 						    {
 						        p = value != null
 						            ? Parameter(baseParameters[i].ParameterName + nRows, value, dbType)
