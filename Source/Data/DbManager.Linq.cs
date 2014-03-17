@@ -228,6 +228,7 @@ namespace BLToolkit.Data
 					var pname = DataProvider.Convert("IDENTITY_PARAMETER", ConvertType.NameToQueryParameter).ToString();
 					idparam = OutputParameter(pname, DbType.Decimal);
 					DataProvider.AttachParameter(Command, idparam);
+                    SetCommandParameters(CommandAction.Select, Command.Parameters.Cast<IDbDataParameter>().ToArray());
 				}
 			}
 
