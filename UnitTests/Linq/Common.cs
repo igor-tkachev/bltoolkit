@@ -5,7 +5,8 @@ using System.Linq.Expressions;
 
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
-
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -443,6 +444,31 @@ namespace Data.Linq
 				ProcessItem(db, 1);
 				ProcessItem(db, 2);
 			});
+		}
+
+		[TableName("Person")]
+		public class PersonTest
+		{
+			[MapField("FirstName"), PrimaryKey]
+			public string ID;
+		}
+
+		static int i = 0;
+
+		static string GetCustKey()
+		{
+			i += 1;
+			return i % 2 == 0 ? "John" : null;
+		}
+
+		[Test]
+		public void Issue288Test([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var test = db.GetTable<PersonTest>().FirstOrDefault(i => i.ID == GetCustKey());
+				Assert.That(test, Is.Not.Null);
+			}
 		}
 	}
 
