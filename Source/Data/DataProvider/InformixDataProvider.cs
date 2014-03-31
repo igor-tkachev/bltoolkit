@@ -10,7 +10,7 @@ namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
 
-	class InformixDataProvider :  DataProviderBase
+	public class InformixDataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject () { return new IfxConnection      (); }
 		public override DbDataAdapter CreateDataAdapterObject() { return new IfxDataAdapter     (); }
