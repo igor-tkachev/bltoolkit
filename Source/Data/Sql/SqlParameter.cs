@@ -7,7 +7,7 @@ namespace BLToolkit.Data.Sql
 {
 	using Mapping;
 
-    public class SqlParameter : SqlValueBase, ISqlExpression
+	public class SqlParameter : SqlValueBase, ISqlExpression
 	{
 		public SqlParameter(Type systemType, string name, object value, MappingSchema mappingSchema)
 		{
@@ -97,7 +97,11 @@ namespace BLToolkit.Data.Sql
 			if (SystemType == null && _value == null)
 				return true;
 
-			return SqlDataType.CanBeNull(SystemType ?? _value.GetType());
+			var type = SystemType ?? _value.GetType();
+
+			return
+				Common.Configuration.Linq.ClassTypeParameterCanAlwaysBeNull && type.IsClass ||
+				SqlDataType.CanBeNull(type);
 		}
 
 		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)

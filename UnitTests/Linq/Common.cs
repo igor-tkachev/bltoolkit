@@ -453,22 +453,37 @@ namespace Data.Linq
 			public string ID;
 		}
 
-		static int i = 0;
+		int _i;
 
-		static string GetCustKey()
+		string GetCustKey()
 		{
-			i += 1;
-			return i % 2 == 0 ? "John" : null;
+			return ++_i % 2 == 0 ? "John" : null;
 		}
 
 		[Test]
 		public void Issue288Test([DataContexts] string context)
 		{
+			BLToolkit.Common.Configuration.Linq.ClassTypeParameterCanAlwaysBeNull = true;
+
+			_i = 0;
+
 			using (var db = GetDataContext(context))
 			{
-				var test = db.GetTable<PersonTest>().FirstOrDefault(i => i.ID == GetCustKey());
+				var test = db.GetTable<PersonTest>().FirstOrDefault(p => p.ID == GetCustKey());
+
+				Assert.That(test, Is.Null);
+			}
+
+			Assert.That(_i, Is.EqualTo(1));
+
+			using (var db = GetDataContext(context))
+			{
+				var test = db.GetTable<PersonTest>().FirstOrDefault(p => p.ID == GetCustKey());
+
 				Assert.That(test, Is.Not.Null);
 			}
+
+			Assert.That(_i, Is.EqualTo(2));
 		}
 	}
 
