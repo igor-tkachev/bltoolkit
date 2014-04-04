@@ -418,7 +418,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return ":" + value;
+			        string str2 = value.ToString();
+
+                    if (str2.Length <= 28)
+					    return ":" + str2;                    
+
+                    return ":" + "P" + Math.Abs(str2.GetHashCode()) + "_";                    
 
                 case ConvertType.NameToQueryField:
                 case ConvertType.NameToQueryFieldAlias:
