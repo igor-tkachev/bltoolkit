@@ -47,8 +47,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 			builder.ReplaceParent(order, sparent);
 
-			if (!methodCall.Method.Name.StartsWith("Then"))
-				sequence.SqlQuery.OrderBy.Items.Clear();
+			//if (!methodCall.Method.Name.StartsWith("Then"))
+			//	sequence.SqlQuery.OrderBy.Items.Clear();
 
 			foreach (var expr in sql)
 			{
