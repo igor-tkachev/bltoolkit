@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Text;
+using System.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -9,6 +10,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{
+        private String[] _reservedWords =
+	    {
+	        "DEPTH", "LENGTH", "VALUE", "VALUES",
+	    };
+
 		public override bool IsInsertOrUpdateSupported { get { return false; } }
 
 		public override int CommandCount(SqlQuery sqlQuery)
@@ -157,7 +163,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTable:
 				case ConvertType.NameToQueryTableAlias:
-					if (QuoteIdentifiers)
+                    if (QuoteIdentifiers || this._reservedWords.Contains(value.ToString().ToUpper()))
 					{
 						var name = value.ToString();
 
