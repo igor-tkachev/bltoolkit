@@ -91,6 +91,11 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
+                switch (requestFlag)
+                {
+                    case RequestFor.Root: return IsExpressionResult.False;
+                }
+
 				throw new InvalidOperationException();
 			}
 
