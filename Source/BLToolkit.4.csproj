@@ -126,6 +126,7 @@
     </Reference>
     <Reference Include="System.ServiceModel">
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web">
     </Reference>
     <Reference Include="System.Web.Services" />

@@ -251,10 +251,12 @@ namespace BLToolkit.Data.DataProvider
 			if (db.Transaction != null)
 				return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
 
+		    //Transaction.Current
+
 			var idx = insertText.IndexOf('\n');
 			var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
 			var rd  = new BulkCopyReader(members, collection);
-			var bc  = new SqlBulkCopy((SqlConnection)db.Connection)
+			var bc = new SqlBulkCopy((SqlConnection)db.Connection, SqlBulkCopyOptions.CheckConstraints, null)
 			{
 				BatchSize            = maxBatchSize,
 				DestinationTableName = tbl,

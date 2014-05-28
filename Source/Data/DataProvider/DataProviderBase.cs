@@ -300,20 +300,20 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
-        public virtual string GetSequenceQuery(string sequenceName)
-        {
-            return null;
-        }
+		public virtual string GetSequenceQuery(string sequenceName)
+		{
+			return null;
+		}
 
-        public virtual string NextSequenceQuery(string sequenceName)
-        {
-            return null;
-        }
+		public virtual string NextSequenceQuery(string sequenceName)
+		{
+			return null;
+		}
 
-        public virtual string GetReturningInto(string columnName)
-        {
-            return null;
-        }
+		public virtual string GetReturningInto(string columnName)
+		{
+			return null;
+		}
 
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
@@ -342,10 +342,10 @@ namespace BLToolkit.Data.DataProvider
 			return dataReader;
 		}
 
-        public virtual IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
-        {
-            return command.ExecuteReader(commandBehavior);
-        }
+		public virtual IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+		{
+			return command.ExecuteReader(commandBehavior);
+		}
 
 		public virtual bool ParameterNamesEqual(string paramName1, string paramName2)
 		{
@@ -400,8 +400,8 @@ namespace BLToolkit.Data.DataProvider
 			public string              GetName        (int i)           { return DataReader.GetName        (i); }
 			public string              GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
 			public Type                GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
-            // GetValue method is virtual since it can be overridden by some data provider 
-            // (For instance, OdbDataProvider uses special methodes for clob data fetching)
+			// GetValue method is virtual since it can be overridden by some data provider 
+			// (For instance, OdbDataProvider uses special methodes for clob data fetching)
 			public virtual object      GetValue       (int i)           { return DataReader.GetValue       (i); }
 			public int                 GetValues      (object[] values) { return DataReader.GetValues      (values); }
 			public int                 GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
