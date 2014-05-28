@@ -1595,6 +1595,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is decimal)  sb.Append(((decimal)value).ToString(NumberFormatInfo));
 			else if (value is double)   sb.Append(((double) value).ToString(NumberFormatInfo));
 			else if (value is float)    sb.Append(((float)  value).ToString(NumberFormatInfo));
+			else if (value is byte[])   BuildByteArray(sb, value);
 			else
 			{
 				var type = value.GetType();
@@ -1657,6 +1658,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.Append(string.Format("'{0:yyyy-MM-dd HH:mm:ss.fff}'", value));
 		}
 
+		protected virtual void BuildByteArray(StringBuilder sb, object value)
+		{
+			byte[] array = ((byte[])value);
+
+			sb.Append("0x");
+			sb.Append(string.Concat(array.Select(item => item.ToString("X2"))));
+		}
 		#endregion
 
 		#region BuildBinaryExpression
@@ -3084,7 +3092,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					var v3 = func.Parameters[4] as SqlValue;
 
 					if (c1 != null && c1.Conditions.Count == 1 && v1 != null && v1.Value is int &&
-					    c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
+						c2 != null && c2.Conditions.Count == 1 && v2 != null && v2.Value is int && v3 != null && v3.Value is int)
 					{
 						var ee1 = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
 						var ee2 = c2.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
@@ -3154,13 +3162,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						var bv2 = (bool)v2.Value;
 
 						if (bv == bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal ||
-						    bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual)
+							bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual)
 						{
 							return c1;
 						}
 
 						if (bv == bv2 && expr.Operator == SqlQuery.Predicate.Operator.NotEqual ||
-						    bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal)
+							bv != bv1 && expr.Operator == SqlQuery.Predicate.Operator.Equal)
 						{
 							var ee = c1.Conditions[0].Predicate as SqlQuery.Predicate.ExprExpr;
 
