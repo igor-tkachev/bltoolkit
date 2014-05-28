@@ -965,11 +965,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public void SetAlias(string alias)
 			{
-				if (alias.Contains('<'))
-					return;
+                if (alias == null || alias.Contains('<'))
+                    return;
 
 				if (SqlTable.Alias == null)
-					SqlTable.Alias = alias;
+	    			SqlTable.Alias = alias;
 			}
 
 			#endregion

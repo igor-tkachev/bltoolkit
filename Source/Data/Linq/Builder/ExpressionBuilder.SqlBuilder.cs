@@ -1360,9 +1360,8 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Equal   :
 				case ExpressionType.NotEqual:
 
-					if (!context.SqlQuery.IsParameterDependent && (l is SqlParameter || r is SqlParameter) 
- 						&& (l.CanBeNull() || l.SystemType.IsClass) 
- 						&& (r.CanBeNull() || r.SystemType.IsClass))
+                    if (!context.SqlQuery.IsParameterDependent &&
+                        (l is SqlParameter && l.CanBeNull() || r is SqlParameter && r.CanBeNull()))
  					{
   						context.SqlQuery.IsParameterDependent = true;
  					}

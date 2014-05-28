@@ -1334,7 +1334,8 @@ namespace BLToolkit.Data.Sql
 
 						var nq = new SqlQuery { QueryType = q.QueryType };
 
-						_visitedElements.Add(q, nq);
+                        _visitedElements.Add(q, nq);
+                        _visitedElements.Add(q.All, nq.All);
 
 						var fc = (SqlQuery.FromClause)   ConvertInternal(q.From,    action) ?? q.From;
 						var sc = (SqlQuery.SelectClause) ConvertInternal(q.Select,  action) ?? q.Select;
