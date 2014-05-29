@@ -260,11 +260,12 @@ namespace BLToolkit.Data.DataProvider
 				DestinationTableName = tbl,
 			};
 
-			int	index	=	0;
-			foreach	(var memberMapper	in members)
+			var	index = 0;
+
+			foreach	(var memberMapper in members)
 			{
-				bc.ColumnMappings.Add(new	SqlBulkCopyColumnMapping(index,	memberMapper.Name));
-				index	+= 1;
+				bc.ColumnMappings.Add(new SqlBulkCopyColumnMapping(index, memberMapper.Name));
+				index++;
 			}
 
 			bc.WriteToServer(rd);
