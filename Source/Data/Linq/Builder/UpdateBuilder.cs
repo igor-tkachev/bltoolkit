@@ -314,6 +314,7 @@ namespace BLToolkit.Data.Linq.Builder
 			LambdaExpression             extract,
 			Expression                   update,
 			IBuildContext                select,
+			SqlTable                     table,
 			List<SqlQuery.SetExpression> items)
 		{
 			var ext = extract.Body;
@@ -333,12 +334,46 @@ namespace BLToolkit.Data.Linq.Builder
 			if (member is MethodInfo)
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-			var column = select.ConvertToSql(
-				body, 1, ConvertFlags.Field);
-				//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field);
+			var members = body.GetMembers();
+			var name    = members
+				.Skip(1)
+				.Select(ex =>
+				{
+					var me = ex as MemberExpression;
 
-			if (column.Length == 0)
-				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
+					if (me == null)
+						return null;
+
+					var m = me.Member;
+
+					if (m is MethodInfo)
+						m = TypeHelper.GetPropertyByMethod((MethodInfo)m);
+
+					return m;
+				})
+				.Where(m => m != null && !TypeHelper.IsNullableValueMember(m))
+				.Select(m => m.Name)
+				.Aggregate((s1,s2) => s1 + "." + s2);
+
+			if (table != null && !table.Fields.ContainsKey(name))
+				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, name);
+
+			ISqlExpression column;
+			if (table != null)
+			{
+				column = table.Fields[name];
+			}
+			else
+			{
+				var sql = select.ConvertToSql(
+					body, 1, ConvertFlags.Field);
+					//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
+
+				if (sql.Length == 0)
+					throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
+
+				column = sql[0].Sql;
+			}
 
 			var expr   = builder.ConvertToSql(select, update, false, false);
 
@@ -348,7 +383,7 @@ namespace BLToolkit.Data.Linq.Builder
 				((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
 			}
 
-			items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
 
 		#endregion
@@ -426,6 +461,7 @@ namespace BLToolkit.Data.Linq.Builder
 						extract,
 						update,
 						sequence,
+						sequence.SqlQuery.Update.Table,
 						sequence.SqlQuery.Update.Items);
 
 				return sequence;

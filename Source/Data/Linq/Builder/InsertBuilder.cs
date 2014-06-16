@@ -248,6 +248,7 @@ namespace BLToolkit.Data.Linq.Builder
 						extract,
 						update,
 						sequence,
+						sequence.SqlQuery.Insert.Into,
 						sequence.SqlQuery.Insert.Items);
 
 				return sequence;
