@@ -330,13 +330,31 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression ConvertExpression(Expression expression)
 		{
-			return expression.Convert2(e =>
-			{
-				if (CanBeConstant(e) || CanBeCompiled(e))
-					return new ExpressionHelper.ConvertInfo(e, true);
+            return expression.Convert2(e =>
+            {
+                if (CanBeConstant(e) || CanBeCompiled(e))
+                    return new ExpressionHelper.ConvertInfo(e, true);
 
-				switch (e.NodeType)
-				{
+                switch (e.NodeType)
+                {
+                    //This is to handle VB's weird expression generation when dealing with nullable properties.
+                    case ExpressionType.Coalesce:
+                        {
+                            var b = (BinaryExpression)e;
+
+                            var constantRight = b.Right as ConstantExpression;
+
+                            if (constantRight != null)
+                            {
+                                if (constantRight.Value is bool && (bool)constantRight.Value == false)
+                                {
+                                    var left = b.Left as BinaryExpression;
+                                    //return ExposeExpression(b.Left);
+                                    return new ExpressionHelper.ConvertInfo(b.Left, false);
+                                }
+                            }
+                            break;
+                        }
 					case ExpressionType.New:
 						{
 							var ex = ConvertNew((NewExpression)e);
