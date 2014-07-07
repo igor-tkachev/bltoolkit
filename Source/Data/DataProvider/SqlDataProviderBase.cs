@@ -308,7 +308,12 @@ namespace BLToolkit.Data.DataProvider
 
 			public object GetValue(int i)
 			{
-				return _members[i].GetValue(_enumerator.Current);
+				var value = _members[i].GetValue(_enumerator.Current);
+
+				if (value != null && value.GetType().IsEnum)
+					value = Map.EnumToValue(value, true);
+
+				return value;
 			}
 
 			public int FieldCount
