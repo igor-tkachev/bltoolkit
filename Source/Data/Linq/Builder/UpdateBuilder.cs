@@ -340,9 +340,21 @@ namespace BLToolkit.Data.Linq.Builder
 			if (column.Length == 0)
 				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
 
-			var expr   = builder.ConvertToSql(select, update, false, false);
+            var expr = builder.ConvertToSql(select, update, false, false);
 
-			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
+			var updateMemberMapper = select.Builder.MappingSchema.GetObjectMapper(member.DeclaringType).FirstOrDefault(x => x.Name == body.Member.Name);
+		    if (!updateMemberMapper.SupportsValue)
+		    {
+		        var obj = Activator.CreateInstance(member.DeclaringType);
+                var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
+		        memberAccessor.SetValue(obj, ((SqlValueBase) expr).Value);
+		        ((SqlValueBase) expr).ValueConverter = (o) =>
+		        {
+		            memberAccessor.SetValue(obj, o);
+                    return updateMemberMapper.GetValue(obj);
+		        };
+		    }
+            else if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
 			{
 				var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
 				((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
