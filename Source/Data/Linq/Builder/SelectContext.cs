@@ -363,7 +363,7 @@ namespace BLToolkit.Data.Linq.Builder
 		SqlInfo[] ConvertExpressions(Expression expression, ConvertFlags flags)
 		{
 			return Builder.ConvertExpressions(this, expression, flags)
-				.Select(CheckExpression)
+				.Select(info => CheckExpression(info))
 				.ToArray();
 		}
 
