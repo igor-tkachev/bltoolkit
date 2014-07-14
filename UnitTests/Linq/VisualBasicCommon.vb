@@ -22,4 +22,13 @@ Public Module VisualBasicCommon
             Select cust.CustomerID
     End Function
 
+    Public Function SearchCondition3(ByVal db As NorthwindDB) As IEnumerable(Of Integer)
+        '#11/14/1997#
+        Dim query = From order In db.Order
+            Where order.OrderDate = New DateTime(1997, 11, 14)
+            Select order.OrderID
+
+        Return query
+    End Function
+
 End Module

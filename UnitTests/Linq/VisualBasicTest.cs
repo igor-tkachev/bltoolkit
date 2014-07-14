@@ -62,5 +62,26 @@ namespace Data.Linq
 					VisualBasicCommon.SearchCondition2(db));
 			}
 		}
+
+        [Test]
+        public void SearchCondition3([IncludeDataContexts("Northwind")] string context)
+        {
+            using (var db = new NorthwindDB())
+            {
+
+                var cQuery = from order in db.Order
+                             where order.OrderDate == new DateTime(1997, 11, 14)
+                    select order.OrderID;
+
+                var cSharpResults = cQuery.ToList();
+
+                var vbResults = (VisualBasicCommon.SearchCondition3(db)).ToList();
+
+                AreEqual(
+                    cSharpResults,
+                    vbResults);
+            }
+        }
+
 	}
 }
