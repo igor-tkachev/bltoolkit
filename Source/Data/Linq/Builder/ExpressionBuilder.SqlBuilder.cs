@@ -342,18 +342,22 @@ namespace BLToolkit.Data.Linq.Builder
 						{
 							var b = (BinaryExpression)e;
 
+							var equalityLeft = b.Left as BinaryExpression;
 							var constantRight = b.Right as ConstantExpression;
 
-							if (constantRight != null)
+							if (equalityLeft != null && constantRight != null)
 							{
-								if (constantRight.Value is bool && (bool)constantRight.Value == false)
+								if (equalityLeft.Type.GetGenericTypeDefinition() == typeof(System.Nullable<>))
 								{
-									//var left = b.Left as BinaryExpression;
-									//return ExposeExpression(b.Left);
-									return new ExpressionHelper.ConvertInfo(b.Left, false);
+									if (equalityLeft.NodeType == ExpressionType.Equal && equalityLeft.Left.Type == equalityLeft.Right.Type)
+									{
+										if (constantRight.Value is bool && (bool)constantRight.Value == false)
+										{
+											return new ExpressionHelper.ConvertInfo(equalityLeft, false);
+										}
+									}
 								}
 							}
-
 							break;
 						}
 
