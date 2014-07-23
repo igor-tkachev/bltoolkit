@@ -238,7 +238,18 @@ namespace BLToolkit.Mapping
 		public virtual Double   GetDouble  (object o) { return MemberAccessor.GetDouble  (o); }
 		public virtual Decimal  GetDecimal (object o) { return MemberAccessor.GetDecimal (o); }
 		public virtual Guid     GetGuid    (object o) { return MemberAccessor.GetGuid    (o); }
-		public virtual DateTime GetDateTime(object o) { return MemberAccessor.GetDateTime(o); }
+
+	    public virtual DateTime GetDateTime(object o)
+	    {
+	        var dt = MemberAccessor.GetDateTime(o);
+
+            if (dt.Kind == DateTimeKind.Unspecified)
+                dt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+            else if (dt.Kind == DateTimeKind.Local)
+                dt = dt.ToUniversalTime();
+
+            return dt;
+	    }
 		public virtual DateTimeOffset GetDateTimeOffset(object o) { return MemberAccessor.GetDateTimeOffset(o); }
 
 		// Nullable type getters.
@@ -263,7 +274,20 @@ namespace BLToolkit.Mapping
 		public virtual Double?   GetNullableDouble  (object o) { return MemberAccessor.GetNullableDouble  (o); }
 		public virtual Decimal?  GetNullableDecimal (object o) { return MemberAccessor.GetNullableDecimal (o); }
 		public virtual Guid?     GetNullableGuid    (object o) { return MemberAccessor.GetNullableGuid    (o); }
-		public virtual DateTime? GetNullableDateTime(object o) { return MemberAccessor.GetNullableDateTime(o); }
+
+	    public virtual DateTime? GetNullableDateTime(object o)
+	    {
+	        var dt = MemberAccessor.GetNullableDateTime(o);
+	        if (!dt.HasValue)
+	            return null;
+
+            if (dt.Value.Kind == DateTimeKind.Unspecified)
+                dt = DateTime.SpecifyKind(dt.Value, DateTimeKind.Utc);
+            else if (dt.Value.Kind == DateTimeKind.Local)
+                dt = dt.Value.ToUniversalTime();
+
+	        return dt;
+	    }
 		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o) { return MemberAccessor.GetNullableDateTimeOffset(o); }
 
 #if !SILVERLIGHT

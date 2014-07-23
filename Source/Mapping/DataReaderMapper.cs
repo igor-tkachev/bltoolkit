@@ -88,7 +88,18 @@ namespace BLToolkit.Mapping
 		public virtual Double   GetDouble  (object o, int index) { return _dataReader.GetDouble  (index); }
 		public virtual Decimal  GetDecimal (object o, int index) { return _dataReader.GetDecimal (index); }
 		public virtual Guid     GetGuid    (object o, int index) { return _dataReader.GetGuid    (index); }
-		public virtual DateTime GetDateTime(object o, int index) { return _dataReader.GetDateTime(index); }
+
+	    public virtual DateTime GetDateTime(object o, int index)
+	    {
+	        var dt = _dataReader.GetDateTime(index);
+
+	        if (dt.Kind == DateTimeKind.Unspecified)
+	            dt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+	        else if (dt.Kind == DateTimeKind.Local)
+	            dt = dt.ToUniversalTime();
+
+	        return dt;
+	    }
 
 		public virtual DateTimeOffset GetDateTimeOffset(object o, int index)
 		{
@@ -119,8 +130,23 @@ namespace BLToolkit.Mapping
 		public virtual Double?   GetNullableDouble  (object o, int index) { return _dataReader.IsDBNull(index)? null: (Double?)  _dataReader.GetDouble  (index); }
 		public virtual Decimal?  GetNullableDecimal (object o, int index) { return _dataReader.IsDBNull(index)? null: (Decimal?) _dataReader.GetDecimal (index); }
 		public virtual Guid?     GetNullableGuid    (object o, int index) { return _dataReader.IsDBNull(index)? null: (Guid?)    _dataReader.GetGuid    (index); }
-		public virtual DateTime? GetNullableDateTime(object o, int index) { return _dataReader.IsDBNull(index)? null: (DateTime?)_dataReader.GetDateTime(index); }
-		public virtual DateTimeOffset? GetNullableDateTimeOffset(object o, int index)
+
+	    public virtual DateTime? GetNullableDateTime(object o, int index)
+	    {
+	        if (_dataReader.IsDBNull(index))
+	            return null;
+
+	        var dt = _dataReader.GetDateTime(index);
+
+	        if (dt.Kind == DateTimeKind.Unspecified)
+	            dt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+	        else if (dt.Kind == DateTimeKind.Local)
+	            dt = dt.ToUniversalTime();
+
+	        return dt;
+	    }
+
+	    public virtual DateTimeOffset? GetNullableDateTimeOffset(object o, int index)
 		{
 			return _dataReader.IsDBNull(index)? null:
 				_dataReaderEx != null? _dataReaderEx.GetDateTimeOffset(index):
