@@ -342,7 +342,7 @@ namespace BLToolkit.Data.Linq.Builder
 
             var expr = builder.ConvertToSql(select, update, false, false);
 
-			var updateMemberMapper = select.Builder.MappingSchema.GetObjectMapper(member.DeclaringType).FirstOrDefault(x => x.Name == body.Member.Name);
+			var updateMemberMapper = select.Builder.MappingSchema.GetObjectMapper(member.DeclaringType).FirstOrDefault(x => x.MemberName == body.Member.Name);
 		    if (!updateMemberMapper.SupportsValue)
 		    {
 		        var obj = Activator.CreateInstance(member.DeclaringType);
