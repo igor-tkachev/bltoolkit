@@ -7,6 +7,7 @@ using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 
 #region ReSharper disable
 // ReSharper disable UnusedParameter.Local
@@ -628,12 +629,12 @@ namespace BLToolkit.Data
 					_dataProvider.GetDataReader(_mappingSchema, SelectCommand.ExecuteReader(commandBehavior)));
 		}
 
-		private int ExecuteNonQueryInternal()
-		{
-			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
-		}
+	    private int ExecuteNonQueryInternal()
+	    {
+	        return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);	        
+	    }
 
-		#endregion
+	    #endregion
 
 		#region Parameters
 
@@ -4442,29 +4443,51 @@ namespace BLToolkit.Data
 			}
 		}
 
-		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
-		{
-			var res = default(T);
+	    private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
+	    {
+	        var res = default(T);
 
-			try
-			{
-				OnBeforeOperation(operationType);
-				res = operation();
-				OnAfterOperation (operationType);
-			}
-			catch (Exception ex)
-			{
-				if (res is IDisposable)
-					((IDisposable)res).Dispose();
+	        int retryCount = 5;
 
-				HandleOperationException(operationType, ex);
-				throw;
-			}
+	        try
+	        {
+	            OnBeforeOperation(operationType);
 
-			return res;
-		}
+	            while (retryCount > 0)
+	            {
+	                try
+	                {
+	                    res = operation();
+	                    break;
+	                }
+	                catch (System.Data.SqlClient.SqlException ex)
+	                {
+	                    if (ex.Number == 1205) // Deadlock                         
+	                    {
+                            retryCount--;
+                            Thread.Sleep(10);
+	                    }
+	                    else
+	                        throw;
+	                }
+	            }
 
-		private void HandleOperationException(OperationType op, Exception ex)
+	            OnAfterOperation(operationType);
+	        }
+
+	        catch (Exception ex)
+	        {
+	            if (res is IDisposable)
+	                ((IDisposable) res).Dispose();
+
+	            HandleOperationException(operationType, ex);
+	            throw;
+	        }
+
+	        return res;
+	    }
+
+	    private void HandleOperationException(OperationType op, Exception ex)
 		{
 			var dex = new DataException(this, ex);
 
