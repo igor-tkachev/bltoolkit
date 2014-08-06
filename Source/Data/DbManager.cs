@@ -4447,29 +4447,44 @@ namespace BLToolkit.Data
 	    {
 	        var res = default(T);
 
-	        int retryCount = 5;
+	        int retryCount = 0;
 
 	        try
 	        {
 	            OnBeforeOperation(operationType);
 
-	            while (retryCount > 0)
+	            while (true)
 	            {
 	                try
 	                {
 	                    res = operation();
 	                    break;
 	                }
-	                catch (System.Data.SqlClient.SqlException ex)
+	                catch (Exception ex)
 	                {
-	                    if (ex.Number == 1205) // Deadlock                         
+                        var retryHandler = Configuration.RetryOnException;
+	                    if (retryHandler != null)
 	                    {
-                            retryCount--;
-                            Thread.Sleep(10);
+	                        if (!retryHandler(ex, retryCount))
+	                            throw;
+
+	                        retryCount++;
 	                    }
 	                    else
+	                    {
 	                        throw;
+	                    }
 	                }
+	                //catch (System.Data.SqlClient.SqlException ex)
+                    //{
+                    //    if (ex.Number == 1205) // Deadlock                         
+                    //    {
+                    //        retryCount--;
+                    //        Thread.Sleep(10);
+                    //    }
+                    //    else
+                    //        throw;
+                    //}
 	            }
 
 	            OnAfterOperation(operationType);

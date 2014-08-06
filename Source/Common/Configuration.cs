@@ -54,6 +54,9 @@ namespace BLToolkit.Common
 		/// </summary>
 		public static bool FilterOutBaseEqualAttributes { get; set; }
 
+	    public delegate bool RetryOnExceptionDelegate(Exception exception, int retryCount);
+        public static RetryOnExceptionDelegate RetryOnException { get; set; }
+
 		/// <summary>
 		/// Controls whether attributes specified on base types should be always added to list of attributes
 		/// when scanning hierarchy tree or they should be compared to attributes found on derived classes
