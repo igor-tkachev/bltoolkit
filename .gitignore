@@ -29,6 +29,7 @@ Thumbs.db
 *.userprefs
 *.sdf
 *.xap
+*.ide
 obj/
 [Rr]elease*/
 _ReSharper*/
