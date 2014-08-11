@@ -337,6 +337,30 @@ namespace BLToolkit.Data.Linq.Builder
 
 				switch (e.NodeType)
 				{
+					//This is to handle VB's weird expression generation when dealing with nullable properties.
+					case ExpressionType.Coalesce:
+						{
+							var b = (BinaryExpression)e;
+
+							var equalityLeft = b.Left as BinaryExpression;
+							var constantRight = b.Right as ConstantExpression;
+
+							if (equalityLeft != null && constantRight != null)
+							{
+								if (equalityLeft.Type.GetGenericTypeDefinition() == typeof(System.Nullable<>))
+								{
+									if (equalityLeft.NodeType == ExpressionType.Equal && equalityLeft.Left.Type == equalityLeft.Right.Type)
+									{
+										if (constantRight.Value is bool && (bool)constantRight.Value == false)
+										{
+											return new ExpressionHelper.ConvertInfo(equalityLeft, false);
+										}
+									}
+								}
+							}
+							break;
+						}
+
 					case ExpressionType.New:
 						{
 							var ex = ConvertNew((NewExpression)e);
@@ -1360,16 +1384,13 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Equal   :
 				case ExpressionType.NotEqual:
 
-                    if (!context.SqlQuery.IsParameterDependent &&
-                        (l is SqlParameter && l.CanBeNull() || r is SqlParameter && r.CanBeNull()))
- 					{
-  						context.SqlQuery.IsParameterDependent = true;
- 					}
+					if (!context.SqlQuery.IsParameterDependent && (l is SqlParameter && l.CanBeNull() || r is SqlParameter && r.CanBeNull()))
+						context.SqlQuery.IsParameterDependent = true;
 
 					// | (SqlQuery(Select([]) as q), SqlValue(null))
 					// | (SqlValue(null), SqlQuery(Select([]) as q))  =>
 
-					SqlQuery q =
+					var q =
 						l.ElementType == QueryElementType.SqlQuery &&
 						r.ElementType == QueryElementType.SqlValue &&
 						((SqlValue)r).Value == null &&

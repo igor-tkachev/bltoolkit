@@ -74,10 +74,16 @@ namespace BLToolkit.Common
 
 		public static class Linq
 		{
-			public static bool PreloadGroups          { get; set; }
-			public static bool IgnoreEmptyUpdate      { get; set; }
-			public static bool AllowMultipleQuery     { get; set; }
-			public static bool GenerateExpressionTest { get; set; }
+			static Linq()
+			{
+				ClassTypeParameterCanAlwaysBeNull = true;
+			}
+
+			public static bool PreloadGroups                     { get; set; }
+			public static bool IgnoreEmptyUpdate                 { get; set; }
+			public static bool AllowMultipleQuery                { get; set; }
+			public static bool GenerateExpressionTest            { get; set; }
+			public static bool ClassTypeParameterCanAlwaysBeNull { get; set; }
 		}
 
 		public static class NullableValues
