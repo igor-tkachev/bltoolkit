@@ -299,9 +299,31 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction()"]/*' />
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		/// <seealso cref="Transaction"/>
-		public virtual DbManager BeginTransaction()
+		public virtual DbManagerTransaction BeginTransaction()
 		{
-			return BeginTransaction(IsolationLevel.ReadCommitted);
+			// If transaction is open, we dispose it, it will rollback all changes.
+			//
+			if (_transaction != null)
+			{
+				ExecuteOperation(OperationType.DisposeTransaction, _transaction.Dispose);
+			}
+
+			// Create new transaction object.
+			//
+			_transaction = ExecuteOperation(
+				OperationType.BeginTransaction,
+				() => Connection.BeginTransaction());
+
+			_closeTransaction = true;
+
+			// If the active command exists.
+			//
+			if (_selectCommand != null) _selectCommand.Transaction = _transaction;
+			if (_insertCommand != null) _insertCommand.Transaction = _transaction;
+			if (_updateCommand != null) _updateCommand.Transaction = _transaction;
+			if (_deleteCommand != null) _deleteCommand.Transaction = _transaction;
+
+			return new DbManagerTransaction(this);
 		}
 
 		/// <summary>
@@ -315,7 +337,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction(IsolationLevel)"]/*' />
 		/// <param name="il">One of the <see cref="IsolationLevel"/> values.</param>
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public virtual DbManager BeginTransaction(IsolationLevel il)
+		public virtual DbManagerTransaction BeginTransaction(IsolationLevel il)
 		{
 			// If transaction is open, we dispose it, it will rollback all changes.
 			//
@@ -339,7 +361,7 @@ namespace BLToolkit.Data
 			if (_updateCommand != null) _updateCommand.Transaction = _transaction;
 			if (_deleteCommand != null) _deleteCommand.Transaction = _transaction;
 
-			return this;
+			return new DbManagerTransaction(this);
 		}
 
 		/// <summary>
