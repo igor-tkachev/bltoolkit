@@ -172,6 +172,13 @@ namespace BLToolkit.Data.DataProvider
 
 		#region Virtual Members
 
+		public virtual bool SupportsVersionResolve { get { return false; } }
+
+		public virtual DataProviderBase ResolveVersion(string connectionString)
+		{
+			return this;
+		}
+
 		/// <summary>
 		/// Open an <see cref="IDataReader"/> into the given RefCursor object
 		/// </summary>
