@@ -244,7 +244,8 @@
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
-    <Compile Include="Data\Linq\IUpdateable.cs" />
+    <Compile Include="Data\Linq\IUpdatable.cs" />
+    <Compile Include="Data\Linq\Builder\AsUpdatableBuilder.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />

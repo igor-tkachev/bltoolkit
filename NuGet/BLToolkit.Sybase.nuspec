@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.Sybase</id>
-		<version>4.1.21</version>
+		<version>4.2.0</version>
 		<title>BLToolkit Sybase Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -17,7 +17,6 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\DataProviders\Sybase\bin\Release\BLToolkit.Data.DataProvider.Sybase.3.dll" target="lib\net35" />
 		<file src="..\DataProviders\Sybase\bin\Release\BLToolkit.Data.DataProvider.Sybase.4.dll" target="lib\net40" />
 	</files>
 </package>

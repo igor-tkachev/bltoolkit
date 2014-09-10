@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Linq.Expressions;
 
+#if !(FW4 || SILVERLIGHT)
+using System.Linq;
+#endif
+
+
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
