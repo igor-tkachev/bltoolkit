@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using BLToolkit.Data;
 using BLToolkit.Mapping.Fluent;
@@ -20,16 +21,20 @@ namespace BLToolkit.Fluent.Test
 		[TestMethod]
 		public void ShouldConfigMapping()
 		{
-			ExtensionList extensions = new ExtensionList();
-            FluentConfig.Configure(extensions).MapingFromAssemblyOf<FluentMapAttributesTest>();
+			for (var i = 1; i <= 2; i++)
+			{
+				ExtensionList extensions = new ExtensionList();
+				FluentConfig.Configure(extensions).MapingFromAssemblyOf<FluentMapAttributesTest>();
 
-		    var key = extensions[typeof(DboFluentMapAttributesTest).FullName];
-		    var mem1 = key["Id"];
-            Assert.IsTrue(mem1.Attributes.ContainsKey("Identity"));
-		    
-            var mem2 = key["Test"];
-            Assert.IsTrue(mem2.Attributes.ContainsKey("MemberMapper"));
-            Assert.IsTrue(mem2.Attributes.ContainsKey("DbType"));            
+				Console.WriteLine("Iteration {0}", i);
+				var key = extensions[typeof (DboFluentMapAttributesTest).FullName];
+				var mem1 = key["Id"];
+				Assert.IsTrue(mem1.Attributes.ContainsKey("Identity"));
+
+				var mem2 = key["Test"];
+				Assert.IsTrue(mem2.Attributes.ContainsKey("MemberMapper"));
+				Assert.IsTrue(mem2.Attributes.ContainsKey("DbType"));
+			}
 		}
 
         public class DboFluentMapAttributesTest

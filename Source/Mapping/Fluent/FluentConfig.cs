@@ -102,24 +102,39 @@ namespace BLToolkit.Mapping.Fluent
 			public void MapingFromAssembly(Assembly assembly)
 			{
 				ExtensionList res;
-				if (!_hash.TryGetValue(assembly, out res))
+				if (_hash.TryGetValue(assembly, out res))
 				{
-					res = new ExtensionList();
-					_hash.Add(assembly, res);
-
-					string fluentType = typeof(IFluentMap).FullName;
-					var mapTypes = from type in assembly.GetTypes()
-							   where type.IsClass && !type.IsAbstract && !type.IsGenericType
-									 && (null != type.GetInterface(fluentType)) // Is IFluentMap
-									 && (null != type.GetConstructor(new Type[0])) // Is defaut ctor
-							   select type;
-                    foreach (var fluentMapType in mapTypes)
-					{
-                        MapingFromType(fluentMapType);
-					}
+					FluentMapHelper.MergeExtensions(res, ref _extensions);
+					return;
 				}
-				//FluentMapHelper.MergeExtensions(res, ref this._extensions);
-            }
+
+			    lock (_hash)
+			    {
+
+				    if (!_hash.TryGetValue(assembly, out res))
+
+
+				    {
+					    res = new ExtensionList();
+					    _hash.Add(assembly, res);
+
+					    string fluentType = typeof (IFluentMap).FullName;
+					    var mapTypes = from type in assembly.GetTypes()
+						    where type.IsClass && !type.IsAbstract && !type.IsGenericType
+						          && (null != type.GetInterface(fluentType)) // Is IFluentMap
+						          && (null != type.GetConstructor(new Type[0]))
+						    // Is defaut ctor
+						    select type;
+					    foreach (var fluentMapType in mapTypes)
+					    {
+						    MapingFromType(fluentMapType);
+					    }
+						FluentMapHelper.MergeExtensions(_extensions, ref res);
+				    }
+					else
+						FluentMapHelper.MergeExtensions(res, ref _extensions);
+			    }
+			}
 
             #region Conventions
 
