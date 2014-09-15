@@ -433,9 +433,9 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
-		public override DataProviderBase ResolveVersion(string connectionString)
+		public override DataProviderBase ResolveVersion(string configuration, string connectionString)
 		{
-			return SqlDataProviderVersionResolver.Instance.InvalidateDataProvider(this, connectionString) ?? this;
+			return SqlDataProviderVersionResolver.Instance.InvalidateDataProvider(this, configuration, connectionString) ?? this;
 		}
 
 		public override bool SupportsVersionResolve

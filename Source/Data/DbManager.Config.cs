@@ -428,7 +428,7 @@ namespace BLToolkit.Data
 			}
 
 			if (dp.SupportsVersionResolve)
-				dp = dp.ResolveVersion(GetConnectionString(configurationString));
+				dp = dp.ResolveVersion(configurationString, GetConnectionString(configurationString));
 
 			if (_firstConfiguration == null)
 			{

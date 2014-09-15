@@ -43,7 +43,7 @@ namespace BLToolkit.Data.DataProvider
 			return _providers[providerType];
 		}
 
-		public DataProviderBase InvalidateDataProvider(DataProviderBase dataProvider, string connectionString)
+		public DataProviderBase InvalidateDataProvider(DataProviderBase dataProvider, string configuration, string connectionString)
 		{
 			var dataProviderType = dataProvider.GetType();
 			if (!_providers.ContainsKey(dataProviderType))
@@ -62,7 +62,7 @@ namespace BLToolkit.Data.DataProvider
 				if (_providersToStrings.TryGetValue(connectionString, out result))
 					return result;
 
-				result = InvalidateDataProviderInternal(dataProvider, connectionString);
+				result = InvalidateDataProviderInternal(dataProvider, configuration, connectionString);
 
 				if (result != null)
 					_providersToStrings.Add(connectionString, result);
@@ -71,7 +71,6 @@ namespace BLToolkit.Data.DataProvider
 			return result;
 		}
 
-		protected abstract DataProviderBase InvalidateDataProviderInternal(DataProviderBase dataProvider,
-		                                                                   string connectionString);
+		protected abstract DataProviderBase InvalidateDataProviderInternal(DataProviderBase dataProvider, string configuration, string connectionString);
 	}
 }

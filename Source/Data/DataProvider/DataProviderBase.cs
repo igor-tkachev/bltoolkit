@@ -174,7 +174,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual bool SupportsVersionResolve { get { return false; } }
 
-		public virtual DataProviderBase ResolveVersion(string connectionString)
+		public virtual DataProviderBase ResolveVersion(string configuration, string connectionString)
 		{
 			return this;
 		}
