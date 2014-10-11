@@ -556,7 +556,17 @@ namespace BLToolkit.Data
 			remove { Events.RemoveHandler(_eventOperationException, value); }
 		}
 
-		private static readonly object _eventInitCommand = new object();
+        private static readonly object _eventOperationExceptionRetry = new object();
+        /// <summary>
+        /// Occurs when a server-side operation is failed to execute.
+        /// </summary>
+        public event OperationExceptionEventHandler OperationExceptionRetry
+        {
+            add { Events.AddHandler(_eventOperationExceptionRetry, value); }
+            remove { Events.RemoveHandler(_eventOperationExceptionRetry, value); }
+        }
+
+        private static readonly object _eventInitCommand = new object();
 		/// <summary>
 		/// Occurs when the <see cref="Command"/> is initializing.
 		/// </summary>
@@ -611,7 +621,26 @@ namespace BLToolkit.Data
 			throw ex;
 		}
 
-		#endregion
+        /// <summary>
+        /// Raises the <see cref="OperationException"/> event.
+        /// </summary>
+        /// <param name="op">The <see cref="OperationType"/>.</param>
+        /// <param name="ex">The <see cref="Exception"/> occurred.</param>
+        protected virtual bool OnOperationExceptionRetry(OperationType op, DataException ex)
+        {
+            var e = new OperationExceptionRetryEventArgs(op, ex);
+
+            if (CanRaiseEvents)
+            {
+                var handler = (OperationExceptionRetryEventHandler)Events[_eventOperationExceptionRetry];
+                if (handler != null)
+                    handler(this, e);
+            }
+
+            return e.RetryOperation;
+        }
+
+        #endregion
 
 		#region Protected Methods
 
@@ -4417,7 +4446,22 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(operationType);
-				operation();
+
+                while (true)
+                {
+                    try
+                    {
+    				    operation();
+                    }
+                    catch(Exception ex)
+                    {
+                        if(!HandleOperationExceptionRetry(operationType, ex))
+                            throw;
+                        continue;
+                    }
+                    break;
+                }
+
 				OnAfterOperation (operationType);
 			}
 			catch (Exception ex)
@@ -4434,14 +4478,30 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(operationType);
-				res = operation();
+
+                while (true)
+                {
+                    try
+                    {
+                        res = operation();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (res is IDisposable)
+                            ((IDisposable)res).Dispose();
+
+                        if (!HandleOperationExceptionRetry(operationType, ex))
+                            throw;
+
+                        continue;
+                    }
+                    break;
+                }
+
 				OnAfterOperation (operationType);
 			}
 			catch (Exception ex)
 			{
-				if (res is IDisposable)
-					((IDisposable)res).Dispose();
-
 				HandleOperationException(operationType, ex);
 				throw;
 			}
@@ -4459,7 +4519,17 @@ namespace BLToolkit.Data
 			OnOperationException(op, dex);
 		}
 
-		#endregion
+        private bool HandleOperationExceptionRetry(OperationType op, Exception ex)
+        {
+            var dex = new DataException(this, ex);
+
+            if (TraceSwitch.TraceError)
+                WriteTraceLine(string.Format("Operation '{0}' throws exception '{1}'", op, dex), TraceSwitch.DisplayName);
+
+            return OnOperationExceptionRetry(op, dex);
+        }
+
+        #endregion
 
 		#region IDisposable interface
 
