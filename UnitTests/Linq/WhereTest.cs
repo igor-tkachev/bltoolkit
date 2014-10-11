@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using NUnit.Framework;
-
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Mapping;
+
+using NUnit.Framework;
 
 namespace Data.Linq
 {
@@ -193,19 +194,19 @@ namespace Data.Linq
 			TestOneJohn(db => from p in db.Person where p.ID * 10 - 9 == 1 select p);
 		}
 
-		[Test]
+        [Test]
 		public void BinaryXor()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID ^ 2) == 3 select p);
 		}
 
-		[Test]
+        [Test]
 		public void BinaryAnd()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID & 3) == 1 select p);
 		}
 
-		[Test]
+        [Test]
 		public void BinaryOr()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID | 2) == 3 select p);
@@ -838,7 +839,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SelectNestedCalculatedTest()
+		public void SelectNestedCalculatedTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -908,12 +909,15 @@ namespace Data.Linq
 		public void CheckField6()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in    Parent
-				select new { p, Value = p.Value1 * 100 } into p
-				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p },
-				from p in db.Parent
-				select new { p, Value = p.Value1 * 100 } into p
-				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p }));
+				from p1 in    Parent
+				select new { p1, Value = p1.Value1 * 100 } into p
+				where p.p1.ParentID == 1 && p.Value > 0
+				select new { p, p.p1.Value1, p.Value, p.p1 },
+
+				from p1 in db.Parent
+				select new { p1, Value = p1.Value1 * 100 } into p
+				where p.p1.ParentID == 1 && p.Value > 0
+				select new { p, p.p1.Value1, p.Value, p.p1 }));
 		}
 
 		[Test]
@@ -922,11 +926,11 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in Types
 				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
-				where pp.Value != 0
+				where pp.Value != 0 && pp.Value != 7
 				select pp.Value,
 				from p in db.Types
 				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
-				where pp.Value != 0
+				where pp.Value != 0 && pp.Value != 7
 				select pp.Value));
 		}
 

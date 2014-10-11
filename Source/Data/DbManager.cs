@@ -158,6 +158,11 @@ namespace BLToolkit.Data
 			set { _canRaiseEvents = value; }
 		}
 
+        /// <summary>
+        /// Use plain text query instead of using command parameters
+        /// </summary>
+        public bool UseQueryText { get; set; }
+
 		#endregion
 
 		#region Connection
@@ -1596,7 +1601,7 @@ namespace BLToolkit.Data
 
 			parameter.ParameterName = parameterName;
 			parameter.Direction     = parameterDirection;
-			parameter.DbType        = dbType;
+			parameter.DbType        = _dataProvider.GetParameterDbType(dbType);
 
 			_dataProvider.SetParameterValue(parameter, value ?? DBNull.Value);
 
@@ -2608,11 +2613,12 @@ namespace BLToolkit.Data
 					{
 						var value  = members[i].GetValue(obj);
 						var type   = members[i].MemberAccessor.Type;
-						//var dbType = members[i].GetDbType();
+						var dbType = members[i].GetDbType();
 
 						IDbDataParameter p;
 
-						if ((value == null || value == DBNull.Value) && type == typeof(byte[]) || type == typeof(System.Data.Linq.Binary))
+						if ((value == null || value == DBNull.Value) && (dbType == DbType.Binary || type == typeof(byte[])) ||
+							type == typeof(System.Data.Linq.Binary))
 						{
 							p = Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, DbType.Binary);
 						}
@@ -2621,7 +2627,9 @@ namespace BLToolkit.Data
 							if (value != null && value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+							p = value != null
+								? Parameter(baseParameters[i].ParameterName + nRows, value)
+								: Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, members[i].GetDbType());
 						}
 
 						parameters.Add(p);
@@ -2641,11 +2649,16 @@ namespace BLToolkit.Data
 							isPrepared = false;
 
 							var type   = members[i].MemberAccessor.Type;
+							var dbType = members[i].GetDbType();
 
 							if (value.GetType().IsEnum)
 								value = MappingSchema.MapEnumToValue(value, true);
 
-							var p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
+							IDbDataParameter p;
+							if (dbType != DbType.Object)
+								p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value, dbType);
+							else
+								p = Parameter(baseParameters[i].ParameterName + nRows, value ?? DBNull.Value/*, dbType*/);
 
 							parameters[n + i] = p;
 							hasValue  [n + i] = true;
@@ -2882,6 +2895,20 @@ namespace BLToolkit.Data
 			return rowsAffected;
 		}
 
+		/// <summary>
+		/// Executes several SQL statements at a time using single roundtrip to the server (if supported by data provider).
+		/// </summary>
+		/// <remarks>
+		/// All parameters of the query must be arrays of type corresponding to the type of the parameter. 
+		/// The value of the <paramref name="iterations"/> parameter must be equal to the number of elements of each array.
+		/// </remarks>
+		/// <param name="iterations">The number of iterations.</param>
+		/// <returns>The number of rows affected by the command.</returns>
+		public int ExecuteArray(int iterations)
+		{
+			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, () => DataProvider.ExecuteArray(SelectCommand, iterations));
+		}
+
 		#endregion
 
 		#region ExecuteScalar
@@ -3041,7 +3068,8 @@ namespace BLToolkit.Data
 		/// <seealso cref="ExecuteScalar{T}(ScalarSourceType, NameOrIndexParameter)"/>
 		public T ExecuteScalar<T>()
 		{
-			return (T)_mappingSchema.ConvertChangeType(ExecuteScalar(), typeof(T));
+			var value = _mappingSchema.ConvertChangeType(ExecuteScalar(), typeof(T));
+			return value == null && typeof(T).IsEnum ? default(T) : (T)value;
 		}
 
 		/// <summary>
@@ -4386,67 +4414,37 @@ namespace BLToolkit.Data
 
 		private void ExecuteOperation(OperationType operationType, Action operation)
 		{
-            Random Rnd = new Random();
-
-            var success = false;
-            var retried = 0;
-
-            while (!success)
-            {
 			try
 			{
 				OnBeforeOperation(operationType);
 				operation();
 				OnAfterOperation (operationType);
-                    success = true;
 			}
 			catch (Exception ex)
 			{
-                    if (ex.Message.ToLower().Contains("deadlock") && retried++ < 100)
-                    {
-                        System.Threading.Thread.Sleep(Rnd.Next(1000, 5000));
-                        continue;
-                    }
-
 				HandleOperationException(operationType, ex);
 				throw;
 			}
 		}
 
-        }
-
 		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
 		{
 			var res = default(T);
-            Random Rnd = new Random();
 
-            var success = false;
-            var retried = 0;
-
-            while (!success)
-            {
 			try
 			{
 				OnBeforeOperation(operationType);
 				res = operation();
 				OnAfterOperation (operationType);
-                    success = true;
 			}
 			catch (Exception ex)
 			{
 				if (res is IDisposable)
 					((IDisposable)res).Dispose();
 
-                    if (ex.Message.ToLower().Contains("deadlock") && retried++ < 100)
-                    {
-                        System.Threading.Thread.Sleep(Rnd.Next(1000, 5000));
-                        continue;
-                    }
-
 				HandleOperationException(operationType, ex);
 				throw;
 			}
-            }
 
 			return res;
 		}

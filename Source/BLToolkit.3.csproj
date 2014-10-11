@@ -135,7 +135,12 @@
       <DependentUpon>Convert.tt</DependentUpon>
     </Compile>
     <Compile Include="DataAccess\ScalarAttribute.cs" />
+    <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
+    <Compile Include="Data\DataExceptionType.cs" />
     <Compile Include="Data\DataProvider\FirebirdMappingSchema.cs" />
+    <Compile Include="Data\DataProvider\Sql2000DataProvider.cs" />
+    <Compile Include="Data\DataProvider\Sql2005DataProvider.cs" />
+    <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\Linq\Builder\AggregationBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
     <Compile Include="Data\Linq\Builder\BuildInfo.cs" />
@@ -198,8 +203,12 @@
     <Compile Include="Data\Linq\Extensions.cs" />
     <Compile Include="Data\Linq\IDataContextInfo.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2012SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlTableType.cs" />
+    <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
+    <Compile Include="Mapping\ExpressionMapIgnoreAttribute.cs" />
     <Compile Include="Mapping\IMappingSchemaProvider.cs" />
     <Compile Include="Mapping\MemberMapper.generated.cs">
       <AutoGen>True</AutoGen>
@@ -235,7 +244,8 @@
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
-    <Compile Include="Data\Linq\IUpdateable.cs" />
+    <Compile Include="Data\Linq\IUpdatable.cs" />
+    <Compile Include="Data\Linq\Builder\AsUpdatableBuilder.cs" />
     <Compile Include="Data\Linq\MethodExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\IDataContext.cs" />

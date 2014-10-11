@@ -1,74 +1,54 @@
--- Cleanup schema
+-- Person Table
 
-DECLARE
-	REFCURSOR SYS_REFCURSOR;
-	SEQUENCE_NAME VARCHAR2(30);
-	TABLE_NAME VARCHAR2(30);
-	CONSTRAINT_NAME VARCHAR2(30);
-BEGIN
-OPEN REFCURSOR FOR
-	SELECT
-		SEQUENCE_NAME
-	FROM
-		USER_SEQUENCES;
-LOOP
-	FETCH
-		REFCURSOR
-	INTO
-		SEQUENCE_NAME;
-	EXIT
-		WHEN REFCURSOR%NOTFOUND;
-	EXECUTE IMMEDIATE
-		'DROP SEQUENCE ' || SEQUENCE_NAME;
-END LOOP;
-
-OPEN REFCURSOR FOR
-	SELECT
-		CONSTRAINT_NAME, TABLE_NAME
-	FROM
-		USER_CONSTRAINTS
-	WHERE
-		CONSTRAINT_TYPE = 'R';
-LOOP
-	FETCH
-		REFCURSOR
-	INTO
-		CONSTRAINT_NAME, TABLE_NAME;
-	EXIT
-		WHEN REFCURSOR%NOTFOUND;
-	EXECUTE IMMEDIATE
-		'ALTER TABLE ' || TABLE_NAME || ' DROP CONSTRAINT ' || CONSTRAINT_NAME;
-END LOOP;
-
-OPEN REFCURSOR FOR
-	SELECT
-		TABLE_NAME
-	FROM
-		USER_TABLES;
-LOOP
-	FETCH
-		REFCURSOR
-	INTO
-		TABLE_NAME;
-	EXIT
-		WHEN REFCURSOR%NOTFOUND;
-	EXECUTE IMMEDIATE
-		'DROP TABLE ' || TABLE_NAME;
-END LOOP;
-END;
+DROP SEQUENCE PersonSeq
+/
+DROP TABLE Doctor
+/
+DROP TABLE Patient
+/
+DROP TABLE Person
+/
+DROP SEQUENCE BinaryDataSeq
+/
+DROP TABLE BinaryData
+/
+DROP SEQUENCE DataTypeTestSeq
+/
+DROP TABLE DataTypeTest
+/
+DROP TABLE GrandChild
+/
+DROP TABLE Child
+/
+DROP TABLE Parent
+/
+DROP TABLE LinqDataTypes
+/
+DROP SEQUENCE SequenceTestSeq
+/
+DROP TABLE SequenceTest
+/
+DROP TABLE "STG_TRADE_INFORMATION"
+/
+DROP table t_test_user_contract
+/
+DROP table t_test_user
+/
+DROP sequence sq_test_user
+/
+DROP sequence sq_test_user_contract
 /
 
--- Person Table
 
 CREATE SEQUENCE PersonSeq
 /
 
 CREATE TABLE Person
-	( PersonID                     NUMBER NOT NULL PRIMARY KEY
-	, Firstname                    VARCHAR2(50) NOT NULL
-	, Lastname                     VARCHAR2(50) NOT NULL
-	, Middlename                   VARCHAR2(50)
-	, Gender                       CHAR(1) NOT NULL
+	( PersonID   NUMBER       NOT NULL PRIMARY KEY
+	, Firstname  VARCHAR2(50) NOT NULL
+	, Lastname   VARCHAR2(50) NOT NULL
+	, Middlename VARCHAR2(50)
+	, Gender     CHAR(1)      NOT NULL
 	
 	, CONSTRAINT Ck_Person_Gender  CHECK (Gender IN ('M', 'F', 'U', 'O'))
 	)
@@ -647,4 +627,32 @@ create table t_test_user_contract
 create sequence sq_test_user
 /
 create sequence sq_test_user_contract
+/
+
+
+DROP SEQUENCE TestIdentitySeq
+/
+DROP TABLE TestIdentity
+/
+
+CREATE TABLE TestIdentity (
+	ID NUMBER NOT NULL PRIMARY KEY
+)
+/
+
+CREATE SEQUENCE TestIdentitySeq
+/
+
+CREATE OR REPLACE TRIGGER TestIdentity_Add
+BEFORE INSERT
+ON TestIdentity
+FOR EACH ROW
+BEGIN
+SELECT
+	TestIdentitySeq.NEXTVAL
+INTO
+	:NEW.ID
+FROM
+	dual;
+END;
 /

@@ -10,6 +10,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return new MsSql2008SqlProvider();
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
 			BuildInsertOrUpdateQueryAsMerge(sb, null);

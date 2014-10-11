@@ -1,22 +1,16 @@
 ﻿<#@ template language="C#" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs" #>
 <#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"            #>
-<#@ include file="$(SolutionDir)\Source\Templates\BLT4Toolkit.ttinclude"          #>
 <#@ include file="$(SolutionDir)\Source\Templates\WCFAttributes.ttinclude"        #>
 <#@ include file="$(SolutionDir)\Source\Templates\MSSql.ttinclude"                #>
 <#@ include file="$(SolutionDir)\Source\Templates\PluralSingular.ttinclude"       #>
 <#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>
 <#
 	ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
-	//ConnectionString = "Server=.;Database=Northwind;Integrated Security=SSPI";
-	//ConnectionString = "Server=DBHost;Database=BLToolkitData;Uid=sa;Pwd=TestPassword";
 
+	DataContextName      = "MSSqlDataContext";
 	BaseDataContextClass = "DataContext";
-	Namespace = "MSSQLDataModel";
+	Namespace            = "MSSqlDataModel";
 
-	LoadMetadata();
-
-	//RenderBackReferences = false;
-	
 	GenerateModel();
 #>

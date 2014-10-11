@@ -46,6 +46,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsConstant3([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var arr = new[] { "oh", "oh'", "oh\\" };
+
+				var q = from p in db.Person where  arr.Contains(p.FirstName) select p;
+				Assert.AreEqual(0, q.Count());
+			}
+		}
+
+		[Test]
 		public void ContainsParameter1()
 		{
 			var str = "oh";
@@ -259,16 +271,18 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void IndexOf3()
+		public void IndexOf3([DataContexts(
+			ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Access)] string context)
 		{
 			var s = "e";
 			var n1 = 2;
 			var n2 = 5;
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Access }, db => 
+
+			using (var db = GetDataContext(context))
 			{
 				var q = from p in db.Person where p.LastName.IndexOf(s, n1, n2) == 1 && p.ID == 2 select p;
 				Assert.AreEqual(2, q.ToList().First().ID);
-			});
+			}
 		}
 
 		static readonly string[] _lastIndexExcludeList = new[]
@@ -488,7 +502,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test]
 		public void Replace()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>

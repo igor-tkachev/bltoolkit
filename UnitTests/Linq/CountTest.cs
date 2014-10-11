@@ -67,9 +67,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SubQueryCount()
+		public void SubQueryCount([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				AreEqual(
 					from p in Parent
@@ -149,21 +149,22 @@ namespace Data.Linq
 
 
 		[Test]
-		public void GroupBy21()
+		public void GroupBy21([DataContexts] string context)
 		{
 			var n = 1;
 
-			ForEachProvider(db => AreEqual(
-				from ch in
-					from ch in Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
-				where ch.ParentID + 1 > n
-				group ch by ch into g
-				select g.Count(p => p.ParentID < 3),
-				from ch in
-					from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
-				where ch.ParentID + 1 > n
-				group ch by ch into g
-				select g.Count(p => p.ParentID < 3)));
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from ch in
+						from ch in Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+					where ch.ParentID + 1 > n
+					group ch by ch into g
+					select g.Count(p => p.ParentID < 3),
+					from ch in
+						from ch in db.Child select new { ParentID = ch.ParentID + 1, ch.ChildID }
+					where ch.ParentID + 1 > n
+					group ch by ch into g
+					select g.Count(p => p.ParentID < 3));
 		}
 
 		[Test]
@@ -189,7 +190,7 @@ namespace Data.Linq
 		[Test]
 		public void GroupBy23()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, "Oracle", ProviderName.Sybase, ProviderName.Access }, db => AreEqual(
+			ForEachProvider(new[] { ProviderName.SqlCe, "Oracle", "DevartOracle", "Sql2000", ProviderName.Sybase, ProviderName.Access }, db => AreEqual(
 				from p in
 					from p in Parent select new { ParentID = p.ParentID + 1, p.Value1 }
 				where p.ParentID + 1 > 1

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-using BLToolkit.Mapping;
-using BLToolkit.Reflection;
 
 #region ReSharper disable
 // ReSharper disable SuggestUseVarKeywordEverywhere
@@ -12,6 +10,8 @@ using BLToolkit.Reflection;
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Mapping;
+	using Reflection;
 
 	using Linq;
 
@@ -146,6 +146,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		protected override void BuildDataType(StringBuilder sb, SqlDataType type)
 		{
 			switch (type.SqlDbType)
@@ -216,23 +222,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildFromClause(sb);
 		}
 
-		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = false;
 
-			if (col.SystemType == typeof(bool))
+			if (expr.SystemType == typeof(bool))
 			{
-				if (col.Expression is SqlQuery.SearchCondition)
+				if (expr is SqlQuery.SearchCondition)
 					wrap = true;
 				else
 				{
-					var ex = col.Expression as SqlExpression;
+					var ex = expr as SqlExpression;
 					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
 				}
 			}
 
 			if (wrap) sb.Append("CASE WHEN ");
-			base.BuildColumn(sb, col, ref addAlias);
+			base.BuildColumnExpression(sb, expr, alias, ref addAlias);
 			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 

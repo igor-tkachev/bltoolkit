@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 using BLToolkit.ComponentModel;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -92,6 +93,12 @@ namespace Reflection
 			Assert.IsNotNull(typeDescriptionProvider);
 
 			typeDescriptionProvider.GetAttributes();
+		}
+
+		[Test]
+		public void ListTest()
+		{
+			var t = TypeAccessor.CreateInstanceEx<List<int>>();
 		}
 	}
 }

@@ -27,5 +27,6 @@ namespace Data.Linq
 		Table<GrandChild1>            GrandChild1            { get; }
 		Table<LinqDataTypes>          Types                  { get; }
 		Table<LinqDataTypes2>         Types2                 { get; }
+		Table<TestIdentity>           TestIdentity           { get; }
 	}
 }

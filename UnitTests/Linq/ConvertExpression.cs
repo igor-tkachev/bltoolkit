@@ -202,11 +202,10 @@ namespace Data.Linq
 
 
 		[Test]
-		public void LetTest1()
+		public void LetTest1([DataContexts(ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase)] string context)
 		{
-			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.Informix, ProviderName.Sybase },
-				db => AreEqual(
+			using (var db = GetDataContext(context))
+				AreEqual(
 					from p in Parent
 					let ch = p.Children
 					where ch.FirstOrDefault() != null
@@ -215,7 +214,7 @@ namespace Data.Linq
 					from p in db.Parent
 					let ch = p.Children
 					where ch.FirstOrDefault() != null
-					select ch.FirstOrDefault().ParentID));
+					select ch.FirstOrDefault().ParentID);
 		}
 
 		[Test]
@@ -486,12 +485,12 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void LetTest11()
+		public void LetTest11([DataContexts] string context)
 		{
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;
 
-			ForEachProvider(
-				db => AreEqual(
+			using (var db = GetDataContext(context))
+				AreEqual(
 					from p in Parent
 					let ch1 = Child.FirstOrDefault(c => c.ParentID > 0)
 					let ch2 = Child.Where(c => c.ChildID > -100)
@@ -508,7 +507,7 @@ namespace Data.Linq
 					{
 						First1 = ch1 == null ? 0 : ch1.ParentID,
 						First2 = ch2.FirstOrDefault()
-					}));
+					});
 
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = false;
 		}

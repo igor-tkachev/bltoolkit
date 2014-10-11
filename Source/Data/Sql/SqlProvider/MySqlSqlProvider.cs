@@ -147,9 +147,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDeleteClause(StringBuilder sb)
 		{
+			var table = SqlQuery.Delete.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Delete.Table) ?? SqlQuery.Delete.Table) :
+				SqlQuery.From.Tables[0];
+
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 
@@ -291,6 +295,54 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			Indent--;
 
 			sb.AppendLine();
+		}
+
+		protected override void BuildEmptyInsert(StringBuilder sb)
+		{
+			sb.AppendLine("() VALUES ()");
+		}
+
+		public static bool GenerateOldGuid = false;
+
+		public override void BuildValue(StringBuilder sb, object value)
+		{
+			if (GenerateOldGuid && value is Guid)
+			{
+				var bytes = ((Guid)value).ToByteArray();
+
+				sb.Append("X'").Append(ByteArrayToHex(bytes)).Append('\'');
+			}
+			else
+				base.BuildValue(sb, value);
+		}
+
+		static string ByteArrayToHex(byte[] barray)
+		{
+			var c = new char[barray.Length * 2];
+
+			for (var i = 0; i < barray.Length; ++i)
+			{
+				var b = ((byte)(barray[i] >> 4));
+
+				c[i * 2] = (char)(b > 9 ? b + 0x37 : b + 0x30);
+				b = ((byte)(barray[i] & 0xF));
+				c[i * 2 + 1] = (char)(b > 9 ? b + 0x37 : b + 0x30);
+			}
+
+			return new string(c);
+		}
+
+		protected override void BuildString(StringBuilder sb, string value)
+		{
+			base.BuildString(sb, value.Replace("\\", "\\\\"));
+		}
+
+		protected override void BuildChar(StringBuilder sb, char value)
+		{
+			if (value == '\\')
+				sb.Append("\\\\");
+			else
+				base.BuildChar(sb, value);
 		}
 	}
 }

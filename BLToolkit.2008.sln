@@ -19,29 +19,27 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLTgen.2008", "Tools\BLTgen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Templates.2008", "Tools\Templates\Templates.2008.csproj", "{6E0C5565-F9A3-441C-9CB2-8B1878A800EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitAddin", "Tools\NUnitAddin\NUnitAddin.csproj", "{B951C0DA-943C-4B04-BCAF-8180DD5829C2}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Linq", "Linq", "{4ABA64DA-8981-42F5-9144-DFD5350BEC2D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataProviders", "DataProviders", "{9F229425-A623-4066-9A92-84F31DD54FD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DB2.3", "DataProviders\BLToolkit.Data.DataProvider.DB2.3.csproj", "{86BF4F10-3606-4016-9919-84C3335813B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.DB2.3", "DataProviders\DB2\BLToolkit.Data.DataProvider.DB2.3.csproj", "{86BF4F10-3606-4016-9919-84C3335813B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Firebird.3", "DataProviders\BLToolkit.Data.DataProvider.Firebird.3.csproj", "{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Firebird.3", "DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.3.csproj", "{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Informix.3", "DataProviders\BLToolkit.Data.DataProvider.Informix.3.csproj", "{B1DEA25C-7667-471B-BBAD-64D017FDD104}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Informix.3", "DataProviders\Informix\BLToolkit.Data.DataProvider.Informix.3.csproj", "{B1DEA25C-7667-471B-BBAD-64D017FDD104}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.MySql.3", "DataProviders\BLToolkit.Data.DataProvider.MySql.3.csproj", "{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.MySql.3", "DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.3.csproj", "{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Oracle.3", "DataProviders\BLToolkit.Data.DataProvider.Oracle.3.csproj", "{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Oracle.3", "DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.3.csproj", "{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.PostgreSQL.3", "DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.3.csproj", "{5A556D57-0D68-433B-AD78-02849583582B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.PostgreSQL.3", "DataProviders\PostgreSQL\BLToolkit.Data.DataProvider.PostgreSQL.3.csproj", "{5A556D57-0D68-433B-AD78-02849583582B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SqlCe.3", "DataProviders\BLToolkit.Data.DataProvider.SqlCe.3.csproj", "{85E90F57-8DE1-4912-8414-28578F4D71CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SqlCe.3", "DataProviders\SqlCe\BLToolkit.Data.DataProvider.SqlCe.3.csproj", "{85E90F57-8DE1-4912-8414-28578F4D71CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SQLite.3", "DataProviders\BLToolkit.Data.DataProvider.SQLite.3.csproj", "{3E414663-B673-47A8-AB59-0E08FE43DA86}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.SQLite.3", "DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.3.csproj", "{3E414663-B673-47A8-AB59-0E08FE43DA86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.3", "DataProviders\BLToolkit.Data.DataProvider.Sybase.3.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLToolkit.Data.DataProvider.Sybase.3", "DataProviders\Sybase\BLToolkit.Data.DataProvider.Sybase.3.csproj", "{6CD8CC3D-643D-4D09-8660-A26085C44FBC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq.Demo.2008", "Demo\Linq\Demo\Linq.Demo.2008.csproj", "{57CE5505-44CB-42E4-A346-3471F68A5B60}"
 EndProject
@@ -105,18 +103,6 @@ Global
 		{6E0C5565-F9A3-441C-9CB2-8B1878A800EF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{6E0C5565-F9A3-441C-9CB2-8B1878A800EF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{6E0C5565-F9A3-441C-9CB2-8B1878A800EF}.Release|Win32.ActiveCfg = Release|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Release|.NET.ActiveCfg = Release|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2}.Release|Win32.ActiveCfg = Release|Any CPU
 		{86BF4F10-3606-4016-9919-84C3335813B6}.Debug|.NET.ActiveCfg = Debug|Any CPU
 		{86BF4F10-3606-4016-9919-84C3335813B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{86BF4F10-3606-4016-9919-84C3335813B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -245,7 +231,6 @@ Global
 		{DE735B24-E20B-4440-BBBB-35AECC3F1124} = {92307E70-A839-4A76-9701-B5603B05BC08}
 		{65FC918C-FF12-4C75-96F5-180B552989E5} = {92307E70-A839-4A76-9701-B5603B05BC08}
 		{6E0C5565-F9A3-441C-9CB2-8B1878A800EF} = {92307E70-A839-4A76-9701-B5603B05BC08}
-		{B951C0DA-943C-4B04-BCAF-8180DD5829C2} = {92307E70-A839-4A76-9701-B5603B05BC08}
 		{4ABA64DA-8981-42F5-9144-DFD5350BEC2D} = {F45E2E57-2D88-49DF-8C97-9D8EE7A0A4B1}
 		{57CE5505-44CB-42E4-A346-3471F68A5B60} = {4ABA64DA-8981-42F5-9144-DFD5350BEC2D}
 		{86BF4F10-3606-4016-9919-84C3335813B6} = {9F229425-A623-4066-9A92-84F31DD54FD2}

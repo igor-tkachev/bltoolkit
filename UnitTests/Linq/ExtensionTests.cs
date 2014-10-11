@@ -19,32 +19,32 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TableName()
+		public void TableName([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 				db.GetTable<ParenTable>().TableName("Parent").ToList();
 		}
 
 		[Test]
-		public void DatabaseName()
+		public void DatabaseName([IncludeDataContexts("Sql2008")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
-				db.GetTable<Parent>().DatabaseName("BLToolkitData").ToList();
+			using (var db = new TestDbManager(context))
+				db.GetTable<Parent>().DatabaseName("TestData").ToList();
 		}
 
 		[Test]
-		public void OwnerName()
+		public void OwnerName([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 				db.GetTable<Parent>().OwnerName("dbo").ToList();
 		}
 
 		[Test]
-		public void AllNames()
+		public void AllNames([IncludeDataContexts("Sql2008")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 				db.GetTable<ParenTable>()
-					.DatabaseName("BLToolkitData")
+					.DatabaseName("TestData")
 					.OwnerName("dbo")
 					.TableName("Parent")
 					.ToList();

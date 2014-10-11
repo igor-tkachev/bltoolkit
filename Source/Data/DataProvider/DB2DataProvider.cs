@@ -8,7 +8,7 @@ namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
 
-	class DB2DataProvider :  DataProviderBase
+	public class DB2DataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject () { return new DB2Connection (); }
 		public override DbDataAdapter CreateDataAdapterObject() { return new DB2DataAdapter(); }
@@ -16,7 +16,6 @@ namespace BLToolkit.Data.DataProvider
 
 		public override Type   ConnectionType { get { return typeof(DB2Connection);         } }
 		public override string Name           { get { return DataProvider.ProviderName.DB2; } }
-		public override string EndOfSql       { get { return ";"; } }
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
@@ -67,5 +66,21 @@ namespace BLToolkit.Data.DataProvider
 				}
 			}
 		}
+
+		/*
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (DB2Command)command;
+			try
+			{
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				cmd.ArrayBindCount = 0;
+			}
+		}
+		*/
 	}
 }

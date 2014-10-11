@@ -60,6 +60,7 @@ namespace BLToolkit.Data.Sql
 		internal void Init(
 			InsertClause       insert,
 			UpdateClause       update,
+			DeleteClause       delete,
 			SelectClause       select,
 			FromClause         from,
 			WhereClause        where,
@@ -73,6 +74,7 @@ namespace BLToolkit.Data.Sql
 		{
 			_insert             = insert;
 			_update             = update;
+			_delete             = delete;
 			_select             = select;
 			_from               = from;
 			_where              = where;
@@ -424,6 +426,15 @@ namespace BLToolkit.Data.Sql
 					((SqlQuery)Source).ForEachTable(action, visitedQueries);
 			}
 
+			public IEnumerable<ISqlTableSource> GetTables()
+			{
+				yield return Source;
+
+				foreach (var join in Joins)
+					foreach (var table in join.Table.GetTables())
+						yield return table;
+			}
+
 			public int GetJoinNumber()
 			{
 				var n = Joins.Count;
@@ -579,10 +590,11 @@ namespace BLToolkit.Data.Sql
 		{
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak, SearchCondition searchCondition)
 			{
-				JoinType  = joinType;
-				Table     = table;
-				IsWeak    = isWeak;
-				Condition = searchCondition;
+				JoinType        = joinType;
+				Table           = table;
+				IsWeak          = isWeak;
+				Condition       = searchCondition;
+				CanConvertApply = true;
 			}
 
 			public JoinedTable(JoinType joinType, TableSource table, bool isWeak)
@@ -595,10 +607,11 @@ namespace BLToolkit.Data.Sql
 			{
 			}
 
-			public JoinType        JoinType  { get; set; }
-			public TableSource     Table     { get; set; }
-			public SearchCondition Condition { get; private set; }
-			public bool            IsWeak    { get; set; }
+			public JoinType        JoinType        { get; set; }
+			public TableSource     Table           { get; set; }
+			public SearchCondition Condition       { get; private set; }
+			public bool            IsWeak          { get; set; }
+			public bool            CanConvertApply { get; set; }
 
 			public ICloneableElement Clone(Dictionary<ICloneableElement,ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
 			{
@@ -1819,6 +1832,7 @@ namespace BLToolkit.Data.Sql
 				: base(sqlQuery)
 			{
 				_columns.AddRange(clone._columns.ConvertAll(c => (Column)c.Clone(objectTree, doClone)));
+
 				IsDistinct = clone.IsDistinct;
 				TakeValue  = clone.TakeValue == null ? null : (ISqlExpression)clone.TakeValue.Clone(objectTree, doClone);
 				SkipValue  = clone.SkipValue == null ? null : (ISqlExpression)clone.SkipValue.Clone(objectTree, doClone);
@@ -1830,6 +1844,7 @@ namespace BLToolkit.Data.Sql
 				IsDistinct = isDistinct;
 				TakeValue  = takeValue;
 				SkipValue  = skipValue;
+
 				_columns.AddRange(columns);
 			}
 
@@ -2468,6 +2483,89 @@ namespace BLToolkit.Data.Sql
 
 		#endregion
 
+		#region DeleteClause
+
+		public class DeleteClause : IQueryElement, ISqlExpressionWalkable, ICloneableElement
+		{
+			public SqlTable Table { get; set; }
+
+			#region Overrides
+
+#if OVERRIDETOSTRING
+
+			public override string ToString()
+			{
+				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
+			}
+
+#endif
+
+			#endregion
+
+			#region ICloneableElement Members
+
+			public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+			{
+				if (!doClone(this))
+					return this;
+
+				var clone = new DeleteClause();
+
+				if (Table != null)
+					clone.Table = (SqlTable)Table.Clone(objectTree, doClone);
+
+				objectTree.Add(this, clone);
+
+				return clone;
+			}
+
+			#endregion
+
+			#region ISqlExpressionWalkable Members
+
+			[Obsolete]
+			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
+			{
+				if (Table != null)
+					((ISqlExpressionWalkable)Table).Walk(skipColumns, func);
+
+				return null;
+			}
+
+			#endregion
+
+			#region IQueryElement Members
+
+			public QueryElementType ElementType { get { return QueryElementType.DeleteClause; } }
+
+			StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
+			{
+				sb.Append("DELETE FROM ");
+
+				if (Table != null)
+					((IQueryElement)Table).ToString(sb, dic);
+
+				sb.AppendLine();
+
+				return sb;
+			}
+
+			#endregion
+		}
+
+		private DeleteClause _delete;
+		public  DeleteClause  Delete
+		{
+			get { return _delete ?? (_delete = new DeleteClause()); }
+		}
+
+		public void ClearDelete()
+		{
+			_delete = null;
+		}
+
+		#endregion
+
 		#region FromClause
 
 		public class FromClause : ClauseBase, IQueryElement, ISqlExpressionWalkable
@@ -2623,7 +2721,7 @@ namespace BLToolkit.Data.Sql
 				get { return _tables; }
 			}
 
-			IEnumerable<ISqlTableSource> GetJoinTables(TableSource source, QueryElementType elementType)
+			static IEnumerable<ISqlTableSource> GetJoinTables(TableSource source, QueryElementType elementType)
 			{
 				if (source.Source.ElementType == elementType)
 					yield return source.Source;
@@ -2641,6 +2739,33 @@ namespace BLToolkit.Data.Sql
 			internal IEnumerable<ISqlTableSource> GetFromQueries()
 			{
 				return Tables.SelectMany(_ => GetJoinTables(_, QueryElementType.SqlQuery));
+			}
+
+			static TableSource FindTableSource(TableSource source, SqlTable table)
+			{
+				if (source.Source == table)
+					return source;
+
+				foreach (var join in source.Joins)
+				{
+					var ts = FindTableSource(join.Table, table);
+					if (ts != null)
+						return ts;
+				}
+
+				return null;
+			}
+
+			public ISqlTableSource FindTableSource(SqlTable table)
+			{
+				foreach (var source in Tables)
+				{
+					var ts = FindTableSource(source, table);
+					if (ts != null)
+						return ts;
+				}
+
+				return null;
 			}
 
 			#region Overrides
@@ -3138,7 +3263,7 @@ namespace BLToolkit.Data.Sql
 #endif
 
 			OptimizeUnions();
-			FinalizeAndValidateInternal(isApplySupported, optimizeColumns, true);
+			FinalizeAndValidateInternal(isApplySupported, optimizeColumns, true, new List<ISqlTableSource>());
 			ResolveFields();
 			SetAliases();
 
@@ -3420,7 +3545,7 @@ namespace BLToolkit.Data.Sql
 			{
 				var sql = e as SqlQuery;
 
-				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._insert != null || sql._update != null)
+				if (sql == null || sql.From.Tables.Count != 1 || !sql.IsSimple || sql._insert != null || sql._update != null || sql._delete != null)
 					return;
 
 				var table = sql.From.Tables[0];
@@ -3479,7 +3604,7 @@ namespace BLToolkit.Data.Sql
 			});
 		}
 
-		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns, bool optimizeSearchCondition)
+		void FinalizeAndValidateInternal(bool isApplySupported, bool optimizeColumns, bool optimizeSearchCondition, List<ISqlTableSource> tables)
 		{
 			OptimizeSearchCondition(Where. SearchCondition);
 			OptimizeSearchCondition(Having.SearchCondition);
@@ -3500,14 +3625,14 @@ namespace BLToolkit.Data.Sql
 				if (sql != null && sql != this)
 				{
 					sql.ParentSql = this;
-					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns, false);
+					sql.FinalizeAndValidateInternal(isApplySupported, optimizeColumns, false, tables);
 
 					if (sql.IsParameterDependent)
 						IsParameterDependent = true;
 				}
 			});
 
-			ResolveWeakJoins();
+			ResolveWeakJoins(tables);
 			OptimizeColumns();
 			OptimizeApplies   (isApplySupported, optimizeColumns);
 			OptimizeSubQueries(isApplySupported, optimizeColumns);
@@ -3665,10 +3790,8 @@ namespace BLToolkit.Data.Sql
 				OrderBy.Items.Clear();
 		}
 
-		void ResolveWeakJoins()
+		internal void ResolveWeakJoins(List<ISqlTableSource> tables)
 		{
-			List<ISqlTableSource> tables = null;
-
 			Func<TableSource,bool> findTable = null; findTable = table =>
 			{
 				if (tables.Contains(table.Source))
@@ -3691,6 +3814,8 @@ namespace BLToolkit.Data.Sql
 				return false;
 			};
 
+			var areTablesCollected = false;
+
 			ForEachTable(table =>
 			{
 				for (var i = 0; i < table.Joins.Count; i++)
@@ -3699,9 +3824,9 @@ namespace BLToolkit.Data.Sql
 
 					if (join.IsWeak)
 					{
-						if (tables == null)
+						if (!areTablesCollected)
 						{
-							tables = new List<ISqlTableSource>();
+							areTablesCollected = true;
 
 							Action<IQueryElement> tableCollector = expr =>
 							{
@@ -3724,6 +3849,22 @@ namespace BLToolkit.Data.Sql
 
 							if (_update != null)
 								visitor.VisitAll(Update, tableCollector);
+
+							if (_delete != null)
+								visitor.VisitAll(Delete, tableCollector);
+
+							visitor.VisitAll(From, expr =>
+							{
+								var tbl = expr as SqlTable;
+
+								if (tbl != null && tbl.TableArguments != null)
+								{
+									var v = new QueryVisitor();
+
+									foreach (var arg in tbl.TableArguments)
+										v.VisitAll(arg, tableCollector);
+								}
+							});
 						}
 
 						if (findTable(join.Table))
@@ -3734,7 +3875,6 @@ namespace BLToolkit.Data.Sql
 						{
 							table.Joins.RemoveAt(i);
 							i--;
-							continue;
 						}
 					}
 				}
@@ -3820,7 +3960,7 @@ namespace BLToolkit.Data.Sql
 			bool        optimizeValues,
 			bool        optimizeColumns)
 		{
-			var query = (SqlQuery)childSource. Source;
+			var query = (SqlQuery)childSource.Source;
 
 			var isQueryOK = query.From.Tables.Count == 1;
 
@@ -3910,6 +4050,9 @@ namespace BLToolkit.Data.Sql
 			foreach (var join in joinSource.Joins)
 				if (join.JoinType == JoinType.CrossApply || join.JoinType == JoinType.OuterApply)
 					OptimizeApply(joinSource, join, isApplySupported, optimizeColumns);
+
+			if (isApplySupported && !joinTable.CanConvertApply)
+				return;
 
 			if (joinSource.Source.ElementType == QueryElementType.SqlQuery)
 			{
@@ -4010,9 +4153,10 @@ namespace BLToolkit.Data.Sql
 				{
 					var sql = From.Tables[i].Source as SqlQuery;
 
-					if (sql != null && sql.OrderBy.Items.Count > 0)
-						foreach (var item in sql.OrderBy.Items)
-							OrderBy.Expr(item.Expression, item.IsDescending);
+					if (!Select.Columns.All(c => IsAggregationFunction(c.Expression)))
+						if (sql != null && sql.OrderBy.Items.Count > 0)
+							foreach (var item in sql.OrderBy.Items)
+								OrderBy.Expr(item.Expression, item.IsDescending);
 
 					From.Tables[i] = table;
 				}
@@ -4072,7 +4216,7 @@ namespace BLToolkit.Data.Sql
 
 			var alias = desiredAlias;
 
-			if (string.IsNullOrEmpty(desiredAlias))
+			if (string.IsNullOrEmpty(desiredAlias) || desiredAlias.Length > 30)
 			{
 				desiredAlias = defaultAlias;
 				alias        = defaultAlias + "1";
@@ -4454,6 +4598,7 @@ namespace BLToolkit.Data.Sql
 
 			if (IsInsert) _insert = (InsertClause)clone._insert.Clone(objectTree, doClone);
 			if (IsUpdate) _update = (UpdateClause)clone._update.Clone(objectTree, doClone);
+			if (IsDelete) _delete = (DeleteClause)clone._delete.Clone(objectTree, doClone);
 
 			_select  = new SelectClause (this, clone._select,  objectTree, doClone);
 			_from    = new FromClause   (this, clone._from,    objectTree, doClone);
@@ -4589,6 +4734,7 @@ namespace BLToolkit.Data.Sql
 		{
 			if (_insert != null) ((ISqlExpressionWalkable)_insert).Walk(skipColumns, func);
 			if (_update != null) ((ISqlExpressionWalkable)_update).Walk(skipColumns, func);
+			if (_delete != null) ((ISqlExpressionWalkable)_delete).Walk(skipColumns, func);
 
 			((ISqlExpressionWalkable)Select) .Walk(skipColumns, func);
 			((ISqlExpressionWalkable)From)   .Walk(skipColumns, func);

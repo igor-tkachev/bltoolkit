@@ -61,7 +61,7 @@ namespace BLToolkit.Aspects
 		}
 
 		private static readonly IList _registeredAspects = ArrayList.Synchronized(new ArrayList());
-		private static          IList  RegisteredAspects
+		protected static          IList  RegisteredAspects
 		{
 			get { return _registeredAspects; }
 		}
@@ -281,6 +281,29 @@ namespace BLToolkit.Aspects
 			ClearCache(GetMethodInfo(declaringType, methodName, types));
 		}
 
+		/// <summary>
+		/// Clear a method call cache.
+		/// </summary>
+		/// <param name="declaringType">The method declaring type.</param>
+		/// <param name="methodName">The method name.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <param name="values">An array of values of the parameters for the method to get</param>
+		public static void ClearCache(Type declaringType, string methodName, Type[] types, object[] values)
+		{
+			var methodInfo = GetMethodInfo(declaringType, methodName, types);
+
+			if (methodInfo == null)
+				throw new ArgumentNullException("methodInfo");
+
+			var aspect = GetAspect(methodInfo);
+
+			if (aspect != null)
+				CleanupThread.ClearCache(aspect.Cache, new CompoundValue(values));
+		}
+
 		public static void ClearCache(Type declaringType)
 		{
 			if (declaringType == null)
@@ -482,6 +505,16 @@ namespace BLToolkit.Aspects
 					_objectsExpired += cache.Count;
 					cache.Clear();
 				}
+			}
+
+			public static void ClearCache(IDictionary cache, CompoundValue key)
+			{
+				lock (RegisteredAspects.SyncRoot)
+					lock (cache.SyncRoot)
+					{
+						_objectsExpired += 1;
+						cache.Remove(key);
+					}
 			}
 
 			public static void ClearCache()

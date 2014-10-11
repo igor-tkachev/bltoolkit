@@ -456,11 +456,20 @@ CREATE TABLE LinqDataTypes
 	MoneyValue     decimal(10,4) NULL,
 	DateTimeValue  datetime      NULL,
 	DateTimeValue2 datetime      NULL,
-	BoolValue      bit,
+	BoolValue      bit           default(0),
 	GuidValue      char(36)      NULL,
 	BinaryValue    binary(500)   NULL,
 	SmallIntValue  smallint      NULL,
 	IntValue       int           NULL,
 	BigIntValue    bigint        NULL
+)
+GO
+
+DROP TABLE TestIdentity
+GO
+
+CREATE TABLE TestIdentity
+(
+	ID int IDENTITY CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED
 )
 GO

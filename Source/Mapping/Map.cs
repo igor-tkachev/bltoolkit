@@ -1011,6 +1011,11 @@ namespace BLToolkit.Mapping
 			return _defaultSchema.GetObjectMapper<TSource,TDest>(deepCopy);
 		}
 
+		public static Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy, bool includeComplexMapping)
+		{
+			return _defaultSchema.GetObjectMapper<TSource,TDest>(deepCopy, includeComplexMapping);
+		}
+
 		#endregion
 	}
 }

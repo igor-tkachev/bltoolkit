@@ -11,6 +11,16 @@ using BLToolkit.Reflection;
 
 namespace EditableObjects
 {
+	[Serializable]
+	public abstract class SerializableObject : EditableObject
+	{
+		public abstract int    ID   { get; set; }
+		public abstract Guid   UUID { get; set; }
+		public abstract string Name { get; set; }
+
+		public abstract EditableList<string> Array { get; set; }
+	}
+
 	[TestFixture]
 	public class EditableArrayListTest
 	{
@@ -387,16 +397,6 @@ namespace EditableObjects
 				Console.WriteLine(o);
 		}
 
-		[Serializable]
-		public abstract class SerializableObject : EditableObject
-		{
-			public abstract int    ID   { get; set; }
-			public abstract Guid   UUID { get; set; }
-			public abstract string Name { get; set; }
-
-			public abstract EditableList<string> Array { get; set; }
-		}
-
 		[Test]
 		public void SerializationTest()
 		{
@@ -411,7 +411,7 @@ namespace EditableObjects
 			//Configuration.NotifyOnChangesOnly = false;
 		}
 
-		[Test]
+		//////[Test] Resharpe 8 issue
 		public void SerializationTest2()
 		{
 			//Configuration.NotifyOnChangesOnly = true;

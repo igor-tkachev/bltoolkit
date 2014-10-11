@@ -208,7 +208,7 @@ namespace Data.Linq
 				});
 		}
 
-		[Test]
+        [Test]
 		public void BinaryLength()
 		{
 			ForEachProvider(
@@ -303,23 +303,21 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void DateTime21()
+		public void DateTime21([DataContexts(ProviderName.SQLite)] string context)
 		{
-			ForEachProvider(
-				new[] { ProviderName.SQLite },
-				db =>
-				{
-					var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue;
-					var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
+			using (var db = GetDataContext(context))
+			{
+				var pdt = db.Types2.First(t => t.ID == 1).DateTimeValue;
+				var dt  = DateTime.Parse("2010-12-14T05:00:07.4250141Z");
 
-					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = dt });
+				db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = dt });
 
-					var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue;
+				var dt2 = db.Types2.First(t => t.ID == 1).DateTimeValue;
 
-					db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = pdt });
+				db.Types2.Update(t => t.ID == 1, t => new LinqDataTypes2 { DateTimeValue = pdt });
 
-					Assert.AreNotEqual(dt.Ticks, dt2.Value.Ticks);
-				});
+				Assert.AreNotEqual(dt.Ticks, dt2.Value.Ticks);
+			}
 		}
 
 		[Test]
@@ -328,8 +326,8 @@ namespace Data.Linq
 			ForEachProvider(
 				new[]
 				{
-					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
-					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+					ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
 				{
@@ -352,8 +350,8 @@ namespace Data.Linq
 			ForEachProvider(
 				new[]
 				{
-					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
-					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+					ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
 				{
@@ -379,8 +377,8 @@ namespace Data.Linq
 			ForEachProvider(
 				new[]
 				{
-					ProviderName.SqlCe, ProviderName.Access, "Sql2005", ProviderName.DB2, ProviderName.Informix,
-					ProviderName.Firebird, "Oracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
+					ProviderName.SqlCe, ProviderName.Access, "Sql2000", "Sql2005", ProviderName.DB2, ProviderName.Informix,
+					ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.Sybase
 				},
 				db =>
 				{
@@ -409,7 +407,7 @@ namespace Data.Linq
 					from t in db.Types2 where new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100) }.Contains(t.DateTimeValue) select t));
 		}
 
-		[Test]
+        [Test]
 		public void DateTimeArray2()
 		{
 			var arr = new DateTime?[] { new DateTime(2001, 1, 11, 1, 11, 21, 100), new DateTime(2012, 11, 7, 19, 19, 29, 90) };
@@ -422,7 +420,7 @@ namespace Data.Linq
 						from t in db.Types2 where arr.Contains(t.DateTimeValue) select t));
 		}
 
-		[Test]
+        [Test]
 		public void DateTimeArray3()
 		{
 			var arr = new List<DateTime?> { new DateTime(2001, 1, 11, 1, 11, 21, 100) };
@@ -480,7 +478,7 @@ namespace Data.Linq
 		[Test]
 		public void Unicode()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.Firebird, ProviderName.Sybase }, db =>
+			ForEachProvider(new[] { "DevartOracle", ProviderName.Informix, ProviderName.Firebird, ProviderName.Sybase }, db =>
 			{
 				try
 				{
@@ -512,15 +510,16 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void TestCultureInfo()
+		public void TestCultureInfo([DataContexts] string context)
 		{
 			var current = Thread.CurrentThread.CurrentCulture;
 
 			Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-RU");
 
-			ForEachProvider(db => AreEqual(
-				from t in    Types where t.MoneyValue > 0.5m select t,
-				from t in db.Types where t.MoneyValue > 0.5m select t));
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from t in    Types where t.MoneyValue > 0.5m select t,
+					from t in db.Types where t.MoneyValue > 0.5m select t);
 
 			Thread.CurrentThread.CurrentCulture = current;
 		}

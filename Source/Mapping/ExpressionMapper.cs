@@ -31,6 +31,7 @@ namespace BLToolkit.Mapping
 		public   MappingSchema             MappingSchema;
 		public   bool                      DeepCopy              = true;
 		public   bool                      HandleCrossReferences = true;
+		public   bool                      IncludeComplexMapping;
 
 		public   Dictionary<object,object> MapperList     = new Dictionary<object,object>();
 
@@ -54,8 +55,9 @@ namespace BLToolkit.Mapping
 		private  Func<object,object>   _getCurrent;
 		private  Action<object,object> _setCurrent;
 
-		public bool DeepCopy             { get { return _parameters.DeepCopy;              } set { _parameters.DeepCopy              = value; } }
-		public bool HandleBackReferences { get { return _parameters.HandleCrossReferences; } set { _parameters.HandleCrossReferences = value; } }
+		public bool DeepCopy              { get { return _parameters.DeepCopy;              } set { _parameters.DeepCopy              = value; } }
+		public bool HandleBackReferences  { get { return _parameters.HandleCrossReferences; } set { _parameters.HandleCrossReferences = value; } }
+		public bool IncludeComplexMapping { get { return _parameters.IncludeComplexMapping; } set { _parameters.IncludeComplexMapping = value; } }
 
 		public ExpressionMapper()
 			: this(Map.DefaultSchema)
@@ -601,7 +603,7 @@ namespace BLToolkit.Mapping
 
 			foreach (MemberMapper dmm in dest)
 			{
-				if (dmm is MemberMapper.ComplexMapper)
+				if (!IncludeComplexMapping && dmm is MemberMapper.ComplexMapper)
 					continue;
 
 				var dma = dmm.MemberAccessor;
@@ -609,14 +611,27 @@ namespace BLToolkit.Mapping
 				if (!dma.HasSetter)
 					continue;
 
+				var attr = dma.GetAttribute<ExpressionMapIgnoreAttribute>();
+
+				if (attr != null && attr.Ignore)
+					continue;
+
 				var smm = src[dmm.Name];
 
-				if (smm == null || smm is MemberMapper.ComplexMapper)
+				if (smm == null)
+					continue;
+
+				if (!IncludeComplexMapping && smm is MemberMapper.ComplexMapper)
 					continue;
 
 				var sma = smm.MemberAccessor;
 
 				if (!sma.HasGetter)
+					continue;
+
+				attr = sma.GetAttribute<ExpressionMapIgnoreAttribute>();
+
+				if (attr != null && attr.Ignore)
 					continue;
 
 				_getCurrent = dma.GetValue;
@@ -638,7 +653,7 @@ namespace BLToolkit.Mapping
 
 			var destMembers = from m in ((IEnumerable<MemberAccessor>)dest.TypeAccessor) select m;
 
-			destMembers = destMembers.Except(dest.Select(mm => mm.MemberAccessor));
+			destMembers = destMembers.Except(dest.Select(mm => mm.MemberAccessor)).ToList();
 
 			var srcMembers =
 				(from m in ((IEnumerable<MemberAccessor>)src.TypeAccessor) select m)
@@ -687,10 +702,35 @@ namespace BLToolkit.Mapping
 			return expr;
 		}
 
+		interface IAbstractHelper
+		{
+			Func<TSource,TDest> GetMapper(MappingParameters ps);
+		}
+
+		class AbstractHelper<TS,TD> : IAbstractHelper
+		{
+			public Func<TSource,TDest> GetMapper(MappingParameters ps)
+			{
+				var em     = new ExpressionMapper<TS,TD>(ps);
+				var mapper = em.GetMapper();
+
+				return source => (TDest)(object)mapper((TS)(object)source);
+			}
+		}
+
 		public Func<TSource,TDest> GetMapper()
 		{
 			if (typeof(TSource) == typeof(TDest) && !DeepCopy)
 				return s => (TDest)(object)s;
+
+			if (TypeHelper.IsAbstractClass(typeof(TSource)) || TypeHelper.IsAbstractClass(typeof(TDest)))
+			{
+				var st = TypeHelper.IsAbstractClass(typeof(TSource)) ? TypeAccessor<TSource>.Instance.Type : typeof(TSource);
+				var dt = TypeHelper.IsAbstractClass(typeof(TDest))   ? TypeAccessor<TDest>.  Instance.Type : typeof(TDest);
+
+				var type = typeof(AbstractHelper<,>).MakeGenericType(typeof(TSource), typeof(TDest), st, dt);
+				return ((IAbstractHelper)Activator.CreateInstance(type)).GetMapper(_parameters);
+			}
 
 			var parm = Expression.Parameter(typeof(TSource), "src");
 			var expr = GetValueMapper(

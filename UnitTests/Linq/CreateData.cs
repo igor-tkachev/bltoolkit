@@ -138,23 +138,22 @@ namespace Create
 			}
 		}
 
-#if !MOBILE
-		[Test] public void DB2       () { RunScript(ProviderName.DB2,              "\nGO\n",  "DB2");        }
-		[Test] public void Informix  () { RunScript(ProviderName.Informix,         "\nGO\n",  "Informix");   }
-		[Test] public void Oracle    () { RunScript("Oracle",                      "\n/\n",   "Oracle");     }
-		[Test] public void Firebird  () { RunScript(ProviderName.Firebird,         "COMMIT;", "Firebird2");  }
-		[Test] public void PostgreSQL() { RunScript(ProviderName.PostgreSQL,       "\nGO\n",  "PostgreSQL"); }
-		[Test] public void MySql     () { RunScript(ProviderName.MySql,            "\nGO\n",  "MySql");      }
-		[Test] public void Sql2005   () { RunScript("Sql2005",                     "\nGO\n",  "MsSql");      }
-		[Test] public void Sybase    () { RunScript(ProviderName.Sybase,           "\nGO\n",  "Sybase");     }
-#endif
-
-		[Test] public void Sql2008   () { RunScript("Sql2008",                     "\nGO\n",  "MsSql");      }
-		[Test] public void SqlCe     () { RunScript(ProviderName.SqlCe,            "\nGO\n",  "SqlCe");      }
-		[Test] public void SqlCeData () { RunScript(ProviderName.SqlCe + ".Data",  "\nGO\n",  "SqlCe");      }
-		[Test] public void SQLite    () { RunScript(ProviderName.SQLite,           "\nGO\n",  "SQLite");     }
-		[Test] public void SQLiteData() { RunScript(ProviderName.SQLite + ".Data", "\nGO\n",  "SQLite");     }
-		[Test] public void Access    () { RunScript(ProviderName.Access,           "\nGO\n",  "Access");     }
-		[Test] public void AccessData() { RunScript(ProviderName.Access + ".Data", "\nGO\n",  "Access");     }
+		[Test] public void DB2       ([IncludeDataContexts(ProviderName.DB2       )] string context) { RunScript(context,           "\nGO\n",  "DB2");        }
+		[Test] public void Informix  ([IncludeDataContexts(ProviderName.Informix  )] string context) { RunScript(context,           "\nGO\n",  "Informix");   }
+		[Test] public void Oracle    ([IncludeDataContexts("Oracle"               )] string context) { RunScript(context,           "\n/\n",   "Oracle");     }
+		[Test] public void Firebird  ([IncludeDataContexts(ProviderName.Firebird  )] string context) { RunScript(context,           "COMMIT;", "Firebird2");  }
+		[Test] public void PostgreSQL([IncludeDataContexts(ProviderName.PostgreSQL)] string context) { RunScript(context,           "\nGO\n",  "PostgreSQL"); }
+		[Test] public void MySql     ([IncludeDataContexts(ProviderName.MySql     )] string context) { RunScript(context,           "\nGO\n",  "MySql");      }
+		[Test] public void Sql2000   ([IncludeDataContexts("Sql2000"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql2000");  }
+		[Test] public void Sql2005   ([IncludeDataContexts("Sql2005"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2008   ([IncludeDataContexts("Sql2008"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2012   ([IncludeDataContexts("Sql2012"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void SqlCe     ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context,           "\nGO\n",  "SqlCe");      }
+		[Test] public void SqlCeData ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context + ".Data", "\nGO\n",  "SqlCe");      }
+		[Test] public void SQLite    ([IncludeDataContexts(ProviderName.SQLite    )] string context) { RunScript(context,           "\nGO\n",  "SQLite");     }
+		[Test] public void SQLiteData([IncludeDataContexts(ProviderName.SQLite    )] string context) { RunScript(context + ".Data", "\nGO\n",  "SQLite");     }
+		[Test] public void Access    ([IncludeDataContexts(ProviderName.Access    )] string context) { RunScript(context,           "\nGO\n",  "Access");     }
+		[Test] public void AccessData([IncludeDataContexts(ProviderName.Access    )] string context) { RunScript(context + ".Data", "\nGO\n",  "Access");     }
+		[Test] public void Sybase    ([IncludeDataContexts(ProviderName.Sybase    )] string context) { RunScript(context,           "\nGO\n",  "Sybase");     }
 	}
 }

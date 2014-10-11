@@ -142,7 +142,7 @@ namespace Data.Linq
 		[Test]
 		public void SkipCount()
 		{
-			ForEachProvider(new[] { ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(new[] { "Sql2000", ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
 				   Child.Skip(2).Count(),
 				db.Child.Skip(2).Count()));
 		}
@@ -184,7 +184,7 @@ namespace Data.Linq
 		public void SkipTake4()
 		{
 			var expected = Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2);
-			ForEachProvider(new[] { ProviderName.SQLite, ProviderName.Sybase, ProviderName.Access }, db =>
+			ForEachProvider(new[] { "Sql2000", ProviderName.SQLite, ProviderName.Sybase, ProviderName.Access }, db =>
 			{
 				var result = db.Child.OrderByDescending(c => c.ChildID).Skip(1).Take(7).OrderBy(c => c.ChildID).Skip(2);
 				Assert.IsTrue(result.ToList().SequenceEqual(expected));
@@ -234,7 +234,7 @@ namespace Data.Linq
 		public void SkipTake6()
 		{
 			ForEachProvider(
-				new[] { ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Access, ProviderName.Sybase },
+				new[] { "Sql2000", ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Access, ProviderName.Sybase },
 				db =>
 				{
 					SkipTake6(db, false);
@@ -245,7 +245,7 @@ namespace Data.Linq
 		[Test]
 		public void SkipTakeCount()
 		{
-			ForEachProvider(new[] { ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
+			ForEachProvider(new[] { "Sql2000", ProviderName.SqlCe, ProviderName.Sybase, ProviderName.SQLite, ProviderName.Access }, db => Assert.AreEqual(
 				   Child.Skip(2).Take(5).Count(),
 				db.Child.Skip(2).Take(5).Count()));
 		}
@@ -266,11 +266,12 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ElementAt1()
+		public void ElementAt1([DataContexts] string context)
 		{
-			ForEachProvider(db => Assert.AreEqual(
-				(from p in    Parent where p.ParentID > 1 select p).ElementAt(3),
-				(from p in db.Parent where p.ParentID > 1 select p).ElementAt(3)));
+			using (var db = GetDataContext(context))
+				Assert.AreEqual(
+					(from p in    Parent where p.ParentID > 1 select p).ElementAt(3),
+					(from p in db.Parent where p.ParentID > 1 select p).ElementAt(3));
 		}
 
 		[Test]

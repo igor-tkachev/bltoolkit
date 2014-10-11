@@ -31,36 +31,49 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+    <Reference Include="Castle.Core, Version=3.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Castle\Castle.Core.dll</HintPath>
+      <HintPath>..\..\packages\Castle.Core.3.2.1\lib\net40-client\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataAccess\FullSqlQueryBase.cs" />
+    <Compile Include="DataAccess\FullSqlQuery.cs" />
     <Compile Include="DataAccess\FullSqlQueryInfo.cs" />
     <Compile Include="DataAccess\FullSqlQueryParameterInfo.cs" />
     <Compile Include="DataAccess\FullSqlQueryT.cs" />
     <Compile Include="Emit\DynamicCompilationSpike.cs" />
     <Compile Include="Emit\FunctionFactory.cs" />
+    <Compile Include="Mapping\CollectionFullObjectMapper.cs" />
+    <Compile Include="Mapping\NotifyPropertyChangedInterceptor.cs" />
+    <Compile Include="Mapping\DataBindingMappingSchema.cs" />
+    <Compile Include="Mapping\DataBindingObjectMapper.cs" />
+    <Compile Include="Mapping\FactoryType.cs" />
     <Compile Include="Mapping\FullMappingSchema.cs" />
     <Compile Include="Mapping\FullObjectMapper.cs" />
+    <Compile Include="Mapping\ILazyMapper.cs" />
+    <Compile Include="Mapping\IMapper.cs" />
+    <Compile Include="Mapping\IObjectMapper.cs" />
+    <Compile Include="Mapping\IPropertiesMapping.cs" />
     <Compile Include="Mapping\LazyValueLoadInterceptor.cs" />
+    <Compile Include="Mapping\OwnerDescription.cs" />
+    <Compile Include="Mapping\TableDescription.cs" />
+    <Compile Include="Mapping\TypeFactory.cs" />
+    <Compile Include="Mapping\ValueMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reflection\FullInitContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\BLToolkit.4.csproj">
       <Project>{0C325F5D-E50E-4340-8724-D29896CCC583}</Project>
       <Name>BLToolkit.4</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

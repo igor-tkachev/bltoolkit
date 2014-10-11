@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -28,6 +29,7 @@ using Oracle.DataAccess.Types;
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
+	using BLToolkit.Data.Sql;
 
 	/// <summary>
 	/// Implements access to the Data Provider for Oracle.
@@ -179,6 +181,25 @@ namespace BLToolkit.Data.DataProvider
 			return base.CreateCommandObject(connection);
 		}
 
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			base.SetParameterValue(parameter, value);
+
+			// strings and byte arrays larger than 4000 bytes may be handled improperly
+			if (parameter is OracleParameterWrap)
+			{
+				const int ThresholdSize = 4000;
+				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+				}
+				else if (value is byte[] && ((byte[])value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Blob;
+				}
+			}
+		}
+
 		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
 		{
 			var oraParameter = (parameter is OracleParameterWrap)?
@@ -264,6 +285,21 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// Open an <see cref="IDataReader"/> into the given <see cref="OracleRefCursor"/> object
+		/// </summary>
+		/// <param name="refCursor">an <see cref="OracleRefCursor"/> to perform GetDataReader() on</param>
+		/// <returns>The <see cref="IDataReader"/> into the returned by GetDataReader()</returns>
+		public override IDataReader GetRefCursorDataReader(object refCursor)
+		{
+			var oracleRefCursor = refCursor as OracleRefCursor;
+
+			if (oracleRefCursor == null)
+				throw new ArgumentException("Argument must be of type 'OracleRefCursor'", "refCursor");
+
+			return oracleRefCursor.GetDataReader();
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -620,6 +656,33 @@ namespace BLToolkit.Data.DataProvider
 			get { return 0; }
 		}
 
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (OracleCommand)command;
+			var oracleParameters = cmd.Parameters.OfType<OracleParameter>().ToArray();
+			var oldCollectionTypes = oracleParameters.Select(p => p.CollectionType).ToArray();
+
+			try
+			{
+				foreach (var p in oracleParameters)
+				{
+					p.CollectionType = OracleCollectionType.None;
+				}
+
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				foreach (var p in oracleParameters.Zip(oldCollectionTypes, (p, t) => new { Param = p, CollectionType = t }))
+				{
+					p.Param.CollectionType = p.CollectionType;
+				}
+
+				cmd.ArrayBindCount = 0;
+			}
+		}
+
 		public override ISqlProvider CreateSqlProvider()
 		{
 			return new OracleSqlProvider();
@@ -684,6 +747,12 @@ namespace BLToolkit.Data.DataProvider
 				NameOrIndexParameter nip)
 			{
 				return new OracleScalarDataReaderMapper(this, dataReader, nip);
+			}
+
+			public override Reflection.Extension.ExtensionList Extensions
+			{
+				get { return Map.DefaultSchema.Extensions;  }
+				set { Map.DefaultSchema.Extensions = value; }
 			}
 
 			#region Convert
@@ -847,8 +916,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
 				}
 
 				return base.ConvertToGuid(value);
@@ -870,8 +939,8 @@ namespace BLToolkit.Data.DataProvider
 #endif
 				if (value is OracleClob)
 				{
-					var oraClob = (OracleClob)value;
-					return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
+					using (var oraClob = (OracleClob)value)
+						return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
 				}
 
 				return base.ConvertToString(value);
@@ -916,8 +985,8 @@ namespace BLToolkit.Data.DataProvider
 			{
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? null: oraBlob.Value;
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? null: oraBlob.Value;
 				}
 
 				if (value is OracleBinary)
@@ -945,8 +1014,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleClob)
 				{
-					var oraClob = (OracleClob)value;
-					return oraClob.IsNull? null: oraClob.Value.ToCharArray();
+					using (var oraClob = (OracleClob)value)
+						return oraClob.IsNull? null: oraClob.Value.ToCharArray();
 				}
 
 				return base.ConvertToCharArray(value);
@@ -1113,8 +1182,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
 				}
 
 				return base.ConvertToNullableGuid(value);
@@ -1141,6 +1210,25 @@ namespace BLToolkit.Data.DataProvider
 				}
 
 				return base.MapValueToEnum(value, type);
+			}
+
+			public override object MapValueToEnum(object value, MemberAccessor ma)
+			{
+				if (value is OracleString)
+				{
+					var oracleValue = (OracleString)value;
+					value = oracleValue.IsNull ? null : oracleValue.Value;
+				}
+				else if (value is OracleDecimal)
+				{
+					var oracleValue = (OracleDecimal)value;
+					if (oracleValue.IsNull)
+						value = null;
+					else
+						value = oracleValue.Value;
+				}
+
+				return base.MapValueToEnum(value, ma);
 			}
 
 			public override object ConvertChangeType(object value, Type conversionType)
@@ -1524,6 +1612,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			var sb  = new StringBuilder();
 			var sp  = new OracleSqlProvider();
+			var pn  = 0;
 			var n   = 0;
 			var cnt = 0;
 			var str = "\t" + insertText
@@ -1536,6 +1625,8 @@ namespace BLToolkit.Data.DataProvider
 				//.Replace("  ", " ")
 				+ ") VALUES (";
 
+			var parameters = new List<IDbDataParameter>();
+
 			foreach (var item in collection)
 			{
 				if (sb.Length == 0)
@@ -1547,6 +1638,9 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
+					if (value != null && value.GetType().IsEnum)
+						value = MappingSchema.MapEnumToValue(value, true);
+
 					if (value is Nullable<DateTime>)
 						value = ((DateTime?)value).Value;
 
@@ -1554,6 +1648,12 @@ namespace BLToolkit.Data.DataProvider
 					{
 						var dt = (DateTime)value;
 						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
+					}
+					else if (value is string && ((string)value).Length >= 2000)
+					{
+						var par = db.Parameter("p" + ++pn, value);
+						parameters.Add(par);
+						sb.Append(":" + par.ParameterName);
 					}
 					else
 						sp.BuildValue(sb, value);
@@ -1573,11 +1673,15 @@ namespace BLToolkit.Data.DataProvider
 					var sql = sb.ToString();
 
 					if (DbManager.TraceSwitch.TraceInfo)
-						DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+						DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-					cnt += db.SetCommand(sql).ExecuteNonQuery();
+					cnt += db
+						.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+						.ExecuteNonQuery();
 
-					n = 0;
+					parameters.Clear();
+					pn = 0;
+					n  = 0;
 					sb.Length = 0;
 				}
 			}
@@ -1589,9 +1693,11 @@ namespace BLToolkit.Data.DataProvider
 				var sql = sb.ToString();
 
 				if (DbManager.TraceSwitch.TraceInfo)
-					DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+					DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
+				cnt += db
+					.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+					.ExecuteNonQuery();
 			}
 
 			return cnt;

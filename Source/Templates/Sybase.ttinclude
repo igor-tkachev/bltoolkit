@@ -78,10 +78,10 @@ private void LoadServerMetadata()
 					ID     = Convert.ToInt32(rd["id"]),
 					Column = new Column
 					{
-						ID         = Convert.ToInt16(rd["colid"]),
+						ID         = Convert.ToInt16  (rd["colid"]),
 						ColumnName = Convert.ToString (rd["name"]),
 						MemberName = Convert.ToString (rd["name"]),
-						ColumnType = Convert.ToString(rd["typename"]),
+						ColumnType = Convert.ToString (rd["typename"]),
 						IsNullable = Convert.ToBoolean(rd["isNullable"]),
 						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
 						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),

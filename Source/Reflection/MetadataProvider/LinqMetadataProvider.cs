@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Data.Linq.Mapping;
 using System.Linq;
-using BLToolkit.DataAccess;
 
 namespace BLToolkit.Reflection.MetadataProvider
 {
+	using DataAccess;
 	using Mapping;
 	using Extension;
 

@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-using BLToolkit.Validation;
+
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -752,9 +753,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void StackOverflow()
+		public void StackOverflow([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from c in db.Child
@@ -770,6 +771,43 @@ namespace Data.Linq
 				}
 
 				var list = q.ToList();
+			}
+		}
+
+		[Test]
+		public void ApplyJoin([IncludeDataContexts("Sql2008")] string context)
+		{
+			using (var db = new TestDbManager(context))
+			{
+				var q =
+					from ch in db.Child
+					from p in new Model.Functions(db).GetParentByID(ch.Parent.ParentID)
+					select p;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Issue257([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var q =
+					from m in db.Types
+						join p in db.Parent on m.ID equals p.ParentID
+					group m by new
+					{
+						m.DateTimeValue.Date
+					}
+					into b
+					select new
+					{
+						QualiStatusByDate = b.Key,
+						Count             = b.Count()
+					};
+
+				q.ToList();
 			}
 		}
 	}

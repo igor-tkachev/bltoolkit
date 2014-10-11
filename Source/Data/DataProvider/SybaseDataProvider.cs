@@ -165,6 +165,8 @@ namespace BLToolkit.Data.DataProvider
 				commandParameters = list.ToArray();
 		}
 
+		public override string EndOfSql { get { return ""; } }
+
 		public override DbType GetDbType(Type systemType)
 		{
 			if (systemType == typeof(byte[]))
@@ -172,7 +174,6 @@ namespace BLToolkit.Data.DataProvider
 
 			return base.GetDbType(systemType);
 		}
-
 
 		#region DataReaderEx
 

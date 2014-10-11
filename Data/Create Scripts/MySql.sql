@@ -12,8 +12,8 @@ GO
 CREATE TABLE Person
 (
 	PersonID   int         AUTO_INCREMENT NOT NULL,
-	FirstName  varchar(50) NOT NULL,
-	LastName   varchar(50) NOT NULL,
+	FirstName  varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+	LastName   varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
 	MiddleName varchar(50)     NULL,
 	Gender     char(1)     NOT NULL,
 	CONSTRAINT PK_Person PRIMARY KEY CLUSTERED (PersonID)
@@ -465,5 +465,14 @@ CREATE TABLE LinqDataTypes
 	SmallIntValue  smallint,
 	IntValue       int NULL,
 	BigIntValue    bigint NULL
+)
+GO
+
+DROP TABLE TestIdentity
+GO
+
+CREATE TABLE TestIdentity (
+	ID int AUTO_INCREMENT NOT NULL,
+	CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED (ID)
 )
 GO

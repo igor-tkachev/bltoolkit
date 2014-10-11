@@ -181,7 +181,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test]
 		public void ObjectCompare()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -271,7 +271,7 @@ namespace Data.Linq
 		public void SubSub2()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Access, ProviderName.DB2, "Oracle", ProviderName.MySql, ProviderName.Sybase, ProviderName.Informix },
+				new[] { ProviderName.Access, ProviderName.DB2, "Oracle", "DevartOracle", "Sql2000", ProviderName.MySql, ProviderName.Sybase, ProviderName.Informix },
 				db => AreEqual(
 					from p1 in
 						from p2 in Parent

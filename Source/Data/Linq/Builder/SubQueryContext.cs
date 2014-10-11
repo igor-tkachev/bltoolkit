@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Linq;
 
 namespace BLToolkit.Data.Linq.Builder
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 
 	class SubQueryContext : PassThroughContext

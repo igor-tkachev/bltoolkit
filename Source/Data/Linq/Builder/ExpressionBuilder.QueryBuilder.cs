@@ -19,39 +19,30 @@ namespace BLToolkit.Data.Linq.Builder
 
 		public Expression BuildExpression(IBuildContext context, Expression expression)
 		{
-			var newExpr = expression.Convert2(pi =>
+			var newExpr = expression.Convert2(expr =>
 			{
-				if (_skippedExpressions.Contains(pi))
-					return new ExpressionHelper.ConvertInfo(pi, true);
+				if (_skippedExpressions.Contains(expr))
+					return new ExpressionHelper.ConvertInfo(expr, true);
 
-				switch (pi.NodeType)
+				if (expr.Find(IsNoneSqlMember) != null)
+					return new ExpressionHelper.ConvertInfo(expr);
+
+				switch (expr.NodeType)
 				{
 					case ExpressionType.MemberAccess:
 						{
-							if (IsServerSideOnly(pi) || PreferServerSide(pi))
-								return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
+							if (IsServerSideOnly(expr) || PreferServerSide(expr))
+								return new ExpressionHelper.ConvertInfo(BuildSql(context, expr));
 
-							var ma = (MemberExpression)pi;
+							var ma = (MemberExpression)expr;
 
 							if (SqlProvider.ConvertMember(ma.Member) != null)
 								break;
 
-							/*
-							var res = context.IsExpression(pi, 0, RequestFor.Association);
-
-							if (res.Result)
-							{
-								var table = (TableBuilder.AssociatedTableContext)res.Context;
-
-								if (table.IsList)
-									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
-							}
-							*/
-
-							var ctx = GetContext(context, pi);
+							var ctx = GetContext(context, expr);
 
 							if (ctx != null)
-								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(pi, 0));
+								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(expr, 0));
 
 							var ex = ma.Expression;
 
@@ -69,47 +60,47 @@ namespace BLToolkit.Data.Linq.Builder
 
 					case ExpressionType.Parameter:
 						{
-							if (pi == ParametersParam)
+							if (expr == ParametersParam)
 								break;
 
-							var ctx = GetContext(context, pi);
+							var ctx = GetContext(context, expr);
 
 							if (ctx != null)
-								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(pi, 0));
+								return new ExpressionHelper.ConvertInfo(ctx.BuildExpression(expr, 0));
 
 							break;
 						}
 
 					case ExpressionType.Constant:
 						{
-							if (ExpressionHelper.IsConstant(pi.Type))
+							if (ExpressionHelper.IsConstant(expr.Type))
 								break;
 
-							if (_expressionAccessors.ContainsKey(pi))
-								return new ExpressionHelper.ConvertInfo(Expression.Convert(_expressionAccessors[pi], pi.Type));
+							if (_expressionAccessors.ContainsKey(expr))
+								return new ExpressionHelper.ConvertInfo(Expression.Convert(_expressionAccessors[expr], expr.Type));
 
 							break;
 						}
 
 					case ExpressionType.Coalesce:
 
-						if (pi.Type == typeof(string) && MappingSchema.GetDefaultNullValue<string>() != null)
-							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
+						if (expr.Type == typeof(string) && MappingSchema.GetDefaultNullValue<string>() != null)
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, expr));
 
-						if (CanBeTranslatedToSql(context, ConvertExpression(pi), true))
-							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
+						if (CanBeTranslatedToSql(context, ConvertExpression(expr), true))
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, expr));
 
 						break;
 
 					case ExpressionType.Conditional:
 
-						if (CanBeTranslatedToSql(context, ConvertExpression(pi), true))
-							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
+						if (CanBeTranslatedToSql(context, ConvertExpression(expr), true))
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, expr));
 						break;
 
 					case ExpressionType.Call:
 						{
-							var ce = (MethodCallExpression)pi;
+							var ce = (MethodCallExpression)expr;
 
 							if (IsGroupJoinSource(context, ce))
 							{
@@ -122,14 +113,14 @@ namespace BLToolkit.Data.Linq.Builder
 
 							if (IsSubQuery(context, ce))
 							{
-								if (TypeHelper.IsSameOrParent(typeof(IEnumerable), pi.Type) && pi.Type != typeof(string) && !pi.Type.IsArray)
-									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, pi));
+								if (TypeHelper.IsSameOrParent(typeof(IEnumerable), expr.Type) && expr.Type != typeof(string) && !expr.Type.IsArray)
+									return new ExpressionHelper.ConvertInfo(BuildMultipleQuery(context, expr));
 
 								return new ExpressionHelper.ConvertInfo(GetSubQuery(context, ce).BuildExpression(null, 0));
 							}
 
-							if (IsServerSideOnly(pi) || PreferServerSide(pi))
-								return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
+							if (IsServerSideOnly(expr) || PreferServerSide(expr))
+								return new ExpressionHelper.ConvertInfo(BuildSql(context, expr));
 						}
 
 						break;
@@ -137,7 +128,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 				if (EnforceServerSide(context))
 				{
-					switch (pi.NodeType)
+					switch (expr.NodeType)
 					{
 						case ExpressionType.MemberInit :
 						case ExpressionType.New        :
@@ -145,13 +136,13 @@ namespace BLToolkit.Data.Linq.Builder
 							break;
 
 						default                        :
-							if (CanBeCompiled(pi))
+							if (CanBeCompiled(expr))
 								break;
-							return new ExpressionHelper.ConvertInfo(BuildSql(context, pi));
+							return new ExpressionHelper.ConvertInfo(BuildSql(context, expr));
 					}
 				}
 
-				return new ExpressionHelper.ConvertInfo(pi);
+				return new ExpressionHelper.ConvertInfo(expr);
 			});
 
 			return newExpr;
@@ -168,7 +159,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		Expression BuildSql(IBuildContext context, Expression expression)
 		{
-			var sqlex = ConvertToSqlExpression(context, expression);
+			var sqlex = ConvertToSqlExpression(context, expression, true);
 			var idx   = context.SqlQuery.Select.Add(sqlex);
 
 			idx = context.ConvertToParentIndex(idx, context);
@@ -176,6 +167,51 @@ namespace BLToolkit.Data.Linq.Builder
 			var field = BuildSql(expression.Type, idx);
 
 			return field;
+		}
+
+		public Expression BuildSql(MemberAccessor ma, int idx, MethodInfo checkNullFunction, Expression context)
+		{
+			var expr = Expression.Call(DataReaderParam, ReflectionHelper.DataReader.GetValue, Expression.Constant(idx));
+
+			if (checkNullFunction != null)
+				expr = Expression.Call(null, checkNullFunction, expr, context);
+
+			Expression mapper;
+
+			if (TypeHelper.IsEnumOrNullableEnum(ma.Type))
+			{
+				var type = TypeHelper.ToNullable(ma.Type);
+				mapper =
+					Expression.Convert(
+						Expression.Call(
+							Expression.Constant(MappingSchema),
+							ReflectionHelper.MapSchema.MapValueToEnumWithMemberAccessor,
+								expr,
+								Expression.Constant(ma)),
+						type);
+			}
+			else
+			{
+				MethodInfo mi;
+
+				if (!ReflectionHelper.MapSchema.Converters.TryGetValue(ma.Type, out mi))
+				{
+					mapper =
+						Expression.Convert(
+							Expression.Call(
+								Expression.Constant(MappingSchema),
+								ReflectionHelper.MapSchema.ChangeType,
+									expr,
+									Expression.Constant(ma.Type)),
+							ma.Type);
+				}
+				else
+				{
+					mapper = Expression.Call(Expression.Constant(MappingSchema), mi, expr);
+				}
+			}
+
+			return mapper;
 		}
 
 		public Expression BuildSql(Type type, int idx, MethodInfo checkNullFunction, Expression context)
@@ -225,6 +261,36 @@ namespace BLToolkit.Data.Linq.Builder
 		public Expression BuildSql(Type type, int idx)
 		{
 			return BuildSql(type, idx, null, null);
+		}
+
+		public Expression BuildSql(MemberAccessor ma, int idx)
+		{
+			return BuildSql(ma, idx, null, null);
+		}
+
+		#endregion
+
+		#region IsNonSqlMember
+
+		bool IsNoneSqlMember(Expression expr)
+		{
+			switch (expr.NodeType)
+			{
+				case ExpressionType.MemberAccess:
+					{
+						var me = (MemberExpression)expr;
+
+						var om = (
+							from c in Contexts.OfType<TableBuilder.TableContext>()
+							where c.ObjectType == me.Member.DeclaringType
+							select c.ObjectMapper
+						).FirstOrDefault();
+
+						return om != null && om.Associations.All(a => !TypeHelper.Equals(a.MemberAccessor.MemberInfo, me.Member)) && om[me.Member.Name, true] == null;
+					}
+			}
+
+			return false;
 		}
 
 		#endregion

@@ -1311,9 +1311,13 @@ namespace BLToolkit.Linq
 						var l = Convert(e.Left,       func);
 						var r = Convert(e.Right,      func);
 
+#if FW3
 						return c != e.Conversion || l != e.Left || r != e.Right ?
 							Expression.MakeBinary(expr.NodeType, l, r, e.IsLiftedToNull, e.Method, (LambdaExpression)c):
 							expr;
+#else
+						return e.Update(l, (LambdaExpression)c, r);
+#endif
 					}
 
 				case ExpressionType.ArrayLength:
@@ -1330,12 +1334,16 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as UnaryExpression;
+						var e = (UnaryExpression)expr;
 						var o = Convert(e.Operand, func);
 
+#if FW3
 						return o != e.Operand ?
 							Expression.MakeUnary(expr.NodeType, o, e.Type, e.Method) :
 							expr;
+#else
+						return e.Update(o);
+#endif
 					}
 
 				case ExpressionType.Call:
@@ -1344,13 +1352,17 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as MethodCallExpression;
+						var e = (MethodCallExpression)expr;
 						var o = Convert(e.Object,    func);
 						var a = Convert(e.Arguments, func);
 
+#if FW3
 						return o != e.Object || a != e.Arguments ? 
 							Expression.Call(o, e.Method, a) :
 							expr;
+#else
+						return e.Update(o, a);
+#endif
 					}
 
 				case ExpressionType.Conditional:
@@ -1359,14 +1371,18 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as ConditionalExpression;
+						var e = (ConditionalExpression)expr;
 						var s = Convert(e.Test,    func);
 						var t = Convert(e.IfTrue,  func);
 						var f = Convert(e.IfFalse, func);
 
+#if FW3
 						return s != e.Test || t != e.IfTrue || f != e.IfFalse ?
 							Expression.Condition(s, t, f) :
 							expr;
+#else
+						return e.Update(s, t, f);
+#endif
 					}
 
 				case ExpressionType.Invoke:
@@ -1375,11 +1391,15 @@ namespace BLToolkit.Linq
 						if (exp != expr)
 							return exp;
 
-						var e  = expr as InvocationExpression;
+						var e  = (InvocationExpression)expr;
 						var ex = Convert(e.Expression, func);
 						var a  = Convert(e.Arguments,  func);
 
+#if FW3
 						return ex != e.Expression || a != e.Arguments ? Expression.Invoke(ex, a) : expr;
+#else
+						return e.Update(ex, a);
+#endif
 					}
 
 				case ExpressionType.Lambda:
@@ -1388,7 +1408,7 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as LambdaExpression;
+						var e = (LambdaExpression)expr;
 						var b = Convert(e.Body,       func);
 						var p = Convert(e.Parameters, func);
 
@@ -1401,7 +1421,7 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as ListInitExpression;
+						var e = (ListInitExpression)expr;
 						var n = Convert(e.NewExpression, func);
 						var i = Convert(e.Initializers,  p =>
 						{
@@ -1409,9 +1429,13 @@ namespace BLToolkit.Linq
 							return args != p.Arguments? Expression.ElementInit(p.AddMethod, args): p;
 						});
 
+#if FW3
 						return n != e.NewExpression || i != e.Initializers ?
 							Expression.ListInit((NewExpression)n, i) :
 							expr;
+#else
+						return e.Update((NewExpression)n, i);
+#endif
 					}
 
 				case ExpressionType.MemberAccess:
@@ -1420,10 +1444,14 @@ namespace BLToolkit.Linq
 						if (exp != expr)
 							return exp;
 
-						var e  = expr as MemberExpression;
+						var e  = (MemberExpression)expr;
 						var ex = Convert(e.Expression, func);
 
+#if FW3
 						return ex != e.Expression ? Expression.MakeMemberAccess(ex, e.Member) : expr;
+#else
+						return e.Update(ex);
+#endif
 					}
 
 				case ExpressionType.MemberInit:
@@ -1477,13 +1505,17 @@ namespace BLToolkit.Linq
 							return b;
 						};
 
-						var e  = expr as MemberInitExpression;
+						var e  = (MemberInitExpression)expr;
 						var ne = Convert(e.NewExpression, func);
 						var bb = Convert(e.Bindings,      modify);
 
+#if FW3
 						return ne != e.NewExpression || bb != e.Bindings ?
 							Expression.MemberInit((NewExpression)ne, bb) :
 							expr;
+#else
+						return e.Update((NewExpression)ne, bb);
+#endif
 					}
 
 				case ExpressionType.New:
@@ -1492,14 +1524,18 @@ namespace BLToolkit.Linq
 						if (ex != expr)
 							return ex;
 
-						var e = expr as NewExpression;
+						var e = (NewExpression)expr;
 						var a = Convert(e.Arguments, func);
 
+#if FW3
 						return a != e.Arguments ?
 							e.Members == null ?
 								Expression.New(e.Constructor, a) :
 								Expression.New(e.Constructor, a, e.Members) :
 							expr;
+#else
+						return e.Update(a);
+#endif
 					}
 
 				case ExpressionType.NewArrayBounds:
@@ -1508,10 +1544,14 @@ namespace BLToolkit.Linq
 						if (exp != expr)
 							return exp;
 
-						var e  = expr as NewArrayExpression;
+						var e  = (NewArrayExpression)expr;
 						var ex = Convert(e.Expressions, func);
 
+#if FW3
 						return ex != e.Expressions ? Expression.NewArrayBounds(e.Type, ex) : expr;
+#else
+						return e.Update(ex);
+#endif
 					}
 
 				case ExpressionType.NewArrayInit:
@@ -1520,12 +1560,17 @@ namespace BLToolkit.Linq
 						if (exp != expr)
 							return exp;
 
-						var e  = expr as NewArrayExpression;
+						var e  = (NewArrayExpression)expr;
 						var ex = Convert(e.Expressions, func);
 
+#if FW3
 						return ex != e.Expressions ?
 							Expression.NewArrayInit(e.Type.GetElementType(), ex) :
 							expr;
+#else
+						return e.Update(ex);
+
+#endif
 					}
 
 				case ExpressionType.TypeIs:
@@ -1534,10 +1579,14 @@ namespace BLToolkit.Linq
 						if (exp != expr)
 							return exp;
 
-						var e  = expr as TypeBinaryExpression;
+						var e  = (TypeBinaryExpression)expr;
 						var ex = Convert(e.Expression, func);
 
+#if FW3
 						return ex != e.Expression ? Expression.TypeIs(ex, e.Type) : expr;
+#else
+						return e.Update(ex);
+#endif
 					}
 
 #if FW4 || SILVERLIGHT
@@ -1548,11 +1597,11 @@ namespace BLToolkit.Linq
 						if (exp != expr)
 							return exp;
 
-						var e  = expr as BlockExpression;
+						var e  = (BlockExpression)expr;
 						var ex = Convert(e.Expressions, func);
 						var v  = Convert(e.Variables,   func);
 
-						return ex != e.Expressions || v != e.Variables ? Expression.Block(e.Type, v, ex) : expr;
+						return e.Update(v, ex);
 					}
 
 #endif
@@ -1634,6 +1683,57 @@ namespace BLToolkit.Linq
 			}
 
 			return modified ? list : source;
+		}
+
+#if FW3
+		static IEnumerable<Expression> ConvertMethodArguments(IEnumerable<Expression> source, MethodBase method)
+		{
+			return ConvertMethodArguments(source, method, null);
+		}
+
+		static IEnumerable<Expression> ConvertMethodArguments(IEnumerable<Expression> source, MethodBase method, IList<MemberInfo> initMembers)
+#else
+		static IEnumerable<Expression> ConvertMethodArguments(IEnumerable<Expression> source, MethodBase method, IList<MemberInfo> initMembers = null)
+#endif
+		{
+			var list = new List<Expression>();
+
+			var targetTypes = new List<Type>();
+			foreach (var param in method.GetParameters())
+			{
+				targetTypes.Add(param.ParameterType);
+			}
+			if (initMembers != null)
+			{
+				foreach (var mi in initMembers)
+				{
+					if (mi is PropertyInfo)
+					{
+						targetTypes.Add(((PropertyInfo)mi).PropertyType);
+					}
+					else if (mi is FieldInfo)
+					{
+						targetTypes.Add(((FieldInfo)mi).FieldType);
+					}
+				}
+			}
+
+			var idx = 0;
+			foreach (var item in source)
+			{
+				var targetType = targetTypes[idx];
+				if (item.Type != targetType)
+				{
+					list.Add(Expression.Convert(item, targetType));
+				}
+				else
+				{
+					list.Add(item);
+				}
+				idx++;
+			}
+
+			return list;
 		}
 
 		public static Expression Convert2(this Expression expr, Func<Expression,ConvertInfo> func)
@@ -1719,8 +1819,8 @@ namespace BLToolkit.Linq
 						var o = Convert2(e.Object,    func);
 						var a = Convert2(e.Arguments, func);
 
-						return o != e.Object || a != e.Arguments ? 
-							Expression.Call(o, e.Method, a) : 
+						return o != e.Object || a != e.Arguments ?
+							Expression.Call(o, e.Method, ConvertMethodArguments(a, e.Method)) : 
 							expr;
 					}
 
@@ -1813,7 +1913,13 @@ namespace BLToolkit.Linq
 										var ex = Convert2(ma.Expression, func);
 
 										if (ex != ma.Expression)
+										{
+											if (ex.Type != ma.Expression.Type)
+											{
+												ex = Expression.Convert(ex, ma.Expression.Type);
+											}
 											ma = Expression.Bind(ma.Member, ex);
+										}
 
 										return ma;
 									}
@@ -1868,8 +1974,8 @@ namespace BLToolkit.Linq
 
 						return a != e.Arguments ?
 							e.Members == null ?
-								Expression.New(e.Constructor, a) :
-								Expression.New(e.Constructor, a, e.Members) :
+								Expression.New(e.Constructor, ConvertMethodArguments(a, e.Constructor)) :
+								Expression.New(e.Constructor, ConvertMethodArguments(a, e.Constructor, e.Members), e.Members) :
 							expr;
 					}
 

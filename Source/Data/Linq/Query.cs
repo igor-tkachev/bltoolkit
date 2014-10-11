@@ -401,9 +401,11 @@ namespace BLToolkit.Data.Linq
 
 						foreach (var v in (IEnumerable)value)
 						{
-							values.Add(v != null && v.GetType().IsEnum ?
-								MappingSchema.MapEnumToValue(v, true) :
-								v);
+							values.Add(v);
+							// Enum mapping done by parameter itself
+							//values.Add(v != null && v.GetType().IsEnum ?
+							//	MappingSchema.MapEnumToValue(v, true) :
+							//	v);
 						}
 
 						value = values;
@@ -500,10 +502,28 @@ namespace BLToolkit.Data.Linq
 				var member = members[i];
 				var pof    = Expression.PropertyOrField(getter, member) as Expression;
 
-				getter = i == 0 ? pof : Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
+				if (i == 0)
+				{
+					if (members.Length == 1 && mm.IsExplicit)
+					{
+						if (getter.Type != typeof(object))
+							getter = Expression.Convert(getter, typeof(object));
+
+						pof = Expression.Call(
+							Expression.Constant(mm),
+							ReflectionHelper.Expressor<MemberMapper>.MethodExpressor(m => m.GetValue(null)),
+							getter);
+					}
+
+					getter = pof;
+				}
+				else
+				{
+					getter = Expression.Condition(Expression.Equal(getter, Expression.Constant(null)), defValue, pof);
+				}
 			}
 
-			if (!mm.Type.IsClass && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
+			if (!mm.Type.IsClass && !mm.Type.IsInterface && mm.MapMemberInfo.Nullable && !TypeHelper.IsNullableType(mm.Type))
 			{
 				var method = ReflectionHelper.Expressor<int>.MethodExpressor(_ => ConvertNullable(0, 0))
 					.GetGenericMethodDefinition()
@@ -512,7 +532,10 @@ namespace BLToolkit.Data.Linq
 				getter = Expression.Call(null, method, getter, Expression.Constant(mm.MapMemberInfo.NullValue));
 			}
 			else
-				getter = Expression.Convert(getter, typeof(object));
+			{
+				if (getter.Type != typeof(object))
+					getter = Expression.Convert(getter, typeof(object));
+			}
 
 			var mapper    = Expression.Lambda<Func<Expression,object[],object>>(
 				getter,
@@ -525,8 +548,10 @@ namespace BLToolkit.Data.Linq
 				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema)
 			};
 
-			if (field.SystemType.IsEnum)
-				param.SqlParameter.SetEnumConverter(field.SystemType, dataContext.MappingSchema);
+			if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))
+			{
+				param.SqlParameter.SetEnumConverter(field.MemberMapper.ComplexMemberAccessor, dataContext.MappingSchema);
+			}
 
 			return param;
 		}
@@ -869,6 +894,9 @@ namespace BLToolkit.Data.Linq
 							ei.Queries[0].Parameters.Add(param);
 
 							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+
+							if (field.Nullable)
+								sqlQuery.IsParameterDependent = true;
 						}
 
 						ei.SetNonQueryQuery();
@@ -922,6 +950,9 @@ namespace BLToolkit.Data.Linq
 							ei.Queries[0].Parameters.Add(param);
 
 							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+
+							if (field.Nullable)
+								sqlQuery.IsParameterDependent = true;
 						}
 
 						ei.SetNonQueryQuery();
@@ -981,7 +1012,7 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
+		Func<IDataContextInfo,Expression,object[],int,IEnumerable<IDataReader>> GetQuery()
 		{
 			FinalizeQuery();
 
@@ -1030,6 +1061,12 @@ namespace BLToolkit.Data.Linq
 				}
 			}
 
+			return query;
+		}
+
+		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],T> mapper)
+		{
+			var query = GetQuery();
 			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
 		}
 
@@ -1046,6 +1083,29 @@ namespace BLToolkit.Data.Linq
 
 			foreach (var dr in data)
 				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
+		}
+
+		internal void SetQuery(Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)
+		{
+			var query = GetQuery();
+			GetIEnumerable = (ctx,db,expr,ps) => Map(query(db, expr, ps, 0), ctx, db, expr, ps, mapper);
+		}
+
+		static IEnumerable<T> Map(
+			IEnumerable<IDataReader> data,
+			QueryContext             queryContext,
+			IDataContextInfo         dataContextInfo,
+			Expression               expr,
+			object[]                 ps,
+			Func<QueryContext,IDataContext,IDataReader,Expression,object[],int,T> mapper)
+		{
+			if (queryContext == null)
+				queryContext = new QueryContext(dataContextInfo, expr, ps);
+
+			var counter = 0;
+
+			foreach (var dr in data)
+				yield return mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps, counter++);
 		}
 
 		#endregion

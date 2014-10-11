@@ -100,9 +100,6 @@ namespace BLToolkit.Data.Linq.Builder
 						MemberExpression = Expression.MakeMemberAccess(_unionParameter, info.Members[0])
 					};
 
-					//if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
-					//	throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
-
 					members.Add(new UnionMember { Member = member, Info1 = info });
 				}
 
@@ -113,7 +110,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					var em = members.FirstOrDefault(m =>
 						m.Member.SequenceInfo != null &&
-						m.Member.SequenceInfo.CompareMembers(info));
+						m.Member.SequenceInfo.CompareLastMember(info));
 
 					if (em == null)
 					{
@@ -141,8 +138,8 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						member.Info1 = new SqlInfo(member.Info2.Members)
 						{
-							Sql    = new SqlValue(null),
-							Query  = sequence1.SqlQuery,
+							Sql   = new SqlValue(null),
+							Query = sequence1.SqlQuery,
 						};
 
 						member.Member.SequenceInfo = member.Info1;
@@ -152,8 +149,8 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						member.Info2 = new SqlInfo(member.Info1.Members)
 						{
-							Sql    = new SqlValue(null),
-							Query  = sequence2.SqlQuery,
+							Sql   = new SqlValue(null),
+							Query = sequence2.SqlQuery,
 						};
 					}
 
@@ -161,8 +158,6 @@ namespace BLToolkit.Data.Linq.Builder
 					sequence2.SqlQuery.Select.Columns.Add(new SqlQuery.Column(sequence2.SqlQuery, member.Info2.Sql));
 
 					member.Member.SequenceInfo.Index = i;
-					//member.Info1.Index = i;
-					//member.Info2.Index = i;
 
 					_members[member.Member.MemberExpression.Member] = member.Member;
 				}
@@ -172,58 +167,6 @@ namespace BLToolkit.Data.Linq.Builder
 
 				foreach (var key in sequence2.ColumnIndexes.Keys.ToList())
 					sequence2.ColumnIndexes[key] = sequence2.SqlQuery.Select.Add(key);
-
-				/*
-				if (_isObject)
-				{
-					foreach (var info in info1)
-					{
-						if (info.Member == null)
-							throw new InvalidOperationException();
-
-						CheckAndAddMember(sequence1, sequence2, info);
-					}
-
-					info2 = sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
-
-					if (info1.Count != info2.Count)
-					{
-						for (var i = 0; i < info2.Count; i++)
-						{
-							if (i < info1.Count)
-							{
-								if (info1[i].Index != info2[i].Index)
-									throw new InvalidOperationException();
-							}
-							else
-							{
-								CheckAndAddMember(sequence2, sequence1, info2[i]);
-							}
-						}
-					}
-				}
-				else
-					sequence2.ConvertToIndex(null, 0, ConvertFlags.All).OrderBy(_ => _.Index).ToList();
-				*/
-			}
-
-			void CheckAndAddMember(IBuildContext sequence1, IBuildContext sequence2, SqlInfo info)
-			{
-				var member = new Member
-				{
-					SequenceInfo     = info,
-					MemberExpression = Expression.PropertyOrField(_unionParameter, info.Members[0].Name)
-				};
-
-				if (sequence1.IsExpression(member.MemberExpression, 1, RequestFor.Object).Result)
-					throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
-
-				var idx = sequence2.ConvertToIndex(member.MemberExpression, 1, ConvertFlags.Field);
-
-				if (idx[0].Index != member.SequenceInfo.Index)
-					throw new LinqException("Types in {0} are constructed incompatibly.", _methodCall.Method.Name);
-
-				_members.Add(member.MemberExpression.Member, member);
 			}
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
@@ -287,7 +230,7 @@ namespace BLToolkit.Data.Linq.Builder
 					{
 						var levelExpression = expression.GetLevelExpression(1);
 
-						if (expression == levelExpression)
+						if (expression == levelExpression && !IsExpression(expression, 1, RequestFor.Object).Result)
 						{
 							var idx = ConvertToIndex(expression, level, ConvertFlags.Field);
 							var n   = idx[0].Index;
@@ -298,8 +241,6 @@ namespace BLToolkit.Data.Linq.Builder
 							return Builder.BuildSql(expression.Type, n);
 						}
 					}
-
-					//throw new InvalidOperationException();
 				}
 
 				return base.BuildExpression(expression, level);
@@ -374,9 +315,9 @@ namespace BLToolkit.Data.Linq.Builder
 									{
 										member.SqlQueryInfo = new SqlInfo(member.MemberExpression.Member)
 										{
-											Index  = -2,
-											Sql    = SubQuery.SqlQuery.Select.Columns[member.SequenceInfo.Index],
-											Query  = SqlQuery,
+											Index = -2,
+											Sql   = SubQuery.SqlQuery.Select.Columns[member.SequenceInfo.Index],
+											Query = SqlQuery,
 										};
 									}
 

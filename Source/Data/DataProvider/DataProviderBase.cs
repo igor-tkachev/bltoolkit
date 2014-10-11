@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.Linq;
-using BLToolkit.Data.Linq;
-using BLToolkit.Data.Sql;
+using System.Linq;
 
 namespace BLToolkit.Data.DataProvider
 {
@@ -173,9 +172,24 @@ namespace BLToolkit.Data.DataProvider
 
 		#region Virtual Members
 
+		/// <summary>
+		/// Open an <see cref="IDataReader"/> into the given RefCursor object
+		/// </summary>
+		/// <param name="refCursor">The refcursor to open an <see cref="IDataReader"/> to</param>
+		/// <returns>The <see cref="IDataReader"/> into the refcursor</returns>
+		public virtual IDataReader GetRefCursorDataReader(object refCursor)
+		{
+			throw new NotSupportedException("Operation not supported on this DataProvider");
+		}
+
 		public virtual object Convert(object value, ConvertType convertType)
 		{
 			return SqlProvider.Convert(value, convertType);
+		}
+
+		public virtual DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			return DataExceptionType.Undefined;
 		}
 
 		public virtual void InitDbManager(DbManager dbManager)
@@ -218,6 +232,89 @@ namespace BLToolkit.Data.DataProvider
 			return true;
 		}
 
+		public virtual int ExecuteArray(IDbCommand command, int iterations)
+		{
+			// save parameter values
+			var parameters = command.Parameters
+				.OfType<IDbDataParameter>()
+				.Select(param => new
+				{
+					Parameter = param,
+					Value = param.Value as Array
+				})
+				.ToArray();
+
+			var outParameters = parameters
+				.Where(p =>
+					p.Parameter.Direction == ParameterDirection.InputOutput ||
+					p.Parameter.Direction == ParameterDirection.Output)
+				.ToArray();
+
+			// validate parameter values
+			foreach (var p in parameters)
+			{
+				if (p.Value == null)
+				{
+					throw new InvalidOperationException("ExecuteArray requires that all " +
+						"parameter values are arrays. Parameter name: " + p.Parameter.ParameterName);
+				}
+
+				if (p.Value.GetLength(0) != iterations)
+				{
+					throw new InvalidOperationException("ExecuteArray requires that array sizes are " +
+						"equal to the number of iterations. Parameter name: " + p.Parameter.ParameterName);
+				}
+			}
+
+			try
+			{
+				// run iterations
+				int rowsAffected = 0;
+				for (int iteration = 0; iteration < iterations; iteration++)
+				{
+					// copy input parameter values
+					foreach (var param in parameters)
+					{
+						SetParameterValue(param.Parameter, param.Value.GetValue(iteration));
+					}
+
+					rowsAffected += command.ExecuteNonQuery();
+
+					// return output parameter values
+					foreach (var param in outParameters)
+					{
+						var outputValue = param.Parameter.Value;
+						param.Value.SetValue(outputValue, iteration);
+					}
+				}
+
+				return rowsAffected;
+			}
+			finally
+			{
+				// restore parameter values
+				foreach (var param in parameters)
+				{
+					param.Parameter.Value = param.Value;
+				}
+			}
+		}
+
+        public virtual string GetSequenceQuery(string sequenceName)
+        {
+            return null;
+        }
+
+        public virtual string NextSequenceQuery(string sequenceName)
+        {
+            return null;
+        }
+
+        public virtual string GetReturningInto(string columnName)
+        {
+            return null;
+        }
+
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
 			if (value is System.Data.Linq.Binary)
@@ -244,6 +341,11 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return dataReader;
 		}
+
+        public virtual IDataReader GetDataReader(IDbCommand command, CommandBehavior commandBehavior)
+        {
+            return command.ExecuteReader(commandBehavior);
+        }
 
 		public virtual bool ParameterNamesEqual(string paramName1, string paramName2)
 		{
@@ -295,26 +397,28 @@ namespace BLToolkit.Data.DataProvider
 
 			#region Implementation of IDataRecord
 
-			public string      GetName        (int i)           { return DataReader.GetName        (i); }
-			public string      GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
-			public Type        GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
-			public object      GetValue       (int i)           { return DataReader.GetValue       (i); }
-			public int         GetValues      (object[] values) { return DataReader.GetValues      (values); }
-			public int         GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
-			public bool        GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
-			public byte        GetByte        (int i)           { return DataReader.GetByte        (i); }
-			public char        GetChar        (int i)           { return DataReader.GetChar        (i); }
-			public Guid        GetGuid        (int i)           { return DataReader.GetGuid        (i); }
-			public short       GetInt16       (int i)           { return DataReader.GetInt16       (i); }
-			public int         GetInt32       (int i)           { return DataReader.GetInt32       (i); }
-			public long        GetInt64       (int i)           { return DataReader.GetInt64       (i); }
-			public float       GetFloat       (int i)           { return DataReader.GetFloat       (i); }
-			public double      GetDouble      (int i)           { return DataReader.GetDouble      (i); }
-			public string      GetString      (int i)           { return DataReader.GetString      (i); }
-			public decimal     GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
-			public DateTime    GetDateTime    (int i)           { return DataReader.GetDateTime    (i); }
-			public IDataReader GetData        (int i)           { return DataReader.GetData        (i); }
-			public bool        IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
+			public string              GetName        (int i)           { return DataReader.GetName        (i); }
+			public string              GetDataTypeName(int i)           { return DataReader.GetDataTypeName(i); }
+			public Type                GetFieldType   (int i)           { return DataReader.GetFieldType   (i); }
+            // GetValue method is virtual since it can be overridden by some data provider 
+            // (For instance, OdbDataProvider uses special methodes for clob data fetching)
+			public virtual object      GetValue       (int i)           { return DataReader.GetValue       (i); }
+			public int                 GetValues      (object[] values) { return DataReader.GetValues      (values); }
+			public int                 GetOrdinal     (string   name)   { return DataReader.GetOrdinal     (name);   }
+			public bool                GetBoolean     (int i)           { return DataReader.GetBoolean     (i); }
+			public byte                GetByte        (int i)           { return DataReader.GetByte        (i); }
+			public char                GetChar        (int i)           { return DataReader.GetChar        (i); }
+			public Guid                GetGuid        (int i)           { return DataReader.GetGuid        (i); }
+			public short               GetInt16       (int i)           { return DataReader.GetInt16       (i); }
+			public int                 GetInt32       (int i)           { return DataReader.GetInt32       (i); }
+			public long                GetInt64       (int i)           { return DataReader.GetInt64       (i); }
+			public float               GetFloat       (int i)           { return DataReader.GetFloat       (i); }
+			public double              GetDouble      (int i)           { return DataReader.GetDouble      (i); }
+			public string              GetString      (int i)           { return DataReader.GetString      (i); }
+			public decimal             GetDecimal     (int i)           { return DataReader.GetDecimal     (i); }
+			public DateTime            GetDateTime    (int i)           { return DataReader.GetDateTime    (i); }
+			public IDataReader         GetData        (int i)           { return DataReader.GetData        (i); }
+			public bool                IsDBNull       (int i)           { return DataReader.IsDBNull       (i); }
 
 			public int FieldCount { get { return DataReader.FieldCount; } }
 
@@ -364,6 +468,17 @@ namespace BLToolkit.Data.DataProvider
 
 		#region InsertBatch
 
+		public virtual int InsertBatchWithIdentity<T>(
+			DbManager db,
+			string insertText,
+			IEnumerable<T> collection,
+			MemberMapper[] members,
+			int maxBatchSize,
+			DbManager.ParameterProvider<T> getParameters)
+		{
+			throw new NotImplementedException("Insert batch with identity is not implemented!");
+		}
+
 		public virtual int InsertBatch<T>(
 			DbManager      db,
 			string         insertText,
@@ -377,5 +492,22 @@ namespace BLToolkit.Data.DataProvider
 		}
 
 		#endregion
+
+		protected int ExecuteSqlList(DbManager db, IEnumerable<string> sqlList)
+		{
+			var cnt = 0;
+
+			foreach (string sql in sqlList)
+			{
+				cnt += db.SetCommand(sql).ExecuteNonQuery();
+			}
+
+			return cnt;
+		}
+
+		public virtual DbType GetParameterDbType(DbType dbType)
+		{
+			return dbType;
+		}
 	}
 }

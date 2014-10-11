@@ -29,7 +29,7 @@ namespace BLToolkit.Data.Linq.Builder
 				sequence = new SubQueryContext(sequence);
 			}
 
-			if (sequence.SqlQuery.OrderBy.Items.Count > 0)
+			if (!sequence.SqlQuery.OrderBy.IsEmpty)
 			{
 				if (sequence.SqlQuery.Select.TakeValue == null && sequence.SqlQuery.Select.SkipValue == null)
 					sequence.SqlQuery.OrderBy.Items.Clear();

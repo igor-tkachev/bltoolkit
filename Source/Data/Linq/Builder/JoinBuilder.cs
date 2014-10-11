@@ -157,8 +157,8 @@ namespace BLToolkit.Data.Linq.Builder
 				join.JoinedTable.Condition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 			else
 				join
-					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector)).Equal
-					.Expr(builder.ConvertToSql(innerKeyContext, innerKeySelector));
+					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector, false)).Equal
+					.Expr(builder.ConvertToSql(innerKeyContext, innerKeySelector, false));
 
 			predicate = builder.ConvertObjectComparison(
 				ExpressionType.Equal,
@@ -169,8 +169,8 @@ namespace BLToolkit.Data.Linq.Builder
 				countSql.Where.SearchCondition.Conditions.Add(new SqlQuery.Condition(false, predicate));
 			else
 				countSql.Where
-					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector)).Equal
-					.Expr(builder.ConvertToSql(countKeyContext, innerKeySelector));
+					.Expr(builder.ConvertToSql(outerKeyContext, outerKeySelector, false)).Equal
+					.Expr(builder.ConvertToSql(countKeyContext, innerKeySelector, false));
 		}
 
 		class InnerKeyContext : ExpressionContext
@@ -190,8 +190,8 @@ namespace BLToolkit.Data.Linq.Builder
 
 						return new SqlInfo(idx.Members)
 						{
-							Sql    = SqlQuery.Select.Columns[n],
-							Index  = n
+							Sql   = SqlQuery.Select.Columns[n],
+							Index = n
 						};
 					})
 					.ToArray();

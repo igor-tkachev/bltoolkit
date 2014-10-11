@@ -16,15 +16,15 @@ namespace Data.Linq.ProviderSpecific
 {
 	using Model;
 
-	[TestFixture]
+    [TestFixture, Category("Oracle")]
 	public class Oracle : TestBase
 	{
 		#region Sequence
 
 		[Test]
-		public void SequenceInsert()
+		public void SequenceInsert([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.GetTable<OracleSpecific.SequenceTest>().Where(_ => _.Value == "SeqValue").Delete();
 				db.Insert(new OracleSpecific.SequenceTest { Value = "SeqValue" });
@@ -38,9 +38,9 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SequenceInsertWithIdentity()
+		public void SequenceInsertWithIdentity([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.GetTable<OracleSpecific.SequenceTest>().Where(_ => _.Value == "SeqValue").Delete();
 
@@ -72,7 +72,7 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void InsertBatch1()
+		public void InsertBatch1([IncludeDataContexts("Oracle")] string context)
 		{
 			var data = new[]
 			{
@@ -86,16 +86,16 @@ namespace Data.Linq.ProviderSpecific
 				new Trade { ID = 973, Version = 1, TypeID = 20160, TypeName = "EU Allowances", },
 			};
 
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.InsertBatch(5, data);
 			}
 		}
 
 		[Test]
-		public void InsertBatch2()
+		public void InsertBatch2([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.Types2.Delete(_ => _.ID > 1000);
 
@@ -137,9 +137,9 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		//[Test]
-		public void CanInsertProductWithAccessorTest()
+		public void CanInsertProductWithAccessorTest([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var dbManager = new TestDbManager("Oracle"))
+			using (var dbManager = new TestDbManager(context))
 			{
 				var productEntityAccesor = DataAccessor.CreateInstance<ProductEntityAccesor>(dbManager);
 

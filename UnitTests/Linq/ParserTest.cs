@@ -866,9 +866,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Join6()
+		public void Join6([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from g in db.GrandChild

@@ -451,5 +451,34 @@ namespace Data
 				Assert.AreEqual(s.LastName,  p.LastName);
 			}
 		}
+
+		[Test]
+		public void EnumExecuteScalarTest1()
+		{
+			using (var dbm = new DbManager())
+			{
+				var gender = dbm.SetCommand(CommandType.Text, "select 'M'")
+								.ExecuteScalar<Gender>();
+
+				Assert.That(gender, Is.EqualTo(Gender.Male));
+			}
+		}
+
+		public enum ABType
+		{
+			Error = -1,
+			A = 0,
+			B,
+		}
+
+		[Test]
+		public void EnumExecuteScalarTest2()
+		{
+			using (var db = new DbManager())
+			{
+				var type = db.SetCommand("select 1 where 1 = 2").ExecuteScalar<ABType>();
+				Assert.That(type, Is.EqualTo(ABType.A));
+			}
+		}
 	}
 }

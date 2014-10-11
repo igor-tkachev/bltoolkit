@@ -121,7 +121,7 @@ namespace BLToolkit.Data.DataProvider
 				// if we have a stored procedure, then maybe command paramaters were formatted
 				// (SprocParameterPrefix added). In this case we need to format given parameter name first
 				// and only then try to take parameter by formatted parameter name
-				string parameterName = command.CommandType == CommandType.StoredProcedure
+				var parameterName = command.CommandType == CommandType.StoredProcedure
 					? Convert(nameOrIndex.Name, ConvertType.NameToSprocParameter).ToString()
 					: nameOrIndex.Name;
 
@@ -151,6 +151,20 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+		public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			switch (number)
+			{
+				case 1213: return DataExceptionType.Deadlock;
+				case 1205: return DataExceptionType.Timeout;
+				case 1216:
+				case 1217: return DataExceptionType.ForeignKeyViolation;
+				case 1169: return DataExceptionType.UniqueIndexViolation;
+			}
+
+			return DataExceptionType.Undefined;
+		}
+
 		public override Type ConnectionType
 		{
 			get { return typeof(MySqlConnection); }
@@ -168,7 +182,7 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void Configure(System.Collections.Specialized.NameValueCollection attributes)
 		{
-			string paremeterPrefix = attributes["ParameterPrefix"];
+			var paremeterPrefix = attributes["ParameterPrefix"];
 			if (paremeterPrefix != null)
 				CommandParameterPrefix = SprocParameterPrefix = paremeterPrefix;
 
@@ -180,7 +194,7 @@ namespace BLToolkit.Data.DataProvider
 			if (paremeterPrefix != null)
 				SprocParameterPrefix = paremeterPrefix;
 
-			string configName = attributes["ParameterSymbolConfig"];
+			var configName = attributes["ParameterSymbolConfig"];
 			if (configName != null)
 			{
 				switch (configName)
@@ -194,15 +208,15 @@ namespace BLToolkit.Data.DataProvider
 				}
 			}
 
-			string parameterSymbol = attributes["ParameterSymbol"];
+			var parameterSymbol = attributes["ParameterSymbol"];
 			if (parameterSymbol != null && parameterSymbol.Length == 1)
 				ParameterSymbol = parameterSymbol[0];
 
-			string convertParameterSymbols = attributes["ConvertParameterSymbols"];
+			var convertParameterSymbols = attributes["ConvertParameterSymbols"];
 			if (convertParameterSymbols != null)
 				ConvertParameterSymbols = new List<char>(convertParameterSymbols.ToCharArray());
 
-			string tryConvertParameterSymbol = attributes["TryConvertParameterSymbol"];
+			var tryConvertParameterSymbol = attributes["TryConvertParameterSymbol"];
 			if (tryConvertParameterSymbol != null)
 				TryConvertParameterSymbol = BLToolkit.Common.Convert.ToBoolean(tryConvertParameterSymbol);
 

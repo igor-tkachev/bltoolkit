@@ -135,7 +135,10 @@ namespace Mapping
 			public SqlSingle Single;
 		}
 
+
 		[Test]
+		// fixes test fail due to use of "," vs "." in numbers parsing for some cultures
+		[SetCulture("")]
 		public void SqlTypeMemberTest()
 		{
 			ObjectMapper om = Map.GetObjectMapper(typeof(Object3));

@@ -2,8 +2,6 @@
 	ConnectionType = "MySql.Data.MySqlClient.MySqlConnection, MySql.Data";
 #><#+
 
-bool TimestampsAreNonUpdatable = true;
-
 private void LoadServerMetadata()
 {
 	var tables  = CreateList(new { ID = "", Table  = new Table() });
@@ -73,7 +71,9 @@ private void LoadServerMetadata()
 				NUMERIC_PRECISION        as prec,
 				NUMERIC_SCALE            as scale,
 				EXTRA = 'auto_increment' as isIdentity,
- 				c.COLUMN_TYPE            as columnType
+ 				c.COLUMN_TYPE            as columnType,
+				COLUMN_DEFAULT           as columnDefault,
+				EXTRA                    as extra
 			FROM
 				INFORMATION_SCHEMA.COLUMNS c
 			WHERE
@@ -91,16 +91,18 @@ private void LoadServerMetadata()
 					ID     = Convert.ToString(rd["id"]),
 					Column = new Column
 					{
-						ID         = Convert.ToInt16  (rd["colid"]),
-						ColumnName = Convert.ToString (rd["name"]),
-						MemberName = Convert.ToString (rd["name"]),
-						ColumnType = Convert.ToString (rd["dataType"]),
-						IsNullable = Convert.ToBoolean(rd["isNullable"]),
-						IsIdentity = Convert.ToBoolean(rd["isIdentity"]),
-						Length     = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
-						Precision  = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
-						Scale      = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
-		}
+						ID            = Convert.ToInt16  (rd["colid"]),
+						ColumnName    = Convert.ToString (rd["name"]),
+						MemberName    = Convert.ToString (rd["name"]),
+						ColumnType    = Convert.ToString (rd["dataType"]),
+						IsNullable    = Convert.ToBoolean(rd["isNullable"]),
+						IsIdentity    = Convert.ToBoolean(rd["isIdentity"]),
+						Length        = rd.IsDBNull(rd.GetOrdinal("length")) ? 0 : Convert.ToInt64(rd["length"]),
+						Precision     = rd.IsDBNull(rd.GetOrdinal("prec"))   ? 0 : Convert.ToInt32(rd["prec"]),
+						Scale         = rd.IsDBNull(rd.GetOrdinal("scale"))  ? 0 : Convert.ToInt32(rd["scale"]),
+						ColumnDefault = Convert.ToString(rd["columnDefault"]),
+						Extra         = Convert.ToString(rd["extra"]).ToUpper()
+					}
 				};
 
 				var c           = col.Column;
@@ -149,8 +151,14 @@ private void LoadServerMetadata()
 						c.Type = "DateTime";
 						c.DbType = DbType.DateTime;
 						c.SqlDbType = SqlDbType.Timestamp;
-						if(TimestampsAreNonUpdatable)
-							c.Attributes.Add("NonUpdatable");
+						
+						if(c.ColumnDefault == "CURRENT_TIMESTAMP" || c.Extra.Contains("ON UPDATE CURRENT_TIMESTAMP"))
+						{
+							c.Attributes.Add(string.Format(
+								"NonUpdatable(OnInsert = {0}, OnUpdate = {1})",
+								c.ColumnDefault == "CURRENT_TIMESTAMP" ? "true" : "false",
+								c.Extra.Contains("ON UPDATE CURRENT_TIMESTAMP") ? "true" : "false"));
+						}
 						break;
 					case "tinyint"    :
 						if(columnType == "tinyint(1)")
@@ -289,4 +297,11 @@ private string GetDatabaseSqlFilter(string optionalTablePrefix)
 	string tablePrefix = string.IsNullOrEmpty(optionalTablePrefix) ? "" : optionalTablePrefix + ".";
 	return string.Format(" AND {0}TABLE_SCHEMA = '{1}' ", tablePrefix, _databaseName);
 }
+
+public partial class Column
+{
+	public string ColumnDefault;
+	public string Extra;
+}
+
 #>

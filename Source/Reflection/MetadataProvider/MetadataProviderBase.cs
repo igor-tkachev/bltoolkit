@@ -42,6 +42,12 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		#endregion
 
+		public virtual string GetSequenceName(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
 		#region GetFieldStorage
 
 		public virtual string GetFieldStorage(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
@@ -79,6 +85,37 @@ namespace BLToolkit.Reflection.MetadataProvider
 			return
 				TypeHelper.IsScalar(member.Type) == false;// ||
 				//(member.MemberInfo is FieldInfo && ((FieldInfo)member.MemberInfo).IsLiteral);
+		}
+
+		#endregion
+
+		#region GetMapField
+
+		public virtual MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
+		#endregion
+
+		#region GetDbType
+
+		[CLSCompliant(false)]
+		public virtual DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
+		}
+
+		#endregion
+
+		#region GetPrimaryKey
+
+		public virtual PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return null;
 		}
 
 		#endregion
@@ -136,6 +173,16 @@ namespace BLToolkit.Reflection.MetadataProvider
 				/*||
 				member.Type == typeof(System.Data.Linq.Binary) ||
 				member.Type == typeof(byte[])*/;
+		}
+
+		#endregion
+
+		#region GetLazyInstance
+
+		public virtual bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			isSet = false;
+			return false;
 		}
 
 		#endregion

@@ -111,5 +111,10 @@ namespace BLToolkit.Data.DataProvider
 		{
 			return new SqlCeSqlProvider();
 		}
+
+		public override DbType GetParameterDbType(DbType dbType)
+		{
+			return dbType == DbType.DateTime2 ? DbType.DateTime : dbType;
+		}
 	}
 }

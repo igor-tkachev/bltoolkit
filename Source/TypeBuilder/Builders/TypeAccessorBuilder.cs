@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
 namespace BLToolkit.TypeBuilder.Builders
 {
+	using Mapping;
 	using Reflection;
 	using Reflection.Emit;
 
@@ -72,7 +74,13 @@ namespace BLToolkit.TypeBuilder.Builders
 				}
 			}
 
-			if (!_originalType.Type.IsVisible && !_friendlyAssembly)
+			if (!_originalType.Type.IsVisible && !_friendlyAssembly || 
+				(
+					from p in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+					from a in p.GetCustomAttributes(typeof(MapFieldAttribute), true).Cast<MapFieldAttribute>()
+					where a.Storage != null
+					select a
+				).Any())
 				return typeof (ExprTypeAccessor<,>).MakeGenericType(_type, _originalType);
 
 			var typeName = GetTypeName();
@@ -216,6 +224,7 @@ namespace BLToolkit.TypeBuilder.Builders
 				if (pi.GetIndexParameters().Length == 0)
 					AddMemberToDictionary(members, pi);
 
+			var interfaceMethods = _originalType.Type.IsClass && !_originalType.Type.IsArray ? _originalType.Type.GetInterfaces().SelectMany(ti => _originalType.GetInterfaceMap(ti).TargetMethods).ToList() : new List<MethodInfo>();
 			foreach (var pi in _originalType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
 			{
 				if (pi.GetIndexParameters().Length == 0)
@@ -223,7 +232,8 @@ namespace BLToolkit.TypeBuilder.Builders
 					var getter = pi.GetGetMethod(true);
 					var setter = pi.GetSetMethod(true);
 
-					if (getter != null && getter.IsAbstract || setter != null && setter.IsAbstract)
+					if (getter != null && (getter.IsAbstract || interfaceMethods.Contains(getter))
+						|| setter != null && (setter.IsAbstract || interfaceMethods.Contains(setter)))
 						AddMemberToDictionary(members, pi);
 				}
 			}
@@ -253,7 +263,8 @@ namespace BLToolkit.TypeBuilder.Builders
 		private void BuildMember(MemberInfo mi)
 		{
 			var isValueType = _originalType.IsValueType;
-			var nestedType  = _typeBuilder.DefineNestedType("Accessor$" + mi.Name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
+			var name        = "Accessor$" + mi.Name.Replace('.', '_').Replace('<', '_').Replace('>', '_');
+			var nestedType  = _typeBuilder.DefineNestedType(name, TypeAttributes.NestedPrivate, typeof(MemberAccessor));
 			var ctorBuilder = BuildNestedTypeConstructor(nestedType);
 
 			BuildGetter    (mi, nestedType);

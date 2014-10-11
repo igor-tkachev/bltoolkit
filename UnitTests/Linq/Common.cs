@@ -5,7 +5,8 @@ using System.Linq.Expressions;
 
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
-
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -108,6 +109,25 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CoalesceLike([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+				AreEqual(
+					from p in    Person
+					where
+						(p.FirstName == null ? (bool?)null : (bool?)p.FirstName.StartsWith("Jo")) == null ?
+							false :
+							(p.FirstName == null ? (bool?)null : p.FirstName.StartsWith("Jo")).Value
+					select p,
+					from p in db.Person
+					where
+						(p.FirstName == null ? (bool?)null : (bool?)p.FirstName.StartsWith("Jo")) == null ?
+							false :
+							(p.FirstName == null ? (bool?)null : p.FirstName.StartsWith("Jo")).Value
+					select p);
+		}
+
+		[Test]
 		public void PreferServerFunc1()
 		{
 			ForEachProvider(db => AreEqual(
@@ -145,7 +165,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ExecuteTest()
+		public void ExecuteTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -424,6 +444,46 @@ namespace Data.Linq
 				ProcessItem(db, 1);
 				ProcessItem(db, 2);
 			});
+		}
+
+		[TableName("Person")]
+		public class PersonTest
+		{
+			[MapField("FirstName"), PrimaryKey]
+			public string ID;
+		}
+
+		int _i;
+
+		string GetCustKey()
+		{
+			return ++_i % 2 == 0 ? "John" : null;
+		}
+
+		[Test]
+		public void Issue288Test([DataContexts] string context)
+		{
+			BLToolkit.Common.Configuration.Linq.ClassTypeParameterCanAlwaysBeNull = true;
+
+			_i = 0;
+
+			using (var db = GetDataContext(context))
+			{
+				var test = db.GetTable<PersonTest>().FirstOrDefault(p => p.ID == GetCustKey());
+
+				Assert.That(test, Is.Null);
+			}
+
+			Assert.That(_i, Is.EqualTo(1));
+
+			using (var db = GetDataContext(context))
+			{
+				var test = db.GetTable<PersonTest>().FirstOrDefault(p => p.ID == GetCustKey());
+
+				Assert.That(test, Is.Not.Null);
+			}
+
+			Assert.That(_i, Is.EqualTo(2));
 		}
 	}
 

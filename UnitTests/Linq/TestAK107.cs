@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
-	[TestFixture]
+	[TestFixture, Category("Oracle")]
 	public class TestAK107 : TestBase
 	{
 		[TableName(Name = "t_test_user")]
@@ -50,9 +50,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void UserInsert()
+		public void UserInsert([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 				db.Insert(new User { Name = "user" });
@@ -60,9 +60,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void UserInsertWithIdentity()
+		public void UserInsertWithIdentity([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 				db.InsertWithIdentity(new User { Name = "user" });
@@ -70,9 +70,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void UserLinqInsert()
+		public void UserLinqInsert([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 				db.GetTable<User>().Insert(() => new User { Name = "user" });
@@ -80,9 +80,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void UserLinqInsertWithIdentity()
+		public void UserLinqInsertWithIdentity([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 				db.GetTable<User>().InsertWithIdentity(() => new User { Name = "user" });
@@ -90,9 +90,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ContractInsert()
+		public void ContractInsert([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 
@@ -104,9 +104,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ContractInsertWithIdentity()
+		public void ContractInsertWithIdentity([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 
@@ -121,9 +121,9 @@ namespace Data.Linq
 		static long ContractSequence { get; set;  }
 
 		[Test]
-		public void ContractLinqInsert()
+		public void ContractLinqInsert([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 
@@ -141,9 +141,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ContractLinqInsertWithIdentity()
+		public void ContractLinqInsertWithIdentity([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 
@@ -155,9 +155,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ContractLinqManyInsert()
+		public void ContractLinqManyInsert([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 
@@ -169,9 +169,9 @@ namespace Data.Linq
 		}
 
 		//[Test]
-		public void ContractLinqManyInsertWithIdentity()
+		public void ContractLinqManyInsertWithIdentity([IncludeDataContexts("Oracle")] string context)
 		{
-			using (var db = new TestDbManager("Oracle"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 

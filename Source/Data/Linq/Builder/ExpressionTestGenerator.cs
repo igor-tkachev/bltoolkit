@@ -830,17 +830,19 @@ using System.Linq.Expressions;
 
 using NUnit.Framework;
 {0}
-namespace Data.Linq
+namespace Data.Linq.UserTests
 {{
 	[TestFixture]
 	public class UserTest : TestBase
 	{{
 		[Test]
-		public void Test()
+		public void Test([DataContexts] string context)
 		{{
 			// {1}
-			ForEachProvider(db =>
-				{2});
+			using (var db = GetDataContext(context))
+			{{
+				{2};
+			}}
 		}}
 	}}
 }}

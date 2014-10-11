@@ -10,7 +10,8 @@ namespace BLToolkit.Reflection.Extension
 			get
 			{
 				TypeExtension value;
-				return TryGetValue(typeName, out value) ? value : TypeExtension.Null;
+				lock (this)
+					return TryGetValue(typeName, out value) ? value : TypeExtension.Null;
 			}
 		}
 
@@ -18,9 +19,10 @@ namespace BLToolkit.Reflection.Extension
 		{
 			get
 			{
-				foreach (var ext in Values)
-					if (ext.Name == type.Name || ext.Name == type.FullName)
-						return ext;
+				lock (this)
+					foreach (var ext in Values)
+						if (ext.Name == type.Name || ext.Name == type.FullName)
+							return ext;
 
 				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
 					return this[Nullable.GetUnderlyingType(type)];
@@ -31,7 +33,8 @@ namespace BLToolkit.Reflection.Extension
 
 		public void Add(TypeExtension typeInfo)
 		{
-			Add(typeInfo.Name, typeInfo);
+			lock (this)
+				Add(typeInfo.Name, typeInfo);
 		}
 	}
 }

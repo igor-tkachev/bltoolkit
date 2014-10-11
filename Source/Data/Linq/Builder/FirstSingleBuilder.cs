@@ -48,6 +48,32 @@ namespace BLToolkit.Data.Linq.Builder
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
+			if (methodCall.Arguments.Count == 2)
+			{
+				var predicate = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				var info      = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
+
+				if (info != null)
+				{
+					info.Expression = methodCall.Convert(ex => ConvertMethod(methodCall, 0, info, predicate.Parameters[0], ex));
+					info.Parameter  = param;
+
+					return info;
+				}
+			}
+			else
+			{
+				var info = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), null);
+
+				if (info != null)
+				{
+					info.Expression = methodCall.Convert(ex => ConvertMethod(methodCall, 0, info, null, ex));
+					info.Parameter  = param;
+
+					return info;
+				}
+			}
+
 			return null;
 		}
 
@@ -83,7 +109,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (expression == null)
 				{
-					if (Builder.SqlProvider.IsApplyJoinSupported)
+					if (Builder.SqlProvider.IsApplyJoinSupported && Parent.SqlQuery.GroupBy.IsEmpty)
 					{
 						var join = SqlQuery.OuterApply(SqlQuery);
 

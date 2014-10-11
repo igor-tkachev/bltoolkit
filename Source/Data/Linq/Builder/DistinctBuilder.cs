@@ -21,6 +21,7 @@ namespace BLToolkit.Data.Linq.Builder
 				sequence = new SubQueryContext(sequence);
 
 			sequence.SqlQuery.Select.IsDistinct = true;
+			sequence.ConvertToIndex(null, 0, ConvertFlags.All);
 
 			return sequence;
 		}

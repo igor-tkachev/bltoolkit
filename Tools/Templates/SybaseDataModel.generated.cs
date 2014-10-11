@@ -14,7 +14,7 @@ using BLToolkit.Validation;
 
 namespace SybaseDataModel
 {
-	public partial class SybaseDataModel : DbManager
+	public partial class SybaseDataContext : DbManager
 	{
 		public Table<BinaryData>      BinaryData      { get { return this.GetTable<BinaryData>();      } }
 		public Table<Child>           Child           { get { return this.GetTable<Child>();           } }
@@ -26,6 +26,7 @@ namespace SybaseDataModel
 		public Table<Patient>         Patient         { get { return this.GetTable<Patient>();         } }
 		public Table<Person>          Person          { get { return this.GetTable<Person>();          } }
 		public Table<sysquerymetrics> sysquerymetrics { get { return this.GetTable<sysquerymetrics>(); } }
+		public Table<TestIdentity>    TestIdentity    { get { return this.GetTable<TestIdentity>();    } }
 	}
 
 	[TableName(Name="BinaryData")]
@@ -92,13 +93,16 @@ namespace SybaseDataModel
 	[TableName(Name="LinqDataTypes")]
 	public partial class LinqDataTypes
 	{
-		[          Required     ] public int       ID            { get; set; } // int(4)
-		[Nullable               ] public decimal?  MoneyValue    { get; set; } // decimal(6)(10,4)
-		[Nullable               ] public DateTime? DateTimeValue { get; set; } // datetime(8)
-		[          Required     ] public bool      BoolValue     { get; set; } // bit(1)
-		[Nullable, MaxLength(36)] public string    GuidValue     { get; set; } // char(36)
-		[Nullable               ] public byte[]    BinaryValue   { get; set; } // binary(500)
-		[Nullable               ] public short?    SmallIntValue { get; set; } // smallint(2)
+		[          Required     ] public int       ID             { get; set; } // int(4)
+		[Nullable               ] public decimal?  MoneyValue     { get; set; } // decimal(6)(10,4)
+		[Nullable               ] public DateTime? DateTimeValue  { get; set; } // datetime(8)
+		[Nullable               ] public DateTime? DateTimeValue2 { get; set; } // datetime(8)
+		[          Required     ] public bool      BoolValue      { get; set; } // bit(1)
+		[Nullable, MaxLength(36)] public string    GuidValue      { get; set; } // char(36)
+		[Nullable               ] public byte[]    BinaryValue    { get; set; } // binary(500)
+		[Nullable               ] public short?    SmallIntValue  { get; set; } // smallint(2)
+		[Nullable               ] public int?      IntValue       { get; set; } // int(4)
+		[Nullable               ] public long?     BigIntValue    { get; set; } // bigint(8)
 	}
 
 	[TableName(Name="Parent")]
@@ -161,5 +165,11 @@ namespace SybaseDataModel
 		[Nullable                ] public int?   cnt       { get; set; } // int(4)
 		[Nullable                ] public int?   abort_cnt { get; set; } // int(4)
 		[Nullable, MaxLength(255)] public string qtext     { get; set; } // varchar(255)
+	}
+
+	[TableName(Name="TestIdentity")]
+	public partial class TestIdentity
+	{
+		[Identity, PrimaryKey(1), Required] public int ID { get; set; } // int(4)
 	}
 }

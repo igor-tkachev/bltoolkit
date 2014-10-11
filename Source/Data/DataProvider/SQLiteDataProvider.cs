@@ -107,13 +107,22 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+		public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			switch (number)
+			{
+				case 19: return DataExceptionType.ConstraintViolation;
+			}
+			return DataExceptionType.Undefined;
+		}
+
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
 			if (parameter.Direction == ParameterDirection.Input || parameter.Direction == ParameterDirection.InputOutput)
 			{
 				if (parameter.Value is XmlDocument)
 				{
-					parameter.Value = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
+					parameter.Value  = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
 					parameter.DbType = DbType.Binary;
 				}
 			}

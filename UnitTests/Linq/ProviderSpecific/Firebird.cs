@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 
 using NUnit.Framework;
@@ -9,13 +10,13 @@ using UnitTests.Linq.Interface.Model;
 
 namespace Data.Linq.ProviderSpecific
 {
-	[TestFixture]
+	[TestFixture, Category("Firebird")]
 	public class Firebird : TestBase
 	{
 		[Test]
-		public void SequenceInsert()
+		public void SequenceInsert([IncludeDataContexts(ProviderName.Firebird)] string context)
 		{
-			using (var db = new TestDbManager("Fdp"))
+			using (var db = new TestDbManager(context))
 			{
 				db.GetTable<FirebirdSpecific.SequenceTest>().Where(_ => _.Value == "SeqValue").Delete();
 				db.Insert(new FirebirdSpecific.SequenceTest { Value = "SeqValue" });
@@ -29,9 +30,9 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		[Test]
-		public void SequenceInsertWithIdentity()
+		public void SequenceInsertWithIdentity([IncludeDataContexts(ProviderName.Firebird)] string context)
 		{
-			using (var db = new TestDbManager("Fdp"))
+			using (var db = new TestDbManager(context))
 			{
 				db.GetTable<FirebirdSpecific.SequenceTest>().Where(_ => _.Value == "SeqValue").Delete();
 

@@ -1,5 +1,9 @@
 ﻿using System;
-using System.Transactions;
+using System.Data;
+
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 
 using NUnit.Framework;
 
@@ -7,44 +11,29 @@ using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq.ProviderSpecific
 {
-	//[TestFixture]
+	[TestFixture]
 	public class SqlCe : TestBase
 	{
-		//[Test]
-		public void SqlTest()
+		[TableName("LinqDataTypes")]
+		class Test
 		{
-			using (new TransactionScope())
+			public int ID;
+			[MapField("DateTimeValue"), DbType(DbType.DateTime2)]
+			public DateTime? Data;
+		}
+
+		[Test]
+		public void DateTime2Test([IncludeDataContexts(ProviderName.SqlCe)] string context)
+		{
+			using (var db = new TestDbManager(context))
 			{
-				using (var db = new TestDbManager(ProviderName.SqlCe))
+				try
 				{
-					var list = db
-						.SetCommand(@"
-
-UPDATE
-    [Parent]
-SET
-    [Value1] = 1
-WHERE
-    [Parent].[ParentID] = 100;
-
-INSERT INTO [Parent] 
-(
-    [ParentID],
-    [Value1]
-)
-VALUES
-(
-    100,
-    NULL
-)
-
-
-")
-						.ExecuteScalar();
-
-					list = db
-						.SetCommand(@"SELECT @@IDENTITY")
-						.ExecuteScalar();
+					new SqlQuery<Test>().Insert(db, new Test { ID = 100001, Data = DateTime.Now });
+				}
+				finally
+				{
+					db.GetTable<Test>().Delete(t => t.ID > 10000);
 				}
 			}
 		}
