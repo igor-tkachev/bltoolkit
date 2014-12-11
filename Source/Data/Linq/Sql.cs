@@ -8,7 +8,7 @@ namespace BLToolkit.Data.Linq
 	using Data.Sql;
 	using Reflection;
 
-	public static class Sql
+	public static partial class Sql
 	{
 		#region Common Functions
 
