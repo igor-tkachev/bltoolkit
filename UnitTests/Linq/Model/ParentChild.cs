@@ -94,6 +94,13 @@ namespace Data.Linq.Model
 		{
 			unchecked { return (ParentID * 397) ^ ChildID; }
 		}
+
+		public static Child CreateInstance(Child child, Parent parent)
+		{
+			child.Parent = parent;
+
+			return child;
+		}
 	}
 
 	public class GrandChild : IEquatable<GrandChild>

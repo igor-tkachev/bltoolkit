@@ -2152,6 +2152,15 @@ namespace BLToolkit.Linq
 						if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
 							return GetRootObject(e.Arguments[0]);
 
+						if (e.Arguments != null && e.Arguments.Count > 0
+							&& e.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true).Length == 0)
+							for (int i = 0; i < e.Arguments.Count; i++)
+							{
+								var arg = e.Arguments[i];
+								if (arg.Type == e.Type)
+									return GetRootObject(arg);
+							}
+
 						break;
 					}
 
