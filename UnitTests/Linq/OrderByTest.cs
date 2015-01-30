@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using BLToolkit.Data.Linq;
 using NUnit.Framework;
 
 using BLToolkit.Data.DataProvider;
@@ -328,5 +328,70 @@ namespace Data.Linq
 			});
 		}
 
+		[Test]
+		public void Issue_309()
+		{
+			var expected1 = Child.OrderBy(_ => _.ParentID).ThenBy(_ => _.ChildID).ToList();
+			var expected2 = Child.OrderBy(_ => _.ParentID).ThenByDescending(_ => _.ChildID).ToList();
+
+			ForEachProvider(db =>
+			{
+				var qry = from ss in db.Child
+						  orderby ss.ParentID
+						  select new { ss };
+
+				var result = qry
+					.ThenBy(_ => _.ss.ChildID)
+					.Select(_ => _.ss)
+					.ToList();
+
+				Assert.IsTrue(result.SequenceEqual(expected1));
+				AreEqual(expected1, result);
+
+				var result2 = db.Child
+					.ThenBy(_ => _.ParentID)
+					.ThenBy(_ => _.ChildID)
+					.ToList();
+
+				Assert.IsTrue(result2.SequenceEqual(expected1));
+				AreEqual(expected1, result2);
+
+				var result3 = qry
+					.ThenByDescending(_ => _.ss.ChildID)
+					.Select(_ => _.ss)
+					.ToList();
+
+				Assert.IsTrue(result3.SequenceEqual(expected2));
+				AreEqual(expected2, result3);
+				
+				var result4 = db.Child
+					.ThenBy(_ => _.ParentID)
+					.ThenByDescending(_ => _.ChildID)
+					.ToList();
+				
+				Assert.IsTrue(result3.SequenceEqual(expected2));
+				AreEqual(expected2, result4);
+
+				AreEqual(
+					   Child.OrderBy(_ => _.ChildID),
+					db.Child.ThenBy(_ => _.ChildID));
+
+				AreEqual(
+					   Child.OrderByDescending(_ => _.ChildID),
+					db.Child.ThenByDescending(_ => _.ParentID));
+
+				var qry2 = from ss in db.Child
+						  select new { ss };
+
+				AreEqual(
+					     Child.OrderBy(_ => _.ChildID),
+					qry2.ThenBy(_ => _.ss.ChildID).Select(_ => _.ss));
+				
+				AreEqual(
+					     Child.OrderByDescending(_ => _.ChildID),
+					qry2.ThenByDescending(_ => _.ss.ChildID).Select(_ => _.ss));
+
+			});
+		}
 	}
 }
