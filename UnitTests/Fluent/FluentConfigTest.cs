@@ -17,13 +17,16 @@ namespace BLToolkit.Fluent.Test
 		[TestMethod]
 		public void ShouldConfigMapping()
 		{
-			ExtensionList extensions = new ExtensionList();
-			FluentConfig.Configure(extensions)
-				.MapingFromAssemblyOf<FluentConfigTest>();
+			for (int i = 1; i <= 2; i++)
+			{
+				ExtensionList extensions = new ExtensionList();
+				FluentConfig.Configure(extensions)
+					.MapingFromAssemblyOf<FluentConfigTest>();
 
-			Assert.IsTrue(extensions.ContainsKey(typeof(Dbo1).FullName), "Not mapping");
-			Assert.IsFalse(extensions.ContainsKey(typeof(Dbo2).FullName), "Fail mapping for abstract");
-			Assert.IsFalse(extensions.ContainsKey(typeof(Dbo3).FullName), "Fail mapping for generic");
+				Assert.IsTrue(extensions.ContainsKey(typeof (Dbo1).FullName), "Not mapping");
+				Assert.IsFalse(extensions.ContainsKey(typeof (Dbo2).FullName), "Fail mapping for abstract");
+				Assert.IsFalse(extensions.ContainsKey(typeof (Dbo3).FullName), "Fail mapping for generic");
+			}
 		}
 
 		public class Dbo1
