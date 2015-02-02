@@ -704,6 +704,32 @@ namespace BLToolkit.Data.Linq
 
 		#endregion
 
+		#region IOrderedQueryable
+
+		public static IOrderedQueryable<TSource> ThenBy<TSource, TKey>(
+			[NotNull]                this IQueryable<TSource> source, 
+			[NotNull, InstantHandle] Expression<Func<TSource, TKey>> keySelector)
+		{
+			return (IOrderedQueryable<TSource>)source.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TKey) }),
+					new[] { source.Expression, Expression.Quote(keySelector) }));
+		}
+
+		public static IOrderedQueryable<TSource> ThenByDescending<TSource, TKey>(
+			[NotNull]                this IQueryable<TSource> source,
+			[NotNull, InstantHandle] Expression<Func<TSource, TKey>> keySelector)
+		{
+			return (IOrderedQueryable<TSource>)source.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TKey) }),
+					new[] { source.Expression, Expression.Quote(keySelector) }));
+		}
+
+		#endregion
+
 		#region Stub helpers
 
 		static TOutput Where<TOutput,TSource,TInput>(this TInput source, Func<TSource,bool> predicate)
