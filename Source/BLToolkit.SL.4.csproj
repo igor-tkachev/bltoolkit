@@ -192,6 +192,7 @@
     <Compile Include="Data\Linq\ReflectionHelper.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\Sql.cs" />
+    <Compile Include="Data\Linq\Sql.GroupBy.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
