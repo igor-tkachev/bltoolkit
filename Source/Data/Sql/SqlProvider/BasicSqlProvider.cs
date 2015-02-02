@@ -751,6 +751,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (SqlQuery.GroupBy.Items.Count == 0)
 				return;
 
+			if (SqlQuery.GroupBy.Items.Count == 1)
+			{
+				var item = SqlQuery.GroupBy.Items[0];
+
+				if (item is SqlValue)
+				{
+					var value = ((SqlValue)item).Value;
+
+					if (value is Sql.GroupBy)
+						return;
+				}
+			}
+
 			AppendIndent(sb);
 
 			sb.Append("GROUP BY").AppendLine();
