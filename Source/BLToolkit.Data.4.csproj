@@ -317,6 +317,7 @@
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\QueryableAccessor.cs" />
     <Compile Include="Data\Linq\Sql.GroupBy.cs" />
+    <Compile Include="Data\OperationExceptionRetryEventArgs.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2012SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlValueBase.cs" />
