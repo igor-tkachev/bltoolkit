@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Insert", "InsertWithIdentity");
+			return methodCall.IsQueryable("Insert", "InsertWithIdentity","InsertWithOutput");
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
@@ -98,8 +98,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			sequence.SqlQuery.QueryType           = QueryType.Insert;
 			sequence.SqlQuery.Insert.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
+			sequence.SqlQuery.Insert.WithOutput   = methodCall.Method.Name == "InsertWithOutput";
 
-			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity);
+			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity || sequence.SqlQuery.Insert.WithOutput);
 		}
 
 		protected override SequenceConvertInfo Convert(

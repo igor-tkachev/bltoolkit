@@ -324,6 +324,22 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
 					new[] { query.Expression, Expression.Quote(setter) }));
 		}
+		
+		public static object InsertWithOutput<T>(
+	            [NotNull]                this Table<T> target,
+	            [NotNull, InstantHandle] Expression<Func<T>> setter )
+	        {
+	            if (target == null) throw new ArgumentNullException("target");
+	            if (setter == null) throw new ArgumentNullException("setter");
+	
+	            IQueryable<T> query = target;
+	
+	            return query.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( T ) } ),
+	                    new[] { query.Expression, Expression.Quote( setter ) } ) );
+	        }
 
 		#region ValueInsertable
 
@@ -450,6 +466,19 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
 					new[] { query.Expression }));
 		}
+		
+		public static object InsertWithOutput<T>( [NotNull] this IValueInsertable<T> source )
+	        {
+	            if (source == null) throw new ArgumentNullException( "source" );
+	
+	            var query = ( (ValueInsertable<T>)source ).Query;
+	
+	            return query.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( T ) } ),
+	                    new[] { query.Expression } ) );
+	        }
 
 		#endregion
 
@@ -486,6 +515,22 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),
 					new[] { source.Expression, ((IQueryable<TTarget>)target).Expression, Expression.Quote(setter) }));
 		}
+		
+		public static object InsertWithOutput<TSource, TTarget>(
+	            [NotNull]                this IQueryable<TSource> source,
+	            [NotNull]                Table<TTarget> target,
+	            [NotNull, InstantHandle] Expression<Func<TSource, TTarget>> setter)
+	        {
+	            if (source == null) throw new ArgumentNullException( "source" );
+	            if (target == null) throw new ArgumentNullException( "target" );
+	            if (setter == null) throw new ArgumentNullException( "setter" );
+	
+	            return source.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( TSource ), typeof( TTarget ) } ),
+	                    new[] { source.Expression, ( (IQueryable<TTarget>)target ).Expression, Expression.Quote( setter ) } ) );
+	        }
 
 		class SelectInsertable<T,TT> : ISelectInsertable<T,TT>
 		{
