@@ -263,6 +263,7 @@
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="Data\DataExceptionType.cs" />
+    <Compile Include="Data\DataProvider\DataProviderVersionResolverBase.cs" />
     <Compile Include="Data\DataProvider\Sql2005DataProvider.cs" />
     <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\DataProviderInterpreterBase.cs" />
@@ -274,6 +275,7 @@
     <Compile Include="Data\DataProvider\Sql2008DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\DataProvider\SqlDataProviderVersionResolver.cs" />
     <Compile Include="Data\DbConnectionFactory.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\IDbConnectionFactory.cs" />

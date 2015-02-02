@@ -23,6 +23,10 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public abstract class SqlDataProviderBase : DataProviderBase
 	{
+		protected SqlDataProviderBase()
+		{
+			SqlDataProviderVersionResolver.Instance.AddDataProvider(this);
+		}
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
@@ -427,6 +431,16 @@ namespace BLToolkit.Data.DataProvider
 			{
 				base.SetParameterValue(parameter, value);
 			}
+		}
+
+		public override DataProviderBase ResolveVersion(string configuration, string connectionString)
+		{
+			return SqlDataProviderVersionResolver.Instance.InvalidateDataProvider(this, configuration, connectionString) ?? this;
+		}
+
+		public override bool SupportsVersionResolve
+		{
+			get { return true; }
 		}
 	}
 }

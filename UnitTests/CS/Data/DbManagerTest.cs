@@ -480,5 +480,19 @@ namespace Data
 				Assert.That(type, Is.EqualTo(ABType.A));
 			}
 		}
+
+		[Test]
+		public void DataProviderTest()
+		{
+			for (var i = 0; i < 2; i++) // second call to test "first configuration cache"
+				using (var db = new DbManager())
+				{
+					var actualProviderType = db.DataProvider.GetType();
+
+					Assert.AreNotEqual(typeof (SqlDataProvider), actualProviderType);
+					Assert.AreNotEqual(typeof (SqlDataProviderBase), actualProviderType);
+
+				}
+		}
 	}
 }
