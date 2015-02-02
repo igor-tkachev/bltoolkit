@@ -1,4 +1,30 @@
-3.2.1 (2013-10-06)
+3.3.3
+==================
+- fixed #70 - Serilog integration modifies LoggerConfiguration.MinimumLevel
+- fixed #69 - Added SourceContext to the Serilog Logger - contributed by @KevivL
+
+3.3.2
+==================
+- fixed #66 - SerilogLogger implementation bug where exceptions were passed through incorrectly
+
+3.3.1
+==================
+- implemented #61 - Added support for Serilog - contributed by Russell J Baker (@ruba1987)
+
+3.3.0
+==================
+- implemented #51 - removed abandoned projects: Binder, Pagination, Validator
+- implemented #49 - build NuGet and Zip packages from TeamCity - contributed by Blair Conrad (@blairconrad)
+- implemented #42 - move complicated BuildInternalsVisibleMessageForType method out of DynamicProxyBuilder - contributed by Blair Conrad (@blairconrad)
+- fixed #47 - Calling DynamicProxy proxy methods with multidimensional array parameters - contributed by  Ed Parcell (@edparcell)
+- fixed #44 - DictionaryAdapter FetchAttribute on type has no effect
+- fixed #34 and #39 - inaccessible type parameters should give better error messsages - contributed by Blair Conrad (@blairconrad)
+
+3.2.2
+==================
+- fixed #35 - ParameterBuilder.SetConstant fails when using a default value of null - contributed by (@jonasro)
+
+3.2.1
 ==================
 - fixed #32 - Improve configuration of SmtpClient in sync sending - contributed by Artur Dorochowicz (@ArturDorochowicz)
 - fixed #31 - [DynamicProxy] Preserve DefaultValues of proxied method's parameters (in .NET 4.5)
