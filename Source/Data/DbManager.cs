@@ -2389,6 +2389,8 @@ namespace BLToolkit.Data
 					}
 					else if (p.Value is DBNull)
 					{
+                        if (p.DbType == DbType.Decimal)
+                            p.Precision = 1;
 						p.Size = 1;
 					}
 					else if (p.Value is byte[])
