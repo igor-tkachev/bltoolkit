@@ -485,8 +485,8 @@ namespace Data.Linq
 		public void ProjectionTest1()
 		{
 			ForEachProvider(db => AreEqual(
-				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID },
-				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID }));
+				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value, ID2 = c.ParentID },
+				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value, ID2 = c.ParentID }));
 		}
 
 		[TableName("Person")]

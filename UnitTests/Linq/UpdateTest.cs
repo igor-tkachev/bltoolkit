@@ -303,6 +303,35 @@ namespace Update
 		}
 
 		[Test]
+		public void Update12()
+		{
+			ForEachProvider(db =>
+			{
+				var parent3 = db.GetTable<Parent3>();
+				try
+				{
+					var id = 1001;
+
+					parent3.Delete(_ => _.ParentID2 > 1000);
+					parent3.Insert(() => new Parent3() { ParentID2 = id, Value = id});
+
+					Assert.AreEqual(1, parent3.Where(_ => _.ParentID2 == id).Set(_ => _.ParentID2, id+1).Set(_ => _.Value, _ => _.ParentID2).Update());
+
+					var obj = parent3.FirstOrDefault(_ => _.ParentID2 == id + 1);
+					Assert.IsNotNull(obj);
+
+					db.Update(obj);
+
+				}
+				finally
+				{
+					parent3.Delete(_ => _.ParentID2 > 1000);
+				}
+			});
+		}
+
+
+		[Test]
 		public void UpdateAssociation1([DataContexts(ProviderName.Sybase, ProviderName.Informix)] string context)
 		{
 			using (var db = GetDataContext(context))
