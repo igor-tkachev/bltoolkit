@@ -2232,6 +2232,9 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (ignoredMembers != null)
 				{
+					if (IsNullConstant(pi))
+						return false;
+
 					if (pi != ignoredMembers[ignoredMembers.Count - 1])
 						throw new InvalidOperationException();
 
@@ -2306,9 +2309,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 							Expression obj = null;
 
-							if (e.Left.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Left).Value == null)
+							if (IsNullConstant(e.Left))
 								obj = e.Right;
-							else if (e.Right.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Right).Value == null)
+							else if (IsNullConstant(e.Right))
 								obj = e.Left;
 
 							if (obj != null)
@@ -2333,6 +2336,10 @@ namespace BLToolkit.Data.Linq.Builder
 			});
 		}
 
+		private static bool IsNullConstant(Expression expr)
+		{
+			return expr.NodeType == ExpressionType.Constant && ((ConstantExpression) expr).Value == null;
+		}
 		#endregion
 
 		#region Helpers

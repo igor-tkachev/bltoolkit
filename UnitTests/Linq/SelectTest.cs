@@ -569,5 +569,26 @@ namespace Data.Linq
 				Assert.That(sql.IndexOf("ParentID_"), Is.LessThan(0));
 			}
 		}
+
+		[Test]
+		public void Issue317()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q = 
+					from p in db.Parent
+					join c in db.Child on p.ParentID equals c.ChildID into childs
+					from c in childs.DefaultIfEmpty()
+					select new
+					{
+						p.ParentID,
+						ChildId1 = null == c ? -1000 : c.ChildID,
+						ChildId2 = c == null ? -2000 : c.ChildID,
+					};
+
+				q.ToArray();
+
+			}
+		}
 	}
 }
