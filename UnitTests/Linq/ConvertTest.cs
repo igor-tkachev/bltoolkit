@@ -407,72 +407,72 @@ namespace Data.Linq
 		public void ToChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.Char(20), t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.Char(20), t.MoneyValue).Trim(' ', '0', '.')));
+				from t in Types    select Sql.Convert(Sql.Char(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.Char(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultChar()
 		{
 			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToVarChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.VarChar(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultVarChar()
 		{
 			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToNChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.NChar(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultNChar()
 		{
 			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToNVarChar()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.NVarChar(20), t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void ToDefaultNVarChar()
 		{
 			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
-				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.'),
-				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).Trim(' ', '0', '.')));
+				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
+				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
 
 		[Test]
 		public void DecimalToString()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.Replace(',', '.').TrimEnd('0', '.'),
-				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.Replace(',', '.').TrimEnd('0', '.')));
+				from p in from t in    Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.InvariantDecimal().TrimEnd('0', '.'),
+				from p in from t in db.Types select Convert.ToString(t.MoneyValue) where p.Length > 0 select p.InvariantDecimal().TrimEnd('0', '.')));
 		}
 
 		[Test]

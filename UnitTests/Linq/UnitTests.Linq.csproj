@@ -180,6 +180,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper.cs" />
     <Compile Include="UpdateTest.cs" />
     <Compile Include="DeleteTest.cs" />
     <Compile Include="EnumMapping.cs" />
