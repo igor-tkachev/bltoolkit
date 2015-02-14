@@ -177,15 +177,16 @@ namespace BLToolkit.Data.Linq.Builder
 
 					if (expr is SqlParameter)
 					{
-						var type = member.MemberType == MemberTypes.Field ? 
-							((FieldInfo)   member).FieldType :
-							((PropertyInfo)member).PropertyType;
+						SetConverter(builder, member, expr);
+						//var type = member.MemberType == MemberTypes.Field ? 
+						//	((FieldInfo)   member).FieldType :
+						//	((PropertyInfo)member).PropertyType;
 
-						if (TypeHelper.IsEnumOrNullableEnum(type))
-						{
-							var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
-							((SqlParameter)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-						}
+						//if (TypeHelper.IsEnumOrNullableEnum(type))
+						//{
+						//	var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
+						//	((SqlParameter)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+						//}
 					}
 
 					items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
@@ -227,11 +228,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
 						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression, false);
 
-						if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(ma.Expression.Type))
-						{
-							var memberAccessor = TypeAccessor.GetAccessor(ma.Member.DeclaringType)[ma.Member.Name];
-							((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-						}
+						SetConverter(builder, ma.Member, expr);
 
 						items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 					}
@@ -299,11 +296,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			builder.ReplaceParent(ctx, sp);
 
-			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Body.Type))
-			{
-				var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
-				((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-			}
+			SetConverter(builder, member, expr);
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
@@ -375,15 +368,38 @@ namespace BLToolkit.Data.Linq.Builder
 				column = sql[0].Sql;
 			}
 
-			var expr   = builder.ConvertToSql(select, update, false, false);
+			var expr = builder.ConvertToSql(select, update, false, false);
 
-			if (expr is SqlValueBase && TypeHelper.IsEnumOrNullableEnum(update.Type))
-			{
-				var memberAccessor = TypeAccessor.GetAccessor(body.Member.DeclaringType)[body.Member.Name];
-				((SqlValueBase)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
-			}
+			SetConverter(builder, member, expr);
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
+		}
+
+		private static void SetConverter(
+			ExpressionBuilder builder, 
+			MemberInfo        member,
+			ISqlExpression    expr)
+		{
+			var sqlValue = expr as SqlValueBase;
+			if (sqlValue == null)
+				return;
+			var mm = builder.MappingSchema.GetObjectMapper(member.DeclaringType)
+				.First(_ => _.MemberName == member.Name);
+
+			if (TypeHelper.IsEnumOrNullableEnum(mm.Type))
+			{
+				var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
+				sqlValue.SetEnumConverter(memberAccessor, builder.MappingSchema);
+			}			
+			else if (!mm.SupportsValue)
+			{
+				sqlValue.ValueConverter = _ =>
+				{
+					var obj = TypeAccessor.CreateInstanceEx(member.DeclaringType);
+					mm.MemberAccessor.SetValue(obj, _);
+					return mm.GetValue(obj);
+				};
+			}
 		}
 
 		#endregion

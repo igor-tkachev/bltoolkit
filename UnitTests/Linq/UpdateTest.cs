@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 using BLToolkit.Data;
@@ -7,7 +8,7 @@ using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-
+using BLToolkit.Mapping.MemberMappers;
 using NUnit.Framework;
 
 using Data.Linq;
@@ -569,6 +570,89 @@ namespace Update
 				if (db is DbManager)
 					Assert.IsFalse(((DbManager)db).LastQuery.Contains("IS NULL"));
 			}
+		}
+
+		public class TestObject
+		{
+			public int Value { get; set; }
+		}
+
+		[TableName("DataTypeTest")]
+		public class Table4 
+		{
+			[PrimaryKey, MapField("DataTypeID"), Identity]
+			public int Id;
+			[MemberMapper(typeof(JSONSerialisationMapper))]
+			[MapField("String_"), DbType(DbType.String)]
+			public TestObject Object;
+		}
+
+		[Test]
+		public void UpdateComplexField()
+		{
+			ForEachProvider(db =>
+			{
+				var table = db.GetTable<Table4>();
+				int id = 0;
+				try
+				{
+
+					var obj = new Table4();
+					obj.Object = new TestObject() {Value = 101};
+					obj.Id = id = Convert.ToInt32(db.InsertWithIdentity(obj));
+
+					var obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+
+					obj.Object.Value = 999;
+					db.Update(obj);
+
+					obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);				
+
+					obj.Object.Value = 666;
+					table
+						.Where(_ => _.Id == id)
+						.Set(_ => _.Object, _ => obj.Object)
+						.Update();
+
+					obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);				
+
+					obj.Object.Value = 777;
+					table
+						.Where(_ => _.Id == id)
+						.Set(_ => _.Object, obj.Object)
+						.Update();
+
+					obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+
+					var id2 = Convert.ToInt32(table.InsertWithIdentity(() => new Table4
+					{
+						Object = new TestObject() {Value = 300}
+					}));
+
+					obj2 = table.First(_ => _.Id == id2);
+					Assert.AreEqual(300, obj2.Object.Value);
+
+					var id3 = Convert.ToInt32(table.Value(_ => _.Object, () => obj.Object)
+						.InsertWithIdentity());
+					
+					obj2 = table.First(_ => _.Id == id3);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+
+					var id4 = Convert.ToInt32(table.Value(_ => _.Object, obj.Object)
+						.InsertWithIdentity());
+					
+					obj2 = table.First(_ => _.Id == id4);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+				}
+				finally
+				{
+					table.Delete(_ => _.Id >= id);
+				}
+			});
 		}
 	}
 }

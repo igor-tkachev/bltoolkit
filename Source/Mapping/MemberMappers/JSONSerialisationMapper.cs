@@ -2,7 +2,6 @@
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Xml.Serialization;
 using BLToolkit.Reflection;
 
 namespace BLToolkit.Mapping.MemberMappers
