@@ -1508,7 +1508,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupByDate([DataContexts] string context)
+		public void GroupByDate1([DataContexts] string context)
 		{
 			using (var db = GetDataContext(context))
 			{
@@ -1530,6 +1530,88 @@ namespace Data.Linq
 						month = grp.Key.Month
 					});
 			}
+		}
+
+		[Test]
+		public void GroupByDate2([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var expected = ( 
+					from t in Types2
+					group t by new { t.DateTimeValue.Value.Month, t.DateTimeValue.Value.Year } into grp
+					select new
+					{
+						Total = grp.Sum(_ => _.MoneyValue),
+						grp
+					}).ToList();
+
+				var result = (
+					from t in db.Types2
+					group t by new { t.DateTimeValue.Value.Month, t.DateTimeValue.Value.Year } into grp
+					select new
+					{
+						Total = grp.Sum(_ => _.MoneyValue),
+						grp
+					}).ToList();
+
+				Assert.AreEqual(expected.Count, result.Count);
+				for (int i = 0; i < expected.Count; i++)
+				{
+					var e = expected[i];
+					var r = result  [i];
+					Assert.AreEqual(e.Total,         r.Total);
+					Assert.AreEqual(e.grp.Key.Month, r.grp.Key.Month);
+					Assert.AreEqual(e.grp.Key.Year,  r.grp.Key.Year);
+				}
+			}
+		}
+
+		[Test]
+		public void Issue_294()
+		{
+			var expected1 =
+				(from p in Parent
+					group p by new {p.ParentID}
+					into grp
+					select grp).ToList();
+			var expected2 =
+				(from p in Child
+					group p by new {p.ChildID, p.ParentID}
+					into grp
+					select grp).ToList();
+
+			ForEachProvider(db =>
+			{
+				var result1 =
+					(from p in db.Parent
+						group p by new {p.ParentID}
+						into grp
+						select grp).ToList();
+
+				Assert.AreEqual(expected1.Count, result1.Count);
+				for (int i = 0; i < expected1.Count; i++)
+				{
+					var e = expected1[i];
+					var r = result1  [i];
+					Assert.AreEqual(e.Key.ParentID, r.Key.ParentID);
+				}
+
+				var result2 =
+					(from p in db.Child
+						group p by new {p.ChildID, p.ParentID}
+						into grp
+						select grp).ToList();
+
+				Assert.AreEqual(expected2.Count, result2.Count);
+				for (int i = 0; i < expected2.Count; i++)
+				{
+					var e = expected2[i];
+					var r = result2  [i];
+					Assert.AreEqual(e.Key.ChildID,  r.Key.ChildID);
+					Assert.AreEqual(e.Key.ParentID, r.Key.ParentID);
+				}
+			});
 		}
 	}
 }
