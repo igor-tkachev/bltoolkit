@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Data.Linq;
+using System.Linq;
+using System.Xml.Linq;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
@@ -59,6 +62,77 @@ namespace Update
 
 				foreach (var parent in list)
 					db.Parent.Delete(p => p.ParentID == parent.ParentID);
+			}
+		}
+
+		[TableName("TestIdentity")]
+		public class Table
+		{
+			[Identity, MapField("ID")]
+			public int    Id;
+			public int?   IntValue;
+			public string StringValue;
+		}
+
+		[Test]
+		public void TransactionWithIdentity([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var db = new TestDbManager(context))
+			{
+				try
+				{
+					var list = new[]
+					{
+						new Table {IntValue = 1111, StringValue = "1111"},
+						new Table {IntValue = 2111, StringValue = "2111"},
+						new Table {IntValue = 3111, StringValue = "3111"},
+						new Table {IntValue = 4111, StringValue = "4111"},
+					};
+
+					db.GetTable<Table>().Delete(_ => _.Id > 2);
+					var c1 = db.GetTable<Table>().Count();
+					
+					db.BeginTransaction();
+					db.InsertBatch(list);
+					db.CommitTransaction();
+
+					var c2 = db.GetTable<Table>().Count();
+
+					Assert.AreEqual(c1+4, c2);
+				}
+				finally
+				{
+					db.GetTable<Table>().Delete(_ => _.Id > 2);
+				}
+			}
+		}
+
+		[Test]
+		public void NoTransactionWithIdentity([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var db = new TestDbManager(context))
+			{
+				try
+				{
+					var list = new[]
+					{
+						new Table {IntValue = 1111, StringValue = "1111"},
+						new Table {IntValue = 2111, StringValue = "2111"},
+						new Table {IntValue = 3111, StringValue = "3111"},
+						new Table {IntValue = 4111, StringValue = "4111"},
+					};
+
+					db.GetTable<Table>().Delete(_ => _.Id > 2);
+					var c1 = db.GetTable<Table>().Count();
+					db.InsertBatch(list);
+					var c2 = db.GetTable<Table>().Count();
+
+					Assert.AreEqual(c1+4, c2);
+				}
+				finally
+				{
+					db.GetTable<Table>().Delete(_ => _.Id > 2);
+				}
 			}
 		}
 
