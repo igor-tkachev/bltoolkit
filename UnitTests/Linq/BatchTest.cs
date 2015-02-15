@@ -240,12 +240,60 @@ namespace Update
 			                          public bool   IsActive  { get; set; }
 		}
 
-		[Test, ExpectedException(typeof(InvalidOperationException), ExpectedMessage="Cannot access destination table '[KanoonIr]..[Area]'.")]
+		[Test, ExpectedException(typeof(InvalidOperationException)
+			/*,ExpectedMessage="Cannot access destination table '[KanoonIr]..[Area]'."*/)]
 		public void Issue260([IncludeDataContexts("Sql2005")] string context)
 		{
 			using (var db = GetDataContext(context))
 			{
 				((DbManager)db).InsertBatch(new[] { new Area { AreaCode = 1 } });
+			}
+		}
+
+		[TableName("LinqDataTypes")]
+		public class Table3 
+		{
+			[PrimaryKey(1)] public int      ID;
+			                public decimal  MoneyValue;
+			                public DateTime DateTimeValue;
+			[PrimaryKey(2)] public bool     BoolValue;
+			                public short    SmallIntValue;
+		}
+
+		[Test]
+		public void BatchWithTwoKeys([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var db = (TestDbManager)GetDataContext(context))
+			{
+				var list = new[]
+					{
+						new Table3 {ID = 1000, BoolValue = true,  MoneyValue = 10.1m, DateTimeValue = DateTime.Today},
+						new Table3 {ID = 1001, BoolValue = false, MoneyValue = 10.1m, DateTimeValue = DateTime.Today},
+						new Table3 {ID = 1002, BoolValue = true,  MoneyValue = 10.1m, DateTimeValue = DateTime.Today},
+						new Table3 {ID = 1003, BoolValue = false, MoneyValue = 10.1m, DateTimeValue = DateTime.Today},
+					};
+
+				db.GetTable<Table3>().Delete(_ => _.ID >= 1000);
+				db.InsertBatch(list);
+				var tomorrow = DateTime.Today.AddDays(1);
+
+				var res = db.GetTable<Table3>().Where(_ => _.ID >= 1000).ToList();
+				res.ForEach(_ => { _.MoneyValue = _.ID; _.DateTimeValue = tomorrow; _.SmallIntValue = 121; });
+
+				new SqlQuery<Table3>().Update(db, int.MaxValue, res);
+				res = db.GetTable<Table3>().Where(_ => _.ID >= 1000).ToList();
+				res.ForEach(_=> { Assert.AreEqual(_.ID, _.MoneyValue); Assert.AreEqual(tomorrow, _.DateTimeValue); Assert.AreEqual(121, _.SmallIntValue);});
+				
+				res.ForEach(_=> { _.MoneyValue = _.ID+1; _.DateTimeValue = tomorrow; _.SmallIntValue = 131; });
+
+				db.Update<Table3>(res);
+				res = db.GetTable<Table3>().Where(_ => _.ID >= 1000).ToList();
+				res.ForEach(_=> { Assert.AreEqual(_.ID+1, _.MoneyValue); Assert.AreEqual(tomorrow, _.DateTimeValue); Assert.AreEqual(131, _.SmallIntValue);});
+
+				db.Delete<Table3>(res);
+				res = db.GetTable<Table3>().Where(_ => _.ID >= 1000).ToList();
+				Assert.IsEmpty(res);
+
 			}
 		}
 	}
