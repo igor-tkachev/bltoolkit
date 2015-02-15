@@ -577,9 +577,9 @@ DROP TABLE TestIdentity
 COMMIT;
 
 CREATE TABLE TestIdentity (
-ID          INTEGER     NOT NULL PRIMARY KEY
-IntValue    INTEGER     NULL,
-StringValue VARCHAR(50) NULL
+ID          INTEGER     NOT NULL PRIMARY KEY,
+IntValue    INTEGER,
+StringValue VARCHAR(50) 
 )
 COMMIT;
 
