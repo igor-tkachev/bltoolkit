@@ -19,7 +19,7 @@ namespace Update
 	public class BatchTest : TestBase
 	{
 		[Test]
-		public void Transaction([DataContexts(ExcludeLinqService = true)] string context)
+		public void Transaction([DataContexts(ExcludeLinqService = true)] string context, [Values(Int32.MaxValue, 1)]int batchSize)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -35,7 +35,7 @@ namespace Update
 					db.Parent.Delete(p => p.ParentID == parent.ParentID);
 
 				db.BeginTransaction();
-				db.InsertBatch(list);
+				db.InsertBatch(batchSize, list);
 				db.CommitTransaction();
 
 				foreach (var parent in list)
@@ -44,7 +44,7 @@ namespace Update
 		}
 
 		[Test]
-		public void NoTransaction([DataContexts(ExcludeLinqService=true)] string context)
+		public void NoTransaction([DataContexts(ExcludeLinqService = true)] string context, [Values(Int32.MaxValue, 1)]int batchSize)
 		{
 			using (var db = new TestDbManager(context))
 			{
@@ -59,7 +59,7 @@ namespace Update
 				foreach (var parent in list)
 					db.Parent.Delete(p => p.ParentID == parent.ParentID);
 
-				db.InsertBatch(list);
+				db.InsertBatch(batchSize, list);
 
 				foreach (var parent in list)
 					db.Parent.Delete(p => p.ParentID == parent.ParentID);
