@@ -577,13 +577,13 @@ namespace Update
 			public int Value { get; set; }
 		}
 
-		[TableName("DataTypeTest")]
+		[TableName("TestIdentity")]
 		public class Table4 
 		{
-			[PrimaryKey, MapField("DataTypeID"), Identity]
+			[PrimaryKey, MapField("ID"), Identity]
 			public int Id;
 			[MemberMapper(typeof(JSONSerialisationMapper))]
-			[MapField("String_"), DbType(DbType.String)]
+			[MapField("StringValue"), DbType(DbType.String)]
 			public TestObject Object;
 		}
 
