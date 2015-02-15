@@ -555,9 +555,15 @@ namespace Mapping
 		[Test]
 		public void AccessorTest()
 		{
-			var test     = TypeAccessor<Test>.CreateInstance();
-			var mapper   = Map.GetObjectMapper<Test,Test>();
+			var test   = TypeAccessor<Test>.CreateInstance();
+			var mapper = Map.GetObjectMapper<Test,Test>();
+
+			test.Id = 1234124;
 			var testCopy = mapper(test);
+
+			Assert.IsNotNull(testCopy);
+			Assert.AreEqual(test.Id, testCopy.Id);
 		}
+
 	}
 }
