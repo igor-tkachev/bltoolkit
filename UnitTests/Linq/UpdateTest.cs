@@ -654,5 +654,56 @@ namespace Update
 				}
 			});
 		}
+
+		[TableName("LinqDataTypes")]
+		public class LinqDataTypes3
+		{
+			[PrimaryKey] 
+			public int ID;
+			public DateTime  DateTimeValue;
+			public DateTime? DateTimeValue2;
+		}
+
+		[Test]
+		public void Update15()
+		{
+			ForEachProvider(db =>
+			{
+				var table = db.GetTable<LinqDataTypes3>();
+				var date1 = new DateTime(2000, 1, 1);
+				var date2 = new DateTime(2001, 1, 1);
+				var date3 = new DateTime(2002, 1, 1);
+
+				var obj = new LinqDataTypes3()
+				{
+					ID             = 1000,
+					DateTimeValue  = date1,
+					DateTimeValue2 = date1
+				};
+
+				table.Delete(_ => _.ID == obj.ID);
+				db.Insert(obj);
+
+				table
+					.Where(_ => _.ID == obj.ID)
+					.Set(_ => _.DateTimeValue,  date2)
+					.Set(_ => _.DateTimeValue2, date3)
+					.Update();
+
+				var res = table.First(_ => _.ID == obj.ID);
+				Assert.AreEqual(date2, res.DateTimeValue);
+				Assert.AreEqual(date3, res.DateTimeValue2);
+
+				table
+					.Where(_ => _.ID == obj.ID)
+					.Set(_ => _.DateTimeValue,  date3)
+					.Set(_ => _.DateTimeValue2, date2)
+					.Update();
+
+				res = table.First(_ => _.ID == obj.ID);
+				Assert.AreEqual(date3, res.DateTimeValue);
+				Assert.AreEqual(date2, res.DateTimeValue2);
+			});
+		}
 	}
 }
