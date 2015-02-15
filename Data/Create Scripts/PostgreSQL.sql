@@ -177,6 +177,8 @@ CREATE SEQUENCE "TestIdentity_ID_seq" INCREMENT 1 START 1
 GO
 
 CREATE TABLE "TestIdentity" (
-	"ID" INTEGER PRIMARY KEY DEFAULT NEXTVAL('"TestIdentity_ID_seq"')
+	"ID"          INTEGER     PRIMARY KEY DEFAULT NEXTVAL('"TestIdentity_ID_seq"'),
+	"IntValue"    INTEGER     NULL,
+	"StringValue" VARCHAR(50) NULL
 )
 GO

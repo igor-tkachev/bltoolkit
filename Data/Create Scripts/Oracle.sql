@@ -636,7 +636,10 @@ DROP TABLE TestIdentity
 /
 
 CREATE TABLE TestIdentity (
-	ID NUMBER NOT NULL PRIMARY KEY
+	ID          NUMBER       NOT NULL PRIMARY KEY,
+	IntValue    INTEGER      NULL,
+	StringValue NVARCHAR(50) NULL
+
 )
 /
 
