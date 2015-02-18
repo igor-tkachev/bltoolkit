@@ -332,6 +332,12 @@ namespace BLToolkit.Data.DataProvider
 				parameter.DbType = DbType.Binary;
 				parameter.Size   = arr.Length;
 			}
+			else if (value is System.Xml.XmlDocument)
+			{
+				parameter.Value = ((System.Xml.XmlDocument)value).OuterXml;
+				parameter.DbType = DbType.Xml;
+				parameter.Size = parameter.Value.ToString().Length;
+			}
 			else
 				parameter.Value = value;
 		}
