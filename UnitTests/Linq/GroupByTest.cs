@@ -1544,7 +1544,7 @@ namespace Data.Linq
 					{
 						Total = grp.Sum(_ => _.MoneyValue),
 						grp
-					}).ToList();
+					}).ToList().OrderBy(_ => _.grp.Key.Month).ThenBy(_ => _.grp.Key.Year).ToArray();
 
 				var result = (
 					from t in db.Types2
@@ -1553,10 +1553,10 @@ namespace Data.Linq
 					{
 						Total = grp.Sum(_ => _.MoneyValue),
 						grp
-					}).ToList();
+					}).OrderBy(_ => _.grp.Key.Month).ThenBy(_ => _.grp.Key.Year).ToArray();
 
-				Assert.AreEqual(expected.Count, result.Count);
-				for (int i = 0; i < expected.Count; i++)
+				Assert.AreEqual(expected.Length, result.Length);
+				for (int i = 0; i < expected.Length; i++)
 				{
 					var e = expected[i];
 					var r = result  [i];
