@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -39,7 +41,7 @@ namespace Data
 
 		public class DataTypeTest
 		{
-			[MapField("DataTypeID")]
+			[MapField("DataTypeID"), Identity]
 			public int       ID;
 			[MapIgnore(false)]
 			public Byte[]    Binary_;
@@ -157,6 +159,98 @@ namespace Data
 				TypeAccessor.WriteConsole(dt);
 			}
 		}
+
+#if !SQLCE
+		[Test]
+		public void TestDataTypeTestInsert()
+		{
+			using (DbManager db = new DbManager())
+			{
+				var dt = new DataTypeTest
+				{
+					Binary_ = new byte[2] { 1, 2 },
+#if !ORACLE
+					Boolean_ = true,
+					Guid_ = Guid.Empty,
+#endif
+					Byte_ = 250,
+					Bytes_ = new byte[] { 2, 1 },
+					DateTime_ = DateTime.Now,
+					Decimal_ = 9876543210.0m,
+					Double_ = 12345.67890,
+					Int16_ = 12345,
+					Int32_ = 1234567890,
+					Int64_ = 1234567890123456789,
+					Money_ = 99876543210.0m,
+					Single_ = 1234.0f,
+					String_ = "Crazy Frog",
+
+					Char_ = 'F',
+					SByte_ = 123,
+					//UInt16_   = 65432,
+					//UInt32_   = 4000000000,
+					//UInt64_   = 12345678901234567890,
+#if !SQLCE
+					Stream_ = new MemoryStream(5),
+					Xml_ = new XmlTextReader(new StringReader("<xml/>")),
+					XmlDoc_ = new XmlDocument()
+#endif
+				};
+
+#if !SQLCE
+				dt.XmlDoc_.LoadXml("<root><sql id=\"1\">Some Text</sql></root>");
+#endif
+
+				SqlQuery query = new SqlQuery(db);
+				query.Insert(dt);
+			}
+		}
+
+		[Test]
+		public void TestDataTypeTestInsertWithIdentity()
+		{
+			using (DbManager db = new DbManager())
+			{
+				var dt = new DataTypeTest
+				{
+					Binary_ = new byte[2] { 1, 2 },
+#if !ORACLE
+					Boolean_ = true,
+					Guid_ = Guid.Empty,
+#endif
+					Byte_ = 250,
+					Bytes_ = new byte[] { 2, 1 },
+					DateTime_ = DateTime.Now,
+					Decimal_ = 9876543210.0m,
+					Double_ = 12345.67890,
+					Int16_ = 12345,
+					Int32_ = 1234567890,
+					Int64_ = 1234567890123456789,
+					Money_ = 99876543210.0m,
+					Single_ = 1234.0f,
+					String_ = "Crazy Frog",
+
+					Char_ = 'F',
+					SByte_ = 123,
+					//UInt16_   = 65432,
+					//UInt32_   = 4000000000,
+					//UInt64_   = 12345678901234567890,
+#if !SQLCE
+					Stream_ = new MemoryStream(5),
+					Xml_ = new XmlTextReader(new StringReader("<xml/>")),
+					XmlDoc_ = new XmlDocument()
+#endif
+				};
+
+#if !SQLCE
+				dt.XmlDoc_.LoadXml("<root><sql id=\"2\">Other Verbiage</sql></root>");
+#endif
+
+				int id = (int)db.InsertWithIdentity(dt);
+				TypeAccessor.WriteConsole(id);
+			}
+		}
+#endif
 
 #if !ORACLE
 		[Test]
