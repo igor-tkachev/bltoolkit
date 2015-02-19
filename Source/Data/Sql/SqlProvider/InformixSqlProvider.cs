@@ -166,7 +166,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								func.Parameters);
 					case "Hour"     :
 					case "Minute"   :
-					case "Second"   : return new SqlExpression(func.SystemType, string.Format("({{0}}::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
+					case "Second"   : return new SqlExpression(func.SystemType, string.Format("(({{0}})::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
 				}
 			}
 
