@@ -367,12 +367,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildEmptyInsert(StringBuilder sb)
 		{
-			sb.Append("VALUES ");
+			sb.Append("VALUES (");
+			for (var i = 0; i < SqlQuery.Insert.Into.Fields.Count; i++)
+				sb.Append("DEFAULT, ");
 
-			foreach (var col in SqlQuery.Insert.Into.Fields)
-				sb.Append("(DEFAULT)");
-
-			sb.AppendLine();
+			sb.Remove(sb.Length - 2, 2);
+			sb.Append(")");
 		}
 	}
 }

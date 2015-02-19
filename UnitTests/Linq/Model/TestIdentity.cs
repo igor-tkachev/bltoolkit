@@ -10,6 +10,8 @@ namespace Data.Linq.Model
 		//[SequenceName(ProviderName.PostgreSQL, "Seq")]
 		//[SequenceName(ProviderName.Firebird,   "PersonID")]
 		//[SequenceName("ID")]
-		public int ID;
+		public int    ID;
+		public int?   IntValue;
+		public string StringValue;
 	}
 }
