@@ -1574,12 +1574,12 @@ namespace Data.Linq
 				(from p in Parent
 					group p by new {p.ParentID}
 					into grp
-					select grp).ToList();
+					select grp).OrderBy(_ => _.Key.ParentID).ToList();
 			var expected2 =
 				(from p in Child
 					group p by new {p.ChildID, p.ParentID}
 					into grp
-					select grp).ToList();
+					select grp).OrderBy(_ => _.Key.ChildID).ThenBy(_ => _.Key.ParentID).ToList();
 
 			ForEachProvider(db =>
 			{
@@ -1587,7 +1587,7 @@ namespace Data.Linq
 					(from p in db.Parent
 						group p by new {p.ParentID}
 						into grp
-						select grp).ToList();
+						select grp).OrderBy(_ => _.Key.ParentID).ToList();
 
 				Assert.AreEqual(expected1.Count, result1.Count);
 				for (int i = 0; i < expected1.Count; i++)
@@ -1601,7 +1601,7 @@ namespace Data.Linq
 					(from p in db.Child
 						group p by new {p.ChildID, p.ParentID}
 						into grp
-						select grp).ToList();
+						select grp).OrderBy(_ => _.Key.ChildID).ThenBy(_ => _.Key.ParentID).ToList();
 
 				Assert.AreEqual(expected2.Count, result2.Count);
 				for (int i = 0; i < expected2.Count; i++)
