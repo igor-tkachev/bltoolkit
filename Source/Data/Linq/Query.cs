@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Xml;
 
 namespace BLToolkit.Data.Linq
 {
@@ -388,7 +389,7 @@ namespace BLToolkit.Data.Linq
 			{
 				var value = p.Accessor(expr, parameters);
 
-				if (value is IEnumerable)
+				if (value is IEnumerable && !(value is XmlDocument))
 				{
 					var type  = value.GetType();
 					var etype = TypeHelper.GetElementType(type);

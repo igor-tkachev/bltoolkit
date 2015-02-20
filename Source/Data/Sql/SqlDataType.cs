@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace BLToolkit.Data.Sql
 {
@@ -251,6 +252,7 @@ namespace BLToolkit.Data.Sql
 					if (underlyingType == typeof(DateTimeOffset)) return DateTimeOffset;
 #endif
 					if (underlyingType == typeof(TimeSpan))       return TimeSpan;
+					if (underlyingType == typeof(XmlDocument))    return DbXml;
 					break;
 
 				case TypeCode.DBNull   :

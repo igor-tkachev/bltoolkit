@@ -324,9 +324,9 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
-			if (value is System.Data.Linq.Binary)
+			if (value is Binary)
 			{
-				var arr = ((System.Data.Linq.Binary)value).ToArray();
+				var arr = ((Binary)value).ToArray();
 
 				parameter.Value  = arr;
 				parameter.DbType = DbType.Binary;

@@ -41,6 +41,43 @@ namespace Data
 
 		public class DataTypeTest
 		{
+			public int       ID;
+			[MapIgnore(false)]
+			public Byte[]    Binary_;
+#if !ORACLE
+			// Oracle does not know boolean nor guid.
+			//
+			public Boolean   Boolean_;
+			public Guid      Guid_;
+#endif
+			public Byte      Byte_;
+			[MapIgnore(false)]
+			public Byte[]    Bytes_;
+			public DateTime  DateTime_;
+			public Decimal   Decimal_;
+			public Double    Double_;
+			public Int16     Int16_;
+			public Int32     Int32_;
+			public Int64     Int64_;
+			public Decimal   Money_;
+			public Single    Single_;
+			public String    String_;
+
+			public Char      Char_;
+			public SByte     SByte_;
+			public UInt16    UInt16_;
+			public UInt32    UInt32_;
+			public UInt64    UInt64_;
+#if !SQLCE
+			[MapIgnore(false)]
+			public Stream    Stream_;
+			public XmlReader Xml_;
+#endif
+		}
+
+		[TableName("DataTypeTest")]
+		public class DataTypeTest2
+		{
 			[MapField("DataTypeID"), Identity]
 			public int       ID;
 			[MapIgnore(false)]
@@ -106,6 +143,16 @@ namespace Data
 #endif
 		}
 
+		[TestFixtureTearDown]
+		public void TestFixtureTearDown()
+		{
+			using (var db = new DbManager())
+			{
+				db.SetCommand("DELETE FROM DataTypeTest WHERE DataTypeID > 2")
+					.ExecuteNonQuery();
+			}
+		}
+
 		[Test]
 		public void ExecuteList1()
 		{
@@ -160,13 +207,28 @@ namespace Data
 			}
 		}
 
+		[Test]
+		public void ExecuteObject3()
+		{
+			using (DbManager db = new DbManager())
+			{
+				DataTypeTest2 dt = (DataTypeTest2)db
+					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
+					db.Parameter("id", 2))
+					.ExecuteObject(typeof(DataTypeTest2));
+
+				TypeAccessor.WriteConsole(dt);
+				Console.WriteLine(dt.XmlDoc_.InnerXml);
+			}
+		}
+
 #if !SQLCE
 		[Test]
 		public void TestDataTypeTestInsert()
 		{
 			using (DbManager db = new DbManager())
 			{
-				var dt = new DataTypeTest
+				var dt = new DataTypeTest2
 				{
 					Binary_ = new byte[2] { 1, 2 },
 #if !ORACLE
@@ -211,7 +273,7 @@ namespace Data
 		{
 			using (DbManager db = new DbManager())
 			{
-				var dt = new DataTypeTest
+				var dt = new DataTypeTest2
 				{
 					Binary_ = new byte[2] { 1, 2 },
 #if !ORACLE
@@ -243,11 +305,17 @@ namespace Data
 				};
 
 #if !SQLCE
-				dt.XmlDoc_.LoadXml("<root><sql id=\"2\">Other Verbiage</sql></root>");
+				string innerxml = "<root><sql id=\"2\">Other Verbiage</sql></root>";
+				dt.XmlDoc_.LoadXml(innerxml);
 #endif
 
-				int id = (int)db.InsertWithIdentity(dt);
-				TypeAccessor.WriteConsole(id);
+				var id = Convert.ToInt32(db.InsertWithIdentity(dt));
+				var obj = db.GetTable<DataTypeTest2>().Where(_ => _.ID == id).First();
+
+#if !SQLCE
+				Assert.AreEqual(innerxml, obj.XmlDoc_.OuterXml);
+#endif
+				TypeAccessor.WriteConsole(obj);
 			}
 		}
 #endif
@@ -424,11 +492,8 @@ namespace Data
 #if !SQLCE
 					Stream_   = new MemoryStream(5),
 					Xml_      = new XmlTextReader(new StringReader("<xml/>")),
-					XmlDoc_   = new XmlDocument(),
 #endif
 				};
-
-				dt.XmlDoc_.LoadXml("<xmldoc/>");
 
 				var parameters = db.CreateParameters(dt);
 
@@ -441,7 +506,7 @@ namespace Data
 					var p         = parameters.First(obj => obj.ParameterName == paramName);
 
 					Assert.IsNotNull(p);
-					Assert.AreEqual(mm.GetValue(dt), p.Value);
+					Assert.AreEqual(mm.GetValue(dt), p.Value, mm.MemberName);
 				}
 			}
 		}
