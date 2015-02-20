@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.Linq.Mapping;
 using System.Linq;
-
+using System.Runtime.InteropServices;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
@@ -159,5 +159,41 @@ namespace Data.Linq.ProviderSpecific
 		}
 
 		#endregion
+
+	    public class LongFieldName
+	    {
+			[PrimaryKey]
+		    public int Id;
+			public string VeryVeryVeryVeryLongFieldName1;
+			public string VeryVeryVeryVeryLongFieldName2;
+	    }
+
+	    [Test]
+	    public void ParameterNameLength([IncludeDataContexts("Oracle")] string context)
+	    {
+			using (var db = new TestDbManager(context))
+			{
+				var t = db.GetTable<LongFieldName>();
+				t.Delete();
+
+				var p = new LongFieldName();
+				p.Id = 1;
+				p.VeryVeryVeryVeryLongFieldName1 = "yah!";
+				db.Insert(p);
+				db.Update(p);
+
+				t.Insert(() => new LongFieldName() {Id = 2, VeryVeryVeryVeryLongFieldName1 = "Crazy name"});
+				t.Set(_ => _.VeryVeryVeryVeryLongFieldName1, _ => _.VeryVeryVeryVeryLongFieldName1 + "111")
+					.Update();
+				t.Set(_ => _.VeryVeryVeryVeryLongFieldName1,  "111")
+					.Update();
+
+				var q = new SqlQuery<LongFieldName>(db);
+
+				p.Id = 3;
+				q.Insert(p);
+				q.Update(p);
+			}
+		}
 	}
 }

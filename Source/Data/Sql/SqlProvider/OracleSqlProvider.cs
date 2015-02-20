@@ -354,7 +354,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return ":" + value;
+					string name = value.ToString();
+
+					if (name.Length <= 28)
+						return ":" + name;
+
+					int hashCode = name.GetHashCode();
+					return string.Format(":P{0}{1}_", hashCode < 0 ? "m" : "", Math.Abs(hashCode));
+
 			}
 
 			return value;

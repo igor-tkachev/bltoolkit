@@ -659,3 +659,13 @@ FROM
 	dual;
 END;
 /
+
+DROP TABLE LongFieldName
+/
+create table LongFieldName
+(
+	Id number primary key,
+	VeryVeryVeryVeryLongFieldName1 varchar(50) null,
+	VeryVeryVeryVeryLongFieldName2 varchar(50) null
+)
+/
