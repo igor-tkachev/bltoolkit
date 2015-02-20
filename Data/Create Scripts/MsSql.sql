@@ -553,3 +553,11 @@ CREATE TABLE TestIdentity (
 	ID int NOT NULL IDENTITY(1,1) CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED
 )
 GO
+
+CREATE TABLE TestProduct
+(
+	ID             int NOT NULL,
+	Name           nvarchar(50) NOT NULL,
+	Price		   decimal(18,2) NULL
+)
+GO

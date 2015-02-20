@@ -83,5 +83,33 @@ namespace Update
 				((DbManager)db).InsertBatch(new[] { new Area { AreaCode = 1 } });
 			}
 		}
+
+        [TableName( "TestProduct" )]
+        public class TestProduct
+        {
+            [MapField( "ID" )]
+            public int ID { get; set; }
+
+            [MapField( "Name" )]
+            public string Name { get; set; }
+
+            [MapField( "Price" )]
+            public decimal? Price { get; set; }
+        }
+
+        [Test]
+        public void UpdateBatch( [DataContexts( ExcludeLinqService = true )] string context )
+        {
+            using ( var db = new TestDbManager( context ) )
+            {
+                var list = new[]
+				{
+					new TestProduct { ID = 1, Name = "Product 1", Price = 100m },
+					new TestProduct { ID = 2, Name = "Product 2", Price = null },
+				};
+
+                db.Update(5, list);
+            }
+        }
 	}
 }
