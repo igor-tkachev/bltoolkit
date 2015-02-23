@@ -11,10 +11,10 @@ namespace BLToolkit.Data.Linq
 		{
 			if (dataContext == null) throw new ArgumentNullException("dataContext");
 
-			DataContext = dataContext;
+			DataContext         = dataContext;
 		}
 
-		public DataContext DataContext { get; set; }
+		public DataContext DataContext         { get; set; }
 
 		int _transactionCounter;
 

@@ -169,5 +169,23 @@ namespace BLToolkit.Data.Linq
 				_dbManager = null;
 			}
 		}
+
+		public DataContextTransaction BeginTransaction(IsolationLevel level)
+		{
+			var dct = new DataContextTransaction(this);
+
+			dct.BeginTransaction(level);
+
+			return dct;
+		}
+
+		public DataContextTransaction BeginTransaction()
+		{
+			var dct = new DataContextTransaction(this);
+
+			dct.BeginTransaction();
+
+			return dct;
+		}
 	}
 }
