@@ -375,16 +375,24 @@ namespace BLToolkit.Data.Linq
 		}
 
 		object SetCommand(IDataContext dataContext, Expression expr, object[] parameters, int idx)
-		{
+        {
 			lock (this)
-			{
-				SetParameters(expr, parameters, idx);
+            {
+                bool useQueryText = dataContext is DbManager && ((DbManager)dataContext).UseQueryText;
+                SetParameters(expr, parameters, idx, useQueryText);
 				return dataContext.SetQuery(Queries[idx]);
 			}
 		}
 
-		void SetParameters(Expression expr, object[] parameters, int idx)
-		{
+        void SetParameters(Expression expr, object[] parameters, int idx, bool useQueryText)
+        {
+            Query<T>.QueryInfo queryInfo = this.Queries[idx];
+            if (queryInfo.UseQueryText != useQueryText)
+            {
+                queryInfo.Context = null;
+                queryInfo.UseQueryText = useQueryText;
+            }
+
 			foreach (var p in Queries[idx].Parameters)
 			{
 				var value = p.Accessor(expr, parameters);
@@ -413,6 +421,10 @@ namespace BLToolkit.Data.Linq
 					}
 				}
 
+                if (useQueryText && queryInfo.Context != null && !object.Equals(p.SqlParameter.Value, value))
+                {
+                    queryInfo.Context = null;
+                }
 				p.SqlParameter.Value = value;
 			}
 		}
@@ -448,7 +460,12 @@ namespace BLToolkit.Data.Linq
 			}
 
 			public SqlQuery SqlQuery { get; set; }
-			public object   Context  { get; set; }
+            public object Context { get; set; }
+            public bool UseQueryText
+            {
+                get;
+                set;
+            }
 
 			public SqlParameter[] GetParameters()
 			{
