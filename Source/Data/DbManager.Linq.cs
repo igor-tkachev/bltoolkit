@@ -80,6 +80,7 @@ namespace BLToolkit.Data
 			}
 
 			var sqlProvider = DataProvider.CreateSqlProvider();
+            sqlProvider.UseQueryText = this.UseQueryText;
 
 			var cc = sqlProvider.CommandCount(sql);
 			var sb = new StringBuilder();
@@ -112,7 +113,12 @@ namespace BLToolkit.Data
 		}
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
-		{
+        {
+            if (this.UseQueryText)
+            {
+                return;
+            }
+
 			var parameters = query.GetParameters();
 
 			if (parameters.Length == 0 && pq.SqlParameters.Count == 0)

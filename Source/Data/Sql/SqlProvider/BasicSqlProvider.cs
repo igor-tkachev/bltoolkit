@@ -17,6 +17,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public abstract class BasicSqlProvider : ISqlProvider
 	{
+        public bool UseQueryText
+        {
+            get;
+            set;
+        }
+
 		#region Init
 
 		public SqlQuery SqlQuery { get; set; }
@@ -92,7 +98,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (union.IsAll) sb.Append(" ALL");
 						sb.AppendLine();
 
-						CreateSqlProvider().BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
+                        ISqlProvider sqlProvider = this.CreateSqlProvider();
+                        sqlProvider.UseQueryText = this.UseQueryText;
+                        sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
 					}
 				}
 			}
@@ -120,7 +128,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
-			return CreateSqlProvider().BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
+            ISqlProvider sqlProvider = this.CreateSqlProvider();
+            sqlProvider.UseQueryText = this.UseQueryText;
+            return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
 		protected abstract ISqlProvider CreateSqlProvider();
@@ -1519,7 +1529,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var parm = (SqlParameter)expr;
 
-						if (parm.IsQueryParameter)
+                        if (!this.UseQueryText && parm.IsQueryParameter)
 						{
 							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
 							sb.Append(name);
