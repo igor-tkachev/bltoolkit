@@ -104,8 +104,9 @@ namespace Data.Linq
 				switch (str)
 				{
 					//case "Data.Linq.Model.Gender" : return typeof(Gender);
-					case "Data.Linq.Model.Person": return typeof(Person);
-					default                       : return null;
+					case "Data.Linq.Model.Person"      : return typeof(Person);
+					case "Data.Linq.WhereTest+TestEnum": return typeof(WhereTest.TestEnum);
+					default                            : return null;
 				}
 			};
 		}

@@ -276,6 +276,7 @@ namespace BLToolkit.Data.DataProvider
 			readonly MemberMapper[] _members;
 			readonly IEnumerable    _collection;
 			readonly IEnumerator    _enumerator;
+			readonly MappingSchema  _mappingSchema;
 
 			public int Count;
 
@@ -311,7 +312,9 @@ namespace BLToolkit.Data.DataProvider
 				var value = _members[i].GetValue(_enumerator.Current);
 
 				if (value != null && value.GetType().IsEnum)
-					value = Map.EnumToValue(value, true);
+				{
+					value = _members[i].MappingSchema.MapEnumToValue(value, _members[i].MemberAccessor, true);
+				}
 
 				return value;
 			}

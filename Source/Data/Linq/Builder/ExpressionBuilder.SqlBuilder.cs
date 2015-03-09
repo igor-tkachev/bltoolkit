@@ -1903,9 +1903,10 @@ namespace BLToolkit.Data.Linq.Builder
 						var p = BuildParameter(arr).SqlParameter;
 						p.IsQueryParameter = false;
 						if (memberAccessor != null)
-						{
 							p.SetEnumConverter(memberAccessor, MappingSchema);
-						}
+						else if (expr != null && expr.SystemType != null && expr.SystemType.IsEnum)
+							p.SetEnumConverter(expr.SystemType, MappingSchema);
+
 						return new SqlQuery.Predicate.InList(expr, false, p);
 					}
 

@@ -216,6 +216,7 @@
     <Compile Include="Data\DataProvider\ProviderName.cs" />
     <Compile Include="Data\DataProvider\SqlDataProviderVersionResolver.cs" />
     <Compile Include="Data\DbConnectionFactory.cs" />
+    <Compile Include="Data\DbManagerTransaction.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\IDbConnectionFactory.cs" />
     <Compile Include="Data\Linq\Builder\AsUpdatableBuilder.cs" />

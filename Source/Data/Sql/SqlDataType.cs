@@ -252,7 +252,9 @@ namespace BLToolkit.Data.Sql
 					if (underlyingType == typeof(DateTimeOffset)) return DateTimeOffset;
 #endif
 					if (underlyingType == typeof(TimeSpan))       return TimeSpan;
+#if !SILVERLIGHT
 					if (underlyingType == typeof(XmlDocument))    return DbXml;
+#endif
 					break;
 
 				case TypeCode.DBNull   :

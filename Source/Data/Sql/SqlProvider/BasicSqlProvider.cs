@@ -1658,17 +1658,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (type.IsEnum)
 				{
-					value = Map.EnumToValue(value);
+					var attrs = type.GetCustomAttributes(typeof(SqlEnumAttribute), true);
+					value = Map.EnumToValue(value, attrs.Length == 0);
 
 					if (value != null && !value.GetType().IsEnum)
 						BuildValue(sb, value);
 					else if (value != null)
-					{
-						var attrs = value.GetType().GetCustomAttributes(typeof(SqlEnumAttribute), true);
-
-						value = Map.EnumToValue(value, attrs.Length == 0);
 						sb.Append(value);
-					}
+
 				}
 				else
 					sb.Append(value);

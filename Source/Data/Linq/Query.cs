@@ -389,7 +389,12 @@ namespace BLToolkit.Data.Linq
 			{
 				var value = p.Accessor(expr, parameters);
 
-				if (value is IEnumerable && !(value is XmlDocument))
+				if (value is IEnumerable
+#if !SILVERLIGHT
+					&& !(value is XmlDocument)
+#endif
+					
+					)
 				{
 					var type  = value.GetType();
 					var etype = TypeHelper.GetElementType(type);
