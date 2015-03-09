@@ -1525,7 +1525,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var parm = (SqlParameter)expr;
 
-						if (!UseQueryText && parm.IsQueryParameter)
+						if (!BuildAsValue(parm))
 						{
 							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
 							sb.Append(name);
@@ -1549,6 +1549,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return sb;
+		}
+
+		public virtual bool BuildAsValue(SqlParameter parm)
+		{
+			return (UseQueryText && !(parm.Value is System.Data.Linq.Binary))
+			       || !parm.IsQueryParameter;
 		}
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)

@@ -114,10 +114,10 @@ namespace BLToolkit.Data
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
         {
-			if (UseQueryText)
-				return;
+			var sql = DataProvider.CreateSqlProvider();
+			sql.UseQueryText = UseQueryText;
 
-			var parameters = query.GetParameters();
+			var parameters = query.GetParameters().Where(_ => !sql.BuildAsValue(_)).ToArray();
 
 			if (parameters.Length == 0 && pq.SqlParameters.Count == 0)
 				return;
@@ -287,7 +287,7 @@ namespace BLToolkit.Data
 
 			var sb = new StringBuilder();
 
-			sb.Append("-- ").Append(ConfigurationString);
+			sb.Append("-- ").Append(ConfigurationString).AppendFormat(" UseQueryText={0}", UseQueryText);
 
 			if (ConfigurationString != DataProvider.Name)
 				sb.Append(' ').Append(DataProvider.Name);

@@ -201,12 +201,18 @@ namespace Data.Linq
 				if (!info.Loaded)
 					continue;
 
-				yield return new TestDbManager(info.Name);
+				yield return new TestDbManager(info.Name, false);
+				yield return new TestDbManager(info.Name, true);
 
 				var ip = GetIP(info.Name);
 				var dx = new TestServiceModelDataContext(ip);
 
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+
+				yield return dx;
+
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider + UseQueryText");
+				dx.UseQueryText = true;
 
 				yield return dx;
 			}

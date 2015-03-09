@@ -211,6 +211,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 
+		public override void BuildValue(StringBuilder sb, object value)
+		{
+			if (value is Guid)
+				sb.Append("'{").Append(value).Append("}'");
+			else
+				base.BuildValue(sb, value);
+		}
+
 		public override object Convert(object value, ConvertType convertType)
 		{
 			switch (convertType)

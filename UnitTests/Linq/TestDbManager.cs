@@ -15,13 +15,14 @@ namespace Data.Linq
 
 	public class TestDbManager : DbManager, ITestDataContext
 	{
-		public TestDbManager(string configString)
+		public TestDbManager(string configString, bool useQueryText = false)
 			: base(configString)
 		{
+			UseQueryText = useQueryText;
 		}
 
 		public TestDbManager()
-			: base(ProviderName.Access)
+			: this(ProviderName.Access, false)
 		{
 		}
 

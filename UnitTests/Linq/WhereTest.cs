@@ -656,14 +656,19 @@ namespace Data.Linq
 		[Test]
 		public void CheckCondition2()
 		{
+			var p1 = 1;
+			var p2 = 2;
+			var p3 = 3;
+			var p4 = 4;
+
 			var expected =
 				from p in Parent
-				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				where p.ParentID == p1 && p.Value1 == p1 || p.ParentID == p2 && (p.ParentID != p3 || p.ParentID == p4) && p.Value1.HasValue
 				select p;
 
 			ForEachProvider(db => AreEqual(expected,
 				from p in db.Parent
-				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				where p.ParentID == p1 && p.Value1 == p1 || p.ParentID == p2 && (p.ParentID != p3 || p.ParentID == p4) && p.Value1.HasValue
 				select p));
 		}
 

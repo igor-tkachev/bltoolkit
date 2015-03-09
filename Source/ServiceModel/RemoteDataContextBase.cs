@@ -70,6 +70,8 @@ namespace BLToolkit.ServiceModel
 			get { return false; }
 		}
 
+		public bool UseQueryText { get; set; }
+
 		static readonly Dictionary<Type,Func<ISqlProvider>> _sqlProviders = new Dictionary<Type, Func<ISqlProvider>>();
 
 		Func<ISqlProvider> _createSqlProvider;

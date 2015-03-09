@@ -378,7 +378,7 @@ namespace BLToolkit.Data.Linq
 		{
 			lock (this)
 			{
-				bool useQueryText = dataContext is DbManager && ((DbManager) dataContext).UseQueryText;
+				bool useQueryText = dataContext.UseQueryText;
 				SetParameters(expr, parameters, idx, useQueryText);
 				return dataContext.SetQuery(Queries[idx]);
 			}
