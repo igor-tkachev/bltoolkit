@@ -374,24 +374,24 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		object SetCommand(IDataContext dataContext, Expression expr, object[] parameters, int idx)
-        {
+		private object SetCommand(IDataContext dataContext, Expression expr, object[] parameters, int idx)
+		{
 			lock (this)
-            {
-                bool useQueryText = dataContext is DbManager && ((DbManager)dataContext).UseQueryText;
-                SetParameters(expr, parameters, idx, useQueryText);
+			{
+				bool useQueryText = dataContext is DbManager && ((DbManager) dataContext).UseQueryText;
+				SetParameters(expr, parameters, idx, useQueryText);
 				return dataContext.SetQuery(Queries[idx]);
 			}
 		}
 
-        void SetParameters(Expression expr, object[] parameters, int idx, bool useQueryText)
-        {
-            Query<T>.QueryInfo queryInfo = this.Queries[idx];
-            if (queryInfo.UseQueryText != useQueryText)
-            {
-                queryInfo.Context = null;
-                queryInfo.UseQueryText = useQueryText;
-            }
+		private void SetParameters(Expression expr, object[] parameters, int idx, bool useQueryText)
+		{
+			Query<T>.QueryInfo queryInfo = this.Queries[idx];
+			if (queryInfo.UseQueryText != useQueryText)
+			{
+				queryInfo.Context = null;
+				queryInfo.UseQueryText = useQueryText;
+			}
 
 			foreach (var p in Queries[idx].Parameters)
 			{
@@ -399,21 +399,21 @@ namespace BLToolkit.Data.Linq
 
 				if (value is IEnumerable
 #if !SILVERLIGHT
-					&& !(value is XmlDocument)
+				    && !(value is XmlDocument)
 #endif
-					
+
 					)
 				{
-					var type  = value.GetType();
+					var type = value.GetType();
 					var etype = TypeHelper.GetElementType(type);
 
-					if (etype == null || etype == typeof(object) ||
-						etype.IsEnum ||
-						(TypeHelper.IsNullableType(etype) && etype.GetGenericArguments()[0].IsEnum))
+					if (etype == null || etype == typeof (object) ||
+					    etype.IsEnum ||
+					    (TypeHelper.IsNullableType(etype) && etype.GetGenericArguments()[0].IsEnum))
 					{
 						var values = new List<object>();
 
-						foreach (var v in (IEnumerable)value)
+						foreach (var v in (IEnumerable) value)
 						{
 							values.Add(v);
 							// Enum mapping done by parameter itself
@@ -426,10 +426,10 @@ namespace BLToolkit.Data.Linq
 					}
 				}
 
-                if (useQueryText && queryInfo.Context != null && !object.Equals(p.SqlParameter.Value, value))
-                {
-                    queryInfo.Context = null;
-                }
+				if (useQueryText && queryInfo.Context != null && !object.Equals(p.SqlParameter.Value, value))
+				{
+					queryInfo.Context = null;
+				}
 				p.SqlParameter.Value = value;
 			}
 		}
@@ -464,13 +464,9 @@ namespace BLToolkit.Data.Linq
 				SqlQuery = new SqlQuery();
 			}
 
-			public SqlQuery SqlQuery { get; set; }
-            public object Context { get; set; }
-            public bool UseQueryText
-            {
-                get;
-                set;
-            }
+			public SqlQuery SqlQuery     { get; set; }
+			public object   Context      { get; set; }
+			public bool     UseQueryText { get; set; }
 
 			public SqlParameter[] GetParameters()
 			{

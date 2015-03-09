@@ -114,10 +114,8 @@ namespace BLToolkit.Data
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
         {
-            if (this.UseQueryText)
-            {
-                return;
-            }
+			if (UseQueryText)
+				return;
 
 			var parameters = query.GetParameters();
 

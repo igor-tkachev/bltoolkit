@@ -17,16 +17,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public abstract class BasicSqlProvider : ISqlProvider
 	{
-        public bool UseQueryText
-        {
-            get;
-            set;
-        }
 
 		#region Init
 
-		public SqlQuery SqlQuery { get; set; }
-		public int      Indent   { get; set; }
+		public bool     UseQueryText { get; set; }
+		public SqlQuery SqlQuery     { get; set; }
+		public int      Indent       { get; set; }
 
 		private int _nextNesting = 1;
 		private int _nesting;
@@ -98,9 +94,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (union.IsAll) sb.Append(" ALL");
 						sb.AppendLine();
 
-                        ISqlProvider sqlProvider = this.CreateSqlProvider();
-                        sqlProvider.UseQueryText = this.UseQueryText;
-                        sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
+						ISqlProvider sqlProvider = CreateSqlProvider();
+						sqlProvider.UseQueryText = UseQueryText;
+						sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
 					}
 				}
 			}
@@ -128,9 +124,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
-            ISqlProvider sqlProvider = this.CreateSqlProvider();
-            sqlProvider.UseQueryText = this.UseQueryText;
-            return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
+			ISqlProvider sqlProvider = CreateSqlProvider();
+			sqlProvider.UseQueryText = UseQueryText;
+			return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
 		protected abstract ISqlProvider CreateSqlProvider();
@@ -1529,7 +1525,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var parm = (SqlParameter)expr;
 
-                        if (!this.UseQueryText && parm.IsQueryParameter)
+						if (!UseQueryText && parm.IsQueryParameter)
 						{
 							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
 							sb.Append(name);

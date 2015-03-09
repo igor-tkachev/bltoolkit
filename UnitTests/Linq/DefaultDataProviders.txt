@@ -4,9 +4,9 @@
 
 --Local (can allways be used)
 
-Access
-SqlCe
-SQLite
+--Access
+--SqlCe
+--SQLite
 
 --DBHost
 
@@ -16,7 +16,7 @@ SQLite
 --Sql2005
 --Sql2008
 --Sql2012
---MySql
+MySql
 --Oracle
 --PostgreSQL
 --Northwind
