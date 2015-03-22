@@ -4,7 +4,8 @@ using System.Linq.Expressions;
 
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
-
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq
@@ -282,6 +283,42 @@ namespace Data.Linq
 					select ch;
 
 				q.ToList();
+			}
+		}
+
+		[Test]
+		public void PropertyExpressionTest()
+		{
+			ForEachProvider(db =>
+				AreEqual(Parent.Select(_ => _.Children.Count()),
+						db.GetTable<Parent6>().Select(_ => _.GetChildCount())));
+
+			ForEachProvider(db =>
+				AreEqual(Parent.Select(_ => _.Children.Count()),
+						db.GetTable<Parent6>().Select(_ => _.ChildCount)));
+		}
+
+		[TableName("Parent")]
+		public class Parent6 : Parent
+		{
+			[MethodExpression("ChildCountExpression")]
+			[MapIgnore]
+			public int ChildCount
+			{
+				get { return Children.Count; }
+			}
+
+			[MethodExpression("ChildCountExpression")]
+			public int GetChildCount()
+			{
+				return Children.Count;
+			}
+
+			static Expression ChildCountExpression()
+			{
+				return
+					(Expression<Func<Parent, int>>)
+					(p => p.Children.Count());
 			}
 		}
 	}
