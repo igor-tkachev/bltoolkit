@@ -135,8 +135,9 @@ namespace BLToolkit.Data
 
 					if (sqlp.IsQueryParameter)
 					{
-						var parm = parameters.Length > i && parameters[i] == sqlp ? parameters[i] : parameters.First(p => p == sqlp);
-						AddParameter(parms, x, parm);
+						var parm = parameters.Length > i && parameters[i] == sqlp ? parameters[i] : parameters.FirstOrDefault(p => p == sqlp);
+						if (parm != null)
+							AddParameter(parms, x, parm);
 					}
 				}
 			}

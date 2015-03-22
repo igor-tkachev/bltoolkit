@@ -173,6 +173,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("to_date('{0:yyyy-MM-dd HH:mm:ss.fff}', '%Y-%m-%d %H:%M:%S%F3')", value));
+		}
+
 		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
 		{
 			func = ConvertFunctionParameters(func);
