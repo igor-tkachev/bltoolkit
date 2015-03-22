@@ -19,7 +19,7 @@ namespace BLToolkit.ServiceModel
 		string             _contextID;
 		string IDataContext.ContextID
 		{
-			get { return _contextID ?? (_contextID = ContextIDPrefix + SqlProviderType.Name.Replace("SqlProvider", "")); }
+			get { return _contextID ?? (_contextID = ContextIDPrefix + SqlProviderType.Name.Replace("SqlProvider", "") + UseQueryText); }
 		}
 
 		private MappingSchema _mappingSchema;
@@ -70,7 +70,17 @@ namespace BLToolkit.ServiceModel
 			get { return false; }
 		}
 
-		public bool UseQueryText { get; set; }
+		private bool _useQueryContext;
+		public  bool UseQueryText
+		{
+			get { return _useQueryContext; }
+			set
+			{
+				_useQueryContext = value;
+				_contextID = null;
+			}
+
+		}
 
 		static readonly Dictionary<Type,Func<ISqlProvider>> _sqlProviders = new Dictionary<Type, Func<ISqlProvider>>();
 

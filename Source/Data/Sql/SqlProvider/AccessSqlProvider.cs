@@ -432,7 +432,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (parm.Value is DateTime)
 			{
 				var dt = (DateTime) parm.Value;
-				return dt.Millisecond == 0;
+				return dt.Millisecond == 0 && !parm.IsQueryParameter;
 			}
 
 			return base.BuildAsValue(parm);

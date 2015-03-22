@@ -1095,9 +1095,8 @@ namespace BLToolkit.ServiceModel
 							var likeEnd   = ReadString();
 							*/
 
-							obj = new SqlParameter(systemType, name, value, (MappingSchema)null)
+							obj = new SqlParameter(systemType, name, value, (MappingSchema)null, isQueryParameter)
 							{
-								IsQueryParameter = isQueryParameter,
 								DbType           = dbType,
 								DbSize           = dbSize,
 								//EnumTypes        = enumTypes,

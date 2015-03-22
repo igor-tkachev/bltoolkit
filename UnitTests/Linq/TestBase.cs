@@ -211,8 +211,8 @@ namespace Data.Linq
 
 				yield return dx;
 
-				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider + UseQueryText");
 				dx.UseQueryText = true;
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider + UseQueryText");
 
 				yield return dx;
 			}

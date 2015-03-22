@@ -80,7 +80,7 @@ namespace BLToolkit.Data
 			}
 
 			var sqlProvider = DataProvider.CreateSqlProvider();
-            sqlProvider.UseQueryText = this.UseQueryText;
+            //sqlProvider.UseQueryText = this.UseQueryText;
 
 			var cc = sqlProvider.CommandCount(sql);
 			var sb = new StringBuilder();
@@ -115,7 +115,7 @@ namespace BLToolkit.Data
 		void GetParameters(IQueryContext query, PreparedQuery pq)
         {
 			var sql = DataProvider.CreateSqlProvider();
-			sql.UseQueryText = UseQueryText;
+			//sql.UseQueryText = UseQueryText;
 
 			var parameters = query.GetParameters().Where(_ => !sql.BuildAsValue(_)).ToArray();
 
@@ -353,7 +353,7 @@ namespace BLToolkit.Data
 
 		string IDataContext.ContextID
 		{
-			get { return DataProvider.Name; }
+			get { return DataProvider.Name + UseQueryText; }
 		}
 
 		static Func<ISqlProvider> GetCreateSqlProvider(DataProviderBase dp)

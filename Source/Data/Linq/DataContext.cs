@@ -18,17 +18,17 @@ namespace BLToolkit.Data.Linq
 		{
 			ConfigurationString = configurationString;
 			DataProvider        = DbManager.GetDataProvider(configurationString);
-			ContextID           = DataProvider.Name;
+			//ContextID           = DataProvider.Name;
 
 			MappingSchema = DataProvider.MappingSchema ?? Map.DefaultSchema;
 		}
 
 		public string           ConfigurationString { get; private set; }
 		public DataProviderBase DataProvider        { get; private set; }
-		public string           ContextID           { get; set;         }
 		public MappingSchema    MappingSchema       { get; set;         }
 		public string           LastQuery           { get; set;         }
 		public bool             UseQueryText        { get; set;         }
+		public string           ContextID           { get { return DataProvider.Name + UseQueryText; } }
 
 		private bool _keepConnectionAlive;
 		public  bool  KeepConnectionAlive
@@ -146,7 +146,7 @@ namespace BLToolkit.Data.Linq
 				ConfigurationString = ConfigurationString,
 				KeepConnectionAlive = KeepConnectionAlive,
 				DataProvider        = DataProvider,
-				ContextID           = ContextID,
+				//ContextID           = ContextID,
 				MappingSchema       = MappingSchema,
 				UseQueryText        = UseQueryText
 			};

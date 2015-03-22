@@ -95,7 +95,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						sb.AppendLine();
 
 						ISqlProvider sqlProvider = CreateSqlProvider();
-						sqlProvider.UseQueryText = UseQueryText;
+						//sqlProvider.UseQueryText = UseQueryText;
 						sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
 					}
 				}
@@ -125,7 +125,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
 			ISqlProvider sqlProvider = CreateSqlProvider();
-			sqlProvider.UseQueryText = UseQueryText;
+			//sqlProvider.UseQueryText = UseQueryText;
 			return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
@@ -1553,8 +1553,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual bool BuildAsValue(SqlParameter parm)
 		{
-			return (UseQueryText && !(parm.Value is System.Data.Linq.Binary))
-			       || !parm.IsQueryParameter;
+			return !parm.IsQueryParameter && !(parm.Value is System.Data.Linq.Binary);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
