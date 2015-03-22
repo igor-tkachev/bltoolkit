@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -1722,7 +1723,7 @@ namespace BLToolkit.Linq
 			foreach (var item in source)
 			{
 				var targetType = targetTypes[idx];
-				if (item.Type != targetType)
+				if (item.Type != targetType && !TypeHelper.IsSameOrParent(typeof(IEnumerable), item.Type))
 				{
 					list.Add(Expression.Convert(item, targetType));
 				}
