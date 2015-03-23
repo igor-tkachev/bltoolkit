@@ -95,7 +95,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						sb.AppendLine();
 
 						ISqlProvider sqlProvider = CreateSqlProvider();
-						//sqlProvider.UseQueryText = UseQueryText;
 						sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
 					}
 				}
@@ -125,7 +124,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
 			ISqlProvider sqlProvider = CreateSqlProvider();
-			//sqlProvider.UseQueryText = UseQueryText;
 			return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
