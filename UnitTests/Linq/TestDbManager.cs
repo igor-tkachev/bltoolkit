@@ -15,10 +15,10 @@ namespace Data.Linq
 
 	public class TestDbManager : DbManager, ITestDataContext
 	{
-		public TestDbManager(string configString, bool useQueryText = false)
+		public TestDbManager(string configString, bool inlineParameters = false)
 			: base(configString)
 		{
-			UseQueryText = useQueryText;
+			InlineParameters = inlineParameters;
 		}
 
 		public TestDbManager()

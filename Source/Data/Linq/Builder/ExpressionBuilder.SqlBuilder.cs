@@ -1119,7 +1119,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, name, null, MappingSchema, !DataContextInfo.DataContext.UseQueryText)
+				SqlParameter = new SqlParameter(expr.Type, name, null, MappingSchema, !DataContextInfo.DataContext.InlineParameters)
 			};
 
 			_parameters.Add(expr, p);
@@ -1789,7 +1789,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, member.Name, null, MappingSchema, !DataContextInfo.DataContext.UseQueryText)
+				SqlParameter = new SqlParameter(expr.Type, member.Name, null, MappingSchema, !DataContextInfo.DataContext.InlineParameters)
 			};
 
 			_parameters.Add(expr, p);
@@ -1947,7 +1947,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
-					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, !DataContextInfo.DataContext.UseQueryText, GetLikeEscaper(start, end))
+					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, !DataContextInfo.DataContext.InlineParameters, GetLikeEscaper(start, end))
 				};
 
 				CurrentSqlParameters.Add(ep);

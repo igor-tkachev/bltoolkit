@@ -286,7 +286,7 @@ namespace BLToolkit.Data
 
 			var sb = new StringBuilder();
 
-			sb.Append("-- ").Append(ConfigurationString).AppendFormat(" UseQueryText={0}", UseQueryText);
+			sb.Append("-- ").Append(ConfigurationString).AppendFormat(" InlineParameters={0}", InlineParameters);
 
 			if (ConfigurationString != DataProvider.Name)
 				sb.Append(' ').Append(DataProvider.Name);
@@ -351,7 +351,7 @@ namespace BLToolkit.Data
 
 		string IDataContext.ContextID
 		{
-			get { return DataProvider.Name + UseQueryText; }
+			get { return DataProvider.Name + InlineParameters; }
 		}
 
 		static Func<ISqlProvider> GetCreateSqlProvider(DataProviderBase dp)

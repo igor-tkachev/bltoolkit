@@ -161,7 +161,7 @@ namespace BLToolkit.Data
         /// <summary>
         /// Use plain text query instead of using command parameters
         /// </summary>
-        public bool UseQueryText { get; set; }
+        public bool InlineParameters { get; set; }
 
 		#endregion
 

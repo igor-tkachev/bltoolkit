@@ -19,7 +19,7 @@ namespace BLToolkit.ServiceModel
 		string             _contextID;
 		string IDataContext.ContextID
 		{
-			get { return _contextID ?? (_contextID = ContextIDPrefix + SqlProviderType.Name.Replace("SqlProvider", "") + UseQueryText); }
+			get { return _contextID ?? (_contextID = ContextIDPrefix + SqlProviderType.Name.Replace("SqlProvider", "") + InlineParameters); }
 		}
 
 		private MappingSchema _mappingSchema;
@@ -70,13 +70,13 @@ namespace BLToolkit.ServiceModel
 			get { return false; }
 		}
 
-		private bool _useQueryContext;
-		public  bool UseQueryText
+		private bool _inlineParameters;
+		public  bool InlineParameters
 		{
-			get { return _useQueryContext; }
+			get { return _inlineParameters; }
 			set
 			{
-				_useQueryContext = value;
+				_inlineParameters = value;
 				_contextID = null;
 			}
 

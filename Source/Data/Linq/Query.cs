@@ -378,7 +378,7 @@ namespace BLToolkit.Data.Linq
 		{
 			lock (this)
 			{
-				bool useQueryText = dataContext.UseQueryText;
+				bool useQueryText = dataContext.InlineParameters;
 				SetParameters(expr, parameters, idx, useQueryText);
 				return dataContext.SetQuery(Queries[idx]);
 			}
@@ -565,7 +565,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema, !dataContext.UseQueryText)
+				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema, !dataContext.InlineParameters)
 			};
 
 			if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))

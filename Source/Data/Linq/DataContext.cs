@@ -27,8 +27,8 @@ namespace BLToolkit.Data.Linq
 		public DataProviderBase DataProvider        { get; private set; }
 		public MappingSchema    MappingSchema       { get; set;         }
 		public string           LastQuery           { get; set;         }
-		public bool             UseQueryText        { get; set;         }
-		public string           ContextID           { get { return DataProvider.Name + UseQueryText; } }
+		public bool             InlineParameters        { get; set;         }
+		public string           ContextID           { get { return DataProvider.Name + InlineParameters; } }
 
 		private bool _keepConnectionAlive;
 		public  bool  KeepConnectionAlive
@@ -73,7 +73,7 @@ namespace BLToolkit.Data.Linq
 					_connectionString = DbManager.GetConnectionString(ConfigurationString);
 
 				_dbManager = new DbManager(DataProvider, _connectionString) { MappingSchema = MappingSchema };
-				_dbManager.UseQueryText = UseQueryText;
+				_dbManager.InlineParameters = InlineParameters;
 			}
 
 			return _dbManager;
@@ -148,7 +148,7 @@ namespace BLToolkit.Data.Linq
 				DataProvider        = DataProvider,
 				//ContextID           = ContextID,
 				MappingSchema       = MappingSchema,
-				UseQueryText        = UseQueryText
+				InlineParameters        = InlineParameters
 			};
 
 			if (forNestedQuery && _dbManager != null && _dbManager.IsMarsEnabled)

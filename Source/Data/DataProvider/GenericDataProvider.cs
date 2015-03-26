@@ -146,7 +146,7 @@ namespace BLToolkit.Data.DataProvider
             int                             maxBatchSize, 
             DbManager.ParameterProvider<T>  getParameters)
         {
-            if (db.UseQueryText && Name == ProviderFullName.Oracle)
+            if (db.InlineParameters && Name == ProviderFullName.Oracle)
             {
                 List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, true);
                 return ExecuteSqlList(db, sqlList);
@@ -164,12 +164,12 @@ namespace BLToolkit.Data.DataProvider
         {
             if (Name == ProviderFullName.Oracle)
             {
-                if (db.UseQueryText)
+                if (db.InlineParameters)
                 {
                     List<string> sqlList = _dataProviderInterpreter.GetInsertBatchSqlList(insertText, collection, members, maxBatchSize, false);
                     return ExecuteSqlList(db, sqlList);
                 }
-                throw new NotSupportedException("Set UseQueryText = true on the current generic data provider!");                
+				throw new NotSupportedException("Set InlineParameters = true on the current generic data provider!");                
             }
             return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
         }
