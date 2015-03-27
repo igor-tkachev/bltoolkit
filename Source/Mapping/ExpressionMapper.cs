@@ -441,7 +441,7 @@ namespace BLToolkit.Mapping
 
 				[UsedImplicitly]
 				static TList MapScalarList<TList>(IEnumerable<TSourceItem> source, Func<TSourceItem,TDestItem> itemMapper)
-					where TList : class, IList<TDestItem>, new()
+					where TList : class, ICollection<TDestItem>, new()
 				{
 					if (source == null)
 						return null;

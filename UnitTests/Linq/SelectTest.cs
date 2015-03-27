@@ -485,8 +485,8 @@ namespace Data.Linq
 		public void ProjectionTest1()
 		{
 			ForEachProvider(db => AreEqual(
-				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID },
-				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID }));
+				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value, ID2 = c.ParentID },
+				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value, ID2 = c.ParentID }));
 		}
 
 		[TableName("Person")]
@@ -567,6 +567,27 @@ namespace Data.Linq
 				var sql = q.ToString();
 
 				Assert.That(sql.IndexOf("ParentID_"), Is.LessThan(0));
+			}
+		}
+
+		[Test]
+		public void Issue317()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q = 
+					from p in db.Parent
+					join c in db.Child on p.ParentID equals c.ChildID into childs
+					from c in childs.DefaultIfEmpty()
+					select new
+					{
+						p.ParentID,
+						ChildId1 = null == c ? -1000 : c.ChildID,
+						ChildId2 = c == null ? -2000 : c.ChildID,
+					};
+
+				q.ToArray();
+
 			}
 		}
 	}

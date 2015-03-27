@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,17 +10,76 @@ namespace BLToolkit.Data.Sql
 {
 	public abstract class SqlValueBase: IValueContainer
 	{
+		[CLSCompliant(false)] 
+		private object _convertedValue;
+
 		[CLSCompliant(false)]
 		protected      object _value;
 		public virtual object  Value
 		{
 			get
 			{
+				if (_convertedValue != null)
+					return _convertedValue;
+
 				var valueConverter = ValueConverter;
-				return valueConverter == null ? _value : valueConverter(_value);
+				if (valueConverter == null)
+					return _value;
+
+				if (_value == null)
+					return _convertedValue = valueConverter(_value);
+
+				if (!(_value is string)
+					&& _value is IEnumerable)
+				{
+#if SILVERLIGHT
+					var res = new List<Object>(10);
+#else
+					var res = new ArrayList(10);
+#endif
+					var e   = ((IEnumerable)_value);
+					var ut  = null as Type;
+
+					foreach (var val in e)
+					{
+						var element = valueConverter(val);
+						res.Add(element);
+
+						if (ut == null)
+							ut = element.GetType();
+						else if (ut != element.GetType())
+							ut = typeof(object);
+					}
+
+					if (ut == null)
+						ut = typeof (object);
+
+					if (ut != typeof (object))
+					{
+						var array = Array.CreateInstance(ut, res.Count);
+#if !SILVERLIGHT
+						res.CopyTo(array);
+#else 
+						for(var i = 0; i < res.Count; i++)
+							array.SetValue(res[i], i);
+#endif
+						_convertedValue = array;
+					}
+					else
+						_convertedValue = res.ToArray();
+
+				}
+				else
+					_convertedValue = valueConverter(_value);
+
+				return _convertedValue;
 			}
 
-			set { _value = value; }
+			set
+			{
+				_value = value;
+				_convertedValue = null;
+			}
 		}
 
 		#region Value Converter
@@ -48,7 +108,11 @@ namespace BLToolkit.Data.Sql
 				return _valueConverter;
 			}
 
-			set { _valueConverter = value; }
+			set
+			{
+				_valueConverter = value;
+				_convertedValue = null;
+			}
 		}
 
 		bool _isEnumConverterSet;

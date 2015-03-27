@@ -205,7 +205,9 @@
     <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="DataAccess\ScalarAttribute.cs" />
+    <Compile Include="Data\DbManagerTransaction.cs" />
     <Compile Include="Data\DataExceptionType.cs" />
+    <Compile Include="Data\DataProvider\DataProviderVersionResolverBase.cs" />
     <Compile Include="Data\DataProvider\Sql2005DataProvider.cs" />
     <Compile Include="Data\DataProvider\DataProviderInterpreterBase.cs" />
     <Compile Include="Data\DataProvider\Interpreters\OracleDataProviderInterpreter.cs" />
@@ -217,6 +219,7 @@
     <Compile Include="Data\DataProvider\Sql2012DataProvider.cs" />
     <Compile Include="Data\DataProvider\SqlDataProvider.cs" />
     <Compile Include="Data\DataProvider\ProviderName.cs" />
+    <Compile Include="Data\DataProvider\SqlDataProviderVersionResolver.cs" />
     <Compile Include="Data\DbConnectionFactory.cs" />
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\IDbConnectionFactory.cs" />
@@ -255,7 +258,9 @@
     <Compile Include="Data\Linq\IExpressionQuery.cs" />
     <Compile Include="Data\Linq\MemberInfoComparer.cs" />
     <Compile Include="Data\Linq\QueryableAccessor.cs" />
+    <Compile Include="Data\Linq\Sql.GroupBy.cs" />
     <Compile Include="Data\Linq\TableT.cs" />
+    <Compile Include="Data\OperationExceptionRetryEventArgs.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2000SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2012SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlValueBase.cs" />

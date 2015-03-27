@@ -280,6 +280,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return value;
 		}
 
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.AppendFormat("cast('{0:yyyy-MM-dd HH:mm:ss.fff}' as timestamp)", value);
+		}
+
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
 			BuildInsertOrUpdateQueryAsMerge(sb, "FROM rdb$database");

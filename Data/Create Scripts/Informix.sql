@@ -86,7 +86,9 @@ DROP TABLE TestIdentity
 GO
 
 CREATE TABLE TestIdentity (
-	ID SERIAL NOT NULL,
+	ID          SERIAL       NOT NULL,
+	IntValue    INTEGER      NULL,
+	StringValue NVARCHAR(50) NULL,
 	PRIMARY KEY(ID)
 )
 GO

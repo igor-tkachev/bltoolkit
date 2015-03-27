@@ -166,11 +166,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								func.Parameters);
 					case "Hour"     :
 					case "Minute"   :
-					case "Second"   : return new SqlExpression(func.SystemType, string.Format("({{0}}::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
+					case "Second"   : return new SqlExpression(func.SystemType, string.Format("(({{0}})::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
 				}
 			}
 
 			return expr;
+		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("to_date('{0:yyyy-MM-dd HH:mm:ss.fff}', '%Y-%m-%d %H:%M:%S%F3')", value));
 		}
 
 		protected override void BuildFunction(StringBuilder sb, SqlFunction func)

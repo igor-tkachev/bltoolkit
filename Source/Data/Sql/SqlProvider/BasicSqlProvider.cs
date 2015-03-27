@@ -17,10 +17,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 	public abstract class BasicSqlProvider : ISqlProvider
 	{
+
 		#region Init
 
-		public SqlQuery SqlQuery { get; set; }
-		public int      Indent   { get; set; }
+		public bool     UseQueryText { get; set; }
+		public SqlQuery SqlQuery     { get; set; }
+		public int      Indent       { get; set; }
 
 		private int _nextNesting = 1;
 		private int _nesting;
@@ -92,7 +94,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (union.IsAll) sb.Append(" ALL");
 						sb.AppendLine();
 
-						CreateSqlProvider().BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
+						ISqlProvider sqlProvider = CreateSqlProvider();
+						sqlProvider.BuildSql(commandNumber, union.SqlQuery, sb, indent, nesting, skipAlias);
 					}
 				}
 			}
@@ -120,7 +123,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (!IsTakeSupported && sqlQuery.Select.TakeValue != null)
 				throw new SqlException("Take for subqueries is not supported by the '{0}' provider.", Name);
 
-			return CreateSqlProvider().BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
+			ISqlProvider sqlProvider = CreateSqlProvider();
+			return sqlProvider.BuildSql(0, sqlQuery, sb, indent, nesting, skipAlias);
 		}
 
 		protected abstract ISqlProvider CreateSqlProvider();
@@ -178,6 +182,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildInsertQuery(StringBuilder sb)
 		{
+			if (SqlQuery.Insert.WithOutput)
+                		BuildSetOutput(sb);
+                
 			BuildStep = Step.InsertClause; BuildInsertClause(sb);
 
 			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.From.Tables.Count != 0)
@@ -193,6 +200,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
+				
+			if (SqlQuery.Insert.WithOutput)
+                		BuildGetOutput(sb);
 		}
 
 		protected virtual void BuildUnknownQuery(StringBuilder sb)
@@ -395,6 +405,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				sb.AppendLine();
 				AppendIndent(sb).AppendLine(")");
+				
+				if ( SqlQuery.Insert.WithOutput )
+		                {
+		                    var pkField = SqlQuery.Insert.Into.Fields.FirstOrDefault(x=>x.Value.IsIdentity && x.Value.IsPrimaryKey);
+		
+		                    AppendIndent( sb ).Append( "output inserted.[" ).Append( pkField.Value.Name ).AppendLine( "] into @tabTempInsert" );
+		                }
 
 				if (SqlQuery.QueryType == QueryType.InsertOrUpdate || SqlQuery.From.Tables.Count == 0)
 				{
@@ -427,6 +444,16 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			//throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
 		}
+		
+		protected virtual void BuildSetOutput(StringBuilder sb)
+	        {
+	            //throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
+	        }
+	
+	        protected virtual void BuildGetOutput(StringBuilder sb)
+	        {
+	            //throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
+	        }
 
 		#endregion
 
@@ -750,6 +777,19 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			if (SqlQuery.GroupBy.Items.Count == 0)
 				return;
+
+			if (SqlQuery.GroupBy.Items.Count == 1)
+			{
+				var item = SqlQuery.GroupBy.Items[0];
+
+				if (item is SqlValue)
+				{
+					var value = ((SqlValue)item).Value;
+
+					if (value is Sql.GroupBy)
+						return;
+				}
+			}
 
 			AppendIndent(sb);
 
@@ -1483,7 +1523,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 					{
 						var parm = (SqlParameter)expr;
 
-						if (parm.IsQueryParameter)
+						if (!BuildAsValue(parm))
 						{
 							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
 							sb.Append(name);
@@ -1507,6 +1547,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			}
 
 			return sb;
+		}
+
+		public virtual bool BuildAsValue(SqlParameter parm)
+		{
+			return !parm.IsQueryParameter && !(parm.Value is System.Data.Linq.Binary);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
@@ -1622,12 +1667,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				if (type.IsEnum)
 				{
-					value = Map.EnumToValue(value);
+					var attrs = type.GetCustomAttributes(typeof(SqlEnumAttribute), true);
+					value = Map.EnumToValue(value, attrs.Length == 0);
 
 					if (value != null && !value.GetType().IsEnum)
 						BuildValue(sb, value);
-					else
+					else if (value != null)
 						sb.Append(value);
+
 				}
 				else
 					sb.Append(value);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 using BLToolkit.Data;
@@ -7,7 +8,7 @@ using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
-
+using BLToolkit.Mapping.MemberMappers;
 using NUnit.Framework;
 
 using Data.Linq;
@@ -303,6 +304,35 @@ namespace Update
 		}
 
 		[Test]
+		public void Update12()
+		{
+			ForEachProvider(db =>
+			{
+				var parent3 = db.GetTable<Parent3>();
+				try
+				{
+					var id = 1001;
+
+					parent3.Delete(_ => _.ParentID2 > 1000);
+					parent3.Insert(() => new Parent3() { ParentID2 = id, Value = id});
+
+					Assert.AreEqual(1, parent3.Where(_ => _.ParentID2 == id).Set(_ => _.ParentID2, id+1).Set(_ => _.Value, _ => _.ParentID2).Update());
+
+					var obj = parent3.FirstOrDefault(_ => _.ParentID2 == id + 1);
+					Assert.IsNotNull(obj);
+
+					db.Update(obj);
+
+				}
+				finally
+				{
+					parent3.Delete(_ => _.ParentID2 > 1000);
+				}
+			});
+		}
+
+
+		[Test]
 		public void UpdateAssociation1([DataContexts(ProviderName.Sybase, ProviderName.Informix)] string context)
 		{
 			using (var db = GetDataContext(context))
@@ -540,6 +570,140 @@ namespace Update
 				if (db is DbManager)
 					Assert.IsFalse(((DbManager)db).LastQuery.Contains("IS NULL"));
 			}
+		}
+
+		public class TestObject
+		{
+			public int Value { get; set; }
+		}
+
+		[TableName("TestIdentity")]
+		public class Table4 
+		{
+			[PrimaryKey, MapField("ID"), Identity]
+			public int Id;
+			[MemberMapper(typeof(JSONSerialisationMapper))]
+			[MapField("StringValue"), DbType(DbType.String)]
+			public TestObject Object;
+		}
+
+		[Test]
+		public void UpdateComplexField()
+		{
+			ForEachProvider(db =>
+			{
+				var table = db.GetTable<Table4>();
+				int id = 3;
+				try
+				{
+
+					var obj = new Table4();
+					obj.Object = new TestObject() {Value = 101};
+					obj.Id = id = Convert.ToInt32(db.InsertWithIdentity(obj));
+
+					var obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+
+					obj.Object.Value = 999;
+					db.Update(obj);
+
+					obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);				
+
+					obj.Object.Value = 666;
+					table
+						.Where(_ => _.Id == id)
+						.Set(_ => _.Object, _ => obj.Object)
+						.Update();
+
+					obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);				
+
+					obj.Object.Value = 777;
+					table
+						.Where(_ => _.Id == id)
+						.Set(_ => _.Object, obj.Object)
+						.Update();
+
+					obj2 = table.First(_ => _.Id == id);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+
+					var id2 = Convert.ToInt32(table.InsertWithIdentity(() => new Table4
+					{
+						Object = new TestObject() {Value = 300}
+					}));
+
+					obj2 = table.First(_ => _.Id == id2);
+					Assert.AreEqual(300, obj2.Object.Value);
+
+					var id3 = Convert.ToInt32(table.Value(_ => _.Object, () => obj.Object)
+						.InsertWithIdentity());
+					
+					obj2 = table.First(_ => _.Id == id3);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+
+					var id4 = Convert.ToInt32(table.Value(_ => _.Object, obj.Object)
+						.InsertWithIdentity());
+					
+					obj2 = table.First(_ => _.Id == id4);
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
+				}
+				finally
+				{
+					table.Delete(_ => _.Id >= id);
+				}
+			});
+		}
+
+		[TableName("LinqDataTypes")]
+		public class LinqDataTypes3
+		{
+			[PrimaryKey] 
+			public int ID;
+			public DateTime  DateTimeValue;
+			public DateTime? DateTimeValue2;
+		}
+
+		[Test]
+		public void Update15()
+		{
+			ForEachProvider(db =>
+			{
+				var table = db.GetTable<LinqDataTypes3>();
+				var date1 = new DateTime(2000, 1, 1);
+				var date2 = new DateTime(2001, 1, 1);
+				var date3 = new DateTime(2002, 1, 1);
+
+				var obj = new LinqDataTypes3()
+				{
+					ID             = 1000,
+					DateTimeValue  = date1,
+					DateTimeValue2 = date1
+				};
+
+				table.Delete(_ => _.ID == obj.ID);
+				db.Insert(obj);
+
+				table
+					.Where(_ => _.ID == obj.ID)
+					.Set(_ => _.DateTimeValue,  date2)
+					.Set(_ => _.DateTimeValue2, date3)
+					.Update();
+
+				var res = table.First(_ => _.ID == obj.ID);
+				Assert.AreEqual(date2, res.DateTimeValue);
+				Assert.AreEqual(date3, res.DateTimeValue2);
+
+				table
+					.Where(_ => _.ID == obj.ID)
+					.Set(_ => _.DateTimeValue,  date3)
+					.Set(_ => _.DateTimeValue2, date2)
+					.Update();
+
+				res = table.First(_ => _.ID == obj.ID);
+				Assert.AreEqual(date3, res.DateTimeValue);
+				Assert.AreEqual(date2, res.DateTimeValue2);
+			});
 		}
 	}
 }

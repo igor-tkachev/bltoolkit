@@ -440,5 +440,27 @@ namespace Mapping
 
 			Assert.That(clone.MyInnerClass, Is.Not.Null);
 		}
+
+		public class Object3
+		{
+			public HashSet<string> HashSet = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+		}
+
+		[Test]
+		public void ICollectionMapTest()
+		{
+			var mapper = Map.GetObjectMapper<Object3, Object3>();
+			var src = new Object3();
+			src.HashSet.Add(Guid.NewGuid().ToString());
+			src.HashSet.Add(Guid.NewGuid().ToString());
+
+			var dest = mapper(src);
+
+			Assert.IsNotNull(dest);
+			foreach (var str in src.HashSet)
+			{
+				Assert.That(dest.HashSet.Contains(str));
+			}
+		}
 	}
 }

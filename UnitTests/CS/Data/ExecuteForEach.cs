@@ -81,9 +81,9 @@ namespace Data
 
 			using (DbManager db = new DbManager())
 			{
-				db
-					.BeginTransaction()
-					.SetCommand(
+				db.BeginTransaction();
+				
+				db.SetCommand(
 					@"if exists (select 1 from  sysobjects where  id = object_id('_tmp'))
 							drop table _tmp
 					create table _tmp ( Length int, name varchar(50) )")

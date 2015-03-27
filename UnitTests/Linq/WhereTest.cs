@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 using BLToolkit.Data.DataProvider;
+using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 
 using NUnit.Framework;
@@ -654,14 +656,19 @@ namespace Data.Linq
 		[Test]
 		public void CheckCondition2()
 		{
+			var p1 = 1;
+			var p2 = 2;
+			var p3 = 3;
+			var p4 = 4;
+
 			var expected =
 				from p in Parent
-				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				where p.ParentID == p1 && p.Value1 == p1 || p.ParentID == p2 && (p.ParentID != p3 || p.ParentID == p4) && p.Value1.HasValue
 				select p;
 
 			ForEachProvider(db => AreEqual(expected,
 				from p in db.Parent
-				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				where p.ParentID == p1 && p.Value1 == p1 || p.ParentID == p2 && (p.ParentID != p3 || p.ParentID == p4) && p.Value1.HasValue
 				select p));
 		}
 
@@ -944,6 +951,90 @@ namespace Data.Linq
 				from t in db.Types
 				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
 				select t));
+		}
+
+		[Test] 
+		public void GroupBySubQquery1([DataContexts]string context) 
+		{ 
+			using (var db = GetDataContext(context)) 
+			{ 
+				var p1    = Child; 
+				var qry1  = p1.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+				var qry12 = p1.Where(x => qry1.Any(y => y == x.ChildID)); 
+
+				var p2    = db.Child; 
+				var qry2  = p2.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+				var qry22 = p2.Where(x => qry2.Any(y => y == x.ChildID)); 
+
+				AreEqual(qry12, qry22); 
+			} 
+		} 
+
+ 		[Test] 
+ 		public void GroupBySubQquery2([DataContexts]string context) 
+ 		{ 
+ 			using (var db = GetDataContext(context)) 
+ 			{ 
+ 				var p1    = Child; 
+ 				var qry1  = p1.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+ 				var qry12 = p1.Where(x => qry1.Contains(x.ChildID)); 
+  
+ 				var p2    = db.Child; 
+ 				var qry2  = p2.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+ 				var qry22 = p2.Where(x => qry2.Contains(x.ChildID)); 
+  
+ 				AreEqual(qry12, qry22); 
+ 			} 
+ 		}
+
+		public enum TestEnum
+		{
+			First,
+			Second,
+			Third
+		}
+
+		[TableName("LinqDataTypes")]
+		public class Table
+		{
+			[PrimaryKey]
+			public int       ID;
+			public decimal   MoneyValue;
+			[DbType(DbType.DateTime)]
+			public DateTime? DateTimeValue;
+			[DbType(DbType.DateTime)]
+			public DateTime? DateTimeValue2;
+			public bool?     BoolValue;
+			public Guid?     GuidValue;
+			public short?    SmallIntValue;
+			[MapField("IntValue")]
+			public TestEnum? EnumValue;
+			public long?     BigIntValue;
+		}
+
+
+		[Test]
+		public void NullableEnum_344()
+		{
+			ForEachProvider(db =>
+			{
+				var t = db.GetTable<Table>();
+				t.Where(_ => _.ID > 1000).Delete();
+
+				t.Insert(() => new Table { ID = 1003, MoneyValue = 0m, DateTimeValue = null,         BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null, EnumValue = null });
+				t.Insert(() => new Table { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null,                                             SmallIntValue =  2,    EnumValue = TestEnum.Second });
+
+				var types = new[] { TestEnum.Second, TestEnum.First };
+
+				var data = t
+				  .Where(i => types.Contains(i.EnumValue ?? TestEnum.First))
+				  .ToList();
+
+				Assert.That(data.Count >= 2);
+
+				t.Where(_ => _.ID > 1000).Delete();
+
+			});
 		}
 	}
 }

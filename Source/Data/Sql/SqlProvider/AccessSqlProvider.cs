@@ -343,7 +343,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			if (value is bool)
 				sb.Append(value);
 			else if (value is Guid)
-				sb.Append("'").Append(((Guid)value).ToString("B")).Append("'");
+				//sb.Append("'").Append(((Guid)value).ToString("B")).Append("'");
+				sb.Append("{guid {").Append(value).Append("}}");
 			else
 				base.BuildValue(sb, value);
 		}
@@ -424,6 +425,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildDateTime(StringBuilder sb, object value)
 		{
 			sb.Append(string.Format("#{0:yyyy-MM-dd HH:mm:ss}#", value));
+		}
+
+		public override bool BuildAsValue(SqlParameter parm)
+		{
+			if (parm.Value is DateTime)
+			{
+				var dt = (DateTime) parm.Value;
+				return dt.Millisecond == 0 && !parm.IsQueryParameter;
+			}
+
+			return base.BuildAsValue(parm);
 		}
 	}
 }

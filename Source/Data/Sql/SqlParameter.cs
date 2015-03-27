@@ -9,9 +9,9 @@ namespace BLToolkit.Data.Sql
 
 	public class SqlParameter : SqlValueBase, ISqlExpression
 	{
-		public SqlParameter(Type systemType, string name, object value, MappingSchema mappingSchema)
+		public SqlParameter(Type systemType, string name, object value, MappingSchema mappingSchema, bool isQueryParameter)
 		{
-			IsQueryParameter = true;
+			IsQueryParameter = isQueryParameter;
 			Name             = name;
 			SystemType       = systemType;
 			_value           = value;
@@ -22,23 +22,23 @@ namespace BLToolkit.Data.Sql
 			}
 		}
 
-		public SqlParameter(Type systemType, string name, object value, Converter<object,object> valueConverter)
-			: this(systemType, name, value, (MappingSchema)null)
+		public SqlParameter(Type systemType, string name, object value, bool isQueryParameter, Converter<object,object> valueConverter)
+			: this(systemType, name, value, (MappingSchema)null, isQueryParameter)
 		{
 			ValueConverter = valueConverter;
 		}
 
-		[Obsolete]
-		public SqlParameter(string name, object value)
-			: this(value == null ? null : value.GetType(), name, value, (MappingSchema)null)
-		{
-		}
+		//[Obsolete]
+		//public SqlParameter(string name, object value)
+		//	: this(value == null ? null : value.GetType(), name, value, (MappingSchema)null)
+		//{
+		//}
 
-		[Obsolete]
-		public SqlParameter(string name, object value, Converter<object,object> valueConverter)
-			: this(value == null ? null : value.GetType(), name, value, valueConverter)
-		{
-		}
+		//[Obsolete]
+		//public SqlParameter(string name, object value, Converter<object,object> valueConverter)
+		//	: this(value == null ? null : value.GetType(), name, value, valueConverter)
+		//{
+		//}
 
 		public string Name             { get; set; }
 		public Type   SystemType       { get; set; }
@@ -122,7 +122,7 @@ namespace BLToolkit.Data.Sql
 
 			if (!objectTree.TryGetValue(this, out clone))
 			{
-				var p = new SqlParameter(SystemType, Name, _value, ValueConverter) { IsQueryParameter = IsQueryParameter, DbType = DbType, DbSize = DbSize };
+				var p = new SqlParameter(SystemType, Name, _value, IsQueryParameter, ValueConverter) { DbType = DbType, DbSize = DbSize };
 
 				objectTree.Add(this, clone = p);
 			}

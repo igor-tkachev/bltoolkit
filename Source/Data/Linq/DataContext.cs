@@ -18,16 +18,17 @@ namespace BLToolkit.Data.Linq
 		{
 			ConfigurationString = configurationString;
 			DataProvider        = DbManager.GetDataProvider(configurationString);
-			ContextID           = DataProvider.Name;
+			//ContextID           = DataProvider.Name;
 
 			MappingSchema = DataProvider.MappingSchema ?? Map.DefaultSchema;
 		}
 
 		public string           ConfigurationString { get; private set; }
 		public DataProviderBase DataProvider        { get; private set; }
-		public string           ContextID           { get; set;         }
 		public MappingSchema    MappingSchema       { get; set;         }
 		public string           LastQuery           { get; set;         }
+		public bool             InlineParameters        { get; set;         }
+		public string           ContextID           { get { return DataProvider.Name + InlineParameters; } }
 
 		private bool _keepConnectionAlive;
 		public  bool  KeepConnectionAlive
@@ -72,6 +73,7 @@ namespace BLToolkit.Data.Linq
 					_connectionString = DbManager.GetConnectionString(ConfigurationString);
 
 				_dbManager = new DbManager(DataProvider, _connectionString) { MappingSchema = MappingSchema };
+				_dbManager.InlineParameters = InlineParameters;
 			}
 
 			return _dbManager;
@@ -144,8 +146,9 @@ namespace BLToolkit.Data.Linq
 				ConfigurationString = ConfigurationString,
 				KeepConnectionAlive = KeepConnectionAlive,
 				DataProvider        = DataProvider,
-				ContextID           = ContextID,
+				//ContextID           = ContextID,
 				MappingSchema       = MappingSchema,
+				InlineParameters        = InlineParameters
 			};
 
 			if (forNestedQuery && _dbManager != null && _dbManager.IsMarsEnabled)
@@ -168,6 +171,24 @@ namespace BLToolkit.Data.Linq
 				_dbManager.Dispose();
 				_dbManager = null;
 			}
+		}
+
+		public DataContextTransaction BeginTransaction(IsolationLevel level)
+		{
+			var dct = new DataContextTransaction(this);
+
+			dct.BeginTransaction(level);
+
+			return dct;
+		}
+
+		public DataContextTransaction BeginTransaction()
+		{
+			var dct = new DataContextTransaction(this);
+
+			dct.BeginTransaction();
+
+			return dct;
 		}
 	}
 }

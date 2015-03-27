@@ -470,6 +470,8 @@ GO
 
 CREATE TABLE TestIdentity
 (
-	ID int IDENTITY CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED
+ID          int          IDENTITY CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED,
+IntValue    int          NULL,
+StringValue NVARCHAR(50) NULL
 )
 GO

@@ -37,7 +37,8 @@ namespace BLToolkit.Data.Linq.Builder
 							var ma = (MemberExpression)expr;
 
 							if (SqlProvider.ConvertMember(ma.Member) != null)
-								break;
+								return new ExpressionHelper.ConvertInfo(BuildSql(context, expr)); //break;
+							//var l = SqlProvider.ConvertMember(ma.Member);
 
 							var ctx = GetContext(context, expr);
 

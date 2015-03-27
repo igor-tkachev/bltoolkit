@@ -191,6 +191,7 @@ namespace BLToolkit.ServiceModel
 										case TypeCode.Double   : data[i] = rd.GetDouble  (i).ToString(CultureInfo.InvariantCulture); break;
 										case TypeCode.Single   : data[i] = rd.GetFloat   (i).ToString(CultureInfo.InvariantCulture); break;
 										case TypeCode.DateTime : data[i] = rd.GetDateTime(i).ToString("o");                          break;
+										case TypeCode.Boolean  : data[i] = rd.GetBoolean (i).ToString(CultureInfo.InvariantCulture); break;
 										default                :
 											{
 												if (type == typeof(DateTimeOffset))

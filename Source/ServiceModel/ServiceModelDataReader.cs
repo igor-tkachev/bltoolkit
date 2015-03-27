@@ -91,6 +91,8 @@ namespace BLToolkit.ServiceModel
 
 		public bool GetBoolean(int i)
 		{
+			if (_data[i][0] == '\0')
+				return (bool) GetValue(i);
 			return bool.Parse(_data[i]);
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 
 using BLToolkit.Data;
@@ -875,6 +876,60 @@ namespace Update
 
 				db.Types2.Delete(_ => _.ID > 1000);
 			}
+		}
+		
+		public enum TestEnum
+		{
+			First,
+			Second,
+			Third
+		}
+
+		[TableName("LinqDataTypes")]
+		public class Table 
+		{
+			[PrimaryKey]
+			public int       ID;
+			public decimal   MoneyValue;
+			[DbType(DbType.DateTime)]
+			public DateTime? DateTimeValue;
+			[DbType(DbType.DateTime)]
+			public DateTime? DateTimeValue2;
+			public bool?     BoolValue;
+			public Guid?     GuidValue;
+			public short?    SmallIntValue;
+			[MapField("IntValue")]
+			public TestEnum? EnumValue;
+			public long?     BigIntValue;
+		}
+
+
+		[Test]
+		public void InsertBatch3()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<Table>();
+
+				t.Delete(_ => _.ID > 1000);
+
+				((DbManager)db).InsertBatch(1, new[]
+				{
+					new Table { ID = 1003, MoneyValue = 0m, DateTimeValue = null,         BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null, EnumValue = null },
+					new Table { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null,                                             SmallIntValue =  2,    EnumValue = TestEnum.Second },
+				});
+
+				foreach (var e in t.Where(_ => _.ID > 1000))
+				{
+					if (e.EnumValue != null)
+						Assert.AreEqual(TestEnum.Second, e.EnumValue);
+				}
+
+				t.Delete(_ => _.ID > 1000);
+			});
 		}
 
 		[TableName("Parent")]

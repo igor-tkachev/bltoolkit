@@ -370,15 +370,15 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else if (value is DateTime)
 			{
 				sb.AppendFormat("TO_TIMESTAMP('{0:yyyy-MM-dd HH:mm:ss.fffffff}', 'YYYY-MM-DD HH24:MI:SS.FF7')", value);
-            }
+			}
             else if (value is byte[])
             {
                 sb.Append("'"+ ByteToHexBitFiddle(value as byte[]) +"'");
             }
-            else
-                base.BuildValue(sb, value);
-        }
- 
+			else
+				base.BuildValue(sb, value);
+		}
+
         static string ByteToHexBitFiddle(byte[] bytes)
         {
             char[] c = new char[bytes.Length * 2];
@@ -418,12 +418,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-			        string str2 = value.ToString();
+					string name = value.ToString();
 
-                    if (str2.Length <= 28)
-					    return ":" + str2;                    
+					if (name.Length <= 28)
+						return ":" + name;
 
-                    return ":" + "P" + Math.Abs(str2.GetHashCode()) + "_";                    
+					int hashCode = name.GetHashCode();
+					return string.Format(":P{0}{1}_", hashCode < 0 ? "m" : "", Math.Abs(hashCode));
 
                 case ConvertType.NameToQueryField:
                 case ConvertType.NameToQueryFieldAlias:
@@ -448,12 +449,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildEmptyInsert(StringBuilder sb)
 		{
-			sb.Append("VALUES ");
+			sb.Append("VALUES (");
+			for (var i = 0; i < SqlQuery.Insert.Into.Fields.Count; i++)
+				sb.Append("DEFAULT, ");
 
-			foreach (var col in SqlQuery.Insert.Into.Fields)
-				sb.Append("(DEFAULT)");
-
-			sb.AppendLine();
+			sb.Remove(sb.Length - 2, 2);
+			sb.Append(")");
 		}
 	}
 }

@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -39,7 +41,44 @@ namespace Data
 
 		public class DataTypeTest
 		{
-			[MapField("DataTypeID")]
+			public int       ID;
+			[MapIgnore(false)]
+			public Byte[]    Binary_;
+#if !ORACLE
+			// Oracle does not know boolean nor guid.
+			//
+			public Boolean   Boolean_;
+			public Guid      Guid_;
+#endif
+			public Byte      Byte_;
+			[MapIgnore(false)]
+			public Byte[]    Bytes_;
+			public DateTime  DateTime_;
+			public Decimal   Decimal_;
+			public Double    Double_;
+			public Int16     Int16_;
+			public Int32     Int32_;
+			public Int64     Int64_;
+			public Decimal   Money_;
+			public Single    Single_;
+			public String    String_;
+
+			public Char      Char_;
+			public SByte     SByte_;
+			public UInt16    UInt16_;
+			public UInt32    UInt32_;
+			public UInt64    UInt64_;
+#if !SQLCE
+			[MapIgnore(false)]
+			public Stream    Stream_;
+			public XmlReader Xml_;
+#endif
+		}
+
+		[TableName("DataTypeTest")]
+		public class DataTypeTest2
+		{
+			[MapField("DataTypeID"), Identity]
 			public int       ID;
 			[MapIgnore(false)]
 			public Byte[]    Binary_;
@@ -104,6 +143,16 @@ namespace Data
 #endif
 		}
 
+		[TestFixtureTearDown]
+		public void TestFixtureTearDown()
+		{
+			using (var db = new DbManager())
+			{
+				db.SetCommand("DELETE FROM DataTypeTest WHERE DataTypeID > 2")
+					.ExecuteNonQuery();
+			}
+		}
+
 		[Test]
 		public void ExecuteList1()
 		{
@@ -157,6 +206,119 @@ namespace Data
 				TypeAccessor.WriteConsole(dt);
 			}
 		}
+
+		[Test]
+		public void ExecuteObject3()
+		{
+			using (DbManager db = new DbManager())
+			{
+				DataTypeTest2 dt = (DataTypeTest2)db
+					.SetCommand("SELECT * FROM DataTypeTest WHERE DataTypeID = " + db.DataProvider.Convert("id", ConvertType.NameToQueryParameter),
+					db.Parameter("id", 2))
+					.ExecuteObject(typeof(DataTypeTest2));
+
+				TypeAccessor.WriteConsole(dt);
+				Console.WriteLine(dt.XmlDoc_.InnerXml);
+			}
+		}
+
+#if !SQLCE
+		[Test]
+		public void TestDataTypeTestInsert()
+		{
+			using (DbManager db = new DbManager())
+			{
+				var dt = new DataTypeTest2
+				{
+					Binary_ = new byte[2] { 1, 2 },
+#if !ORACLE
+					Boolean_ = true,
+					Guid_ = Guid.Empty,
+#endif
+					Byte_ = 250,
+					Bytes_ = new byte[] { 2, 1 },
+					DateTime_ = DateTime.Now,
+					Decimal_ = 9876543210.0m,
+					Double_ = 12345.67890,
+					Int16_ = 12345,
+					Int32_ = 1234567890,
+					Int64_ = 1234567890123456789,
+					Money_ = 99876543210.0m,
+					Single_ = 1234.0f,
+					String_ = "Crazy Frog",
+
+					Char_ = 'F',
+					SByte_ = 123,
+					//UInt16_   = 65432,
+					//UInt32_   = 4000000000,
+					//UInt64_   = 12345678901234567890,
+#if !SQLCE
+					Stream_ = new MemoryStream(5),
+					Xml_ = new XmlTextReader(new StringReader("<xml/>")),
+					XmlDoc_ = new XmlDocument()
+#endif
+				};
+
+#if !SQLCE
+				dt.XmlDoc_.LoadXml("<root><sql id=\"1\">Some Text</sql></root>");
+#endif
+
+				SqlQuery query = new SqlQuery(db);
+				query.Insert(dt);
+			}
+		}
+
+		[Test]
+		public void TestDataTypeTestInsertWithIdentity()
+		{
+			using (DbManager db = new DbManager())
+			{
+				var dt = new DataTypeTest2
+				{
+					Binary_ = new byte[2] { 1, 2 },
+#if !ORACLE
+					Boolean_ = true,
+					Guid_ = Guid.Empty,
+#endif
+					Byte_ = 250,
+					Bytes_ = new byte[] { 2, 1 },
+					DateTime_ = DateTime.Now,
+					Decimal_ = 9876543210.0m,
+					Double_ = 12345.67890,
+					Int16_ = 12345,
+					Int32_ = 1234567890,
+					Int64_ = 1234567890123456789,
+					Money_ = 99876543210.0m,
+					Single_ = 1234.0f,
+					String_ = "Crazy Frog",
+
+					Char_ = 'F',
+					SByte_ = 123,
+					//UInt16_   = 65432,
+					//UInt32_   = 4000000000,
+					//UInt64_   = 12345678901234567890,
+#if !SQLCE
+					Stream_ = new MemoryStream(5),
+					Xml_ = new XmlTextReader(new StringReader("<xml/>")),
+					XmlDoc_ = new XmlDocument()
+#endif
+				};
+
+#if !SQLCE
+				string innerxml = "<root><sql id=\"2\">Other Verbiage</sql></root>";
+				dt.XmlDoc_.LoadXml(innerxml);
+#endif
+
+				var id = Convert.ToInt32(db.InsertWithIdentity(dt));
+				var obj = db.GetTable<DataTypeTest2>().Where(_ => _.ID == id).First();
+
+#if !SQLCE
+				Assert.AreEqual(innerxml, obj.XmlDoc_.OuterXml);
+#endif
+				TypeAccessor.WriteConsole(obj);
+			}
+		}
+#endif
 
 #if !ORACLE
 		[Test]
@@ -330,11 +492,8 @@ namespace Data
 #if !SQLCE
 					Stream_   = new MemoryStream(5),
 					Xml_      = new XmlTextReader(new StringReader("<xml/>")),
-					XmlDoc_   = new XmlDocument(),
 #endif
 				};
-
-				dt.XmlDoc_.LoadXml("<xmldoc/>");
 
 				var parameters = db.CreateParameters(dt);
 
@@ -347,7 +506,7 @@ namespace Data
 					var p         = parameters.First(obj => obj.ParameterName == paramName);
 
 					Assert.IsNotNull(p);
-					Assert.AreEqual(mm.GetValue(dt), p.Value);
+					Assert.AreEqual(mm.GetValue(dt), p.Value, mm.MemberName);
 				}
 			}
 		}
@@ -479,6 +638,20 @@ namespace Data
 				var type = db.SetCommand("select 1 where 1 = 2").ExecuteScalar<ABType>();
 				Assert.That(type, Is.EqualTo(ABType.A));
 			}
+		}
+
+		[Test]
+		public void DataProviderTest()
+		{
+			for (var i = 0; i < 2; i++) // second call to test "first configuration cache"
+				using (var db = new DbManager())
+				{
+					var actualProviderType = db.DataProvider.GetType();
+
+					Assert.AreNotEqual(typeof (SqlDataProvider), actualProviderType);
+					Assert.AreNotEqual(typeof (SqlDataProviderBase), actualProviderType);
+
+				}
 		}
 	}
 }

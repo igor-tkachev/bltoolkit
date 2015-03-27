@@ -104,8 +104,9 @@ namespace Data.Linq
 				switch (str)
 				{
 					//case "Data.Linq.Model.Gender" : return typeof(Gender);
-					case "Data.Linq.Model.Person": return typeof(Person);
-					default                       : return null;
+					case "Data.Linq.Model.Person"      : return typeof(Person);
+					case "Data.Linq.WhereTest+TestEnum": return typeof(WhereTest.TestEnum);
+					default                            : return null;
 				}
 			};
 		}
@@ -200,12 +201,18 @@ namespace Data.Linq
 				if (!info.Loaded)
 					continue;
 
-				yield return new TestDbManager(info.Name);
+				yield return new TestDbManager(info.Name, false);
+				yield return new TestDbManager(info.Name, true);
 
 				var ip = GetIP(info.Name);
 				var dx = new TestServiceModelDataContext(ip);
 
 				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+
+				yield return dx;
+
+				dx.InlineParameters = true;
+				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider + InlineParameters");
 
 				yield return dx;
 			}
@@ -598,7 +605,7 @@ namespace Data.Linq
 						{
 							ch.Parent        = Parent. Single(p => p.ParentID == ch.ParentID);
 							ch.Parent1       = Parent1.Single(p => p.ParentID == ch.ParentID);
-							ch.ParentID2     = new Parent3 { ParentID2 = ch.Parent.ParentID, Value1 = ch.Parent.Value1 };
+							ch.ParentID2     = new Parent3 { ParentID2 = ch.Parent.ParentID, Value = ch.Parent.Value1 };
 							ch.GrandChildren = GrandChild.Where(c => c.ParentID == ch.ParentID && c.ChildID == ch.ChildID).ToList();
 						}
 					}

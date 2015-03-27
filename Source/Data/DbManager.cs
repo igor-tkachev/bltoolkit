@@ -162,7 +162,7 @@ namespace BLToolkit.Data
         /// <summary>
         /// Use plain text query instead of using command parameters
         /// </summary>
-        public bool UseQueryText { get; set; }
+        public bool InlineParameters { get; set; }
 
 		#endregion
 
@@ -300,9 +300,31 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction()"]/*' />
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
 		/// <seealso cref="Transaction"/>
-		public virtual DbManager BeginTransaction()
+		public virtual DbManagerTransaction BeginTransaction()
 		{
-			return BeginTransaction(IsolationLevel.ReadCommitted);
+			// If transaction is open, we dispose it, it will rollback all changes.
+			//
+			if (_transaction != null)
+			{
+				ExecuteOperation(OperationType.DisposeTransaction, _transaction.Dispose);
+		}
+
+			// Create new transaction object.
+			//
+			_transaction = ExecuteOperation(
+				OperationType.BeginTransaction,
+				() => Connection.BeginTransaction());
+
+			_closeTransaction = true;
+
+			// If the active command exists.
+			//
+			if (_selectCommand != null) _selectCommand.Transaction = _transaction;
+			if (_insertCommand != null) _insertCommand.Transaction = _transaction;
+			if (_updateCommand != null) _updateCommand.Transaction = _transaction;
+			if (_deleteCommand != null) _deleteCommand.Transaction = _transaction;
+
+			return new DbManagerTransaction(this);
 		}
 
 		/// <summary>
@@ -316,7 +338,7 @@ namespace BLToolkit.Data
 		/// <include file="Examples.xml" path='examples/db[@name="BeginTransaction(IsolationLevel)"]/*' />
 		/// <param name="il">One of the <see cref="IsolationLevel"/> values.</param>
 		/// <returns>This instance of the <see cref="DbManager"/>.</returns>
-		public virtual DbManager BeginTransaction(IsolationLevel il)
+		public virtual DbManagerTransaction BeginTransaction(IsolationLevel il)
 		{
 			// If transaction is open, we dispose it, it will rollback all changes.
 			//
@@ -340,7 +362,7 @@ namespace BLToolkit.Data
 			if (_updateCommand != null) _updateCommand.Transaction = _transaction;
 			if (_deleteCommand != null) _deleteCommand.Transaction = _transaction;
 
-			return this;
+			return new DbManagerTransaction(this);
 		}
 
 		/// <summary>
@@ -557,6 +579,16 @@ namespace BLToolkit.Data
 			remove { Events.RemoveHandler(_eventOperationException, value); }
 		}
 
+		private static readonly object _eventOperationExceptionRetry = new object();
+		/// <summary>
+		/// Occurs when a server-side operation is failed to execute.
+		/// </summary>
+		public event OperationExceptionEventHandler OperationExceptionRetry
+		{
+			add    { Events.AddHandler(_eventOperationExceptionRetry, value); }
+			remove { Events.RemoveHandler(_eventOperationExceptionRetry, value); }
+		}
+
 		private static readonly object _eventInitCommand = new object();
 		/// <summary>
 		/// Occurs when the <see cref="Command"/> is initializing.
@@ -612,6 +644,25 @@ namespace BLToolkit.Data
 			throw ex;
 		}
 
+		/// <summary>
+		/// Raises the <see cref="OperationException"/> event.
+		/// </summary>
+		/// <param name="op">The <see cref="OperationType"/>.</param>
+		/// <param name="ex">The <see cref="Exception"/> occurred.</param>
+		protected virtual bool OnOperationExceptionRetry(OperationType op, DataException ex)
+		{
+			var e = new OperationExceptionRetryEventArgs(op, ex);
+
+			if (CanRaiseEvents)
+			{
+				var handler = (OperationExceptionRetryEventHandler)Events[_eventOperationExceptionRetry];
+				if (handler != null)
+					handler(this, e);
+			}
+
+			return e.RetryOperation;
+		}
+
 		#endregion
 
 		#region Protected Methods
@@ -629,12 +680,12 @@ namespace BLToolkit.Data
 					_dataProvider.GetDataReader(_mappingSchema, SelectCommand.ExecuteReader(commandBehavior)));
 		}
 
-	    private int ExecuteNonQueryInternal()
-	    {
-	        return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);	        
-	    }
+		private int ExecuteNonQueryInternal()
+		{
+			return ExecuteOperation<int>(OperationType.ExecuteNonQuery, SelectCommand.ExecuteNonQuery);
+		}
 
-	    #endregion
+		#endregion
 
 		#region Parameters
 
@@ -2636,14 +2687,14 @@ namespace BLToolkit.Data
                             }
 						    else if (dbType != DbType.Object)
 						    {
-						        p = value != null
+							p = value != null
 						            ? Parameter(baseParameters[i].ParameterName + nRows, value, dbType)
 						            : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value, dbType);
 						    }
 						    else
 						    {
                                 p = value != null
-                                    ? Parameter(baseParameters[i].ParameterName + nRows, value)
+								? Parameter(baseParameters[i].ParameterName + nRows, value)
                                     : Parameter(baseParameters[i].ParameterName + nRows, DBNull.Value);
 						    }
 						}
@@ -4433,7 +4484,23 @@ namespace BLToolkit.Data
 			try
 			{
 				OnBeforeOperation(operationType);
+
+				while (true)
+				{
+					try
+					{
 				operation();
+					}
+					catch(Exception ex)
+					{
+						if(!HandleOperationExceptionRetry(operationType, ex))
+							throw;
+						continue;
+					}
+
+					break;
+				}
+
 				OnAfterOperation (operationType);
 			}
 			catch (Exception ex)
@@ -4443,21 +4510,21 @@ namespace BLToolkit.Data
 			}
 		}
 
-	    private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
-	    {
-	        var res = default(T);
+		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
+		{
+			var res = default(T);
 
 	        int retryCount = 0;
 
-	        try
-	        {
-	            OnBeforeOperation(operationType);
+			try
+			{
+				OnBeforeOperation(operationType);
 
-	            while (true)
-	            {
-	                try
-	                {
-	                    res = operation();
+				while (true)
+				{
+					try
+					{
+				res = operation();
 	                    break;
 	                }
 	                catch (Exception ex)
@@ -4487,22 +4554,34 @@ namespace BLToolkit.Data
                     //}
 	            }
 
-	            OnAfterOperation(operationType);
-	        }
+			}
 
-	        catch (Exception ex)
-	        {
-	            if (res is IDisposable)
-	                ((IDisposable) res).Dispose();
+			catch (Exception ex)
+			{
+				if (res is IDisposable)
+					((IDisposable)res).Dispose();
 
-	            HandleOperationException(operationType, ex);
-	            throw;
-	        }
+						if (!HandleOperationExceptionRetry(operationType, ex))
+							throw;
 
-	        return res;
-	    }
+						continue;
+					}
 
-	    private void HandleOperationException(OperationType op, Exception ex)
+					break;
+				}
+
+				OnAfterOperation (operationType);
+			}
+			catch (Exception ex)
+			{
+				HandleOperationException(operationType, ex);
+				throw;
+			}
+
+			return res;
+		}
+
+		private void HandleOperationException(OperationType op, Exception ex)
 		{
 			var dex = new DataException(this, ex);
 
@@ -4510,6 +4589,16 @@ namespace BLToolkit.Data
 				WriteTraceLine(string.Format("Operation '{0}' throws exception '{1}'", op, dex), TraceSwitch.DisplayName);
 
 			OnOperationException(op, dex);
+		}
+
+		private bool HandleOperationExceptionRetry(OperationType op, Exception ex)
+		{
+			var dex = new DataException(this, ex);
+
+			if (TraceSwitch.TraceError)
+				WriteTraceLine(string.Format("Operation '{0}' throws exception '{1}'", op, dex), TraceSwitch.DisplayName);
+
+			return OnOperationExceptionRetry(op, dex);
 		}
 
 		#endregion

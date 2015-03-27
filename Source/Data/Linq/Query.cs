@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Xml;
 
 namespace BLToolkit.Data.Linq
 {
@@ -373,33 +374,46 @@ namespace BLToolkit.Data.Linq
 			}
 		}
 
-		object SetCommand(IDataContext dataContext, Expression expr, object[] parameters, int idx)
+		private object SetCommand(IDataContext dataContext, Expression expr, object[] parameters, int idx)
 		{
 			lock (this)
 			{
-				SetParameters(expr, parameters, idx);
+				bool useQueryText = dataContext.InlineParameters;
+				SetParameters(expr, parameters, idx, useQueryText);
 				return dataContext.SetQuery(Queries[idx]);
 			}
 		}
 
-		void SetParameters(Expression expr, object[] parameters, int idx)
+		private void SetParameters(Expression expr, object[] parameters, int idx, bool useQueryText)
 		{
+			Query<T>.QueryInfo queryInfo = this.Queries[idx];
+			if (queryInfo.UseQueryText != useQueryText)
+			{
+				queryInfo.Context = null;
+				queryInfo.UseQueryText = useQueryText;
+			}
+
 			foreach (var p in Queries[idx].Parameters)
 			{
 				var value = p.Accessor(expr, parameters);
 
-				if (value is IEnumerable)
+				if (value is IEnumerable
+#if !SILVERLIGHT
+				    && !(value is XmlDocument)
+#endif
+
+					)
 				{
-					var type  = value.GetType();
+					var type = value.GetType();
 					var etype = TypeHelper.GetElementType(type);
 
-					if (etype == null || etype == typeof(object) ||
-						etype.IsEnum ||
-						(TypeHelper.IsNullableType(etype) && etype.GetGenericArguments()[0].IsEnum))
+					if (etype == null || etype == typeof (object) ||
+					    etype.IsEnum ||
+					    (TypeHelper.IsNullableType(etype) && etype.GetGenericArguments()[0].IsEnum))
 					{
 						var values = new List<object>();
 
-						foreach (var v in (IEnumerable)value)
+						foreach (var v in (IEnumerable) value)
 						{
 							values.Add(v);
 							// Enum mapping done by parameter itself
@@ -412,6 +426,10 @@ namespace BLToolkit.Data.Linq
 					}
 				}
 
+				if (useQueryText && queryInfo.Context != null && !object.Equals(p.SqlParameter.Value, value))
+				{
+					queryInfo.Context = null;
+				}
 				p.SqlParameter.Value = value;
 			}
 		}
@@ -446,8 +464,9 @@ namespace BLToolkit.Data.Linq
 				SqlQuery = new SqlQuery();
 			}
 
-			public SqlQuery SqlQuery { get; set; }
-			public object   Context  { get; set; }
+			public SqlQuery SqlQuery     { get; set; }
+			public object   Context      { get; set; }
+			public bool     UseQueryText { get; set; }
 
 			public SqlParameter[] GetParameters()
 			{
@@ -470,6 +489,7 @@ namespace BLToolkit.Data.Linq
 		{
 			public static readonly Dictionary<object,Query<int>>    Insert             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<object>> InsertWithIdentity = new Dictionary<object,Query<object>>();
+			public static readonly Dictionary<object,Query<object>> InsertWithOutput   = new Dictionary<object, Query<object>>();
 			public static readonly Dictionary<object,Query<int>>    InsertOrUpdate     = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Update             = new Dictionary<object,Query<int>>();
 			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
@@ -545,7 +565,7 @@ namespace BLToolkit.Data.Linq
 			{
 				Expression   = null,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema)
+				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema, !dataContext.InlineParameters)
 			};
 
 			if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))
@@ -670,6 +690,64 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+		
+		#region InsertWithOutput
+
+	        public static object InsertWithOutput( IDataContextInfo dataContextInfo, T obj )
+	        {
+	            if ( Equals( default( T ), obj ) )
+	                return 0;
+	
+	            Query<object> ei;
+	
+	            var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
+	
+	            if ( !ObjectOperation<T>.InsertWithOutput.TryGetValue( key, out ei ) )
+	                lock ( _sync )
+	                    if ( !ObjectOperation<T>.InsertWithOutput.TryGetValue( key, out ei ) )
+	                    {
+	                        var sqlTable = new SqlTable<T>( dataContextInfo.MappingSchema );
+	                        var sqlQuery = new SqlQuery { QueryType = QueryType.Insert };
+	
+	                        sqlQuery.Insert.Into = sqlTable;
+	                        sqlQuery.Insert.WithIdentity = true;
+	
+	                        ei = new Query<object>
+	                        {
+	                            MappingSchema = dataContextInfo.MappingSchema,
+	                            ContextID = dataContextInfo.ContextID,
+	                            CreateSqlProvider = dataContextInfo.CreateSqlProvider,
+	                            Queries = { new Query<object>.QueryInfo { SqlQuery = sqlQuery, } }
+	                        };
+	
+	                        foreach ( var field in sqlTable.Fields )
+	                        {
+	                            if ( field.Value.IsInsertable )
+	                            {
+	                                var param = GetParameter<object>( dataContextInfo.DataContext, field.Value );
+	
+	                                ei.Queries[0].Parameters.Add( param );
+	
+	                                sqlQuery.Insert.Items.Add( new SqlQuery.SetExpression( field.Value, param.SqlParameter ) );
+	                            }
+	                            else if ( field.Value.IsIdentity )
+	                            {
+	                                var expr = ei.SqlProvider.GetIdentityExpression( sqlTable, field.Value, true );
+	
+	                                if ( expr != null )
+	                                    sqlQuery.Insert.Items.Add( new SqlQuery.SetExpression( field.Value, expr ) );
+	                            }
+	                        }
+	
+	                        ei.SetScalarQuery<object>();
+	
+	                        ObjectOperation<T>.InsertWithOutput.Add( key, ei );
+	                    }
+	
+	            return ei.GetElement( null, dataContextInfo, Expression.Constant( obj ), null );
+	        }
+	
+	        #endregion
 
 		#region InsertOrReplace
 

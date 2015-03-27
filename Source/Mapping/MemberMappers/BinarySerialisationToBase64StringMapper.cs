@@ -13,7 +13,9 @@ namespace BLToolkit.Mapping.MemberMappers
 
 		public override object GetValue(object o)
 		{
-			return Convert.ToBase64String(BinarySerialize(this.MemberAccessor.GetValue(o)));            
+			var buffer = BinarySerialize(MemberAccessor.GetValue(o));
+
+			return buffer != null ? Convert.ToBase64String(buffer) : null;
 		}
 
 		static byte[] BinarySerialize(object obj)

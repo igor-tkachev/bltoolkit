@@ -172,6 +172,13 @@ namespace BLToolkit.Data.DataProvider
 
 		#region Virtual Members
 
+		public virtual bool SupportsVersionResolve { get { return false; } }
+
+		public virtual DataProviderBase ResolveVersion(string configuration, string connectionString)
+		{
+			return this;
+		}
+
 		/// <summary>
 		/// Open an <see cref="IDataReader"/> into the given RefCursor object
 		/// </summary>
@@ -317,13 +324,19 @@ namespace BLToolkit.Data.DataProvider
 
 		public virtual void SetParameterValue(IDbDataParameter parameter, object value)
 		{
-			if (value is System.Data.Linq.Binary)
+			if (value is Binary)
 			{
-				var arr = ((System.Data.Linq.Binary)value).ToArray();
+				var arr = ((Binary)value).ToArray();
 
 				parameter.Value  = arr;
 				parameter.DbType = DbType.Binary;
 				parameter.Size   = arr.Length;
+			}
+			else if (value is System.Xml.XmlDocument)
+			{
+				parameter.Value = ((System.Xml.XmlDocument)value).OuterXml;
+				parameter.DbType = DbType.Xml;
+				parameter.Size = parameter.Value.ToString().Length;
 			}
 			else
 				parameter.Value = value;

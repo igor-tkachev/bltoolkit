@@ -346,12 +346,10 @@ namespace BLToolkit.EditableObjects
 
 				foreach (var o in List)
 				{
-					if (o is EditableObject)
-						if (((EditableObject)o).IsDirty)
-							return true;
-					else if (o is IEditable)
-						if (((IEditable)o).IsDirty)
-							return true;
+         if (o is EditableObject && ((EditableObject)o).IsDirty)
+            return true;
+         if (o is IEditable && ((IEditable)o).IsDirty)
+            return true;
 				}
 
 				return false;

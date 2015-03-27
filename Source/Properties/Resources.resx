@@ -291,4 +291,10 @@
   <data name="TypeBuilder_GenericShouldBeSingleTyped" xml:space="preserve">
     <value>Could not build the '{0}' property of the '{1}' type: generic type '{2}' and it's generic parameter types should have only one parameter type.</value>
   </data>
+	<data name="DataProviderVersionResolverBase_InvalidProviderType">
+		<value xml:space="preserve">{0} is not a subclass of {1}</value>
+	</data>
+	<data name="DataProviderVersionResolverBase_ProviderIsNotRegistered">
+		<value xml:space="preserve">{0} ({1}) is not a registered data provider</value>
+	</data>
 </root>

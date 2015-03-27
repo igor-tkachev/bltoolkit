@@ -131,6 +131,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Create Scripts", "Create Sc
 		Data\Create Scripts\Firebird2.sql = Data\Create Scripts\Firebird2.sql
 		Data\Create Scripts\Informix.sql = Data\Create Scripts\Informix.sql
 		Data\Create Scripts\MsSql.sql = Data\Create Scripts\MsSql.sql
+		Data\Create Scripts\MsSql2000.sql = Data\Create Scripts\MsSql2000.sql
 		Data\Create Scripts\MySql.sql = Data\Create Scripts\MySql.sql
 		Data\Create Scripts\Oracle.sql = Data\Create Scripts\Oracle.sql
 		Data\Create Scripts\PostgreSQL.sql = Data\Create Scripts\PostgreSQL.sql

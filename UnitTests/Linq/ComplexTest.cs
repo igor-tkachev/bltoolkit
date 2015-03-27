@@ -316,6 +316,58 @@ namespace Data.Linq
 			}
 		}
 
+
+
+		[Test]
+		public void BuildQueryTest()
+		{
+			ForEachProvider(db =>
+			{
+				var query = db.Child.Select(_ => Model.Child.CreateInstance(_, _.Parent));
+
+				var list1 = query.ToList();
+				var list2 = query.Where(_ => _.ChildID > 0).ToList();
+
+				AreEqual(list1, list2);
+				AreEqual(list2, Child);
+			}
+				);
+		}
+
+		[Test]
+		public void BuildQueryTest2()
+		{
+			ForEachProvider(db =>
+			{
+				var query = db.Child.Select(_ => new Child() {ChildID = _.ChildID, Parent = _.Parent});
+
+				var list1 = query.ToList();
+				var list2 = query.Where(_ => _.ChildID > 0).ToList();
+
+				AreEqual(list1, list2);
+				AreEqual(list2, Child.Select(_ => new Child() { ChildID = _.ChildID, Parent = _.Parent }));
+
+			}
+				);
+		}
+
+		[Test]
+		public void BuildQueryTest3()
+		{
+			ForEachProvider(db =>
+			{
+				var query = db.Child;
+
+				var list1 = query.ToList();
+				var list2 = query.Where(_ => _.ChildID > 0).ToList();
+
+				AreEqual(list1, list2);
+				AreEqual(list2, Child);
+
+			}
+				);
+		}
+
 		#region IEnumerableTest
 
 		public class Entity

@@ -2,18 +2,26 @@
 -- Copy this file as UserDataProviders.txt and uncomment providers you need to work on.
 -- UserDataProviders.txt is in .gitignore and it is not committed to the repository.
 
+--Local (can allways be used)
+
 Access
 SqlCe
 SQLite
+
+--DBHost
+
 --DB2
 --Fdp
 --Informix
---Sql2000
 --Sql2005
 --Sql2008
 --Sql2012
 --MySql
 --Oracle
 --PostgreSQL
---Sybase
 --Northwind
+
+--DBHost2008
+
+--Sql2000
+--Sybase

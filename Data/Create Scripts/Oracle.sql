@@ -636,7 +636,10 @@ DROP TABLE TestIdentity
 /
 
 CREATE TABLE TestIdentity (
-	ID NUMBER NOT NULL PRIMARY KEY
+	ID          NUMBER       NOT NULL PRIMARY KEY,
+	IntValue    INTEGER      NULL,
+	StringValue VARCHAR(50)  NULL
+
 )
 /
 
@@ -655,4 +658,14 @@ INTO
 FROM
 	dual;
 END;
+/
+
+DROP TABLE LongFieldName
+/
+create table LongFieldName
+(
+	Id number primary key,
+	VeryVeryVeryVeryLongFieldName1 varchar(50) null,
+	VeryVeryVeryVeryLongFieldName2 varchar(50) null
+)
 /

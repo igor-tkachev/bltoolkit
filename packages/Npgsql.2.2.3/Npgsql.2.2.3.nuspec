@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Npgsql</id>
+    <version>2.2.3</version>
+    <title>Npgsql</title>
+    <authors>Francisco Figueiredo Jr.,  Josh Cooley,  Dave Page,  Jon Asher,  Brar Piening,  Chris Morgan,  Hiroshi Saito,  Jon Hanna,  Federico Di Gregorio,  Glen Parker,  Shay Rojansky</authors>
+    <owners>Francisco Figueiredo Jr.,  Josh Cooley,  Dave Page,  Jon Asher,  Brar Piening,  Chris Morgan,  Hiroshi Saito,  Jon Hanna,  Federico Di Gregorio,  Glen Parker,  Shay Rojansky</owners>
+    <licenseUrl>https://github.com/npgsql/Npgsql/wiki/License</licenseUrl>
+    <projectUrl>https://github.com/npgsql/Npgsql</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Npgsql is a .Net data provider for Postgresql. It allows any program developed for .Net framework to access database server. It is implemented in 100% C# code. Postgresql 9.x and above is officially supported.</description>
+    <summary>Npgsql is a .Net data provider for Postgresql.</summary>
+    <copyright>Copyright 2002 - 2014 Npgsql Development Team</copyright>
+    <language>en-US</language>
+    <tags>Npgsql postgres data database Postgresql</tags>
+  </metadata>
+</package>

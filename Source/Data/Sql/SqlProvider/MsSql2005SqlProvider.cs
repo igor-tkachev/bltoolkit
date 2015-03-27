@@ -66,6 +66,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return new MsSql2005SqlProvider();
 		}
 
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("'{0:yyyy-MM-ddTHH:mm:ss.fff}'", value));
+		}
+
 		protected override void BuildDataType(System.Text.StringBuilder sb, SqlDataType type)
 		{
 			switch (type.SqlDbType)

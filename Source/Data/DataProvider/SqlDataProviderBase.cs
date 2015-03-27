@@ -23,6 +23,10 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public abstract class SqlDataProviderBase : DataProviderBase
 	{
+		protected SqlDataProviderBase()
+		{
+			SqlDataProviderVersionResolver.Instance.AddDataProvider(this);
+		}
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
@@ -257,12 +261,9 @@ namespace BLToolkit.Data.DataProvider
 				DestinationTableName = tbl,
 			};
 
-			var	index = 0;
-
-			foreach	(var memberMapper in members)
+			for	(var index = 0; index < members.Length; index++)
 			{
-				bc.ColumnMappings.Add(new SqlBulkCopyColumnMapping(index, memberMapper.Name));
-				index++;
+				bc.ColumnMappings.Add(new SqlBulkCopyColumnMapping(index, members[index].Name));
 			}
 
 			bc.WriteToServer(rd);
@@ -275,6 +276,7 @@ namespace BLToolkit.Data.DataProvider
 			readonly MemberMapper[] _members;
 			readonly IEnumerable    _collection;
 			readonly IEnumerator    _enumerator;
+			readonly MappingSchema  _mappingSchema;
 
 			public int Count;
 
@@ -307,7 +309,14 @@ namespace BLToolkit.Data.DataProvider
 
 			public object GetValue(int i)
 			{
-				return _members[i].GetValue(_enumerator.Current);
+				var value = _members[i].GetValue(_enumerator.Current);
+
+				if (value != null && value.GetType().IsEnum)
+				{
+					value = _members[i].MappingSchema.MapEnumToValue(value, _members[i].MemberAccessor, true);
+				}
+
+				return value;
 			}
 
 			public int FieldCount
@@ -433,6 +442,16 @@ namespace BLToolkit.Data.DataProvider
 			{
 				base.SetParameterValue(parameter, value);
 			}
+		}
+
+		public override DataProviderBase ResolveVersion(string configuration, string connectionString)
+		{
+			return SqlDataProviderVersionResolver.Instance.InvalidateDataProvider(this, configuration, connectionString) ?? this;
+		}
+
+		public override bool SupportsVersionResolve
+		{
+			get { return true; }
 		}
 	}
 }

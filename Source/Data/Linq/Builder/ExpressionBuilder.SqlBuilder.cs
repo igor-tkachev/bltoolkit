@@ -1119,7 +1119,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, name, null, MappingSchema)
+				SqlParameter = new SqlParameter(expr.Type, name, null, MappingSchema, !DataContextInfo.DataContext.InlineParameters)
 			};
 
 			_parameters.Add(expr, p);
@@ -1789,7 +1789,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				Expression   = expr,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(expr.Type, member.Name, null, MappingSchema)
+				SqlParameter = new SqlParameter(expr.Type, member.Name, null, MappingSchema, !DataContextInfo.DataContext.InlineParameters)
 			};
 
 			_parameters.Add(expr, p);
@@ -1903,9 +1903,10 @@ namespace BLToolkit.Data.Linq.Builder
 						var p = BuildParameter(arr).SqlParameter;
 						p.IsQueryParameter = false;
 						if (memberAccessor != null)
-						{
 							p.SetEnumConverter(memberAccessor, MappingSchema);
-						}
+						else if (expr != null && expr.SystemType != null && expr.SystemType.IsEnum)
+							p.SetEnumConverter(expr.SystemType, MappingSchema);
+
 						return new SqlQuery.Predicate.InList(expr, false, p);
 					}
 
@@ -1946,7 +1947,7 @@ namespace BLToolkit.Data.Linq.Builder
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
-					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, GetLikeEscaper(start, end))
+					SqlParameter = new SqlParameter(ep.Expression.Type, p.Name, p.Value, !DataContextInfo.DataContext.InlineParameters, GetLikeEscaper(start, end))
 				};
 
 				CurrentSqlParameters.Add(ep);
@@ -2232,6 +2233,9 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (ignoredMembers != null)
 				{
+					if (IsNullConstant(pi))
+						return false;
+
 					if (pi != ignoredMembers[ignoredMembers.Count - 1])
 						throw new InvalidOperationException();
 
@@ -2306,9 +2310,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 							Expression obj = null;
 
-							if (e.Left.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Left).Value == null)
+							if (IsNullConstant(e.Left))
 								obj = e.Right;
-							else if (e.Right.NodeType == ExpressionType.Constant && ((ConstantExpression)e.Right).Value == null)
+							else if (IsNullConstant(e.Right))
 								obj = e.Left;
 
 							if (obj != null)
@@ -2333,6 +2337,10 @@ namespace BLToolkit.Data.Linq.Builder
 			});
 		}
 
+		private static bool IsNullConstant(Expression expr)
+		{
+			return expr.NodeType == ExpressionType.Constant && ((ConstantExpression) expr).Value == null;
+		}
 		#endregion
 
 		#region Helpers

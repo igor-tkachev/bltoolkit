@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -1722,7 +1723,7 @@ namespace BLToolkit.Linq
 			foreach (var item in source)
 			{
 				var targetType = targetTypes[idx];
-				if (item.Type != targetType)
+				if (item.Type != targetType && !TypeHelper.IsSameOrParent(typeof(IEnumerable), item.Type))
 				{
 					list.Add(Expression.Convert(item, targetType));
 				}
@@ -2151,6 +2152,15 @@ namespace BLToolkit.Linq
 
 						if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
 							return GetRootObject(e.Arguments[0]);
+
+						if (e.Arguments != null && e.Arguments.Count > 0
+							&& e.Method.GetCustomAttributes(typeof(SqlFunctionAttribute), true).Length == 0)
+							for (int i = 0; i < e.Arguments.Count; i++)
+							{
+								var arg = e.Arguments[i];
+								if (arg.Type == e.Type)
+									return GetRootObject(arg);
+							}
 
 						break;
 					}

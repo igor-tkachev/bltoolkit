@@ -19,7 +19,7 @@ namespace BLToolkit.ServiceModel
 		string             _contextID;
 		string IDataContext.ContextID
 		{
-			get { return _contextID ?? (_contextID = ContextIDPrefix + SqlProviderType.Name.Replace("SqlProvider", "")); }
+			get { return _contextID ?? (_contextID = ContextIDPrefix + SqlProviderType.Name.Replace("SqlProvider", "") + InlineParameters); }
 		}
 
 		private MappingSchema _mappingSchema;
@@ -68,6 +68,18 @@ namespace BLToolkit.ServiceModel
 		public bool IsMarsEnabled
 		{
 			get { return false; }
+		}
+
+		private bool _inlineParameters;
+		public  bool InlineParameters
+		{
+			get { return _inlineParameters; }
+			set
+			{
+				_inlineParameters = value;
+				_contextID = null;
+			}
+
 		}
 
 		static readonly Dictionary<Type,Func<ISqlProvider>> _sqlProviders = new Dictionary<Type, Func<ISqlProvider>>();

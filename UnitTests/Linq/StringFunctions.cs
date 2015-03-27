@@ -136,6 +136,17 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void StartsWith11()
+		{
+			ForEachProvider(db =>
+			{
+				var jo = "Jo";
+				var q = from p in db.Person where p.FirstName.StartsWith(jo) && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void StartsWith2()
 		{
 			ForEachProvider(

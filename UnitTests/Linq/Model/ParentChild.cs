@@ -94,6 +94,13 @@ namespace Data.Linq.Model
 		{
 			unchecked { return (ParentID * 397) ^ ChildID; }
 		}
+
+		public static Child CreateInstance(Child child, Parent parent)
+		{
+			child.Parent = parent;
+
+			return child;
+		}
 	}
 
 	public class GrandChild : IEquatable<GrandChild>
@@ -144,9 +151,10 @@ namespace Data.Linq.Model
 	[TableName("Parent")]
 	public class Parent3 : IEquatable<Parent3>, IComparable
 	{
-		[MapField("ParentID")]
+		[MapField("ParentID"), PrimaryKey]
 		public int  ParentID2 { get; set; }
-		public int? Value1    { get; set; }
+		[MapField("Value1")]
+		public int? Value     { get; set; }
 
 		public override bool Equals(object obj)
 		{
@@ -158,12 +166,12 @@ namespace Data.Linq.Model
 		{
 			if (ReferenceEquals(null, other)) return false;
 			if (ReferenceEquals(this, other)) return true;
-			return other.ParentID2 == ParentID2 && other.Value1.Equals(Value1);
+			return other.ParentID2 == ParentID2 && other.Value.Equals(Value);
 		}
 
 		public override int GetHashCode()
 		{
-			unchecked { return (ParentID2 * 397) ^ (Value1 ?? 0); }
+			unchecked { return (ParentID2 * 397) ^ (Value ?? 0); }
 		}
 
 		public int CompareTo(object obj)

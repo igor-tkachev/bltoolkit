@@ -341,47 +341,48 @@ namespace BLToolkit.Data
 
 				if (css != null && !string.IsNullOrEmpty(css.ProviderName))
 				{
-					string provider = null;
+					string provider = css.ProviderName;
+					//string provider = null;
 
-					if (css.ProviderName == "System.Data.SqlClient")
-					{
-						try
-						{
-							using (SqlConnection sqlConnection = new SqlConnection(css.ConnectionString))
-							{
-								sqlConnection.Open();
+					//if (css.ProviderName == "System.Data.SqlClient")
+					//{
+					//    try
+					//    {
+					//        using (SqlConnection sqlConnection = new SqlConnection(css.ConnectionString))
+					//        {
+					//            sqlConnection.Open();
 
-								string serverVersion = sqlConnection.ServerVersion;
-								string[] serverVersionDetails = serverVersion.Split(new string[] {"."},
-																					StringSplitOptions.None);
+					//            string serverVersion = sqlConnection.ServerVersion;
+					//            string[] serverVersionDetails = serverVersion.Split(new string[] {"."},
+					//                                                                StringSplitOptions.None);
 
-								int versionNumber = int.Parse(serverVersionDetails[0]);
+					//            int versionNumber = int.Parse(serverVersionDetails[0]);
 
-								switch (versionNumber)
-								{
-									case  8: provider = "MSSQL2000"; break;
-									case  9: provider = "MSSQL2005"; break; //MSSQL 2005 -> Can the same as 2008
-									case 10: provider = "MSSQL2008"; break;
-									case 11: provider = "MSSQL2012"; break;
-									default: provider = "MSSQL2008"; break;
-								}
-							}
-						}
-						catch (Exception)
-						{}
-					}
+					//            switch (versionNumber)
+					//            {
+					//                case  8: provider = "MSSQL2000"; break;
+					//                case  9: provider = "MSSQL2005"; break; //MSSQL 2005 -> Can the same as 2008
+					//                case 10: provider = "MSSQL2008"; break;
+					//                case 11: provider = "MSSQL2012"; break;
+					//                default: provider = "MSSQL2008"; break;
+					//            }
+					//        }
+					//    }
+					//    catch (Exception)
+					//    {}
+					//}
 
-					if (provider == null)
-					{
-						// This hack should be redone.
-						//
-						provider = css.ProviderName == "System.Data.SqlClient" ?
-							configurationString.IndexOf("2012") >= 0 ? "MSSQL2012" :
-							configurationString.IndexOf("2008") >= 0 ? "MSSQL2008" :
-							configurationString.IndexOf("2000") >= 0 ? "MSSQL2000" :
-								css.ProviderName :
-								css.ProviderName;
-					}
+					//if (provider == null)
+					//{
+					//    // This hack should be redone.
+					//    //
+					//    provider = css.ProviderName == "System.Data.SqlClient" ?
+					//        configurationString.IndexOf("2012") >= 0 ? "MSSQL2012" :
+					//        configurationString.IndexOf("2008") >= 0 ? "MSSQL2008" :
+					//        configurationString.IndexOf("2000") >= 0 ? "MSSQL2000" :
+					//            css.ProviderName :
+					//            css.ProviderName;
+					//}
 
 					dp = _dataProviderNameList[provider];
 				}
@@ -426,6 +427,9 @@ namespace BLToolkit.Data
 				_configurationList[configurationString] = dp;
 			}
 
+			if (dp.SupportsVersionResolve)
+				dp = dp.ResolveVersion(configurationString, GetConnectionString(configurationString));
+
 			if (_firstConfiguration == null)
 			{
 				lock (_configurationList.SyncRoot)
@@ -437,6 +441,7 @@ namespace BLToolkit.Data
 					}
 				}
 			}
+
 
 			return dp;
 		}

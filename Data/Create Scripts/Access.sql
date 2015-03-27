@@ -275,7 +275,9 @@ DROP TABLE TestIdentity
 GO
 
 CREATE TABLE TestIdentity (
-	ID Int IDENTITY,
+	ID          Int         IDENTITY,
+	IntValue    int         NULL,
+	StringValue text(50)    NULL,
 	CONSTRAINT PK_TestIdentity PRIMARY KEY (ID)
 )
 GO
