@@ -4510,76 +4510,65 @@ namespace BLToolkit.Data
 			}
 		}
 
-		private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
-		{
-			var res = default(T);
+        private T ExecuteOperation<T>(OperationType operationType, Func<T> operation)
+        {
+            var res = default(T);
 
-	        int retryCount = 0;
+            int retryCount = 0;
 
-			try
-			{
-				OnBeforeOperation(operationType);
+            try
+            {
+                OnBeforeOperation(operationType);
 
-				while (true)
-				{
-					try
-					{
-				res = operation();
-	                    break;
-	                }
-	                catch (Exception ex)
-	                {
-                        var retryHandler = Configuration.RetryOnException;
-	                    if (retryHandler != null)
-	                    {
-	                        if (!retryHandler(ex, retryCount))
-	                            throw;
+                while (true)
+                {
+                    try
+                    {
+                        try
+                        {
+                            res = operation();
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            var retryHandler = Configuration.RetryOnException;
+                            if (retryHandler != null)
+                            {
+                                if (!retryHandler(ex, retryCount))
+                                    throw;
 
-	                        retryCount++;
-	                    }
-	                    else
-	                    {
-	                        throw;
-	                    }
-	                }
-	                //catch (System.Data.SqlClient.SqlException ex)
-                    //{
-                    //    if (ex.Number == 1205) // Deadlock                         
-                    //    {
-                    //        retryCount--;
-                    //        Thread.Sleep(10);
-                    //    }
-                    //    else
-                    //        throw;
-                    //}
-	            }
+                                retryCount++;
+                            }
+                            else
+                            {
+                                throw;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (res is IDisposable)
+                            ((IDisposable)res).Dispose();
 
-			}
+                        if (!HandleOperationExceptionRetry(operationType, ex))
+                            throw;
 
-			catch (Exception ex)
-			{
-				if (res is IDisposable)
-					((IDisposable)res).Dispose();
+                        continue;
+                    }
 
-						if (!HandleOperationExceptionRetry(operationType, ex))
-							throw;
+                    break;
+                }
 
-						continue;
-					}
+                OnAfterOperation(operationType);
+            }
+            catch (Exception ex)
+            {
+                HandleOperationException(operationType, ex);
+                throw;
+            }
 
-					break;
-				}
-
-				OnAfterOperation (operationType);
-			}
-			catch (Exception ex)
-			{
-				HandleOperationException(operationType, ex);
-				throw;
-			}
-
-			return res;
-		}
+            return res;
+        }
 
 		private void HandleOperationException(OperationType op, Exception ex)
 		{
