@@ -123,7 +123,7 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
-		protected virtual void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb, int nParameter)
+        protected virtual void AddWherePK(DbManager db, SqlQueryInfo query, StringBuilder sb, int nParameter, object instance = null)
 		{
 			sb.Append("WHERE\n");
 
@@ -135,16 +135,23 @@ namespace BLToolkit.DataAccess
 
 			foreach (var mm in memberMappers)
 			{
-				var p = query.AddParameter(
-					db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
-					mm.Name);
+                if (mm.IsNull(instance))
+                {
+                    sb.AppendFormat("\t{0} IS NULL AND\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
+                }
+                else
+			    {
+			        var p = query.AddParameter(
+			            db.DataProvider.Convert(mm.Name + "_W", ConvertType.NameToQueryParameter).ToString(),
+			            mm.Name);
+                    
+			        sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
 
-				sb.AppendFormat("\t{0} = ", db.DataProvider.Convert(p.FieldName, ConvertType.NameToQueryField));
-
-				if (nParameter < 0)
-					sb.AppendFormat("{0} AND\n", p.ParameterName);
-				else
-					sb.AppendFormat("{{{0}}} AND\n", nParameter++);
+			        if (nParameter < 0)
+			            sb.AppendFormat("{0} AND\n", p.ParameterName);
+			        else
+			            sb.AppendFormat("{{{0}}} AND\n", nParameter++);
+			    }
 			}
 
 			sb.Remove(sb.Length - 5, 5);
@@ -270,7 +277,7 @@ namespace BLToolkit.DataAccess
 			return query;
 		}
 
-		protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type, int nParameter)
+        protected SqlQueryInfo CreateUpdateSqlText(DbManager db, Type type, int nParameter, object instance = null)
 		{
 			var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
 			var om      = db.MappingSchema.GetObjectMapper(type);
@@ -319,14 +326,14 @@ namespace BLToolkit.DataAccess
 
 			sb.Remove(sb.Length - 2, 1);
 
-			AddWherePK(db, query, sb, nParameter);
+			AddWherePK(db, query, sb, nParameter, instance);
 
 			query.QueryText = sb.ToString();
 
 			return query;
 		}
 
-		protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type, int nParameter)
+        protected SqlQueryInfo CreateDeleteSqlText(DbManager db, Type type, int nParameter, object instance = null)
 		{
 			var om    = db.MappingSchema.GetObjectMapper(type);
 			var sb    = new StringBuilder();
@@ -336,7 +343,7 @@ namespace BLToolkit.DataAccess
 			AppendTableName(sb, db, type);
 			sb.AppendLine();
 
-			AddWherePK(db, query, sb, nParameter);
+			AddWherePK(db, query, sb, nParameter, instance);
 
 			query.QueryText = sb.ToString();
 
@@ -344,7 +351,7 @@ namespace BLToolkit.DataAccess
 		}
 
 		[NoInterception]
-		protected virtual SqlQueryInfo CreateSqlText(DbManager db, Type type, string actionName)
+        protected virtual SqlQueryInfo CreateSqlText(DbManager db, Type type, string actionName, object instance = null)
 		{
 			switch (actionName)
 			{
@@ -352,10 +359,10 @@ namespace BLToolkit.DataAccess
 				case "SelectAll":   return CreateSelectAllSqlText  (db, type);
 				case "Insert":      return CreateInsertSqlText     (db, type, -1);
 				case "InsertBatch": return CreateInsertSqlText     (db, type,  0);
-				case "Update":      return CreateUpdateSqlText     (db, type, -1);
-				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0);
-				case "Delete":      return CreateDeleteSqlText     (db, type, -1);
-				case "DeleteBatch": return CreateDeleteSqlText     (db, type,  0);
+				case "Update":      return CreateUpdateSqlText     (db, type, -1, instance);
+				case "UpdateBatch": return CreateUpdateSqlText     (db, type,  0, instance);
+				case "Delete":      return CreateDeleteSqlText     (db, type, -1, instance);
+				case "DeleteBatch": return CreateDeleteSqlText     (db, type,  0, instance);
 				default:
 					throw new DataAccessException(
 						string.Format("Unknown action '{0}'.", actionName));
@@ -365,15 +372,17 @@ namespace BLToolkit.DataAccess
 		private static readonly Hashtable _actionSqlQueryInfo = new Hashtable();
 
 		[NoInterception]
-		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName)
+		public virtual SqlQueryInfo GetSqlQueryInfo(DbManager db, Type type, string actionName, object instance = null)
 		{
 			var key   = type.FullName + "$" + actionName + "$" + db.DataProvider.UniqueName + "$" + GetTableName(type);
 			var query = (SqlQueryInfo)_actionSqlQueryInfo[key];
 
 			if (query == null)
 			{
-				query = CreateSqlText(db, type, actionName);
-				_actionSqlQueryInfo[key] = query;
+				query = CreateSqlText(db, type, actionName, instance);
+
+			    if (instance != null)
+			        _actionSqlQueryInfo[key] = query;
 			}
 
 			return query;

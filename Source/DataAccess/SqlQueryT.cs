@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BLToolkit.DataAccess
 {
@@ -327,16 +329,42 @@ namespace BLToolkit.DataAccess
 
 		public virtual int Delete(DbManager db, int maxBatchSize, IEnumerable<T> list)
 		{
-			var query = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
+            var memberMappers = GetKeyFieldList(db, typeof(T));
+		    if (memberMappers.Any(x => x.MapMemberInfo.Nullable))
+		    {
+                var l = new T[1];
 
-			db.SetCommand(query.QueryText);
+		        var res = 0;
+		        foreach (var o in list)
+		        {
+		            var query = GetSqlQueryInfo(db, typeof (T), "DeleteBatch", o);
 
-			return ExecuteForEach(
-				db,
-				list,
-				query.GetMemberMappers(),
-				maxBatchSize,
-				obj => query.GetParameters(db, obj));
+		            db.SetCommand(query.QueryText);
+
+		            l[0] = o;
+		             res += ExecuteForEach(
+		                db,
+		                l,
+		                query.GetMemberMappers(),
+		                maxBatchSize,
+		                obj => query.GetParameters(db, obj));
+		        }
+
+		        return res;
+		    }
+		    else
+		    {
+                var query = GetSqlQueryInfo(db, typeof(T), "DeleteBatch");
+
+                db.SetCommand(query.QueryText);
+
+		        return ExecuteForEach(
+		            db,
+		            list,
+		            query.GetMemberMappers(),
+		            maxBatchSize,
+		            obj => query.GetParameters(db, obj));
+		    }
 		}
 
 		public virtual int Delete(int maxBatchSize, IEnumerable<T> list)
