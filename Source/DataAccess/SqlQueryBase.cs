@@ -135,7 +135,7 @@ namespace BLToolkit.DataAccess
 
 			foreach (var mm in memberMappers)
 			{
-                if (mm.IsNull(instance))
+                if (instance != null && mm.IsNull(instance))
                 {
                     sb.AppendFormat("\t{0} IS NULL AND\n", db.DataProvider.Convert(mm.Name, ConvertType.NameToQueryField));
                 }
