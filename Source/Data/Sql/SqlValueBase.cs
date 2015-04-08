@@ -29,47 +29,47 @@ namespace BLToolkit.Data.Sql
 				if (_value == null)
 					return _convertedValue = valueConverter(_value);
 
-				if (!(_value is string)
-					&& _value is IEnumerable)
-				{
-#if SILVERLIGHT
-					var res = new List<Object>(10);
-#else
-					var res = new ArrayList(10);
-#endif
-					var e   = ((IEnumerable)_value);
-					var ut  = null as Type;
+//                if (!(_value is string)
+//                    && _value is IEnumerable)
+//                {
+//#if SILVERLIGHT
+//                    var res = new List<Object>(10);
+//#else
+//                    var res = new ArrayList(10);
+//#endif
+//                    var e   = ((IEnumerable)_value);
+//                    var ut  = null as Type;
 
-					foreach (var val in e)
-					{
-						var element = valueConverter(val);
-						res.Add(element);
+//                    foreach (var val in e)
+//                    {
+//                        var element = valueConverter(val);
+//                        res.Add(element);
 
-						if (ut == null)
-							ut = element.GetType();
-						else if (ut != element.GetType())
-							ut = typeof(object);
-					}
+//                        if (ut == null)
+//                            ut = element.GetType();
+//                        else if (ut != element.GetType())
+//                            ut = typeof(object);
+//                    }
 
-					if (ut == null)
-						ut = typeof (object);
+//                    if (ut == null)
+//                        ut = typeof (object);
 
-					if (ut != typeof (object))
-					{
-						var array = Array.CreateInstance(ut, res.Count);
-#if !SILVERLIGHT
-						res.CopyTo(array);
-#else 
-						for(var i = 0; i < res.Count; i++)
-							array.SetValue(res[i], i);
-#endif
-						_convertedValue = array;
-					}
-					else
-						_convertedValue = res.ToArray();
+//                    if (ut != typeof (object))
+//                    {
+//                        var array = Array.CreateInstance(ut, res.Count);
+//#if !SILVERLIGHT
+//                        res.CopyTo(array);
+//#else 
+//                        for(var i = 0; i < res.Count; i++)
+//                            array.SetValue(res[i], i);
+//#endif
+//                        _convertedValue = array;
+//                    }
+//                    else
+//                        _convertedValue = res.ToArray();
 
-				}
-				else
+//                }
+//                else
 					_convertedValue = valueConverter(_value);
 
 				return _convertedValue;
