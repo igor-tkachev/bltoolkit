@@ -391,7 +391,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
 				sqlValue.SetEnumConverter(memberAccessor, builder.MappingSchema);
 			}			
-			else if (!mm.SupportsValue)
+			else if (!mm.SupportsValue && !mm.Type.IsArray)
 			{
 				sqlValue.ValueConverter = _ =>
 				{
