@@ -1816,6 +1816,54 @@ namespace BLToolkit.Mapping
 
 			if (type == null) throw new ArgumentNullException("type");
 
+			var enumerable = value as IEnumerable;
+			if (enumerable != null)
+			{
+				Type resType = typeof(object);
+
+#if SILVERLIGHT
+				var result = new List<object>();
+
+				foreach (var item in enumerable)
+				{
+					result.Add(MapEnumToValue(item, type, convertToUnderlyingType));
+				}
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						resType = var.GetType();
+						break;
+					}
+				}
+
+				var arr = Array.CreateInstance(resType, result.Count);
+
+				Array.Copy(result.ToArray(), arr, arr.Length);
+
+				return arr;
+#else
+				var result = new ArrayList();
+
+				foreach (var item in enumerable)
+				{
+					result.Add(MapEnumToValue(item, type, convertToUnderlyingType));
+				}
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						resType = var.GetType();
+						break;
+					}
+				}
+
+				return result.ToArray(resType);
+#endif			
+			}
+
 			type = value.GetType();
 
 			object nullValue = GetNullValue(type);

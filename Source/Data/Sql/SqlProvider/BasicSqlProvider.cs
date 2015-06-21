@@ -1526,6 +1526,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 						if (!BuildAsValue(parm))
 						{
 							var name = Convert(parm.Name, ConvertType.NameToQueryParameter);
+							parm.IsQueryParameter = true;
 							sb.Append(name);
 						}
 						else

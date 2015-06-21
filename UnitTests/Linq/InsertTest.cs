@@ -1063,5 +1063,170 @@ namespace Update
 					}
 				});
 		}
+
+		[TableName("LinqDataTypes")]
+		public class Table2
+		{
+			[PrimaryKey]
+			public int ID;
+			public byte[] BinaryValue;
+
+			public override bool Equals(object obj)
+			{
+				var o = obj as Table2;
+				if (o == null)
+					return false;
+
+				if (ID != o.ID)
+					return false;
+
+				if (BinaryValue.Length != o.BinaryValue.Length)
+					return false;
+
+				for (int i = 0; i < BinaryValue.Length; i++)
+				{
+					if (BinaryValue[i] != o.BinaryValue[i])
+						return false;
+				}
+
+				return true;
+			}
+
+			public override int GetHashCode()
+			{
+				return ID;
+			}
+		}
+
+
+		[Test]
+		public void InsertBinaryBatch()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<Table2>();
+
+				t.Delete(_ => _.ID > 1000);
+
+				var src = new[]
+				{
+					new Table2 { ID = 1001, BinaryValue = new byte[]{0, 1, 2}},
+					new Table2 { ID = 1002, BinaryValue = new byte[]{3, 4, 5}}
+				};
+				((DbManager)db).InsertBatch(1, src);
+
+				AreEqual(src, t.Where(_ => _.ID > 1000));
+				t.Delete(_ => _.ID > 1000);
+
+				db.Insert(src[0]);
+				db.Insert(src[1]);
+
+				AreEqual(src, t.Where(_ => _.ID > 1000));
+				t.Delete(_ => _.ID > 1000);
+
+				foreach (var o in src)
+					t
+						.Value(_ => _.ID, o.ID)
+						.Value(_ => _.BinaryValue, o.BinaryValue)
+						.Insert();
+
+				AreEqual(src, t.Where(_ => _.ID > 1000));
+				t.Delete(_ => _.ID > 1000);
+
+			});
+
+		}
+		
+		[Test]
+		public void InsertBinary()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<Table2>();
+
+				t.Delete(_ => _.ID > 1000);
+
+				var src = new[]
+				{
+					new Table2 { ID = 1001, BinaryValue = new byte[]{0, 1, 2}},
+					new Table2 { ID = 1002, BinaryValue = new byte[]{3, 4, 5}}
+				};
+
+				foreach (var o in src)
+					t
+						.Value(_ => _.ID, o.ID)
+						.Value(_ => _.BinaryValue, o.BinaryValue)
+						.Insert();
+
+				AreEqual(src, t.Where(_ => _.ID > 1000));
+				t.Delete(_ => _.ID > 1000);
+
+			});
+
+		}
+
+		[Test]
+		public void InsertBinary2()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<Table2>();
+
+				t.Delete(_ => _.ID > 1000);
+
+				var src = new[]
+				{
+					new Table2 { ID = 1001, BinaryValue = new byte[]{0, 1, 2}},
+					new Table2 { ID = 1002, BinaryValue = new byte[]{3, 4, 5}}
+				};
+
+				db.Insert(src[0]);
+				db.Insert(src[1]);
+
+				AreEqual(src, t.Where(_ => _.ID > 1000));
+				t.Delete(_ => _.ID > 1000);
+			});
+
+		}
+
+		[Test]
+		public void InsertBinary3()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<Table2>();
+
+				t.Delete(_ => _.ID > 1000);
+
+				var src = new[]
+				{
+					new Table2 { ID = 1001, BinaryValue = new byte[]{0, 1, 2}},
+					new Table2 { ID = 1002, BinaryValue = new byte[]{3, 4, 5}}
+				};
+
+				foreach (var o in src)
+					t
+						.Value(_ => _.ID, () => o.ID)
+						.Value(_ => _.BinaryValue, () => o.BinaryValue)
+						.Insert();
+
+				AreEqual(src, t.Where(_ => _.ID > 1000));
+				t.Delete(_ => _.ID > 1000);
+
+			});
+
+		}
 	}
 }

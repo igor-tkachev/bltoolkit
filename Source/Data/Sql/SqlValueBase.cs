@@ -23,54 +23,59 @@ namespace BLToolkit.Data.Sql
 					return _convertedValue;
 
 				var valueConverter = ValueConverter;
+
 				if (valueConverter == null)
-					return _value;
+					return _convertedValue = _value;
 
-				if (_value == null)
-					return _convertedValue = valueConverter(_value);
+				#region enumeration vas done to issue 344, moved to MappingSchema
 
-				if (!(_value is string)
-					&& _value is IEnumerable)
-				{
-#if SILVERLIGHT
-					var res = new List<Object>(10);
-#else
-					var res = new ArrayList(10);
-#endif
-					var e   = ((IEnumerable)_value);
-					var ut  = null as Type;
+//				if (_value == null)
+//					return _convertedValue = valueConverter(_value);
 
-					foreach (var val in e)
-					{
-						var element = valueConverter(val);
-						res.Add(element);
+//				if (/*!(_value is string)*/ _isEnumConverterSet
+//					&& _value is IEnumerable)
+//				{
+//#if SILVERLIGHT
+//					var res = new List<Object>(10);
+//#else
+//					var res = new ArrayList(10);
+//#endif
+//					var e = ((IEnumerable)_value);
+//					var ut = null as Type;
 
-						if (ut == null)
-							ut = element.GetType();
-						else if (ut != element.GetType())
-							ut = typeof(object);
-					}
+//					foreach (var val in e)
+//					{
+//						var element = valueConverter(val);
+//						res.Add(element);
 
-					if (ut == null)
-						ut = typeof (object);
+//						if (ut == null)
+//							ut = element.GetType();
+//						else if (ut != element.GetType())
+//							ut = typeof(object);
+//					}
 
-					if (ut != typeof (object))
-					{
-						var array = Array.CreateInstance(ut, res.Count);
-#if !SILVERLIGHT
-						res.CopyTo(array);
-#else 
-						for(var i = 0; i < res.Count; i++)
-							array.SetValue(res[i], i);
-#endif
-						_convertedValue = array;
-					}
-					else
-						_convertedValue = res.ToArray();
+//					if (ut == null)
+//						ut = typeof(object);
 
-				}
-				else
-					_convertedValue = valueConverter(_value);
+//					if (ut != typeof(object))
+//					{
+//						var array = Array.CreateInstance(ut, res.Count);
+//#if !SILVERLIGHT
+//						res.CopyTo(array);
+//#else 
+//						for(var i = 0; i < res.Count; i++)
+//							array.SetValue(res[i], i);
+//#endif
+//						_convertedValue = array;
+//					}
+//					else
+//						_convertedValue = res.ToArray();
+
+//				}
+//				else
+
+				#endregion
+				_convertedValue = valueConverter(_value);
 
 				return _convertedValue;
 			}

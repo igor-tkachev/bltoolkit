@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -391,7 +392,7 @@ namespace BLToolkit.Data.Linq.Builder
 				var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
 				sqlValue.SetEnumConverter(memberAccessor, builder.MappingSchema);
 			}			
-			else if (!mm.SupportsValue)
+			else if (!mm.SupportsValue &&!(mm is DefaultMemberMapper) /*&& !mm.Type.IsArray*/)
 			{
 				sqlValue.ValueConverter = _ =>
 				{
