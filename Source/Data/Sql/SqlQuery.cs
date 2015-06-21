@@ -4268,8 +4268,8 @@ namespace BLToolkit.Data.Sql
 						{
 							var p = (SqlParameter)expr;
 
-							if (p.IsQueryParameter)
-							{
+							//if (p.IsQueryParameter)
+							//{
 								if (!objs.ContainsKey(expr))
 								{
 									objs.Add(expr, expr);
@@ -4277,9 +4277,11 @@ namespace BLToolkit.Data.Sql
 								}
 
 								Parameters.Add(p);
-							}
-							else
-								IsParameterDependent = true;
+							//}
+							//else
+							//	IsParameterDependent = true;
+
+							IsParameterDependent |= !p.IsQueryParameter;
 						}
 
 						break;

@@ -431,6 +431,8 @@ namespace BLToolkit.Data.Linq
 					queryInfo.Context = null;
 				}
 				p.SqlParameter.Value = value;
+				if (useQueryText)
+					p.SqlParameter.IsQueryParameter = !SqlProvider.IsValueBuildable(value);
 			}
 		}
 

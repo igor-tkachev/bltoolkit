@@ -427,15 +427,13 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			sb.Append(string.Format("#{0:yyyy-MM-dd HH:mm:ss}#", value));
 		}
 
-		public override bool BuildAsValue(SqlParameter parm)
+		public override bool IsValueBuildable(object value)
 		{
-			if (parm.Value is DateTime)
+			if (value is DateTime)
 			{
-				var dt = (DateTime) parm.Value;
-				return dt.Millisecond == 0 && !parm.IsQueryParameter;
+				return ((DateTime) value).Millisecond == 0;
 			}
-
-			return base.BuildAsValue(parm);
+			return base.IsValueBuildable(value);
 		}
 	}
 }

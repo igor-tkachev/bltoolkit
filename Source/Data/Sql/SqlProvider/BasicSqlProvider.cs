@@ -1551,7 +1551,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		public virtual bool BuildAsValue(SqlParameter parm)
 		{
-			return !parm.IsQueryParameter && !(parm.Value is System.Data.Linq.Binary);
+			return !parm.IsQueryParameter && IsValueBuildable(parm.Value);
+		}
+
+		public virtual bool IsValueBuildable(object value)
+		{
+			return !(value is System.Data.Linq.Binary);
 		}
 
 		protected void BuildExpression(StringBuilder sb, int parentPrecedence, ISqlExpression expr, string alias, ref bool addAlias)
