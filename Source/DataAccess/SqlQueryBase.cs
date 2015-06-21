@@ -389,7 +389,10 @@ namespace BLToolkit.DataAccess
 			if (query == null)
 			{
 				query = CreateSqlText(db, type, actionName);
-				_actionSqlQueryInfo[key] = query;
+				lock (_actionSqlQueryInfo)
+				{
+					_actionSqlQueryInfo[key] = query;
+				}
 			}
 
 			return query;
