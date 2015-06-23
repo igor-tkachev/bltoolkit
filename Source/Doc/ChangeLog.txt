@@ -1,3 +1,19 @@
+v.4.3
+
+Enhancement
+
+Complex mappers (JSON, XML, etc) support for Linq queries
+Ability to inline parameters (binaries are not inlined, for Access time with milliseconds not inlined)
+Ability to use XmlDocument as parameter in queries
+
+
+Bug fixes
+Oracle - long parameter names
+Nullable enums in batch insert and Where closure
+Using TimeSpan in EditableObjects
+Race condition in SqlQueryBase
+MapValue support for Linq
+
 v 4.1
 
 Enhancement

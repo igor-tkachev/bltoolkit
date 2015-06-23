@@ -15,7 +15,7 @@ namespace BLToolkit
 		/// <summary>
 		/// Minor component of version.
 		/// </summary>
-		public const string MinorVersion = "2";
+		public const string MinorVersion = "3";
 
 		/// <summary>
 		/// Build component of version.
