@@ -1036,5 +1036,28 @@ namespace Data.Linq
 
 			});
 		}
+
+		[Test]
+		public void NullableEnum_302()
+		{
+			ForEachProvider(db =>
+			{
+				var t = db.GetTable<Table>();
+				t.Where(_ => _.ID > 1000).Delete();
+
+				t.Insert(() => new Table { ID = 1003, MoneyValue = 0m, DateTimeValue = null, BoolValue = true, GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue = null, EnumValue = null });
+				t.Insert(() => new Table { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null, SmallIntValue = 2, EnumValue = TestEnum.Second });
+
+
+				var data = t
+				  .Where(i => new[] { TestEnum.Second, TestEnum.First }.Contains(i.EnumValue ?? TestEnum.First))
+				  .ToList();
+
+				Assert.That(data.Count >= 2);
+
+				t.Where(_ => _.ID > 1000).Delete();
+
+			});
+		}
 	}
 }
