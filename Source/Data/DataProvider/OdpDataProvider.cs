@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.Linq;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1649,7 +1650,7 @@ namespace BLToolkit.Data.DataProvider
 						var dt = (DateTime)value;
 						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
 					}
-					else if (value is string && ((string)value).Length >= 2000)
+					else if ((value is string && ((string)value).Length >= 2000) || value is byte[] || value is Binary)
 					{
 						var par = db.Parameter("p" + ++pn, value);
 						parameters.Add(par);

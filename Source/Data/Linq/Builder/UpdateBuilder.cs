@@ -178,7 +178,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					if (expr is SqlParameter)
 					{
-						SetConverter(builder, member, expr);
+						SetConverter(builder.MappingSchema, member, expr);
 						//var type = member.MemberType == MemberTypes.Field ? 
 						//	((FieldInfo)   member).FieldType :
 						//	((PropertyInfo)member).PropertyType;
@@ -229,7 +229,7 @@ namespace BLToolkit.Data.Linq.Builder
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
 						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression, false);
 
-						SetConverter(builder, ma.Member, expr);
+						SetConverter(builder.MappingSchema, ma.Member, expr);
 
 						items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 					}
@@ -297,7 +297,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			builder.ReplaceParent(ctx, sp);
 
-			SetConverter(builder, member, expr);
+			SetConverter(builder.MappingSchema, member, expr);
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
@@ -371,31 +371,37 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var expr = builder.ConvertToSql(select, update, false, false);
 
-			SetConverter(builder, member, expr);
+			SetConverter(builder.MappingSchema, member, expr);
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
 
-		private static void SetConverter(
-			ExpressionBuilder builder, 
-			MemberInfo        member,
-			ISqlExpression    expr)
+		internal static void SetConverter(MappingSchema mappingSchema, MemberInfo member, ISqlExpression expr)
 		{
 			var sqlValue = expr as SqlValueBase;
 			if (sqlValue == null)
 				return;
-			var mm = builder.MappingSchema.GetObjectMapper(member.DeclaringType)
-				.First(_ => _.MemberName == member.Name);
+
+			var mm = mappingSchema.GetObjectMapper(member.DeclaringType)
+				.FirstOrDefault(_ => _.MemberName == member.Name);
+			if (mm == null)
+				return;
 
 			if (TypeHelper.IsEnumOrNullableEnum(mm.Type))
 			{
 				var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
-				sqlValue.SetEnumConverter(memberAccessor, builder.MappingSchema);
+				sqlValue.SetEnumConverter(memberAccessor, mappingSchema);
 			}			
-			else if (!mm.SupportsValue &&!(mm is DefaultMemberMapper) /*&& !mm.Type.IsArray*/)
+			else if (mm.IsExplicit || mm.MapMemberInfo.MapValues != null)
 			{
 				sqlValue.ValueConverter = _ =>
 				{
+					if (_ == null && mm.Type.IsValueType)
+						return _;
+
+					//if (_ != null && _.GetType() != mm.MemberAccessor.Type)
+					//	return _;
+
 					var obj = TypeAccessor.CreateInstanceEx(member.DeclaringType);
 					mm.MemberAccessor.SetValue(obj, _);
 					return mm.GetValue(obj);

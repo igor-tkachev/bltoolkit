@@ -526,16 +526,19 @@ namespace BLToolkit.Data.Linq
 
 				if (i == 0)
 				{
-					if (members.Length == 1 && mm.IsExplicit)
-					{
-						if (getter.Type != typeof(object))
-							getter = Expression.Convert(getter, typeof(object));
+					// this goes to UpdateBuilder.SetConverter
+					// 
 
-						pof = Expression.Call(
-							Expression.Constant(mm),
-							ReflectionHelper.Expressor<MemberMapper>.MethodExpressor(m => m.GetValue(null)),
-							getter);
-					}
+					//if (members.Length == 1 && mm.IsExplicit)
+					//{
+					//	if (getter.Type != typeof(object))
+					//		getter = Expression.Convert(getter, typeof(object));
+
+					//	pof = Expression.Call(
+					//		Expression.Constant(mm),
+					//		ReflectionHelper.Expressor<MemberMapper>.MethodExpressor(m => m.GetValue(null)),
+					//		getter);
+					//}
 
 					getter = pof;
 				}
@@ -570,10 +573,12 @@ namespace BLToolkit.Data.Linq
 				SqlParameter = new SqlParameter(field.SystemType, field.Name.Replace('.', '_'), null, dataContext.MappingSchema, !dataContext.InlineParameters)
 			};
 
-			if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))
-			{
-				param.SqlParameter.SetEnumConverter(field.MemberMapper.ComplexMemberAccessor, dataContext.MappingSchema);
-			}
+			UpdateBuilder.SetConverter(mm.MappingSchema, mm.MemberAccessor.MemberInfo, param.SqlParameter);
+
+			//if (TypeHelper.IsEnumOrNullableEnum(field.SystemType))
+			//{
+			//	param.SqlParameter.SetEnumConverter(field.MemberMapper.ComplexMemberAccessor, dataContext.MappingSchema);
+			//}
 
 			return param;
 		}

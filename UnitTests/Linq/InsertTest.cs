@@ -1228,5 +1228,221 @@ namespace Update
 			});
 
 		}
+
+
+		[TableName("LinqDataTypes")]
+		public class MappedFieldsTable  
+		{
+			public const int True  = 10;
+			public const int False = 20;
+			
+			[PrimaryKey]
+			public int ID;
+
+			[MapField("SmallIntValue")]
+			[MapValue(true,  True)]
+			[MapValue(false, False)]
+			public bool BoolValue1;
+
+			[MapField("MoneyValue")]
+			[MapValue(true,  True)]
+			[MapValue(false, False)]
+			public bool? BoolValue2;
+
+		}
+		
+		[TableName("LinqDataTypes")]
+		[MapValue(typeof(bool), true,  MappedFieldsTable.True)]
+		[MapValue(typeof(bool), false, MappedFieldsTable.False)]
+		public class MappedClassTable
+		{
+			public const int True  = 10;
+			public const int False = 20;
+			
+			[PrimaryKey]
+			public int ID;
+
+			[MapField("SmallIntValue")]
+			public bool BoolValue1 { get; set; }
+
+			[MapField("MoneyValue")]
+			public bool? BoolValue2 { get; set; }
+
+		}
+
+		[TableName("LinqDataTypes")]
+		public class MappedBoolCheckTable
+		{
+			[PrimaryKey]
+			public int ID;
+
+			[MapField("SmallIntValue")]
+			public int BoolValue1;
+
+			[MapField("MoneyValue")]
+			public int? BoolValue2;
+		}
+
+		[Test]
+		public void InsertMappedBool1()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<MappedFieldsTable>();
+				var ct = db.GetTable<MappedBoolCheckTable>().Where(_ => _.ID == 1001);
+
+				t.Delete(_ => _.ID > 1000);
+
+				var src = new MappedFieldsTable {ID = 1001, BoolValue1 = true, BoolValue2 = false};
+
+				t
+					.Value(_ => _.ID, src.ID)
+					.Value(_ => _.BoolValue1, src.BoolValue1)
+					.Value(_ => _.BoolValue2, src.BoolValue2)
+					.Insert();
+
+				//db.Insert(src);
+
+				var to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				t.Delete(_ => _.ID > 1000);
+
+
+				db.Insert(src);
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				t.Delete(_ => _.ID > 1000);
+
+				t
+					.Value(_ => _.ID, src.ID)
+					.Value(_ => _.BoolValue1, () => src.BoolValue1)
+					.Value(_ => _.BoolValue2, () => src.BoolValue2)
+					.Insert();
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				src.BoolValue1 = false;
+				src.BoolValue2 = true;
+
+				db.Update(src);
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue2);
+
+				t.Where(_ => _.ID == src.ID)
+					.Set(_ => _.BoolValue1, true)
+					.Set(_ => _.BoolValue2, false)
+					.Update();
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				t.Where(_ => _.ID == src.ID)
+					.Set(_ => _.BoolValue1, () => false)
+					.Set(_ => _.BoolValue2, () => true)
+					.Update();
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue2);
+
+				ct.Delete();
+
+			});
+
+		}
+
+		[Test]
+		public void InsertMappedBool2()
+		{
+			ForEachProvider(db =>
+			{
+				if (!(db is DbManager))
+					return;
+
+				var t = db.GetTable<MappedClassTable>();
+				var ct = db.GetTable<MappedBoolCheckTable>().Where(_ => _.ID == 1001);
+
+				t.Delete(_ => _.ID > 1000);
+
+				var src = new MappedFieldsTable {ID = 1001, BoolValue1 = true, BoolValue2 = false};
+
+				t
+					.Value(_ => _.ID, src.ID)
+					.Value(_ => _.BoolValue1, src.BoolValue1)
+					.Value(_ => _.BoolValue2, src.BoolValue2)
+					.Insert();
+
+				//db.Insert(src);
+
+				var to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				t.Delete(_ => _.ID > 1000);
+
+
+				db.Insert(src);
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				t.Delete(_ => _.ID > 1000);
+
+				t
+					.Value(_ => _.ID, src.ID)
+					.Value(_ => _.BoolValue1, () => src.BoolValue1)
+					.Value(_ => _.BoolValue2, () => src.BoolValue2)
+					.Insert();
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				src.BoolValue1 = false;
+				src.BoolValue2 = true;
+
+				db.Update(src);
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue2);
+
+				t.Where(_ => _.ID == src.ID)
+					.Set(_ => _.BoolValue1, true)
+					.Set(_ => _.BoolValue2, false)
+					.Update();
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue2);
+
+				t.Where(_ => _.ID == src.ID)
+					.Set(_ => _.BoolValue1, () => false)
+					.Set(_ => _.BoolValue2, () => true)
+					.Update();
+
+				to = ct.First();
+				Assert.AreEqual(MappedFieldsTable.False, to.BoolValue1);
+				Assert.AreEqual(MappedFieldsTable.True,  to.BoolValue2);
+
+				ct.Delete();
+
+			});
+
+		}
 	}
 }
