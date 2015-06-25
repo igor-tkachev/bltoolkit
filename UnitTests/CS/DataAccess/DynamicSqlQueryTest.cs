@@ -18,7 +18,11 @@ namespace DataAccess
 			{
 				public override string GetSqlText(DataAccessor accessor, DbManager dbManager)
 				{
-					return SqlText + 1;
+					return SqlText + 1
+#if FIREBIRD
+						+ " from dual"
+#endif
+						;
 				}
 			}
 
@@ -33,7 +37,11 @@ namespace DataAccess
 			{
 				switch (queryID)
 				{
-					case 2: return sqlQuery + queryID;
+					case 2: return sqlQuery + queryID
+#if FIREBIRD
+						+ " from dual"
+#endif
+						;
 				}
 
 				return base.PrepareSqlQuery(db, queryID, uniqueQueryID, sqlQuery);
