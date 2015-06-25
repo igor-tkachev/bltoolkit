@@ -14,7 +14,9 @@ namespace Data
 #endif
 	public class OutputParameter
 	{
+#if MSSQL
 		[Test]
+#endif
 		public void DirectTest()
 		{
 			using (DbManager db = new DbManager())
@@ -35,7 +37,9 @@ namespace Data
 			public abstract void SelectJohn([ParamSize(50), ParamDbType(DbType.String)] out string name, [Format] string paramName, [Format] string FieldName);
 		}
 
+#if MSSQL
 		[Test]
+#endif
 		public void AccessorTest()
 		{
 			using (DbManager db = new DbManager())

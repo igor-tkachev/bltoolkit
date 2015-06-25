@@ -256,13 +256,13 @@ namespace BLToolkit.Data.DataProvider
 		{
 			if (value is System.Xml.XmlDocument)
 			{
-				parameter.Value = ((System.Xml.XmlDocument) value).OuterXml;
+				parameter.Value = ((System.Xml.XmlDocument)value).OuterXml;
 				parameter.DbType = DbType.String;
 				parameter.Size = parameter.Value.ToString().Length;
 			}
-			else if(value is Stream)
+			else if (value is Stream)
 			{
-				var arr =  MappingSchema.ConvertToByteArray(value);
+				var arr = MappingSchema.ConvertToByteArray(value);
 				parameter.Value = arr;
 				parameter.DbType = DbType.Binary;
 				parameter.Size = arr.Length;

@@ -502,6 +502,10 @@ namespace Data
 
 				foreach (MemberMapper mm in ObjectMapper<DataTypeTest>.Instance)
 				{
+#if FIREBIRD
+					if (mm.MemberName == "Stream_" || mm.MemberName == "Xml_")
+						continue;
+#endif
 					var paramName = (string)db.DataProvider.Convert(mm.Name, db.GetConvertTypeToParameter());
 					var p         = parameters.First(obj => obj.ParameterName == paramName);
 
