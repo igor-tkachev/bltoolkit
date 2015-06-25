@@ -538,7 +538,9 @@ namespace DataAccess
 			Assert.IsInstanceOf(typeof(Other.Person), list[0]);
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void ParamNullValueIDTest()
 		{
 			// Parameter id == 1 will be replaced with NULL
@@ -552,7 +554,9 @@ namespace DataAccess
 			Assert.IsNotNull(e2);
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif 
 		public void ParamNullValueNullableIDTest()
 		{
 			// Parameter id == 1 will be replaced with NULL
