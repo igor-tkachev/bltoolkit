@@ -31,7 +31,11 @@ namespace Data.Linq
 			var providerListFile =
 				File.Exists(@"..\..\UserDataProviders.txt") ?
 					@"..\..\UserDataProviders.txt" :
+#if Ci
+					@"..\..\DefaultDataProviders.Ci.txt";
+#else
 					@"..\..\DefaultDataProviders.txt";
+#endif
 
 			UserProviders.AddRange(
 				File.ReadAllLines(providerListFile)
