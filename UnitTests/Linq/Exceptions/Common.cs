@@ -18,6 +18,7 @@ namespace Data.Exceptions
 	{
 		class MyDbManager : TestDbManager
 		{
+			public MyDbManager(string confName) : base(confName) {}
 			public MyDbManager() : base("Sql2008") {}
 
 			protected override SqlQuery ProcessQuery(SqlQuery sqlQuery)
@@ -76,7 +77,7 @@ namespace Data.Exceptions
 		[Test, ExpectedException(typeof(DataException), ExpectedMessage = "Invalid object name 'Parent1'.")]
 		public void ReplaceTableTest([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new MyDbManager())
+			using (var db = new MyDbManager(context))
 			{
 				var n = 555;
 
