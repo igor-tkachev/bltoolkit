@@ -9,7 +9,9 @@ using NUnit.Framework;
 
 namespace Data
 {
+#if MSSQL
 	[TestFixture]
+#endif
 	public class OutputParameter
 	{
 		[Test]

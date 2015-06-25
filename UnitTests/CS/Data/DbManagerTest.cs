@@ -616,7 +616,14 @@ namespace Data
 		{
 			using (var dbm = new DbManager())
 			{
-				var gender = dbm.SetCommand(CommandType.Text, "select 'M'")
+				var gender = dbm.SetCommand(CommandType.Text, 
+#if FIREBIRD
+					"select 'M' from dual"
+#else
+					"select 'M'"
+#endif
+					
+					)
 								.ExecuteScalar<Gender>();
 
 				Assert.That(gender, Is.EqualTo(Gender.Male));
@@ -635,7 +642,15 @@ namespace Data
 		{
 			using (var db = new DbManager())
 			{
-				var type = db.SetCommand("select 1 where 1 = 2").ExecuteScalar<ABType>();
+				var type = db.SetCommand(
+#if FIREBIRD
+					"select 1 from dual where 1 = 2"
+#else
+					"select 1 where 1 = 2"
+
+#endif
+					)
+					.ExecuteScalar<ABType>();
 				Assert.That(type, Is.EqualTo(ABType.A));
 			}
 		}

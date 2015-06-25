@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Data.Common;
+using System.IO;
 using System.Linq;
 
 using BLToolkit.Data.Sql.SqlProvider;
@@ -250,6 +251,26 @@ namespace BLToolkit.Data.DataProvider
 
 			base.Configure(attributes);
 		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is System.Xml.XmlDocument)
+			{
+				parameter.Value = ((System.Xml.XmlDocument) value).OuterXml;
+				parameter.DbType = DbType.String;
+				parameter.Size = parameter.Value.ToString().Length;
+			}
+			else if(value is Stream)
+			{
+				var arr =  MappingSchema.ConvertToByteArray(value);
+				parameter.Value = arr;
+				parameter.DbType = DbType.Binary;
+				parameter.Size = arr.Length;
+			}
+			else
+				base.SetParameterValue(parameter, value);
+		}
+
 		#endregion
 
 		#region FbDataReaderEx

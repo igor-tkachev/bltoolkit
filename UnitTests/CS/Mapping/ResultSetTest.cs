@@ -8,7 +8,9 @@ using NUnit.Framework;
 
 namespace Mapping
 {
+#if !FIREBIRD
 	[TestFixture]
+#endif 
 	public class ResultSetTest
 	{
 		public class Master

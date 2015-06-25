@@ -947,7 +947,11 @@ namespace DataAccess
 
 		public abstract class SomeDA : DataAccessor<Whatever2>
 		{
+#if FIREBIRD
+			[SqlQuery("select 'Gogi' as Name, 10 as Age from dual")]
+#else
 			[SqlQuery("select 'Gogi' as Name, 10 as Age")]
+#endif
 			public abstract Whatever GetWhatever();
 		}
 

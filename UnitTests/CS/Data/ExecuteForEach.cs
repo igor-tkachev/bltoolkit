@@ -13,16 +13,16 @@ namespace Data
 	{
 		public class TypeWrapper<T>
 		{
-			public TypeWrapper(T value)
+			public TypeWrapper(T someValue)
 			{
-				_value = value;
+				_someValue = someValue;
 			}
 
-			private T _value;
-			public  T  Value
+			private T _someValue;
+			public  T  SomeValue
 			{
-				get { return _value;  }
-				set { _value = value; }
+				get { return _someValue;  }
+				set { _someValue = value; }
 			}
 		}
 
@@ -35,7 +35,9 @@ namespace Data
 			RunTest(new double[] { 1, 2, 3, 4 });
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void TestVarTypes()
 		{
 			RunTest(new byte[][] { new byte[] { 1, 2 }, new byte[] { 3, 4 } });
@@ -71,7 +73,9 @@ namespace Data
 			}
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void TestStringWithDiffLength()
 		{
 			List<Item> test = new List<Item>();
@@ -117,8 +121,19 @@ namespace Data
 
 			using (DbManager db = new DbManager())
 			{
-				db
-					.SetCommand(@"SELECT @Value as 'value'")
+
+
+#if FIREBIRD
+				var type = "numeric(18, 2)";
+				if (typeof (T) == typeof (string))
+					type = "varchar(100)";
+				if (typeof (T) == typeof (DateTime))
+					type = "TIMESTAMP";
+
+				db.SetCommand(string.Format(@"SELECT cast(@SomeValue as {0}) as SomeValue FROM Dual", type))
+#else
+				db.SetCommand(@"SELECT @SomeValue as 'SomeValue'")
+#endif
 					.ExecuteForEach<TypeWrapper<T>>(col);
 			}
 		}

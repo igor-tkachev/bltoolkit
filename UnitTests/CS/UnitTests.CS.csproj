@@ -86,6 +86,15 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Ci|AnyCPU'">
+    <OutputPath>bin\Release Ci\</OutputPath>
+    <DefineConstants>TRACE;FW3;FIREBIRD</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
@@ -248,7 +257,15 @@
     <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Data\BLToolkitData.fdb">
+      <Link>BLToolkitData.fdb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="App.Release Ci.config">
+      <DependentUpon>App.config</DependentUpon>
       <SubType>Designer</SubType>
     </None>
     <None Include="DataAccess\PersonDataSet2.xsc">
@@ -321,6 +338,10 @@
     <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.4.csproj">
+      <Project>{c1f8c201-bbd9-44f4-884c-cff8cc960b68}</Project>
+      <Name>BLToolkit.Data.DataProvider.Firebird.4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
@@ -338,5 +359,26 @@
       <Name>BLToolkit.4.JointureAddOn</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\Redist\Firebird\fbembed.dll">
+      <Link>fbembed.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Redist\Firebird\icudt30.dll">
+      <Link>icudt30.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Redist\Firebird\icuin30.dll">
+      <Link>icuin30.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Redist\Firebird\icuuc30.dll">
+      <Link>icuuc30.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release Ci'">
+    <AppConfig>App.Release Ci.config</AppConfig>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
