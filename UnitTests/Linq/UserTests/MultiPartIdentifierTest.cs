@@ -17,9 +17,11 @@ namespace Data.Linq.UserTests
 	{
 		class Table1
 		{
+#pragma warning disable 0649
 			public long Field1;
 			public long Field2;
 			public int? Field3;
+#pragma warning restore 0649
 
 			[Association(ThisKey = "Field2", OtherKey = "Field2", CanBeNull = false)]
 			public Table2 Table2Ref { get; set; }
@@ -42,7 +44,9 @@ namespace Data.Linq.UserTests
 
 		class Table3
 		{
+#pragma warning disable 0649
 			public int Field4;
+#pragma warning restore 0649
 
 			[Association(ThisKey="Field4", OtherKey="Field4", CanBeNull=true)]
 			public List<Table2> Table2s { get; set; }
@@ -62,8 +66,10 @@ namespace Data.Linq.UserTests
 
 		class Table5
 		{
+#pragma warning disable 0649
 			public int? Field5;
 			public int  ProblematicalField;
+#pragma warning restore 0649
 
 			[Association(ThisKey = "Field5", OtherKey = "ProblematicalField", CanBeNull = true)]
 			public Table5 Table5Ref { get; set; }

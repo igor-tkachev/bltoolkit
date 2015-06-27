@@ -14,6 +14,7 @@ namespace Data.Linq.UserTests
 		[TableName("GrandChild")]
 		class Table1
 		{
+#pragma warning disable 0649
 			public int ChildID;
 		}
 
@@ -22,6 +23,7 @@ namespace Data.Linq.UserTests
 		{
 			public int ChildID;
 			public int ParentID;
+#pragma warning restore 0649
 
 			[Association(ThisKey = "ChildID", OtherKey = "ChildID", CanBeNull = true)]
 			public List<Table1> GrandChildren { get; set; }

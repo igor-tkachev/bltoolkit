@@ -10,6 +10,7 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
+#pragma warning disable 0649
 	[TestFixture, Category("MapValue")]
 	public class EnumMapping : TestBase
 	{
@@ -1531,4 +1532,5 @@ namespace Data.Linq
 			});
 		}
 	}
+#pragma warning restore 0649
 }

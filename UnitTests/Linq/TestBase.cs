@@ -230,8 +230,6 @@ namespace Data.Linq
 				Except = except;
 			}
 
-			const bool IncludeLinqService = true;
-
 			public string[] Except             { get; set; }
 			public string[] Include            { get; set; }
 			public bool     ExcludeLinqService { get; set; }
@@ -241,7 +239,7 @@ namespace Data.Linq
 				if (Include != null)
 				{
 					var list = Include.Intersect(
-						IncludeLinqService ? 
+						ExcludeLinqService == false ? 
 							UserProviders.Concat(UserProviders.Select(p => p + ".LinqService")) :
 							UserProviders).
 						ToArray();
@@ -264,7 +262,7 @@ namespace Data.Linq
 
 					providers.Add(info.Name);
 
-					if (IncludeLinqService && !ExcludeLinqService)
+					if (!ExcludeLinqService)
 					{
 						providers.Add(info.Name + ".LinqService");
 					}

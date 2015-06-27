@@ -276,7 +276,6 @@ namespace BLToolkit.Data.DataProvider
 			readonly MemberMapper[] _members;
 			readonly IEnumerable    _collection;
 			readonly IEnumerator    _enumerator;
-			readonly MappingSchema  _mappingSchema;
 
 			public int Count;
 
