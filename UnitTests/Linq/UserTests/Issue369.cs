@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
+using BLToolkit;
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -116,7 +118,9 @@ namespace Data.Linq.UserTests
 		}
 
 		[Test]
-		public void NullableTest1([DataContextsAttribute(ExcludeLinqService = true)] string config)
+		public void NullableTest1([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
+			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
+			ExcludeLinqService = true)] string config)
 		{
 			NullableTest(
 				(db, data) =>
@@ -132,7 +136,10 @@ namespace Data.Linq.UserTests
 		}
 
 		[Test]
-		public void NullableTest2([DataContextsAttribute(ExcludeLinqService = true)] string config)
+		public void NullableTest2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
+			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
+			"Oracle",
+			ExcludeLinqService = true)]string config)
 		{
 			NullableTest4(
 				(db, data) =>
@@ -144,7 +151,9 @@ namespace Data.Linq.UserTests
 		}
 
 		[Test]
-		public void NullableTest1_2([DataContextsAttribute("Access", ExcludeLinqService = true)] string config)
+		public void NullableTest1_2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
+			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL, ProviderName.Access,
+			ExcludeLinqService = true)] string config)
 		{
 			NullableTest4(
 				(db, data) =>
@@ -160,7 +169,10 @@ namespace Data.Linq.UserTests
 		}
 
 		[Test]
-		public void NullableTest2_2([DataContextsAttribute(ExcludeLinqService = true)] string config)
+		public void NullableTest2_2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
+			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
+			"Oracle",
+			ExcludeLinqService = true)] string config)
 		{
 			NullableTest(
 				(db, data) =>
