@@ -40,7 +40,22 @@ namespace Data.Linq
 			UserProviders.AddRange(
 				File.ReadAllLines(providerListFile)
 					.Select(s => s.Trim())
-					.Where (s => s.Length > 0 && !s.StartsWith("--")));
+					.Where(s => s.Length > 0 && !s.StartsWith("--"))
+					.Select(s =>
+					{
+						var ss = s.Split('*');
+						switch (ss.Length)
+						{
+							case 0:  return null;
+							case 1:  return new UserProviderInfo { Name = ss[0].Trim() };
+							default: return new UserProviderInfo { Name = ss[0].Trim(), ConnectionString = ss[1].Trim() };
+						}
+					}));
+
+			foreach (var provider in UserProviders)
+				if (provider.ConnectionString != null)
+					DbManager.AddConnectionString(provider.Name, provider.ConnectionString);
+
 
 			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
 			{
@@ -170,7 +185,13 @@ namespace Data.Linq
 			public          bool   Skip;
 		}
 
-		public static readonly List<string>       UserProviders = new List<string>();
+		public class UserProviderInfo
+		{
+			public string Name;
+			public string ConnectionString;
+		}
+
+		public static readonly List<UserProviderInfo> UserProviders = new List<UserProviderInfo>();
 		public static readonly List<ProviderInfo> Providers = new List<ProviderInfo>
 		{
 			new ProviderInfo("Sql2008",               null,                                          "BLToolkit.Data.DataProvider.Sql2008DataProvider"),
@@ -193,7 +214,7 @@ namespace Data.Linq
 
 		static IEnumerable<ITestDataContext> GetProviders(IEnumerable<string> exceptList)
 		{
-			var list = UserProviders.Concat(UserProviders.Select(p => p + ".LinqService"));
+			var list = UserProviders.Select(_ => _.Name).Concat(UserProviders.Select(p => p + ".LinqService"));
 
 			foreach (var info in Providers.Where(p => list.Contains(p.Name)))
 			{
@@ -240,8 +261,8 @@ namespace Data.Linq
 				{
 					var list = Include.Intersect(
 						ExcludeLinqService == false ? 
-							UserProviders.Concat(UserProviders.Select(p => p + ".LinqService")) :
-							UserProviders).
+							UserProviders.Select(_ => _.Name).Concat(UserProviders.Select(p => p + ".LinqService")) :
+							UserProviders.Select(_ => _.Name)).
 						ToArray();
 
 					return list;
@@ -257,7 +278,7 @@ namespace Data.Linq
 					if (Except != null && Except.Contains(info.Name))
 						continue;
 
-					if (!UserProviders.Contains(info.Name))
+					if (!UserProviders.Select(_ => _.Name).Contains(info.Name))
 						continue;
 
 					providers.Add(info.Name);
