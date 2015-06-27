@@ -14,14 +14,16 @@ namespace Data.Exceptions
 	[TestFixture]
 	public class Mapping : TestBase
 	{
-		[Test, ExpectedException(typeof(LinqException))]
+		[Test, ExpectedException(typeof (LinqException))]
 		public void MapIgnore1()
 		{
-			ForEachProvider(typeof(LinqException), db =>
-			{
-				var q = from p in db.Person where p.Name == "123" select p;
-				q.ToList();
-			});
+			ForEachProvider(typeof (LinqException),
+				new[] {"Northwind"},
+				db =>
+				{
+					var q = from p in db.Person where p.Name == "123" select p;
+					q.ToList();
+				});
 		}
 
 		[TableName("Person")]
@@ -31,11 +33,12 @@ namespace Data.Exceptions
 			[MapIgnore] public string FirstName;
 		}
 
-		[Test, ExpectedException(typeof(LinqException))]
+		[Test, ExpectedException(typeof (LinqException))]
 		public void MapIgnore2()
 		{
-			ForEachProvider(typeof(LinqException), db =>
-				db.GetTable<TestPerson1>().FirstOrDefault(_ => _.FirstName == null));
+			ForEachProvider(typeof (LinqException),
+				new[] {"Northwind"},
+				db => db.GetTable<TestPerson1>().FirstOrDefault(_ => _.FirstName == null));
 		}
 	}
 }

@@ -12,13 +12,17 @@ namespace Data.Exceptions
 		[Test, ExpectedException(typeof(InvalidOperationException))]
 		public void First()
 		{
-			ForEachProvider(typeof(InvalidOperationException), db => db.Parent.First(p => p.ParentID == 100));
+			ForEachProvider(typeof(InvalidOperationException),
+				new[] { "Northwind" },
+				db => db.Parent.First(p => p.ParentID == 100));
 		}
 
 		[Test, ExpectedException(typeof(InvalidOperationException))]
 		public void Single()
 		{
-			ForEachProvider(typeof(InvalidOperationException), db => db.Parent.Single());
+			ForEachProvider(typeof(InvalidOperationException),
+				new[] { "Northwind" },
+				db => db.Parent.Single());
 		}
 	}
 }

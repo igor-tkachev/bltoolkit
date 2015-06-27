@@ -16,7 +16,9 @@ namespace Data.Exceptions
 		{
 			try
 			{
-				ForEachProvider(db =>
+				ForEachProvider(
+					new[] { "Northwind" },
+					db =>
 					db.Doctor.InsertOrUpdate(
 						() => new Doctor
 						{
@@ -36,11 +38,14 @@ namespace Data.Exceptions
 		}
 
 		[Test, ExpectedException(typeof(LinqException))]
-		public void InsertOrUpdate2()
+		public void InsertOrUpdate2(/*[DataContexts("Northwind")] string config*/)
 		{
 			try
 			{
-				ForEachProvider(db =>
+				ForEachProvider(
+					typeof(LinqException),
+					new[] { "Northwind" },
+					db =>
 					db.Patient.InsertOrUpdate(
 						() => new Patient
 						{
