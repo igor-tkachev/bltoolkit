@@ -50,7 +50,8 @@ namespace Data.Linq
 							case 1:  return new UserProviderInfo { Name = ss[0].Trim() };
 							default: return new UserProviderInfo { Name = ss[0].Trim(), ConnectionString = ss[1].Trim() };
 						}
-					}));
+					})
+					.Where(_ => _ != null));
 
 			foreach (var provider in UserProviders)
 				if (provider.ConnectionString != null)
