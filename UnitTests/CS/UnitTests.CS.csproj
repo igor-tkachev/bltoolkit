@@ -264,10 +264,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App.Release Ci.config">
-      <DependentUpon>App.config</DependentUpon>
-      <SubType>Designer</SubType>
-    </None>
     <None Include="DataAccess\PersonDataSet2.xsc">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </None>
@@ -377,8 +373,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release Ci'">
-    <AppConfig>App.Release Ci.config</AppConfig>
-  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

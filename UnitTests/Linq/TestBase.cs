@@ -31,11 +31,7 @@ namespace Data.Linq
 			var providerListFile =
 				File.Exists(@"..\..\UserDataProviders.txt") ?
 					@"..\..\UserDataProviders.txt" :
-#if Ci
-					@"..\..\DefaultDataProviders.Ci.txt";
-#else
 					@"..\..\DefaultDataProviders.txt";
-#endif
 
 			UserProviders.AddRange(
 				File.ReadAllLines(providerListFile)
@@ -863,7 +859,7 @@ namespace Data.Linq
 			var resultList   = result.  ToList();
 			var expectedList = expected.ToList();
 
-			Assert.AreNotEqual(0, expectedList.Count);
+			Assert.AreNotEqual(0, expectedList.Count, "Expected result count 0");
 			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
 			var exceptExpectedList = resultList.  Except(expectedList).ToList();
@@ -876,8 +872,8 @@ namespace Data.Linq
 				for (var i = 0; i < resultList.Count; i++)
 					Debug.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
 
-			Assert.AreEqual(0, exceptExpected);
-			Assert.AreEqual(0, exceptResult);
+			Assert.AreEqual(0, exceptExpected, "There are records in result, not present in base");
+			Assert.AreEqual(0, exceptResult,   "Result do not have records from base");
 		}
 
 		protected void AreEqual<T>(IEnumerable<IEnumerable<T>> expected, IEnumerable<IEnumerable<T>> result)
@@ -885,7 +881,7 @@ namespace Data.Linq
 			var resultList   = result.  ToList();
 			var expectedList = expected.ToList();
 
-			Assert.AreNotEqual(0, expectedList.Count);
+			Assert.AreNotEqual(0, expectedList.Count, "Expected count 0");
 			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
 			for (var i = 0; i < resultList.Count; i++)
@@ -903,8 +899,8 @@ namespace Data.Linq
 			var resultList   = result.  ToList();
 			var expectedList = expected.ToList();
 
-			Assert.AreNotEqual(0, expectedList.Count);
-			Assert.AreEqual(expectedList.Count, resultList.Count);
+			Assert.AreNotEqual(0, expectedList.Count, "Expected count 0");
+			Assert.AreEqual(expectedList.Count, resultList.Count, "Expected and result lists are different. Lenght: ");
 
 			var b = expectedList.SequenceEqual(resultList);
 
@@ -912,7 +908,7 @@ namespace Data.Linq
 				for (var i = 0; i < resultList.Count; i++)
 					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
 
-			Assert.IsTrue(b);
+			Assert.IsTrue(b, "lists are not same!");
 		}
 
 		protected void CompareSql(string result, string expected)
