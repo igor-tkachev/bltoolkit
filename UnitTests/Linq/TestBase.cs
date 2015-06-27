@@ -229,12 +229,12 @@ namespace Data.Linq
 				var ip = GetIP(info.Name);
 				var dx = new TestServiceModelDataContext(ip);
 
-				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+				Console.WriteLine(((IDataContext)dx).ContextID + " Provider ");
 
 				yield return dx;
 
 				dx.InlineParameters = true;
-				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider + InlineParameters");
+				Console.WriteLine(((IDataContext)dx).ContextID + " Provider + InlineParameters");
 
 				yield return dx;
 			}
@@ -308,12 +308,12 @@ namespace Data.Linq
 				var ip  = GetIP(str);
 				var dx  = new TestServiceModelDataContext(ip);
 
-				Debug.WriteLine(((IDataContext)dx).ContextID, "Provider ");
+				Console.WriteLine(((IDataContext)dx).ContextID + " Provider ");
 
 				return dx;
 			}
 
-			Debug.WriteLine(configuration, "Provider ");
+			Console.WriteLine(configuration + " Provider ");
 
 			return new TestDbManager(configuration);
 		}
@@ -870,7 +870,7 @@ namespace Data.Linq
 
 			if (exceptResult != 0 || exceptExpected != 0)
 				for (var i = 0; i < resultList.Count; i++)
-					Debug.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
+					Console.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
 
 			Assert.AreEqual(0, exceptExpected, "There are records in result, not present in base");
 			Assert.AreEqual(0, exceptResult,   "Result do not have records from base");
@@ -906,7 +906,7 @@ namespace Data.Linq
 
 			if (!b)
 				for (var i = 0; i < resultList.Count; i++)
-					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
+					Console.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
 
 			Assert.IsTrue(b, "lists are not same!");
 		}
