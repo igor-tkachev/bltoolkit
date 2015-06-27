@@ -429,7 +429,9 @@ namespace BLToolkit.Data.DataProvider
 			else if (value is string)
 			{
 				parameter.Value = value;
-				if (parameter.DbType == DbType.String && ((string)value).Length == 0) parameter.Size = 1;
+				var svalue = (string)value;
+				if (parameter.Size == 0 && parameter.DbType == DbType.String && svalue.Length == 0)
+					parameter.Size = 1;
 			}
 			else
 			{

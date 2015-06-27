@@ -252,6 +252,17 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+		public override DbType GetParameterDbType(DbType dbType)
+		{
+			switch (dbType)
+			{
+				case DbType.DateTime2:
+					return DbType.DateTime;
+				default:
+					return dbType;
+			}
+		}
+
 		#region DataReaderEx
 
 		public override IDataReader GetDataReader(MappingSchema schema, IDataReader dataReader)

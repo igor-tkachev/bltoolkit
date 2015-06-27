@@ -1135,9 +1135,10 @@ namespace BLToolkit.Data
 					var value = mm.GetValue(obj);
 
 					_dataProvider.SetParameterValue(
-						Parameter(name),
-						value == null || mm.MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
-							DBNull.Value: value);
+						Parameter(name), value ?? DBNull.Value);
+//						value == null || mm.MapMemberInfo.Nullable && _mappingSchema.IsNull(value)?
+//						value == null || (mm.MapMemberInfo.Nullable && !TypeHelper.IsNullable(mm.MapMemberInfo.Type)  && _mappingSchema.IsNull(value))?
+					//DBNull.Value: value);
 				}
 			}
 

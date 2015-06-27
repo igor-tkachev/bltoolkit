@@ -451,6 +451,63 @@ VALUES
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
 GO
 
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'DataTypeTest_Insert')
+BEGIN DROP PROCEDURE DataTypeTest_Insert END
+GO
+
+CREATE PROCEDURE DataTypeTest_Insert
+	@Binary_         binary(50)       =null,
+	@Boolean_        bit              =null,
+	@Byte_           tinyint          =null,
+	@Bytes_          varbinary(50)    =null,
+	@Char_           char(1)          =null,
+	@DateTime_       datetime         =null,
+	@Decimal_        decimal(20,2)    =null,
+	@Double_         float            =null,
+	@Guid_           uniqueidentifier =null,
+	@Int16_          smallint         =null,
+	@Int32_          int              =null,
+	@Int64_          bigint           =null,
+	@Money_          money            =null,
+	@SByte_          tinyint          =null,
+	@Single_         real             =null,
+	@Stream_         varbinary(50)    =null,
+	@String_         nvarchar(50)     =null,
+	@UInt16_         smallint         =null,
+	@UInt32_         int              =null,
+	@UInt64_         bigint           =null,
+	@Xml_            xml              =null
+AS
+	INSERT INTO DataTypeTest
+		(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
+		 Double_,    Guid_,  Int16_,  Int32_,  Int64_,    Money_,   SByte_,
+		 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
+	VALUES
+		(  
+			@Binary_         ,
+			@Boolean_        ,
+			@Byte_           ,
+			@Bytes_          ,
+			@Char_           ,
+			@DateTime_       ,
+			@Decimal_        ,
+			@Double_         ,
+			@Guid_           ,
+			@Int16_          ,
+			@Int32_          ,
+			@Int64_          ,
+			@Money_          ,
+			@SByte_          ,
+			@Single_         ,
+			@Stream_         ,
+			@String_         ,
+			@UInt16_         ,
+			@UInt32_         ,
+			@UInt64_         ,
+			@Xml_            
+		)
+
+GO
 -- SKIP Sql2005 BEGIN
 --
 -- Arrays
