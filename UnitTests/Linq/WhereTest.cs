@@ -1171,6 +1171,33 @@ namespace Data.Linq
 			TestPredicate2(_ => true);
 		}
 
+		public class DP
+		{
+			public Doctor D;
+			public Person P;
+		}
+
+		[Test]
+		public void Predicate12()
+		{
+			ForEachProvider(db =>
+			{
+				Expression<Func<DP, bool>> predicate = dp => dp.D.PersonID == dp.P.ID;
+
+				var q1 = from d in Doctor
+						 from p in Person
+						 select new DP {D = d,  P = p};
+				var q2 = from d in db.Doctor
+						 from p in db.Person
+						 select new DP {D = d,  P = p};
+
+				AreEqual(
+					q1.Where(predicate.Compile()).Select(_ => _.P) ,
+					q2.Where(predicate)          .Select(_ => _.P));
+			});
+		}
+
+
 		[Test]
 		public void Any1()
 		{
