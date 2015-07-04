@@ -50,7 +50,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			if (methodCall.Arguments.Count == 2)
 			{
-				var predicate = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				var predicate = (LambdaExpression)ExpressionBuilder.GetPredicate(methodCall.Arguments[1]);
 				var info      = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
 
 				if (info != null)

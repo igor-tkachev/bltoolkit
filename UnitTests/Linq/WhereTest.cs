@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-
+using System.Linq.Expressions;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
@@ -1059,5 +1059,213 @@ namespace Data.Linq
 
 			});
 		}
+
+		public void TestPredicate(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db =>
+			{
+				var q1 =    Person.Where(predicate.Compile());
+				var q2 = db.Person.Where(predicate);
+
+				AreEqual(q1, q2);
+			});
+		}
+		
+		public void TestPredicate2(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db =>
+			{
+				var q1 =    Doctor.Where(doc =>    Person.Where(predicate.Compile()).Select(_ => _.ID).Contains(doc.PersonID));
+				var q2 = db.Doctor.Where(doc => db.Person.Where(predicate)          .Select(_ => _.ID).Contains(doc.PersonID));
+
+				AreEqual(q1, q2);
+			});
+		}
+
+		public void TestAny(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Person.Any(predicate)));
+		}
+
+		public void TestAny2(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Doctor.Any(_ => db.Person.Any(predicate))));
+		}
+
+		public void TestFirst(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Person.First(predicate) != null));
+		}
+
+		public void TestFirst2(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Doctor.First(_ => db.Person.First(predicate) != null) != null));
+		}
+
+		[Test]
+		public void Predicate()
+		{
+			TestPredicate(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Predicate2()
+		{
+			TestPredicate(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Predicate3()
+		{
+			TestPredicate(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		private static Expression<Func<Person, bool>> _predicate4 = _ => _.FirstName.Length > 0 && _.FirstName == "John";
+
+		[Test]
+		public void Predicate4()
+		{
+			TestPredicate(_predicate4);
+		}
+
+		[Test]
+		public void Predicate5()
+		{
+			TestPredicate2(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Predicate6()
+		{
+			TestPredicate2(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Predicate7()
+		{
+			TestPredicate2(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void Predicate8()
+		{
+			TestPredicate2(_predicate4);
+		}
+		
+		[Test]
+		public void Predicate9()
+		{
+			var val = "John";
+			TestPredicate2(_ => _.FirstName.Length > 0 && _.FirstName == val);
+		}
+		
+		[Test]
+		public void Predicate10()
+		{
+			TestPredicate2(_ => 1 == 1);
+		}
+
+		[Test]
+		public void Predicate11()
+		{
+			TestPredicate2(_ => true);
+		}
+
+		[Test]
+		public void Any1()
+		{
+			TestAny(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any2()
+		{
+			TestAny(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Any3()
+		{
+			TestAny(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any4()
+		{
+			TestAny(_predicate4);
+		}
+
+		[Test]
+		public void Any5()
+		{
+			TestAny2(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any6()
+		{
+			TestAny2(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Any7()
+		{
+			TestAny2(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any8()
+		{
+			TestAny2(_predicate4);
+		}
+
+		[Test]
+		public void First1()
+		{
+			TestFirst(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void First2()
+		{
+			TestFirst(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void First3()
+		{
+			TestFirst(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void First4()
+		{
+			TestFirst(_predicate4);
+		}
+
+		[Test]
+		public void First5()
+		{
+			TestFirst2(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void First6()
+		{
+			TestFirst2(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void First7()
+		{
+			TestFirst2(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void First8()
+		{
+			TestFirst2(_predicate4);
+		}
+	
 	}
 }
