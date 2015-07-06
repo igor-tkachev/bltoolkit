@@ -353,7 +353,8 @@ namespace BLToolkit.Data.Linq.Builder
 					MappingSchema = data.MappingSchema,
 					DataSource    = source,
 					SourceObject  = dataReader,
-					ObjectMapper  = data.ObjectMapper
+					ObjectMapper  = data.ObjectMapper,
+					IsLinqSource  = true 
 				};
 
 				var destObject = data.ObjectMapper.CreateInstance(initContext);
