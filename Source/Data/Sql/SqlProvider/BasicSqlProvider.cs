@@ -182,9 +182,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected virtual void BuildInsertQuery(StringBuilder sb)
 		{
-			if (SqlQuery.Insert.WithOutput)
-                		BuildSetOutput(sb);
-                
 			BuildStep = Step.InsertClause; BuildInsertClause(sb);
 
 			if (SqlQuery.QueryType == QueryType.Insert && SqlQuery.From.Tables.Count != 0)
@@ -200,9 +197,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			if (SqlQuery.Insert.WithIdentity)
 				BuildGetIdentity(sb);
-				
-			if (SqlQuery.Insert.WithOutput)
-                		BuildGetOutput(sb);
 		}
 
 		protected virtual void BuildUnknownQuery(StringBuilder sb)
@@ -405,13 +399,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 				sb.AppendLine();
 				AppendIndent(sb).AppendLine(")");
-				
-				if ( SqlQuery.Insert.WithOutput )
-		                {
-		                    var pkField = SqlQuery.Insert.Into.Fields.FirstOrDefault(x=>x.Value.IsIdentity && x.Value.IsPrimaryKey);
-		
-		                    AppendIndent( sb ).Append( "output inserted.[" ).Append( pkField.Value.Name ).AppendLine( "] into @tabTempInsert" );
-		                }
 
 				if (SqlQuery.QueryType == QueryType.InsertOrUpdate || SqlQuery.From.Tables.Count == 0)
 				{
@@ -444,16 +431,6 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			//throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
 		}
-		
-		protected virtual void BuildSetOutput(StringBuilder sb)
-	        {
-	            //throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
-	        }
-	
-	        protected virtual void BuildGetOutput(StringBuilder sb)
-	        {
-	            //throw new SqlException("Insert with identity is not supported by the '{0}' sql provider.", Name);
-	        }
 
 		#endregion
 

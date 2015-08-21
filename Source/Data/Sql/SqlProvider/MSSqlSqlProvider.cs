@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -32,21 +33,88 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.AppendLine()
 				.AppendLine("SELECT SCOPE_IDENTITY()");
 		}
-		
-		protected override void BuildSetOutput( StringBuilder sb )
-	        {
-	        	// TODO: set the right data type
-	            sb
-	                .AppendLine()
-	                .Append( "declare @tabTempInsert table(TempID " ).Append( "uniqueidentifier" ).AppendLine( ")" );
-	        }
-	
-	        protected override void BuildGetOutput( StringBuilder sb )
-	        {
-	            sb
-	                .AppendLine()
-	                .AppendLine( "select top 1 TempID from @tabTempInsert" );
-	        }
+
+        protected override void BuildInsertClause( StringBuilder sb, string insertText, bool appendTableName )
+        {
+            AppendIndent(sb).Append(insertText);
+
+			if (appendTableName)
+				BuildPhysicalTable(sb, SqlQuery.Insert.Into, null);
+
+			if (SqlQuery.Insert.Items.Count == 0)
+			{
+				sb.Append(' ');
+				BuildEmptyInsert(sb);
+			}
+			else
+			{
+				sb.AppendLine();
+
+				AppendIndent(sb).AppendLine("(");
+
+				Indent++;
+
+				var first = true;
+
+				foreach (var expr in SqlQuery.Insert.Items)
+				{
+					if (!first)
+						sb.Append(',').AppendLine();
+					first = false;
+
+					AppendIndent(sb);
+					BuildExpression(sb, expr.Column, false, true);
+				}
+
+				Indent--;
+
+				sb.AppendLine();
+				AppendIndent(sb).AppendLine(")");
+				
+				if ( SqlQuery.Insert.WithOutput )
+		        {
+                    var pkField = SqlQuery.Insert.Into.Fields.FirstOrDefault( x => x.Value.IsIdentity && x.Value.IsPrimaryKey );
+
+                    AppendIndent( sb ).Append( "OUTPUT INSERTED.[" ).Append( pkField.Value.Name ).AppendLine( "] INTO @tabOutput" );
+		        }
+
+				if (SqlQuery.QueryType == QueryType.InsertOrUpdate || SqlQuery.From.Tables.Count == 0)
+				{
+					AppendIndent(sb).AppendLine("VALUES");
+					AppendIndent(sb).AppendLine("(");
+
+					Indent++;
+
+					first = true;
+
+					foreach (var expr in SqlQuery.Insert.Items)
+					{
+						if (!first)
+							sb.Append(',').AppendLine();
+						first = false;
+
+						AppendIndent(sb);
+						BuildExpression(sb, expr.Expression);
+					}
+
+					Indent--;
+
+					sb.AppendLine();
+					AppendIndent(sb).AppendLine(")");
+				}
+			}
+        }
+
+        protected override void BuildInsertQuery( StringBuilder sb )
+        {
+            if ( SqlQuery.Insert.WithOutput )
+                sb.Append( "DECLARE @tabOutput TABLE(id " ).Append( "UNIQUEIDENTIFIER" ).Append( ")" ).AppendLine();
+
+            base.BuildInsertQuery( sb );
+
+            if ( SqlQuery.Insert.WithOutput )
+                sb.AppendLine( "SELECT TOP 1 id FROM @tabOutput" );
+        }
 
 		protected override void BuildOrderByClause(StringBuilder sb)
 		{

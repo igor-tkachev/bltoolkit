@@ -10,7 +10,6 @@ namespace BLToolkit.Data.Sql
 {
 	public abstract class SqlValueBase: IValueContainer
 	{
-		[CLSCompliant(false)] 
 		private object _convertedValue;
 
 		[CLSCompliant(false)]

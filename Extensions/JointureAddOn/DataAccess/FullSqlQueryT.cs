@@ -39,7 +39,7 @@ namespace BLToolkit.DataAccess
             return (TL)base.SelectAll(db, (IList)list, typeof(T));
         }
 
-        public TL SelectAll<TL>(DbManager db) where TL : IList<T>, new()
+        public new TL SelectAll<TL>(DbManager db) where TL : IList<T>, new()
         {
             return SelectAll(db, new TL());
         }
@@ -54,7 +54,7 @@ namespace BLToolkit.DataAccess
             return SelectAll(DbManager, list);
         }
 
-        public TL SelectAll<TL>() where TL : IList<T>, new()
+        public new TL SelectAll<TL>() where TL : IList<T>, new()
         {
             return SelectAll<TL>(DbManager);
         }

@@ -557,7 +557,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ObjectUnion()
+		public void ObjectUnion([IncludeDataContexts("Northwind")] string config)
 		{
 			using (var db = new NorthwindDB())
 			{

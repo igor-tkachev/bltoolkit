@@ -592,11 +592,23 @@ namespace BLToolkit.Data.Linq.Builder
 
 		#region ConvertWhere
 
+		internal static Expression GetPredicate(Expression expression)
+		{
+			var expr = expression.Unwrap();
+			switch (expr.NodeType)
+			{
+				case ExpressionType.MemberAccess:
+					var li = Expression.Lambda<Func<object>>(((MemberExpression) expr)).Compile().DynamicInvoke();
+					return GetPredicate((System.Linq.Expressions.Expression) li);
+			}
+			return expr;
+		}
+
 		Expression ConvertWhere(MethodCallExpression method)
 		{
 			var sequence  = OptimizeExpression(method.Arguments[0]);
 			var predicate = OptimizeExpression(method.Arguments[1]);
-			var lambda    = (LambdaExpression)predicate.Unwrap();
+			var lambda    = (LambdaExpression) GetPredicate(predicate);
 			var lparam    = lambda.Parameters[0];
 			var lbody     = lambda.Body;
 

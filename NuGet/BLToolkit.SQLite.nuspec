@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.SQLite</id>
-		<version>4.2.0</version>
+		<version>4.3.1</version>
 		<title>BLToolkit SQLite Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -13,7 +13,7 @@
 		<summary />
 		<tags>SQLite bltoolkit Linq ORM DAL database DB</tags>
 		<dependencies>
-			<dependency id="System.Data.SQLite" />
+			<dependency id="System.Data.SQLite.Core" />
 			<dependency id="BLToolkit"  />
 		</dependencies>
 	</metadata>

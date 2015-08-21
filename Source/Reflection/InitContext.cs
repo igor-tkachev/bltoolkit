@@ -20,6 +20,7 @@ namespace BLToolkit.Reflection
 		public bool           StopMapping      { get; set; }
 		[CLSCompliant(false)]
 		public IMapDataSource DataSource       { get; set; }
+		public bool           IsLinqSource     { get; set; }
 
 		private Dictionary<object,object> _items;
 		public  Dictionary<object,object>  Items
@@ -33,5 +34,6 @@ namespace BLToolkit.Reflection
 			[DebuggerStepThrough] get { return !IsSource;  }
 			[DebuggerStepThrough] set { IsSource = !value; }
 		}
+
 	}
 }
