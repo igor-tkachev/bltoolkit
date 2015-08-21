@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading;
 
 namespace BLToolkit.Aspects.Builders
 {
@@ -284,6 +285,18 @@ namespace BLToolkit.Aspects.Builders
 
 			if (field == null)
 			{
+				// Create MethodInfoLock field.
+				//
+				var typeEmit = Context.TypeBuilder.TypeInitializer.Emitter;
+				var syncRoot = Context.CreatePrivateStaticField(
+					fieldName+"$Lock", typeof(object));
+
+				typeEmit
+					.newobj(typeof(object))
+					.stsfld(syncRoot)
+					;
+
+
 				// Create MethodInfo field.
 				//
 				field = _localInterceptor? 
@@ -291,6 +304,13 @@ namespace BLToolkit.Aspects.Builders
 					Context.CreatePrivateStaticField(fieldName, typeof(IInterceptor));
 
 				var emit = Context.MethodBuilder.Emitter;
+
+
+				emit.BeginExceptionBlock();
+				emit
+					.LoadField(syncRoot)
+					.call(typeof (Monitor), "Enter", typeof (object));
+
 
 				var checkInterceptor = emit.DefineLabel();
 				var methodInfo       = Context.GetItem<FieldBuilder>("$BLToolkit.MethodInfo");
@@ -321,6 +341,14 @@ namespace BLToolkit.Aspects.Builders
 
 					.MarkLabel (checkInterceptor)
 					;
+
+
+				emit.BeginFinallyBlock();
+				emit
+					.LoadField(syncRoot)
+					.call(typeof(Monitor), "Exit", typeof(object));
+				emit.ILGenerator.EndExceptionBlock();
+
 			}
 
 			return field;

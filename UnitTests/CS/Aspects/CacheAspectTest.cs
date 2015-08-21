@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using BLToolkit.Aspects;
 using BLToolkit.Reflection;
 
@@ -152,6 +155,150 @@ namespace Aspects
 
 			i = TypeAccessor<TestClass1>.CreateInstance().Get<int>     (0);
 			d = TypeAccessor<TestClass1>.CreateInstance().Get<DateTime>(0);
+		}
+
+
+		public abstract class MultiThread
+		{
+			public static int Value;
+
+			[Cache]
+			public virtual int GetValue()
+			{
+				return Value++;
+			}
+
+			[Cache]
+			public virtual int Throw()
+			{
+				Value++;
+				throw new Exception("Dou!");
+			}
+
+			[ClearCache]
+			public virtual void Clear()
+			{
+				Value = 0;
+			}
+
+		}
+
+		[Test]
+		public void OneThreadTest()
+		{
+			var o = TypeAccessor.CreateInstanceEx<MultiThread>();
+			o.Clear();
+
+			for (int i = 0; i < 10; i++)
+				o.GetValue();
+
+			Assert.AreEqual(1, MultiThread.Value);
+		}
+
+
+		[Test]
+		public void MultiThreadTest()
+		{
+			var o = TypeAccessor.CreateInstanceEx<MultiThread>();
+			o.Clear();
+
+			Action<object> increment = (j) =>
+			{
+				Console.WriteLine("Start increment {0}", j);
+				o.GetValue();
+				Thread.Sleep(100);
+				Console.WriteLine("End increment {0}", j);
+			};
+
+			var tasks = new List<Task>(10);
+
+			for(int i = 0; i < 10; i++)
+				tasks.Add(Task.Factory.StartNew(increment, i));
+
+			Task.WaitAll(tasks.ToArray());
+
+			Assert.AreEqual(1, MultiThread.Value);
+
+		}
+
+		[Test]
+		public void MultiThreadTest10()
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				Console.WriteLine("Iteration {0}", i+1);
+				MultiThread.Value = 0;
+				Console.WriteLine("ClearCache");
+				CacheAspect.ClearCache();
+				Console.WriteLine("ClearCache - complete");
+				MultiThreadTest();
+			}
+		}
+
+		[Test]
+		public void MultiThreadThrow()
+		{
+			MultiThread.Value = 0;
+			var o = TypeAccessor.CreateInstanceEx<MultiThread>();
+			Action<object> action = (n) =>
+			{
+				try
+				{
+					Console.WriteLine("Thread {1} Begin Throw {0}", n, Thread.CurrentThread.ManagedThreadId);
+					o.Throw();
+				}
+				catch
+				{
+					Thread.Sleep(50);
+					Console.WriteLine("Thread {1} End Throw {0}", n, Thread.CurrentThread.ManagedThreadId);
+				}
+
+			};
+
+			var tasks = new List<Task>(10);
+
+			for(int i = 0; i < 10; i++)
+				tasks.Add(Task.Factory.StartNew(action, i));
+
+			Task.WaitAll(tasks.ToArray());
+
+			Assert.AreEqual(10, MultiThread.Value);
+
+		}
+
+
+		[Test]
+		public void MultiThreadCacheClear()
+		{
+			var o = TypeAccessor.CreateInstanceEx<MultiThread>();
+			o.Clear();
+
+			Action<object> action = (j) =>
+			{
+				Console.WriteLine("Thread {1} Begin increment {0}", j, Thread.CurrentThread.ManagedThreadId);
+				o.GetValue();
+				Thread.Sleep(50);
+				Console.WriteLine("Thread {1} End increment {0}", j, Thread.CurrentThread.ManagedThreadId);
+			};
+
+			Action<Object> clear = (k) =>
+			{
+				Console.WriteLine("Thread {1} Begin clear {0}", k, Thread.CurrentThread.ManagedThreadId);
+				o.Clear();
+				Thread.Sleep(50);
+				Console.WriteLine("Thread {1} End clear {0}", k, Thread.CurrentThread.ManagedThreadId);
+			};
+
+			var tasks = new List<Task>(20);
+
+			for(int i = 0; i < 20; i++)
+				tasks.Add(i%2 == 0 ? Task.Factory.StartNew(action, i) : Task.Factory.StartNew(clear, i));
+
+			var ok = Task.WaitAll(tasks.ToArray(), 25*50);
+			Task.WaitAll(tasks.ToArray());
+			Assert.True(ok);
+
+
 		}
 	}
 }

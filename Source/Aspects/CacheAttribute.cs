@@ -26,7 +26,7 @@ namespace BLToolkit.Aspects
 		public CacheAttribute(Type cacheAspectType, string configString)
 			: base(
 				cacheAspectType,
-				InterceptType.BeforeCall | InterceptType.AfterCall,
+				InterceptType.BeforeCall | InterceptType.AfterCall | InterceptType.OnFinally,
 				configString,
 				TypeBuilderConsts.Priority.CacheAspect)
 		{
