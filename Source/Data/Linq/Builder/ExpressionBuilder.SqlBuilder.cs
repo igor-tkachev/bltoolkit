@@ -1483,7 +1483,11 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				case ExpressionType.Constant:
 					{
-						var name = Enum.GetName(type, ((ConstantExpression)value).Value);
+						var enumValue = ((ConstantExpression)value).Value;
+						if (enumValue == null)
+							return null;
+
+						var name = Enum.GetName(type, enumValue);
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
