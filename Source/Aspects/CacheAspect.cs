@@ -412,6 +412,30 @@ namespace BLToolkit.Aspects
 
 		#endregion
 
+		#region Statistics
+
+		public static int WorkTimes
+		{
+			get { return CleanupThread.WorkTimes; }
+		}
+
+		public static TimeSpan WorkTime
+		{
+			get { return CleanupThread.WorkTime; }
+		}
+
+		public static int ObjectsExpired
+		{
+			get { return CleanupThread.ObjectsExpired; }
+		}
+
+		public static int ObjectsInCache
+		{
+			get { return CleanupThread.ObjectsInCache; }
+		}
+
+		#endregion
+
 		#region Cleanup Thread
 
 		private class CleanupThread
