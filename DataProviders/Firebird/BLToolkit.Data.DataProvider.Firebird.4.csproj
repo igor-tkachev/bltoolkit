@@ -87,7 +87,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FirebirdSql.Data.FirebirdClient">
-      <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.4.6.4.0\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
+      <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.4.7.0.0\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

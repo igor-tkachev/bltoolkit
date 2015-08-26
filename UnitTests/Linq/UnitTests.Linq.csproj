@@ -112,17 +112,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="Devart.Data, Version=5.0.1214.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data, Version=5.0.1270.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.8.4.422\lib\Devart.Data.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.8.5.478\lib\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.Oracle, Version=8.4.422.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data.Oracle, Version=8.5.478.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.8.4.422\lib\Devart.Data.Oracle.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.8.5.478\lib\Devart.Data.Oracle.dll</HintPath>
     </Reference>
-    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=4.6.4.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
+    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=4.7.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.4.6.4.0\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
+      <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.4.7.0.0\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
     </Reference>
     <Reference Include="IBM.Data.DB2, Version=9.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -136,13 +136,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Npgsql.2.2.5\lib\net40\Mono.Security.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.9.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+    <Reference Include="MySql.Data, Version=6.9.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MySql.Data.6.9.6\lib\net40\MySql.Data.dll</HintPath>
+      <HintPath>..\..\packages\MySql.Data.6.9.7\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Npgsql, Version=2.2.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Npgsql">
       <HintPath>..\..\packages\Npgsql.2.2.5\lib\net40\Npgsql.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
