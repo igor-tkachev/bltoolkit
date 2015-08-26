@@ -45,6 +45,10 @@ namespace BLToolkit.Aspects
 
 			_methodInfo = info.MethodInfo;
 
+			CacheSyncRoot = info.SyncRoot;
+
+			_cache = CreateCache();
+
 			var ps = configString.Split(';');
 
 			foreach (var p in ps)
@@ -86,7 +90,7 @@ namespace BLToolkit.Aspects
 		
 		private void Lock()
 		{
-			Monitor.Enter(_cacheSyncRoot);
+			Monitor.Enter(CacheSyncRoot);
 			_isLocked = Thread.CurrentThread.ManagedThreadId;
 		}
 
@@ -96,7 +100,7 @@ namespace BLToolkit.Aspects
 				return;
 			_isLocked = -1;
 
-			Monitor.Exit(_cacheSyncRoot);
+			Monitor.Exit(CacheSyncRoot);
 		}
 
 		protected override void BeforeCall(InterceptCallInfo info)
@@ -204,6 +208,8 @@ namespace BLToolkit.Aspects
 			base.OnFinally(info);
 		}
 
+		public bool HasCache {get { return CacheSyncRoot != null && Cache != null; }}
+
 		#endregion
 
 		#region Global Parameters
@@ -234,12 +240,12 @@ namespace BLToolkit.Aspects
 
 		#region Cache
 
-		internal object _cacheSyncRoot = new object(); //{get { return _methodInfo; }}
+		internal object CacheSyncRoot;
 
 		private IDictionary _cache;
 		public  IDictionary  Cache
 		{
-			get { return _cache ?? (_cache = CreateCache()); }
+			get { return _cache; }
 		}
 
 		protected virtual CacheAspectItem CreateCacheItem(InterceptCallInfo info)
@@ -448,7 +454,6 @@ namespace BLToolkit.Aspects
 						}
 			}
 
-
 			private static void Cleanup(object state)
 			{
 				if (!Monitor.TryEnter(RegisteredAspects.SyncRoot, 10))
@@ -470,8 +475,15 @@ namespace BLToolkit.Aspects
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
 						var cache = aspect.Cache;
-						lock (aspect._cacheSyncRoot)
+						if (!aspect.HasCache)
+							continue;
+
+						// cache can be in process now
+						if(!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+							continue;
+						try
 						{
+
 							foreach (DictionaryEntry de in cache)
 							{
 								var wr = de.Value as WeakReference;
@@ -486,7 +498,7 @@ namespace BLToolkit.Aspects
 								}
 								else
 								{
-									isExpired = ((CacheAspectItem)de.Value).IsExpired;
+									isExpired = ((CacheAspectItem) de.Value).IsExpired;
 								}
 
 								if (isExpired)
@@ -502,6 +514,10 @@ namespace BLToolkit.Aspects
 							list.Clear();
 
 							objectsInCache += cache.Count;
+						}
+						finally
+						{
+							Monitor.Exit(aspect.CacheSyncRoot);
 						}
 					}
 
@@ -547,21 +563,43 @@ namespace BLToolkit.Aspects
 
 			public static void ClearCache(CacheAspect aspect)
 			{
-				lock (RegisteredAspects.SyncRoot) lock (aspect._cacheSyncRoot)
+				lock (RegisteredAspects.SyncRoot) 
 				{
-					_objectsExpired += aspect.Cache.Count;
-					aspect.Cache.Clear();
+					if (!aspect.HasCache)
+						return;
+					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+						return;
+					try
+					{
+						_objectsExpired += aspect.Cache.Count;
+						aspect.Cache.Clear();
+					}
+					finally
+					{
+						Monitor.Exit(aspect.CacheSyncRoot);
+					}
 				}
 			}
 
 			public static void ClearCache(CacheAspect aspect, CompoundValue key)
 			{
 				lock (RegisteredAspects.SyncRoot)
-					lock (aspect._cacheSyncRoot)
+				{
+					if (!aspect.HasCache)
+						return;
+
+					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+						return;
+					try
 					{
 						_objectsExpired += 1;
 						aspect.Cache.Remove(key);
 					}
+					finally
+					{
+						Monitor.Exit(aspect.CacheSyncRoot);
+					}
+				}
 			}
 
 			public static void ClearCache()
@@ -571,8 +609,19 @@ namespace BLToolkit.Aspects
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
 						_objectsExpired += aspect.Cache.Count;
-						lock (aspect._cacheSyncRoot)
+						if (!aspect.HasCache)
+							continue;
+
+						if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+							continue;
+						try
+						{
 							aspect.Cache.Clear();
+						}
+						finally
+						{
+							Monitor.Exit(aspect.CacheSyncRoot);
+						}
 					}
 				}
 			}

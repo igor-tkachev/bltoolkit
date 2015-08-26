@@ -334,6 +334,11 @@ namespace BLToolkit.Aspects.Builders
 					emit.stfld(field);
 
 				emit
+					.LoadField(methodInfo)
+					.LoadField(syncRoot)
+					.call(typeof (CallMethodInfo), "set_SyncRoot", typeof (object));
+
+				emit
 					.LoadField (field)
 					.LoadField (methodInfo)
 					.ldstrEx   (_configString ?? "")

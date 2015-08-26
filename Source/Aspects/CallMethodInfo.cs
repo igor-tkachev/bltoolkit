@@ -52,6 +52,8 @@ namespace BLToolkit.Aspects
 			internal set { _cacheAspect = value; }
 		}
 
+		public object SyncRoot { get; set; }
+
 		#endregion
 
 		#region Proptected Members
