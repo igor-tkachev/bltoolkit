@@ -4532,12 +4532,14 @@ namespace BLToolkit.Data
                         catch (Exception ex)
                         {
                             var retryHandler = Configuration.RetryOnException;
-                            if (retryHandler != null)
+                            if ((retryHandler != null) && (_transaction == null))
                             {
                                 if (!retryHandler(ex, retryCount))
                                     throw;
 
                                 retryCount++;
+
+                                continue;
                             }
                             else
                             {
