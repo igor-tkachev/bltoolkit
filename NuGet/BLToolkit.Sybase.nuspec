@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.Sybase</id>
-		<version>4.3.2</version>
+		<version>4.3.3</version>
 		<title>BLToolkit Sybase Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit</id>
-		<version>4.3.2</version>
+		<version>4.3.3</version>
 		<title>Business Logic Toolkit for .NET</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -18,5 +18,9 @@
 		<file src="..\Source\bin\Release\BLToolkit.4.dll"    target="lib\net40-full"   />
 		<file src="..\Source\bin\Release\BLToolkit.CP.4.dll" target="lib\net40-client" />
 		<file src="..\Source\bin\Release\BLToolkit.SL.4.dll" target="lib\sl40"         />
+		<file src="..\Source\bin\Release\BLToolkit.3.pdb"    target="lib\net35"        />
+		<file src="..\Source\bin\Release\BLToolkit.4.pdb"    target="lib\net40-full"   />
+		<file src="..\Source\bin\Release\BLToolkit.CP.4.pdb" target="lib\net40-client" />
+		<file src="..\Source\bin\Release\BLToolkit.SL.4.pdb" target="lib\sl40"         />
 	</files>
 </package>
