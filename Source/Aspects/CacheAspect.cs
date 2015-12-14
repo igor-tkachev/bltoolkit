@@ -498,9 +498,10 @@ namespace BLToolkit.Aspects
 
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
-						var cache = aspect.Cache;
 						if (!aspect.HasCache)
 							continue;
+
+						var cache = aspect.Cache;
 
 						// cache can be in process now
 						if(!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
@@ -591,6 +592,7 @@ namespace BLToolkit.Aspects
 				{
 					if (!aspect.HasCache)
 						return;
+
 					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
 						return;
 					try
@@ -632,9 +634,10 @@ namespace BLToolkit.Aspects
 				{
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
-						_objectsExpired += aspect.Cache.Count;
 						if (!aspect.HasCache)
 							continue;
+
+						_objectsExpired += aspect.Cache.Count;
 
 						if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
 							continue;
