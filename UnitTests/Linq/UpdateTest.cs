@@ -707,5 +707,40 @@ namespace Update
 				Assert.AreEqual(date2, res.DateTimeValue2);
 			});
 		}
+
+		[Test]
+		public void Issue331()
+		{
+			ForEachProvider(dc =>
+			{
+				var db = dc as DbManager;
+				if (db == null)
+					return;
+
+				var id = BLToolkit.Common.Convert.ToInt32(db.InsertWithIdentity(new DataTypeTest3()));
+
+				var values = db.GetTable<DataTypeTest3>().ToList();
+
+				db.Update<DataTypeTest3>(values);
+
+				var s = values.First(_ => _.DataTypeID == 2);
+				var o = values.First(_ => _.DataTypeID == id);
+
+				db.MappingSchema.MapObjectToObject(s, o);
+				o.DataTypeID = id;
+
+				Assert.AreEqual(s.String_,  o.String_);
+				Assert.AreEqual(s.Decimal_, o.Decimal_);
+
+				db.Update<DataTypeTest3>(values);
+
+				o = db.GetTable<DataTypeTest3>().First(_ => _.DataTypeID == id);
+
+				Assert.AreEqual(s.String_,  o.String_);
+				Assert.AreEqual(s.Decimal_, o.Decimal_);
+
+			});
+		}
+
 	}
 }

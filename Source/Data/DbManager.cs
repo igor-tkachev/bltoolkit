@@ -2458,6 +2458,29 @@ namespace BLToolkit.Data
 						else
 							p.Scale = p.Scale;
 					}
+
+					switch (p.DbType)
+					{
+						case DbType.AnsiString:
+						case DbType.Binary:
+						case DbType.Object:
+						case DbType.String:
+						case DbType.VarNumeric:
+						case DbType.AnsiStringFixedLength:
+						case DbType.StringFixedLength:
+							if (p.Size == 0)
+							{
+								p.Size = 1;
+								prepare = true;
+							}
+							break;
+						case DbType.Decimal:
+							if (p.Precision == 0 && p.Scale == 0)
+								p.Precision = 1;
+							break;
+					}
+
+					p.Size = p.Size;
 				}
 
 				// Re-prepare command to avoid truncation.

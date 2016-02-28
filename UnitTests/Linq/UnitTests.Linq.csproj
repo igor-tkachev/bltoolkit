@@ -270,6 +270,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DefaultDataProviders.txt" />
+    <Content Include="UserDataProviders.txt" />
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
