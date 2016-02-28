@@ -408,6 +408,8 @@ namespace BLToolkit.Data
 
 		#region Commands
 
+		public int? CommandTimeout { get; set; }
+
 		private IDbCommand _selectCommand;
 		/// <summary>
 		/// Gets the <see cref="IDbCommand"/> used by this instance of the <see cref="DbManager"/>.
@@ -510,6 +512,9 @@ namespace BLToolkit.Data
 					command.Transaction = Transaction;
 				}
 			}
+
+			if (CommandTimeout.HasValue)
+				command.CommandTimeout = CommandTimeout.Value;
 
 			if (CanRaiseEvents)
 			{

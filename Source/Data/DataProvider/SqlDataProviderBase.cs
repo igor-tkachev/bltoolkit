@@ -261,6 +261,9 @@ namespace BLToolkit.Data.DataProvider
 				DestinationTableName = tbl,
 			};
 
+			if (db.CommandTimeout.HasValue)
+				bc.BulkCopyTimeout = db.CommandTimeout.Value;
+
 			for	(var index = 0; index < members.Length; index++)
 			{
 				bc.ColumnMappings.Add(new SqlBulkCopyColumnMapping(index, members[index].Name));

@@ -15,6 +15,7 @@ namespace Data
 				db.BeforeOperation += HandleBeforeOperation;
 				db.AfterOperation  += HandleAfterOperation;
 				db.InitCommand     += HandleInitCommand;
+				db.CommandTimeout  = 911;
 
 				db
 					.SetCommand("SELECT * FROM Person")
@@ -34,7 +35,9 @@ namespace Data
 
 		private static void HandleInitCommand(object sender, InitCommandEventArgs ea)
 		{
-			Console.WriteLine("Init command:  " + ea.Command.CommandText);
+			Console.WriteLine("Init command:     " + ea.Command.CommandText);
+			Console.WriteLine("Command timeout:  " + ea.Command.CommandTimeout);
+			Assert.AreEqual(911, ea.Command.CommandTimeout);
 		}
 
 		[Test, ExpectedException(typeof(DataException))]
