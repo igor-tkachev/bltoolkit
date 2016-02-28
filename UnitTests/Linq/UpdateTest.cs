@@ -711,7 +711,7 @@ namespace Update
 		[Test]
 		public void Issue331()
 		{
-			ForEachProvider(dc =>
+			ForEachProvider(new[] { "PostgreSQL" }, dc =>
 			{
 				var db = dc as DbManager;
 				if (db == null)
