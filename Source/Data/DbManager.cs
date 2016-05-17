@@ -2473,6 +2473,10 @@ namespace BLToolkit.Data
 						case DbType.VarNumeric:
 						case DbType.AnsiStringFixedLength:
 						case DbType.StringFixedLength:
+						case DbType.DateTime:
+						case DbType.DateTime2:
+						case DbType.DateTimeOffset:
+						case DbType.Date:
 							if (p.Size == 0)
 							{
 								p.Size = 1;
