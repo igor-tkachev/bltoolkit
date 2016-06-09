@@ -354,7 +354,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					string name = value.ToString();
+					string name = value.ToString().Replace(" ", string.Empty);
 
 					if (name.Length <= 28)
 						return ":" + name;

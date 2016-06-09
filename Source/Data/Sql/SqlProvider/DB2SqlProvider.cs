@@ -268,11 +268,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return "@" + value;
+					return "@" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return ":" + value;
+					return ":" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.SprocParameterToName:
 					if (value != null)
