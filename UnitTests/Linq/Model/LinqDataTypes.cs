@@ -15,6 +15,9 @@ namespace Data.Linq.Model
 		public Guid     GuidValue;
 		public Binary   BinaryValue;
 		public short    SmallIntValue;
+		public UInt16   UInt16;
+		public UInt32   UInt32;
+		public UInt64   UInt64;
 
 		public override bool Equals(object obj)
 		{
@@ -34,7 +37,10 @@ namespace Data.Linq.Model
 				other.DateTimeValue.Date   == DateTimeValue.Date &&
 				other.DateTimeValue.Hour   == DateTimeValue.Hour &&
 				other.DateTimeValue.Minute == DateTimeValue.Minute &&
-				other.DateTimeValue.Second == DateTimeValue.Second;
+				other.DateTimeValue.Second == DateTimeValue.Second &&
+				other.UInt16               == UInt16 &&
+				other.UInt32               == UInt32 &&
+				other.UInt64               == UInt64;
 		}
 
 		public override int GetHashCode()

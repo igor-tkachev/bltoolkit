@@ -267,7 +267,10 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    OleObject NULL,
 	SmallIntValue  smallint,
 	IntValue       int       NULL,
-	BigIntValue    long      NULL
+	BigIntValue    long      NULL,
+	UInt16         decimal(5, 0) NULL,
+	UInt32         decimal(10, 0) NULL,
+	UInt64         decimal(20, 0) NULL
 )
 GO
 
