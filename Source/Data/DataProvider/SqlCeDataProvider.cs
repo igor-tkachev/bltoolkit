@@ -125,6 +125,7 @@ namespace BLToolkit.Data.DataProvider
 			else if (value is ulong)
 			{
 				parameter.Value = value.ToString();
+				parameter.DbType = DbType.String;
 			}
 			else
 				base.SetParameterValue(parameter, value);

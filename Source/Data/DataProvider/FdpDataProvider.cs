@@ -267,6 +267,18 @@ namespace BLToolkit.Data.DataProvider
 				parameter.DbType = DbType.Binary;
 				parameter.Size = arr.Length;
 			}
+			else if (value is ushort)
+			{
+				parameter.Value = (int)(ushort)value;
+			}
+			else if (value is uint)
+			{
+				parameter.Value = (long)(uint)value;
+			}
+			else if (value is ulong)
+			{
+				parameter.Value = value.ToString();
+			}
 			else
 				base.SetParameterValue(parameter, value);
 		}

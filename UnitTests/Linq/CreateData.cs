@@ -64,7 +64,7 @@ namespace Create
 
 				db.InsertBatch(new[]
 				{
-					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001,  1,  11,  1, 11, 21, 100), BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  1, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = UInt64.MaxValue/2 },
+					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001,  1,  11,  1, 11, 21, 100), BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  1, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = UInt64.MaxValue/2    },
 					new LinqDataTypes { ID =  2, MoneyValue =  2.49m, DateTimeValue = new DateTime(2005,  5,  15,  5, 15, 25, 500), BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b"), SmallIntValue =  2, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
 					new LinqDataTypes { ID =  3, MoneyValue =  3.99m, DateTimeValue = new DateTime(2009,  9,  19,  9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d2f970c0-35ac-4987-9cd5-5badb1757436"), SmallIntValue =  3, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
 					new LinqDataTypes { ID =  4, MoneyValue =  4.50m, DateTimeValue = new DateTime(2009,  9,  20,  9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b"), SmallIntValue =  4, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
