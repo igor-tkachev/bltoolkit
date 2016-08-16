@@ -596,11 +596,11 @@ namespace Data.Linq
 		{
 			using (var db = GetDataContext(context))
 			{
-				var dbm = db as DbManager;
-				if (dbm != null)
-				{
-					var dt = dbm.SetCommand("select * from linqdatatypes").ExecuteDataTable();
-				}
+				//var dbm = db as DbManager;
+				//if (dbm != null)
+				//{
+				//	var dt = dbm.SetCommand("select * from LinqDataTypes").ExecuteDataTable();
+				//}
 				AreEqual(Types, db.Types);
 			}
 		}

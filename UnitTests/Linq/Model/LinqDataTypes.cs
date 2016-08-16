@@ -65,7 +65,7 @@ namespace Data.Linq.Model
 
 		public override string ToString()
 		{
-			return string.Format("{{{0,2}, {1,7}, {2}, {3,5}, {4}, {5}}}", ID, MoneyValue, DateTimeValue, BoolValue, GuidValue, SmallIntValue);
+			return string.Format("{{{0,2}, {1,7}, {2}, {3,5}, {4}, {5}, {6}, {7}, {8}}}", ID, MoneyValue, DateTimeValue, BoolValue, GuidValue, SmallIntValue, UInt16, UInt32, UInt64);
 		}
 	}
 
