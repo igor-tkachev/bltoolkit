@@ -512,7 +512,8 @@ namespace Data
 					var p         = parameters.First(obj => obj.ParameterName == paramName);
 
 					Assert.IsNotNull(p);
-					Assert.AreEqual(mm.GetValue(dt), p.Value, mm.MemberName);
+					if (mm.MapMemberInfo.Type != typeof(ulong))
+						Assert.AreEqual(mm.GetValue(dt), p.Value, mm.MemberName);
 				}
 			}
 		}
