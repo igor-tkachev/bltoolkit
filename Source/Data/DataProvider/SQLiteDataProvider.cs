@@ -133,7 +133,10 @@ namespace BLToolkit.Data.DataProvider
 		public override void SetParameterValue(IDbDataParameter parameter, object value)
 		{
 			if (parameter.DbType == DbType.DateTime2)
+			{
 				parameter.DbType = DbType.DateTime;
+				parameter.Value  = value;
+			}
 			//if (value is ushort)
 			//{
 			//	parameter.Value = (int)(ushort)value;
@@ -141,13 +144,13 @@ namespace BLToolkit.Data.DataProvider
 			else if (value is uint)
 			{
 				parameter.DbType = DbType.VarNumeric;
-				parameter.Value = value;
+				parameter.Value  = value;
 			}
 			else if (value is ulong)
 			{
 				parameter.DbType = DbType.VarNumeric;
-				parameter.Size = 25;
-				parameter.Value = value;
+				parameter.Size   = 25;
+				parameter.Value  = value;
 
 			}
 			else
