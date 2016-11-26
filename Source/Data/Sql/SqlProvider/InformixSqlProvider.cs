@@ -257,7 +257,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case ConvertType.NameToQueryParameter   : return "?";
 				case ConvertType.NameToCommandParameter :
-				case ConvertType.NameToSprocParameter   : return ":" + value;
+				case ConvertType.NameToSprocParameter   : return ":" + value.ToString().Replace(" ", string.Empty);
 				case ConvertType.SprocParameterToName   :
 					if (value != null)
 					{

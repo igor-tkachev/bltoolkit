@@ -590,5 +590,20 @@ namespace Data.Linq
 
 			}
 		}
+
+		[Test]
+		public void SelectLinqTypes([DataContexts]string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				//var dbm = db as DbManager;
+				//if (dbm != null)
+				//{
+				//	var dt = dbm.SetCommand("select * from LinqDataTypes").ExecuteDataTable();
+				//}
+				AreEqual(Types, db.Types);
+			}
+		}
+
 	}
 }

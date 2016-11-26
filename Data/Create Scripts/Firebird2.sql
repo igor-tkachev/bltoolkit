@@ -533,7 +533,6 @@ CREATE TABLE Parent     (ParentID int, Value1  int)                   COMMIT;
 CREATE TABLE Child      (ParentID int, ChildID int)                   COMMIT;
 CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int) COMMIT;
 
-
 DROP TABLE LinqDataTypes COMMIT;
 
 CREATE TABLE LinqDataTypes
@@ -547,7 +546,10 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    blob,
 	SmallIntValue  smallint,
 	IntValue       int,
-	BigIntValue    bigint
+	BigIntValue    bigint,
+	UInt16         numeric(6,  0),
+	UInt32         numeric(11, 0),
+	UInt64         char(20)
 )
 COMMIT;
 

@@ -419,15 +419,15 @@ namespace BLToolkit.Data.DataProvider
 			}
 			else if (value is ushort)
 			{
-				parameter.Value = (short)(ushort)value;
+				parameter.Value = (int)(ushort)value;
 			}
 			else if (value is uint)
 			{
-				parameter.Value = (int)(uint)value;
+				parameter.Value = (long)(uint)value;
 			}
 			else if (value is ulong)
 			{
-				parameter.Value = (long)(ulong)value;
+				parameter.Value = value.ToString();
 			}
 			else if (value is string)
 			{

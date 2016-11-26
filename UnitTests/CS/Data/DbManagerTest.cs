@@ -249,9 +249,9 @@ namespace Data
 
 					Char_ = 'F',
 					SByte_ = 123,
-					//UInt16_   = 65432,
-					//UInt32_   = 4000000000,
-					//UInt64_   = 12345678901234567890,
+					UInt16_ = UInt16.MaxValue,
+					UInt32_ = UInt32.MaxValue,
+					UInt64_ = UInt64.MaxValue,
 #if !SQLCE
 					Stream_ = new MemoryStream(5),
 					Xml_ = new XmlTextReader(new StringReader("<xml/>")),
@@ -265,6 +265,8 @@ namespace Data
 
 				SqlQuery query = new SqlQuery(db);
 				query.Insert(dt);
+				var list = query.SelectAll<DataTypeTest2>();
+				Assert.That(list.Any(_ => _.UInt16_ == UInt16.MaxValue && _.UInt32_ == UInt32.MaxValue && _.UInt64_ == UInt64.MaxValue));
 			}
 		}
 
@@ -294,9 +296,9 @@ namespace Data
 
 					Char_ = 'F',
 					SByte_ = 123,
-					//UInt16_   = 65432,
-					//UInt32_   = 4000000000,
-					//UInt64_   = 12345678901234567890,
+					UInt16_ = UInt16.MaxValue,
+					UInt32_ = UInt32.MaxValue,
+					UInt64_ = UInt64.MaxValue,
 #if !SQLCE
 					Stream_ = new MemoryStream(5),
 					Xml_ = new XmlTextReader(new StringReader("<xml/>")),
@@ -510,7 +512,8 @@ namespace Data
 					var p         = parameters.First(obj => obj.ParameterName == paramName);
 
 					Assert.IsNotNull(p);
-					Assert.AreEqual(mm.GetValue(dt), p.Value, mm.MemberName);
+					if (mm.MapMemberInfo.Type != typeof(ulong))
+						Assert.AreEqual(mm.GetValue(dt), p.Value, mm.MemberName);
 				}
 			}
 		}

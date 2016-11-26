@@ -202,14 +202,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return ParameterSymbol + value.ToString();
+					return ParameterSymbol + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToCommandParameter:
-					return ParameterSymbol + CommandParameterPrefix + value;
+					return ParameterSymbol + CommandParameterPrefix + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToSprocParameter:
 					{
-						var valueStr = value.ToString();
+						var valueStr = value.ToString().Replace(" ", string.Empty);
 
 						if(string.IsNullOrEmpty(valueStr))
 							throw new ArgumentException("Argument 'value' must represent parameter name.");

@@ -112,6 +112,25 @@ namespace BLToolkit.Data.DataProvider
 			return new SqlCeSqlProvider();
 		}
 
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is ushort)
+			{
+				parameter.Value = (int)(ushort)value;
+			}
+			else if (value is uint)
+			{
+				parameter.Value = (long)(uint)value;
+			}
+			else if (value is ulong)
+			{
+				parameter.Value = value.ToString();
+				parameter.DbType = DbType.String;
+			}
+			else
+				base.SetParameterValue(parameter, value);
+		}
+
 		public override DbType GetParameterDbType(DbType dbType)
 		{
 			switch (dbType)

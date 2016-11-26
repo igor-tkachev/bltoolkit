@@ -387,7 +387,7 @@ CREATE TABLE DataTypeTest
 (
 	DataTypeID      int              AUTO_INCREMENT NOT NULL,
 	Binary_         binary(50)       NULL,
-	Boolean_        bit              NOT NULL,
+	Boolean_        bit              NULL,
 	Byte_           tinyint          NULL,
 	Bytes_          varbinary(50)    NULL,
 	Char_           char(1)          NULL,
@@ -464,7 +464,10 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    varbinary(5000) NULL,
 	SmallIntValue  smallint,
 	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	BigIntValue    bigint NULL,
+	UInt16         decimal(5,  0)  NULL,
+	UInt32         decimal(10, 0)  NULL,
+	UInt64         decimal(20, 0)  NULL
 )
 GO
 

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Description;
-
+using System.Text;
 using BLToolkit.Data.DataProvider;
 using BLToolkit.Common;
 using BLToolkit.Data;
@@ -868,12 +868,18 @@ namespace Data.Linq
 			var exceptExpected = exceptExpectedList.Count;
 			var exceptResult   = exceptResultList.  Count;
 
+			var sb = new StringBuilder();
+
 			if (exceptResult != 0 || exceptExpected != 0)
 				for (var i = 0; i < resultList.Count; i++)
+				{
 					Debug.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
+					sb.AppendFormat("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
+					sb.AppendLine();
+				}
 
-			Assert.AreEqual(0, exceptExpected, "There are records in result, not present in base");
-			Assert.AreEqual(0, exceptResult,   "Result do not have records from base");
+			Assert.AreEqual(0, exceptExpected, "There are records in result, not present in base: " + sb);
+			Assert.AreEqual(0, exceptResult,   "Result do not have records from base: " + sb);
 		}
 
 		protected void AreEqual<T>(IEnumerable<IEnumerable<T>> expected, IEnumerable<IEnumerable<T>> result)
@@ -904,11 +910,17 @@ namespace Data.Linq
 
 			var b = expectedList.SequenceEqual(resultList);
 
+			var sb = new StringBuilder();
+
 			if (!b)
 				for (var i = 0; i < resultList.Count; i++)
-					Debug.WriteLine(string.Format("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]));
+				{ 
+					Debug.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
+					sb.AppendFormat("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
+					sb.AppendLine();
+				}
 
-			Assert.IsTrue(b, "lists are not same!");
+			Assert.IsTrue(b, "lists are not same: " + sb);
 		}
 
 		protected void CompareSql(string result, string expected)

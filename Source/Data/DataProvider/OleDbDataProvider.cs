@@ -66,7 +66,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return "@" + value;
+					return "@" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToQueryField:
 				case ConvertType.NameToQueryFieldAlias:

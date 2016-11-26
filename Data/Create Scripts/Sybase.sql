@@ -461,7 +461,11 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    binary(500)   NULL,
 	SmallIntValue  smallint      NULL,
 	IntValue       int           NULL,
-	BigIntValue    bigint        NULL
+	BigIntValue    bigint        NULL,
+	UInt16         decimal(5, 0) NULL,
+	UInt32         decimal(10,0) NULL,
+	UInt64         decimal(20,0) NULL
+
 )
 GO
 

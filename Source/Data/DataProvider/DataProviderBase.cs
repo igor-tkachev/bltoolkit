@@ -338,6 +338,24 @@ namespace BLToolkit.Data.DataProvider
 				parameter.DbType = DbType.Xml;
 				parameter.Size = parameter.Value.ToString().Length;
 			}
+			//else if (value is UInt16)
+			//{
+			//	parameter.Value = (Int32)(UInt16)value;
+			//	parameter.DbType = DbType.UInt16;
+			//	parameter.Size = 5;
+			//}
+			//else if (value is UInt32)
+			//{
+			//	parameter.Value = value;
+			//	parameter.DbType = DbType.VarNumeric;
+			//	parameter.Size = 10;
+			//}
+			//else if (value is UInt64)
+			//{
+			//	parameter.Value = value;
+			//	parameter.DbType = DbType.VarNumeric;
+			//	parameter.Size = 20;
+			//}
 			else
 				parameter.Value = value;
 		}

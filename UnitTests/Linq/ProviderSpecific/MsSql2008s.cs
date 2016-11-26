@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 using NUnit.Framework;
 
 namespace Data.Linq.ProviderSpecific
@@ -44,6 +46,31 @@ namespace Data.Linq.ProviderSpecific
 
 				db.SetCommand(@"UPDATE LinqDataTypes SET SmallIntValue = @value WHERE ID = 1", db.Parameter("value", (ushort)value)).ExecuteNonQuery();
 			}
+		}
+
+		[TableName("Person")]
+		public class Person375
+		{
+			[SqlFunction("getdate()", ServerSideOnly = true)]
+			[MapIgnore]
+			public DateTime GetDate { get; set; }
+
+			public int PersonId;
+		}
+
+		[Test]
+		public void Issue375([IncludeDataContexts("Sql2005", "Sql2008", "Sql2012")] string context)
+		{
+			using (var db = new TestDbManager(context))
+			{
+				Assert.IsNotEmpty(db.GetTable<Person375>().ToList());
+				Assert.IsNotEmpty(new SqlQuery<Person375>(db).SelectAll());
+
+				var time = db.GetTable<Person375>().Select(_ => _.GetDate);
+
+				Assert.AreNotEqual(default(DateTime), time);
+			}
+			
 		}
 	}
 }

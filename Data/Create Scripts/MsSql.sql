@@ -422,9 +422,9 @@ CREATE TABLE DataTypeTest
 	Single_         real             NULL,
 	Stream_         varbinary(50)    NULL,
 	String_         nvarchar(50)     NULL,
-	UInt16_         smallint         NULL,
-	UInt32_         int              NULL,
-	UInt64_         bigint           NULL,
+	UInt16_         numeric(5)       NULL,
+	UInt32_         numeric(10)      NULL,
+	UInt64_         numeric(20)      NULL,
 	Xml_            xml              NULL
 ) ON [PRIMARY]
 GO
@@ -579,7 +579,10 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    varbinary(5000),
 	SmallIntValue  smallint,
 	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	BigIntValue    bigint NULL,
+	UInt16         numeric(5,  0)  NULL,
+	UInt32         numeric(10, 0)  NULL,
+	UInt64         numeric(20, 0)  NULL
 )
 GO
 -- SKIP Sql2005 END
@@ -597,7 +600,10 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    varbinary(5000) NULL,
 	SmallIntValue  smallint,
 	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	BigIntValue    bigint NULL,
+	UInt16         numeric(5,  0)  NULL,
+	UInt32         numeric(10, 0)  NULL,
+	UInt64         numeric(20, 0)  NULL
 )
 GO
 -- SKIP Sql2012 END

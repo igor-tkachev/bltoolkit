@@ -68,10 +68,23 @@ namespace BLToolkit.Data.DataProvider
 
 		public override void SetParameterValue(IDbDataParameter parameter, object value)
 		{
-			if(value is Enum)
+			if (value is Enum)
 			{
 				var type = Enum.GetUnderlyingType(value.GetType());
 				value = (MappingSchema ?? Map.DefaultSchema).ConvertChangeType(value, type);
+
+			}
+			else if (value is ushort)
+			{
+				parameter.Value = (int)(ushort)value;
+			}
+			else if (value is uint)
+			{
+				parameter.Value = (long)(uint)value;
+			}
+			else if (value is ulong)
+			{
+				parameter.Value = (decimal)(ulong)value;
 
 			}
 			base.SetParameterValue(parameter, value);

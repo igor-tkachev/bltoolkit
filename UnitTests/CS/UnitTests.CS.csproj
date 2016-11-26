@@ -179,6 +179,7 @@
     <Compile Include="Data\Sql\DefinitionTest.cs" />
     <Compile Include="Data\Sql\FromTest.cs" />
     <Compile Include="Data\Sql\SelectTest.cs" />
+    <Compile Include="Data\UnsignedTest.cs" />
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
     <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />

@@ -191,7 +191,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
 					{
-						var name = "@" + value;
+						var name = "@" + value.ToString().Replace(" ", string.Empty);
 
 						if (name.Length > 27)
 							name = name.Substring(0, 27);

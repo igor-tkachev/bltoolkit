@@ -5,19 +5,19 @@ namespace BLToolkit.Validation
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class MaxLengthAttribute : ValidatorBaseAttribute
 	{
-		public MaxLengthAttribute(int maxLength)
+		public MaxLengthAttribute(Int64 maxLength)
 		{
 			_value = maxLength;
 		}
 
-		public MaxLengthAttribute(int maxLength, string errorMessage)
+		public MaxLengthAttribute(Int64 maxLength, string errorMessage)
 			: this(maxLength)
 		{
 			ErrorMessage = errorMessage;
 		}
 
-		private readonly int _value;
-		public           int  Value
+		private readonly Int64 _value;
+		public           Int64  Value
 		{
 			get { return _value; }
 		}

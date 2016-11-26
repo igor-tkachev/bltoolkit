@@ -77,6 +77,17 @@ namespace BLToolkit.Data.DataProvider
 			}
 		}
 
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is ulong)
+			{
+				parameter.Value = (decimal) (ulong) value;
+
+			}
+			else
+				base.SetParameterValue(parameter, value);
+		}
+
 		/*
 		public override int ExecuteArray(IDbCommand command, int iterations)
 		{
