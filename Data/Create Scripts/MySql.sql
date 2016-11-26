@@ -387,7 +387,7 @@ CREATE TABLE DataTypeTest
 (
 	DataTypeID      int              AUTO_INCREMENT NOT NULL,
 	Binary_         binary(50)       NULL,
-	Boolean_        bit              NOT NULL,
+	Boolean_        bit              NULL,
 	Byte_           tinyint          NULL,
 	Bytes_          varbinary(50)    NULL,
 	Char_           char(1)          NULL,
