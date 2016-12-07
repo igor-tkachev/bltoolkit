@@ -1,19 +1,19 @@
 
-DROP TABLE Doctor
+DROP TABLE IF EXISTS Doctor
 GO
-DROP TABLE Patient
+DROP TABLE IF EXISTS Patient
 GO
 
 -- Person Table
 
-DROP TABLE Person
+DROP TABLE IF EXISTS Person
 GO
 
 CREATE TABLE Person
 (
 	PersonID   int         AUTO_INCREMENT NOT NULL,
-	FirstName  varchar(50) NOT NULL,
-	LastName   varchar(50) NOT NULL,
+	FirstName  varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+	LastName   varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
 	MiddleName varchar(50)     NULL,
 	Gender     char(1)     NOT NULL,
 	CONSTRAINT PK_Person PRIMARY KEY CLUSTERED (PersonID)
@@ -58,7 +58,7 @@ GO
 
 -- GetPersonById
 
-DROP Procedure GetPersonById
+DROP Procedure IF EXISTS GetPersonById
 GO
 
 CREATE Procedure GetPersonById(_ID INT)
@@ -71,7 +71,7 @@ GO
 
 -- GetPersonByName
 
-DROP Procedure GetPersonByName
+DROP Procedure IF EXISTS GetPersonByName
 GO
 
 CREATE Procedure GetPersonByName
@@ -88,20 +88,20 @@ GO
 
 -- Person_SelectByKey
 
-DROP Procedure Person_SelectByKey
+DROP Procedure IF EXISTS Person_SelectByKey
 GO
 
 CREATE Procedure Person_SelectByKey(id int)
 BEGIN
 
-    SELECT * FROM Person WHERE PersonID = id;
+	SELECT * FROM Person WHERE PersonID = id;
 
 END
 GO
 
 -- Person_SelectAll
 
-DROP Procedure Person_SelectAll
+DROP Procedure IF EXISTS Person_SelectAll
 GO
 
 CREATE Procedure Person_SelectAll()
@@ -114,7 +114,7 @@ GO
 
 -- Person_SelectByName
 
-DROP Procedure Person_SelectByName
+DROP Procedure IF EXISTS Person_SelectByName
 GO
 
 CREATE Procedure Person_SelectByName
@@ -136,7 +136,7 @@ GO
 
 -- Person_SelectListByName
 
-DROP Procedure Person_SelectListByName
+DROP Procedure IF EXISTS Person_SelectListByName
 GO
 
 CREATE Procedure Person_SelectListByName
@@ -158,7 +158,7 @@ GO
 
 -- Person_Insert
 
-DROP Procedure Person_Insert
+DROP Procedure IF EXISTS Person_Insert
 GO
 
 CREATE Procedure Person_Insert
@@ -182,7 +182,7 @@ GO
 
 -- Person_Insert_OutputParameter
 
-DROP Procedure Person_Insert_OutputParameter
+DROP Procedure IF EXISTS Person_Insert_OutputParameter
 GO
 
 CREATE Procedure Person_Insert_OutputParameter
@@ -207,7 +207,7 @@ GO
 
 -- Person_Update
 
-DROP Procedure Person_Update
+DROP Procedure IF EXISTS Person_Update
 GO
 
 CREATE Procedure Person_Update
@@ -235,7 +235,7 @@ GO
 
 -- Person_Delete
 
-DROP Procedure Person_Delete
+DROP Procedure IF EXISTS Person_Delete
 GO
 
 CREATE Procedure Person_Delete
@@ -251,7 +251,7 @@ GO
 
 -- Patient_SelectAll
 
-DROP Procedure Patient_SelectAll
+DROP Procedure IF EXISTS Patient_SelectAll
 GO
 
 CREATE Procedure Patient_SelectAll()
@@ -269,7 +269,7 @@ GO
 
 -- Patient_SelectByName
 
-DROP Procedure Patient_SelectByName
+DROP Procedure IF EXISTS Patient_SelectByName
 GO
 
 CREATE Procedure Patient_SelectByName
@@ -292,7 +292,7 @@ GO
 
 -- BinaryData Table
 
-DROP TABLE BinaryData
+DROP TABLE IF EXISTS BinaryData
 GO
 
 CREATE TABLE BinaryData
@@ -306,15 +306,15 @@ GO
 
 -- OutRefTest
 
-DROP Procedure OutRefTest
+DROP Procedure IF EXISTS OutRefTest
 GO
 
 CREATE Procedure OutRefTest
 (
-	    ID             int,
+		ID             int,
 	OUT outputID       int,
 	OUT inputOutputID  int,
-	    str            varchar(50),
+		str            varchar(50),
 	OUT outputStr      varchar(50),
 	OUT inputOutputStr varchar(50)
 )
@@ -330,12 +330,12 @@ GO
 
 -- OutRefEnumTest
 
-DROP Procedure OutRefEnumTest
+DROP Procedure IF EXISTS OutRefEnumTest
 GO
 
 CREATE Procedure OutRefEnumTest
 (
-	    str            varchar(50),
+		str            varchar(50),
 	OUT outputStr      varchar(50),
 	OUT inputOutputStr varchar(50)
 )
@@ -349,7 +349,7 @@ GO
 
 -- ExecuteScalarTest
 
-DROP Procedure Scalar_DataReader
+DROP Procedure IF EXISTS Scalar_DataReader
 GO
 
 CREATE Procedure Scalar_DataReader()
@@ -362,7 +362,7 @@ BEGIN
 END
 GO
 
-DROP Procedure Scalar_OutputParameter
+DROP Procedure IF EXISTS Scalar_OutputParameter
 GO
 
 CREATE Procedure Scalar_OutputParameter
@@ -380,14 +380,14 @@ GO
 
 -- Data Types test
 
-DROP TABLE DataTypeTest
+DROP TABLE IF EXISTS DataTypeTest
 GO
 
 CREATE TABLE DataTypeTest
 (
 	DataTypeID      int              AUTO_INCREMENT NOT NULL,
 	Binary_         binary(50)       NULL,
-	Boolean_        bit              NOT NULL,
+	Boolean_        bit              NULL,
 	Byte_           tinyint          NULL,
 	Bytes_          varbinary(50)    NULL,
 	Char_           char(1)          NULL,
@@ -417,8 +417,8 @@ INSERT INTO DataTypeTest
 	 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
 VALUES
 	(   NULL,        0,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
-	    NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
+		NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL,
+		NULL,     NULL,    NULL,    NULL,    NULL,      NULL,     NULL)
 GO
 
 INSERT INTO DataTypeTest
@@ -435,11 +435,11 @@ GO
 
 
 
-DROP TABLE Parent
+DROP TABLE IF EXISTS Parent
 GO
-DROP TABLE Child
+DROP TABLE IF EXISTS Child
 GO
-DROP TABLE GrandChild
+DROP TABLE IF EXISTS GrandChild
 GO
 
 CREATE TABLE Parent     (ParentID int, Value1 int)
@@ -450,7 +450,7 @@ CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int)
 GO
 
 
-DROP TABLE LinqDataTypes
+DROP TABLE IF EXISTS LinqDataTypes
 GO
 
 CREATE TABLE LinqDataTypes
@@ -461,9 +461,23 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue2 datetime NULL,
 	BoolValue      boolean,
 	GuidValue      char(36),
-	BinaryValue    varbinary(5000),
+	BinaryValue    varbinary(5000) NULL,
 	SmallIntValue  smallint,
 	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	BigIntValue    bigint NULL,
+	UInt16         decimal(5,  0)  NULL,
+	UInt32         decimal(10, 0)  NULL,
+	UInt64         decimal(20, 0)  NULL
+)
+GO
+
+DROP TABLE IF EXISTS TestIdentity
+GO
+
+CREATE TABLE TestIdentity (
+ID          INTEGER      AUTO_INCREMENT NOT NULL,
+IntValue    INTEGER      NULL,
+StringValue NVARCHAR(50) NULL,
+CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED (ID)
 )
 GO

@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			return methodCall.IsQueryable("Insert", "InsertWithIdentity");
+			return methodCall.IsQueryable("Insert", "InsertWithIdentity","InsertWithOutput");
 		}
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
@@ -98,8 +98,9 @@ namespace BLToolkit.Data.Linq.Builder
 
 			sequence.SqlQuery.QueryType           = QueryType.Insert;
 			sequence.SqlQuery.Insert.WithIdentity = methodCall.Method.Name == "InsertWithIdentity";
+			sequence.SqlQuery.Insert.WithOutput   = methodCall.Method.Name == "InsertWithOutput";
 
-			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity);
+			return new InsertContext(buildInfo.Parent, sequence, sequence.SqlQuery.Insert.WithIdentity || sequence.SqlQuery.Insert.WithOutput);
 		}
 
 		protected override SequenceConvertInfo Convert(
@@ -130,27 +131,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 
@@ -177,6 +178,10 @@ namespace BLToolkit.Data.Linq.Builder
 				if (source.NodeType == ExpressionType.Constant && ((ConstantExpression)source).Value == null)
 				{
 					sequence = builder.BuildSequence(new BuildInfo((IBuildContext)null, into, new SqlQuery()));
+
+					if (sequence.SqlQuery.Select.IsDistinct)
+						sequence = new SubQueryContext(sequence);
+
 					sequence.SqlQuery.Insert.Into = ((TableBuilder.TableContext)sequence).SqlTable;
 					sequence.SqlQuery.From.Tables.Clear();
 				}
@@ -185,6 +190,10 @@ namespace BLToolkit.Data.Linq.Builder
 				else
 				{
 					sequence = builder.BuildSequence(new BuildInfo(buildInfo, source));
+
+					if (sequence.SqlQuery.Select.IsDistinct)
+						sequence = new SubQueryContext(sequence);
+
 					var tbl = builder.BuildSequence(new BuildInfo((IBuildContext)null, into, new SqlQuery()));
 					sequence.SqlQuery.Insert.Into = ((TableBuilder.TableContext)tbl).SqlTable;
 				}
@@ -240,6 +249,7 @@ namespace BLToolkit.Data.Linq.Builder
 						extract,
 						update,
 						sequence,
+						sequence.SqlQuery.Insert.Into,
 						sequence.SqlQuery.Insert.Items);
 
 				return sequence;

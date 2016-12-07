@@ -7,7 +7,6 @@ using System.Data;
 using NUnit.Framework;
 
 using BLToolkit.Data;
-using BLToolkit.Data.DataProvider;
 using BLToolkit.DataAccess;
 using BLToolkit.EditableObjects;
 using BLToolkit.Mapping;
@@ -539,7 +538,9 @@ namespace DataAccess
 			Assert.IsInstanceOf(typeof(Other.Person), list[0]);
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void ParamNullValueIDTest()
 		{
 			// Parameter id == 1 will be replaced with NULL
@@ -553,7 +554,9 @@ namespace DataAccess
 			Assert.IsNotNull(e2);
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif 
 		public void ParamNullValueNullableIDTest()
 		{
 			// Parameter id == 1 will be replaced with NULL
@@ -929,6 +932,43 @@ namespace DataAccess
 				list.Add(p);
 
 			Assert.AreNotEqual(0, list.Count);
+		}
+
+		#endregion
+
+		#region Pull Request 121
+
+		public class Whatever
+		{
+			public string Name { get; set; }
+			public int Age { get; set; }
+		}
+
+		public class Whatever2
+		{
+			public bool IsFoo { get; set; }
+		}
+
+		public abstract class SomeDA : DataAccessor<Whatever2>
+		{
+#if FIREBIRD
+			[SqlQuery("select 'Gogi' as Name, 10 as Age from dual")]
+#else
+			[SqlQuery("select 'Gogi' as Name, 10 as Age")]
+#endif
+			public abstract Whatever GetWhatever();
+		}
+
+		[Test]
+		public void TestIssue121()
+		{
+			using (var dbm = new DbManager())
+			{
+				var da  = DataAccessor.CreateInstance<SomeDA>(dbm);
+				var foo = da.GetWhatever();
+
+				Assert.That(foo, Is.InstanceOf<Whatever>());
+			}
 		}
 
 		#endregion

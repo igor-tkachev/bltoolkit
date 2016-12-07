@@ -21,9 +21,9 @@ using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Validation;
 
-namespace MSSQLDataModel
+namespace MSSqlDataModel
 {
-	public partial class MSSqlDataModel : DataContext
+	public partial class MSSqlDataContext : DataContext
 	{
 		public Table<AlphabeticalListOfProduct>  AlphabeticalListOfProducts   { get { return this.GetTable<AlphabeticalListOfProduct>();  } }
 		/// <summary>

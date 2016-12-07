@@ -52,6 +52,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugMono|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -85,10 +86,18 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Ci|AnyCPU'">
+    <OutputPath>bin\Release Ci\</OutputPath>
+    <DefineConstants>TRACE;MSSQL;FW3;</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -170,6 +179,7 @@
     <Compile Include="Data\Sql\DefinitionTest.cs" />
     <Compile Include="Data\Sql\FromTest.cs" />
     <Compile Include="Data\Sql\SelectTest.cs" />
+    <Compile Include="Data\UnsignedTest.cs" />
     <Compile Include="EditableObjects\EditableObjectT.cs" />
     <Compile Include="EditableObjects\EditableArrayListTest.cs" />
     <Compile Include="EditableObjects\EditableList_AcceptChanges.cs" />
@@ -186,6 +196,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="JointureTests\Title.cs" />
+    <Compile Include="Mapping\BltMapTests.cs" />
+    <Compile Include="Mapping\MemberMapperDefaultMappersTest.cs" />
     <Compile Include="Mapping\ExpressionMapperTest.cs" />
     <Compile Include="Mapping\NullableEnum.cs" />
     <Compile Include="Mapping\DefaultValueAttributeTest.cs" />
@@ -201,6 +213,7 @@
     <Compile Include="Mapping\ObjectMapperAttributeTest.cs" />
     <Compile Include="Mapping\ObjectMapperTest.cs" />
     <Compile Include="Mapping\ResultSetTest.cs" />
+    <Compile Include="Mapping\TestFluentNullable.cs" />
     <Compile Include="Mapping\TrimmableAttributeTest.cs" />
     <Compile Include="Mapping\XmlMap.cs" />
     <Compile Include="Patterns\MustImplementAttributeTest.cs" />
@@ -245,6 +258,10 @@
     <Compile Include="Validation\RegExValidationTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Data\BLToolkitData.fdb">
+      <Link>BLToolkitData.fdb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
@@ -263,6 +280,7 @@
     <None Include="DataAccess\PersonDataSet2.xsx">
       <DependentUpon>PersonDataSet2.xsd</DependentUpon>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -317,11 +335,15 @@
     <EmbeddedResource Include="Data\Sql\DefinitionData.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.4.csproj">
+      <Project>{c1f8c201-bbd9-44f4-884c-cff8cc960b68}</Project>
+      <Name>BLToolkit.Data.DataProvider.Firebird.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
     </ProjectReference>
@@ -333,6 +355,24 @@
       <Project>{9FD2722C-1E6C-4061-8AC0-32EE28808FC0}</Project>
       <Name>BLToolkit.4.JointureAddOn</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\Redist\Firebird\fbembed.dll">
+      <Link>fbembed.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Redist\Firebird\icudt30.dll">
+      <Link>icudt30.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Redist\Firebird\icuin30.dll">
+      <Link>icuin30.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\Redist\Firebird\icuuc30.dll">
+      <Link>icuuc30.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

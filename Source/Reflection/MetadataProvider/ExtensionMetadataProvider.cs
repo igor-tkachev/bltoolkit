@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -20,11 +21,9 @@ namespace BLToolkit.Reflection.MetadataProvider
 
 		private static object GetValue(TypeExtension typeExtension, MemberAccessor member, string elemName, out bool isSet)
 		{
-			var value = typeExtension[member.Name][elemName].Value;
-
-			isSet = value != null;
-
-			return value;
+			AttributeExtensionCollection ext;
+			isSet = typeExtension[member.Name].Attributes.TryGetValue(elemName, out ext);
+			return isSet ? ext.Value : null;
 		}
 
 		#endregion
@@ -84,6 +83,103 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+		#region GetMapField
+
+		public override MapFieldAttribute GetMapField(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			var extList = typeExtension[member.Name]["MapField"];
+
+			if (extList != AttributeExtensionCollection.Null)
+			{
+				isSet = true;
+				var attr = new MapFieldAttribute();
+
+				var extFormat = extList.FirstOrDefault(x => x.Name == "Format");
+				var extMapName = extList.FirstOrDefault(x => x.Name == "MapName");
+				var extIsInheritanceDiscriminator = extList.FirstOrDefault(x => x.Name == "IsInheritanceDiscriminator");
+				var extOrigName = extList.FirstOrDefault(x => x.Name == "OrigName");
+				var extStorage = extList.FirstOrDefault(x => x.Name == "Storage");
+
+				if (extFormat != null) 
+					attr.Format = (string)extFormat.Value;
+				if (extMapName != null) 
+					attr.MapName = (string)extMapName.Value;
+				if (extFormat != null) 
+					attr.IsInheritanceDiscriminator = Convert.ToBoolean(extIsInheritanceDiscriminator.Value);
+				if (extFormat != null) 
+					attr.OrigName = (string)extOrigName.Value;
+				if (extFormat != null) 
+					attr.Storage = (string)extStorage.Value;
+				return attr;
+			}
+
+			return base.GetMapField(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
+		#region GetDbType
+
+		[CLSCompliant(false)]
+		public override DbTypeAttribute GetDbType(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+		{
+			var extList = typeExtension[member.Name]["DbType"];
+
+			if (extList != AttributeExtensionCollection.Null)
+			{
+				isSet = true;
+				var attr = new DbTypeAttribute(DbType.String);
+
+				var extDbType = extList.FirstOrDefault(x => x.Name == "DbType");
+				var extSize = extList.FirstOrDefault(x => x.Name == "Size");
+
+				DbType dbType;
+				if (extDbType != null)
+				{
+#if SILVERLIGHT || FW4
+					DbType.TryParse(extDbType.Value.ToString(), out dbType);
+#else
+					dbType = (DbType)Enum.Parse(typeof(DbType), extDbType.Value.ToString());
+#endif
+					attr.DbType = dbType;
+				}
+				if (extSize != null)
+				{
+					attr.Size = int.Parse(extSize.Value.ToString());
+				}
+				return attr;
+			}
+
+			return base.GetDbType(typeExtension, member, out isSet);
+		}
+
+		#endregion
+
+        #region GetPrimaryKey
+
+        public override PrimaryKeyAttribute GetPrimaryKey(TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            var extList = typeExtension[member.Name]["PrimaryKey"];
+
+            if (extList != AttributeExtensionCollection.Null)
+            {
+                isSet = true;
+                int order = -1;
+                var extOrder = extList.FirstOrDefault(x => x.Name == "Order");
+                if (extOrder != null)
+                {
+                    order = int.Parse(extOrder.Value.ToString());
+                }
+                var attr = new PrimaryKeyAttribute(order);
+                return attr;
+            }
+
+            return base.GetPrimaryKey(typeExtension, member, out isSet);
+        }
+
+        #endregion
+
 
 		#region GetTrimmable
 
@@ -271,6 +367,27 @@ namespace BLToolkit.Reflection.MetadataProvider
 		}
 
 		#endregion
+
+        #region GetNullable
+
+        public override bool GetLazyInstance(MappingSchema mappingSchema, TypeExtension typeExtension, MemberAccessor member, out bool isSet)
+        {
+            // Check extension <Member1 Nullable='true' />
+            //
+            var value = GetValue(typeExtension, member, "LazyInstance", out isSet);
+
+            if (isSet)
+                return TypeExtension.ToBoolean(value);
+
+            // Check extension <Member1 NullValue='-1' />
+            //
+            if (GetValue(typeExtension, member, "LazyInstance", out isSet) != null)
+                return true;
+
+            return base.GetLazyInstance(mappingSchema, typeExtension, member, out isSet);
+        }
+
+        #endregion
 
 		#region GetNullable
 

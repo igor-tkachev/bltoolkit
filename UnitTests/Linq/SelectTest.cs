@@ -190,11 +190,11 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleSelect11()
+		public void MultipleSelect11([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
 			var dt = DateTime.Now;
 
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from p in db.Parent
@@ -269,6 +269,23 @@ namespace Data.Linq
 			}
 
 			Assert.IsTrue((DateTime.Now - dt).TotalSeconds < 30);
+		}
+
+		[Test]
+		public void MutiplySelect12([DataContexts(ExcludeLinqService = true)] string context)
+		{
+			using (var db = (TestDbManager)GetDataContext(context))
+			{
+				var q =
+					from grandChild in db.GrandChild
+					from child in db.Child
+					where grandChild.ChildID.HasValue
+					select grandChild;
+				q.ToList();
+
+				var selectCount = db.LastQuery.Split(' ', '\t', '\n', '\r').Count(s => s.Equals("select", StringComparison.InvariantCultureIgnoreCase));
+				Assert.AreEqual(1, selectCount, "Why do we need \"select from select\"??");
+			}
 		}
 
 		[Test]
@@ -439,6 +456,18 @@ namespace Data.Linq
 							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0, i)).ToArray();
 
 				Assert.AreEqual("7.77.True.0", lines[0]);
+
+				q =
+					db.Child
+						.OrderByDescending(m => m.ChildID)
+						.Where(m => m.Parent != null && m.ParentID > 0);
+
+				lines =
+					q.Select(
+						(m, i) =>
+							ConvertString(m.Parent.ParentID.ToString(), m.ChildID, i % 2 == 0, i)).ToArray();
+
+				Assert.AreEqual("7.77.True.0", lines[0]);
 			});
 		}
 
@@ -456,8 +485,8 @@ namespace Data.Linq
 		public void ProjectionTest1()
 		{
 			ForEachProvider(db => AreEqual(
-				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID },
-				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value1, ID2 = c.ParentID }));
+				from c in    Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value, ID2 = c.ParentID },
+				from c in db.Child select new { c.ChildID, ID = 0, ID1 = c.ParentID2.ParentID2, c.ParentID2.Value, ID2 = c.ParentID }));
 		}
 
 		[TableName("Person")]
@@ -518,5 +547,63 @@ namespace Data.Linq
 				p.Arr.Single();
 			});
 		}
+
+		[TableName("Parent")]
+		public class TestParent
+		{
+			[MapField("ParentID")] public int  ParentID_;
+			[MapField("Value1")]   public int? Value1_;
+		}
+
+		[Test]
+		public void SelectField()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q =
+					from p in db.GetTable<TestParent>()
+					select p.Value1_;
+
+				var sql = q.ToString();
+
+				Assert.That(sql.IndexOf("ParentID_"), Is.LessThan(0));
+			}
+		}
+
+		[Test]
+		public void Issue317()
+		{
+			using (var db = new TestDbManager())
+			{
+				var q = 
+					from p in db.Parent
+					join c in db.Child on p.ParentID equals c.ChildID into childs
+					from c in childs.DefaultIfEmpty()
+					select new
+					{
+						p.ParentID,
+						ChildId1 = null == c ? -1000 : c.ChildID,
+						ChildId2 = c == null ? -2000 : c.ChildID,
+					};
+
+				q.ToArray();
+
+			}
+		}
+
+		[Test]
+		public void SelectLinqTypes([DataContexts]string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				//var dbm = db as DbManager;
+				//if (dbm != null)
+				//{
+				//	var dt = dbm.SetCommand("select * from LinqDataTypes").ExecuteDataTable();
+				//}
+				AreEqual(Types, db.Types);
+			}
+		}
+
 	}
 }

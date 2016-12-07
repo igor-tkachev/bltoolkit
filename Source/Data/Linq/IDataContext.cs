@@ -10,6 +10,7 @@ namespace BLToolkit.Data.Linq
 	{
 		string             ContextID         { get; }
 		Func<ISqlProvider> CreateSqlProvider { get; }
+		bool               InlineParameters      { get; set; }
 
 		object             SetQuery        (IQueryContext queryContext);
 		int                ExecuteNonQuery (object query);

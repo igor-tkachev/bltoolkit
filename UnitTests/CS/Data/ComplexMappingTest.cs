@@ -41,7 +41,9 @@ namespace Data
 			public abstract Parent Parent { get; set; }
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void Test1()
 		{
 			List<Parent> parents = new List<Parent>();

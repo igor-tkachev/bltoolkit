@@ -36,9 +36,9 @@ namespace Data.Linq
 	public class L2SAttributes : TestBase
 	{
 		[Test]
-		public void IsDbGeneratedTest()
+		public void IsDbGeneratedTest([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager("Sql2008"))
+			using (var db = new TestDbManager(context))
 			{
 				db.BeginTransaction();
 

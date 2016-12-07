@@ -10,6 +10,16 @@ namespace UnitTests.CS.Data
 	[TestFixture]
 	public class ExecuteObjectTest
 	{
+#if FIREBIRD
+		const string _query = @"  SELECT 1 AS PersonId, '1' AS FirstName, '1' AS MiddleName, '1' AS LastName FROM Dual
+							UNION SELECT 2 AS PersonId, '2' AS FirstName, '2' AS MiddleName, '2' AS LastName FROM Dual
+							UNION SELECT 3 AS PersonId, '3' AS FirstName, '3' AS MiddleName, '3' AS LastName FROM Dual
+							UNION SELECT 4 AS PersonId, '4' AS FirstName, '0' AS MiddleName, '4' AS LastName FROM Dual
+							UNION SELECT 5 AS PersonId, '5' AS FirstName, '1' AS MiddleName, '5' AS LastName FROM Dual
+							UNION SELECT 6 AS PersonId, '6' AS FirstName, '2' AS MiddleName, '6' AS LastName FROM Dual
+							UNION SELECT 7 AS PersonId, '7' AS FirstName, '3' AS MiddleName, '7' AS LastName FROM Dual
+							UNION SELECT 8 AS PersonId, '8' AS FirstName, '0' AS MiddleName, '8' AS LastName FROM Dual";
+#else 
 		const string _query = @"  SELECT 1 AS PersonId, '1' AS FirstName, '1' AS MiddleName, '1' AS LastName
 							UNION SELECT 2 AS PersonId, '2' AS FirstName, '2' AS MiddleName, '2' AS LastName
 							UNION SELECT 3 AS PersonId, '3' AS FirstName, '3' AS MiddleName, '3' AS LastName
@@ -18,6 +28,7 @@ namespace UnitTests.CS.Data
 							UNION SELECT 6 AS PersonId, '6' AS FirstName, '2' AS MiddleName, '6' AS LastName
 							UNION SELECT 7 AS PersonId, '7' AS FirstName, '3' AS MiddleName, '7' AS LastName
 							UNION SELECT 8 AS PersonId, '8' AS FirstName, '0' AS MiddleName, '8' AS LastName";
+#endif
 
 		[ObjectFactory(typeof(Person.Factory))]
 		public class Person

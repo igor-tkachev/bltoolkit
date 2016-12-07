@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Globalization;
 using BLToolkit.Common;
+using BLToolkit.Reflection;
 using NUnit.Framework;
 
 using BLToolkit.Mapping;
@@ -545,5 +546,24 @@ namespace Mapping
 
 			Convert<DateTime,string>.From = prev;
 		}
+
+		public abstract class Test
+		{
+			public abstract int Id { get; set; }
+		}
+
+		[Test]
+		public void AccessorTest()
+		{
+			var test   = TypeAccessor<Test>.CreateInstance();
+			var mapper = Map.GetObjectMapper<Test,Test>();
+
+			test.Id = 1234124;
+			var testCopy = mapper(test);
+
+			Assert.IsNotNull(testCopy);
+			Assert.AreEqual(test.Id, testCopy.Id);
+		}
+
 	}
 }

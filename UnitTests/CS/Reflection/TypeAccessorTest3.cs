@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+using BLToolkit.ComponentModel;
 using BLToolkit.DataAccess;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
@@ -82,6 +83,22 @@ namespace Reflection
 
 			m = ta["Master"].GetValue(d2); // Exception 
 			Assert.IsNotNull(m);
+		}
+
+		[Test]
+		public void TestITypeDescriptionProviderGetAttributes()
+		{
+			var ta = TypeAccessor<Detail2>.Instance;
+			var typeDescriptionProvider = ta as ITypeDescriptionProvider;
+			Assert.IsNotNull(typeDescriptionProvider);
+
+			typeDescriptionProvider.GetAttributes();
+		}
+
+		[Test]
+		public void ListTest()
+		{
+			var t = TypeAccessor.CreateInstanceEx<List<int>>();
 		}
 	}
 }

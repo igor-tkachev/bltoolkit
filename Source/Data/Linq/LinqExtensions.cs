@@ -54,7 +54,7 @@ namespace BLToolkit.Data.Linq
 
 		#region Scalar Select
 
-		static public T Select<T>([NotNull] this IDataContext dataContext, [NotNull] Expression<Func<T>> selector)
+		static public T Select<T>([NotNull] this IDataContext dataContext, [NotNull, InstantHandle] Expression<Func<T>> selector)
 		{
 			if (dataContext == null) throw new ArgumentNullException("dataContext");
 			if (selector    == null) throw new ArgumentNullException("selector");
@@ -82,7 +82,9 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression }));
 		}
 
-		public static int Delete<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,bool>> predicate)
+		public static int Delete<T>(
+			[NotNull, InstantHandle] this IQueryable<T>       source,
+			[NotNull, InstantHandle] Expression<Func<T,bool>> predicate)
 		{
 			if (source    == null) throw new ArgumentNullException("source");
 			if (predicate == null) throw new ArgumentNullException("predicate");
@@ -99,9 +101,9 @@ namespace BLToolkit.Data.Linq
 		#region Update
 
 		public static int Update<TSource,TTarget>(
-			[NotNull] this IQueryable<TSource>          source,
-			[NotNull] Table<TTarget>                    target,
-			[NotNull] Expression<Func<TSource,TTarget>> setter)
+			[NotNull]                this IQueryable<TSource>          source,
+			[NotNull]                Table<TTarget>                    target,
+			[NotNull, InstantHandle] Expression<Func<TSource,TTarget>> setter)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (target == null) throw new ArgumentNullException("target");
@@ -114,7 +116,9 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, ((IQueryable<TTarget>)target).Expression, Expression.Quote(setter) }));
 		}
 
-		public static int Update<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,T>> setter)
+		public static int Update<T>(
+			[NotNull]                this IQueryable<T>    source,
+			[NotNull, InstantHandle] Expression<Func<T,T>> setter)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (setter == null) throw new ArgumentNullException("setter");
@@ -126,7 +130,10 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(setter) }));
 		}
 
-		public static int Update<T>([NotNull] this IQueryable<T> source, [NotNull] Expression<Func<T,bool>> predicate, [NotNull] Expression<Func<T,T>> setter)
+		public static int Update<T>(
+			[NotNull]                this IQueryable<T>       source,
+			[NotNull, InstantHandle] Expression<Func<T,bool>> predicate,
+			[NotNull, InstantHandle] Expression<Func<T,T>>    setter)
 		{
 			if (source    == null) throw new ArgumentNullException("source");
 			if (predicate == null) throw new ArgumentNullException("predicate");
@@ -139,11 +146,11 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(predicate), Expression.Quote(setter) }));
 		}
 
-		public static int Update<T>([NotNull] this IUpdateable<T> source)
+		public static int Update<T>([NotNull] this IUpdatable<T> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 
-			var query = ((Updateable<T>)source).Query;
+			var query = ((Updatable<T>)source).Query;
 
 			return query.Provider.Execute<int>(
 				Expression.Call(
@@ -152,15 +159,28 @@ namespace BLToolkit.Data.Linq
 					new[] { query.Expression }));
 		}
 
-		class Updateable<T> : IUpdateable<T>
+		class Updatable<T> : IUpdatable<T>
 		{
 			public IQueryable<T> Query;
 		}
 
-		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IQueryable<T>     source,
-			[NotNull] Expression<Func<T,TV>> extract,
-			[NotNull] Expression<Func<T,TV>> update)
+		public static IUpdatable<T> AsUpdatable<T>([NotNull] this IQueryable<T> source)
+		{
+			if (source  == null) throw new ArgumentNullException("source");
+
+			var query = source.Provider.CreateQuery<T>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
+					new[] { source.Expression }));
+
+			return new Updatable<T> { Query = query };
+		}
+
+		public static IUpdatable<T> Set<T,TV>(
+			[NotNull]                this IQueryable<T>     source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> extract,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> update)
 		{
 			if (source  == null) throw new ArgumentNullException("source");
 			if (extract == null) throw new ArgumentNullException("extract");
@@ -172,19 +192,19 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { source.Expression, Expression.Quote(extract), Expression.Quote(update) }));
 
-			return new Updateable<T> { Query = query };
+			return new Updatable<T> { Query = query };
 		}
 
-		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IUpdateable<T>    source,
-			[NotNull] Expression<Func<T,TV>> extract,
-			[NotNull] Expression<Func<T,TV>> update)
+		public static IUpdatable<T> Set<T,TV>(
+			[NotNull]                this IUpdatable<T>    source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> extract,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> update)
 		{
 			if (source  == null) throw new ArgumentNullException("source");
 			if (extract == null) throw new ArgumentNullException("extract");
 			if (update  == null) throw new ArgumentNullException("update");
 
-			var query = ((Updateable<T>)source).Query;
+			var query = ((Updatable<T>)source).Query;
 
 			query = query.Provider.CreateQuery<T>(
 				Expression.Call(
@@ -192,13 +212,13 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { query.Expression, Expression.Quote(extract), Expression.Quote(update) }));
 
-			return new Updateable<T> { Query = query };
+			return new Updatable<T> { Query = query };
 		}
 
-		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IQueryable<T>     source,
-			[NotNull] Expression<Func<T,TV>> extract,
-			[NotNull] Expression<Func<TV>>   update)
+		public static IUpdatable<T> Set<T,TV>(
+			[NotNull]                this IQueryable<T>     source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> extract,
+			[NotNull, InstantHandle] Expression<Func<TV>>   update)
 		{
 			if (source  == null) throw new ArgumentNullException("source");
 			if (extract == null) throw new ArgumentNullException("extract");
@@ -210,19 +230,19 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { source.Expression, Expression.Quote(extract), Expression.Quote(update) }));
 
-			return new Updateable<T> { Query = query };
+			return new Updatable<T> { Query = query };
 		}
 
-		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IUpdateable<T>    source,
-			[NotNull] Expression<Func<T,TV>> extract,
-			[NotNull] Expression<Func<TV>>   update)
+		public static IUpdatable<T> Set<T,TV>(
+			[NotNull]                this IUpdatable<T>    source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> extract,
+			[NotNull, InstantHandle] Expression<Func<TV>>   update)
 		{
 			if (source  == null) throw new ArgumentNullException("source");
 			if (extract == null) throw new ArgumentNullException("extract");
 			if (update  == null) throw new ArgumentNullException("update");
 
-			var query = ((Updateable<T>)source).Query;
+			var query = ((Updatable<T>)source).Query;
 
 			query = query.Provider.CreateQuery<T>(
 				Expression.Call(
@@ -230,13 +250,13 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { query.Expression, Expression.Quote(extract), Expression.Quote(update) }));
 
-			return new Updateable<T> { Query = query };
+			return new Updatable<T> { Query = query };
 		}
 
-		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IQueryable<T>     source,
-			[NotNull] Expression<Func<T,TV>> extract,
-			TV                               value)
+		public static IUpdatable<T> Set<T,TV>(
+			[NotNull]                this IQueryable<T>     source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> extract,
+			TV                                              value)
 		{
 			if (source  == null) throw new ArgumentNullException("source");
 			if (extract == null) throw new ArgumentNullException("extract");
@@ -247,18 +267,18 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { source.Expression, Expression.Quote(extract), Expression.Constant(value, typeof(TV)) }));
 
-			return new Updateable<T> { Query = query };
+			return new Updatable<T> { Query = query };
 		}
 
-		public static IUpdateable<T> Set<T,TV>(
-			[NotNull] this IUpdateable<T>    source,
-			[NotNull] Expression<Func<T,TV>> extract,
-			TV                               value)
+		public static IUpdatable<T> Set<T,TV>(
+			[NotNull]                this IUpdatable<T>    source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> extract,
+			TV                                              value)
 		{
 			if (source  == null) throw new ArgumentNullException("source");
 			if (extract == null) throw new ArgumentNullException("extract");
 
-			var query = ((Updateable<T>)source).Query;
+			var query = ((Updatable<T>)source).Query;
 
 			query = query.Provider.CreateQuery<T>(
 				Expression.Call(
@@ -266,14 +286,16 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T), typeof(TV) }),
 					new[] { query.Expression, Expression.Quote(extract), Expression.Constant(value, typeof(TV)) }));
 
-			return new Updateable<T> { Query = query };
+			return new Updatable<T> { Query = query };
 		}
 
 		#endregion
 
 		#region Insert
 
-		public static int Insert<T>([NotNull] this Table<T> target, [NotNull] Expression<Func<T>> setter)
+		public static int Insert<T>(
+			[NotNull]                this Table<T>       target,
+			[NotNull, InstantHandle] Expression<Func<T>> setter)
 		{
 			if (target == null) throw new ArgumentNullException("target");
 			if (setter == null) throw new ArgumentNullException("setter");
@@ -287,7 +309,9 @@ namespace BLToolkit.Data.Linq
 					new[] { query.Expression, Expression.Quote(setter) }));
 		}
 
-		public static object InsertWithIdentity<T>([NotNull] this Table<T> target, [NotNull] Expression<Func<T>> setter)
+        public static object InsertWithIdentity<T>(
+			[NotNull]                this Table<T>       target,
+			[NotNull, InstantHandle] Expression<Func<T>> setter)
 		{
 			if (target == null) throw new ArgumentNullException("target");
 			if (setter == null) throw new ArgumentNullException("setter");
@@ -300,6 +324,22 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
 					new[] { query.Expression, Expression.Quote(setter) }));
 		}
+		
+		public static object InsertWithOutput<T>(
+	            [NotNull]                this Table<T> target,
+	            [NotNull, InstantHandle] Expression<Func<T>> setter )
+	        {
+	            if (target == null) throw new ArgumentNullException("target");
+	            if (setter == null) throw new ArgumentNullException("setter");
+	
+	            IQueryable<T> query = target;
+	
+	            return query.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( T ) } ),
+	                    new[] { query.Expression, Expression.Quote( setter ) } ) );
+	        }
 
 		#region ValueInsertable
 
@@ -324,9 +364,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static IValueInsertable<T> Value<T,TV>(
-			[NotNull] this Table<T>          source,
-			[NotNull] Expression<Func<T,TV>> field,
-			[NotNull] Expression<Func<TV>>   value)
+			[NotNull]                this Table<T>          source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> field,
+			[NotNull, InstantHandle] Expression<Func<TV>>   value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");
@@ -344,9 +384,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static IValueInsertable<T> Value<T,TV>(
-			[NotNull] this Table<T>          source,
-			[NotNull] Expression<Func<T,TV>> field,
-			TV                               value)
+			[NotNull]                this Table<T>          source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>> field,
+			TV                                              value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");
@@ -363,9 +403,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static IValueInsertable<T> Value<T,TV>(
-			[NotNull] this IValueInsertable<T> source,
-			[NotNull] Expression<Func<T,TV>>   field,
-			[NotNull] Expression<Func<TV>>     value)
+			[NotNull]                this IValueInsertable<T> source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>>   field,
+			[NotNull, InstantHandle] Expression<Func<TV>>     value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");
@@ -383,9 +423,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static IValueInsertable<T> Value<T,TV>(
-			[NotNull] this IValueInsertable<T> source,
-			[NotNull] Expression<Func<T,TV>>   field,
-			TV                                 value)
+			[NotNull]                this IValueInsertable<T> source,
+			[NotNull, InstantHandle] Expression<Func<T,TV>>   field,
+			TV                                                value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");
@@ -426,13 +466,28 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(T) }),
 					new[] { query.Expression }));
 		}
+		
+		public static object InsertWithOutput<T>( [NotNull] this IValueInsertable<T> source )
+	        {
+	            if (source == null) throw new ArgumentNullException( "source" );
+	
+	            var query = ( (ValueInsertable<T>)source ).Query;
+	
+	            return query.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( T ) } ),
+	                    new[] { query.Expression } ) );
+	        }
 
 		#endregion
 
 		#region SelectInsertable
 
 		public static int Insert<TSource,TTarget>(
-			[NotNull] this IQueryable<TSource> source, [NotNull] Table<TTarget> target, [NotNull] Expression<Func<TSource,TTarget>> setter)
+			[NotNull]                this IQueryable<TSource> source, 
+			[NotNull]                Table<TTarget> target, 
+			[NotNull, InstantHandle] Expression<Func<TSource, TTarget>> setter)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (target == null) throw new ArgumentNullException("target");
@@ -446,7 +501,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static object InsertWithIdentity<TSource,TTarget>(
-			[NotNull] this IQueryable<TSource> source, [NotNull] Table<TTarget> target, [NotNull] Expression<Func<TSource,TTarget>> setter)
+			[NotNull]                this IQueryable<TSource>          source,
+			[NotNull]                Table<TTarget>                    target,
+			[NotNull, InstantHandle] Expression<Func<TSource,TTarget>> setter)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (target == null) throw new ArgumentNullException("target");
@@ -458,6 +515,22 @@ namespace BLToolkit.Data.Linq
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TTarget) }),
 					new[] { source.Expression, ((IQueryable<TTarget>)target).Expression, Expression.Quote(setter) }));
 		}
+		
+		public static object InsertWithOutput<TSource, TTarget>(
+	            [NotNull]                this IQueryable<TSource> source,
+	            [NotNull]                Table<TTarget> target,
+	            [NotNull, InstantHandle] Expression<Func<TSource, TTarget>> setter)
+	        {
+	            if (source == null) throw new ArgumentNullException( "source" );
+	            if (target == null) throw new ArgumentNullException( "target" );
+	            if (setter == null) throw new ArgumentNullException( "setter" );
+	
+	            return source.Provider.Execute<object>(
+	                Expression.Call(
+	                    null,
+	                    ( (MethodInfo)MethodBase.GetCurrentMethod() ).MakeGenericMethod( new[] { typeof( TSource ), typeof( TTarget ) } ),
+	                    new[] { source.Expression, ( (IQueryable<TTarget>)target ).Expression, Expression.Quote( setter ) } ) );
+	        }
 
 		class SelectInsertable<T,TT> : ISelectInsertable<T,TT>
 		{
@@ -480,9 +553,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(
-			[NotNull] this ISelectInsertable<TSource,TTarget> source,
-			[NotNull] Expression<Func<TTarget,TValue>>        field,
-			[NotNull] Expression<Func<TSource,TValue>>        value)
+			[NotNull]                this ISelectInsertable<TSource,TTarget> source,
+			[NotNull, InstantHandle] Expression<Func<TTarget,TValue>>        field,
+			[NotNull, InstantHandle] Expression<Func<TSource,TValue>>        value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");
@@ -500,9 +573,9 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(
-			[NotNull] this ISelectInsertable<TSource,TTarget> source,
-			[NotNull] Expression<Func<TTarget,TValue>>        field,
-			[NotNull] Expression<Func<TValue>>                value)
+			[NotNull]                this ISelectInsertable<TSource,TTarget> source,
+			[NotNull, InstantHandle] Expression<Func<TTarget,TValue>>        field,
+			[NotNull, InstantHandle] Expression<Func<TValue>>                value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (field  == null) throw new ArgumentNullException("field");
@@ -520,8 +593,8 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static ISelectInsertable<TSource,TTarget> Value<TSource,TTarget,TValue>(
-			[NotNull] this ISelectInsertable<TSource,TTarget> source,
-			[NotNull] Expression<Func<TTarget,TValue>>        field,
+			[NotNull]                this ISelectInsertable<TSource,TTarget> source,
+			[NotNull, InstantHandle] Expression<Func<TTarget,TValue>>        field,
 			TValue                                            value)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -571,9 +644,9 @@ namespace BLToolkit.Data.Linq
 		#region InsertOrUpdate
 
 		public static int InsertOrUpdate<T>(
-			[NotNull] this Table<T> target,
-			[NotNull] Expression<Func<T>> insertSetter,
-			[NotNull] Expression<Func<T,T>> onDuplicateKeyUpdateSetter)
+			[NotNull]                this Table<T>         target,
+			[NotNull, InstantHandle] Expression<Func<T>>   insertSetter,
+			[NotNull, InstantHandle] Expression<Func<T,T>> onDuplicateKeyUpdateSetter)
 		{
 			if (target                     == null) throw new ArgumentNullException("target");
 			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
@@ -589,10 +662,10 @@ namespace BLToolkit.Data.Linq
 		}
 
 		public static int InsertOrUpdate<T>(
-			[NotNull] this Table<T> target,
-			[NotNull] Expression<Func<T>>   insertSetter,
-			[NotNull] Expression<Func<T,T>> onDuplicateKeyUpdateSetter,
-			[NotNull] Expression<Func<T>>   keySelector)
+			[NotNull]                this Table<T>         target,
+			[NotNull, InstantHandle] Expression<Func<T>>   insertSetter,
+			[NotNull, InstantHandle] Expression<Func<T,T>> onDuplicateKeyUpdateSetter,
+			[NotNull, InstantHandle] Expression<Func<T>>   keySelector)
 		{
 			if (target                     == null) throw new ArgumentNullException("target");
 			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
@@ -618,7 +691,9 @@ namespace BLToolkit.Data.Linq
 
 		#region Take / Skip / ElementAt
 
-		public static IQueryable<TSource> Take<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> count)
+		public static IQueryable<TSource> Take<TSource>(
+			[NotNull] this IQueryable<TSource> source,
+			[NotNull, InstantHandle] Expression<Func<int>>    count)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (count  == null) throw new ArgumentNullException("count");
@@ -630,7 +705,9 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(count) }));
 		}
 
-		public static IQueryable<TSource> Skip<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> count)
+		public static IQueryable<TSource> Skip<TSource>(
+			[NotNull]                this IQueryable<TSource> source,
+			[NotNull, InstantHandle] Expression<Func<int>>    count)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (count  == null) throw new ArgumentNullException("count");
@@ -642,7 +719,9 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(count) }));
 		}
 
-		public static TSource ElementAt<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> index)
+		public static TSource ElementAt<TSource>(
+			[NotNull]                this IQueryable<TSource> source,
+			[NotNull, InstantHandle] Expression<Func<int>>    index)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (index  == null) throw new ArgumentNullException("index");
@@ -654,7 +733,9 @@ namespace BLToolkit.Data.Linq
 					new[] { source.Expression, Expression.Quote(index) }));
 		}
 
-		public static TSource ElementAtOrDefault<TSource>([NotNull] this IQueryable<TSource> source, [NotNull] Expression<Func<int>> index)
+		public static TSource ElementAtOrDefault<TSource>(
+			[NotNull]                this IQueryable<TSource> source,
+			[NotNull, InstantHandle] Expression<Func<int>> index)
 		{
 			if (source == null) throw new ArgumentNullException("source");
 			if (index  == null) throw new ArgumentNullException("index");
@@ -664,6 +745,32 @@ namespace BLToolkit.Data.Linq
 					null,
 					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource) }),
 					new[] { source.Expression, Expression.Quote(index) }));
+		}
+
+		#endregion
+
+		#region IOrderedQueryable
+
+		public static IOrderedQueryable<TSource> ThenBy<TSource, TKey>(
+			[NotNull]                this IQueryable<TSource> source, 
+			[NotNull, InstantHandle] Expression<Func<TSource, TKey>> keySelector)
+		{
+			return (IOrderedQueryable<TSource>)source.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TKey) }),
+					new[] { source.Expression, Expression.Quote(keySelector) }));
+		}
+
+		public static IOrderedQueryable<TSource> ThenByDescending<TSource, TKey>(
+			[NotNull]                this IQueryable<TSource> source,
+			[NotNull, InstantHandle] Expression<Func<TSource, TKey>> keySelector)
+		{
+			return (IOrderedQueryable<TSource>)source.Provider.CreateQuery<TSource>(
+				Expression.Call(
+					null,
+					((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new[] { typeof(TSource), typeof(TKey) }),
+					new[] { source.Expression, Expression.Quote(keySelector) }));
 		}
 
 		#endregion

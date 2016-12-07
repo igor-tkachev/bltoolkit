@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading;
 
 namespace BLToolkit.Aspects.Builders
 {
@@ -215,12 +216,31 @@ namespace BLToolkit.Aspects.Builders
 			{
 				_methodCounter++;
 
+				// Create MethodInfoLock field.
+				//
+				var typeEmit = Context.TypeBuilder.TypeInitializer.Emitter;
+				var syncRoot = Context.CreatePrivateStaticField(
+					Context.CurrentMethod.Name + "$Lock" + _methodCounter, typeof (object));
+
+				typeEmit
+					.newobj(typeof(object))
+					.stsfld(syncRoot)
+					;
+
+
 				// Create MethodInfo field.
 				//
 				var methodInfo = Context.CreatePrivateStaticField(
 					"_methodInfo$" + Context.CurrentMethod.Name + _methodCounter, typeof(CallMethodInfo));
 
 				var emit = Context.MethodBuilder.Emitter;
+
+
+				emit.BeginExceptionBlock();
+				emit
+					.LoadField(syncRoot)
+					.call(typeof(Monitor), "Enter", typeof(object));
+
 
 				var checkMethodInfo = emit.DefineLabel();
 
@@ -231,8 +251,17 @@ namespace BLToolkit.Aspects.Builders
 					.castclass (typeof(MethodInfo))
 					.newobj    (TypeHelper.GetConstructor(typeof(CallMethodInfo), typeof(MethodInfo)))
 					.stsfld    (methodInfo)
+					.LoadField (methodInfo)
+					.LoadField (syncRoot)
+					.call      (typeof (CallMethodInfo), "set_SyncRoot", typeof (object))
 					.MarkLabel (checkMethodInfo)
 					;
+
+				emit.BeginFinallyBlock();
+				emit
+					.LoadField(syncRoot)
+					.call(typeof(Monitor), "Exit", typeof(object));
+				emit.ILGenerator.EndExceptionBlock();
 
 				// Create & initialize the field.
 				//
@@ -272,6 +301,7 @@ namespace BLToolkit.Aspects.Builders
 
 				Context.Items.Add("$BLToolkit.MethodInfo", methodInfo);
 				Context.Items.Add("$BLToolkit.InfoField",  field);
+				Context.Items.Add("$BLToolkit.SyncRoot",   syncRoot);
 			}
 
 			return field;
@@ -284,6 +314,8 @@ namespace BLToolkit.Aspects.Builders
 
 			if (field == null)
 			{
+
+
 				// Create MethodInfo field.
 				//
 				field = _localInterceptor? 
@@ -294,6 +326,13 @@ namespace BLToolkit.Aspects.Builders
 
 				var checkInterceptor = emit.DefineLabel();
 				var methodInfo       = Context.GetItem<FieldBuilder>("$BLToolkit.MethodInfo");
+				var syncRoot         = Context.GetItem<FieldBuilder>("$BLToolkit.SyncRoot");
+
+				emit.BeginExceptionBlock();
+				emit
+					.LoadField(syncRoot)
+					.call(typeof(Monitor), "Enter", typeof(object));
+
 
 				emit
 					.LoadField (field)
@@ -321,6 +360,14 @@ namespace BLToolkit.Aspects.Builders
 
 					.MarkLabel (checkInterceptor)
 					;
+
+
+				emit.BeginFinallyBlock();
+				emit
+					.LoadField(syncRoot)
+					.call(typeof(Monitor), "Exit", typeof(object));
+				emit.ILGenerator.EndExceptionBlock();
+
 			}
 
 			return field;
@@ -336,6 +383,7 @@ namespace BLToolkit.Aspects.Builders
 		{
 			Context.Items.Remove("$BLToolkit.MethodInfo");
 			Context.Items.Remove("$BLToolkit.InfoField");
+			Context.Items.Remove("$BLToolkit.SyncRoot");
 		}
 	}
 }

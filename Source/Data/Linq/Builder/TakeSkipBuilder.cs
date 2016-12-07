@@ -24,7 +24,7 @@ namespace BLToolkit.Data.Linq.Builder
 			if (arg.NodeType == ExpressionType.Lambda)
 				arg = ((LambdaExpression)arg).Body.Unwrap();
 
-			var expr = builder.ConvertToSql(sequence, arg);
+			var expr = builder.ConvertToSql(sequence, arg, false);
 
 			if (methodCall.Method.Name == "Take")
 			{
@@ -41,6 +41,21 @@ namespace BLToolkit.Data.Linq.Builder
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
+			var info = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), null);
+
+			if (info != null)
+			{
+				info.Expression =
+					Expression.Call(
+						methodCall.Method.DeclaringType,
+						methodCall.Method.Name,
+						new[] { info.Expression.Type.GetGenericArguments()[0] },
+						info.Expression, methodCall.Arguments[1]);
+				info.Parameter  = param;
+
+				return info;
+			}
+
 			return null;
 		}
 

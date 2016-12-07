@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Text;
 using JetBrains.Annotations;
 
@@ -297,10 +296,10 @@ namespace System
  
 				private bool EqualsTo(Binary binary)
 				{
-					if ((object)this == (object)binary)      return true;
-					if ((object)binary == null)              return false;
-					if (_bytes.Length != binary._bytes.Length) return false;
-					if (_hashCode     != binary._hashCode)     return false;
+					if ((object)this   == (object)binary)       return true;
+					if ((object)binary == null)                 return false;
+					if (_bytes.Length  != binary._bytes.Length) return false;
+					if (_hashCode      != binary._hashCode)     return false;
 
 					for (int i = 0; i < _bytes.Length; i++)
 						if (_bytes[i] != binary._bytes[i])

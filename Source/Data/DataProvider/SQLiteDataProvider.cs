@@ -107,13 +107,22 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+		public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			switch (number)
+			{
+				case 19: return DataExceptionType.ConstraintViolation;
+			}
+			return DataExceptionType.Undefined;
+		}
+
 		public override void AttachParameter(IDbCommand command, IDbDataParameter parameter)
 		{
 			if (parameter.Direction == ParameterDirection.Input || parameter.Direction == ParameterDirection.InputOutput)
 			{
 				if (parameter.Value is XmlDocument)
 				{
-					parameter.Value = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
+					parameter.Value  = Encoding.UTF8.GetBytes(((XmlDocument) parameter.Value).InnerXml);
 					parameter.DbType = DbType.Binary;
 				}
 			}
@@ -124,9 +133,28 @@ namespace BLToolkit.Data.DataProvider
 		public override void SetParameterValue(IDbDataParameter parameter, object value)
 		{
 			if (parameter.DbType == DbType.DateTime2)
+			{
 				parameter.DbType = DbType.DateTime;
+				parameter.Value  = value;
+			}
+			//if (value is ushort)
+			//{
+			//	parameter.Value = (int)(ushort)value;
+			//}
+			else if (value is uint)
+			{
+				parameter.DbType = DbType.VarNumeric;
+				parameter.Value  = value;
+			}
+			else if (value is ulong)
+			{
+				parameter.DbType = DbType.VarNumeric;
+				parameter.Size   = 25;
+				parameter.Value  = value;
 
-			base.SetParameterValue(parameter, value);
+			}
+			else
+				base.SetParameterValue(parameter, value);
 		}
 
 		public override ISqlProvider CreateSqlProvider()

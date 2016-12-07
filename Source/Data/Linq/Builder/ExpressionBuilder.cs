@@ -52,6 +52,7 @@ namespace BLToolkit.Data.Linq.Builder
 			new IntersectBuilder     (),
 			new CastBuilder          (),
 			new OfTypeBuilder        (),
+			new AsUpdatableBuilder   (),
 		};
 
 		public static void AddBuilder(ISequenceBuilder builder)
@@ -97,7 +98,7 @@ namespace BLToolkit.Data.Linq.Builder
 			OriginalExpression = expression;
 
 			_visitedExpressions = new HashSet<Expression>();
-			Expression         = ConvertExpressionTree(expression);
+			Expression          = ConvertExpressionTree(expression);
 			_visitedExpressions = null;
 		}
 
@@ -214,17 +215,54 @@ namespace BLToolkit.Data.Linq.Builder
 			expr = ExposeExpression  (expr);
 			expr = OptimizeExpression(expr);
 
-			if (SequenceParameter == null)
-				SequenceParameter = Expression.Parameter(expr.Type, "cp");
+			var paramType   = expr.Type;
+			var isQueryable = false;
+
+			if (expression.NodeType == ExpressionType.Call)
+			{
+				var call = (MethodCallExpression)expression;
+
+				if (call.IsQueryable() && call.Object == null && call.Arguments.Count > 0 && call.Type.IsGenericType)
+				{
+					var type = call.Type.GetGenericTypeDefinition();
+
+					if (type == typeof(IQueryable<>) || type == typeof(IEnumerable<>))
+					{
+						var arg = call.Type.GetGenericArguments();
+
+						if (arg.Length == 1)
+						{
+							paramType   = arg[0];
+							isQueryable = true;
+						}
+					}
+				}
+			}
+
+			SequenceParameter = Expression.Parameter(paramType, "cp");
 
 			var sequence = ConvertSequence(new BuildInfo((IBuildContext)null, expr, new SqlQuery()), SequenceParameter);
 
 			if (sequence != null)
 			{
-				expr = sequence.Expression;
+				if (sequence.Expression.Type != expr.Type)
+				{
+					if (isQueryable)
+					{
+						var p = sequence.ExpressionsToReplace.SingleOrDefault(s => s.Path.NodeType == ExpressionType.Parameter);
 
-				if (sequence.Parameter.Type != SequenceParameter.Type)
+						return Expression.Call(
+							((MethodCallExpression)expr).Method.DeclaringType,
+							"Select",
+							new[] { p.Path.Type, paramType },
+							sequence.Expression,
+							Expression.Lambda(p.Expr, (ParameterExpression)p.Path));
+					}
+
 					throw new InvalidOperationException();
+				}
+
+				return sequence.Expression;
 			}
 
 			return expr;
@@ -341,105 +379,102 @@ namespace BLToolkit.Data.Linq.Builder
 			if (_optimizedExpressions.TryGetValue(expression, out expr))
 				return expr;
 
-			_optimizedExpressions[expression] = expr = OptimizeExpressionImpl(expression);
+			_optimizedExpressions[expression] = expr = expression.Convert(OptimizeExpressionImpl);
 
 			return expr;
 		}
 
-		Expression OptimizeExpressionImpl(Expression expression)
+		Expression OptimizeExpressionImpl(Expression expr)
 		{
-			return expression.Convert(expr =>
+			switch (expr.NodeType)
 			{
-				switch (expr.NodeType)
-				{
-					case ExpressionType.MemberAccess:
+				case ExpressionType.MemberAccess:
+					{
+						var me = (MemberExpression)expr;
+
+						// Replace Count with Count()
+						//
+						if (me.Member.Name == "Count")
 						{
-							var me = (MemberExpression)expr;
+							var isList = typeof(ICollection).IsAssignableFrom(me.Member.DeclaringType);
 
-							// Replace Count with Count()
-							//
-							if (me.Member.Name == "Count")
+							if (!isList)
+								isList = me.Member.DeclaringType.GetInterfaces()
+									.Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>));
+
+							if (isList)
 							{
-								var isList = typeof(ICollection).IsAssignableFrom(me.Member.DeclaringType);
+								var mi = EnumerableMethods
+									.First(m => m.Name == "Count" && m.GetParameters().Length == 1)
+									.MakeGenericMethod(TypeHelper.GetElementType(me.Expression.Type));
 
-								if (!isList)
-									isList = me.Member.DeclaringType.GetInterfaces()
-										.Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>));
-
-								if (isList)
-								{
-									var mi = EnumerableMethods
-										.First(m => m.Name == "Count" && m.GetParameters().Length == 1)
-										.MakeGenericMethod(TypeHelper.GetElementType(me.Expression.Type));
-
-									return Expression.Call(null, mi, me.Expression);
-								}
+								return Expression.Call(null, mi, me.Expression);
 							}
+						}
+
+						if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
+						{
+							var ex = ConvertIQueriable(expr);
+
+							if (ex != expr)
+								return ConvertExpressionTree(ex);
+						}
+
+						return ConvertSubquery(expr);
+					}
+
+				case ExpressionType.Call :
+					{
+						var call = (MethodCallExpression)expr;
+
+						if (call.IsQueryable())
+						{
+							switch (call.Method.Name)
+							{
+								case "Where"              : return ConvertWhere     (call);
+								case "GroupBy"            : return ConvertGroupBy   (call);
+								case "SelectMany"         : return ConvertSelectMany(call);
+								case "Select"             : return ConvertSelect    (call);
+								case "LongCount"          :
+								case "Count"              :
+								case "Single"             :
+								case "SingleOrDefault"    :
+								case "First"              :
+								case "FirstOrDefault"     : return ConvertPredicate (call);
+								case "Min"                :
+								case "Max"                : return ConvertSelector  (call, true);
+								case "Sum"                :
+								case "Average"            : return ConvertSelector  (call, false);
+								case "ElementAt"          :
+								case "ElementAtOrDefault" : return ConvertElementAt (call);
+							}
+						}
+						else
+						{
+							var l = ConvertMethodExpression(call.Method);
+
+							if (l != null)
+								return OptimizeExpression(ConvertMethod(call, l));
 
 							if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
 							{
-								var ex = ConvertIQueriable(expr);
+								var attr = GetTableFunctionAttribute(call.Method);
 
-								if (ex != expr)
-									return ConvertExpressionTree(ex);
-							}
-
-							return ConvertSubquery(expr);
-						}
-
-					case ExpressionType.Call :
-						{
-							var call = (MethodCallExpression)expr;
-
-							if (call.IsQueryable())
-							{
-								switch (call.Method.Name)
+								if (attr == null)
 								{
-									case "Where"              : return ConvertWhere     (call);
-									case "GroupBy"            : return ConvertGroupBy   (call);
-									case "SelectMany"         : return ConvertSelectMany(call);
-									case "Select"             : return ConvertSelect    (call);
-									case "LongCount"          :
-									case "Count"              :
-									case "Single"             :
-									case "SingleOrDefault"    :
-									case "First"              :
-									case "FirstOrDefault"     : return ConvertPredicate (call);
-									case "Min"                :
-									case "Max"                : return ConvertSelector  (call, true);
-									case "Sum"                :
-									case "Average"            : return ConvertSelector  (call, false);
-									case "ElementAt"          :
-									case "ElementAtOrDefault" : return ConvertElementAt (call);
+									var ex = ConvertIQueriable(expr);
+
+									if (ex != expr)
+										return ConvertExpressionTree(ex);
 								}
 							}
-							else
-							{
-								var l = ConvertMethodExpression(call.Method);
-
-								if (l != null)
-									return OptimizeExpression(ConvertMethod(call, l));
-
-								if (CompiledParameters == null && TypeHelper.IsSameOrParent(typeof(IQueryable), expr.Type))
-								{
-									var attr = GetTableFunctionAttribute(call.Method);
-
-									if (attr == null)
-									{
-										var ex = ConvertIQueriable(expr);
-
-										if (ex != expr)
-											return ConvertExpressionTree(ex);
-									}
-								}
-							}
-
-							return ConvertSubquery(expr);
 						}
-				}
 
-				return expr;
-			});
+						return ConvertSubquery(expr);
+					}
+			}
+
+			return expr;
 		}
 
 		LambdaExpression ConvertMethodExpression(MemberInfo mi)
@@ -465,8 +500,26 @@ namespace BLToolkit.Data.Linq.Builder
 
 			if (attr != null)
 			{
-				var call = Expression.Lambda<Func<LambdaExpression>>(
-					Expression.Convert(Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty), typeof(LambdaExpression)));
+				Expression expr;
+
+				if (mi is MethodInfo && ((MethodInfo)mi).IsGenericMethod)
+				{
+					var method = (MethodInfo)mi;
+					var args   = method.GetGenericArguments();
+					var names  = args.Select(t => t.Name).ToArray();
+					var name   = string.Format(attr.MethodName, names);
+
+					if (name != attr.MethodName)
+						expr = Expression.Call(mi.DeclaringType, name, Array<Type>.Empty);
+					else
+						expr = Expression.Call(mi.DeclaringType, name, args);
+				}
+				else
+				{
+					expr = Expression.Call(mi.DeclaringType, attr.MethodName, Array<Type>.Empty);
+				}
+
+				var call = Expression.Lambda<Func<LambdaExpression>>(Expression.Convert(expr, typeof(LambdaExpression)));
 
 				return call.Compile()();
 			}
@@ -496,27 +549,7 @@ namespace BLToolkit.Data.Linq.Builder
 									case "SingleOrDefault" :
 									case "First"           :
 									case "FirstOrDefault"  :
-										{
-											var param    = Expression.Parameter(call.Type, "p");
-											var selector = expr.Convert(e => e == call ? param : e);
-											var method   = GetQueriableMethodInfo(call, (m,_) => m.Name == call.Method.Name && m.GetParameters().Length == 1);
-											var select   = call.Method.DeclaringType == typeof(Enumerable) ?
-												EnumerableMethods
-													.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
-													.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
-												QueryableMethods
-													.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
-													.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
-
-											call   = (MethodCallExpression)OptimizeExpression(call);
-											select = select.MakeGenericMethod(call.Type, expr.Type);
-											method = method.MakeGenericMethod(expr.Type);
-
-											return Expression.Call(null, method,
-												Expression.Call(null, select,
-													call.Arguments[0],
-													Expression.Lambda(selector, param)));
-										}
+										return ConvertSingleOrFirst(expr, call);
 								}
 
 								return expr;
@@ -532,15 +565,50 @@ namespace BLToolkit.Data.Linq.Builder
 			return expr;
 		}
 
+		Expression ConvertSingleOrFirst(Expression expr, MethodCallExpression call)
+		{
+			var param = Expression.Parameter(call.Type, "p");
+			var selector = expr.Convert(e => e == call ? param : e);
+			var method = GetQueriableMethodInfo(call, (m, _) => m.Name == call.Method.Name && m.GetParameters().Length == 1);
+			var select = call.Method.DeclaringType == typeof(Enumerable) ?
+				EnumerableMethods
+					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2) :
+				QueryableMethods
+					.Where(m => m.Name == "Select" && m.GetParameters().Length == 2)
+					.First(m => m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2);
+
+			call = (MethodCallExpression)OptimizeExpression(call);
+			select = select.MakeGenericMethod(call.Type, expr.Type);
+			method = method.MakeGenericMethod(expr.Type);
+
+			return Expression.Call(null, method,
+				Expression.Call(null, select,
+					call.Arguments[0],
+					Expression.Lambda(selector, param)));
+		}
+
 		#endregion
 
 		#region ConvertWhere
+
+		internal static Expression GetPredicate(Expression expression)
+		{
+			var expr = expression.Unwrap();
+			switch (expr.NodeType)
+			{
+				case ExpressionType.MemberAccess:
+					var li = Expression.Lambda<Func<object>>(((MemberExpression) expr)).Compile().DynamicInvoke();
+					return GetPredicate((System.Linq.Expressions.Expression) li);
+			}
+			return expr;
+		}
 
 		Expression ConvertWhere(MethodCallExpression method)
 		{
 			var sequence  = OptimizeExpression(method.Arguments[0]);
 			var predicate = OptimizeExpression(method.Arguments[1]);
-			var lambda    = (LambdaExpression)predicate.Unwrap();
+			var lambda    = (LambdaExpression) GetPredicate(predicate);
 			var lparam    = lambda.Parameters[0];
 			var lbody     = lambda.Body;
 
@@ -1169,6 +1237,10 @@ namespace BLToolkit.Data.Linq.Builder
 				var p    = Expression.Parameter(typeof(Expression), "exp");
 				var exas = expression.GetExpressionAccessors(p);
 				var expr = ReplaceParameter(exas, expression, _ => {});
+
+				if (expr.Find(e => e.NodeType == ExpressionType.Parameter && e != p) != null)
+					return expression;
+
 				var l    = Expression.Lambda<Func<Expression,IQueryable>>(Expression.Convert(expr, typeof(IQueryable)), new [] { p });
 				var n    = _query.AddQueryableAccessors(expression, l);
 

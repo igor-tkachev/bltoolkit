@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit</id>
-		<version>4.1.9</version>
+		<version>4.3.5</version>
 		<title>Business Logic Toolkit for .NET</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
-		<licenseUrl>http://bltoolkit.net/License.ashx</licenseUrl>
-		<projectUrl>http://bltoolkit.net/</projectUrl>
+		<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+		<projectUrl>https://github.com/igor-tkachev/bltoolkit</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Business Logic Toolkit is a set of components to simplify .NET application development.</description>
 		<summary />

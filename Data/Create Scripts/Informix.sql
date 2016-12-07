@@ -78,6 +78,20 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    byte,
 	SmallIntValue  smallint,
 	IntValue       int,
-	BigIntValue    bigint
+	BigIntValue    bigint,
+	UInt16         decimal(5,  0),
+	UInt32         decimal(10, 0),
+	UInt64         decimal(20, 0)
+)
+GO
+
+DROP TABLE TestIdentity
+GO
+
+CREATE TABLE TestIdentity (
+	ID          SERIAL       NOT NULL,
+	IntValue    INTEGER      NULL,
+	StringValue NVARCHAR(50) NULL,
+	PRIMARY KEY(ID)
 )
 GO

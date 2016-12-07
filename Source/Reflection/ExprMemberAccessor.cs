@@ -130,7 +130,7 @@ namespace BLToolkit.Reflection
 			{
 				Expression ex = expr;
 
-				if (ex.Type.IsEnum && ex.Type != typeof(T))
+				if (TypeHelper.IsEnumOrNullableEnum(ex.Type) && ex.Type != typeof(T))
 					ex = Expression.Convert(ex, typeof(T));
 
 				Getter = Expression.Lambda<Func<object,T>>(ex, par).Compile();

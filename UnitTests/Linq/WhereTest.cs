@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
+using BLToolkit.Data.DataProvider;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 
 using NUnit.Framework;
-
-using BLToolkit.Data.DataProvider;
 
 namespace Data.Linq
 {
@@ -193,19 +196,19 @@ namespace Data.Linq
 			TestOneJohn(db => from p in db.Person where p.ID * 10 - 9 == 1 select p);
 		}
 
-		[Test]
+        [Test]
 		public void BinaryXor()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID ^ 2) == 3 select p);
 		}
 
-		[Test]
+        [Test]
 		public void BinaryAnd()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID & 3) == 1 select p);
 		}
 
-		[Test]
+        [Test]
 		public void BinaryOr()
 		{
 			TestOneJohn(new[] { ProviderName.Access }, db => from p in db.Person where (p.ID | 2) == 3 select p);
@@ -653,14 +656,19 @@ namespace Data.Linq
 		[Test]
 		public void CheckCondition2()
 		{
+			var p1 = 1;
+			var p2 = 2;
+			var p3 = 3;
+			var p4 = 4;
+
 			var expected =
 				from p in Parent
-				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				where p.ParentID == p1 && p.Value1 == p1 || p.ParentID == p2 && (p.ParentID != p3 || p.ParentID == p4) && p.Value1.HasValue
 				select p;
 
 			ForEachProvider(db => AreEqual(expected,
 				from p in db.Parent
-				where p.ParentID == 1 && p.Value1 == 1 || p.ParentID == 2 && (p.ParentID != 3 || p.ParentID == 4) && p.Value1.HasValue
+				where p.ParentID == p1 && p.Value1 == p1 || p.ParentID == p2 && (p.ParentID != p3 || p.ParentID == p4) && p.Value1.HasValue
 				select p));
 		}
 
@@ -838,7 +846,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SelectNestedCalculatedTest()
+		public void SelectNestedCalculatedTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -908,12 +916,15 @@ namespace Data.Linq
 		public void CheckField6()
 		{
 			ForEachProvider(db => AreEqual(
-				from p in    Parent
-				select new { p, Value = p.Value1 * 100 } into p
-				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p },
-				from p in db.Parent
-				select new { p, Value = p.Value1 * 100 } into p
-				where p.p.ParentID == 1 && p.Value > 0 select new { p.p.Value1, p.Value, p.p, p1 = p }));
+				from p1 in    Parent
+				select new { p1, Value = p1.Value1 * 100 } into p
+				where p.p1.ParentID == 1 && p.Value > 0
+				select new { p, p.p1.Value1, p.Value, p.p1 },
+
+				from p1 in db.Parent
+				select new { p1, Value = p1.Value1 * 100 } into p
+				where p.p1.ParentID == 1 && p.Value > 0
+				select new { p, p.p1.Value1, p.Value, p.p1 }));
 		}
 
 		[Test]
@@ -922,11 +933,11 @@ namespace Data.Linq
 			ForEachProvider(db => AreEqual(
 				from p in Types
 				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
-				where pp.Value != 0
+				where pp.Value != 0 && pp.Value != 7
 				select pp.Value,
 				from p in db.Types
 				select new { Value = Math.Round(p.MoneyValue, 2) } into pp
-				where pp.Value != 0
+				where pp.Value != 0 && pp.Value != 7
 				select pp.Value));
 		}
 
@@ -941,5 +952,347 @@ namespace Data.Linq
 				where !t.BoolValue && t.MoneyValue > 1 && (t.SmallIntValue == 5 || t.SmallIntValue == 7 || t.SmallIntValue == 8)
 				select t));
 		}
+
+		[Test] 
+		public void GroupBySubQquery1([DataContexts]string context) 
+		{ 
+			using (var db = GetDataContext(context)) 
+			{ 
+				var p1    = Child; 
+				var qry1  = p1.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+				var qry12 = p1.Where(x => qry1.Any(y => y == x.ChildID)); 
+
+				var p2    = db.Child; 
+				var qry2  = p2.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+				var qry22 = p2.Where(x => qry2.Any(y => y == x.ChildID)); 
+
+				AreEqual(qry12, qry22); 
+			} 
+		} 
+
+ 		[Test] 
+ 		public void GroupBySubQquery2([DataContexts]string context) 
+ 		{ 
+ 			using (var db = GetDataContext(context)) 
+ 			{ 
+ 				var p1    = Child; 
+ 				var qry1  = p1.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+ 				var qry12 = p1.Where(x => qry1.Contains(x.ChildID)); 
+  
+ 				var p2    = db.Child; 
+ 				var qry2  = p2.GroupBy(x => x.ParentID).Select(x => x.Max(y => y.ChildID)); 
+ 				var qry22 = p2.Where(x => qry2.Contains(x.ChildID)); 
+  
+ 				AreEqual(qry12, qry22); 
+ 			} 
+ 		}
+
+		public enum TestEnum
+		{
+			First,
+			Second,
+			Third
+		}
+
+		[TableName("LinqDataTypes")]
+		public class Table
+		{
+			[PrimaryKey]
+			public int       ID;
+			public decimal   MoneyValue;
+			[DbType(DbType.DateTime)]
+			public DateTime? DateTimeValue;
+			[DbType(DbType.DateTime)]
+			public DateTime? DateTimeValue2;
+			public bool?     BoolValue;
+			public Guid?     GuidValue;
+			public short?    SmallIntValue;
+			[MapField("IntValue")]
+			public TestEnum? EnumValue;
+			public long?     BigIntValue;
+		}
+
+
+		[Test]
+		public void NullableEnum_344()
+		{
+			ForEachProvider(db =>
+			{
+				var t = db.GetTable<Table>();
+				t.Where(_ => _.ID > 1000).Delete();
+
+				t.Insert(() => new Table { ID = 1003, MoneyValue = 0m, DateTimeValue = null,         BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  null, EnumValue = null });
+				t.Insert(() => new Table { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null,                                             SmallIntValue =  2,    EnumValue = TestEnum.Second });
+
+				var types = new[] { TestEnum.Second, TestEnum.First };
+
+				var data = t
+				  .Where(i => types.Contains(i.EnumValue ?? TestEnum.First))
+				  .ToList();
+
+				Assert.That(data.Count >= 2);
+
+				t.Where(_ => _.ID > 1000).Delete();
+
+			});
+		}
+
+		[Test]
+		public void NullableEnum_302()
+		{
+			ForEachProvider(db =>
+			{
+				var t = db.GetTable<Table>();
+				t.Where(_ => _.ID > 1000).Delete();
+
+				t.Insert(() => new Table { ID = 1003, MoneyValue = 0m, DateTimeValue = null, BoolValue = true, GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue = null, EnumValue = null });
+				t.Insert(() => new Table { ID = 1004, MoneyValue = 0m, DateTimeValue = DateTime.Now, BoolValue = false, GuidValue = null, SmallIntValue = 2, EnumValue = TestEnum.Second });
+
+
+				var data = t
+				  .Where(i => new[] { TestEnum.Second, TestEnum.First }.Contains(i.EnumValue ?? TestEnum.First))
+				  .ToList();
+
+				Assert.That(data.Count >= 2);
+
+				t.Where(_ => _.ID > 1000).Delete();
+
+			});
+		}
+
+		public void TestPredicate(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db =>
+			{
+				var q1 =    Person.Where(predicate.Compile());
+				var q2 = db.Person.Where(predicate);
+
+				AreEqual(q1, q2);
+			});
+		}
+		
+		public void TestPredicate2(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db =>
+			{
+				var q1 =    Doctor.Where(doc =>    Person.Where(predicate.Compile()).Select(_ => _.ID).Contains(doc.PersonID));
+				var q2 = db.Doctor.Where(doc => db.Person.Where(predicate)          .Select(_ => _.ID).Contains(doc.PersonID));
+
+				AreEqual(q1, q2);
+			});
+		}
+
+		public void TestAny(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Person.Any(predicate)));
+		}
+
+		public void TestAny2(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Doctor.Any(_ => db.Person.Any(predicate))));
+		}
+
+		public void TestFirst(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Person.First(predicate) != null));
+		}
+
+		public void TestFirst2(Expression<Func<Person, bool>> predicate)
+		{
+			ForEachProvider(db => Assert.True(db.Doctor.First(_ => db.Person.First(predicate) != null) != null));
+		}
+
+		[Test]
+		public void Predicate()
+		{
+			TestPredicate(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Predicate2()
+		{
+			TestPredicate(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Predicate3()
+		{
+			TestPredicate(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		private static Expression<Func<Person, bool>> _predicate4 = _ => _.FirstName.Length > 0 && _.FirstName == "John";
+
+		[Test]
+		public void Predicate4()
+		{
+			TestPredicate(_predicate4);
+		}
+
+		[Test]
+		public void Predicate5()
+		{
+			TestPredicate2(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Predicate6()
+		{
+			TestPredicate2(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Predicate7()
+		{
+			TestPredicate2(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void Predicate8()
+		{
+			TestPredicate2(_predicate4);
+		}
+		
+		[Test]
+		public void Predicate9()
+		{
+			var val = "John";
+			TestPredicate2(_ => _.FirstName.Length > 0 && _.FirstName == val);
+		}
+		
+		[Test]
+		public void Predicate10()
+		{
+			TestPredicate2(_ => 1 == 1);
+		}
+
+		[Test]
+		public void Predicate11()
+		{
+			TestPredicate2(_ => true);
+		}
+
+		public class DP
+		{
+			public Doctor D;
+			public Person P;
+		}
+
+		[Test]
+		public void Predicate12()
+		{
+			ForEachProvider(db =>
+			{
+				Expression<Func<DP, bool>> predicate = dp => dp.D.PersonID == dp.P.ID;
+
+				var q1 = from d in Doctor
+						 from p in Person
+						 select new DP {D = d,  P = p};
+				var q2 = from d in db.Doctor
+						 from p in db.Person
+						 select new DP {D = d,  P = p};
+
+				AreEqual(
+					q1.Where(predicate.Compile()).Select(_ => _.P) ,
+					q2.Where(predicate)          .Select(_ => _.P));
+			});
+		}
+
+
+		[Test]
+		public void Any1()
+		{
+			TestAny(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any2()
+		{
+			TestAny(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Any3()
+		{
+			TestAny(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any4()
+		{
+			TestAny(_predicate4);
+		}
+
+		[Test]
+		public void Any5()
+		{
+			TestAny2(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any6()
+		{
+			TestAny2(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void Any7()
+		{
+			TestAny2(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void Any8()
+		{
+			TestAny2(_predicate4);
+		}
+
+		[Test]
+		public void First1()
+		{
+			TestFirst(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void First2()
+		{
+			TestFirst(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void First3()
+		{
+			TestFirst(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void First4()
+		{
+			TestFirst(_predicate4);
+		}
+
+		[Test]
+		public void First5()
+		{
+			TestFirst2(_ => _.FirstName == "John");
+		}
+
+		[Test]
+		public void First6()
+		{
+			TestFirst2(_ => _.FirstName.Length > 0);
+		}
+
+		[Test]
+		public void First7()
+		{
+			TestFirst2(_ => _.FirstName.Length > 0 && _.FirstName == "John");
+		}
+
+		[Test]
+		public void First8()
+		{
+			TestFirst2(_predicate4);
+		}
+	
 	}
 }

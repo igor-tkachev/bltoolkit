@@ -15,12 +15,12 @@ namespace BLToolkit
 		/// <summary>
 		/// Minor component of version.
 		/// </summary>
-		public const string MinorVersion = "1";
+		public const string MinorVersion = "3";
 
 		/// <summary>
 		/// Build component of version.
 		/// </summary>
-		public const string Build = "9";
+		public const string Build = "5";
 
 		/// <summary>
 		/// Full version string.
@@ -32,8 +32,8 @@ namespace BLToolkit
 		/// </summary>
 		public static readonly Version FullVersion = new Version(FullVersionString);
 
-		public const string ProductName        = "Business Logic Toolkit";
+		public const string ProductName        = "BLToolkit";
 		public const string ProductDescription = "Business Logic Toolkit for .NET";
-		public const string Copyright          = "\xA9 2002-2012 www.bltoolkit.net";
+		public const string Copyright          = "\xA9 2002-2016 www.bltoolkit.net";
 	}
 }

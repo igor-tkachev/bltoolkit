@@ -1,7 +1,9 @@
 using System;
 using System.Data.SqlTypes;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.ComponentModel;
+using BLToolkit.Data.Linq;
 
 #if !SILVERLIGHT && !DATA
 using BLToolkit.ComponentModel;
@@ -122,9 +124,26 @@ namespace BLToolkit.Reflection
 			return true;
 		}
 
+		static object GetDefaultValue<T>()
+		{
+			return default(T);
+		}
+
+		object _defaultValue;
+
 		public virtual object GetValue(object o)
 		{
-			return null;
+			if (_defaultValue == null && Type.IsValueType && !TypeHelper.IsNullableType(Type))
+			{
+				var mi = ReflectionHelper.Expressor<object>.MethodExpressor(_ => GetDefaultValue<int>());
+
+				_defaultValue =
+					Expression.Lambda<Func<object>>(
+						Expression.Call(mi.GetGenericMethodDefinition().MakeGenericMethod(Type)))
+					.Compile()();
+			}
+
+			return _defaultValue;
 		}
 
 		public virtual void SetValue(object o, object value)

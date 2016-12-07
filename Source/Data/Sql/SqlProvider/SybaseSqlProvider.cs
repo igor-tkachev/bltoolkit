@@ -71,6 +71,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		private  bool _isSelect;
 		readonly bool _skipAliases;
 
@@ -86,22 +92,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			_isSelect = false;
 		}
 
-		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
-		{			var wrap = false;
+		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
+		{
+			var wrap = false;
 
-			if (col.SystemType == typeof(bool))
+			if (expr.SystemType == typeof(bool))
 			{
-				if (col.Expression is SqlQuery.SearchCondition)
+				if (expr is SqlQuery.SearchCondition)
 					wrap = true;
 				else
 				{
-					var ex = col.Expression as SqlExpression;
+					var ex = expr as SqlExpression;
 					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
 				}
 			}
 
 			if (wrap) sb.Append("CASE WHEN ");
-			base.BuildColumn(sb, col, ref addAlias);
+			base.BuildColumnExpression(sb, expr, alias, ref addAlias);
 			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 
 			if (_skipAliases) addAlias = false;
@@ -127,7 +134,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			AppendIndent(sb);
 			sb.Append("DELETE FROM ");
-			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
+//			BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
+
+			ISqlTableSource table;
+			ISqlTableSource source;
+
+			if (SqlQuery.Delete.Table != null)
+				table = source = SqlQuery.Delete.Table;
+			else
+			{
+				table  = SqlQuery.From.Tables[0];
+				source = SqlQuery.From.Tables[0].Source;
+			}
+
+			var alias = GetTableAlias(table);
+			BuildPhysicalTable(sb, source, alias);
+
 			sb.AppendLine();
 		}
 
@@ -139,12 +161,26 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				BuildTableName(sb, SqlQuery.From.Tables[0], true, false);
 		}
 
-		protected override void BuildUnicodeString(StringBuilder sb, string value)
+		protected override void BuildString(StringBuilder sb, string value)
 		{
-			sb
-				.Append("N\'")
-				.Append(value.Replace("'", "''"))
-				.Append('\'');
+			foreach (var ch in value)
+			{
+				if (ch > 127)
+				{
+					sb.Append("N");
+					break;
+				}
+			}
+
+			base.BuildString(sb, value);
+		}
+
+		protected override void BuildChar(StringBuilder sb, char value)
+		{
+			if (value > 127)
+				sb.Append("N");
+
+			base.BuildChar(sb, value);
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -155,7 +191,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
 					{
-						var name = "@" + value;
+						var name = "@" + value.ToString().Replace(" ", string.Empty);
 
 						if (name.Length > 27)
 							name = name.Substring(0, 27);
@@ -206,6 +242,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
 			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
+		}
+
+		protected override void BuildEmptyInsert(StringBuilder sb)
+		{
+			sb.AppendLine("VALUES ()");
 		}
 	}
 }

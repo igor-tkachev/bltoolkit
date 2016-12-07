@@ -43,12 +43,13 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>649</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;FW4</DefineConstants>
+    <DefineConstants>TRACE;FW4;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -100,11 +101,28 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Ci|AnyCPU'">
+    <OutputPath>bin\Release Ci\</OutputPath>
+    <DefineConstants>TRACE;FW4;Ci;</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
-    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=2.7.0.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
+    <Reference Include="Devart.Data, Version=5.0.1394.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.2.7.0\lib\net40\FirebirdSql.Data.FirebirdClient.dll</HintPath>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.8.5.602\lib\Devart.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.Oracle, Version=8.5.602.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\dotConnect.Express.for.Oracle.8.5.602\lib\Devart.Data.Oracle.dll</HintPath>
+    </Reference>
+    <Reference Include="FirebirdSql.Data.FirebirdClient, Version=5.0.5.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FirebirdSql.Data.FirebirdClient.5.0.5\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
     </Reference>
     <Reference Include="IBM.Data.DB2, Version=9.0.0.2, Culture=neutral, PublicKeyToken=7c307b91aa13d208, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -114,24 +132,24 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Redist\IBM\IBM.Data.Informix.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Npgsql.2.0.11\lib\Net40\Mono.Security.dll</HintPath>
-    </Reference>
-    <Reference Include="mysql.data, Version=6.4.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\MySql.Data.6.4.4\lib\net40\mysql.data.dll</HintPath>
+      <HintPath>..\..\packages\Npgsql.2.2.5\lib\net40\Mono.Security.dll</HintPath>
     </Reference>
-    <Reference Include="Npgsql, Version=2.0.11.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Npgsql.2.0.11\lib\Net40\Npgsql.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.5.0.9122, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Tools\NUnit\framework\nunit.framework.dll</HintPath>
+      <HintPath>..\..\packages\MySql.Data.6.9.8\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Oracle.DataAccess, Version=2.102.4.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redist\Oracle\Oracle.DataAccess.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Npgsql">
+      <HintPath>..\..\packages\Npgsql.2.2.5\lib\net40\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.DataAccess, Version=4.112.3.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
+      <Private>True</Private>
+      <HintPath>..\..\packages\odp.net.x86.112.3.20\lib\net40\Oracle.DataAccess.dll</HintPath>
     </Reference>
     <Reference Include="Sybase.AdoNet2.AseClient, Version=1.15.192.0, Culture=neutral, PublicKeyToken=95d94fac46c88e1e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -139,6 +157,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -147,13 +166,13 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data.Services" />
-    <Reference Include="System.Data.SQLite, Version=1.0.79.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+    <Reference Include="System.Data.SQLite, Version=1.0.102.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.79.0\lib\net40\System.Data.SQLite.dll</HintPath>
+      <HintPath>..\..\packages\System.Data.SQLite.Core.1.0.102.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.SQLite.Linq, Version=1.0.79.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.1.0.79.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\Microsoft.SqlServer.Compact.4.0.8876.1\lib\net40\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
@@ -168,13 +187,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper.cs" />
+    <Compile Include="UpdateTest.cs" />
+    <Compile Include="DeleteTest.cs" />
+    <Compile Include="EnumMapping.cs" />
+    <Compile Include="Exceptions\DataExceptionTest.cs" />
+    <Compile Include="ExplicitInterfaceTests.cs" />
     <Compile Include="TestAK107.cs" />
     <Compile Include="BatchTest.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="ConvertTest.cs" />
     <Compile Include="CompileTest.cs" />
     <Compile Include="ComplexTest.cs" />
-    <Compile Include="Association.cs" />
+    <Compile Include="AssociationTest.cs" />
     <Compile Include="ConvertExpression.cs" />
     <Compile Include="ConcatUnionTest.cs" />
     <Compile Include="IdlTest.mono.cs" />
@@ -196,8 +221,18 @@
     <Compile Include="ProviderSpecific\MySqlSprocParameterPrefixTests.cs" />
     <Compile Include="ProviderSpecific\Oracle.cs" />
     <Compile Include="TableFunctionTest.cs" />
+    <Compile Include="UserTests\CompareNullableChars.cs" />
+    <Compile Include="UserTests\FirstOrDefaultNullReferenceExceptionTest.cs" />
+    <Compile Include="UserTests\GroupBySubqueryTest.cs" />
+    <Compile Include="UserTests\Issue369.cs" />
+    <Compile Include="UserTests\LetTest.cs" />
+    <Compile Include="UserTests\MultiPartIdentifierTest.cs" />
+    <Compile Include="UserTests\SelectManyUpdateTest.cs" />
+    <Compile Include="UserTests\SelectManyDeleteTest.cs" />
+    <Compile Include="UserTests\UnknownSqlTest.cs" />
+    <Compile Include="UserTests\UnnecessaryInnerJoinTest.cs" />
     <Compile Include="VisualBasicTest.cs" />
-    <Compile Include="DmlTest.cs" />
+    <Compile Include="InsertTest.cs" />
     <Compile Include="ExpressionsTest.cs" />
     <Compile Include="MathFunctions.cs" />
     <Compile Include="Exceptions\Inheritance.cs" />
@@ -234,45 +269,55 @@
       <Link>BLToolkitData.sqlite</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="DefaultDataProviders.txt" />
+    <Content Include="UserDataProviders.txt" />
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.DB2.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\DB2\BLToolkit.Data.DataProvider.DB2.4.csproj">
       <Project>{86BF4F10-3606-4016-9919-84C3335813B6}</Project>
       <Name>BLToolkit.Data.DataProvider.DB2.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Firebird.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\DevartOraclePro\BLToolkit.Data.DataProvider.DevartOracle.4.csproj">
+      <Project>{cb303f0b-0aa3-4589-850a-95e985a09492}</Project>
+      <Name>BLToolkit.Data.DataProvider.DevartOracle.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\Firebird\BLToolkit.Data.DataProvider.Firebird.4.csproj">
       <Project>{C1F8C201-BBD9-44F4-884C-CFF8CC960B68}</Project>
       <Name>BLToolkit.Data.DataProvider.Firebird.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Informix.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Informix\BLToolkit.Data.DataProvider.Informix.4.csproj">
       <Project>{B1DEA25C-7667-471B-BBAD-64D017FDD104}</Project>
       <Name>BLToolkit.Data.DataProvider.Informix.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.MySql.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\MySql\BLToolkit.Data.DataProvider.MySql.4.csproj">
       <Project>{3578AF4C-CBFF-4A38-88F5-E86AC990AFBD}</Project>
       <Name>BLToolkit.Data.DataProvider.MySql.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Oracle.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Oracle\BLToolkit.Data.DataProvider.Oracle.4.csproj">
       <Project>{2B5287F2-A6AC-4D5A-B0A8-01C06144824D}</Project>
       <Name>BLToolkit.Data.DataProvider.Oracle.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Oracle\BLToolkit.Data.DataProvider.OracleManaged.4.csproj">
+      <Project>{785ce174-0a91-465f-9e41-65e6e05a0ec9}</Project>
+      <Name>BLToolkit.Data.DataProvider.OracleManaged.4</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DataProviders\PostgreSQL\BLToolkit.Data.DataProvider.PostgreSQL.4.csproj">
       <Project>{5A556D57-0D68-433B-AD78-02849583582B}</Project>
       <Name>BLToolkit.Data.DataProvider.PostgreSQL.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SqlCe.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\SqlCe\BLToolkit.Data.DataProvider.SqlCe.4.csproj">
       <Project>{85E90F57-8DE1-4912-8414-28578F4D71CD}</Project>
       <Name>BLToolkit.Data.DataProvider.SqlCe.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.SQLite.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\SQLite\BLToolkit.Data.DataProvider.SQLite.4.csproj">
       <Project>{3E414663-B673-47A8-AB59-0E08FE43DA86}</Project>
       <Name>BLToolkit.Data.DataProvider.SQLite.4</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DataProviders\BLToolkit.Data.DataProvider.Sybase.4.csproj">
+    <ProjectReference Include="..\..\DataProviders\Sybase\BLToolkit.Data.DataProvider.Sybase.4.csproj">
       <Project>{6CD8CC3D-643D-4D09-8660-A26085C44FBC}</Project>
       <Name>BLToolkit.Data.DataProvider.Sybase.4</Name>
     </ProjectReference>
@@ -321,7 +366,22 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    if not exist "$(TargetDir)x86" md "$(TargetDir)x86"
+    xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\x86\*.*" "$(TargetDir)x86"
+    if not exist "$(TargetDir)amd64" md "$(TargetDir)amd64"
+    xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\amd64\*.*" "$(TargetDir)amd64"</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

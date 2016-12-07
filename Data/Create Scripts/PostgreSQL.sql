@@ -1,16 +1,11 @@
-DROP TABLE "Doctor"
+DROP TABLE IF EXISTS "Doctor"
 GO
 
-DROP TABLE "Patient"
+DROP TABLE IF EXISTS "Patient"
 GO
 
-DROP TABLE "Person"
+DROP TABLE IF EXISTS "Person"
 GO
---DROP SEQUENCE Seq
---GO
-
---CREATE SEQUENCE Seq INCREMENT 1 START 1
---GO
 
 CREATE TABLE "Person"
 ( 
@@ -70,11 +65,11 @@ END;$_$
 GO
 
 
-DROP TABLE "Parent"
+DROP TABLE IF EXISTS "Parent"
 GO
-DROP TABLE "Child"
+DROP TABLE IF EXISTS "Child"
 GO
-DROP TABLE "GrandChild"
+DROP TABLE IF EXISTS "GrandChild"
 GO
 
 CREATE TABLE "Parent"      ("ParentID" int, "Value1" int)
@@ -85,7 +80,7 @@ CREATE TABLE "GrandChild"  ("ParentID" int, "ChildID" int, "GrandChildID" int)
 GO
 
 
-DROP TABLE "LinqDataTypes"
+DROP TABLE IF EXISTS "LinqDataTypes"
 GO
 
 CREATE TABLE "LinqDataTypes"
@@ -96,15 +91,18 @@ CREATE TABLE "LinqDataTypes"
 	"DateTimeValue2" timestamp,
 	"BoolValue"      boolean,
 	"GuidValue"      uuid,
-	"BinaryValue"    bytea,
+	"BinaryValue"    bytea  NULL,
 	"SmallIntValue"  smallint,
-	"IntValue"       int NULL,
-	"BigIntValue"    bigint NULL
+	"IntValue"       int    NULL,
+	"BigIntValue"    bigint NULL,
+	"UInt16"         decimal(5,  0)  NULL,
+	"UInt32"         decimal(10, 0)  NULL,
+	"UInt64"         decimal(20, 0)  NULL
 )
 GO
 
 
-DROP TABLE entity
+DROP TABLE IF EXISTS entity
 GO
 
 CREATE TABLE entity
@@ -126,4 +124,64 @@ BEGIN
 END;
 $BODY$
 	LANGUAGE plpgsql;
+GO
+
+
+DROP TABLE IF EXISTS "SequenceTest1"
+GO
+
+DROP TABLE IF EXISTS "SequenceTest2"
+GO
+
+DROP TABLE IF EXISTS "SequenceTest3"
+GO
+
+DROP SEQUENCE IF EXISTS SequenceTestSeq
+GO
+
+CREATE SEQUENCE SequenceTestSeq INCREMENT 1 START 1
+GO
+
+DROP SEQUENCE IF EXISTS "SequenceTest2_ID_seq"
+GO
+
+CREATE SEQUENCE "SequenceTest2_ID_seq" INCREMENT 1 START 1
+GO
+
+CREATE TABLE "SequenceTest1"
+(
+	"ID"    INTEGER PRIMARY KEY,
+	"Value" VARCHAR(50)
+)
+GO
+
+CREATE TABLE "SequenceTest2"
+(
+	"ID"    INTEGER PRIMARY KEY DEFAULT NEXTVAL('"SequenceTest2_ID_seq"'),
+	"Value" VARCHAR(50)
+)
+GO
+
+CREATE TABLE "SequenceTest3"
+(
+	"ID"    INTEGER PRIMARY KEY DEFAULT NEXTVAL('SequenceTestSeq'),
+	"Value" VARCHAR(50)
+)
+GO
+
+
+DROP TABLE IF EXISTS "TestIdentity"
+GO
+
+DROP SEQUENCE IF EXISTS "TestIdentity_ID_seq"
+GO
+
+CREATE SEQUENCE "TestIdentity_ID_seq" INCREMENT 1 START 1
+GO
+
+CREATE TABLE "TestIdentity" (
+	"ID"          INTEGER     PRIMARY KEY DEFAULT NEXTVAL('"TestIdentity_ID_seq"'),
+	"IntValue"    INTEGER     NULL,
+	"StringValue" VARCHAR(50) NULL
+)
 GO

@@ -11,35 +11,56 @@ namespace Data.Exceptions
 	[TestFixture]
 	public class DmlTest : TestBase
 	{
-		[Test, ExpectedException(typeof(LinqException), ExpectedMessage = "InsertOrUpdate method requires the 'Doctor' table to have a primary key.")]
+		[Test, ExpectedException(typeof(LinqException))]
 		public void InsertOrUpdate1()
 		{
-			ForEachProvider(db =>
-				db.Doctor.InsertOrUpdate(
-					() => new Doctor
-					{
-						PersonID  = 10,
-						Taxonomy = "....",
-					},
-					p => new Doctor
-					{
-						Taxonomy = "...",
-					}));
+			try
+			{
+				ForEachProvider(
+					new[] { "Northwind" },
+					db =>
+					db.Doctor.InsertOrUpdate(
+						() => new Doctor
+						{
+							PersonID  = 10,
+							Taxonomy = "....",
+						},
+						p => new Doctor
+						{
+							Taxonomy = "...",
+						}));
+			}
+			catch (Exception ex)
+			{
+				Assert.IsTrue(ex.Message.StartsWith("InsertOrUpdate method requires the 'Doctor' table to have a primary key."));
+				throw;
+			}
 		}
 
-		[Test, ExpectedException(typeof(LinqException), ExpectedMessage = "InsertOrUpdate method requires the 'Patient.PersonID' field to be included in the insert setter.")]
-		public void InsertOrUpdate2()
+		[Test, ExpectedException(typeof(LinqException))]
+		public void InsertOrUpdate2(/*[DataContexts("Northwind")] string config*/)
 		{
-			ForEachProvider(db =>
-				db.Patient.InsertOrUpdate(
-					() => new Patient
-					{
-						Diagnosis = "....",
-					},
-					p => new Patient
-					{
-						Diagnosis = "...",
-					}));
+			try
+			{
+				ForEachProvider(
+					typeof(LinqException),
+					new[] { "Northwind" },
+					db =>
+					db.Patient.InsertOrUpdate(
+						() => new Patient
+						{
+							Diagnosis = "....",
+						},
+						p => new Patient
+						{
+							Diagnosis = "...",
+						}));
+			}
+			catch (Exception ex)
+			{
+				Assert.IsTrue(ex.Message.StartsWith("InsertOrUpdate method requires the 'Patient.PersonID' field to be included in the insert setter."));
+				throw;
+			}
 		}
 	}
 }

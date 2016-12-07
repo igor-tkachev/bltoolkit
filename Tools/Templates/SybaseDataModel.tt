@@ -1,14 +1,15 @@
 ﻿<#@ template language="C#" debug="True" hostspecific="True" #>
 <#@ output extension=".generated.cs" #>
-<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude"   #>
-<#@ include file="$(SolutionDir)\Source\Templates\BLT4Toolkit.ttinclude" #>
-<#@ include file="$(SolutionDir)\Source\Templates\Sybase.ttinclude"      #>
+<#@ assembly name="$(SolutionDir)\Redist\Sybase\Sybase.AdoNet2.AseClient.dll" #>
+<#@ include file="$(SolutionDir)\Source\Templates\BLToolkit.ttinclude" #>
+<#@ include file="$(SolutionDir)\Source\Templates\Sybase.ttinclude"    #>
 <#@ include file="$(SolutionDir)\Source\Templates\ValidationAttributes.ttinclude" #>
 <#
-	ConnectionString     = "Data Source=DBHost;Port=5000;Database=BLToolkitData;Uid=sa";
-	DataProviderAssembly = @"E:\Projects\SVN\BLToolkit\trunk\Redist\Sybase\Sybase.AdoNet2.AseClient.dll";
+	GetConnectionObject = () => new Sybase.Data.AseClient.AseConnection();
+	ConnectionString    = "Data Source=DBHost2008;Port=5000;Database=TestData;Uid=sa;Password=TestPassword";
 
-	Namespace = "SybaseDataModel";
+	DataContextName     = "SybaseDataContext";
+	Namespace           = "SybaseDataModel";
 
 	GenerateModel();
 #>

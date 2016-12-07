@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using BLToolkit.Mapping;
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -26,10 +27,13 @@ namespace BLToolkit.Data.Linq.Builder
 			switch (methodCall.Arguments.Count)
 			{
 				case 1 : // int Update<T>(this IUpdateable<T> source)
+					CheckAssociation(sequence);
 					break;
 
 				case 2 : // int Update<T>(this IQueryable<T> source, Expression<Func<T,T>> setter)
 					{
+						CheckAssociation(sequence);
+
 						BuildSetter(
 							builder,
 							buildInfo,
@@ -50,6 +54,8 @@ namespace BLToolkit.Data.Linq.Builder
 							//
 							sequence = builder.BuildWhere(buildInfo.Parent, sequence, (LambdaExpression)methodCall.Arguments[1].Unwrap(), false);
 
+							CheckAssociation(sequence);
+
 							BuildSetter(
 								builder,
 								buildInfo,
@@ -63,6 +69,10 @@ namespace BLToolkit.Data.Linq.Builder
 							// static int Update<TSource,TTarget>(this IQueryable<TSource> source, Table<TTarget> target, Expression<Func<TSource,TTarget>> setter)
 							//
 							var into = builder.BuildSequence(new BuildInfo(buildInfo, expr, new SqlQuery()));
+
+							sequence.ConvertToIndex(null, 0, ConvertFlags.All);
+							sequence.SqlQuery.ResolveWeakJoins(new List<ISqlTableSource>());
+							sequence.SqlQuery.Select.Columns.Clear();
 
 							BuildSetter(
 								builder,
@@ -91,6 +101,34 @@ namespace BLToolkit.Data.Linq.Builder
 			return new UpdateContext(buildInfo.Parent, sequence);
 		}
 
+		static void CheckAssociation(IBuildContext sequence)
+		{
+			var ctx = sequence as SelectContext;
+
+			if (ctx != null && ctx.IsScalar)
+			{
+				var res = ctx.IsExpression(null, 0, RequestFor.Association);
+
+				if (res.Result && res.Context is TableBuilder.AssociatedTableContext)
+				{
+					var atc = (TableBuilder.AssociatedTableContext)res.Context;
+					sequence.SqlQuery.Update.Table = atc.SqlTable;
+				}
+				else
+				{
+					res = ctx.IsExpression(null, 0, RequestFor.Table);
+
+					if (res.Result && res.Context is TableBuilder.TableContext)
+					{
+						var tc = (TableBuilder.TableContext)res.Context;
+
+						if (sequence.SqlQuery.From.Tables.Count == 0 || sequence.SqlQuery.From.Tables[0].Source != tc.SqlQuery)
+							sequence.SqlQuery.Update.Table = tc.SqlTable;
+					}
+				}
+			}
+		}
+
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
@@ -109,16 +147,52 @@ namespace BLToolkit.Data.Linq.Builder
 			List<SqlQuery.SetExpression> items,
 			IBuildContext                sequence)
 		{
-			if (setter.Body.NodeType != ExpressionType.MemberInit)
-				throw new LinqException("Object initializer expected for insert statement.");
+			var path = Expression.Parameter(setter.Body.Type, "p");
+			var ctx  = new ExpressionContext(buildInfo.Parent, sequence, setter);
 
-			var ex  = (MemberInitExpression)setter.Body;
-			var p   = sequence.Parent;
-			var ctx = new ExpressionContext(buildInfo.Parent, sequence, setter);
+			if (setter.Body.NodeType == ExpressionType.MemberInit)
+			{
+				var ex  = (MemberInitExpression)setter.Body;
+				var p   = sequence.Parent;
 
-			BuildSetter(builder, into, items, ctx, ex, Expression.Parameter(ex.Type, "p"));
+				BuildSetter(builder, into, items, ctx, ex, path);
 
-			builder.ReplaceParent(ctx, p);
+				builder.ReplaceParent(ctx, p);
+			}
+			else
+			{
+				var sqlInfo = ctx.ConvertToSql(setter.Body, 0, ConvertFlags.All);
+
+				foreach (var info in sqlInfo)
+				{
+					if (info.Members.Count == 0)
+						throw new LinqException("Object initializer expected for insert statement.");
+
+					if (info.Members.Count != 1)
+						throw new InvalidOperationException();
+
+					var member = info.Members[0];
+					var pe     = Expression.MakeMemberAccess(path, member);
+					var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
+					var expr   = info.Sql;
+
+					if (expr is SqlParameter)
+					{
+						SetConverter(builder.MappingSchema, member, expr);
+						//var type = member.MemberType == MemberTypes.Field ? 
+						//	((FieldInfo)   member).FieldType :
+						//	((PropertyInfo)member).PropertyType;
+
+						//if (TypeHelper.IsEnumOrNullableEnum(type))
+						//{
+						//	var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
+						//	((SqlParameter)expr).SetEnumConverter(memberAccessor, builder.MappingSchema);
+						//}
+					}
+
+					items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+				}
+			}
 		}
 
 		static void BuildSetter(
@@ -153,10 +227,9 @@ namespace BLToolkit.Data.Linq.Builder
 					else
 					{
 						var column = into.ConvertToSql(pe, 1, ConvertFlags.Field);
-						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression);
+						var expr   = builder.ConvertToSqlExpression(ctx, ma.Expression, false);
 
-						if (expr is SqlParameter && ma.Expression.Type.IsEnum)
-							((SqlParameter)expr).SetEnumConverter(ma.Expression.Type, builder.MappingSchema);
+						SetConverter(builder.MappingSchema, ma.Member, expr);
 
 						items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
 					}
@@ -220,12 +293,11 @@ namespace BLToolkit.Data.Linq.Builder
 					//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
 			var sp     = select.Parent;
 			var ctx    = new ExpressionContext(buildInfo.Parent, select, update);
-			var expr   = builder.ConvertToSqlExpression(ctx, update.Body);
+			var expr   = builder.ConvertToSqlExpression(ctx, update.Body, false);
 
 			builder.ReplaceParent(ctx, sp);
 
-			if (expr is SqlParameter && update.Body.Type.IsEnum)
-				((SqlParameter)expr).SetEnumConverter(update.Body.Type, builder.MappingSchema);
+			SetConverter(builder.MappingSchema, member, expr);
 
 			items.Add(new SqlQuery.SetExpression(column, expr));
 		}
@@ -236,6 +308,7 @@ namespace BLToolkit.Data.Linq.Builder
 			LambdaExpression             extract,
 			Expression                   update,
 			IBuildContext                select,
+			SqlTable                     table,
 			List<SqlQuery.SetExpression> items)
 		{
 			var ext = extract.Body;
@@ -255,19 +328,85 @@ namespace BLToolkit.Data.Linq.Builder
 			if (member is MethodInfo)
 				member = TypeHelper.GetPropertyByMethod((MethodInfo)member);
 
-			var column = select.ConvertToSql(
-				body, 1, ConvertFlags.Field);
-				//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field);
+			var members = body.GetMembers();
+			var name    = members
+				.Skip(1)
+				.Select(ex =>
+				{
+					var me = ex as MemberExpression;
 
-			if (column.Length == 0)
-				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
+					if (me == null)
+						return null;
 
-			var expr   = builder.ConvertToSql(select, update);
+					var m = me.Member;
 
-			if (expr is SqlParameter && update.Type.IsEnum)
-				((SqlParameter)expr).SetEnumConverter(update.Type, builder.MappingSchema);
+					if (m is MethodInfo)
+						m = TypeHelper.GetPropertyByMethod((MethodInfo)m);
 
-			items.Add(new SqlQuery.SetExpression(column[0].Sql, expr));
+					return m;
+				})
+				.Where(m => m != null && !TypeHelper.IsNullableValueMember(m))
+				.Select(m => m.Name)
+				.Aggregate((s1,s2) => s1 + "." + s2);
+
+			if (table != null && !table.Fields.ContainsKey(name))
+				throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, name);
+
+			ISqlExpression column;
+			if (table != null)
+			{
+				column = table.Fields[name];
+			}
+			else
+			{
+				var sql = select.ConvertToSql(
+					body, 1, ConvertFlags.Field);
+					//Expression.MakeMemberAccess(Expression.Parameter(member.DeclaringType, "p"), member), 1, ConvertFlags.Field)[0].Sql;
+
+				if (sql.Length == 0)
+					throw new LinqException("Member '{0}.{1}' is not a table column.", member.DeclaringType.Name, member.Name);
+
+				column = sql[0].Sql;
+			}
+
+			var expr = builder.ConvertToSql(select, update, false, false);
+
+			SetConverter(builder.MappingSchema, member, expr);
+
+			items.Add(new SqlQuery.SetExpression(column, expr));
+		}
+
+		internal static void SetConverter(MappingSchema mappingSchema, MemberInfo member, ISqlExpression expr)
+		{
+			var sqlValue = expr as SqlValueBase;
+			if (sqlValue == null)
+				return;
+
+			var mm = mappingSchema.GetObjectMapper(member.DeclaringType)
+				.FirstOrDefault(_ => _.MemberName == member.Name);
+			if (mm == null)
+				return;
+
+			if (TypeHelper.IsEnumOrNullableEnum(mm.Type))
+			{
+				var memberAccessor = TypeAccessor.GetAccessor(member.DeclaringType)[member.Name];
+				sqlValue.SetEnumConverter(memberAccessor, mappingSchema);
+			}			
+			else if (mm.IsExplicit || mm.MapMemberInfo.MapValues != null)
+			{
+				sqlValue.ValueConverter = _ =>
+				{
+					if (_ == null && mm.Type.IsValueType)
+						return _;
+
+					//if (_ != null && _.GetType() != mm.MemberAccessor.Type)
+					//	return _;
+
+					var obj = TypeAccessor.CreateInstanceEx(member.DeclaringType);
+					mm.MemberAccessor.SetValue(obj, _);
+					return mm.GetValue(obj);
+				};
+			}
 		}
 
 		#endregion
@@ -288,27 +427,27 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override Expression BuildExpression(Expression expression, int level)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IsExpressionResult IsExpression(Expression expression, int level, RequestFor requestFlag)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 
@@ -345,6 +484,7 @@ namespace BLToolkit.Data.Linq.Builder
 						extract,
 						update,
 						sequence,
+						sequence.SqlQuery.Update.Table,
 						sequence.SqlQuery.Update.Items);
 
 				return sequence;

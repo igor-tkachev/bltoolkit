@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Threading;
 using BLToolkit.Aspects;
 using BLToolkit.Data;
 using BLToolkit.Data.DataProvider;
@@ -82,13 +82,22 @@ namespace BLToolkit.DataAccess
 		}
 
 		private static readonly Hashtable _keyList = new Hashtable();
+		private static readonly ReaderWriterLockSlim _keyListLock = new ReaderWriterLockSlim();
 
 		[NoInterception]
 		protected internal virtual MemberMapper[] GetKeyFieldList(DbManager db, Type type)
 		{
 			var key    = type.FullName + "$" + db.DataProvider.UniqueName;
-			var mmList = (MemberMapper[])_keyList[key];
-
+			_keyListLock.EnterReadLock();
+			MemberMapper[] mmList = null;
+			try
+			{
+				mmList = (MemberMapper[])_keyList[key];
+			}
+			finally 
+			{
+				_keyListLock.ExitReadLock();
+			}
 			if (mmList == null)
 			{
 				var typeExt = TypeExtension.GetTypeExtension(type, Extensions);
@@ -113,10 +122,17 @@ namespace BLToolkit.DataAccess
 
 				list.Sort((x, y) => x.Order - y.Order);
 
-				_keyList[key] = mmList = new MemberMapper[list.Count];
-
-				for (var i = 0; i < list.Count; i++)
-					mmList[i] = list[i].MemberMapper;
+				_keyListLock.EnterWriteLock();
+				try
+				{
+					_keyList[key] = mmList = new MemberMapper[list.Count];
+					for (var i = 0; i < list.Count; i++)
+						mmList[i] = list[i].MemberMapper;
+				}
+				finally
+				{
+					_keyListLock.ExitWriteLock();
+				}
 			}
 
 			return mmList;
@@ -373,7 +389,10 @@ namespace BLToolkit.DataAccess
 			if (query == null)
 			{
 				query = CreateSqlText(db, type, actionName);
-				_actionSqlQueryInfo[key] = query;
+				lock (_actionSqlQueryInfo)
+				{
+					_actionSqlQueryInfo[key] = query;
+				}
 			}
 
 			return query;

@@ -6,8 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.Linq;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -17,12 +19,18 @@ using BLToolkit.Common;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
 
+#if MANAGED
+using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
+#else
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
+#endif
 
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
+	using BLToolkit.Data.Sql;
 
 	/// <summary>
 	/// Implements access to the Data Provider for Oracle.
@@ -31,6 +39,7 @@ namespace BLToolkit.Data.DataProvider
 	/// See the <see cref="DbManager.AddDataProvider(DataProviderBase)"/> method to find an example.
 	/// </remarks>
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
+#if !MANAGED
 	public class OdpDataProvider : DataProviderBase
 	{
 		public OdpDataProvider()
@@ -38,11 +47,30 @@ namespace BLToolkit.Data.DataProvider
 			MappingSchema = new OdpMappingSchema();
 		}
 
+		public const string NameString = DataProvider.ProviderName.Oracle;
+
+		private const string DbTypeTableName = "Oracle.DataAccess.Client.OraDb_DbTypeTable";
+
 		static OdpDataProvider()
 		{
+#else
+	public class OdpManagedDataProvider : DataProviderBase
+	{
+		public OdpManagedDataProvider()
+		{
+			MappingSchema = new OdpMappingSchema();
+		}
+
+		public const string NameString = DataProvider.ProviderName.OracleManaged;
+
+		private const string DbTypeTableName = "Oracle.ManagedDataAccess.Client.OraDb_DbTypeTable";
+
+		static OdpManagedDataProvider()
+		{
+#endif
 			// Fix Oracle.Net bug #1: Array types are not handled.
 			//
-			var oraDbDbTypeTableType = typeof(OracleParameter).Assembly.GetType("Oracle.DataAccess.Client.OraDb_DbTypeTable");
+			var oraDbDbTypeTableType = typeof(OracleParameter).Assembly.GetType(DbTypeTableName);
 
 			if (null != oraDbDbTypeTableType)
 			{
@@ -74,7 +102,9 @@ namespace BLToolkit.Data.DataProvider
 					typeTable[typeof(OracleTimeStamp[])]   = OracleDbType.TimeStamp;
 					typeTable[typeof(OracleTimeStampLTZ[])]= OracleDbType.TimeStampLTZ;
 					typeTable[typeof(OracleTimeStampTZ[])] = OracleDbType.TimeStampTZ;
+#if !MANAGED
 					typeTable[typeof(OracleXmlType[])]     = OracleDbType.XmlType;
+#endif
 
 					typeTable[typeof(Boolean)]             = OracleDbType.Byte;
 					typeTable[typeof(Guid)]                = OracleDbType.Raw;
@@ -150,6 +180,25 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return base.CreateCommandObject(connection);
+		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			base.SetParameterValue(parameter, value);
+
+			// strings and byte arrays larger than 4000 bytes may be handled improperly
+			if (parameter is OracleParameterWrap)
+			{
+				const int ThresholdSize = 4000;
+				if (value is string && Encoding.UTF8.GetBytes((string)value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Clob;
+				}
+				else if (value is byte[] && ((byte[])value).Length > ThresholdSize)
+				{
+					((OracleParameterWrap)parameter).OracleParameter.OracleDbType = OracleDbType.Blob;
+				}
+			}
 		}
 
 		public override IDbDataParameter CloneParameter(IDbDataParameter parameter)
@@ -237,6 +286,21 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// Open an <see cref="IDataReader"/> into the given <see cref="OracleRefCursor"/> object
+		/// </summary>
+		/// <param name="refCursor">an <see cref="OracleRefCursor"/> to perform GetDataReader() on</param>
+		/// <returns>The <see cref="IDataReader"/> into the returned by GetDataReader()</returns>
+		public override IDataReader GetRefCursorDataReader(object refCursor)
+		{
+			var oracleRefCursor = refCursor as OracleRefCursor;
+
+			if (oracleRefCursor == null)
+				throw new ArgumentException("Argument must be of type 'OracleRefCursor'", "refCursor");
+
+			return oracleRefCursor.GetDataReader();
 		}
 
 		public override object Convert(object value, ConvertType convertType)
@@ -331,8 +395,11 @@ namespace BLToolkit.Data.DataProvider
 
 							for (var i = 0; i < oraParameter.Size; ++i)
 							{
-								if (streams[i] is OracleBFile || streams[i] is OracleBlob ||
-									streams[i] is OracleClob || streams[i] is OracleXmlStream)
+								if (streams[i] is OracleBFile || streams[i] is OracleBlob || streams[i] is OracleClob 
+#if !MANAGED
+									|| streams[i] is OracleXmlStream
+#endif
+									)
 								{
 									// Known Oracle type.
 									//
@@ -350,7 +417,7 @@ namespace BLToolkit.Data.DataProvider
 							switch (oraParameter.OracleDbType)
 							{
 								case OracleDbType.XmlType:
-
+#if !MANAGED
 									for (var i = 0; i < oraParameter.Size; ++i)
 									{
 										values[i] = xmlDocuments[i].DocumentElement == null?
@@ -359,9 +426,10 @@ namespace BLToolkit.Data.DataProvider
 									}
 
 									oraParameter.Value = values;
-
 									break;
-
+#else
+									throw new NotSupportedException();
+#endif
 								// Fix Oracle.Net bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
 								// so m_value.ToString() is not enought.
 								//
@@ -433,7 +501,11 @@ namespace BLToolkit.Data.DataProvider
 					var stream = (Stream) oraParameter.Value;
 
 					if (!(stream is OracleBFile) && !(stream is OracleBlob) &&
-						!(stream is OracleClob) && !(stream is OracleXmlStream))
+						!(stream is OracleClob)
+#if !MANAGED 
+						&& !(stream is OracleXmlStream)
+#endif
+						)
 					{
 						oraParameter.Value = CopyStream(stream, (OracleCommand)command);
 					}
@@ -458,8 +530,12 @@ namespace BLToolkit.Data.DataProvider
 						switch (oraParameter.OracleDbType)
 						{
 							case OracleDbType.XmlType:
+#if !MANAGED
 								oraParameter.Value = new OracleXmlType((OracleConnection)command.Connection, xmlDocument);
 								break;
+#else
+								throw new NotSupportedException();
+#endif
 
 							// Fix Oracle.Net bug #9: XmlDocument.ToString() returns System.Xml.XmlDocument,
 							// so m_value.ToString() is not enought.
@@ -563,8 +639,6 @@ namespace BLToolkit.Data.DataProvider
 			get { return typeof(OracleConnection); }
 		}
 
-		public const string NameString = DataProvider.ProviderName.Oracle;
-
 		/// <summary>
 		/// Returns the data provider name.
 		/// </summary>
@@ -581,6 +655,33 @@ namespace BLToolkit.Data.DataProvider
 		public override int MaxBatchSize
 		{
 			get { return 0; }
+		}
+
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (OracleCommand)command;
+			var oracleParameters = cmd.Parameters.OfType<OracleParameter>().ToArray();
+			var oldCollectionTypes = oracleParameters.Select(p => p.CollectionType).ToArray();
+
+			try
+			{
+				foreach (var p in oracleParameters)
+				{
+					p.CollectionType = OracleCollectionType.None;
+				}
+
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				foreach (var p in oracleParameters.Zip(oldCollectionTypes, (p, t) => new { Param = p, CollectionType = t }))
+				{
+					p.Param.CollectionType = p.CollectionType;
+				}
+
+				cmd.ArrayBindCount = 0;
+			}
 		}
 
 		public override ISqlProvider CreateSqlProvider()
@@ -647,6 +748,12 @@ namespace BLToolkit.Data.DataProvider
 				NameOrIndexParameter nip)
 			{
 				return new OracleScalarDataReaderMapper(this, dataReader, nip);
+			}
+
+			public override Reflection.Extension.ExtensionList Extensions
+			{
+				get { return Map.DefaultSchema.Extensions;  }
+				set { Map.DefaultSchema.Extensions = value; }
 			}
 
 			#region Convert
@@ -810,8 +917,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? DefaultGuidNullValue: new Guid(oraBlob.Value);
 				}
 
 				return base.ConvertToGuid(value);
@@ -824,23 +931,23 @@ namespace BLToolkit.Data.DataProvider
 					var oraString = (OracleString)value;
 					return oraString.IsNull? DefaultStringNullValue: oraString.Value;
 				}
-
+#if !MANAGED
 				if (value is OracleXmlType)
 				{
 					var oraXmlType = (OracleXmlType)value;
 					return oraXmlType.IsNull ? DefaultStringNullValue : oraXmlType.Value;
 				}
-
+#endif
 				if (value is OracleClob)
 				{
-					var oraClob = (OracleClob)value;
-					return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
+					using (var oraClob = (OracleClob)value)
+						return oraClob.IsNull? DefaultStringNullValue: oraClob.Value;
 				}
 
 				return base.ConvertToString(value);
 			}
 
-
+#if !MANAGED
 			public override Stream ConvertToStream(object value)
 			{
 				if (value is OracleXmlType)
@@ -873,13 +980,14 @@ namespace BLToolkit.Data.DataProvider
 
 				return base.ConvertToXmlDocument(value);
 			}
+#endif
 
 			public override Byte[] ConvertToByteArray(object value)
 			{
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? null: oraBlob.Value;
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? null: oraBlob.Value;
 				}
 
 				if (value is OracleBinary)
@@ -907,8 +1015,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleClob)
 				{
-					var oraClob = (OracleClob)value;
-					return oraClob.IsNull? null: oraClob.Value.ToCharArray();
+					using (var oraClob = (OracleClob)value)
+						return oraClob.IsNull? null: oraClob.Value.ToCharArray();
 				}
 
 				return base.ConvertToCharArray(value);
@@ -1075,8 +1183,8 @@ namespace BLToolkit.Data.DataProvider
 
 				if (value is OracleBlob)
 				{
-					var oraBlob = (OracleBlob)value;
-					return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
+					using (var oraBlob = (OracleBlob)value)
+						return oraBlob.IsNull? null: (Guid?)new Guid(oraBlob.Value);
 				}
 
 				return base.ConvertToNullableGuid(value);
@@ -1105,6 +1213,25 @@ namespace BLToolkit.Data.DataProvider
 				return base.MapValueToEnum(value, type);
 			}
 
+			public override object MapValueToEnum(object value, MemberAccessor ma)
+			{
+				if (value is OracleString)
+				{
+					var oracleValue = (OracleString)value;
+					value = oracleValue.IsNull ? null : oracleValue.Value;
+				}
+				else if (value is OracleDecimal)
+				{
+					var oracleValue = (OracleDecimal)value;
+					if (oracleValue.IsNull)
+						value = null;
+					else
+						value = oracleValue.Value;
+				}
+
+				return base.MapValueToEnum(value, ma);
+			}
+
 			public override object ConvertChangeType(object value, Type conversionType)
 			{
 				// Handle OracleDecimal with IsNull == true case
@@ -1125,7 +1252,9 @@ namespace BLToolkit.Data.DataProvider
 					value is OracleTimeStamp?    ((OracleTimeStamp)   value).IsNull:
 					value is OracleTimeStampTZ?  ((OracleTimeStampTZ) value).IsNull:
 					value is OracleTimeStampLTZ? ((OracleTimeStampLTZ)value).IsNull:
+#if !MANAGED
 					value is OracleXmlType?      ((OracleXmlType)     value).IsNull:
+#endif
 					value is OracleBlob?         ((OracleBlob)        value).IsNull:
 					value is OracleClob?         ((OracleClob)        value).IsNull:
 					value is OracleBFile?        ((OracleBFile)       value).IsNull:
@@ -1154,7 +1283,11 @@ namespace BLToolkit.Data.DataProvider
 			{
 				var fieldType = _dataReader.GetProviderSpecificFieldType(index);
 
-				if (fieldType != typeof(OracleXmlType) && fieldType != typeof(OracleBlob))
+				if (fieldType != typeof(OracleBlob)
+#if !MANAGED
+					&& fieldType != typeof(OracleXmlType)
+#endif
+					)
 					fieldType = _dataReader.GetFieldType(index);
 
 				return fieldType;
@@ -1164,12 +1297,13 @@ namespace BLToolkit.Data.DataProvider
 			{
 				var fieldType = _dataReader.GetProviderSpecificFieldType(index);
 
+#if !MANAGED
 				if (fieldType == typeof(OracleXmlType))
 				{
 					var xml = _dataReader.GetOracleXmlType(index);
 					return MappingSchema.ConvertToXmlDocument(xml);
 				}
-
+#endif
 				if (fieldType == typeof(OracleBlob))
 				{
 					var blob = _dataReader.GetOracleBlob(index);
@@ -1227,7 +1361,11 @@ namespace BLToolkit.Data.DataProvider
 
 				_fieldType = _dataReader.GetProviderSpecificFieldType(Index);
 
-				if (_fieldType != typeof(OracleXmlType) && _fieldType != typeof(OracleBlob))
+				if (_fieldType != typeof(OracleBlob)
+#if !MANAGED
+					&& _fieldType != typeof(OracleXmlType)
+#endif
+					)
 					_fieldType = _dataReader.GetFieldType(Index);
 			}
 
@@ -1240,12 +1378,13 @@ namespace BLToolkit.Data.DataProvider
 
 			public override object GetValue(object o, int index)
 			{
+#if !MANAGED
 				if (_fieldType == typeof(OracleXmlType))
 				{
 					var xml = _dataReader.GetOracleXmlType(Index);
 					return MappingSchema.ConvertToXmlDocument(xml);
 				}
-
+#endif
 				if (_fieldType == typeof(OracleBlob))
 				{
 					var blob = _dataReader.GetOracleBlob(Index);
@@ -1474,6 +1613,7 @@ namespace BLToolkit.Data.DataProvider
 		{
 			var sb  = new StringBuilder();
 			var sp  = new OracleSqlProvider();
+			var pn  = 0;
 			var n   = 0;
 			var cnt = 0;
 			var str = "\t" + insertText
@@ -1486,6 +1626,8 @@ namespace BLToolkit.Data.DataProvider
 				//.Replace("  ", " ")
 				+ ") VALUES (";
 
+			var parameters = new List<IDbDataParameter>();
+
 			foreach (var item in collection)
 			{
 				if (sb.Length == 0)
@@ -1497,6 +1639,9 @@ namespace BLToolkit.Data.DataProvider
 				{
 					var value = member.GetValue(item);
 
+					if (value != null && value.GetType().IsEnum)
+						value = MappingSchema.MapEnumToValue(value, true);
+
 					if (value is Nullable<DateTime>)
 						value = ((DateTime?)value).Value;
 
@@ -1504,6 +1649,12 @@ namespace BLToolkit.Data.DataProvider
 					{
 						var dt = (DateTime)value;
 						sb.Append(string.Format("to_timestamp('{0:dd.MM.yyyy HH:mm:ss.ffffff}', 'DD.MM.YYYY HH24:MI:SS.FF6')", dt));
+					}
+					else if ((value is string && ((string)value).Length >= 2000) || value is byte[] || value is Binary)
+					{
+						var par = db.Parameter("p" + ++pn, value);
+						parameters.Add(par);
+						sb.Append(":" + par.ParameterName);
 					}
 					else
 						sp.BuildValue(sb, value);
@@ -1523,11 +1674,15 @@ namespace BLToolkit.Data.DataProvider
 					var sql = sb.ToString();
 
 					if (DbManager.TraceSwitch.TraceInfo)
-						DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+						DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-					cnt += db.SetCommand(sql).ExecuteNonQuery();
+					cnt += db
+						.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+						.ExecuteNonQuery();
 
-					n = 0;
+					parameters.Clear();
+					pn = 0;
+					n  = 0;
 					sb.Length = 0;
 				}
 			}
@@ -1539,9 +1694,11 @@ namespace BLToolkit.Data.DataProvider
 				var sql = sb.ToString();
 
 				if (DbManager.TraceSwitch.TraceInfo)
-					DbManager.WriteTraceLine("\n" + sql, DbManager.TraceSwitch.DisplayName);
+					DbManager.WriteTraceLine("\n" + sql.Replace("\r", ""), DbManager.TraceSwitch.DisplayName);
 
-				cnt += db.SetCommand(sql).ExecuteNonQuery();
+				cnt += db
+					.SetCommand(sql, parameters.Count > 0 ? parameters.ToArray() : null)
+					.ExecuteNonQuery();
 			}
 
 			return cnt;

@@ -181,6 +181,12 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		static void SetQueryParameter(IQueryElement element)
 		{
 			if (element.ElementType == QueryElementType.SqlParameter)
@@ -235,23 +241,23 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				base.BuildValue(sb, value);
 		}
 
-		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = false;
 
-			if (col.SystemType == typeof(bool))
+			if (expr.SystemType == typeof(bool))
 			{
-				if (col.Expression is SqlQuery.SearchCondition)
+				if (expr is SqlQuery.SearchCondition)
 					wrap = true;
 				else
 				{
-					var ex = col.Expression as SqlExpression;
+					var ex = expr as SqlExpression;
 					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
 				}
 			}
 
 			if (wrap) sb.Append("CASE WHEN ");
-			base.BuildColumn(sb, col, ref addAlias);
+			base.BuildColumnExpression(sb, expr, alias, ref addAlias);
 			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 
@@ -262,11 +268,11 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			switch (convertType)
 			{
 				case ConvertType.NameToQueryParameter:
-					return "@" + value;
+					return "@" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return ":" + value;
+					return ":" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.SprocParameterToName:
 					if (value != null)
@@ -300,6 +306,17 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
 			BuildInsertOrUpdateQueryAsMerge(sb, "FROM SYSIBM.SYSDUMMY1 FETCH FIRST 1 ROW ONLY");
+		}
+
+		protected override void BuildEmptyInsert(StringBuilder sb)
+		{
+			sb.Append("VALUES (");
+			for (var i = 0; i < SqlQuery.Insert.Into.Fields.Count; i++)
+				sb.Append("DEFAULT, ");
+
+			sb.Remove(sb.Length - 2, 2);
+			sb.Append(")");
+			sb.AppendLine();
 		}
 	}
 }

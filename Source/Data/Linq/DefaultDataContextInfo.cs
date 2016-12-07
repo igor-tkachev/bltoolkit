@@ -13,7 +13,7 @@ namespace BLToolkit.Data.Linq
 
 		public MappingSchema  MappingSchema  { get { return Map.DefaultSchema; } }
 		public bool           DisposeContext { get { return true; } }
-		public string         ContextID      { get { return _dataProvider.Name; } }
+		public string         ContextID      { get { return _dataProvider.Name+DataContext.InlineParameters; } }
 
 		public ISqlProvider CreateSqlProvider()
 		{

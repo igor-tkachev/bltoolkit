@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 
 using BLToolkit.Data;
+using BLToolkit.Data.DataProvider;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql;
 
@@ -14,13 +15,14 @@ namespace Data.Linq
 
 	public class TestDbManager : DbManager, ITestDataContext
 	{
-		public TestDbManager(string configString)
+		public TestDbManager(string configString, bool inlineParameters = false)
 			: base(configString)
 		{
+			InlineParameters = inlineParameters;
 		}
 
 		public TestDbManager()
-			: base("Sql2008")
+			: this(ProviderName.Access, false)
 		{
 		}
 
@@ -43,6 +45,7 @@ namespace Data.Linq
 		public Table<GrandChild1>            GrandChild1            { get { return GetTable<GrandChild1>();            } }
 		public Table<LinqDataTypes>          Types                  { get { return GetTable<LinqDataTypes>();          } }
 		public Table<LinqDataTypes2>         Types2                 { get { return GetTable<LinqDataTypes2>();         } }
+		public Table<TestIdentity>           TestIdentity           { get { return GetTable<TestIdentity>();           } }
 
 		[TableFunction(Name="GetParentByID")]
 		public Table<Parent> GetParentByID(int? id)

@@ -83,7 +83,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 					default :
 						{
-							var expr = Builder.ConvertToSql(this, expression);
+							var expr = Builder.ConvertToSql(this, expression, false);
 							var idx  = SqlQuery.Select.Add(expr);
 
 							return Builder.BuildSql(expression.Type, idx);

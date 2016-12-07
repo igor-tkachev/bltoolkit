@@ -46,6 +46,18 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsConstant3([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var arr = new[] { "oh", "oh'", "oh\\" };
+
+				var q = from p in db.Person where  arr.Contains(p.FirstName) select p;
+				Assert.AreEqual(0, q.Count());
+			}
+		}
+
+		[Test]
 		public void ContainsParameter1()
 		{
 			var str = "oh";
@@ -89,11 +101,47 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void ContainsParameter4()
+		{
+			ForEachProvider(db =>
+				AreEqual(
+					from p in Person
+					select new
+					{
+						p,
+						Field1 = p.FirstName.Contains("Jo")
+					} into p
+					where p.Field1
+					orderby p.Field1
+					select p,
+					from p in db.Person
+					select new
+					{
+						p,
+						Field1 = p.FirstName.Contains("Jo")
+					} into p
+					where p.Field1
+					orderby p.Field1
+					select p));
+		}
+
+		[Test]
 		public void StartsWith1()
 		{
 			ForEachProvider(db => 
 			{
 				var q = from p in db.Person where p.FirstName.StartsWith("Jo") && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void StartsWith11()
+		{
+			ForEachProvider(db =>
+			{
+				var jo = "Jo";
+				var q = from p in db.Person where p.FirstName.StartsWith(jo) && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}
@@ -134,6 +182,22 @@ namespace Data.Linq
 					from p2 in db.Person
 					where p1.ID == p2.ID && 
 						Sql.Like(p1.FirstName, p2.FirstName.Replace("%", "~%"), '~')
+					select p1));
+		}
+
+		[Test]
+		public void StartsWith5()
+		{
+			ForEachProvider(
+				new[] { ProviderName.DB2, ProviderName.Access },
+				db => AreEqual(
+					from p1 in    Person
+					from p2 in    Person
+					where p1.ID == p2.ID && p1.FirstName.Replace("J", "%").StartsWith(p2.FirstName.Replace("J", "%"))
+					select p1,
+					from p1 in db.Person
+					from p2 in db.Person
+					where p1.ID == p2.ID && p1.FirstName.Replace("J", "%").StartsWith(p2.FirstName.Replace("J", "%"))
 					select p1));
 		}
 
@@ -218,16 +282,18 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void IndexOf3()
+		public void IndexOf3([DataContexts(
+			ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Access)] string context)
 		{
 			var s = "e";
 			var n1 = 2;
 			var n2 = 5;
-			ForEachProvider(new[] { ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, ProviderName.SqlCe, ProviderName.Sybase, ProviderName.Access }, db => 
+
+			using (var db = GetDataContext(context))
 			{
 				var q = from p in db.Person where p.LastName.IndexOf(s, n1, n2) == 1 && p.ID == 2 select p;
 				Assert.AreEqual(2, q.ToList().First().ID);
-			});
+			}
 		}
 
 		static readonly string[] _lastIndexExcludeList = new[]
@@ -447,7 +513,7 @@ namespace Data.Linq
 			});
 		}
 
-		[Test]
+        [Test]
 		public void Replace()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db =>
@@ -524,6 +590,26 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CompareToNotEqual1()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo("Jo") != 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareToNotEqual2()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where 0 != p.FirstName.CompareTo("Jo") && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void CompareTo1()
 		{
 			ForEachProvider(db =>
@@ -544,11 +630,51 @@ namespace Data.Linq
 		}
 
 		[Test]
+		public void CompareTo21()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo("Johnn") <= 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo22()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where 0 >= p.FirstName.CompareTo("Johnn") && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
 		public void CompareTo3()
 		{
 			ForEachProvider(db =>
 			{
 				var q = from p in db.Person where p.FirstName.CompareTo(55) > 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo31()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where p.FirstName.CompareTo(55) >= 0 && p.ID == 1 select p;
+				Assert.AreEqual(1, q.ToList().First().ID);
+			});
+		}
+
+		[Test]
+		public void CompareTo32()
+		{
+			ForEachProvider(db =>
+			{
+				var q = from p in db.Person where 0 <= p.FirstName.CompareTo(55) && p.ID == 1 select p;
 				Assert.AreEqual(1, q.ToList().First().ID);
 			});
 		}

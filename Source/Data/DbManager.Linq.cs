@@ -52,7 +52,7 @@ namespace BLToolkit.Data
 			GetParameters(queryContext, query);
 
 			if (TraceSwitch.TraceInfo)
-				WriteTraceLine(((IDataContext)this).GetSqlText(query), TraceSwitch.DisplayName);
+				WriteTraceLine(((IDataContext)this).GetSqlText(query).Replace("\r", ""), TraceSwitch.DisplayName);
 
 			return query;
 		}
@@ -112,8 +112,10 @@ namespace BLToolkit.Data
 		}
 
 		void GetParameters(IQueryContext query, PreparedQuery pq)
-		{
-			var parameters = query.GetParameters();
+        {
+			var sql = DataProvider.CreateSqlProvider();
+
+			var parameters = query.GetParameters().Where(_ => !sql.BuildAsValue(_)).ToArray();
 
 			if (parameters.Length == 0 && pq.SqlParameters.Count == 0)
 				return;
@@ -131,8 +133,9 @@ namespace BLToolkit.Data
 
 					if (sqlp.IsQueryParameter)
 					{
-						var parm = parameters.Length > i && parameters[i] == sqlp ? parameters[i] : parameters.First(p => p == sqlp);
-						AddParameter(parms, x, parm);
+						var parm = parameters.Length > i && parameters[i] == sqlp ? parameters[i] : parameters.FirstOrDefault(p => p == sqlp);
+						if (parm != null)
+							AddParameter(parms, x, parm);
 					}
 				}
 			}
@@ -166,7 +169,9 @@ namespace BLToolkit.Data
 			}
 			else
 			{
-				var dataType = DataProvider.GetDbType(parm.SystemType);
+                var dataType = DataProvider.GetDbType(parm.SystemType);
+			    if (parm.DbType != DbType.Object)
+			        dataType = parm.DbType;
 				parms.Add(dataType == DbType.Object ? Parameter(name, value) : Parameter(name, null, dataType));
 			}
 		}
@@ -281,7 +286,7 @@ namespace BLToolkit.Data
 
 			var sb = new StringBuilder();
 
-			sb.Append("-- ").Append(ConfigurationString);
+			sb.Append("-- ").Append(ConfigurationString).AppendFormat(" InlineParameters={0}", InlineParameters);
 
 			if (ConfigurationString != DataProvider.Name)
 				sb.Append(' ').Append(DataProvider.Name);
@@ -346,7 +351,7 @@ namespace BLToolkit.Data
 
 		string IDataContext.ContextID
 		{
-			get { return DataProvider.Name; }
+			get { return DataProvider.Name + InlineParameters; }
 		}
 
 		static Func<ISqlProvider> GetCreateSqlProvider(DataProviderBase dp)

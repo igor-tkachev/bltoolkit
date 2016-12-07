@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq.Builder
 {
+	using BLToolkit.Linq;
 	using Data.Sql;
 
 	class SubQueryContext : PassThroughContext
@@ -39,11 +40,71 @@ namespace BLToolkit.Data.Linq.Builder
 		public override SqlQuery      SqlQuery { get; set; }
 		public override IBuildContext Parent   { get; set; }
 
+		public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
+		{
+			if (Expression.NodeType == ExpressionType.Lambda)
+			{
+				var le = (LambdaExpression)Expression;
+
+				if (le.Parameters.Count == 1 && null != Expression.Find(
+					e => e.NodeType == ExpressionType.Call && ((MethodCallExpression)e).IsQueryable()))
+				{
+					if (le.Body.NodeType == ExpressionType.New)
+					{
+						var ne = (NewExpression)le.Body;
+						var p  = Expression.Parameter(ne.Type, "p");
+
+						var seq = new SelectContext(
+							Parent,
+							Expression.Lambda(
+								Expression.New(
+									ne.Constructor,
+									ne.Members.Select(m => Expression.MakeMemberAccess(p, m)).ToArray(),
+									ne.Members),
+								p),
+							this);
+
+						seq.BuildQuery(query, queryParameter);
+
+						return;
+					}
+
+					if (le.Body.NodeType == ExpressionType.MemberInit)
+					{
+						var mi = (MemberInitExpression)le.Body;
+
+						if (mi.NewExpression.Arguments.Count == 0 && mi.Bindings.All(b => b is MemberAssignment))
+						{
+							var p = Expression.Parameter(mi.Type, "p");
+
+							var seq = new SelectContext(
+								Parent,
+								Expression.Lambda(
+									Expression.MemberInit(
+										mi.NewExpression,
+										mi.Bindings
+											.OfType<MemberAssignment>()
+											.Select(ma => Expression.Bind(ma.Member, Expression.MakeMemberAccess(p, ma.Member)))
+											.ToArray()),
+									p),
+								this);
+
+							seq.BuildQuery(query, queryParameter);
+
+							return;
+						}
+					}
+				}
+			}
+
+			base.BuildQuery(query, queryParameter);
+		}
+
 		public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
 		{
 			return SubQuery
 				.ConvertToIndex(expression, level, flags)
-				.Select(idx => new SqlInfo { Sql = SubQuery.SqlQuery.Select.Columns[idx.Index], Member = idx.Member })
+				.Select(idx => new SqlInfo(idx.Members) { Sql = SubQuery.SqlQuery.Select.Columns[idx.Index] })
 				.ToArray();
 		}
 

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
-
+using BLToolkit.Data.DataProvider;
 using NUnit.Framework;
 
 using BLToolkit.Data;
@@ -14,19 +15,31 @@ namespace HowTo.DataAccess
 	[TestFixture]
 	public class CustomSqlQuery2
 	{
-		public abstract class TestAccessorBase<T> : /*[a]*/DataAccessor/*[/a]*/
+		public abstract class TestAccessorBase<T> : /*[a]*/DataAccessor /*[/a]*/
 			where T : TestAccessorBase<T>
 		{
-			const int Sql    = 0;
-			const int Access = 1;
-			const int Oracle = 2;
-			const int Fdp    = 3;
-			const int SQLite = 4;
+			private const int Sql = 0;
+			private const int Access = 1;
+			private const int Oracle = 2;
+			private const int Fdp = 3;
+			private const int SQLite = 4;
+
+			private readonly string[] _msSqlProviderNames = new[]
+			{
+				ProviderName.MsSql,
+				ProviderName.MsSql2000,
+				ProviderName.MsSql2005,
+				ProviderName.MsSql2008,
+				ProviderName.MsSql2012
+			};
 
 			Dictionary<int, string> _sql = new Dictionary<int,string>();
 
-			private string GetSql(string providerName, int provider, int queryID)
+			private string GetSql(string providerName, int provider, int queryId)
 			{
+				if (_msSqlProviderNames.Contains(providerName))
+					providerName = "Sql";
+
 				Stream stream = Assembly.GetCallingAssembly().GetManifestResourceStream(
 					"HowTo.DataAccess.Sql." + providerName + ".xml");
 
@@ -34,7 +47,7 @@ namespace HowTo.DataAccess
 
 				doc.Load(stream);
 
-				XmlNode node = doc.SelectSingleNode(string.Format("/sql/query[@id={0}]", queryID));
+				XmlNode node = doc.SelectSingleNode(string.Format("/sql/query[@id={0}]", queryId));
 
 				return node != null? node.InnerText: null;
 
@@ -47,11 +60,15 @@ namespace HowTo.DataAccess
 
 				switch (providerName)
 				{
-					case "Sql"   : provider = Sql;    break;
-					case "Access": provider = Access; break;
-					case "Oracle": provider = Oracle; break;
-					case "Fdp"   : provider = Fdp;    break;
-					case "SQLite": provider = SQLite; break;
+					case "MsSql2000":
+					case "MsSql2005":
+					case "MsSql2008":
+					case "MsSql2012":
+					case "Sql"      : provider = Sql; break;
+					case "Access"   : provider = Access; break;
+					case "Oracle"   : provider = Oracle; break;
+					case "Fdp"      : provider = Fdp;    break;
+					case "SQLite"   : provider = SQLite; break;
 					default:
 						throw new ApplicationException(
 							string.Format("Unknown data provider '{0}'", providerName));

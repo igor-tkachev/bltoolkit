@@ -18,6 +18,10 @@ namespace BLToolkit.EditableObjects
 	{
 		#region Constructors
 
+		public EditableArrayList() : this(typeof(object), new ArrayList(), true)
+		{
+		}
+
 		public EditableArrayList([JetBrains.Annotations.NotNull] Type itemType, [JetBrains.Annotations.NotNull] ArrayList list, bool trackChanges)
 		{
 			if (itemType == null) throw new ArgumentNullException("itemType");
@@ -342,12 +346,10 @@ namespace BLToolkit.EditableObjects
 
 				foreach (var o in List)
 				{
-					if (o is EditableObject)
-						if (((EditableObject)o).IsDirty)
-							return true;
-					else if (o is IEditable)
-						if (((IEditable)o).IsDirty)
-							return true;
+         if (o is EditableObject && ((EditableObject)o).IsDirty)
+            return true;
+         if (o is IEditable && ((IEditable)o).IsDirty)
+            return true;
 				}
 
 				return false;

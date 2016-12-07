@@ -14,9 +14,9 @@ namespace Data.Linq
 	public class TableFunctionTest : TestBase
 	{
 		[Test]
-		public void Func1()
+		public void Func1([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from p in new Model.Functions(db).GetParentByID(1)
@@ -27,9 +27,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Func2()
+		public void Func2([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from c in db.Child
@@ -41,9 +41,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void Func3()
+		public void Func3([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from c in db.Child
@@ -58,9 +58,9 @@ namespace Data.Linq
 			(DbManager db, int id) => from p in new Model.Functions(db).GetParentByID(id) select p);
 
 		[Test]
-		public void CompiledFunc1()
+		public void CompiledFunc1([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q = _f1(db, 1);
 				q.ToList();
@@ -71,9 +71,9 @@ namespace Data.Linq
 			(TestDbManager db, int id) => from c in db.Child from p in db.GetParentByID(id) select p);
 
 		[Test]
-		public void CompiledFunc2()
+		public void CompiledFunc2([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q = _f2(db, 1);
 				q.ToList();
@@ -81,9 +81,9 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void WithTabLock()
+		public void WithTabLock([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new TestDbManager())
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from p in new Model.Functions(db).WithTabLock<Parent>()
@@ -93,8 +93,8 @@ namespace Data.Linq
 			}
 		}
 
-		[Test]
-		public void FreeText1()
+		[Test, Category("FULLTEXT")]
+		public void FreeText1([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -108,8 +108,8 @@ namespace Data.Linq
 			}
 		}
 
-		[Test]
-		public void FreeText2()
+		[Test, Category("FULLTEXT")]
+		public void FreeText2([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -123,8 +123,8 @@ namespace Data.Linq
 			}
 		}
 
-		[Test]
-		public void FreeText3()
+		[Test, Category("FULLTEXT")]
+		public void FreeText3([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{

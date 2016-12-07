@@ -38,19 +38,19 @@ namespace BLToolkit.ServiceModel
 
 		public DataTable GetSchemaTable()
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 #endif
 
 		public bool IsClosed
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new InvalidOperationException(); }
 		}
 
 		public bool NextResult()
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public bool Read()
@@ -69,7 +69,7 @@ namespace BLToolkit.ServiceModel
 
 		public int RecordsAffected
 		{
-			get { throw new NotImplementedException(); }
+			get { throw new InvalidOperationException(); }
 		}
 
 		#endregion
@@ -91,6 +91,8 @@ namespace BLToolkit.ServiceModel
 
 		public bool GetBoolean(int i)
 		{
+			if (_data[i][0] == '\0')
+				return (bool) GetValue(i);
 			return bool.Parse(_data[i]);
 		}
 
@@ -101,7 +103,7 @@ namespace BLToolkit.ServiceModel
 
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public char GetChar(int i)
@@ -111,12 +113,12 @@ namespace BLToolkit.ServiceModel
 
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public IDataReader GetData(int i)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public string GetDataTypeName(int i)
@@ -195,15 +197,36 @@ namespace BLToolkit.ServiceModel
 				value = value.Substring(2);
 			}
 
+			if (value == null)
+				return null;
+
 			if (type.IsArray && type == typeof(byte[]))
-				return value == null ? null : System.Convert.FromBase64String(value);
+				return System.Convert.FromBase64String(value);
+
+			switch (Type.GetTypeCode(type))
+			{
+				case TypeCode.String   : return value;
+				case TypeCode.Double   : return double.  Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.Decimal  : return decimal. Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.Single   : return float.   Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.DateTime : return DateTime.Parse(value, CultureInfo.InvariantCulture);
+				case TypeCode.Object   :
+					if (type == typeof(double?))   return double.        Parse(value, CultureInfo.InvariantCulture);
+					if (type == typeof(decimal?))  return decimal.       Parse(value, CultureInfo.InvariantCulture);
+					if (type == typeof(float?))    return float.         Parse(value, CultureInfo.InvariantCulture);
+					if (type == typeof(DateTime?)) return DateTime.      Parse(value, CultureInfo.InvariantCulture);
+
+					if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
+						return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
+					break;
+			}
 
 			return Convert.ChangeTypeFromString(value, type);
 		}
 
 		public int GetValues(object[] values)
 		{
-			throw new NotImplementedException();
+			throw new InvalidOperationException();
 		}
 
 		public bool IsDBNull(int i)

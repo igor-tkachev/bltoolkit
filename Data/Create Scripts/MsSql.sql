@@ -422,9 +422,9 @@ CREATE TABLE DataTypeTest
 	Single_         real             NULL,
 	Stream_         varbinary(50)    NULL,
 	String_         nvarchar(50)     NULL,
-	UInt16_         smallint         NULL,
-	UInt32_         int              NULL,
-	UInt64_         bigint           NULL,
+	UInt16_         numeric(5)       NULL,
+	UInt32_         numeric(10)      NULL,
+	UInt64_         numeric(20)      NULL,
 	Xml_            xml              NULL
 ) ON [PRIMARY]
 GO
@@ -451,6 +451,63 @@ VALUES
 	'<root><element strattr="strvalue" intattr="12345"/></root>')
 GO
 
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'DataTypeTest_Insert')
+BEGIN DROP PROCEDURE DataTypeTest_Insert END
+GO
+
+CREATE PROCEDURE DataTypeTest_Insert
+	@Binary_         binary(50)       =null,
+	@Boolean_        bit              =null,
+	@Byte_           tinyint          =null,
+	@Bytes_          varbinary(50)    =null,
+	@Char_           char(1)          =null,
+	@DateTime_       datetime         =null,
+	@Decimal_        decimal(20,2)    =null,
+	@Double_         float            =null,
+	@Guid_           uniqueidentifier =null,
+	@Int16_          smallint         =null,
+	@Int32_          int              =null,
+	@Int64_          bigint           =null,
+	@Money_          money            =null,
+	@SByte_          tinyint          =null,
+	@Single_         real             =null,
+	@Stream_         varbinary(50)    =null,
+	@String_         nvarchar(50)     =null,
+	@UInt16_         smallint         =null,
+	@UInt32_         int              =null,
+	@UInt64_         bigint           =null,
+	@Xml_            xml              =null
+AS
+	INSERT INTO DataTypeTest
+		(Binary_, Boolean_,   Byte_,  Bytes_,  Char_,  DateTime_, Decimal_,
+		 Double_,    Guid_,  Int16_,  Int32_,  Int64_,    Money_,   SByte_,
+		 Single_,  Stream_, String_, UInt16_, UInt32_,   UInt64_,     Xml_)
+	VALUES
+		(  
+			@Binary_         ,
+			@Boolean_        ,
+			@Byte_           ,
+			@Bytes_          ,
+			@Char_           ,
+			@DateTime_       ,
+			@Decimal_        ,
+			@Double_         ,
+			@Guid_           ,
+			@Int16_          ,
+			@Int32_          ,
+			@Int64_          ,
+			@Money_          ,
+			@SByte_          ,
+			@Single_         ,
+			@Stream_         ,
+			@String_         ,
+			@UInt16_         ,
+			@UInt32_         ,
+			@UInt64_         ,
+			@Xml_            
+		)
+
+GO
 -- SKIP Sql2005 BEGIN
 --
 -- Arrays
@@ -522,12 +579,16 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    varbinary(5000),
 	SmallIntValue  smallint,
 	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	BigIntValue    bigint NULL,
+	UInt16         numeric(5,  0)  NULL,
+	UInt32         numeric(10, 0)  NULL,
+	UInt64         numeric(20, 0)  NULL
 )
 GO
 -- SKIP Sql2005 END
 
 -- SKIP Sql2008 BEGIN
+-- SKIP Sql2012 BEGIN
 CREATE TABLE LinqDataTypes
 (
 	ID             int,
@@ -536,10 +597,24 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue2 datetime,
 	BoolValue      bit,
 	GuidValue      uniqueidentifier,
-	BinaryValue    varbinary(5000),
+	BinaryValue    varbinary(5000) NULL,
 	SmallIntValue  smallint,
 	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	BigIntValue    bigint NULL,
+	UInt16         numeric(5,  0)  NULL,
+	UInt32         numeric(10, 0)  NULL,
+	UInt64         numeric(20, 0)  NULL
 )
 GO
+-- SKIP Sql2012 END
 -- SKIP Sql2008 END
+
+DROP TABLE TestIdentity
+GO
+
+CREATE TABLE TestIdentity (
+	ID          INTEGER      NOT NULL IDENTITY(1,1) CONSTRAINT PK_TestIdentity PRIMARY KEY CLUSTERED, 
+	IntValue    INTEGER      NULL,
+	StringValue NVARCHAR(50) NULL
+)
+GO

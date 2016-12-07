@@ -279,13 +279,13 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void ExpressionTest1()
+		public void ExpressionTest1([IncludeDataContexts("Northwind")] string context)
 		{
 			Expression<Func<Northwind.Customer,bool>> pred1 = cust=>cust.Country=="UK";
 			Expression<Func<Northwind.Customer,bool>> pred2 = cust=>cust.Country=="France";
 
 			var param = Expression.Parameter(typeof(Northwind.Customer), "x");
-			var final = Expression.Lambda<Func<Northwind.Customer, bool>>(
+			var final = Expression.Lambda<Func<Northwind.Customer,bool>>(
 				Expression.OrElse(
 					Expression.Invoke(pred1, param),
 					Expression.Invoke(pred2, param)
@@ -304,7 +304,7 @@ namespace Data.Linq
 			Expression<Func<Parent,bool>> pred2 = _=>_.Value1   == 1 || _.Value1 == null;
 
 			var param = Expression.Parameter(typeof(Parent), "x");
-			var final = Expression.Lambda<Func<Parent, bool>>(
+			var final = Expression.Lambda<Func<Parent,bool>>(
 				Expression.AndAlso(
 					Expression.Invoke(pred1, param),
 					Expression.Invoke(pred2, param)
@@ -314,6 +314,58 @@ namespace Data.Linq
 			{
 				Assert.AreEqual(1, db.Parent.Count(final));
 			}
+		}
+
+
+
+		[Test]
+		public void BuildQueryTest()
+		{
+			ForEachProvider(db =>
+			{
+				var query = db.Child.Select(_ => Model.Child.CreateInstance(_, _.Parent));
+
+				var list1 = query.ToList();
+				var list2 = query.Where(_ => _.ChildID > 0).ToList();
+
+				AreEqual(list1, list2);
+				AreEqual(list2, Child);
+			}
+				);
+		}
+
+		[Test]
+		public void BuildQueryTest2()
+		{
+			ForEachProvider(db =>
+			{
+				var query = db.Child.Select(_ => new Child() {ChildID = _.ChildID, Parent = _.Parent});
+
+				var list1 = query.ToList();
+				var list2 = query.Where(_ => _.ChildID > 0).ToList();
+
+				AreEqual(list1, list2);
+				AreEqual(list2, Child.Select(_ => new Child() { ChildID = _.ChildID, Parent = _.Parent }));
+
+			}
+				);
+		}
+
+		[Test]
+		public void BuildQueryTest3()
+		{
+			ForEachProvider(db =>
+			{
+				var query = db.Child;
+
+				var list1 = query.ToList();
+				var list2 = query.Where(_ => _.ChildID > 0).ToList();
+
+				AreEqual(list1, list2);
+				AreEqual(list2, Child);
+
+			}
+				);
 		}
 
 		#region IEnumerableTest

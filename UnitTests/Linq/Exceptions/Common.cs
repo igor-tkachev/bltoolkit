@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NUnit.Framework;
-
 using BLToolkit.Common;
 using BLToolkit.Data;
 using BLToolkit.Data.Linq;
 using BLToolkit.Data.Sql;
 
-using Data.Linq;
-using Data.Linq.Model;
+using NUnit.Framework;
 
 namespace Data.Exceptions
 {
+	using Linq;
+	using Linq.Model;
+
 	[TestFixture]
 	public class Common : TestBase
 	{
 		class MyDbManager : TestDbManager
 		{
+			public MyDbManager(string confName) : base(confName) {}
 			public MyDbManager() : base("Sql2008") {}
 
 			protected override SqlQuery ProcessQuery(SqlQuery sqlQuery)
@@ -74,9 +75,9 @@ namespace Data.Exceptions
 		}
 
 		[Test, ExpectedException(typeof(DataException), ExpectedMessage = "Invalid object name 'Parent1'.")]
-		public void ReplaceTableTest()
+		public void ReplaceTableTest([IncludeDataContexts("Sql2008", "Sql2012")] string context)
 		{
-			using (var db = new MyDbManager())
+			using (var db = new MyDbManager(context))
 			{
 				var n = 555;
 

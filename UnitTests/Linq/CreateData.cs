@@ -64,17 +64,18 @@ namespace Create
 
 				db.InsertBatch(new[]
 				{
-					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001, 1, 11, 1, 11, 21, 100), BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  1 },
-					new LinqDataTypes { ID =  2, MoneyValue =  2.49m, DateTimeValue = new DateTime(2005, 5, 15, 5, 15, 25, 500), BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b"), SmallIntValue =  2 },
-					new LinqDataTypes { ID =  3, MoneyValue =  3.99m, DateTimeValue = new DateTime(2009, 9, 19, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d2f970c0-35ac-4987-9cd5-5badb1757436"), SmallIntValue =  3 },
-					new LinqDataTypes { ID =  4, MoneyValue =  4.50m, DateTimeValue = new DateTime(2009, 9, 20, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b"), SmallIntValue =  4 },
-					new LinqDataTypes { ID =  5, MoneyValue =  5.50m, DateTimeValue = new DateTime(2009, 9, 21, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("febe3eca-cb5f-40b2-ad39-2979d312afca"), SmallIntValue =  5 },
-					new LinqDataTypes { ID =  6, MoneyValue =  6.55m, DateTimeValue = new DateTime(2009, 9, 22, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("8d3c5d1d-47db-4730-9fe7-968f6228a4c0"), SmallIntValue =  6 },
-					new LinqDataTypes { ID =  7, MoneyValue =  7.00m, DateTimeValue = new DateTime(2009, 9, 23, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("48094115-83af-46dd-a906-bff26ee21ee2"), SmallIntValue =  7 },
-					new LinqDataTypes { ID =  8, MoneyValue =  8.99m, DateTimeValue = new DateTime(2009, 9, 24, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("c1139f1f-1335-4cd4-937e-92602f732dd3"), SmallIntValue =  8 },
-					new LinqDataTypes { ID =  9, MoneyValue =  9.63m, DateTimeValue = new DateTime(2009, 9, 25, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("46c5c512-3d4b-4cf7-b4e7-1de080789e5d"), SmallIntValue =  9 },
-					new LinqDataTypes { ID = 10, MoneyValue = 10.77m, DateTimeValue = new DateTime(2009, 9, 26, 9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("61b2bc55-147f-4b40-93ed-a4aa83602fee"), SmallIntValue = 10 },
-					new LinqDataTypes { ID = 11, MoneyValue = 11.45m, DateTimeValue = new DateTime(2009, 9, 27, 9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d3021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 11 },
+					new LinqDataTypes { ID =  1, MoneyValue =  1.11m, DateTimeValue = new DateTime(2001,  1,  11,  1, 11, 21, 100), BoolValue = true,  GuidValue = new Guid("ef129165-6ffe-4df9-bb6b-bb16e413c883"), SmallIntValue =  1, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = UInt64.MaxValue/2    },
+					new LinqDataTypes { ID =  2, MoneyValue =  2.49m, DateTimeValue = new DateTime(2005,  5,  15,  5, 15, 25, 500), BoolValue = false, GuidValue = new Guid("bc663a61-7b40-4681-ac38-f9aaf55b706b"), SmallIntValue =  2, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  3, MoneyValue =  3.99m, DateTimeValue = new DateTime(2009,  9,  19,  9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d2f970c0-35ac-4987-9cd5-5badb1757436"), SmallIntValue =  3, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  4, MoneyValue =  4.50m, DateTimeValue = new DateTime(2009,  9,  20,  9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("40932fdb-1543-4e4a-ac2c-ca371604fb4b"), SmallIntValue =  4, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  5, MoneyValue =  5.50m, DateTimeValue = new DateTime(2009,  9,  21,  9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("febe3eca-cb5f-40b2-ad39-2979d312afca"), SmallIntValue =  5, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  6, MoneyValue =  6.55m, DateTimeValue = new DateTime(2009,  9,  22,  9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("8d3c5d1d-47db-4730-9fe7-968f6228a4c0"), SmallIntValue =  6, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  7, MoneyValue =  7.00m, DateTimeValue = new DateTime(2009,  9,  23,  9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("48094115-83af-46dd-a906-bff26ee21ee2"), SmallIntValue =  7, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  8, MoneyValue =  8.99m, DateTimeValue = new DateTime(2009,  9,  24,  9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("c1139f1f-1335-4cd4-937e-92602f732dd3"), SmallIntValue =  8, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID =  9, MoneyValue =  9.63m, DateTimeValue = new DateTime(2009,  9,  25,  9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("46c5c512-3d4b-4cf7-b4e7-1de080789e5d"), SmallIntValue =  9, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID = 10, MoneyValue = 10.77m, DateTimeValue = new DateTime(2009,  9,  26,  9, 19, 29,  90), BoolValue = false, GuidValue = new Guid("61b2bc55-147f-4b40-93ed-a4aa83602fee"), SmallIntValue = 10, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID = 11, MoneyValue = 11.45m, DateTimeValue = new DateTime(2009,  9,  27,  9, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("d3021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 11, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
+					new LinqDataTypes { ID = 12, MoneyValue = 11.45m, DateTimeValue = new DateTime(2012, 11,   7, 19, 19, 29,  90), BoolValue = true,  GuidValue = new Guid("03021d18-97f0-4dc0-98d0-f0c7df4a1230"), SmallIntValue = 12, UInt16 = UInt16.MaxValue, UInt32 = UInt32.MaxValue, UInt64 = 18446744073709500000 },
 				});
 
 				db.InsertBatch(new[]
@@ -137,23 +138,22 @@ namespace Create
 			}
 		}
 
-#if !MOBILE
-		[Test] public void DB2       () { RunScript(ProviderName.DB2,              "\nGO\n",  "DB2");        }
-		[Test] public void Informix  () { RunScript(ProviderName.Informix,         "\nGO\n",  "Informix");   }
-		[Test] public void Oracle    () { RunScript("Oracle",                      "\n/\n",   "Oracle");     }
-		[Test] public void Firebird  () { RunScript(ProviderName.Firebird,         "COMMIT;", "Firebird2");  }
-		[Test] public void PostgreSQL() { RunScript(ProviderName.PostgreSQL,       "\nGO\n",  "PostgreSQL"); }
-		[Test] public void MySql     () { RunScript(ProviderName.MySql,            "\nGO\n",  "MySql");      }
-		[Test] public void Sql2005   () { RunScript("Sql2005",                     "\nGO\n",  "MsSql");      }
-		[Test] public void Sybase    () { RunScript(ProviderName.Sybase,           "\nGO\n",  "Sybase");     }
-#endif
-
-		[Test] public void Sql2008   () { RunScript("Sql2008",                     "\nGO\n",  "MsSql");      }
-		[Test] public void SqlCe     () { RunScript(ProviderName.SqlCe,            "\nGO\n",  "SqlCe");      }
-		[Test] public void SqlCeData () { RunScript(ProviderName.SqlCe + ".Data",  "\nGO\n",  "SqlCe");      }
-		[Test] public void SQLite    () { RunScript(ProviderName.SQLite,           "\nGO\n",  "SQLite");     }
-		[Test] public void SQLiteData() { RunScript(ProviderName.SQLite + ".Data", "\nGO\n",  "SQLite");     }
-		[Test] public void Access    () { RunScript(ProviderName.Access,           "\nGO\n",  "Access");     }
-		[Test] public void AccessData() { RunScript(ProviderName.Access + ".Data", "\nGO\n",  "Access");     }
+		[Test] public void DB2       ([IncludeDataContexts(ProviderName.DB2       )] string context) { RunScript(context,           "\nGO\n",  "DB2");        }
+		[Test] public void Informix  ([IncludeDataContexts(ProviderName.Informix  )] string context) { RunScript(context,           "\nGO\n",  "Informix");   }
+		[Test] public void Oracle    ([IncludeDataContexts("Oracle"               )] string context) { RunScript(context,           "\n/\n",   "Oracle");     }
+		[Test] public void Firebird  ([IncludeDataContexts(ProviderName.Firebird  )] string context) { RunScript(context,           "COMMIT;", "Firebird2");  }
+		[Test] public void PostgreSQL([IncludeDataContexts(ProviderName.PostgreSQL)] string context) { RunScript(context,           "\nGO\n",  "PostgreSQL"); }
+		[Test] public void MySql     ([IncludeDataContexts(ProviderName.MySql     )] string context) { RunScript(context,           "\nGO\n",  "MySql");      }
+		[Test] public void Sql2000   ([IncludeDataContexts("Sql2000"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql2000");  }
+		[Test] public void Sql2005   ([IncludeDataContexts("Sql2005"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2008   ([IncludeDataContexts("Sql2008"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void Sql2012   ([IncludeDataContexts("Sql2012"              )] string context) { RunScript(context,           "\nGO\n",  "MsSql");      }
+		[Test] public void SqlCe     ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context,           "\nGO\n",  "SqlCe");      }
+		[Test] public void SqlCeData ([IncludeDataContexts(ProviderName.SqlCe     )] string context) { RunScript(context + ".Data", "\nGO\n",  "SqlCe");      }
+		[Test] public void SQLite    ([IncludeDataContexts(ProviderName.SQLite    )] string context) { RunScript(context,           "\nGO\n",  "SQLite");     }
+		[Test] public void SQLiteData([IncludeDataContexts(ProviderName.SQLite    )] string context) { RunScript(context + ".Data", "\nGO\n",  "SQLite");     }
+		[Test] public void Access    ([IncludeDataContexts(ProviderName.Access    )] string context) { RunScript(context,           "\nGO\n",  "Access");     }
+		[Test] public void AccessData([IncludeDataContexts(ProviderName.Access    )] string context) { RunScript(context + ".Data", "\nGO\n",  "Access");     }
+		[Test] public void Sybase    ([IncludeDataContexts(ProviderName.Sybase    )] string context) { RunScript(context,           "\nGO\n",  "Sybase");     }
 	}
 }

@@ -3,6 +3,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Data" #>
 <#@ import namespace="System.Linq" #>
+<#@ import namespace="System.IO"   #>
 <#
 	AppDomain.CurrentDomain.AssemblyResolve += (_,args) =>
 	{
@@ -54,9 +55,9 @@ static WriteTablePropertyAction WriteTableProperty = (tt,name,pname,maxlen,maxpl
 static Action<GeneratedTextTransformation,string> WriteAttribute      = (tt,a) => tt.Write("[{0}]", a);
 static Action<GeneratedTextTransformation>        WriteAttributeLine  =  tt    => tt.WriteLine("");
 
-string ConnectionString;
-string ConnectionType;
-string DataProviderAssembly = null;
+static string ConnectionString;
+static string ConnectionType;
+static string DataProviderAssembly = null;
 
 string DatabaseName             = null;
 string DataContextName          = null;
@@ -65,7 +66,8 @@ string BaseDataContextClass     = "DbManager";
 string BaseEntityClass          = null;
 string OneToManyAssociationType = "IEnumerable<{0}>";
 
-string OwnerToInclude			= null;
+string OwnerToInclude           = null;
+string[] DatabaseQuote          = null;
 
 bool   RenderField              = false;
 bool   RenderBackReferences     = true;
@@ -366,7 +368,7 @@ List<T> CreateList<T>(T item)
 	return new List<T>();
 }
 
-System.Data.IDbConnection GetConnection()
+Func<System.Data.IDbConnection> GetConnectionObject = () =>
 {
 	Type connType = null;
 
@@ -375,7 +377,8 @@ System.Data.IDbConnection GetConnection()
 		try
 		{
 			var assembly = System.Reflection.Assembly.LoadFile(DataProviderAssembly);
-			connType = assembly.GetType(ConnectionType);
+			connType = assembly.GetType(ConnectionType) 
+				?? assembly.GetType(ConnectionType.Substring(0, ConnectionType.IndexOf(",")));
 		}
 		catch
 		{
@@ -385,7 +388,12 @@ System.Data.IDbConnection GetConnection()
 	if (connType == null)
 		connType = Type.GetType(ConnectionType);
 
-	var conn = (System.Data.IDbConnection)Activator.CreateInstance(connType);
+	return (System.Data.IDbConnection)Activator.CreateInstance(connType);
+};
+
+System.Data.IDbConnection GetConnection()
+{
+	var conn = GetConnectionObject();
 
 	conn.ConnectionString = ConnectionString;
 	conn.Open();
@@ -400,8 +408,32 @@ void LoadMetadata()
 
 	IsMetadataLoaded = true;
 
+	if (!string.IsNullOrEmpty(DataProviderAssembly) && !DataProviderAssembly.Contains(":") && DataProviderAssembly.Contains(".."))
+	{
+		try
+		{
+			string path = this.Host.ResolvePath("");
+			DataProviderAssembly = Path.GetFullPath(Path.Combine(path, DataProviderAssembly));
+		}
+		catch 
+		{
+		}
+	}
+
 	BeforeLoadMetadata(this);
 	LoadServerMetadata();
+
+	if (DatabaseQuote != null)
+	{
+		foreach (var t in Tables.Values)
+		{
+			t.TableName = string.Format("{1}{0}{2}", t.TableName, DatabaseQuote.FirstOrDefault(), DatabaseQuote.Skip(1).FirstOrDefault() ?? DatabaseQuote.FirstOrDefault());
+			foreach (var c in t.Columns.Values)
+			{
+				c.ColumnName = string.Format("{1}{0}{2}", c.ColumnName, DatabaseQuote.FirstOrDefault(), DatabaseQuote.Skip(1).FirstOrDefault() ?? DatabaseQuote.FirstOrDefault());
+			}
+		}
+	}
 
 	foreach (var t in Tables.Values)
 	{

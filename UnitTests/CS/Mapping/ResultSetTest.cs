@@ -8,7 +8,9 @@ using NUnit.Framework;
 
 namespace Mapping
 {
+#if !FIREBIRD
 	[TestFixture]
+#endif
 	public class ResultSetTest
 	{
 		public class Master
@@ -36,7 +38,9 @@ namespace Mapping
 			UNION SELECT 6 SlaveID, 2 as MasterID
 			UNION SELECT 7 SlaveID, 1 as MasterID";
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void TestResultSet()
 		{
 			MapResultSet[] sets = new MapResultSet[2];
@@ -60,7 +64,9 @@ namespace Mapping
 			Assert.AreEqual(7, ((Slave)(((Master)sets[0].List[0]).Slaves[1])).ID);
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		[ExpectedException(typeof(MappingException))]
 		public void TestFailResultSet1()
 		{
@@ -83,7 +89,9 @@ namespace Mapping
 			}
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		[ExpectedException(typeof(MappingException))]
 		public void TestFailResultSet2()
 		{
@@ -106,7 +114,9 @@ namespace Mapping
 			}
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		[ExpectedException(typeof(MappingException))]
 		public void TestFailResultSet3()
 		{
@@ -129,7 +139,9 @@ namespace Mapping
 			}
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void TestNextResult()
 		{
 			using (DbManager db = new DbManager())
@@ -147,7 +159,9 @@ namespace Mapping
 			}
 		}
 
+#if !FIREBIRD
 		[Test]
+#endif
 		public void TestDataSet()
 		{
 			using (DbManager db = new DbManager())

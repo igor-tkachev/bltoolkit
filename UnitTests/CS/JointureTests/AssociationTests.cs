@@ -40,19 +40,19 @@ namespace UnitTests.CS.JointureTests
         //[Test]
         public void SelectAllArtistsLazyLoading()
         {
-            using (var db = new MusicDB())
-            {
-                var dbCmd = db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
-
-                dbCmd.MappingSchema = new FullMappingSchema();
-
-                var art     = dbCmd.ExecuteList<Artist2>();
-                var titles  = art[0].Titles;
-                var query2  = new FullSqlQueryT<Artist2>(db);
-                var artists = query2.SelectAll();
-                var artist2 = artists[0];
-                var titles2 = artist2.Titles;
-            }
+//            using (var db = new MusicDB())
+//            {
+//                var dbCmd = db.SetCommand("SELECT ID_ARTIST FROM PITAFR01.Artist where date_creation > sysdate - 200");
+//
+//                dbCmd.MappingSchema = new FullMappingSchema();
+//
+//                var art     = dbCmd.ExecuteList<Artist2>();
+//                var titles  = art[0].Titles;
+//                var query2  = new FullSqlQueryT<Artist2>(db);
+//                var artists = query2.SelectAll();
+//                var artist2 = artists[0];
+//                var titles2 = artist2.Titles;
+//            }
         }
 
         //[Test]

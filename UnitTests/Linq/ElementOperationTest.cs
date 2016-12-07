@@ -81,7 +81,7 @@ namespace Data.Linq
 		public void NestedFirstOrDefaultScalar2()
 		{
 			ForEachProvider(
-				new[] { ProviderName.Informix, "Oracle", ProviderName.Sybase }, db =>
+				new[] { ProviderName.Informix, "Oracle", "DevartOracle", ProviderName.Sybase }, db =>
 				AreEqual(
 					from p in Parent
 					select new
@@ -186,7 +186,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void FirstOrDefaultEntitySet()
+		public void FirstOrDefaultEntitySet([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -197,7 +197,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void NestedSingleOrDefaultTest()
+		public void NestedSingleOrDefaultTest([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -208,7 +208,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void MultipleQuery()
+		public void MultipleQuery([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{

@@ -16,7 +16,9 @@ namespace Data.Exceptions
 		[Test, ExpectedException(typeof(LinqException))]
 		public void InnerJoin()
 		{
-			ForEachProvider(typeof(NotSupportedException), db =>
+			ForEachProvider(typeof(NotSupportedException),
+					new[] { "Northwind" },
+				db =>
 			{
 				var q =
 					from p1 in db.Person

@@ -327,5 +327,34 @@ namespace EditableObjects
 			Console.WriteLine("BLT: {0}", DateTime.Now.Ticks - startTicks);
 		}
 
+		public abstract class Issue368 : EditableObject<Issue368>
+		{
+			 public abstract TimeSpan  Span         { get; set; }
+			 public abstract TimeSpan? NullableSpan { get; set; }
+		}
+
+		[Test]
+		public void Issue_368()
+		{
+			var o = Issue368.CreateInstance();
+			Assert.False(o.IsDirty);
+
+			Assert.IsNull(o.NullableSpan);
+
+			o.Span = new TimeSpan();
+			Assert.False(o.IsDirty);
+
+			o.Span = new TimeSpan(10);
+			Assert.True(o.IsDirty);
+
+			o.AcceptChanges();
+			Assert.IsFalse(o.IsDirty);
+
+			o.NullableSpan = new TimeSpan();
+			Assert.True(o.IsDirty);
+
+			o.AcceptChanges();
+			Assert.IsFalse(o.IsDirty);
+		}
 	}
 }

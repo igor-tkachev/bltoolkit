@@ -1,6 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Linq.Expressions;
+
+#if !(FW4 || SILVERLIGHT)
+using System.Linq;
+#endif
+
 
 namespace BLToolkit.Data.Linq.Builder
 {
@@ -16,11 +20,11 @@ namespace BLToolkit.Data.Linq.Builder
 
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
-			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
+			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]) { CopyTable = true });
 
 			if (methodCall.Arguments.Count == 2)
 			{
-				var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				var condition = (LambdaExpression)ExpressionBuilder.GetPredicate(methodCall.Arguments[1]);
 
 				if (methodCall.Method.Name == "All")
 #if FW4 || SILVERLIGHT
@@ -41,7 +45,7 @@ namespace BLToolkit.Data.Linq.Builder
 		{
 			if (methodCall.Arguments.Count == 2)
 			{
-				var predicate = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+				var predicate = (LambdaExpression)ExpressionBuilder.GetPredicate(methodCall.Arguments[1]);
 				var info      = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
 
 				if (info != null)
@@ -110,7 +114,7 @@ namespace BLToolkit.Data.Linq.Builder
 					return new[] { new SqlInfo { Query = query, Sql = sql } };
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToIndex(Expression expression, int level, ConvertFlags flags)
@@ -134,12 +138,12 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			ISqlExpression _subQuerySql;

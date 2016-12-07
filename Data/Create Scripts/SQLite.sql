@@ -123,8 +123,21 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue2 datetime2,
 	BoolValue      boolean,
 	GuidValue      uniqueidentifier,
-	BinaryValue    binary(5000),
+	BinaryValue    binary(5000) NULL,
 	SmallIntValue  smallint,
-	IntValue       int NULL,
-	BigIntValue    bigint NULL
+	IntValue       int          NULL,
+	BigIntValue    bigint       NULL,
+	UInt16         numeric(5, 0) NULL,
+	UInt32         numeric(10, 0) NULL,
+	UInt64         numeric(20, 0) NULL
 );
+
+DROP TABLE TestIdentity
+GO
+
+CREATE TABLE TestIdentity (
+ID          integer      NOT NULL CONSTRAINT PK_TestIdentity PRIMARY KEY AUTOINCREMENT,
+IntValue    INTEGER      NULL,
+StringValue NVARCHAR(50) NULL
+)
+GO

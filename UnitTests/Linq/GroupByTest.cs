@@ -1043,7 +1043,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GrooupByAssociation3()
+		public void GrooupByAssociation3([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -1059,7 +1059,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GrooupByAssociation4()
+		public void GrooupByAssociation4([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -1119,7 +1119,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void GroupByAggregate2()
+		public void GroupByAggregate2([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 				AreEqual(
@@ -1357,14 +1357,14 @@ namespace Data.Linq
 				 select g.Select(ch => ch.ChildID).Where(id => id < 30).Count(id => id >= 20))));
 		}
 
-		[Test]
-		public void GroupByExtraFieldBugTest()
+		[Test, Category("MySql")]
+		public void GroupByExtraFieldBugTest([IncludeDataContexts(ProviderName.MySql)] string context)
 		{
 			// https://github.com/igor-tkachev/bltoolkit/issues/42
 			// extra field is generated in the GROUP BY clause, for example:
 			// GROUP BY p.LastName, p.LastName <--- the second one is redundant
 
-			using (var db = new TestDbManager("MySql"))
+			using (var db = new TestDbManager(context))
 			{
 				var q =
 					from d in db.Doctor
@@ -1383,6 +1383,235 @@ namespace Data.Linq
 				// check that our field does not present in the GROUP BY clause second time
 				Assert.AreEqual(-1, lastQuery.IndexOf(fieldName, fieldPos + 1));
 			}
+		}
+
+		[Test]
+		public void DoubleGroupBy1()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					from t in
+						from p in Parent
+						where p.Value1 != null
+						group p by p.ParentID into g
+						select new
+						{
+							ID  = g.Key,
+							Max = g.Max(t => t.Value1)
+						}
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					},
+					from t in
+						from p in db.Parent
+						where p.Value1 != null
+						group p by p.ParentID into g
+						select new
+						{
+							ID  = g.Key,
+							Max = g.Max(t => t.Value1)
+						}
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					}));
+			
+		}
+
+		[Test]
+		public void DoubleGroupBy2()
+		{
+			ForEachProvider(
+				db => AreEqual(
+					from p in Parent
+					where p.Value1 != null
+					group p by p.ParentID into g
+					select new
+					{
+						ID  = g.Key,
+						Max = g.Max(t => t.Value1)
+					} into t
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					},
+					from p in db.Parent
+					where p.Value1 != null
+					group p by p.ParentID into g
+					select new
+					{
+						ID  = g.Key,
+						Max = g.Max(t => t.Value1)
+					} into t
+					group t by t.ID into g
+					select new
+					{
+						g.Key,
+						Sum = g.Sum(t => t.Max)
+					}));
+			
+		}
+
+		[Test]
+		public void InnerQuery([DataContexts(ProviderName.SqlCe)] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				AreEqual(
+					   Doctor.GroupBy(s => s.PersonID).Select(s => s.Select(d => d.Taxonomy).First()),
+					db.Doctor.GroupBy(s => s.PersonID).Select(s => s.Select(d => d.Taxonomy).First()));
+			}
+		}
+
+		[Test]
+		public void CalcMember([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				AreEqual(
+					from parent in Parent
+					from child  in Person
+					where child.ID == parent.ParentID
+					let data = new
+					{
+						parent.Value1,
+						Value = child.FirstName == "John" ? child.FirstName : "a"
+					}
+					group data by data.Value into groupedData
+					select new
+					{
+						groupedData.Key,
+						Count = groupedData.Count()
+					},
+					from parent in db.Parent
+					from child  in db.Person
+					where child.ID == parent.ParentID
+					let data = new
+					{
+						parent.Value1,
+						Value = child.FirstName == "John" ? child.FirstName : "a"
+					}
+					group data by data.Value into groupedData
+					select new
+					{
+						groupedData.Key,
+						Count = groupedData.Count()
+					});
+			}
+		}
+
+		[Test]
+		public void GroupByDate1([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				AreEqual(
+					from t in Types2
+					group t by new { t.DateTimeValue.Value.Month, t.DateTimeValue.Value.Year } into grp
+					select new
+					{
+						Total = grp.Sum(_ => _.MoneyValue),
+						year  = grp.Key.Year,
+						month = grp.Key.Month
+					},
+					from t in db.Types2
+					group t by new { t.DateTimeValue.Value.Month, t.DateTimeValue.Value.Year } into grp
+					select new
+					{
+						Total = grp.Sum(_ => _.MoneyValue),
+						year  = grp.Key.Year,
+						month = grp.Key.Month
+					});
+			}
+		}
+
+		[Test]
+		public void GroupByDate2([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var expected = ( 
+					from t in Types2
+					group t by new { t.DateTimeValue.Value.Month, t.DateTimeValue.Value.Year } into grp
+					select new
+					{
+						Total = grp.Sum(_ => _.MoneyValue),
+						grp
+					}).ToList().OrderBy(_ => _.grp.Key.Month).ThenBy(_ => _.grp.Key.Year).ToArray();
+
+				var result = (
+					from t in db.Types2
+					group t by new { t.DateTimeValue.Value.Month, t.DateTimeValue.Value.Year } into grp
+					select new
+					{
+						Total = grp.Sum(_ => _.MoneyValue),
+						grp
+					}).OrderBy(_ => _.grp.Key.Month).ThenBy(_ => _.grp.Key.Year).ToArray();
+
+				Assert.AreEqual(expected.Length, result.Length);
+				for (int i = 0; i < expected.Length; i++)
+				{
+					var e = expected[i];
+					var r = result  [i];
+					Assert.AreEqual(e.Total,         r.Total);
+					Assert.AreEqual(e.grp.Key.Month, r.grp.Key.Month);
+					Assert.AreEqual(e.grp.Key.Year,  r.grp.Key.Year);
+				}
+			}
+		}
+
+		[Test]
+		public void Issue_294()
+		{
+			var expected1 =
+				(from p in Parent
+					group p by new {p.ParentID}
+					into grp
+					select grp).OrderBy(_ => _.Key.ParentID).ToList();
+			var expected2 =
+				(from p in Child
+					group p by new {p.ChildID, p.ParentID}
+					into grp
+					select grp).OrderBy(_ => _.Key.ChildID).ThenBy(_ => _.Key.ParentID).ToList();
+
+			ForEachProvider(db =>
+			{
+				var result1 =
+					(from p in db.Parent
+						group p by new {p.ParentID}
+						into grp
+						select grp).OrderBy(_ => _.Key.ParentID).ToList();
+
+				Assert.AreEqual(expected1.Count, result1.Count);
+				for (int i = 0; i < expected1.Count; i++)
+				{
+					var e = expected1[i];
+					var r = result1  [i];
+					Assert.AreEqual(e.Key.ParentID, r.Key.ParentID);
+				}
+
+				var result2 =
+					(from p in db.Child
+						group p by new {p.ChildID, p.ParentID}
+						into grp
+						select grp).OrderBy(_ => _.Key.ChildID).ThenBy(_ => _.Key.ParentID).ToList();
+
+				Assert.AreEqual(expected2.Count, result2.Count);
+				for (int i = 0; i < expected2.Count; i++)
+				{
+					var e = expected2[i];
+					var r = result2  [i];
+					Assert.AreEqual(e.Key.ChildID,  r.Key.ChildID);
+					Assert.AreEqual(e.Key.ParentID, r.Key.ParentID);
+				}
+			});
 		}
 	}
 }

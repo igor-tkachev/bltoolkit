@@ -2,10 +2,11 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
-using BLToolkit.Data.Sql.SqlProvider;
 
 namespace BLToolkit.Data.DataProvider
 {
+	using Sql.SqlProvider;
+
 	/// <summary>
 	/// Implements access to the Data Provider for OLE DB.
 	/// </summary>
@@ -65,7 +66,7 @@ namespace BLToolkit.Data.DataProvider
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return "@" + value;
+					return "@" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToQueryField:
 				case ConvertType.NameToQueryFieldAlias:

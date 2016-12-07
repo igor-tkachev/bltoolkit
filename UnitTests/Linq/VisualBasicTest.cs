@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
+
 using BLToolkit.Data.DataProvider;
-using Data.Linq.Model;
+
 using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using Model;
+
 	[TestFixture]
 	public class VisualBasicTest : TestBase
 	{
@@ -35,7 +38,7 @@ namespace Data.Linq
 				VisualBasicCommon.ParamenterName(db)));
 		}
 
-		[Test]
+        [Test]
 		public void SearchCondition1()
 		{
 			ForEachProvider(
@@ -48,7 +51,7 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void SearchCondition2()
+		public void SearchCondition2([IncludeDataContexts("Northwind")] string context)
 		{
 			using (var db = new NorthwindDB())
 			{
@@ -57,6 +60,46 @@ namespace Data.Linq
 					where cust.Orders.Count > 0 && cust.CompanyName.StartsWith("H")
 					select cust.CustomerID,
 					VisualBasicCommon.SearchCondition2(db));
+			}
+		}
+
+		[Test]
+		public void SearchCondition3([IncludeDataContexts("Northwind")] string context)
+		{
+			using (var db = new NorthwindDB())
+			{
+
+				var cQuery = from order in db.Order
+								where order.OrderDate == new DateTime(1997, 11, 14)
+					select order.OrderID;
+
+				var cSharpResults = cQuery.ToList();
+
+				var vbResults = (VisualBasicCommon.SearchCondition3(db)).ToList();
+
+				AreEqual(
+					cSharpResults,
+					vbResults);
+			}
+		}
+
+		[Test]
+		public void SearchCondition4([IncludeDataContexts("Northwind")] string context)
+		{
+			using (var db = new NorthwindDB())
+			{
+
+				var cQuery = from order in db.Order
+								where order.OrderDate == new DateTime(1997, 11, 14)
+					select order.OrderID;
+
+				var cSharpResults = cQuery.ToList();
+
+				var vbResults = (VisualBasicCommon.SearchCondition4(db)).ToList();
+
+				AreEqual(
+					cSharpResults,
+					vbResults);
 			}
 		}
 	}

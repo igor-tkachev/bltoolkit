@@ -145,6 +145,7 @@ namespace BLToolkit.Data.Linq
 				{ M(() => "".Length               ), L<S,I>      ( obj           => Sql.Length(obj).Value) },
 				{ M(() => "".Substring  (0)       ), L<S,I,S>    ((obj,p0)       => Sql.Substring(obj, p0 + 1, obj.Length - p0)) },
 				{ M(() => "".Substring  (0,0)     ), L<S,I,I,S>  ((obj,p0,p1)    => Sql.Substring(obj, p0 + 1, p1)) },
+				{ M(() => "".ContainsExactly("")  ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (Sql.ContainsExactly(p0, obj)                .Value) - 1) },
 				{ M(() => "".IndexOf    ("")      ), L<S,S,I>    ((obj,p0)       => p0.Length == 0                    ? 0  : (Sql.CharIndex(p0, obj)                      .Value) - 1) },
 				{ M(() => "".IndexOf    ("",0)    ), L<S,S,I,I>  ((obj,p0,p1)    => p0.Length == 0 && obj.Length > p1 ? p1 : (Sql.CharIndex(p0, obj,               p1 + 1).Value) - 1) },
 				{ M(() => "".IndexOf    ("",0,0)  ), L<S,S,I,I,I>((obj,p0,p1,p2) => p0.Length == 0 && obj.Length > p1 ? p1 : (Sql.CharIndex(p0, Sql.Left(obj, p2), p1)    .Value) - 1) },
@@ -725,6 +726,23 @@ namespace BLToolkit.Data.Linq
 
 			}},
 
+			#region MsSql2012
+
+			{ "MsSql2012", new Dictionary<MemberInfo,LambdaExpression> {
+				{ M(() => Sql.PadRight("",0,' ')),  L<S,I?,C,S>   ((p0,p1,p2) => p0.Length > p1 ? p0 : p0 + Replicate(p2, p1 - p0.Length)) },
+				{ M(() => Sql.PadLeft ("",0,' ')),  L<S,I?,C,S>   ((p0,p1,p2) => p0.Length > p1 ? p0 : Replicate(p2, p1 - p0.Length) + p0) },
+				{ M(() => Sql.Trim    ("")      ),  L<S,S>        ( p0        => Sql.TrimLeft(Sql.TrimRight(p0))) },
+				{ M(() => Sql.MakeDateTime(0,0,0)), L<I?,I?,I?,D?>((y,m,d)    => DateAdd(Sql.DateParts.Month, (y.Value - 1900) * 12 + m.Value - 1, d.Value - 1)) },
+
+				{ M(() => Sql.Cosh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) + Sql.Exp(-v)) / 2) },
+				{ M(() => Sql.Log(0m, 0)), L<M?,M?,M?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
+				{ M(() => Sql.Log(0.0,0)), L<F?,F?,F?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
+				{ M(() => Sql.Sinh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / 2) },
+				{ M(() => Sql.Tanh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / (Sql.Exp(v) + Sql.Exp(-v))) },
+			}},
+
+			#endregion
+
 			#region MsSql2008
 
 			{ "MsSql2008", new Dictionary<MemberInfo,LambdaExpression> {
@@ -738,6 +756,30 @@ namespace BLToolkit.Data.Linq
 				{ M(() => Sql.Log(0.0,0)), L<F?,F?,F?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
 				{ M(() => Sql.Sinh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / 2) },
 				{ M(() => Sql.Tanh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / (Sql.Exp(v) + Sql.Exp(-v))) },
+			}},
+
+			#endregion
+
+			#region MsSql2000
+
+			{ "MsSql2000", new Dictionary<MemberInfo,LambdaExpression> {
+				{ M(() => Sql.PadRight("",0,' ')),  L<S,I?,C,S>   ((p0,p1,p2) => p0.Length > p1 ? p0 : p0 + Replicate(p2, p1 - p0.Length)) },
+				{ M(() => Sql.PadLeft ("",0,' ')),  L<S,I?,C,S>   ((p0,p1,p2) => p0.Length > p1 ? p0 : Replicate(p2, p1 - p0.Length) + p0) },
+				{ M(() => Sql.Trim    ("")      ),  L<S,S>        ( p0        => Sql.TrimLeft(Sql.TrimRight(p0))) },
+				{ M(() => Sql.MakeDateTime(0,0,0)), L<I?,I?,I?,D?>((y,m,d)    => DateAdd(Sql.DateParts.Month, (y.Value - 1900) * 12 + m.Value - 1, d.Value - 1)) },
+				{ M(() => Sql.MakeDateTime(0, 0, 0, 0, 0, 0) ), L<I?,I?,I?,I?,I?,I?,D?>((y,m,d,h,mm,s) => Sql.Convert(Sql.DateTime2,
+					y.ToString() + "-" + m.ToString() + "-" + d.ToString() + " " +
+					h.ToString() + ":" + mm.ToString() + ":" + s.ToString(), 120)) },
+				{ M(() => Sql.Cosh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) + Sql.Exp(-v)) / 2) },
+				{ M(() => Sql.Log(0m, 0)), L<M?,M?,M?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
+				{ M(() => Sql.Log(0.0,0)), L<F?,F?,F?>((m,n) => Sql.Log(n) / Sql.Log(m)) },
+				{ M(() => Sql.Sinh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / 2) },
+				{ M(() => Sql.Tanh(0)   ), L<F?,F?>   ( v    => (Sql.Exp(v) - Sql.Exp(-v)) / (Sql.Exp(v) + Sql.Exp(-v))) },
+
+				{ M(() => DateTime.Parse("")), L<String,DateTime>(p0 => Sql.ConvertTo<DateTime>.From(p0) ) },
+				{ M(() => Sql.RoundToEven(0m) ), L<M?,M?>(d => d - Sql.Floor(d) == 0.5m && (long)Sql.Floor(d) % 2 == 0? Sql.Floor(d) : Sql.Round(d)) },
+				{ M(() => Sql.RoundToEven(0.0)), L<F?,F?>(d => d - Sql.Floor(d) == 0.5  && (long)Sql.Floor(d) % 2 == 0? Sql.Floor(d) : Sql.Round(d)) },
+
 			}},
 
 			#endregion

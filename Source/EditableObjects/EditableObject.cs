@@ -65,6 +65,9 @@ namespace BLToolkit.EditableObjects
 
 	[GlobalInstanceType(typeof(XmlDocument),    typeof(EditableXmlDocument))]
 	[GlobalInstanceType(typeof(EditableObject), typeof(EditableObjectHolder), IsObjectHolder=true)]
+
+	[GlobalInstanceType(typeof(TimeSpan),  typeof(EditableValue<TimeSpan>))]
+	[GlobalInstanceType(typeof(TimeSpan?), typeof(EditableValue<TimeSpan?>))]
 	#endregion
 	[ImplementInterface(typeof(IEditable))]
 	[ImplementInterface(typeof(IMemberwiseEditable))]

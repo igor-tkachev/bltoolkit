@@ -8,12 +8,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.Data.EntityClient;
 using System.Data.Objects;
 using System.Data.Objects.DataClasses;
-using System.Data.EntityClient;
-using System.ComponentModel;
-using System.Xml.Serialization;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 [assembly: EdmSchemaAttribute()]
 #region EDM Relationship Metadata
@@ -513,6 +514,7 @@ namespace NorthwindDataService
         private ObjectSet<Summary_of_Sales_by_Year> _Summary_of_Sales_by_Years;
 
         #endregion
+
         #region AddTo Methods
     
         /// <summary>
@@ -732,11 +734,11 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
-    
 
     #endregion
-    
+
     #region Entities
     
     /// <summary>
@@ -767,6 +769,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1046,6 +1049,7 @@ namespace NorthwindDataService
         partial void OnCategoryNameChanged();
 
         #endregion
+
     
     }
     
@@ -1073,6 +1077,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1175,6 +1180,7 @@ namespace NorthwindDataService
         partial void OnPictureChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -1201,6 +1207,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -1225,6 +1232,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1279,6 +1287,7 @@ namespace NorthwindDataService
         partial void OnCategorySalesChanged();
 
         #endregion
+
     
     }
     
@@ -1306,6 +1315,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1363,6 +1373,7 @@ namespace NorthwindDataService
         partial void OnProductNameChanged();
 
         #endregion
+
     
     }
     
@@ -1390,6 +1401,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1660,6 +1672,7 @@ namespace NorthwindDataService
         partial void OnFaxChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -1708,6 +1721,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -1734,6 +1748,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1839,6 +1854,7 @@ namespace NorthwindDataService
         partial void OnRelationshipChanged();
 
         #endregion
+
     
     }
     
@@ -1864,6 +1880,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -1918,6 +1935,7 @@ namespace NorthwindDataService
         partial void OnCustomerDescChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -1944,6 +1962,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -1972,6 +1991,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -2410,6 +2430,7 @@ namespace NorthwindDataService
         partial void OnPhotoPathChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -2518,6 +2539,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -2558,6 +2580,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -3212,6 +3235,7 @@ namespace NorthwindDataService
         partial void OnFreightChanged();
 
         #endregion
+
     
     }
     
@@ -3237,6 +3261,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -3579,6 +3604,7 @@ namespace NorthwindDataService
         partial void OnShipCountryChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -3719,6 +3745,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -3751,6 +3778,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -3880,6 +3908,7 @@ namespace NorthwindDataService
         partial void OnDiscountChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -3960,6 +3989,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -3994,6 +4024,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -4183,6 +4214,7 @@ namespace NorthwindDataService
         partial void OnExtendedPriceChanged();
 
         #endregion
+
     
     }
     
@@ -4208,6 +4240,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -4262,6 +4295,7 @@ namespace NorthwindDataService
         partial void OnSubtotalChanged();
 
         #endregion
+
     
     }
     
@@ -4289,6 +4323,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -4778,6 +4813,7 @@ namespace NorthwindDataService
         partial void OnCountryChanged();
 
         #endregion
+
     
     }
     
@@ -4807,6 +4843,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5053,6 +5090,7 @@ namespace NorthwindDataService
         partial void OnDiscontinuedChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -5155,6 +5193,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -5181,6 +5220,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5262,6 +5302,7 @@ namespace NorthwindDataService
         partial void OnProductSalesChanged();
 
         #endregion
+
     
     }
     
@@ -5287,6 +5328,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5341,6 +5383,7 @@ namespace NorthwindDataService
         partial void OnUnitPriceChanged();
 
         #endregion
+
     
     }
     
@@ -5370,6 +5413,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5502,6 +5546,7 @@ namespace NorthwindDataService
         partial void OnDiscontinuedChanged();
 
         #endregion
+
     
     }
     
@@ -5529,6 +5574,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5583,6 +5629,7 @@ namespace NorthwindDataService
         partial void OnRegionDescriptionChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -5609,6 +5656,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -5637,6 +5685,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5745,6 +5794,7 @@ namespace NorthwindDataService
         partial void OnProductSalesChanged();
 
         #endregion
+
     
     }
     
@@ -5772,6 +5822,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5877,6 +5928,7 @@ namespace NorthwindDataService
         partial void OnShippedDateChanged();
 
         #endregion
+
     
     }
     
@@ -5904,6 +5956,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -5982,6 +6035,7 @@ namespace NorthwindDataService
         partial void OnPhoneChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -6008,6 +6062,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -6032,6 +6087,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -6110,6 +6166,7 @@ namespace NorthwindDataService
         partial void OnSubtotalChanged();
 
         #endregion
+
     
     }
     
@@ -6135,6 +6192,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -6213,6 +6271,7 @@ namespace NorthwindDataService
         partial void OnSubtotalChanged();
 
         #endregion
+
     
     }
     
@@ -6240,6 +6299,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -6534,6 +6594,7 @@ namespace NorthwindDataService
         partial void OnHomePageChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -6560,6 +6621,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -6588,6 +6650,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -6714,6 +6777,7 @@ namespace NorthwindDataService
         partial void OndefinitionChanged();
 
         #endregion
+
     
     }
     
@@ -6743,6 +6807,7 @@ namespace NorthwindDataService
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -6821,6 +6886,7 @@ namespace NorthwindDataService
         partial void OnRegionIDChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -6885,8 +6951,10 @@ namespace NorthwindDataService
         }
 
         #endregion
+
     }
 
     #endregion
+
     
 }

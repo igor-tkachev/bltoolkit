@@ -110,6 +110,9 @@
     <Compile Include="DataAccess\IdentityAttribute.cs" />
     <Compile Include="DataAccess\NonUpdatableAttribute.cs" />
     <Compile Include="DataAccess\PrimaryKeyAttribute.cs" />
+    <Compile Include="DataAccess\PrimaryKeyGeneratorType.cs" />
+    <Compile Include="DataAccess\ScalarAttribute.cs" />
+    <Compile Include="DataAccess\SequenceKeyGenerator.cs" />
     <Compile Include="DataAccess\SqlIgnoreAttribute.cs" />
     <Compile Include="DataAccess\TableNameAttribute.cs" />
     <Compile Include="Data\DataProvider\ConvertType.cs" />
@@ -117,6 +120,7 @@
     <Compile Include="Data\IDataReaderEx.cs" />
     <Compile Include="Data\Linq\Builder\AggregationBuilder.cs" />
     <Compile Include="Data\Linq\Builder\AllAnyBuilder.cs" />
+    <Compile Include="Data\Linq\Builder\AsUpdatableBuilder.cs" />
     <Compile Include="Data\Linq\Builder\BuildInfo.cs" />
     <Compile Include="Data\Linq\Builder\CastBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ChangeTypeExpression.cs" />
@@ -132,6 +136,7 @@
     <Compile Include="Data\Linq\Builder\ExpressionBuilder.SqlBuilder.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionContext.cs" />
     <Compile Include="Data\Linq\Builder\ExpressionHoder.cs" />
+    <Compile Include="Data\Linq\Builder\ExpressionTestGenerator.cs" />
     <Compile Include="Data\Linq\Builder\FirstSingleBuilder.cs" />
     <Compile Include="Data\Linq\Builder\GroupByBuilder.cs" />
     <Compile Include="Data\Linq\Builder\IBuildContext.cs" />
@@ -175,7 +180,7 @@
     <Compile Include="Data\Linq\IQueryContext.cs" />
     <Compile Include="Data\Linq\ISelectInsertable.cs" />
     <Compile Include="Data\Linq\ITable.cs" />
-    <Compile Include="Data\Linq\IUpdateable.cs" />
+    <Compile Include="Data\Linq\IUpdatable.cs" />
     <Compile Include="Data\Linq\IValueInsertable.cs" />
     <Compile Include="Data\Linq\LinqException.cs" />
     <Compile Include="Data\Linq\LinqExtensions.cs" />
@@ -187,6 +192,7 @@
     <Compile Include="Data\Linq\ReflectionHelper.cs" />
     <Compile Include="Data\Linq\Settings.cs" />
     <Compile Include="Data\Linq\Sql.cs" />
+    <Compile Include="Data\Linq\Sql.GroupBy.cs" />
     <Compile Include="Data\Linq\SqlEnumAttribute.cs" />
     <Compile Include="Data\Linq\SqlExpressionAttribute.cs" />
     <Compile Include="Data\Linq\SqlFunctionAttribute.cs" />
@@ -225,6 +231,7 @@
     <Compile Include="Data\Sql\SqlProvider\ISqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2005SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MsSql2008SqlProvider.cs" />
+    <Compile Include="Data\Sql\SqlProvider\MsSql2012SqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MSSqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\MySqlSqlProvider.cs" />
     <Compile Include="Data\Sql\SqlProvider\OracleSqlProvider.cs" />
@@ -238,6 +245,7 @@
     <Compile Include="Data\Sql\SqlTableT.cs" />
     <Compile Include="Data\Sql\SqlTableType.cs" />
     <Compile Include="Data\Sql\SqlValue.cs" />
+    <Compile Include="Data\Sql\SqlValueBase.cs" />
     <Compile Include="Linq\ExpressionHelper.cs" />
     <Compile Include="Mapping\Association.cs" />
     <Compile Include="Mapping\AssociationAttribute.cs" />
@@ -252,6 +260,7 @@
     <Compile Include="Mapping\DictionaryListMapperT.cs" />
     <Compile Include="Mapping\DictionaryMapper.cs" />
     <Compile Include="Mapping\EnumeratorMapper.cs" />
+    <Compile Include="Mapping\ExpressionMapIgnoreAttribute.cs" />
     <Compile Include="Mapping\ExpressionMapper.cs" />
     <Compile Include="Mapping\IMapDataDestination.cs" />
     <Compile Include="Mapping\IMapDataDestinationList.cs" />
@@ -395,6 +404,7 @@
     <Compile Include="TypeBuilder\ParentAttribute.cs" />
     <Compile Include="TypeBuilder\PropertyChangedAttribute.cs" />
     <Compile Include="TypeBuilder\PropertyInfoAttribute.cs" />
+    <Compile Include="TypeBuilder\RefCursorAttribute.cs" />
     <Compile Include="TypeBuilder\ReturnIfFalseAttribute.cs" />
     <Compile Include="TypeBuilder\ReturnIfNonZeroAttribute.cs" />
     <Compile Include="TypeBuilder\ReturnIfNotNullAttribute.cs" />

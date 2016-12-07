@@ -20,6 +20,9 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		LambdaExpression ConvertMember        (MemberInfo mi);
 		ISqlExpression   GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning);
 
+		bool             BuildAsValue         (SqlParameter parm);
+		bool             IsValueBuildable     (object value);
+
 		string           Name                        { get; }
 		SqlQuery         SqlQuery                    { get; set; }
 

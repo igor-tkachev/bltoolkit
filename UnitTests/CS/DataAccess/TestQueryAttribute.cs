@@ -44,17 +44,21 @@ namespace DataAccess
 		{
 			switch (dbManager.DataProvider.Name)
 			{
-				case ProviderName.MsSql   :
-				case ProviderName.SqlCe   : return SqlText;
+				case ProviderName.MsSql     :
+				case ProviderName.MsSql2000 :
+				case ProviderName.MsSql2005 :
+				case ProviderName.MsSql2008 :
+				case ProviderName.MsSql2012 :
+				case ProviderName.SqlCe     : return SqlText;
 
-				case ProviderName.Access  : return AccessText ?? SqlText;
+				case ProviderName.Access    : return AccessText ?? SqlText;
 	
 				case "Oracle":
-				case ProviderName.Oracle  : return OracleText ?? SqlText;
+				case ProviderName.Oracle    : return OracleText ?? SqlText;
 
-				case ProviderName.Firebird: return FbText     ?? SqlText;
+				case ProviderName.Firebird  : return FbText     ?? SqlText;
 
-				case ProviderName.SQLite  : return SQLiteText ?? SqlText;
+				case ProviderName.SQLite    : return SQLiteText ?? SqlText;
 			}
 
 			throw new ApplicationException(string.Format("Unknown data provider '{0}'", dbManager.DataProvider.Name));

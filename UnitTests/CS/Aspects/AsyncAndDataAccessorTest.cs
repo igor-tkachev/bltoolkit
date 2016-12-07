@@ -13,7 +13,11 @@ namespace Aspects
 	{
 		public abstract class TestObject : DataAccessor
 		{
+#if FIREBIRD
+			[SqlQuery("SELECT cast(@intVal as int) as intval From dual")]
+#else
 			[SqlQuery("SELECT @intVal")]
+#endif
 			public abstract int Test(int @intVal);
 
 			[Async] public abstract IAsyncResult BeginTest(int intVal);

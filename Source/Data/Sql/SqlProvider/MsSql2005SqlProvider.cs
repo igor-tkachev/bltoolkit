@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Text;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
@@ -54,9 +55,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			return expr;
 		}
 
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
+		}
+
 		protected override ISqlProvider CreateSqlProvider()
 		{
 			return new MsSql2005SqlProvider();
+		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("'{0:yyyy-MM-ddTHH:mm:ss.fff}'", value));
 		}
 
 		protected override void BuildDataType(System.Text.StringBuilder sb, SqlDataType type)

@@ -27,38 +27,66 @@ namespace DataAccess
 
 		public interface IValue
 		{
-			string Value { get; }
+			string StringValue { get; }
 		}
 
 		public class MyValue : IValue
 		{
-			private string _value;
-			public  string  Value { get { return _value; } set { _value = value; } }
+			private string _stringValue;
+			public  string  StringValue { get { return _stringValue; } set { _stringValue = value; } }
 		}
 
 		[ActualType(typeof(IName),  typeof(Name1))]
 		[ActualType(typeof(IValue), typeof(MyValue))]
 		public abstract class TestAccessor : DataAccessor
 		{
+#if FIREBIRD
+			[SqlQuery("SELECT 'John' as Name FROM Dual")]
+#else
 			[SqlQuery("SELECT 'John' as Name")]
+#endif
 			public abstract IName GetName();
 
+#if FIREBIRD
+			[SqlQuery("SELECT 'John' as Name FROM Dual"), ObjectType(typeof(Name2))]
+#else
 			[SqlQuery("SELECT 'John' as Name"), ObjectType(typeof(Name2))]
+#endif
 			public abstract IName GetName2();
 
+#if FIREBIRD
+			[SqlQuery("SELECT 'John' as Name FROM Dual")]
+#else
 			[SqlQuery("SELECT 'John' as Name")]
+#endif
 			public abstract IList<IName> GetNameList();
 
+#if FIREBIRD
+			[SqlQuery("SELECT 'John' as Name FROM Dual"), ObjectType(typeof(Name2))]
+#else
 			[SqlQuery("SELECT 'John' as Name"), ObjectType(typeof(Name2))]
+#endif
 			public abstract IList<IName> GetName2List();
 
+#if FIREBIRD
+			[SqlQuery("SELECT 1 as ID, 'John' as Name FROM Dual"), Index("@ID")]
+#else
 			[SqlQuery("SELECT 1 as ID, 'John' as Name"), Index("@ID")]
+#endif
 			public abstract IDictionary<int, IName> GetNameDictionary();
 
+#if FIREBIRD
+			[SqlQuery("SELECT 1 as ID, 'John' as Name FROM Dual"), Index("@ID"), ObjectType(typeof(Name2))]
+#else
 			[SqlQuery("SELECT 1 as ID, 'John' as Name"), Index("@ID"), ObjectType(typeof(Name2))]
+#endif
 			public abstract IDictionary<int, IName> GetName2Dictionary();
 
-			[SqlQuery("SELECT 'John' as Value")]
+#if FIREBIRD
+			[SqlQuery("SELECT 'John' as StringValue FROM Dual")]
+#else
+			[SqlQuery("SELECT 'John' as StringValue")]
+#endif
 			public abstract IValue GetValue();
 		}
 
@@ -113,7 +141,7 @@ namespace DataAccess
 		public void TestValue()
 		{
 			IValue value = Accessor.GetValue();
-			Assert.AreEqual(value.Value, "John");
+			Assert.AreEqual(value.StringValue, "John");
 		}
 	}
 }

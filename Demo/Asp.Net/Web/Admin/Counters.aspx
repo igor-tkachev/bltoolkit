@@ -6,14 +6,14 @@
 <table class="infoTable" cellspacing="0" cellpadding="0" border="0">
 <tr>
 <td style="text-align:left">GC.CollectionCount:</td><td><%= GC.CollectionCount(GC.MaxGeneration) %></td>
-<td style="text-align:left;padding-left:20;">Cache Cleanup Times:</td><td><%= CacheAspect.CleanupThread.WorkTimes %></td>
-<td style="text-align:left;padding-left:20;">Objects in Cache:</td><td><%= CacheAspect.CleanupThread.ObjectsInCache %></td>
+<td style="text-align:left;padding-left:20;">Cache Cleanup Times:</td><td><%= CacheAspect.WorkTimes %></td>
+<td style="text-align:left;padding-left:20;">Objects in Cache:</td><td><%= CacheAspect.ObjectsInCache %></td>
 </tr>
 
 <tr>
 <td style="text-align:left">GC.TotalMemory:</td><td><%= GC.GetTotalMemory(false)/(1024*1024) %>M</td>
-<td style="text-align:left;padding-left:20;">Total Cleanup Time:</td><td><%= CacheAspect.CleanupThread.WorkTime %></td>
-<td style="text-align:left;padding-left:20;">Objects Expired:</td><td><%= CacheAspect.CleanupThread.ObjectsExpired %></td>
+<td style="text-align:left;padding-left:20;">Total Cleanup Time:</td><td><%= CacheAspect.WorkTime %></td>
+<td style="text-align:left;padding-left:20;">Objects Expired:</td><td><%= CacheAspect.ObjectsExpired %></td>
 </tr>
 </table>
 <br/>

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class InformixSqlProvider : BasicSqlProvider
 	{
@@ -166,11 +166,22 @@ namespace BLToolkit.Data.Sql.SqlProvider
 								func.Parameters);
 					case "Hour"     :
 					case "Minute"   :
-					case "Second"   : return new SqlExpression(func.SystemType, string.Format("({{0}}::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
+					case "Second"   : return new SqlExpression(func.SystemType, string.Format("(({{0}})::datetime {0} to {0})::char(3)::int", func.Name), func.Parameters);
 				}
 			}
 
 			return expr;
+		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("to_date('{0:yyyy-MM-dd HH:mm:ss.fff}', '%Y-%m-%d %H:%M:%S%F3')", value));
+		}
+
+		protected override void BuildFunction(StringBuilder sb, SqlFunction func)
+		{
+			func = ConvertFunctionParameters(func);
+			base.BuildFunction(sb, func);
 		}
 
 		public virtual object ConvertBooleanValue(bool value)
@@ -246,7 +257,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			{
 				case ConvertType.NameToQueryParameter   : return "?";
 				case ConvertType.NameToCommandParameter :
-				case ConvertType.NameToSprocParameter   : return ":" + value;
+				case ConvertType.NameToSprocParameter   : return ":" + value.ToString().Replace(" ", string.Empty);
 				case ConvertType.SprocParameterToName   :
 					if (value != null)
 					{

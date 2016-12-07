@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Threading;
 
 namespace BLToolkit.Aspects
@@ -34,6 +35,7 @@ namespace BLToolkit.Aspects
 		private MethodInfo _methodInfo;
 		private int?       _instanceMaxCacheTime;
 		private bool?      _instanceIsWeak;
+		private int        _isLocked;
 
 		public override void Init(CallMethodInfo info, string configString)
 		{
@@ -42,6 +44,10 @@ namespace BLToolkit.Aspects
 			info.CacheAspect = this;
 
 			_methodInfo = info.MethodInfo;
+
+			CacheSyncRoot = info.SyncRoot;
+
+			_cache = CreateCache();
 
 			var ps = configString.Split(';');
 
@@ -61,7 +67,7 @@ namespace BLToolkit.Aspects
 		}
 
 		private static readonly IList _registeredAspects = ArrayList.Synchronized(new ArrayList());
-		private static          IList  RegisteredAspects
+		protected static        IList  RegisteredAspects
 		{
 			get { return _registeredAspects; }
 		}
@@ -80,40 +86,77 @@ namespace BLToolkit.Aspects
 
 		#region Overrides
 
+		// to enable unlock in BeforeCall or in OnFinally
+		
+		private void Lock()
+		{
+			Monitor.Enter(CacheSyncRoot);
+			_isLocked = Thread.CurrentThread.ManagedThreadId;
+		}
+
+		private void EndLock()
+		{
+			if (_isLocked != Thread.CurrentThread.ManagedThreadId)
+				return;
+			_isLocked = -1;
+
+			Monitor.Exit(CacheSyncRoot);
+		}
+
 		protected override void BeforeCall(InterceptCallInfo info)
 		{
 			if (!IsEnabled)
 				return;
 
 			var cache = Cache;
+			var key   = GetKey(info);
+			var item  = GetItem(cache, key);
 
-			lock (cache.SyncRoot)
+			if (item != null && !item.IsExpired)
 			{
-				var key  = GetKey(info);
-				var item = GetItem(cache, key);
+				SetReturnFromCache(info, item);
+				return;
+			}
+
+			try
+			{
+				Lock();
+
+				item = GetItem(cache, key);
 
 				if (item != null && !item.IsExpired)
 				{
-					info.InterceptResult = InterceptResult.Return;
-					info.ReturnValue     = item.ReturnValue;
-
-					if (item.RefValues != null)
-					{
-						var pis = info.CallMethodInfo.Parameters;
-						var n   = 0;
-
-						for (var i = 0; i < pis.Length; i++)
-							if (pis[i].ParameterType.IsByRef)
-								info.ParameterValues[i] = item.RefValues[n++];
-					}
-
-					info.Cached = true;
+					SetReturnFromCache(info, item);
+					EndLock();
 				}
-				else 
+				else
 				{
 					info.Items["CacheKey"] = key;
 				}
 			}
+			catch
+			{
+				EndLock();
+				throw;
+			}
+		}
+
+		private static void SetReturnFromCache(InterceptCallInfo info, CacheAspectItem item)
+		{
+			info.InterceptResult = InterceptResult.Return;
+			info.ReturnValue     = item.ReturnValue;
+
+			if (item.RefValues != null)
+			{
+				var pis = info.CallMethodInfo.Parameters;
+				var n = 0;
+
+				for (var i = 0; i < pis.Length; i++)
+					if (pis[i].ParameterType.IsByRef)
+						info.ParameterValues[i] = item.RefValues[n++];
+			}
+
+			info.Cached = true;
 		}
 
 		protected override void AfterCall(InterceptCallInfo info)
@@ -122,46 +165,50 @@ namespace BLToolkit.Aspects
 				return;
 
 			var cache = Cache;
+			var key   = (CompoundValue) info.Items["CacheKey"];
 
-			lock (cache.SyncRoot)
+			if (key == null)
+				return;
+
+			var maxCacheTime = _instanceMaxCacheTime ?? MaxCacheTime;
+			var isWeak       = _instanceIsWeak       ?? IsWeak;
+
+			var item = new CacheAspectItem
 			{
-				var key = (CompoundValue)info.Items["CacheKey"];
+				ReturnValue  = info.ReturnValue,
+				MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0
+					? DateTime.MaxValue
+					: DateTime.Now.AddMilliseconds(maxCacheTime),
+			};
 
-				if (key == null)
-					return;
+			var pis = info.CallMethodInfo.Parameters;
+			var n = 0;
 
-				var maxCacheTime = _instanceMaxCacheTime ?? MaxCacheTime;
-				var isWeak       = _instanceIsWeak       ?? IsWeak;
+			for (int i = 0; i < pis.Length; i++)
+				if ( pis[i].ParameterType.IsByRef)
+					n++;
 
-				var item = new CacheAspectItem
-				{
-					ReturnValue = info.ReturnValue,
-					MaxCacheTime = maxCacheTime == int.MaxValue || maxCacheTime < 0 ?
-						DateTime.MaxValue :
-						DateTime.Now.AddMilliseconds(maxCacheTime),
-				};
+			if (n > 0)
+			{
+				item.RefValues = new object[n];
 
-				var pis = info.CallMethodInfo.Parameters;
-				var n   = 0;
+				n = 0;
 
-				foreach (var pi in pis)
-					if (pi.ParameterType.IsByRef)
-						n++;
-
-				if (n > 0)
-				{
-					item.RefValues = new object[n];
-
-					n = 0;
-
-					for (var i = 0; i < pis.Length; i++)
-						if (pis[i].ParameterType.IsByRef)
-							item.RefValues[n++] = info.ParameterValues[i];
-				}
-
-				cache[key] = isWeak? (object)new WeakReference(item): item;
+				for (var i = 0; i < pis.Length; i++)
+					if (pis[i].ParameterType.IsByRef)
+						item.RefValues[n++] = info.ParameterValues[i];
 			}
+
+			cache[key] = isWeak ? (object) new WeakReference(item) : item;
 		}
+
+		protected override void OnFinally(InterceptCallInfo info)
+		{
+			EndLock();
+			base.OnFinally(info);
+		}
+
+		public bool HasCache {get { return CacheSyncRoot != null && Cache != null; }}
 
 		#endregion
 
@@ -193,10 +240,12 @@ namespace BLToolkit.Aspects
 
 		#region Cache
 
+		internal object CacheSyncRoot;
+
 		private IDictionary _cache;
 		public  IDictionary  Cache
 		{
-			get { return _cache ?? (_cache = CreateCache()); }
+			get { return _cache; }
 		}
 
 		protected virtual CacheAspectItem CreateCacheItem(InterceptCallInfo info)
@@ -206,7 +255,11 @@ namespace BLToolkit.Aspects
 
 		protected virtual IDictionary CreateCache()
 		{
+#if FW4
+			return new System.Collections.Concurrent.ConcurrentDictionary<CompoundValue, object>();
+#else
 			return Hashtable.Synchronized(new Hashtable());
+#endif
 		}
 
 		protected static CompoundValue GetKey(InterceptCallInfo info)
@@ -264,7 +317,7 @@ namespace BLToolkit.Aspects
 			var aspect = GetAspect(methodInfo);
 
 			if (aspect != null)
-				CleanupThread.ClearCache(aspect.Cache);
+				CleanupThread.ClearCache(aspect);
 		}
 
 		/// <summary>
@@ -281,6 +334,29 @@ namespace BLToolkit.Aspects
 			ClearCache(GetMethodInfo(declaringType, methodName, types));
 		}
 
+		/// <summary>
+		/// Clear a method call cache.
+		/// </summary>
+		/// <param name="declaringType">The method declaring type.</param>
+		/// <param name="methodName">The method name.</param>
+		/// <param name="types">An array of <see cref="System.Type"/> objects representing
+		/// the number, order, and type of the parameters for the method to get.-or-
+		/// An empty array of the type <see cref="System.Type"/> (for example, <see cref="System.Type.EmptyTypes"/>)
+		/// to get a method that takes no parameters.</param>
+		/// <param name="values">An array of values of the parameters for the method to get</param>
+		public static void ClearCache(Type declaringType, string methodName, Type[] types, object[] values)
+		{
+			var methodInfo = GetMethodInfo(declaringType, methodName, types);
+
+			if (methodInfo == null)
+				throw new ArgumentNullException("methodInfo");
+
+			var aspect = GetAspect(methodInfo);
+
+			if (aspect != null)
+				CleanupThread.ClearCache(aspect, new CompoundValue(values));
+		}
+
 		public static void ClearCache(Type declaringType)
 		{
 			if (declaringType == null)
@@ -292,7 +368,7 @@ namespace BLToolkit.Aspects
 			lock (RegisteredAspects.SyncRoot)
 				foreach (CacheAspect aspect in RegisteredAspects)
 					if (aspect._methodInfo.DeclaringType == declaringType)
-						CleanupThread.ClearCache(aspect.Cache);
+						CleanupThread.ClearCache(aspect);
 		}
 
 		public static MethodInfo GetMethodInfo(Type declaringType, string methodName, params Type[] parameterTypes)
@@ -336,9 +412,33 @@ namespace BLToolkit.Aspects
 
 		#endregion
 
+		#region Statistics
+
+		public static int WorkTimes
+		{
+			get { return CleanupThread.WorkTimes; }
+		}
+
+		public static TimeSpan WorkTime
+		{
+			get { return CleanupThread.WorkTime; }
+		}
+
+		public static int ObjectsExpired
+		{
+			get { return CleanupThread.ObjectsExpired; }
+		}
+
+		public static int ObjectsInCache
+		{
+			get { return CleanupThread.ObjectsInCache; }
+		}
+
+		#endregion
+
 		#region Cleanup Thread
 
-		public class CleanupThread
+		private class CleanupThread
 		{
 			private CleanupThread() {}
 
@@ -363,7 +463,7 @@ namespace BLToolkit.Aspects
 						if (_timer == null)
 						{
 							var interval = TimeSpan.FromSeconds(10);
-							_timer = new Timer(Cleanup, null, interval, interval);
+							_timer = new Timer(Cleanup, null, new TimeSpan(0), interval);
 						}
 			}
 
@@ -398,10 +498,17 @@ namespace BLToolkit.Aspects
 
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
+						if (!aspect.HasCache)
+							continue;
+
 						var cache = aspect.Cache;
 
-						lock (cache.SyncRoot)
+						// cache can be in process now
+						if(!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+							continue;
+						try
 						{
+
 							foreach (DictionaryEntry de in cache)
 							{
 								var wr = de.Value as WeakReference;
@@ -416,7 +523,7 @@ namespace BLToolkit.Aspects
 								}
 								else
 								{
-									isExpired = ((CacheAspectItem)de.Value).IsExpired;
+									isExpired = ((CacheAspectItem) de.Value).IsExpired;
 								}
 
 								if (isExpired)
@@ -432,6 +539,10 @@ namespace BLToolkit.Aspects
 							list.Clear();
 
 							objectsInCache += cache.Count;
+						}
+						finally
+						{
+							Monitor.Exit(aspect.CacheSyncRoot);
 						}
 					}
 
@@ -469,18 +580,51 @@ namespace BLToolkit.Aspects
 				get { return _objectsInCache; }
 			}
 
-			public static void UnregisterCache(IDictionary cache)
+			//public static void UnregisterCache(IDictionary cache)
+			//{
+			//	lock (RegisteredAspects.SyncRoot)
+			//		RegisteredAspects.Remove(cache);
+			//}
+
+			public static void ClearCache(CacheAspect aspect)
 			{
-				lock (RegisteredAspects.SyncRoot)
-					RegisteredAspects.Remove(cache);
+				lock (RegisteredAspects.SyncRoot) 
+				{
+					if (!aspect.HasCache)
+						return;
+
+					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+						return;
+					try
+					{
+						_objectsExpired += aspect.Cache.Count;
+						aspect.Cache.Clear();
+					}
+					finally
+					{
+						Monitor.Exit(aspect.CacheSyncRoot);
+					}
+				}
 			}
 
-			public static void ClearCache(IDictionary cache)
+			public static void ClearCache(CacheAspect aspect, CompoundValue key)
 			{
-				lock (RegisteredAspects.SyncRoot) lock (cache.SyncRoot)
+				lock (RegisteredAspects.SyncRoot)
 				{
-					_objectsExpired += cache.Count;
-					cache.Clear();
+					if (!aspect.HasCache)
+						return;
+
+					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+						return;
+					try
+					{
+						_objectsExpired += 1;
+						aspect.Cache.Remove(key);
+					}
+					finally
+					{
+						Monitor.Exit(aspect.CacheSyncRoot);
+					}
 				}
 			}
 
@@ -490,8 +634,21 @@ namespace BLToolkit.Aspects
 				{
 					foreach (CacheAspect aspect in RegisteredAspects)
 					{
+						if (!aspect.HasCache)
+							continue;
+
 						_objectsExpired += aspect.Cache.Count;
-						aspect.Cache.Clear();
+
+						if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+							continue;
+						try
+						{
+							aspect.Cache.Clear();
+						}
+						finally
+						{
+							Monitor.Exit(aspect.CacheSyncRoot);
+						}
 					}
 				}
 			}

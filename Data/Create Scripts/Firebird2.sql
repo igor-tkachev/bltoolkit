@@ -22,6 +22,8 @@ DROP GENERATOR DataTypeID;                    COMMIT;
 DROP GENERATOR PersonID;                      COMMIT;
 DROP GENERATOR TimestampGen;                  COMMIT;
 
+DROP VIEW PersonView;                         COMMIT;
+
 DROP TABLE Dual;                              COMMIT;
 DROP TABLE DataTypeTest;                      COMMIT;
 DROP TABLE BinaryData;                        COMMIT;
@@ -128,11 +130,11 @@ BEGIN
 	SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
 	WHERE PersonID = :id
 	INTO
-		:PersonID,   
-		:FirstName,  
-		:LastName,   
-		:MiddleName, 
-		:Gender ;     
+		:PersonID,
+		:FirstName,
+		:LastName,
+		:MiddleName,
+		:Gender;
 	SUSPEND;
 END
 COMMIT;
@@ -152,11 +154,11 @@ BEGIN
 	FOR 
 		SELECT PersonID, FirstName, LastName, MiddleName, Gender FROM Person 
 		INTO
-			:PersonID,   
-			:FirstName,  
-			:LastName,   
-			:MiddleName, 
-			:Gender     
+			:PersonID,
+			:FirstName,
+			:LastName,
+			:MiddleName,
+			:Gender
 	DO SUSPEND;
 END
 COMMIT;
@@ -282,7 +284,7 @@ AS
 BEGIN
 	FOR 
 		SELECT
-			Person.PersonID, 
+			Person.PersonID,
 			FirstName,
 			LastName,
 			MiddleName,
@@ -293,10 +295,10 @@ BEGIN
 		WHERE
 			Patient.PersonID = Person.PersonID
 		INTO
-			:PersonID,   
-			:FirstName,  
-			:LastName,   
-			:MiddleName, 
+			:PersonID,
+			:FirstName,
+			:LastName,
+			:MiddleName,
 			:Gender,
 			:Diagnosis
 	DO SUSPEND;
@@ -527,10 +529,9 @@ DROP TABLE Parent     COMMIT;
 DROP TABLE Child      COMMIT;
 DROP TABLE GrandChild COMMIT;
 
-CREATE TABLE Parent      (ParentID int, Value1 int)                    COMMIT;
-CREATE TABLE Child       (ParentID int, ChildID int)                   COMMIT;
-CREATE TABLE GrandChild  (ParentID int, ChildID int, GrandChildID int) COMMIT;
-
+CREATE TABLE Parent     (ParentID int, Value1  int)                   COMMIT;
+CREATE TABLE Child      (ParentID int, ChildID int)                   COMMIT;
+CREATE TABLE GrandChild (ParentID int, ChildID int, GrandChildID int) COMMIT;
 
 DROP TABLE LinqDataTypes COMMIT;
 
@@ -545,11 +546,15 @@ CREATE TABLE LinqDataTypes
 	BinaryValue    blob,
 	SmallIntValue  smallint,
 	IntValue       int,
-	BigIntValue    bigint
+	BigIntValue    bigint,
+	UInt16         numeric(6,  0),
+	UInt32         numeric(11, 0),
+	UInt64         char(20)
 )
 COMMIT;
 
-DROP GENERATOR SequenceTestSeq COMMIT;
+DROP GENERATOR SequenceTestSeq
+COMMIT;
 
 CREATE GENERATOR SequenceTestSeq
 COMMIT;
@@ -558,8 +563,40 @@ DROP TABLE SequenceTest COMMIT;
 
 CREATE TABLE SequenceTest
 (
-	ID                 int NOT NULL PRIMARY KEY,
+	ID     int         NOT NULL PRIMARY KEY,
 	Value_ VARCHAR(50) NOT NULL
 )
 COMMIT;
 
+
+DROP TRIGGER CREATE_ID
+COMMIT;
+
+DROP GENERATOR TestIdentityID
+COMMIT;
+
+DROP TABLE TestIdentity
+COMMIT;
+
+CREATE TABLE TestIdentity (
+ID          INTEGER     NOT NULL PRIMARY KEY,
+IntValue    INTEGER,
+StringValue VARCHAR(50) 
+)
+COMMIT;
+
+CREATE GENERATOR TestIdentityID;
+COMMIT;
+
+CREATE TRIGGER CREATE_ID FOR TestIdentity
+BEFORE INSERT POSITION 0
+AS BEGIN
+	NEW.ID = GEN_ID(TestIdentityID, 1);
+END
+COMMIT;
+
+
+CREATE VIEW PersonView
+AS
+    SELECT * FROM Person
+COMMIT;

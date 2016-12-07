@@ -22,7 +22,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			var body = ((LambdaExpression)methodCall.Arguments[1].Unwrap()).Body.Unwrap();
 
-			if (body.NodeType == ExpressionType	.MemberInit)
+			if (body.NodeType == ExpressionType.MemberInit)
 			{
 				var mi = (MemberInitExpression)body;
 				bool throwExpr;
@@ -65,14 +65,16 @@ namespace BLToolkit.Data.Linq.Builder
 			var key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
 			var groupSql = builder.ConvertExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 
-			if (groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
+			if (sequence.SqlQuery.Select.IsDistinct       ||
+			    sequence.SqlQuery.GroupBy.Items.Count > 0 ||
+			    groupSql.Any(_ => !(_.Sql is SqlField || _.Sql is SqlQuery.Column)))
 			{
 				sequence = new SubQueryContext(sequence);
 				key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
 				groupSql = builder.ConvertExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 			}
 
-			sequence.SqlQuery.GroupBy.Items.Clear();
+			//sequence.SqlQuery.GroupBy.Items.Clear();
 
 			foreach (var sql in groupSql)
 				sequence.SqlQuery.GroupBy.Expr(sql.Sql);
@@ -339,7 +341,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			ISqlExpression ConvertEnumerable(MethodCallExpression call)
@@ -414,7 +416,7 @@ namespace BLToolkit.Data.Linq.Builder
 						}
 						else
 						{
-							throw new NotImplementedException();
+							throw new InvalidOperationException();
 						}
 					}
 				}
@@ -479,7 +481,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			readonly Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]> _expressionIndex = new Dictionary<Tuple<Expression,int,ConvertFlags>,SqlInfo[]>();
@@ -521,6 +523,9 @@ namespace BLToolkit.Data.Linq.Builder
 								_key.IsExpression(expression, level + 1, requestFlag);
 						}
 					}
+ 					else if (levelExpression.NodeType == ExpressionType.Call) 
+ 						if (requestFlag == RequestFor.Expression) 
+ 							return IsExpressionResult.True; 
 				}
 
 				return IsExpressionResult.False;
@@ -610,7 +615,7 @@ namespace BLToolkit.Data.Linq.Builder
 					}
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 

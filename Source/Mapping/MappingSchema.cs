@@ -5,11 +5,16 @@ using System.Data;
 using System.Data.Linq;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Xml;
+
+#if !SILVERLIGHT
+using System.Xml.Linq;
+#endif
 
 using BLToolkit.Common;
 using BLToolkit.Properties;
@@ -138,7 +143,7 @@ namespace BLToolkit.Mapping
 
 		#region Public Members
 
-		public ExtensionList Extensions { get; set; }
+		public virtual ExtensionList Extensions { get; set; }
 
 		#endregion
 
@@ -169,6 +174,7 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			DefaultXmlReaderNullValue      = (XmlReader)     GetNullValue(typeof(XmlReader));
 			DefaultXmlDocumentNullValue    = (XmlDocument)   GetNullValue(typeof(XmlDocument));
+            DefaultXElementNullValue       = (XElement)      GetNullValue(typeof(XElement));
 #endif
 		}
 
@@ -182,6 +188,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is SByte ? (SByte)value :
+				value is Byte ? (SByte)(Byte)value :
 				value == null ? DefaultSByteNullValue :
 					Convert.ToSByte(value);
 		}
@@ -234,6 +241,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt16? (UInt16)value:
+				value is Int16? (UInt16)(Int16)value:
 				value == null || value is DBNull? DefaultUInt16NullValue:
 					Convert.ToUInt16(value);
 		}
@@ -246,6 +254,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt32? (UInt32)value:
+				value is Int32? (UInt32)(Int32)value:
 				value == null || value is DBNull? DefaultUInt32NullValue:
 					Convert.ToUInt32(value);
 		}
@@ -258,6 +267,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt64? (UInt64)value:
+				value is Int64? (UInt64)(Int64)value:
 				value == null || value is DBNull? DefaultUInt64NullValue:
 					Convert.ToUInt64(value);
 		}
@@ -404,6 +414,16 @@ namespace BLToolkit.Mapping
 					Convert.ToXmlDocument(value);
 		}
 
+        public XElement DefaultXElementNullValue { get; set; }
+
+        public virtual XElement ConvertToXElement(object value)
+        {
+            return
+                value is XElement ? (XElement)value :
+                value == null || value is DBNull ? DefaultXElementNullValue :
+                    XElement.Parse(value.ToString());
+        }
+
 #endif
 
 		public virtual byte[] ConvertToByteArray(object value)
@@ -431,6 +451,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is SByte? (SByte?)value:
+				value is Byte? (SByte?)(Byte)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableSByte(value);
 		}
@@ -472,6 +493,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt16? (UInt16?)value:
+				value is Int16? (UInt16?)(Int16)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableUInt16(value);
 		}
@@ -481,6 +503,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt32? (UInt32?)value:
+				value is Int32? (UInt32?)(Int32)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableUInt32(value);
 		}
@@ -490,6 +513,7 @@ namespace BLToolkit.Mapping
 		{
 			return
 				value is UInt64? (UInt64?)value:
+				value is Int64? (UInt64?)(Int64)value:
 				value == null || value is DBNull? null:
 					Convert.ToNullableUInt64(value);
 		}
@@ -732,6 +756,7 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			if (typeof(XmlReader)      == typeof(T)) return (T)(object)DefaultXmlReaderNullValue;
 			if (typeof(XmlDocument)    == typeof(T)) return (T)(object)DefaultXmlDocumentNullValue;
+            if (typeof(XElement)       == typeof(T)) return (T)(object)DefaultXElementNullValue;
 #endif
 			if (typeof(DateTimeOffset) == typeof(T)) return (T)(object)DefaultDateTimeOffsetNullValue;
 
@@ -833,7 +858,9 @@ namespace BLToolkit.Mapping
 				}
 			}
 			else if (conversionType.IsEnum)
-				return Enum.ToObject(conversionType, ConvertChangeType(value, Enum.GetUnderlyingType(conversionType), false));
+			{
+				return MapValueToEnum(value, conversionType);
+			}
 
 			if (isNullable)
 			{
@@ -867,6 +894,7 @@ namespace BLToolkit.Mapping
 
 				if (typeof(Guid)           == conversionType) return ConvertToNullableGuid(value);
 				if (typeof(DateTimeOffset) == conversionType) return ConvertToNullableDateTimeOffset(value);
+				if (typeof(TimeSpan)       == conversionType) return ConvertToNullableTimeSpan(value);	
 			}
 
 			switch (Type.GetTypeCode(conversionType))
@@ -893,11 +921,13 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			if (typeof(XmlReader)      == conversionType) return ConvertToXmlReader     (value);
 			if (typeof(XmlDocument)    == conversionType) return ConvertToXmlDocument   (value);
+            if (typeof(XElement)       == conversionType) return ConvertToXElement      (value);
 #endif
 			if (typeof(byte[])         == conversionType) return ConvertToByteArray     (value);
 			if (typeof(Binary)         == conversionType) return ConvertToLinqBinary    (value);
 			if (typeof(DateTimeOffset) == conversionType) return ConvertToDateTimeOffset(value);
 			if (typeof(char[])         == conversionType) return ConvertToCharArray     (value);
+			if (typeof(TimeSpan)       == conversionType) return ConvertToTimeSpan      (value);
 
 #if !SILVERLIGHT
 
@@ -1080,6 +1110,43 @@ namespace BLToolkit.Mapping
 				mapValues = MetadataProvider.GetMapValues(typeExt, type, out isSet);
 
 				_mapValues.Add(type, mapValues);
+
+				return mapValues;
+			}
+		}
+
+		private readonly Dictionary<MemberAccessor, MapValue[]> _memberMapValues = new Dictionary<MemberAccessor, MapValue[]>();
+
+		private Type GetMapValueType(MapValue[] mapValues)
+		{
+			if (mapValues != null)
+			{
+				var value = mapValues.SelectMany(mv => mv.MapValues).FirstOrDefault();
+				if (value != null)
+				{
+					return value.GetType();
+				}
+			}
+			return null;
+		}
+
+		public virtual MapValue[] GetMapValues([JetBrains.Annotations.NotNull] MemberAccessor memberAccessor)
+		{
+			if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
+
+			lock (_memberMapValues)
+			{
+				MapValue[] mapValues;
+
+				if (_memberMapValues.TryGetValue(memberAccessor, out mapValues))
+					return mapValues;
+
+				var typeExt = TypeExtension.GetTypeExtension(memberAccessor.Type, Extensions);
+				bool isSet;
+
+				mapValues = MetadataProvider.GetMapValues(typeExt, memberAccessor, out isSet);
+
+				_memberMapValues.Add(memberAccessor, mapValues);
 
 				return mapValues;
 			}
@@ -1602,10 +1669,16 @@ namespace BLToolkit.Mapping
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
 		public virtual object MapValueToEnum(object value, Type type)
 		{
-			if (value == null)
+			if (value == null || value == DBNull.Value)
 				return GetNullValue(type);
 
 			MapValue[] mapValues = GetMapValues(type);
+
+			var mapValueType = GetMapValueType(mapValues);
+			if (mapValueType != null && value.GetType() != mapValueType)
+			{
+				value = ConvertChangeType(value, mapValueType);
+			}
 
 			if (mapValues != null)
 			{
@@ -1628,15 +1701,16 @@ namespace BLToolkit.Mapping
 
 			InvalidCastException exInvalidCast = null;
 
+			var enumType = TypeHelper.UnwrapNullableType(type);
 			try
 			{
-				value = ConvertChangeType(value, Enum.GetUnderlyingType(type));
+				value = ConvertChangeType(value, Enum.GetUnderlyingType(enumType));
 
-				if (Enum.IsDefined(type, value))
+				if (Enum.IsDefined(enumType, value))
 				{
 					// Regular (known) enum field w/o explicit mapping defined.
 					//
-					return Enum.ToObject(type, value);
+					return Enum.ToObject(enumType, value);
 				}
 			}
 			catch (InvalidCastException ex)
@@ -1660,7 +1734,78 @@ namespace BLToolkit.Mapping
 
 			// At this point we have an undefined enum value.
 			//
-			return Enum.ToObject(type, value);
+			return Enum.ToObject(enumType, value);
+		}
+
+		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+		public virtual object MapValueToEnum(object value, MemberAccessor ma)
+		{
+			if (value == null || value is DBNull)
+				return GetNullValue(ma.Type);
+
+			MapValue[] mapValues = GetMapValues(ma);
+
+			var mapValueType = GetMapValueType(mapValues);
+			if (mapValueType != null && value.GetType() != mapValueType)
+			{
+				value = ConvertChangeType(value, mapValueType);
+			}
+
+			if (mapValues != null)
+			{
+				var comp = (IComparable)value;
+
+				foreach (MapValue mv in mapValues)
+					foreach (object mapValue in mv.MapValues)
+					{
+						try
+						{
+							if (comp.CompareTo(mapValue) == 0)
+								return mv.OrigValue;
+						}
+						catch (ArgumentException ex)
+						{
+							Debug.WriteLine(ex.Message, MethodBase.GetCurrentMethod().Name);
+						}
+					}
+			}
+
+			InvalidCastException exInvalidCast = null;
+
+			var enumType = TypeHelper.UnwrapNullableType(ma.Type);
+			try
+			{
+				value = ConvertChangeType(value, Enum.GetUnderlyingType(enumType));
+
+				if (Enum.IsDefined(enumType, value))
+				{
+					// Regular (known) enum field w/o explicit mapping defined.
+					//
+					return Enum.ToObject(enumType, value);
+				}
+			}
+			catch (InvalidCastException ex)
+			{
+				exInvalidCast = ex;
+			}
+
+			// Default value.
+			//
+			object defaultValue = GetDefaultValue(ma.Type);
+
+			if (defaultValue != null)
+				return defaultValue;
+
+			if (exInvalidCast != null)
+			{
+				// Rethrow an InvalidCastException when no default value specified.
+				//
+				throw exInvalidCast;
+			}
+
+			// At this point we have an undefined enum value.
+			//
+			return Enum.ToObject(enumType, value);
 		}
 
 		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -1670,6 +1815,54 @@ namespace BLToolkit.Mapping
 				return null;
 
 			if (type == null) throw new ArgumentNullException("type");
+
+			var enumerable = value as IEnumerable;
+			if (enumerable != null)
+			{
+				Type resType = typeof(object);
+
+#if SILVERLIGHT
+				var result = new List<object>();
+
+				foreach (var item in enumerable)
+				{
+					result.Add(MapEnumToValue(item, type, convertToUnderlyingType));
+				}
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						resType = var.GetType();
+						break;
+					}
+				}
+
+				var arr = Array.CreateInstance(resType, result.Count);
+
+				Array.Copy(result.ToArray(), arr, arr.Length);
+
+				return arr;
+#else
+				var result = new ArrayList();
+
+				foreach (var item in enumerable)
+				{
+					result.Add(MapEnumToValue(item, type, convertToUnderlyingType));
+				}
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						resType = var.GetType();
+						break;
+					}
+				}
+
+				return result.ToArray(resType);
+#endif			
+			}
 
 			type = value.GetType();
 
@@ -1709,7 +1902,106 @@ namespace BLToolkit.Mapping
 			}
 
 			return convertToUnderlyingType ?
-				System.Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType()), Thread.CurrentThread.CurrentCulture) :
+				System.Convert.ChangeType(value, Enum.GetUnderlyingType(type), Thread.CurrentThread.CurrentCulture) :
+				value;
+		}
+
+		[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+		public virtual object MapEnumToValue(object value, [JetBrains.Annotations.NotNull] MemberAccessor memberAccessor, bool convertToUnderlyingType)
+		{
+			if (value == null)
+				return null;
+
+			if (memberAccessor == null) throw new ArgumentNullException("memberAccessor");
+
+			if (value is IEnumerable)
+			{
+#if SILVERLIGHT
+				var result = new List<object>();
+
+				foreach (var item in (IEnumerable)value)
+				{
+					result.Add(MapEnumToValue(item, memberAccessor, convertToUnderlyingType));
+				}
+
+				var type = typeof(object);
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						type = var.GetType();
+						break;
+					}
+				}
+
+				var arr = Array.CreateInstance(type, result.Count);
+
+				Array.Copy(result.ToArray(), arr, arr.Length);
+
+				return arr;
+#else
+				var result = new ArrayList();
+
+				foreach (var item in (IEnumerable)value)
+				{
+					result.Add(MapEnumToValue(item, memberAccessor, convertToUnderlyingType));
+				}
+
+				var type = typeof(object);
+
+				foreach (var var in result)
+				{
+					if (var != null)
+					{
+						type = var.GetType();
+						break;
+					}
+				}
+
+				return result.ToArray(type);
+#endif
+			}
+
+			object nullValue = GetNullValue(memberAccessor.Type);
+
+			if (nullValue != null)
+			{
+				IComparable comp = (IComparable)value;
+
+				try
+				{
+					if (comp.CompareTo(nullValue) == 0)
+						return null;
+				}
+				catch
+				{
+				}
+			}
+
+			MapValue[] mapValues = GetMapValues(memberAccessor);
+
+			if (mapValues != null)
+			{
+				IComparable comp = (IComparable)value;
+
+				foreach (MapValue mv in mapValues)
+				{
+					try
+					{
+						if (comp.CompareTo(mv.OrigValue) == 0)
+							return mv.MapValues[0];
+					}
+					catch
+					{
+					}
+				}
+			}
+
+			var memberAccessorType = TypeHelper.UnwrapNullableType(memberAccessor.Type);
+
+			return convertToUnderlyingType ?
+				System.Convert.ChangeType(value, Enum.GetUnderlyingType(memberAccessorType), Thread.CurrentThread.CurrentCulture) :
 				value;
 		}
 
@@ -2858,7 +3150,7 @@ namespace BLToolkit.Mapping
 
 		#region MapDataReaderToList
 
-		public IList MapDataReaderToList(
+		public virtual IList MapDataReaderToList(
 			IDataReader     reader,
 			IList           list,
 			Type            destObjectType,
@@ -3639,12 +3931,28 @@ namespace BLToolkit.Mapping
 
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>()
 		{
-			return new ExpressionMapper<TSource,TDest>(this).GetMapper();
+			return new ExpressionMapper<TSource,TDest>(this)
+			{
+				IncludeComplexMapping = Common.Configuration.ExpressionMapper.IncludeComplexMapping
+			}.GetMapper();
 		}
 
 		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy)
 		{
-			return new ExpressionMapper<TSource,TDest>(this) { DeepCopy = deepCopy }.GetMapper();
+			return new ExpressionMapper<TSource,TDest>(this)
+			{
+				DeepCopy              = deepCopy,
+				IncludeComplexMapping = Common.Configuration.ExpressionMapper.IncludeComplexMapping
+			}.GetMapper();
+		}
+
+		public Func<TSource,TDest> GetObjectMapper<TSource,TDest>(bool deepCopy, bool includeComplexMapping)
+		{
+			return new ExpressionMapper<TSource,TDest>(this)
+			{
+				DeepCopy              = deepCopy,
+				IncludeComplexMapping = includeComplexMapping
+			}.GetMapper();
 		}
 
 		#endregion
@@ -3656,6 +3964,6 @@ namespace BLToolkit.Mapping
 			return value;
 		}
 
-		#endregion
+		#endregion        
 	}
 }

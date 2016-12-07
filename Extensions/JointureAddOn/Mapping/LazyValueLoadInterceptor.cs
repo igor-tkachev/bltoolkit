@@ -1,5 +1,4 @@
 using System;
-using BLToolkit.Aspects;
 using Castle.DynamicProxy;
 using IInterceptor = Castle.DynamicProxy.IInterceptor;
 
@@ -7,8 +6,13 @@ namespace BLToolkit.Mapping
 {
     public class LazyValueLoadInterceptor : IInterceptor
     {
+        #region Fields
+
         private readonly IObjectMapper _mapper;
         private readonly Func<IMapper, object, Type, object> _lazyLoader;
+        private bool _intercepted;
+
+        #endregion
 
         public LazyValueLoadInterceptor(IObjectMapper mapper, Func<IMapper, object, Type, object> lazyLoader)
         {
@@ -16,25 +20,19 @@ namespace BLToolkit.Mapping
             _lazyLoader = lazyLoader;
         }
 
-        public bool Intercepted;
         public void Intercept(IInvocation invocation)
         {
             if (invocation.Method.Name.StartsWith("get_"))
             {
                 string propertyName = invocation.Method.Name.Substring(4);
-                var pi = invocation.TargetType.GetProperty(propertyName);
-
-                //// check that we have the attribute defined
-                //if (Attribute.GetCustomAttribute(pi, typeof(LazyInstanceAttribute)) == null)
-                //    return;
 
                 foreach (IMapper map in _mapper.PropertiesMapping)
                 {
                     if (map.PropertyName == propertyName)
                     {
-                        if (!Intercepted)
+                        if (!_intercepted)
                         {
-                            Intercepted = true;
+                            _intercepted = true;
                             map.Setter(invocation.Proxy, _lazyLoader(map, invocation.Proxy, invocation.TargetType));
                         }
                         break;
@@ -44,19 +42,6 @@ namespace BLToolkit.Mapping
 
             // let the original call go through first, so we can notify *after*
             invocation.Proceed();
-        }
-    }
-
-    public class PropInterceptor : Interceptor
-    {
-        protected override void BeforeCall(InterceptCallInfo info)
-        {
-            info.Items["ReturnValue"] = info.ReturnValue;
-        }
-
-        protected override void AfterCall(InterceptCallInfo info)
-        {
-            info.ReturnValue = (int)info.ReturnValue + (int)info.Items["ReturnValue"];
         }
     }
 }

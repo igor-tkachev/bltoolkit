@@ -15,7 +15,7 @@ namespace BLToolkit.Data.Linq.Builder
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var sequence  = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
-			var condition = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+			var condition = (LambdaExpression)ExpressionBuilder.GetPredicate(methodCall.Arguments[1]);
 			var result    = builder.BuildWhere(buildInfo.Parent, sequence, condition, true);
 
 			result.SetAlias(condition.Parameters[0].Name);
@@ -26,7 +26,7 @@ namespace BLToolkit.Data.Linq.Builder
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
-			var predicate = (LambdaExpression)methodCall.Arguments[1].Unwrap();
+			var predicate = (LambdaExpression)ExpressionBuilder.GetPredicate(methodCall.Arguments[1]);
 			var info      = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
 
 			if (info != null)

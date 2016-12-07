@@ -41,6 +41,7 @@ namespace BLToolkit.Data.Sql
 
 		public Type             SystemType { get; private set; }
 		public string           Name       { get; private set; }
+
 		public int              Precedence { get; private set; }
 		public ISqlExpression[] Parameters { get; private set; }
 
@@ -81,19 +82,7 @@ namespace BLToolkit.Data.Sql
 
 		bool IEquatable<ISqlExpression>.Equals(ISqlExpression other)
 		{
-			if (this == other)
-				return true;
-
-			var func = other as SqlFunction;
-
-			if (func == null || Name != func.Name || Parameters.Length != func.Parameters.Length && SystemType != func.SystemType)
-				return false;
-
-			for (var i = 0; i < Parameters.Length; i++)
-				if (!Parameters[i].Equals(func.Parameters[i]))
-					return false;
-
-			return true;
+			return Equals(other, SqlExpression.DefaultComparer);
 		}
 
 		#endregion
@@ -132,6 +121,23 @@ namespace BLToolkit.Data.Sql
 		public bool CanBeNull()
 		{
 			return true;
+		}
+
+		public bool Equals(ISqlExpression other, Func<ISqlExpression,ISqlExpression,bool> comparer)
+		{
+			if (this == other)
+				return true;
+
+			var func = other as SqlFunction;
+
+			if (func == null || Name != func.Name || Parameters.Length != func.Parameters.Length && SystemType != func.SystemType)
+				return false;
+
+			for (var i = 0; i < Parameters.Length; i++)
+				if (!Parameters[i].Equals(func.Parameters[i], comparer))
+					return false;
+
+			return comparer(this, other);
 		}
 
 		#endregion

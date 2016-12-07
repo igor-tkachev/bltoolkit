@@ -10,6 +10,9 @@ using BLToolkit.Reflection;
 using BLToolkit.TypeBuilder;
 
 using Convert = BLToolkit.Common.Convert;
+#if !SILVERLIGHT
+using System.Xml.Linq;
+#endif
 
 namespace BLToolkit.Mapping
 {
@@ -599,6 +602,7 @@ namespace BLToolkit.Mapping
 #if !SILVERLIGHT
 			if (type == typeof(XmlReader))      return n? new XmlReaderMapper.Nullable()      : new XmlReaderMapper();
 			if (type == typeof(XmlDocument))    return n? new XmlDocumentMapper.Nullable()    : new XmlDocumentMapper();
+            if (type == typeof(XElement))       return n? new XElementMapper.Nullable()       : new XElementMapper();
 #endif
 			return null;
 		}
@@ -779,25 +783,26 @@ namespace BLToolkit.Mapping
 
 			if (mapInfo.MapValues != null)
 			{
-				var comp = (IComparable)value;
+				object origValue;
+				if (mapInfo.TryGetOrigValue(value, out origValue))
+					return origValue;
 
-				foreach (var mv       in mapInfo.MapValues)
-				foreach (var mapValue in mv.MapValues)
-				{
-					try
-					{
-						if (comp is string && ((string)comp).Length == 1 && mapValue is char)
-						{
-							if (((string)comp)[0] == (char)mapValue)
-								return mv.OrigValue;
-						}
-						else if (comp.CompareTo(mapValue) == 0)
-							return mv.OrigValue;
-					}
-					catch
-					{
-					}
-				}
+				// 2012-09-18 ili: this is too slow when we have for ex. enum with 50+ values
+				//
+				//var comp = (IComparable)value;
+
+				//foreach (var mv       in mapInfo.MapValues)
+				//foreach (var mapValue in mv.MapValues)
+				//{
+				//    try
+				//    {
+				//        if (comp.CompareTo(mapValue) == 0)
+				//            return mv.OrigValue;
+				//    }
+				//    catch
+				//    {
+				//    }
+				//}
 
 				// Default value.
 				//
@@ -868,19 +873,25 @@ namespace BLToolkit.Mapping
 
 			if (mapInfo.MapValues != null)
 			{
-				var comp = (IComparable)value;
+				object mapValue;
+				if (mapInfo.TryGetMapValue(value, out mapValue))
+					return mapValue;
 
-				foreach (var mv in mapInfo.MapValues)
-				{
-					try
-					{
-						if (comp.CompareTo(mv.OrigValue) == 0)
-							return mv.MapValues[0];
-					}
-					catch
-					{
-					}
-				}
+				//2011-11-16 ili: this is too slow when we have for ex. enum with 50+ values
+				//
+				//var comp = (IComparable)value;
+
+				//foreach (var mv in mapInfo.MapValues)
+				//{
+				//    try
+				//    {
+				//        if (comp.CompareTo(mv.OrigValue) == 0)
+				//            return mv.MapValues[0];
+				//    }
+				//    catch
+				//    {
+				//    }
+				//}
 			}
 
 			return value;

@@ -1089,7 +1089,13 @@ namespace BLToolkit.Reflection
 
 		AttributeCollection ITypeDescriptionProvider.GetAttributes()
 		{
-			return new AttributeCollection((Attribute[])new TypeHelper(OriginalType).GetAttributes());
+			var attributesAsObj = new TypeHelper(OriginalType).GetAttributes();
+			var attributes      = new Attribute[attributesAsObj.Length];
+
+			for (var i = 0; i < attributesAsObj.Length; i++)
+				attributes[i] = attributesAsObj[i] as Attribute;
+
+			return new AttributeCollection(attributes);
 		}
 
 		EventDescriptorCollection ITypeDescriptionProvider.GetEvents()

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text;
 
-using BLToolkit.Reflection;
-
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class SQLiteSqlProvider : BasicSqlProvider
 	{
@@ -150,6 +149,14 @@ namespace BLToolkit.Data.Sql.SqlProvider
 			else
 				base.BuildValue(sb, value);
 		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb
+				.Append(string.Format("'{0:yyyy-MM-dd HH:mm:ss.fffffff}", value).TrimEnd('0'))
+				.Append('\'');
+		}
+
 		public override object Convert(object value, ConvertType convertType)
 		{
 			switch (convertType)
@@ -157,7 +164,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return "@" + value;
+					return "@" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToQueryField:
 				case ConvertType.NameToQueryFieldAlias:

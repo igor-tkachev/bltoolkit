@@ -12,6 +12,8 @@ namespace BLToolkit.Data.Sql.SqlProvider
 	{
 		public override bool IsApplyJoinSupported { get { return true; } }
 
+		protected virtual  bool BuildAlternativeSql  { get { return true; } }
+
 		protected override string FirstFormat
 		{
 			get { return SqlQuery.Select.SkipValue == null ? "TOP ({0})" : null; }
@@ -19,7 +21,10 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildSql(StringBuilder sb)
 		{
-			AlternativeBuildSql(sb, true, base.BuildSql);
+			if (BuildAlternativeSql)
+				AlternativeBuildSql(sb, true, base.BuildSql);
+			else
+				base.BuildSql(sb);
 		}
 
 		protected override void BuildGetIdentity(StringBuilder sb)
@@ -29,15 +34,97 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				.AppendLine("SELECT SCOPE_IDENTITY()");
 		}
 
+        protected override void BuildInsertClause( StringBuilder sb, string insertText, bool appendTableName )
+        {
+            AppendIndent(sb).Append(insertText);
+
+			if (appendTableName)
+				BuildPhysicalTable(sb, SqlQuery.Insert.Into, null);
+
+			if (SqlQuery.Insert.Items.Count == 0)
+			{
+				sb.Append(' ');
+				BuildEmptyInsert(sb);
+			}
+			else
+			{
+				sb.AppendLine();
+
+				AppendIndent(sb).AppendLine("(");
+
+				Indent++;
+
+				var first = true;
+
+				foreach (var expr in SqlQuery.Insert.Items)
+				{
+					if (!first)
+						sb.Append(',').AppendLine();
+					first = false;
+
+					AppendIndent(sb);
+					BuildExpression(sb, expr.Column, false, true);
+				}
+
+				Indent--;
+
+				sb.AppendLine();
+				AppendIndent(sb).AppendLine(")");
+				
+				if ( SqlQuery.Insert.WithOutput )
+		        {
+                    var pkField = SqlQuery.Insert.Into.Fields.FirstOrDefault( x => x.Value.IsIdentity && x.Value.IsPrimaryKey );
+
+                    AppendIndent( sb ).Append( "OUTPUT INSERTED.[" ).Append( pkField.Value.Name ).AppendLine( "] INTO @tabOutput" );
+		        }
+
+				if (SqlQuery.QueryType == QueryType.InsertOrUpdate || SqlQuery.From.Tables.Count == 0)
+				{
+					AppendIndent(sb).AppendLine("VALUES");
+					AppendIndent(sb).AppendLine("(");
+
+					Indent++;
+
+					first = true;
+
+					foreach (var expr in SqlQuery.Insert.Items)
+					{
+						if (!first)
+							sb.Append(',').AppendLine();
+						first = false;
+
+						AppendIndent(sb);
+						BuildExpression(sb, expr.Expression);
+					}
+
+					Indent--;
+
+					sb.AppendLine();
+					AppendIndent(sb).AppendLine(")");
+				}
+			}
+        }
+
+        protected override void BuildInsertQuery( StringBuilder sb )
+        {
+            if ( SqlQuery.Insert.WithOutput )
+                sb.Append( "DECLARE @tabOutput TABLE(id " ).Append( "UNIQUEIDENTIFIER" ).Append( ")" ).AppendLine();
+
+            base.BuildInsertQuery( sb );
+
+            if ( SqlQuery.Insert.WithOutput )
+                sb.AppendLine( "SELECT TOP 1 id FROM @tabOutput" );
+        }
+
 		protected override void BuildOrderByClause(StringBuilder sb)
 		{
-			if (!NeedSkip)
+			if (!BuildAlternativeSql || !NeedSkip)
 				base.BuildOrderByClause(sb);
 		}
 
 		protected override IEnumerable<SqlQuery.Column> GetSelectedColumns()
 		{
-			if (NeedSkip && !SqlQuery.OrderBy.IsEmpty)
+			if (BuildAlternativeSql && NeedSkip && !SqlQuery.OrderBy.IsEmpty)
 				return AlternativeGetSelectedColumns(base.GetSelectedColumns);
 			return base.GetSelectedColumns();
 		}
@@ -104,45 +191,67 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 		protected override void BuildDeleteClause(StringBuilder sb)
 		{
+			var table = SqlQuery.Delete.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Delete.Table) ?? SqlQuery.Delete.Table) :
+				SqlQuery.From.Tables[0];
+
 			AppendIndent(sb)
 				.Append("DELETE ")
-				.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias))
+				.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias))
 				.AppendLine();
 		}
 
 		protected override void BuildUpdateTableName(StringBuilder sb)
 		{
-			if (SqlQuery.Update.Table != null && SqlQuery.Update.Table != SqlQuery.From.Tables[0].Source)
-				BuildPhysicalTable(sb, SqlQuery.Update.Table, null);
+			var table = SqlQuery.Update.Table != null ?
+				(SqlQuery.From.FindTableSource(SqlQuery.Update.Table) ?? SqlQuery.Update.Table) :
+				SqlQuery.From.Tables[0];
+
+			if (table is SqlTable)
+				BuildPhysicalTable(sb, table, null);
 			else
-				sb.Append(Convert(GetTableAlias(SqlQuery.From.Tables[0]), ConvertType.NameToQueryTableAlias));
+				sb.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias));
 		}
 
-		protected override void BuildUnicodeString(StringBuilder sb, string value)
+		protected override void BuildString(StringBuilder sb, string value)
 		{
-			sb
-				.Append("N\'")
-				.Append(value.Replace("'", "''"))
-				.Append('\'');
+			foreach (var ch in value)
+			{
+				if (ch > 127)
+				{
+					sb.Append("N");
+					break;
+				}
+			}
+
+			base.BuildString(sb, value);
 		}
 
-		protected override void BuildColumn(StringBuilder sb, SqlQuery.Column col, ref bool addAlias)
+		protected override void BuildChar(StringBuilder sb, char value)
+		{
+			if (value > 127)
+				sb.Append("N");
+
+			base.BuildChar(sb, value);
+		}
+
+		protected override void BuildColumnExpression(StringBuilder sb, ISqlExpression expr, string alias, ref bool addAlias)
 		{
 			var wrap = false;
 
-			if (col.SystemType == typeof(bool))
+			if (expr.SystemType == typeof(bool))
 			{
-				if (col.Expression is SqlQuery.SearchCondition)
+				if (expr is SqlQuery.SearchCondition)
 					wrap = true;
 				else
 				{
-					var ex = col.Expression as SqlExpression;
+					var ex = expr as SqlExpression;
 					wrap = ex != null && ex.Expr == "{0}" && ex.Parameters.Length == 1 && ex.Parameters[0] is SqlQuery.SearchCondition;
 				}
 			}
 
 			if (wrap) sb.Append("CASE WHEN ");
-			base.BuildColumn(sb, col, ref addAlias);
+			base.BuildColumnExpression(sb, expr, alias, ref addAlias);
 			if (wrap) sb.Append(" THEN 1 ELSE 0 END");
 		}
 
@@ -153,7 +262,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return "@" + value;
+					return "@" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.NameToQueryField:
 				case ConvertType.NameToQueryFieldAlias:
@@ -197,6 +306,20 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		{
 			BuildInsertOrUpdateQueryAsUpdateInsert(sb);
+		}
+
+		protected override void BuildDateTime(StringBuilder sb, object value)
+		{
+			sb.Append(string.Format("convert(datetime2, '{0:yyyy-MM-ddTHH:mm:ss.fffffff}', 126)", value));
+		}
+
+		public override void BuildValue(StringBuilder sb, object value)
+		{
+			if      (value is sbyte)  sb.Append((byte)(sbyte)value);
+			else if (value is ushort) sb.Append((short)(ushort)value);
+			else if (value is uint)   sb.Append((int)(uint)value);
+			else if (value is ulong)  sb.Append((long)(ulong)value);
+			else base.BuildValue(sb, value);
 		}
 	}
 }

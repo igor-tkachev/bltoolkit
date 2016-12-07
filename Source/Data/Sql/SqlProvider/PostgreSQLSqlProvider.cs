@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Data;
 using System.Text;
-
-using BLToolkit.Reflection;
+using System.Linq;
 
 namespace BLToolkit.Data.Sql.SqlProvider
 {
 	using DataProvider;
+	using Reflection;
 
 	public class PostgreSQLSqlProvider : BasicSqlProvider
 	{
@@ -158,6 +158,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryFieldAlias:
 				case ConvertType.NameToQueryTable:
 				case ConvertType.NameToQueryTableAlias:
+                case ConvertType.NameToOwner:
 					if (QuoteIdentifiers)
 					{
 						var name = value.ToString();
@@ -173,7 +174,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 				case ConvertType.NameToQueryParameter:
 				case ConvertType.NameToCommandParameter:
 				case ConvertType.NameToSprocParameter:
-					return ":" + value;
+					return ":" + value.ToString().Replace(" ", string.Empty);
 
 				case ConvertType.SprocParameterToName:
 					if (value != null)
@@ -187,6 +188,106 @@ namespace BLToolkit.Data.Sql.SqlProvider
 
 			return value;
 		}
+
+		public override ISqlExpression GetIdentityExpression(SqlTable table, SqlField identityField, bool forReturning)
+		{
+			if (table.SequenceAttributes != null)
+			{
+				var attr = GetSequenceNameAttribute(table, false);
+	
+				if (attr != null)
+					return new SqlExpression("nextval('" + attr.SequenceName+"')", Precedence.Primary);
+			}
+
+			return base.GetIdentityExpression(table, identityField, forReturning);
+		}
+
+        protected override void BuildInsertClause( StringBuilder sb, string insertText, bool appendTableName )
+        {
+            AppendIndent(sb).Append(insertText);
+
+			if (appendTableName)
+				BuildPhysicalTable(sb, SqlQuery.Insert.Into, null);
+
+			if (SqlQuery.Insert.Items.Count == 0)
+			{
+				sb.Append(' ');
+				BuildEmptyInsert(sb);
+			}
+			else
+			{
+				sb.AppendLine();
+
+				AppendIndent(sb).AppendLine("(");
+
+				Indent++;
+
+				var first = true;
+
+				foreach (var expr in SqlQuery.Insert.Items)
+				{
+					if (!first)
+						sb.Append(',').AppendLine();
+					first = false;
+
+					AppendIndent(sb);
+					BuildExpression(sb, expr.Column, false, true);
+				}
+
+				Indent--;
+
+				sb.AppendLine();
+				AppendIndent(sb).AppendLine(")");
+
+				if (SqlQuery.QueryType == QueryType.InsertOrUpdate || SqlQuery.From.Tables.Count == 0)
+				{
+					AppendIndent(sb).AppendLine("VALUES");
+					AppendIndent(sb).AppendLine("(");
+
+					Indent++;
+
+					first = true;
+
+					foreach (var expr in SqlQuery.Insert.Items)
+					{
+						if (!first)
+							sb.Append(',').AppendLine();
+						first = false;
+
+						AppendIndent(sb);
+						BuildExpression(sb, expr.Expression);
+					}
+
+					Indent--;
+
+					sb.AppendLine();
+                    AppendIndent( sb ).AppendLine( ")" );
+
+                    if ( SqlQuery.Insert.WithOutput )
+                    {
+                        var pkField = SqlQuery.Insert.Into.Fields.FirstOrDefault( x => x.Value.IsIdentity && x.Value.IsPrimaryKey );
+
+                        var name = pkField.Value.Name;
+
+                        if ( QuoteIdentifiers && ( name.Length > 0 && name[0] != '"' ) )
+                            name = '"' + name + '"';
+
+                        sb.Append( string.Format( "RETURNING {0} as id", name ) );
+                    }
+				}
+			}
+        }
+
+        protected override void BuildInsertQuery( StringBuilder sb )
+        {
+            if (SqlQuery.Insert.WithOutput)
+                sb.Append( "WITH taboutput AS (" );
+
+            base.BuildInsertQuery( sb );
+
+            if (SqlQuery.Insert.WithOutput)
+                sb.AppendLine().Append( ")SELECT id FROM taboutput LIMIT 1" );
+        }
 
 		//protected override void BuildInsertOrUpdateQuery(StringBuilder sb)
 		//{

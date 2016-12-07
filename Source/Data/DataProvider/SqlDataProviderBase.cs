@@ -6,8 +6,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 
-using BLToolkit.Data.Sql;
-
 using SqlException = System.Data.SqlClient.SqlException;
 using SqlParameter = System.Data.SqlClient.SqlParameter;
 
@@ -25,6 +23,10 @@ namespace BLToolkit.Data.DataProvider
 	/// <seealso cref="DbManager.AddDataProvider(DataProviderBase)">AddDataManager Method</seealso>
 	public abstract class SqlDataProviderBase : DataProviderBase
 	{
+		protected SqlDataProviderBase()
+		{
+			SqlDataProviderVersionResolver.Instance.AddDataProvider(this);
+		}
 		/// <summary>
 		/// Creates the database connection object.
 		/// </summary>
@@ -144,6 +146,20 @@ namespace BLToolkit.Data.DataProvider
 			return SqlProvider.Convert(value, convertType);
 		}
 
+		public override DataExceptionType ConvertErrorNumberToDataExceptionType(int number)
+		{
+			switch (number)
+			{
+				case 1205: return DataExceptionType.Deadlock;
+				case   -2: return DataExceptionType.Timeout;
+				case  547: return DataExceptionType.ForeignKeyViolation;
+				case 2601: return DataExceptionType.UniqueIndexViolation;
+				case 2627: return DataExceptionType.ConstraintViolation;
+			}
+
+			return DataExceptionType.Undefined;
+		}
+
 		/// <summary>
 		/// Returns connection type.
 		/// </summary>
@@ -236,20 +252,22 @@ namespace BLToolkit.Data.DataProvider
 			int                            maxBatchSize,
 			DbManager.ParameterProvider<T> getParameters)
 		{
-			if (db.Transaction != null)
-				return base.InsertBatch(db, insertText, collection, members, maxBatchSize, getParameters);
-
 			var idx = insertText.IndexOf('\n');
 			var tbl = insertText.Substring(0, idx).Substring("INSERT INTO ".Length).TrimEnd('\r');
 			var rd  = new BulkCopyReader(members, collection);
-			var bc  = new SqlBulkCopy((SqlConnection)db.Connection)
+			var bc  = new SqlBulkCopy((SqlConnection)db.Connection, SqlDataProvider.SqlBulkCopyOptions, (SqlTransaction)db.Transaction)
 			{
 				BatchSize            = maxBatchSize,
 				DestinationTableName = tbl,
 			};
 
-			foreach (var memberMapper in members)
-				bc.ColumnMappings.Add(new SqlBulkCopyColumnMapping(memberMapper.Ordinal, memberMapper.Name));
+			if (db.CommandTimeout.HasValue)
+				bc.BulkCopyTimeout = db.CommandTimeout.Value;
+
+			for	(var index = 0; index < members.Length; index++)
+			{
+				bc.ColumnMappings.Add(new SqlBulkCopyColumnMapping(index, members[index].Name));
+			}
 
 			bc.WriteToServer(rd);
 
@@ -293,7 +311,14 @@ namespace BLToolkit.Data.DataProvider
 
 			public object GetValue(int i)
 			{
-				return _members[i].GetValue(_enumerator.Current);
+				var value = _members[i].GetValue(_enumerator.Current);
+
+				if (value != null && value.GetType().IsEnum)
+				{
+					value = _members[i].MappingSchema.MapEnumToValue(value, _members[i].MemberAccessor, true);
+				}
+
+				return value;
 			}
 
 			public int FieldCount
@@ -384,6 +409,47 @@ namespace BLToolkit.Data.DataProvider
 			}
 
 			#endregion
+		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is sbyte)
+			{
+				parameter.Value = (byte)(sbyte)value;
+			}
+			else if (value is ushort)
+			{
+				parameter.Value = (int)(ushort)value;
+			}
+			else if (value is uint)
+			{
+				parameter.Value = (long)(uint)value;
+			}
+			else if (value is ulong)
+			{
+				parameter.Value = value.ToString();
+			}
+			else if (value is string)
+			{
+				parameter.Value = value;
+				var svalue = (string)value;
+				if (parameter.Size == 0 && parameter.DbType == DbType.String && svalue.Length == 0)
+					parameter.Size = 1;
+			}
+			else
+			{
+				base.SetParameterValue(parameter, value);
+			}
+		}
+
+		public override DataProviderBase ResolveVersion(string configuration, string connectionString)
+		{
+			return SqlDataProviderVersionResolver.Instance.InvalidateDataProvider(this, configuration, connectionString) ?? this;
+		}
+
+		public override bool SupportsVersionResolve
+		{
+			get { return true; }
 		}
 	}
 }

@@ -1,6 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using BLToolkit.Data.DataProvider;
+using BLToolkit.Data.Linq;
+using BLToolkit.DataAccess;
+using BLToolkit.Mapping;
 
 using NUnit.Framework;
 
@@ -592,6 +596,35 @@ namespace Data.Linq
 					.OrderBy(x => x.Parent.ParentID)));
 		}
 
+		public enum EnumInt
+		{
+			[MapValue(1)] One
+		}
+
+		[TableName("Child")]
+		public class EnumChild
+		{
+			public int     ParentID;
+			public EnumInt ChildID;
+		}
+
+		[Test]
+		public void LeftJoin5()
+		{
+			ForEachProvider(db =>
+			{
+				var q =
+					from p in db.Parent
+						join ch in new Table<EnumChild>(db) on p.ParentID equals ch.ParentID into lj1
+						from ch in lj1.DefaultIfEmpty()
+					where ch == null
+					select new { p, ch };
+
+				var list = q.ToList();
+				list.ToString();
+			});
+		}
+
 		[Test]
 		public void SubQueryJoin()
 		{
@@ -719,5 +752,63 @@ namespace Data.Linq
 				});
 		}
 
+		[Test]
+		public void StackOverflow([IncludeDataContexts("Sql2008", "Sql2012")] string context)
+		{
+			using (var db = new TestDbManager(context))
+			{
+				var q =
+					from c in db.Child
+					join p in db.Parent on c.ParentID equals p.ParentID
+					select new { p, c };
+
+				for (var i = 0; i < 100; i++)
+				{
+					q =
+						from c in q
+						join p in db.Parent on c.p.ParentID equals p.ParentID
+						select new { p, c.c };
+				}
+
+				var list = q.ToList();
+			}
+		}
+
+		[Test]
+		public void ApplyJoin([IncludeDataContexts("Sql2008")] string context)
+		{
+			using (var db = new TestDbManager(context))
+			{
+				var q =
+					from ch in db.Child
+					from p in new Model.Functions(db).GetParentByID(ch.Parent.ParentID)
+					select p;
+
+				q.ToList();
+			}
+		}
+
+		[Test]
+		public void Issue257([DataContexts] string context)
+		{
+			using (var db = GetDataContext(context))
+			{
+				var q =
+					from m in db.Types
+						join p in db.Parent on m.ID equals p.ParentID
+					group m by new
+					{
+						m.DateTimeValue.Date
+					}
+					into b
+					select new
+					{
+						QualiStatusByDate = b.Key,
+						Count             = b.Count()
+					};
+
+				q.ToList();
+			}
+		}
 	}
 }

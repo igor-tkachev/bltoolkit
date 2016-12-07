@@ -264,9 +264,23 @@ CREATE TABLE LinqDataTypes
 	DateTimeValue2 datetime,
 	BoolValue      bit,
 	GuidValue      uniqueidentifier,
-	BinaryValue    OleObject,
+	BinaryValue    OleObject NULL,
 	SmallIntValue  smallint,
-	IntValue       int NULL,
-	BigIntValue    long NULL
+	IntValue       int       NULL,
+	BigIntValue    long      NULL,
+	UInt16         decimal(5, 0) NULL,
+	UInt32         decimal(10, 0) NULL,
+	UInt64         decimal(20, 0) NULL
+)
+GO
+
+DROP TABLE TestIdentity
+GO
+
+CREATE TABLE TestIdentity (
+	ID          Int         IDENTITY,
+	IntValue    int         NULL,
+	StringValue text(50)    NULL,
+	CONSTRAINT PK_TestIdentity PRIMARY KEY (ID)
 )
 GO

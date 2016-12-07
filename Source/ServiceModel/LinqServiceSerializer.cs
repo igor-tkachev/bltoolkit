@@ -350,11 +350,15 @@ namespace BLToolkit.ServiceModel
 			{
 				public object GetArray(DeserializerBase deserializer)
 				{
-					var count = deserializer.ReadInt();
-					var arr   = new T[count];
+					var count = deserializer.ReadCount();
+
+					if (count == null)
+						return null;
+
+					var arr   = new T[count.Value];
 					var type  = typeof(T);
 
-					for (var i = 0; i < count; i++)
+					for (var i = 0; i < count.Value; i++)
 						arr[i] = (T)deserializer.ReadValue(type);
 
 					return arr;
@@ -373,7 +377,7 @@ namespace BLToolkit.ServiceModel
 				{
 					var elem = type.GetElementType();
 
-					Func<DeserializerBase, object > deserializer;
+					Func<DeserializerBase,object> deserializer;
 
 					lock (_arrayDeserializers)
 					{
@@ -781,6 +785,7 @@ namespace BLToolkit.ServiceModel
 
 							var appendInsert = false;
 							var appendUpdate = false;
+							var appendDelete = false;
 							var appendSelect = false;
 
 							switch (elem.QueryType)
@@ -794,11 +799,16 @@ namespace BLToolkit.ServiceModel
 									appendUpdate = true;
 									break;
 
+								case QueryType.Delete         :
+									appendDelete = true;
+									appendSelect = true;
+									break;
+
 								case QueryType.Insert         :
 									appendInsert = true;
-									if (elem.From.Tables.Count == 0)
-										break;
-									goto default;
+									if (elem.From.Tables.Count != 0)
+										appendSelect = true;
+									break;
 
 								default                       :
 									appendSelect = true;
@@ -807,6 +817,7 @@ namespace BLToolkit.ServiceModel
 
 							Append(appendInsert); if (appendInsert) Append(elem.Insert);
 							Append(appendUpdate); if (appendUpdate) Append(elem.Update);
+							Append(appendDelete); if (appendDelete) Append(elem.Delete);
 							Append(appendSelect); if (appendSelect) Append(elem.Select);
 
 							Append(elem.Where);
@@ -911,6 +922,13 @@ namespace BLToolkit.ServiceModel
 							Append(elem.Keys);
 							Append(elem.Table);
 
+							break;
+						}
+
+					case QueryElementType.DeleteClause :
+						{
+							var elem = (SqlQuery.DeleteClause)e;
+							Append(elem.Table);
 							break;
 						}
 
@@ -1077,9 +1095,8 @@ namespace BLToolkit.ServiceModel
 							var likeEnd   = ReadString();
 							*/
 
-							obj = new SqlParameter(systemType, name, value, (MappingSchema)null)
+							obj = new SqlParameter(systemType, name, value, (MappingSchema)null, isQueryParameter)
 							{
-								IsQueryParameter = isQueryParameter,
 								DbType           = dbType,
 								DbSize           = dbSize,
 								//EnumTypes        = enumTypes,
@@ -1290,6 +1307,8 @@ namespace BLToolkit.ServiceModel
 							var insert             = readInsert ? Read<SqlQuery.InsertClause>() : null;
 							var readUpdate         = ReadBool();
 							var update             = readUpdate ? Read<SqlQuery.UpdateClause>() : null;
+							var readDelete         = ReadBool();
+							var delete             = readDelete ? Read<SqlQuery.DeleteClause>() : null;
 							var readSelect         = ReadBool();
 							var select             = readSelect ? Read<SqlQuery.SelectClause>() : new SqlQuery.SelectClause(null);
 							var where              = Read<SqlQuery.WhereClause>();
@@ -1306,6 +1325,7 @@ namespace BLToolkit.ServiceModel
 							query.Init(
 								insert,
 								update,
+								delete,
 								select,
 								from,
 								where,
@@ -1419,6 +1439,13 @@ namespace BLToolkit.ServiceModel
 							c.Keys. AddRange(keys);
 							obj = c;
 
+							break;
+						}
+
+					case QueryElementType.DeleteClause :
+						{
+							var table = Read<SqlTable>();
+							obj = new SqlQuery.DeleteClause { Table = table };
 							break;
 						}
 

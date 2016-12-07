@@ -40,7 +40,7 @@ namespace Data.Linq
 				from p in db.Parent select db.Child));
 		}
 
-		[Test]
+		//[Test]
 		public void Test4()
 		{
 			BLToolkit.Common.Configuration.Linq.AllowMultipleQuery = true;

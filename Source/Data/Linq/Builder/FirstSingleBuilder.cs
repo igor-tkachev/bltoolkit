@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq.Builder
 {
 	using BLToolkit.Linq;
 	using Data.Sql;
+	using Reflection;
 
 	class FirstSingleBuilder : MethodCallBuilder
 	{
+		public static string[] MethodNames = new[] { "First", "FirstOrDefault", "Single", "SingleOrDefault" };
+
 		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return 
-				methodCall.IsQueryable("First", "FirstOrDefault", "Single", "SingleOrDefault") &&
+				methodCall.IsQueryable(MethodNames) &&
 				methodCall.Arguments.Count == 1;
 		}
 
@@ -46,6 +48,32 @@ namespace BLToolkit.Data.Linq.Builder
 		protected override SequenceConvertInfo Convert(
 			ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo, ParameterExpression param)
 		{
+			if (methodCall.Arguments.Count == 2)
+			{
+				var predicate = (LambdaExpression)ExpressionBuilder.GetPredicate(methodCall.Arguments[1]);
+				var info      = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), predicate.Parameters[0]);
+
+				if (info != null)
+				{
+					info.Expression = methodCall.Convert(ex => ConvertMethod(methodCall, 0, info, predicate.Parameters[0], ex));
+					info.Parameter  = param;
+
+					return info;
+				}
+			}
+			else
+			{
+				var info = builder.ConvertSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]), null);
+
+				if (info != null)
+				{
+					info.Expression = methodCall.Convert(ex => ConvertMethod(methodCall, 0, info, null, ex));
+					info.Parameter  = param;
+
+					return info;
+				}
+			}
+
 			return null;
 		}
 
@@ -81,7 +109,7 @@ namespace BLToolkit.Data.Linq.Builder
 			{
 				if (expression == null)
 				{
-					if (Builder.SqlProvider.IsApplyJoinSupported)
+					if (Builder.SqlProvider.IsApplyJoinSupported && Parent.SqlQuery.GroupBy.IsEmpty)
 					{
 						var join = SqlQuery.OuterApply(SqlQuery);
 
@@ -117,7 +145,7 @@ namespace BLToolkit.Data.Linq.Builder
 					return Builder.BuildSql(_methodCall.Type, Parent.SqlQuery.Select.Add(SqlQuery));
 				}
 
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 
 			public override SqlInfo[] ConvertToSql(Expression expression, int level, ConvertFlags flags)
@@ -137,7 +165,7 @@ namespace BLToolkit.Data.Linq.Builder
 
 			public override IBuildContext GetContext(Expression expression, int level, BuildInfo buildInfo)
 			{
-				throw new NotImplementedException();
+				throw new InvalidOperationException();
 			}
 		}
 	}

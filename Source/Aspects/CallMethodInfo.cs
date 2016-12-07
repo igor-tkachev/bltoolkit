@@ -52,11 +52,7 @@ namespace BLToolkit.Aspects
 			internal set { _cacheAspect = value; }
 		}
 
-		[Obsolete("Use CacheAspect.Cache instead")]
-		public  IDictionary  MethodCallCache
-		{
-			get { return _cacheAspect != null? _cacheAspect.Cache: new Hashtable(); }
-		}
+		public object SyncRoot { get; set; }
 
 		#endregion
 

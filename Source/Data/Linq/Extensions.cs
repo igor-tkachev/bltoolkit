@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 using JetBrains.Annotations;
 
@@ -206,6 +207,17 @@ namespace BLToolkit.Data.Linq
 			return Query<T>.InsertOrReplace(dataContextInfo, obj);
 		}
 
+		public static int InsertOrReplace<T>([NotNull] this IDataContextInfo dataContextInfo, IEnumerable<T> objs)
+		{
+			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+			int cnt = 0;
+			foreach (var obj in objs)
+			{
+				cnt += Query<T>.InsertOrReplace(dataContextInfo, obj);
+			}
+			return cnt;
+		}
+
 		[Obsolete("Use 'InsertOrReplace' instead.")]
 		public static int InsertOrUpdate<T>(this IDataContext dataContext, T obj)
 		{
@@ -217,6 +229,16 @@ namespace BLToolkit.Data.Linq
 			return Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
 		}
 
+		public static int InsertOrReplace<T>(this IDataContext dataContext, IEnumerable<T> objs)
+		{
+			int cnt = 0;
+			foreach (var obj in objs)
+			{
+				cnt += Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
+			}
+			return cnt;
+		}
+
 		#endregion
 
 		#region InsertBatch
@@ -225,7 +247,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int InsertBatch<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
-			return new SqlQuery<T>().Insert(dataContext, maxBatchSize, list);
+			return new SqlQuery<T>(dataContext).Insert(dataContext, maxBatchSize, list);
 		}
 
 		public static int InsertBatch<T>(this DbManager dataContext, IEnumerable<T> list)
@@ -274,6 +296,21 @@ namespace BLToolkit.Data.Linq
 		}
 
 		#endregion
+		
+		#region InsertWithOutput
+
+	        public static object InsertWithOutput<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+	        {
+	            if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
+	            return Query<T>.InsertWithOutput(dataContextInfo, obj);
+	        }
+	
+	        public static object InsertWithOutput<T>( this IDataContext dataContext, T obj )
+	        {
+	            return Query<T>.InsertWithOutput(DataContextInfo.Create( dataContext ), obj);
+	        }
+	
+	        #endregion
 
 		#region Update
 
@@ -292,7 +329,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int Update<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
-			return new SqlQuery<T>().Update(dataContext, maxBatchSize, list);
+			return new SqlQuery<T>(dataContext).Update(dataContext, maxBatchSize, list);
 		}
 
 		public static int Update<T>(this DbManager dataContext, IEnumerable<T> list)
@@ -321,7 +358,7 @@ namespace BLToolkit.Data.Linq
 
 		public static int Delete<T>(this DbManager dataContext, int maxBatchSize, IEnumerable<T> list)
 		{
-			return new SqlQuery<T>().Delete(dataContext, maxBatchSize, list);
+			return new SqlQuery<T>(dataContext).Delete(dataContext, maxBatchSize, list);
 		}
 
 		public static int Delete<T>(this DbManager dataContext, IEnumerable<T> list)
@@ -332,6 +369,15 @@ namespace BLToolkit.Data.Linq
 #endif
 
 		#endregion
+
+		#endregion
+
+		#region String Extensions
+
+		public static int ContainsExactly(this string s, string value)
+		{
+			return Regex.Matches(s, string.Format(@"(^|\s){0}(\s|$)", value), RegexOptions.IgnoreCase).Count;
+		}
 
 		#endregion
 	}

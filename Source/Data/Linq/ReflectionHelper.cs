@@ -8,8 +8,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml;
+#if !SILVERLIGHT
+using System.Xml.Linq;
+#endif
 
 using LinqBinary = System.Data.Linq.Binary;
+using BLToolkit.Reflection;
 
 namespace BLToolkit.Data.Linq
 {
@@ -190,7 +194,8 @@ namespace BLToolkit.Data.Linq
 
 		public class MapSchema : Expressor<Mapping.MappingSchema>
 		{
-			public static MethodInfo MapValueToEnum = MethodExpressor(m => m.MapValueToEnum   (null, null));
+			public static MethodInfo MapValueToEnum = MethodExpressor(m => m.MapValueToEnum(null, (Type)null));
+			public static MethodInfo MapValueToEnumWithMemberAccessor = MethodExpressor(m => m.MapValueToEnum(null, (MemberAccessor)null));
 			public static MethodInfo ChangeType     = MethodExpressor(m => m.ConvertChangeType(null, null));
 
 			public static Dictionary<Type,MethodInfo> Converters = new Dictionary<Type,MethodInfo>
@@ -222,6 +227,7 @@ namespace BLToolkit.Data.Linq
 #if !SILVERLIGHT
 				{ typeof(XmlReader),       MethodExpressor(m => m.ConvertToXmlReader             (null)) },
 				{ typeof(XmlDocument),     MethodExpressor(m => m.ConvertToXmlDocument           (null)) },
+				{ typeof(XElement),        MethodExpressor(m => m.ConvertToXElement              (null)) },
 #endif
 				{ typeof(Byte[]),          MethodExpressor(m => m.ConvertToByteArray             (null)) },
 				{ typeof(LinqBinary),      MethodExpressor(m => m.ConvertToLinqBinary            (null)) },

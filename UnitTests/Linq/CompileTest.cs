@@ -27,16 +27,16 @@ namespace Data.Linq
 		}
 
 		[Test]
-		public void CompiledTest2()
+		public void CompiledTest2([DataContexts] string context)
 		{
 			var query = CompiledQuery.Compile((ITestDataContext db, int n) =>
 				db.Child.Where(c => c.ParentID == n).Take(n));
 
-			ForEachProvider(db =>
+			using (var db = GetDataContext(context))
 			{
 				Assert.AreEqual(1, query(db, 1).ToList().Count());
 				Assert.AreEqual(2, query(db, 2).ToList().Count());
-			});
+			}
 		}
 
 		[Test]
@@ -110,7 +110,7 @@ namespace Data.Linq
 
 				threads[i] = new Thread(() =>
 				{
-					using (var db = new TestDbManager("Sql2008"))
+					using (var db = new TestDbManager())
 					{
 						var id = (n % 6) + 1;
 						results[n,0] = id;

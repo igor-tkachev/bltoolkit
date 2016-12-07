@@ -10,7 +10,7 @@ namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
 
-	class InformixDataProvider :  DataProviderBase
+	public class InformixDataProvider :  DataProviderBase
 	{
 		public override IDbConnection CreateConnectionObject () { return new IfxConnection      (); }
 		public override DbDataAdapter CreateDataAdapterObject() { return new IfxDataAdapter     (); }
@@ -18,7 +18,6 @@ namespace BLToolkit.Data.DataProvider
 
 		public override Type   ConnectionType { get { return typeof(IfxConnection);              } }
 		public override string Name           { get { return DataProvider.ProviderName.Informix; } }
-		public override string EndOfSql       { get { return ";"; } }
 
 		public override bool DeriveParameters(IDbCommand command)
 		{
@@ -77,6 +76,33 @@ namespace BLToolkit.Data.DataProvider
 				//}
 			}
 		}
+
+		public override void SetParameterValue(IDbDataParameter parameter, object value)
+		{
+			if (value is ulong)
+			{
+				parameter.Value = (decimal) (ulong) value;
+
+			}
+			else
+				base.SetParameterValue(parameter, value);
+		}
+
+		/*
+		public override int ExecuteArray(IDbCommand command, int iterations)
+		{
+			var cmd = (IfxCommand)command;
+			try
+			{
+				cmd.ArrayBindCount = iterations;
+				return cmd.ExecuteNonQuery();
+			}
+			finally
+			{
+				cmd.ArrayBindCount = 0;
+			}
+		}
+		*/
 
 		#region GetDataReader
 

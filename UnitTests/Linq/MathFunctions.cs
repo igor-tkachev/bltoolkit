@@ -18,7 +18,7 @@ namespace Data.Linq
 				from t in from p in db.Types select Math.Abs(p.MoneyValue) where t > 0 select t));
 		}
 
-		[Test]
+        [Test]
 		public void Acos()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -26,7 +26,7 @@ namespace Data.Linq
 				from t in from p in db.Types select Math.Floor(Math.Acos((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
 		}
 
-		[Test]
+        [Test]
 		public void Asin()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -42,7 +42,7 @@ namespace Data.Linq
 				from t in from p in db.Types select Math.Floor(Math.Atan((double)p.MoneyValue / 15) * 15) where t != 0.1 select t));
 		}
 
-		[Test]
+        [Test]
 		public void Atan2()
 		{
 			ForEachProvider(new[] { ProviderName.Access }, db => AreEqual(
@@ -198,8 +198,8 @@ namespace Data.Linq
 		public void Round3()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in from p in    Types select Math.Round(p.MoneyValue, 1) where t != 0 select t,
-				from t in from p in db.Types select Math.Round(p.MoneyValue, 1) where t != 0 select t));
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1) where t != 0 && t != 7 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1) where t != 0 && t != 7 select t));
 		}
 
 		[Test]
@@ -254,8 +254,8 @@ namespace Data.Linq
 		public void Round10()
 		{
 			ForEachProvider(db => AreEqual(
-				from t in from p in    Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select t,
-				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 select t));
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 && t != 7 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, MidpointRounding.ToEven) where t != 0 && t != 7 select t));
 		}
 
 		[Test]
@@ -272,8 +272,8 @@ namespace Data.Linq
 			var mp = MidpointRounding.AwayFromZero;
 
 			ForEachProvider(new[] { ProviderName.SQLite }, db => AreEqual(
-				from t in from p in    Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 select t,
-				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 select t));
+				from t in from p in    Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 && t != 7 select t,
+				from t in from p in db.Types select Math.Round(p.MoneyValue, 1, mp) where t != 0 && t != 7 select t));
 		}
 
 		[Test]
