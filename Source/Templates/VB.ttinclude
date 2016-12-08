@@ -14,10 +14,13 @@ WriteBeginClass     = (tt,cl,bc) =>
 };
 WriteEndClass       =  tt    => WriteLine("End Class");
 MakeGenericType     = (c,t)  => string.Format("{0}(Of {1})", c, t);
-WriteTableProperty  = (tt,name,pname,maxlen,maxplen) =>
+WriteTableProperty  = (tt,name,pname,maxlen,maxplen, desc) =>
 {
+	if (char.IsDigit(pname[0]))
+		pname = "C" + pname;
+
 	WriteLine("");
-	WriteLine("Public ReadOnly Property {0}(){1} As Table(Of {2})", pname, LenDiff(maxplen, pname), name);
+	WriteLine("Public ReadOnly Property [{0}](){1} As Table(Of {2})", pname, LenDiff(maxplen, pname), name);
 	WriteLine("\tGet");
 	WriteLine("\t\tReturn Me.GetTable(Of {0})()", name);
 	WriteLine("\tEnd Get");
@@ -29,7 +32,7 @@ WriteAttributeLine  =  tt    => {};
 RenderColumn = (tt,c,maxLens,attrs) =>
 {
 	WriteLine("");
-
+	
 	var type = MakeType(c.Type);
 
 	if (!tt.RenderField)
@@ -41,10 +44,10 @@ RenderColumn = (tt,c,maxLens,attrs) =>
 		WriteLine("<{0}> _", string.Join(", ", attrs).Replace("=", ":="));
 
 	if (tt.RenderField)
-		WriteLine("Public {0} As {1}", c.MemberName, type);
+		WriteLine("Public [{0}] As {1}", c.MemberName, type);
 	else
 	{
-		WriteLine("Public Property {0} As {1}", c.MemberName, type);
+		WriteLine("Public Property [{0}] As {1}", c.MemberName, type);
 		WriteLine("\tGet");
 		WriteLine("\t\tReturn Me._{0}", c.MemberName);
 		WriteLine("\tEnd Get");
@@ -73,10 +76,10 @@ RenderForeignKey = (tt,key) =>
 		string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()));
 
 	if (RenderField)
-		WriteLine("Public {0} As {1}", key.MemberName, type);
+		WriteLine("Public [{0}] As {1}", key.MemberName, type);
 	else
 	{
-		WriteLine("Public Property {0} As {1}", key.MemberName, type);
+		WriteLine("Public Property [{0}] As {1}", key.MemberName, type);
 		WriteLine("\tGet");
 		WriteLine("\t\tReturn Me._{0}", key.MemberName);
 		WriteLine("\tEnd Get");
@@ -113,5 +116,78 @@ MakeType = t =>
 	}
 	
 	return t;
+};
+
+FreeTextTemplate = () =>
+{
+	return @"
+#Region ""FreeTextTable""
+
+Public Class FreeTextKey(Of T)
+	Public Key As T
+	Public Rank As Integer
+End Class
+
+Private Class FreeTextTableExpressionAttribute
+	Inherits TableExpressionAttribute
+	Public Sub New()
+		MyBase.New("""")
+	End Sub
+
+	Public Overrides Sub SetTable(table As SqlTable, member As MemberInfo, expArgs As IEnumerable(Of Expression), sqlArgs As IEnumerable(Of ISqlExpression))
+		Dim aargs = sqlArgs.ToArray()
+		Dim arr = ConvertArgs(member, aargs).ToList()
+		Dim method = DirectCast(member, MethodInfo)
+		Dim sp = New MsSql2008SqlProvider()
+
+		If True Then
+			Dim ttype = method.GetGenericArguments()(0)
+			Dim tbl = New SqlTable(ttype)
+
+			Dim database = If(tbl.Database Is Nothing, Nothing, sp.Convert(tbl.Database, ConvertType.NameToDatabase).ToString())
+			Dim owner = If(tbl.Owner Is Nothing, Nothing, sp.Convert(tbl.Owner, ConvertType.NameToOwner).ToString())
+			Dim physicalName = If(tbl.PhysicalName Is Nothing, Nothing, sp.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString())
+
+			Dim name = sp.BuildTableName(New StringBuilder(), database, owner, physicalName)
+
+			arr.Add(New SqlExpression(name.ToString(), Precedence.Primary))
+		End If
+
+		If True Then
+			Dim field = DirectCast(expArgs.First(), ConstantExpression).Value
+
+			If TypeOf field Is String Then
+				arr(0) = New SqlExpression(field.ToString(), Precedence.Primary)
+			ElseIf TypeOf field Is LambdaExpression Then
+				Dim body = DirectCast(field, LambdaExpression).Body
+
+				If TypeOf body Is MemberExpression Then
+					Dim name = DirectCast(body, MemberExpression).Member.Name
+
+					name = sp.Convert(name, ConvertType.NameToQueryField).ToString()
+
+					arr(0) = New SqlExpression(name, Precedence.Primary)
+				End If
+			End If
+		End If
+
+		table.SqlTableType = SqlTableType.Expression
+		table.Name = ""FREETEXTTABLE({6}, {2}, {3}) {1}""
+		table.TableArguments = arr.ToArray()
+	End Sub
+End Class
+
+<FreeTextTableExpressionAttribute> _
+Public Function FreeTextTable(Of TTable, TKey)(field As String, text As String) As Table(Of FreeTextKey(Of TKey))
+	Return Me.GetTable(Of FreeTextKey(Of TKey))(Me, DirectCast(MethodBase.GetCurrentMethod(), MethodInfo).MakeGenericMethod(GetType(TTable), GetType(TKey)), field, text)
+End Function
+
+<FreeTextTableExpressionAttribute> _
+Public Function FreeTextTable(Of TTable, TKey)(fieldSelector As Expression(Of Func(Of TTable, String)), text As String) As Table(Of FreeTextKey(Of TKey))
+	Return Me.GetTable(Of FreeTextKey(Of TKey))(Me, DirectCast(MethodBase.GetCurrentMethod(), MethodInfo).MakeGenericMethod(GetType(TTable), GetType(TKey)), fieldSelector, text)
+End Function
+
+#End Region
+";        
 };
 #>

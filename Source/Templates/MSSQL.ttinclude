@@ -231,33 +231,30 @@ private void LoadServerMetadata()
 		// Load FKs.
 		//
 		s = @"
-			SELECT
-				rc.CONSTRAINT_NAME  as Name, 
-				fk.TABLE_CATALOG + '.' + fk.TABLE_SCHEMA + '.' + fk.TABLE_NAME as ThisTable,
-				fk.COLUMN_NAME      as ThisColumn,
-				pk.TABLE_CATALOG + '.' + pk.TABLE_SCHEMA + '.' + pk.TABLE_NAME as OtherTable,
-				pk.COLUMN_NAME      as OtherColumn,
-				cu.ORDINAL_POSITION as Ordinal
-			FROM
-				INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
-			  JOIN 
-				INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE fk
+			SELECT 
+				kc.name as UNIQUE_CONSTRAINT_NAME,
+				f.name AS Name,
+				DB_NAME() + '.' + SCHEMA_NAME (thisobj.schema_id) + '.' + OBJECT_NAME(f.parent_object_id) AS ThisTable,
+				COL_NAME(fc.parent_object_id, fc.parent_column_id) AS ThisColumn,
+				DB_NAME() + '.' + SCHEMA_NAME (otherobj.schema_id) + '.' + OBJECT_NAME (f.referenced_object_id) AS OtherTable,
+				COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS OtherColumn,
+				cu.ORDINAL_POSITION AS Ordinal
+			FROM 
+				sys.foreign_keys AS f
+				INNER JOIN sys.foreign_key_columns AS fc
+					ON f.OBJECT_ID = fc.constraint_object_id
+				LEFT JOIN sys.key_constraints kc 
+					ON kc.parent_object_id = f.referenced_object_id AND kc.type = 'PK'
+				INNER JOIN sys.objects thisobj
+					ON thisobj.object_id = f.parent_object_id
+				INNER JOIN sys.objects otherobj
+					ON otherobj.object_id = f.referenced_object_id
+				INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE cu
 					ON
-						rc.CONSTRAINT_CATALOG        = fk.CONSTRAINT_CATALOG AND
-				rc.CONSTRAINT_SCHEMA		 = fk.CONSTRAINT_SCHEMA AND
-						rc.CONSTRAINT_NAME           = fk.CONSTRAINT_NAME
-			  JOIN 
-				INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE pk
-					ON
-						rc.UNIQUE_CONSTRAINT_CATALOG = pk.CONSTRAINT_CATALOG AND
-				rc.UNIQUE_CONSTRAINT_SCHEMA	 = pk.CONSTRAINT_SCHEMA AND
-						rc.UNIQUE_CONSTRAINT_NAME    = pk.CONSTRAINT_NAME
-			  JOIN 
-				INFORMATION_SCHEMA.KEY_COLUMN_USAGE cu
-					ON
-				rc.CONSTRAINT_CATALOG = cu.CONSTRAINT_CATALOG AND
-				rc.CONSTRAINT_SCHEMA = cu.CONSTRAINT_SCHEMA AND
-						rc.CONSTRAINT_NAME = cu.CONSTRAINT_NAME
+						DB_NAME() = cu.CONSTRAINT_CATALOG AND
+						SCHEMA_NAME(thisobj.schema_id) = cu.CONSTRAINT_SCHEMA AND
+						f.Name = cu.CONSTRAINT_NAME AND 
+						cu.COLUMN_NAME = COL_NAME(fc.parent_object_id, fc.parent_column_id)
 			{0}
 			ORDER BY
 				ThisTable,
@@ -332,91 +329,7 @@ private void LoadServerMetadata()
 		{
 			mssqlAfterWriteTableProperty(tt);
 
-			tt.WriteLine(@"
-#region FreeTextTable
-
-public class FreeTextKey<T>
-{
-	public T   Key;
-	public int Rank;
-}
-
-class FreeTextTableExpressionAttribute : TableExpressionAttribute
-{
-	public FreeTextTableExpressionAttribute()
-		: base("""")
-	{
-	}
-
-	public override void SetTable(SqlTable table, MemberInfo member, IEnumerable<Expression> expArgs, IEnumerable<ISqlExpression> sqlArgs)
-	{
-		var aargs  = sqlArgs.ToArray();
-		var arr    = ConvertArgs(member, aargs).ToList();
-		var method = (MethodInfo)member;
-		var sp     = new MsSql2008SqlProvider();
-
-		{
-			var ttype  = method.GetGenericArguments()[0];
-			var tbl    = new SqlTable(ttype);
-
-			var database     = tbl.Database     == null ? null : sp.Convert(tbl.Database,     ConvertType.NameToDatabase).  ToString();
-			var owner        = tbl.Owner        == null ? null : sp.Convert(tbl.Owner,        ConvertType.NameToOwner).     ToString();
-			var physicalName = tbl.PhysicalName == null ? null : sp.Convert(tbl.PhysicalName, ConvertType.NameToQueryTable).ToString();
-
-			var name   = sp.BuildTableName(new StringBuilder(), database, owner, physicalName);
-
-			arr.Add(new SqlExpression(name.ToString(), Precedence.Primary));
-		}
-
-		{
-			var field = ((ConstantExpression)expArgs.First()).Value;
-
-			if (field is string)
-			{
-				arr[0] = new SqlExpression(field.ToString(), Precedence.Primary);
-			}
-			else if (field is LambdaExpression)
-			{
-				var body = ((LambdaExpression)field).Body;
-
-				if (body is MemberExpression)
-				{
-					var name = ((MemberExpression)body).Member.Name;
-
-					name = sp.Convert(name, ConvertType.NameToQueryField).ToString();
-
-					arr[0] = new SqlExpression(name, Precedence.Primary);
-				}
-			}
-		}
-
-		table.SqlTableType   = SqlTableType.Expression;
-		table.Name           = ""FREETEXTTABLE({6}, {2}, {3}) {1}"";
-		table.TableArguments = arr.ToArray();
-	}
-}
-
-[FreeTextTableExpressionAttribute]
-public Table<FreeTextKey<TKey>> FreeTextTable<TTable,TKey>(string field, string text)
-{
-	return this.GetTable<FreeTextKey<TKey>>(
-		this,
-		((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(TTable), typeof(TKey)),
-		field,
-		text);
-}
-
-[FreeTextTableExpressionAttribute]
-public Table<FreeTextKey<TKey>> FreeTextTable<TTable,TKey>(Expression<Func<TTable,string>> fieldSelector, string text)
-{
-	return this.GetTable<FreeTextKey<TKey>>(
-		this,
-		((MethodInfo)(MethodBase.GetCurrentMethod())).MakeGenericMethod(typeof(TTable), typeof(TKey)),
-		fieldSelector,
-		text);
-}
-
-#endregion");
+			tt.WriteLine(FreeTextTemplate());
 
 		};
 	}
