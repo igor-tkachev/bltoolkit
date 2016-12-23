@@ -230,6 +230,7 @@ namespace Update
 				finally
 				{
 					db.Child.Delete(c => c.ChildID > 1000);
+					db.Parent.Delete(p => p.ParentID > 1000);
 				}
 			});
 		}
