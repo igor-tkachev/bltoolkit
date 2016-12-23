@@ -42,6 +42,7 @@ namespace Update
 				finally
 				{
 					db.Child.Delete(c => c.ChildID > 1000);
+					db.Parent.Delete(p => p.ParentID > 1000);
 				}
 			});
 		}
@@ -65,6 +66,7 @@ namespace Update
 				finally
 				{
 					db.Child.Delete(c => c.ChildID > 1000);
+					db.Parent.Delete(p => p.ParentID > 1000);
 				}
 			});
 		}
@@ -235,7 +237,7 @@ namespace Update
 		[Test]
 		public void Update9()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", "OdpManaged", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
 				try
 				{
@@ -264,7 +266,7 @@ namespace Update
 		[Test]
 		public void Update10()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", "OdpManaged", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
 				try
 				{
@@ -496,7 +498,7 @@ namespace Update
 
 		[Test]
 		public void UpdateAssociation5([DataContexts(
-			ProviderName.Access, ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, "Oracle", ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite,
+			ProviderName.Access, ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, "Oracle", "OdpManaged", ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite,
 			ExcludeLinqService=true)] string context)
 		{
 			using (var db = new DbManager(context))
@@ -580,7 +582,7 @@ namespace Update
 		}
 
 		[TableName("TestIdentity")]
-		public class Table4 
+		public class Table4
 		{
 			[PrimaryKey, MapField("ID"), Identity]
 			public int Id;
@@ -610,7 +612,7 @@ namespace Update
 					db.Update(obj);
 
 					obj2 = table.First(_ => _.Id == id);
-					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);				
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
 
 					obj.Object.Value = 666;
 					table
@@ -619,7 +621,7 @@ namespace Update
 						.Update();
 
 					obj2 = table.First(_ => _.Id == id);
-					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);				
+					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
 
 					obj.Object.Value = 777;
 					table
@@ -640,13 +642,13 @@ namespace Update
 
 					var id3 = Convert.ToInt32(table.Value(_ => _.Object, () => obj.Object)
 						.InsertWithIdentity());
-					
+
 					obj2 = table.First(_ => _.Id == id3);
 					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
 
 					var id4 = Convert.ToInt32(table.Value(_ => _.Object, obj.Object)
 						.InsertWithIdentity());
-					
+
 					obj2 = table.First(_ => _.Id == id4);
 					Assert.AreEqual(obj.Object.Value, obj2.Object.Value);
 				}
@@ -660,7 +662,7 @@ namespace Update
 		[TableName("LinqDataTypes")]
 		public class LinqDataTypes3
 		{
-			[PrimaryKey] 
+			[PrimaryKey]
 			public int ID;
 			public DateTime  DateTimeValue;
 			public DateTime? DateTimeValue2;
@@ -711,7 +713,8 @@ namespace Update
 		[Test]
 		public void Issue331()
 		{
-			ForEachProvider(new[] { "PostgreSQL" }, dc =>
+			// "OdpManaged" doesn't support XML type
+			ForEachProvider(new[] { "PostgreSQL", "OdpManaged" }, dc =>
 			{
 				var db = dc as DbManager;
 				if (db == null)
@@ -729,16 +732,15 @@ namespace Update
 				db.MappingSchema.MapObjectToObject(s, o);
 				o.DataTypeID = id;
 
-				Assert.AreEqual(s.String_,  o.String_);
+				Assert.AreEqual(s.String_, o.String_);
 				Assert.AreEqual(s.Decimal_, o.Decimal_);
 
 				db.Update<DataTypeTest3>(values);
 
 				o = db.GetTable<DataTypeTest3>().First(_ => _.DataTypeID == id);
 
-				Assert.AreEqual(s.String_,  o.String_);
+				Assert.AreEqual(s.String_, o.String_);
 				Assert.AreEqual(s.Decimal_, o.Decimal_);
-
 			});
 		}
 

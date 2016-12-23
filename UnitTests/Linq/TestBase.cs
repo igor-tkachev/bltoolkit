@@ -203,7 +203,7 @@ namespace Data.Linq
 			new ProviderInfo(ProviderName.Firebird,   "BLToolkit.Data.DataProvider.Firebird",        "BLToolkit.Data.DataProvider.FdpDataProvider"),
 			new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.Oracle",          "BLToolkit.Data.DataProvider.OdpDataProvider"),
 			new ProviderInfo("DevartOracle",          "BLToolkit.Data.DataProvider.DevartOracle",    "BLToolkit.Data.DataProvider.DevartOracleDataProvider"),
-			//new ProviderInfo("Oracle",                "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),
+			new ProviderInfo("OdpManaged",            "BLToolkit.Data.DataProvider.OracleManaged",   "BLToolkit.Data.DataProvider.OdpManagedDataProvider"),
 			new ProviderInfo(ProviderName.PostgreSQL, "BLToolkit.Data.DataProvider.PostgreSQL",      "BLToolkit.Data.DataProvider.PostgreSQLDataProvider"),
 			new ProviderInfo(ProviderName.MySql,      "BLToolkit.Data.DataProvider.MySql",           "BLToolkit.Data.DataProvider.MySqlDataProvider"),
 			new ProviderInfo(ProviderName.Sybase,     "BLToolkit.Data.DataProvider.Sybase",          "BLToolkit.Data.DataProvider.SybaseDataProvider"),
@@ -257,7 +257,7 @@ namespace Data.Linq
 				if (Include != null)
 				{
 					var list = Include.Intersect(
-						ExcludeLinqService == false ? 
+						ExcludeLinqService == false ?
 							UserProviders.Select(_ => _.Name).Concat(UserProviders.Select(p => p + ".LinqService")) :
 							UserProviders.Select(_ => _.Name)).
 						ToArray();
@@ -914,7 +914,7 @@ namespace Data.Linq
 
 			if (!b)
 				for (var i = 0; i < resultList.Count; i++)
-				{ 
+				{
 					Debug.WriteLine("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
 					sb.AppendFormat("{0} {1} --- {2}", Equals(expectedList[i], resultList[i]) ? " " : "-", expectedList[i], resultList[i]);
 					sb.AppendLine();

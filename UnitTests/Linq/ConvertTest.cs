@@ -414,7 +414,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", "OdpManaged", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
@@ -430,7 +430,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultVarChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", "OdpManaged", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
@@ -446,7 +446,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultNChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", "OdpManaged", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}
@@ -462,7 +462,7 @@ namespace Data.Linq
 		[Test]
 		public void ToDefaultNVarChar()
 		{
-			ForEachProvider(new[] { "Oracle", "DevartOracle", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
+			ForEachProvider(new[] { "Oracle", "DevartOracle", "OdpManaged", ProviderName.Firebird, ProviderName.PostgreSQL }, db => AreEqual(
 				from t in    Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.'),
 				from t in db.Types select Sql.Convert(Sql.DefaultNVarChar, t.MoneyValue).InvariantDecimal().Trim(' ', '0', '.')));
 		}

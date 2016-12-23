@@ -70,7 +70,7 @@ namespace Data.Linq.UserTests
 
 				db.Person.Where(_ => _.LastName == "Issue369").Delete();
 			}
-			
+
 		}
 
 		[TableName("DataTypeTest")]
@@ -138,7 +138,7 @@ namespace Data.Linq.UserTests
 		[Test]
 		public void NullableTest2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
 			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
-			"Oracle",
+			"Oracle", "OdpManaged",
 			ExcludeLinqService = true)]string config)
 		{
 			NullableTest4(
@@ -171,7 +171,7 @@ namespace Data.Linq.UserTests
 		[Test]
 		public void NullableTest2_2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
 			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
-			"Oracle",
+			"Oracle", "OdpManaged",
 			ExcludeLinqService = true)] string config)
 		{
 			NullableTest(
@@ -237,11 +237,11 @@ namespace Data.Linq.UserTests
 					UInt64_ = 0,
 					Decimal_ = 0,
 					Double_ = 0,
-					Money_ = 0, 
+					Money_ = 0,
 					Single_ = 0,
 					SByte_ = 0,
 				};
-				
+
 				var id = insert(db, data);
 
 				var list = db.GetTable<DataTypeTest>().Where(_ => _.DataTypeID >= id).ToList();
@@ -267,7 +267,7 @@ namespace Data.Linq.UserTests
 				db.GetTable<SmallDataTypeTest>().Delete(_ => _.DataTypeID > 2);
 			}
 		}
-		
+
 		public void NullableTest3(Func<DbManager, DataTypeTest2, int> insert, string config)
 		{
 			using (var db = new TestDbManager(config))
@@ -284,11 +284,11 @@ namespace Data.Linq.UserTests
 					UInt64_ = 0,
 					Decimal_ = 0,
 					Double_ = 0,
-					Money_ = 0, 
+					Money_ = 0,
 					Single_ = 0,
 					SByte_ = 0,
 				};
-				
+
 				var id = insert(db, data);
 
 				var list = db.GetTable<DataTypeTest>().Where(_ => _.DataTypeID >= id).ToList();
@@ -331,11 +331,11 @@ namespace Data.Linq.UserTests
 					UInt64_ = 0,
 					Decimal_ = 0,
 					Double_ = 0,
-					Money_ = 0, 
+					Money_ = 0,
 					Single_ = 0,
 					SByte_ = 0,
 				};
-				
+
 				var id = insert(db, data);
 
 				var list = db.GetTable<SmallDataTypeTest>().Where(_ => _.DataTypeID >= id).ToList();
@@ -377,11 +377,11 @@ namespace Data.Linq.UserTests
 					UInt64_ = 0,
 					Decimal_ = 0,
 					Double_ = 0,
-					Money_ = 0, 
+					Money_ = 0,
 					Single_ = 0,
 					SByte_ = 0,
 				};
-				
+
 				var id = insert(db, data);
 
 				var list = db.GetTable<SmallDataTypeTest>().Where(_ => _.DataTypeID >= id).ToList();

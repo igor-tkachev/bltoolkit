@@ -161,7 +161,7 @@ namespace Update
 
 		[Test]
 		public void DeleteMany1([DataContexts(
-			ProviderName.Access, ProviderName.DB2, ProviderName.Informix, "Oracle",
+			ProviderName.Access, ProviderName.DB2, ProviderName.Informix, "Oracle", "OdpManaged",
 			ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Firebird
 			)] string context)
 		{
@@ -192,7 +192,7 @@ namespace Update
 
 		[Test]
 		public void DeleteMany2([DataContexts(
-			ProviderName.Access, ProviderName.DB2, ProviderName.Informix, "Oracle",
+			ProviderName.Access, ProviderName.DB2, ProviderName.Informix, "Oracle", "OdpManaged",
 			ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Firebird
 			)] string context)
 		{
@@ -232,7 +232,7 @@ namespace Update
 
 		[Test]
 		public void DeleteMany3([DataContexts(
-			ProviderName.Access, ProviderName.DB2, ProviderName.Informix, "Oracle",
+			ProviderName.Access, ProviderName.DB2, ProviderName.Informix, "Oracle", "OdpManaged",
 			ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite, ProviderName.Firebird
 			)] string context)
 		{

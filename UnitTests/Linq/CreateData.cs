@@ -43,7 +43,7 @@ namespace Create
 					if (command.Length == 0)
 						continue;
 
-					try 
+					try
 					{
 						Console.WriteLine(command);
 						db.SetCommand(command).ExecuteNonQuery();
@@ -140,7 +140,8 @@ namespace Create
 
 		[Test] public void DB2       ([IncludeDataContexts(ProviderName.DB2       )] string context) { RunScript(context,           "\nGO\n",  "DB2");        }
 		[Test] public void Informix  ([IncludeDataContexts(ProviderName.Informix  )] string context) { RunScript(context,           "\nGO\n",  "Informix");   }
-		[Test] public void Oracle    ([IncludeDataContexts("Oracle"               )] string context) { RunScript(context,           "\n/\n",   "Oracle");     }
+		[Test] public void Oracle    ([IncludeDataContexts(ProviderName.Oracle    )] string context) { RunScript(context,           "\n/\n",   "Oracle");     }
+		[Test] public void OdpManaged([IncludeDataContexts(ProviderName.OracleManaged)] string context) { RunScript(context,        "\n/\n",   "Oracle");     }
 		[Test] public void Firebird  ([IncludeDataContexts(ProviderName.Firebird  )] string context) { RunScript(context,           "COMMIT;", "Firebird2");  }
 		[Test] public void PostgreSQL([IncludeDataContexts(ProviderName.PostgreSQL)] string context) { RunScript(context,           "\nGO\n",  "PostgreSQL"); }
 		[Test] public void MySql     ([IncludeDataContexts(ProviderName.MySql     )] string context) { RunScript(context,           "\nGO\n",  "MySql");      }

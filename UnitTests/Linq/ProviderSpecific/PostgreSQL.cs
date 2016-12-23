@@ -15,7 +15,7 @@ namespace Data.Linq.ProviderSpecific
     [TestFixture, Category("PostgreSQL")]
 	public class PostgreSQL : TestBase
 	{
-		[TableName(Owner="public", Name="entity")]
+		[TableName(Name="entity")]
 		public class Entity
 		{
 			[MapField("the_name") ] public string TheName { get; set; }

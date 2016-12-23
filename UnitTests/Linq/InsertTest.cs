@@ -334,7 +334,7 @@ namespace Update
 					db.Parent.Delete(p => p.ParentID > 1000);
 
 					db.Insert(new Parent { ParentID = id, Value1 = id });
-		
+
 					Assert.AreEqual(1,
 						db.Parent
 							.Where(p => p.ParentID == id)
@@ -877,7 +877,7 @@ namespace Update
 				db.Types2.Delete(_ => _.ID > 1000);
 			}
 		}
-		
+
 		public enum TestEnum
 		{
 			First,
@@ -886,7 +886,7 @@ namespace Update
 		}
 
 		[TableName("LinqDataTypes")]
-		public class Table 
+		public class Table
 		{
 			[PrimaryKey]
 			public int       ID;
@@ -944,13 +944,20 @@ namespace Update
 		{
 			ForEachProvider(db =>
 			{
-				db.Parent.Delete(p => p.ParentID == 1100);
+				try
+				{
+					db.Parent.Delete(p => p.ParentID == 1100);
 
-				db.Insert(new NullableFieldTestObject { ParentID = 1100 });
+					db.Insert(new NullableFieldTestObject { ParentID = 1100 });
 
-				var parent = db.Parent.Single(p => p.ParentID == 1100);
+					var parent = db.Parent.Single(p => p.ParentID == 1100);
 
-				Assert.IsNull(parent.Value1);
+					Assert.IsNull(parent.Value1);
+				}
+				finally
+				{
+					db.Parent.Delete(p => p.ParentID == 1100);
+				}
 			});
 		}
 
@@ -1046,7 +1053,7 @@ namespace Update
 		public void InsertSingleIdentity()
 		{
 			ForEachProvider(
-				new [] { ProviderName.Informix, ProviderName.SqlCe },
+				new [] { "OdpManaged", ProviderName.Informix, ProviderName.SqlCe },
 				db =>
 				{
 					try
@@ -1139,7 +1146,7 @@ namespace Update
 			});
 
 		}
-		
+
 		[Test]
 		public void InsertBinary()
 		{
@@ -1231,11 +1238,11 @@ namespace Update
 
 
 		[TableName("LinqDataTypes")]
-		public class MappedFieldsTable  
+		public class MappedFieldsTable
 		{
 			public const int True  = 10;
 			public const int False = 20;
-			
+
 			[PrimaryKey]
 			public int ID;
 
@@ -1250,7 +1257,7 @@ namespace Update
 			public bool? BoolValue2;
 
 		}
-		
+
 		[TableName("LinqDataTypes")]
 		[MapValue(typeof(bool), true,  MappedFieldsTable.True)]
 		[MapValue(typeof(bool), false, MappedFieldsTable.False)]
@@ -1258,7 +1265,7 @@ namespace Update
 		{
 			public const int True  = 10;
 			public const int False = 20;
-			
+
 			[PrimaryKey]
 			public int ID;
 
