@@ -138,7 +138,7 @@ namespace Data.Linq.UserTests
 		[Test]
 		public void NullableTest2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
 			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
-			"Oracle", "OdpManaged",
+			"Oracle",  ProviderName.OracleManaged,
 			ExcludeLinqService = true)]string config)
 		{
 			NullableTest4(
@@ -171,7 +171,7 @@ namespace Data.Linq.UserTests
 		[Test]
 		public void NullableTest2_2([DataContextsAttribute(ProviderName.DB2, ProviderName.Firebird,
 			ProviderName.Informix, ProviderName.MySql, ProviderName.Sybase, ProviderName.PostgreSQL,
-			"Oracle", "OdpManaged",
+			"Oracle",  ProviderName.OracleManaged,
 			ExcludeLinqService = true)] string config)
 		{
 			NullableTest(

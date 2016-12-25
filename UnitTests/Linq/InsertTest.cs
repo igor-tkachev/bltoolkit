@@ -1053,7 +1053,7 @@ namespace Update
 		public void InsertSingleIdentity()
 		{
 			ForEachProvider(
-				new [] { "OdpManaged", ProviderName.Informix, ProviderName.SqlCe },
+				new [] { ProviderName.OracleManaged, ProviderName.Informix, ProviderName.SqlCe },
 				db =>
 				{
 					try

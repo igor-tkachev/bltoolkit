@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>BLToolkit.Oracle.Managed</id>
+		<version>4.3.5</version>
+		<title>BLToolkit Managed Oracle Data Provider</title>
+		<authors>Igor Tkachev</authors>
+		<owners />
+		<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+		<projectUrl>https://github.com/igor-tkachev/bltoolkit</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Business Logic Toolkit Oracle Data Provider for .NET</description>
+		<summary />
+		<tags>Oracle Odp bltoolkit Linq ORM DAL database DB</tags>
+		<dependencies>
+			<dependency id="BLToolkit" />
+			<dependency id="Oracle.ManagedDataAccess" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="..\DataProviders\Oracle\bin\ReleaseManaged\BLToolkit.Data.DataProvider.OracleManaged.4.dll" target="lib\net40" />
+	</files>
+</package>

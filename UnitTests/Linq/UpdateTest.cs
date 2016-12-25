@@ -229,7 +229,7 @@ namespace Update
 				}
 				finally
 				{
-					db.Child.Delete(c => c.ChildID > 1000);
+					db.Child .Delete(c => c.ChildID > 1000);
 					db.Parent.Delete(p => p.ParentID > 1000);
 				}
 			});
@@ -238,7 +238,7 @@ namespace Update
 		[Test]
 		public void Update9()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", "OdpManaged", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.OracleManaged, ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
 				try
 				{
@@ -267,7 +267,7 @@ namespace Update
 		[Test]
 		public void Update10()
 		{
-			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", "OdpManaged", ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
+			ForEachProvider(new[] { ProviderName.Informix, ProviderName.SqlCe, ProviderName.DB2, ProviderName.Firebird, "Oracle", "DevartOracle", ProviderName.OracleManaged, ProviderName.PostgreSQL, ProviderName.MySql, ProviderName.SQLite, ProviderName.Access }, db =>
 			{
 				try
 				{
@@ -499,7 +499,7 @@ namespace Update
 
 		[Test]
 		public void UpdateAssociation5([DataContexts(
-			ProviderName.Access, ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, "Oracle", "OdpManaged", ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite,
+			ProviderName.Access, ProviderName.DB2, ProviderName.Firebird, ProviderName.Informix, "Oracle", ProviderName.OracleManaged, ProviderName.PostgreSQL, ProviderName.SqlCe, ProviderName.SQLite,
 			ExcludeLinqService=true)] string context)
 		{
 			using (var db = new DbManager(context))
@@ -715,7 +715,7 @@ namespace Update
 		public void Issue331()
 		{
 			// "OdpManaged" doesn't support XML type
-			ForEachProvider(new[] { "PostgreSQL", "OdpManaged" }, dc =>
+			ForEachProvider(new[] { "PostgreSQL", ProviderName.OracleManaged }, dc =>
 			{
 				var db = dc as DbManager;
 				if (db == null)

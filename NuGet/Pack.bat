@@ -30,6 +30,9 @@ rename BLToolkit.MySql.*.nupkg BLToolkit.MySql.nupkg
 ..\Redist\NuGet Pack BLToolkit.Oracle.nuspec
 rename BLToolkit.Oracle.*.nupkg BLToolkit.Oracle.nupkg
 
+..\Redist\NuGet Pack BLToolkit.Oracle.Managed.nuspec
+rename BLToolkit.Oracle.Managed.*.nupkg BLToolkit.Oracle.Managed.nupkg
+
 ..\Redist\NuGet Pack BLToolkit.PostgreSql.nuspec 
 rename BLToolkit.PostgreSql.*.nupkg BLToolkit.PostgreSql.nupkg
 
