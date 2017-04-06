@@ -11,5 +11,7 @@ See [wiki](https://github.com/igor-tkachev/bltoolkit/wiki) for more details.
 
 This project is suspended - no new features or functionallity would be implemented. Only **small bug** (if any would be reported) fixies would be done.
 
+And certainly we would be happy to merge **your** pull requests.
+
 Please, consider migrating to [linq2db](https://github.com/linq2db)
 
