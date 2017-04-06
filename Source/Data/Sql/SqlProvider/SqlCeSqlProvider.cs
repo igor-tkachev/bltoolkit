@@ -123,7 +123,7 @@ namespace BLToolkit.Data.Sql.SqlProvider
 		{
 			sqlQuery = base.Finalize(sqlQuery);
 
-			new QueryVisitor().Visit(sqlQuery.Select, element =>
+			new QueryVisitor().Visit(sqlQuery, element =>
 			{
 				if (element.ElementType == QueryElementType.SqlParameter)
 				{

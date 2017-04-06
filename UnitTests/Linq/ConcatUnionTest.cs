@@ -9,6 +9,7 @@ using NUnit.Framework;
 
 namespace Data.Linq
 {
+	using BLToolkit.Mapping;
 	using Model;
 
 	[TestFixture]
@@ -628,6 +629,65 @@ namespace Data.Linq
 				var fullJoinSql = fullJoin.ToString(); // BLToolkit.Data.Linq.LinqException : Types in Concat are constructed incompatibly.
 				Assert.IsNotNull(fullJoinSql);
 			}
+		}
+
+
+		[Test]
+		public void Issue395([DataContexts] string context)
+		{
+			var code = "code";
+
+			using (var db = GetDataContext(context))
+			{
+				var query01 = db.GetTable<Union01>()
+					.Where(x => x.LastName != null)
+					.Select(x => new Union()
+					{
+						Id = x.Id,
+						Name = x.LastName,
+						Code = code
+					})
+					;
+
+				var query02 = db.GetTable<Union02>()
+					.Where(x => x.LastName != null)
+					.Select(x => new Union()
+					{
+						Id = x.Id,
+						Name = x.LastName,
+						Code = code
+					})
+					;
+
+				var query = query01.Union(query02);
+
+				var res = query.ToList();
+			}
+		}
+
+		class Union
+		{
+			public int Id { get; set; }
+			public string Name { get; set; }
+			public string Code { get; set; }
+		}
+
+		[TableName("Person")]
+		class Union01
+		{
+			[MapField("PersonID"), PrimaryKey, NonUpdatable]
+			public int Id;
+
+			public string LastName;
+		}
+
+		[TableName("Person")]
+		class Union02
+		{
+			[MapField("PersonID"), PrimaryKey, NonUpdatable]
+			public int Id;
+
+			public string LastName;
 		}
 	}
 }

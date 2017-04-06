@@ -905,7 +905,8 @@ namespace BLToolkit.Data.Linq.Builder
 				case ExpressionType.Parameter    :
 					if (sequence != null)
 						return action(2, sequence, newExpression, nextLevel, memberExpression);
-					throw new InvalidOperationException();
+					break;
+					//throw new InvalidOperationException();
 
 				case ExpressionType.New          :
 				case ExpressionType.MemberInit   :
