@@ -20,7 +20,7 @@ namespace BLToolkit
 		/// <summary>
 		/// Build component of version.
 		/// </summary>
-		public const string Build = "7";
+		public const string Build = "8";
 
 		/// <summary>
 		/// Full version string.
