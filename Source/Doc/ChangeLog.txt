@@ -1,3 +1,7 @@
+v4.3.8
+
+All assemblies are signed
+
 v.4.3
 
 Enhancement
