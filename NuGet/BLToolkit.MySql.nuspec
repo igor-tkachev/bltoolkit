@@ -13,8 +13,8 @@
 		<summary />
 		<tags>MySql bltoolkit Linq ORM DAL database DB</tags>
 		<dependencies>
-			<dependency id="MySql.Data" />
-			<dependency id="BLToolkit"  />
+			<dependency id="MySql.Data" version="6.9.8" />
+			<dependency id="BLToolkit"  version="4.3.8" />
 		</dependencies>
 	</metadata>
 	<files>

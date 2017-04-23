@@ -13,7 +13,7 @@
 		<summary />
 		<tags>Devart dotConnect Oracle bltoolkit Linq ORM DAL database DB</tags>
 		<dependencies>
-			<dependency id="BLToolkit" />
+			<dependency id="BLToolkit" version="4.3.8" />
 		</dependencies>
 	</metadata>
 	<files>
