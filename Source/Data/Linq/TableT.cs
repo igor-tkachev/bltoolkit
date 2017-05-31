@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 
 namespace BLToolkit.Data.Linq
@@ -29,15 +29,23 @@ namespace BLToolkit.Data.Linq
 		
 #endif
 
-		public Table(IDataContext dataContext)
-		{
-			Init(dataContext == null ? null : new DataContextInfo(dataContext), null);
-		}
+        public Table(IDataContext dataContext)
+            : this(CtorFix(dataContext), null)
+        {
+        }
 
-		public Table(IDataContext dataContext, Expression expression)
-		{
-			Init(dataContext == null ? null : new DataContextInfo(dataContext), expression);
-		}
+        public Table(IDataContext dataContext, Expression expression)
+            : this(CtorFix(dataContext), expression)
+        {
+        }
+
+        //fixes .NET 4.5 CLR bug mentioned in this blog post
+        //http://elegantcode.com/2012/08/23/net-4-5-operation-could-destabilize-the-runtime-yikes/
+        //can be reverted if/once the runtime bug is fixed
+        private static IDataContextInfo CtorFix(IDataContext dataContext)
+        {
+            return dataContext == null ? null : new DataContextInfo(dataContext);
+        }
 
 		#region Overrides
 
