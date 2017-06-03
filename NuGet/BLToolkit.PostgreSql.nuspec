@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.PostgreSql</id>
-		<version>4.3.8</version>
+		<version>4.3.9</version>
 		<title>BLToolkit PostgreSql Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -14,7 +14,7 @@
 		<tags>PostgreSql Npgsql bltoolkit Linq ORM DAL database DB</tags>
 		<dependencies>
 			<dependency id="Npgsql"    version="2.2.5" />
-			<dependency id="BLToolkit" version="4.3.8" />
+			<dependency id="BLToolkit" version="4.3.9" />
 		</dependencies>
 	</metadata>
 	<files>

@@ -231,5 +231,27 @@ namespace DataAccess
 				Assert.That(insert.QueryText.Contains(middleName),        "middleName\n" + insert.QueryText);
 			}
 		}
+
+		public class LinqDataTypes
+		{
+			[PrimaryKey]
+			public int Id;
+
+			[Nullable]
+			public DateTime? DateTimeValue;
+
+			public DateTime? DateTimeValue2;
+		}
+
+		[Test]
+		public void InsertNullable()
+		{
+			var da = new SqlQuery();
+			using (var db = new DbManager())
+			{
+				db.BeginTransaction();
+				da.Insert(new LinqDataTypes() {Id = 1000});
+			}
+		}
 	}
 }
