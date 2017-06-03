@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.DB2</id>
-		<version>4.3.8</version>
+		<version>4.3.9</version>
 		<title>BLToolkit DB2 Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -13,7 +13,7 @@
 		<summary />
 		<tags>DB2 bltoolkit Linq ORM DAL database DB</tags>
 		<dependencies>
-			<dependency id="BLToolkit" version="4.3.8" />
+			<dependency id="BLToolkit" version="4.3.9" />
 		</dependencies>
 	</metadata>
 	<files>

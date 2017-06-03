@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>BLToolkit.Firebird</id>
-		<version>4.3.8</version>
+		<version>4.3.9</version>
 		<title>BLToolkit Firebird Data Provider</title>
 		<authors>Igor Tkachev</authors>
 		<owners />
@@ -14,7 +14,7 @@
 		<tags>Firebird bltoolkit Linq ORM DAL database DB</tags>
 		<dependencies>
 			<dependency id="FirebirdSql.Data.FirebirdClient" version="5.0.5" />
-			<dependency id="BLToolkit"                       version="4.3.8" />
+			<dependency id="BLToolkit"                       version="4.3.9" />
 		</dependencies>
 	</metadata>
 	<files>

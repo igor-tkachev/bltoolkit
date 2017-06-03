@@ -734,6 +734,14 @@ namespace BLToolkit.Data.DataProvider
 			base.Configure(attributes);
 		}
 
+		public override DbType GetParameterDbType(DbType dbType)
+		{
+			if (dbType == DbType.DateTime2)
+				return DbType.DateTime;
+
+			return base.GetParameterDbType(dbType);
+		}
+
 		#region Inner types
 
 		public class OdpMappingSchema : MappingSchema
