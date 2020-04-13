@@ -3883,7 +3883,7 @@ namespace BLToolkit.Mapping
 
 				master.AddRelation(output[current], nr.SlaveIndex, nr.MasterIndex, nr.ContainerName);
 
-				current += GetResultSets(current + 1, output, output[current], nr.NextResults);
+				current = GetResultSets(current + 1, output, output[current], nr.NextResults);
 			}
 
 			return current;
