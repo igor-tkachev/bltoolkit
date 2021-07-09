@@ -18,14 +18,8 @@ using BLToolkit.Aspects;
 using BLToolkit.Common;
 using BLToolkit.Mapping;
 using BLToolkit.Reflection;
-
-#if MANAGED
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
-#else
-using Oracle.DataAccess.Client;
-using Oracle.DataAccess.Types;
-#endif
 
 namespace BLToolkit.Data.DataProvider
 {
