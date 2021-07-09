@@ -21,12 +21,6 @@ using BLToolkit.Reflection;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 
-#if MANAGED
-using Oracle.ManagedDataAccess.Client;
-using Oracle.ManagedDataAccess.Types;
-#else
-#endif
-
 namespace BLToolkit.Data.DataProvider
 {
 	using Sql.SqlProvider;
